@@ -1,0 +1,4 @@
+Zone: 09_chest_left
+Level: beginner
+
+Drop video here named: video.mp4

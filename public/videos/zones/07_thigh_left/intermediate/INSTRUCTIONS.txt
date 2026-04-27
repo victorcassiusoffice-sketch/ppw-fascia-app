@@ -1,0 +1,4 @@
+Zone: 07_thigh_left
+Level: intermediate
+
+Drop video here named: video.mp4

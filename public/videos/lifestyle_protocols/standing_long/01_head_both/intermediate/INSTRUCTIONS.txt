@@ -1,0 +1,6 @@
+Lifestyle: standing_long
+Zone: 01_head_both
+Level: intermediate
+
+Drop video here named: video.mp4
+(Overrides the default zone video when this lifestyle is selected)

@@ -1,0 +1,4 @@
+Zone: 10_lower_arm_left
+Level: beginner
+
+Drop video here named: video.mp4

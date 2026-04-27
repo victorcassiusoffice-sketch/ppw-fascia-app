@@ -1,0 +1,4 @@
+Zone: 08_ankle_right
+Level: advanced
+
+Drop video here named: video.mp4

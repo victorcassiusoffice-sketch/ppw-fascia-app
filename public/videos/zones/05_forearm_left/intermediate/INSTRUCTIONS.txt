@@ -1,0 +1,4 @@
+Zone: 05_forearm_left
+Level: intermediate
+
+Drop video here named: video.mp4

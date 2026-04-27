@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 1200" width="600" height="1200">
+  <!-- PPW Body Map Zones — FRONT -->
+  <!-- Layer this SVG over body_front.png in Figma or any editor -->
+  <!-- Each zone is a teal shape (#00d4aa) at 30% opacity with a label -->
+
+  <!-- Background: transparent (overlay on body image) -->
+  <rect width="600" height="1200" fill="none"/>
+
+  <g id="zones_front">
+    <g id="01_head_both">
+      <ellipse cx="300" cy="118" rx="38" ry="46" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="300" y="122" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="9" fill="#ffffff" fill-opacity="0.85">Head</text>
+    </g>
+    <g id="02_neck_left">
+      <rect x="272" y="162" width="28" height="32" rx="3" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="286.0" y="181.0" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="9" fill="#ffffff" fill-opacity="0.85">Neck (L)</text>
+    </g>
+    <g id="02_neck_right">
+      <rect x="300" y="162" width="28" height="32" rx="3" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="314.0" y="181.0" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="9" fill="#ffffff" fill-opacity="0.85">Neck (R)</text>
+    </g>
+    <g id="03_shoulder_left">
+      <ellipse cx="212" cy="222" rx="30" ry="18" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="212" y="226" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="9" fill="#ffffff" fill-opacity="0.85">Shoulder (L)</text>
+    </g>
+    <g id="03_shoulder_right">
+      <ellipse cx="388" cy="222" rx="30" ry="18" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="388" y="226" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="9" fill="#ffffff" fill-opacity="0.85">Shoulder (R)</text>
+    </g>
+    <g id="09_chest_left">
+      <rect x="218" y="240" width="82" height="96" rx="3" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="259.0" y="291.0" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="9" fill="#ffffff" fill-opacity="0.85">Chest (L)</text>
+    </g>
+    <g id="09_chest_right">
+      <rect x="300" y="240" width="82" height="96" rx="3" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="341.0" y="291.0" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="9" fill="#ffffff" fill-opacity="0.85">Chest (R)</text>
+    </g>
+    <g id="04_upper_arm_left">
+      <rect x="150" y="248" width="38" height="145" rx="3" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="169.0" y="323.5" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="9" fill="#ffffff" fill-opacity="0.85">Upper Arm (L)</text>
+    </g>
+    <g id="04_upper_arm_right">
+      <rect x="412" y="248" width="38" height="145" rx="3" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="431.0" y="323.5" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="9" fill="#ffffff" fill-opacity="0.85">Upper Arm (R)</text>
+    </g>
+    <g id="11_lateral_arm_left">
+      <rect x="140" y="255" width="14" height="150" rx="2" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="147.0" y="333.0" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="7" fill="#ffffff" fill-opacity="0.85" transform="rotate(-90,147.0,333.0)">Lateral Arm (L)</text>
+    </g>
+    <g id="11_lateral_arm_right">
+      <rect x="446" y="255" width="14" height="150" rx="2" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="453.0" y="333.0" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="7" fill="#ffffff" fill-opacity="0.85" transform="rotate(-90,453.0,333.0)">Lateral Arm (R)</text>
+    </g>
+    <g id="05_forearm_left">
+      <rect x="140" y="400" width="38" height="100" rx="3" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="159.0" y="453.0" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="9" fill="#ffffff" fill-opacity="0.85">Forearm (L)</text>
+    </g>
+    <g id="05_forearm_right">
+      <rect x="422" y="400" width="38" height="100" rx="3" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="441.0" y="453.0" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="9" fill="#ffffff" fill-opacity="0.85">Forearm (R)</text>
+    </g>
+    <g id="10_lower_arm_left">
+      <rect x="136" y="500" width="36" height="50" rx="3" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="154.0" y="528.0" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="9" fill="#ffffff" fill-opacity="0.85">Lower Arm (L)</text>
+    </g>
+    <g id="10_lower_arm_right">
+      <rect x="428" y="500" width="36" height="50" rx="3" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="446.0" y="528.0" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="9" fill="#ffffff" fill-opacity="0.85">Lower Arm (R)</text>
+    </g>
+    <g id="12_lower_back_left">
+      <rect x="222" y="440" width="78" height="100" rx="3" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="261.0" y="493.0" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="9" fill="#ffffff" fill-opacity="0.85">Lower Back (L)</text>
+    </g>
+    <g id="12_lower_back_right">
+      <rect x="300" y="440" width="78" height="100" rx="3" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="339.0" y="493.0" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="9" fill="#ffffff" fill-opacity="0.85">Lower Back (R)</text>
+    </g>
+    <g id="06_hip_left">
+      <rect x="222" y="548" width="78" height="60" rx="3" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="261.0" y="581.0" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="9" fill="#ffffff" fill-opacity="0.85">Hip (L)</text>
+    </g>
+    <g id="06_hip_right">
+      <rect x="300" y="548" width="78" height="60" rx="3" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="339.0" y="581.0" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="9" fill="#ffffff" fill-opacity="0.85">Hip (R)</text>
+    </g>
+    <g id="07_thigh_left">
+      <rect x="242" y="660" width="56" height="176" rx="3" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="270.0" y="751.0" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="9" fill="#ffffff" fill-opacity="0.85">Thigh (L)</text>
+    </g>
+    <g id="07_thigh_right">
+      <rect x="302" y="660" width="56" height="176" rx="3" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="330.0" y="751.0" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="9" fill="#ffffff" fill-opacity="0.85">Thigh (R)</text>
+    </g>
+    <g id="15_itband_left">
+      <rect x="230" y="680" width="16" height="160" rx="2" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="238.0" y="763.0" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="7" fill="#ffffff" fill-opacity="0.85" transform="rotate(-90,238.0,763.0)">Itband (L)</text>
+    </g>
+    <g id="15_itband_right">
+      <rect x="354" y="680" width="16" height="160" rx="2" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="362.0" y="763.0" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="7" fill="#ffffff" fill-opacity="0.85" transform="rotate(-90,362.0,763.0)">Itband (R)</text>
+    </g>
+    <g id="13_knee_left">
+      <ellipse cx="270" cy="860" rx="26" ry="24" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="270" y="864" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="9" fill="#ffffff" fill-opacity="0.85">Knee (L)</text>
+    </g>
+    <g id="13_knee_right">
+      <ellipse cx="330" cy="860" rx="26" ry="24" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="330" y="864" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="9" fill="#ffffff" fill-opacity="0.85">Knee (R)</text>
+    </g>
+    <g id="08_ankle_left">
+      <ellipse cx="266" cy="1000" rx="22" ry="18" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="266" y="1004" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="9" fill="#ffffff" fill-opacity="0.85">Ankle (L)</text>
+    </g>
+    <g id="08_ankle_right">
+      <ellipse cx="334" cy="1000" rx="22" ry="18" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="334" y="1004" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="9" fill="#ffffff" fill-opacity="0.85">Ankle (R)</text>
+    </g>
+    <g id="14_foot_left">
+      <ellipse cx="268" cy="1038" rx="24" ry="12" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="268" y="1042" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="9" fill="#ffffff" fill-opacity="0.85">Foot (L)</text>
+    </g>
+    <g id="14_foot_right">
+      <ellipse cx="332" cy="1038" rx="24" ry="12" fill="#00d4aa" fill-opacity="0.3" stroke="#00d4aa" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="332" y="1042" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="9" fill="#ffffff" fill-opacity="0.85">Foot (R)</text>
+    </g>
+  </g>
+</svg>

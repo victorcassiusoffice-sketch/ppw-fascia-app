@@ -1,0 +1,6 @@
+Lifestyle: office
+Zone: 12_lower_back_left
+Level: intermediate
+
+Drop video here named: video.mp4
+(Overrides the default zone video when this lifestyle is selected)

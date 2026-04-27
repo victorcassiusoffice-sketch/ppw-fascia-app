@@ -1,0 +1,4 @@
+Zone: 06_hip_left
+Level: beginner
+
+Drop video here named: video.mp4

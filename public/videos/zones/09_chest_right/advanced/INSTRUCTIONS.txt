@@ -1,0 +1,4 @@
+Zone: 09_chest_right
+Level: advanced
+
+Drop video here named: video.mp4

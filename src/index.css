@@ -1,0 +1,136 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ──────────────────────────────────────────
+   PPW palette — Option B (locked)
+   ────────────────────────────────────────── */
+:root {
+  color-scheme: dark;
+  --ppw-bg-deep: #0a1628;
+  --ppw-gold:    #f5b845;
+  --ppw-cream:   #f0e8d8;
+  --ppw-teal:    #4a9eb8;
+
+  --ppw-text:        var(--ppw-cream);
+  --ppw-text-muted:  #7b8eaa;
+  --ppw-card-bg:     rgba(240, 232, 216, 0.04);
+  --ppw-card-border: rgba(240, 232, 216, 0.10);
+}
+
+html, body, #root { height: 100%; }
+body {
+  background: var(--ppw-bg-deep);
+  color: var(--ppw-text);
+  overscroll-behavior: none;
+}
+h1,h2,h3,h4 { font-family: 'Syne', sans-serif; letter-spacing: -0.01em; }
+
+.btn-accent {
+  background: var(--ppw-gold);
+  color: var(--ppw-bg-deep);
+  font-weight: 700;
+  padding: 14px 28px;
+  border-radius: 999px;
+  transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+}
+.btn-accent:hover { transform: translateY(-1px); box-shadow: 0 10px 30px -10px rgba(245,184,69,0.55); }
+.btn-accent:active { transform: translateY(0); }
+.btn-accent:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.btn-teal {
+  background: var(--ppw-teal);
+  color: var(--ppw-bg-deep);
+  font-weight: 700;
+  padding: 12px 24px;
+  border-radius: 999px;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.btn-teal:hover { transform: translateY(-1px); box-shadow: 0 10px 30px -10px rgba(74,158,184,0.55); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ppw-cream);
+  border: 1px solid var(--ppw-card-border);
+  font-weight: 600;
+  padding: 12px 22px;
+  border-radius: 999px;
+  transition: border-color .2s ease, color .2s ease;
+}
+.btn-ghost:hover { border-color: var(--ppw-gold); color: var(--ppw-gold); }
+
+.card {
+  background: linear-gradient(180deg, rgba(240,232,216,0.05), rgba(240,232,216,0.01));
+  border: 1px solid var(--ppw-card-border);
+  border-radius: 20px;
+  transition: border-color .2s ease, transform .2s ease;
+}
+.card:hover { border-color: rgba(245,184,69,0.45); }
+
+.card-cream {
+  background: var(--ppw-cream);
+  color: var(--ppw-bg-deep);
+  border-radius: 20px;
+}
+
+.hotspot {
+  fill: rgba(245,184,69,0);
+  stroke: rgba(240,232,216,0.20);
+  stroke-width: 1.5;
+  cursor: pointer;
+  transition: fill .25s ease, stroke .25s ease;
+}
+.hotspot:hover { fill: rgba(245,184,69,0.22); stroke: rgba(245,184,69,0.55); }
+.hotspot.selected {
+  fill: rgba(245,184,69,0.55);
+  stroke: var(--ppw-gold);
+  stroke-width: 2.5;
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { fill: rgba(245,184,69,0.55); }
+  50%      { fill: rgba(245,184,69,0.70); }
+}
+
+.animate-fadeIn { animation: fadeIn 0.3s ease-out; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.timeline-dot {
+  width: 14px; height: 14px; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 10px; line-height: 1;
+}
+.timeline-protocol { background: var(--ppw-gold);  color: var(--ppw-bg-deep); }
+.timeline-routine  { background: var(--ppw-teal);  color: var(--ppw-bg-deep); }
+.timeline-audio    { background: var(--ppw-cream); color: var(--ppw-bg-deep); }
+
+.timeline-done .timeline-label { text-decoration: line-through; opacity: 0.45; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(240,232,216,0.10); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(245,184,69,0.35); }
+
+.audio-only-wrap {
+  position: relative;
+  width: 100%;
+  height: 80px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--ppw-bg-deep), #14233e);
+  border: 1px solid var(--ppw-card-border);
+}
+.audio-only-wrap iframe {
+  position: absolute; inset: 0;
+  width: 100%; height: 320px;
+  pointer-events: auto;
+}
+
+@media (max-width: 640px) {
+  .btn-accent { padding: 12px 20px; font-size: 0.9rem; }
+  .card       { border-radius: 16px; }
+}

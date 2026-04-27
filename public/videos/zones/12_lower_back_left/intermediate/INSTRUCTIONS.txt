@@ -1,0 +1,4 @@
+Zone: 12_lower_back_left
+Level: intermediate
+
+Drop video here named: video.mp4

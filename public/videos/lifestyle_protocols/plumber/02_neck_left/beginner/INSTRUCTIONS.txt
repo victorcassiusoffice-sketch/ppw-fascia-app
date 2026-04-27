@@ -1,0 +1,6 @@
+Lifestyle: plumber
+Zone: 02_neck_left
+Level: beginner
+
+Drop video here named: video.mp4
+(Overrides the default zone video when this lifestyle is selected)

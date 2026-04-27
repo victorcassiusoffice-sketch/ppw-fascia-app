@@ -1,0 +1,6 @@
+Lifestyle: standing_long
+Zone: 05_forearm_right
+Level: beginner
+
+Drop video here named: video.mp4
+(Overrides the default zone video when this lifestyle is selected)

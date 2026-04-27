@@ -1,0 +1,290 @@
+// Single source of truth for the folder-driven logic.
+// Everything here maps to the public/videos/** tree.
+// If you add a folder on disk, add its code here and the app picks it up.
+
+export const ZONES = [
+  { code: '01_head_both',       label: 'Head',           group: '01_head',       side: 'both'  },
+  { code: '02_neck_left',       label: 'Neck',           group: '02_neck',       side: 'left'  },
+  { code: '02_neck_right',      label: 'Neck',           group: '02_neck',       side: 'right' },
+  { code: '03_shoulder_left',   label: 'Shoulder',       group: '03_shoulder',   side: 'left'  },
+  { code: '03_shoulder_right',  label: 'Shoulder',       group: '03_shoulder',   side: 'right' },
+  { code: '04_upper_arm_left',  label: 'Upper Arm',      group: '04_upper_arm',  side: 'left'  },
+  { code: '04_upper_arm_right', label: 'Upper Arm',      group: '04_upper_arm',  side: 'right' },
+  { code: '05_forearm_left',    label: 'Forearm',        group: '05_forearm',    side: 'left'  },
+  { code: '05_forearm_right',   label: 'Forearm',        group: '05_forearm',    side: 'right' },
+  { code: '06_hip_left',        label: 'Hip',            group: '06_hip',        side: 'left'  },
+  { code: '06_hip_right',       label: 'Hip',            group: '06_hip',        side: 'right' },
+  { code: '07_thigh_left',      label: 'Thigh',          group: '07_thigh',      side: 'left'  },
+  { code: '07_thigh_right',     label: 'Thigh',          group: '07_thigh',      side: 'right' },
+  { code: '08_ankle_left',      label: 'Ankle',          group: '08_ankle',      side: 'left'  },
+  { code: '08_ankle_right',     label: 'Ankle',          group: '08_ankle',      side: 'right' },
+  { code: '09_chest_left',      label: 'Chest',          group: '09_chest',      side: 'left'  },
+  { code: '09_chest_right',     label: 'Chest',          group: '09_chest',      side: 'right' },
+  { code: '10_lower_arm_left',  label: 'Lower Arm',      group: '10_lower_arm',  side: 'left'  },
+  { code: '10_lower_arm_right', label: 'Lower Arm',      group: '10_lower_arm',  side: 'right' },
+  { code: '11_lateral_arm_left', label: 'Lateral Arm',   group: '11_lateral_arm', side: 'left'  },
+  { code: '11_lateral_arm_right',label: 'Lateral Arm',   group: '11_lateral_arm', side: 'right' },
+  { code: '12_lower_back_left', label: 'Lower Back',     group: '12_lower_back', side: 'left'  },
+  { code: '12_lower_back_right',label: 'Lower Back',     group: '12_lower_back', side: 'right' },
+  { code: '13_knee_left',       label: 'Knee',           group: '13_knee',       side: 'left'  },
+  { code: '13_knee_right',      label: 'Knee',           group: '13_knee',       side: 'right' },
+  { code: '14_foot_left',       label: 'Foot',           group: '14_foot',       side: 'left'  },
+  { code: '14_foot_right',      label: 'Foot',           group: '14_foot',       side: 'right' },
+  { code: '15_itband_left',     label: 'IT Band',        group: '15_itband',     side: 'left'  },
+  { code: '15_itband_right',    label: 'IT Band',        group: '15_itband',     side: 'right' },
+];
+
+// Number of tests per zone-group. Each test has a yes/no branch.
+export const TESTS_BY_GROUP = {
+  '01_head':        1,
+  '02_neck':        2,
+  '03_shoulder':    2,
+  '04_upper_arm':   1,
+  '05_forearm':     1,
+  '06_hip':         2,
+  '07_thigh':       1,
+  '08_ankle':       1,
+  '09_chest':       1,
+  '10_lower_arm':   1,
+  '11_lateral_arm': 1,
+  '12_lower_back':  3,
+  '13_knee':        2,
+  '14_foot':        1,
+  '15_itband':      2,
+};
+
+export const LIFESTYLES = [
+  { code: 'plumber',       label: 'Plumber',         icon: '🔧' },
+  { code: 'electrician',   label: 'Electrician',     icon: '⚡' },
+  { code: 'builder',       label: 'Builder',         icon: '🏗️' },
+  { code: 'cyclist',       label: 'Cyclist',         icon: '🚴' },
+  { code: 'racket_sports', label: 'Racket Sports',   icon: '🎾' },
+  { code: 'jujitsu',       label: 'Jiu-Jitsu',       icon: '🥋' },
+  { code: 'office',        label: 'Office',          icon: '💻' },
+  { code: 'standing_long', label: 'Standing Long',   icon: '🧍' },
+  { code: 'lifting_boxes', label: 'Lifting Boxes',   icon: '📦' },
+  { code: 'driving',       label: 'Driving',         icon: '🚗' },
+];
+
+// Which zones a lifestyle pre-selects (sensible defaults; folders still drive playback)
+export const LIFESTYLE_ZONES = {
+  plumber:       ['03_shoulder_left','03_shoulder_right','12_lower_back_left','12_lower_back_right','13_knee_left','13_knee_right'],
+  electrician:   ['02_neck_left','02_neck_right','03_shoulder_left','03_shoulder_right','05_forearm_left','05_forearm_right'],
+  builder:       ['12_lower_back_left','12_lower_back_right','03_shoulder_left','03_shoulder_right','06_hip_left','06_hip_right'],
+  cyclist:       ['06_hip_left','06_hip_right','07_thigh_left','07_thigh_right','12_lower_back_left','12_lower_back_right','15_itband_left','15_itband_right'],
+  racket_sports: ['03_shoulder_left','03_shoulder_right','05_forearm_left','05_forearm_right','11_lateral_arm_left','11_lateral_arm_right'],
+  jujitsu:       ['02_neck_left','02_neck_right','03_shoulder_left','03_shoulder_right','06_hip_left','06_hip_right','12_lower_back_left','12_lower_back_right'],
+  office:        ['01_head_both','02_neck_left','02_neck_right','03_shoulder_left','03_shoulder_right','12_lower_back_left','12_lower_back_right'],
+  standing_long: ['06_hip_left','06_hip_right','13_knee_left','13_knee_right','14_foot_left','14_foot_right','12_lower_back_left','12_lower_back_right'],
+  lifting_boxes: ['12_lower_back_left','12_lower_back_right','06_hip_left','06_hip_right','07_thigh_left','07_thigh_right','03_shoulder_left','03_shoulder_right'],
+  driving:       ['02_neck_left','02_neck_right','12_lower_back_left','12_lower_back_right','06_hip_left','06_hip_right'],
+};
+
+// SVG hotspot geometry for the body map (600x1200).
+// Coordinates matched to body_front.png / body_back.png.
+// Left/right are from the VIEWER's perspective (figure faces you).
+
+export const HOTSPOTS_FRONT = [
+  { code: '01_head_both',        shape: 'ellipse', cx: 300, cy: 118, rx: 38, ry: 46 },
+  { code: '02_neck_left',        shape: 'rect',    x: 272, y: 162, w: 28, h: 32 },
+  { code: '02_neck_right',       shape: 'rect',    x: 300, y: 162, w: 28, h: 32 },
+  { code: '03_shoulder_left',    shape: 'ellipse', cx: 212, cy: 222, rx: 30, ry: 18 },
+  { code: '03_shoulder_right',   shape: 'ellipse', cx: 388, cy: 222, rx: 30, ry: 18 },
+  { code: '09_chest_left',       shape: 'rect',    x: 218, y: 240, w: 82, h: 96 },
+  { code: '09_chest_right',      shape: 'rect',    x: 300, y: 240, w: 82, h: 96 },
+  { code: '04_upper_arm_left',   shape: 'rect',    x: 150, y: 248, w: 38, h: 145 },
+  { code: '04_upper_arm_right',  shape: 'rect',    x: 412, y: 248, w: 38, h: 145 },
+  { code: '11_lateral_arm_left', shape: 'rect',    x: 140, y: 255, w: 14, h: 150 },
+  { code: '11_lateral_arm_right',shape: 'rect',    x: 446, y: 255, w: 14, h: 150 },
+  { code: '05_forearm_left',     shape: 'rect',    x: 140, y: 400, w: 38, h: 100 },
+  { code: '05_forearm_right',    shape: 'rect',    x: 422, y: 400, w: 38, h: 100 },
+  { code: '10_lower_arm_left',   shape: 'rect',    x: 136, y: 500, w: 36, h: 50 },
+  { code: '10_lower_arm_right',  shape: 'rect',    x: 428, y: 500, w: 36, h: 50 },
+  { code: '12_lower_back_left',  shape: 'rect',    x: 222, y: 440, w: 78, h: 100 },
+  { code: '12_lower_back_right', shape: 'rect',    x: 300, y: 440, w: 78, h: 100 },
+  { code: '06_hip_left',         shape: 'rect',    x: 222, y: 548, w: 78, h: 60 },
+  { code: '06_hip_right',        shape: 'rect',    x: 300, y: 548, w: 78, h: 60 },
+  { code: '07_thigh_left',       shape: 'rect',    x: 242, y: 660, w: 56, h: 176 },
+  { code: '07_thigh_right',      shape: 'rect',    x: 302, y: 660, w: 56, h: 176 },
+  { code: '15_itband_left',      shape: 'rect',    x: 230, y: 680, w: 16, h: 160 },
+  { code: '15_itband_right',     shape: 'rect',    x: 354, y: 680, w: 16, h: 160 },
+  { code: '13_knee_left',        shape: 'ellipse', cx: 270, cy: 860, rx: 26, ry: 24 },
+  { code: '13_knee_right',       shape: 'ellipse', cx: 330, cy: 860, rx: 26, ry: 24 },
+  { code: '08_ankle_left',       shape: 'ellipse', cx: 266, cy: 1000, rx: 22, ry: 18 },
+  { code: '08_ankle_right',      shape: 'ellipse', cx: 334, cy: 1000, rx: 22, ry: 18 },
+  { code: '14_foot_left',        shape: 'ellipse', cx: 268, cy: 1038, rx: 24, ry: 12 },
+  { code: '14_foot_right',       shape: 'ellipse', cx: 332, cy: 1038, rx: 24, ry: 12 },
+];
+
+// Back view hotspots - same codes, same coordinates (body shape matches front)
+export const HOTSPOTS_BACK = [
+  { code: '01_head_both',        shape: 'ellipse', cx: 300, cy: 118, rx: 38, ry: 46 },
+  { code: '02_neck_left',        shape: 'rect',    x: 272, y: 162, w: 28, h: 32 },
+  { code: '02_neck_right',       shape: 'rect',    x: 300, y: 162, w: 28, h: 32 },
+  { code: '03_shoulder_left',    shape: 'ellipse', cx: 212, cy: 222, rx: 30, ry: 18 },
+  { code: '03_shoulder_right',   shape: 'ellipse', cx: 388, cy: 222, rx: 30, ry: 18 },
+  { code: '09_chest_left',       shape: 'rect',    x: 218, y: 240, w: 82, h: 96 },
+  { code: '09_chest_right',      shape: 'rect',    x: 300, y: 240, w: 82, h: 96 },
+  { code: '04_upper_arm_left',   shape: 'rect',    x: 150, y: 248, w: 38, h: 145 },
+  { code: '04_upper_arm_right',  shape: 'rect',    x: 412, y: 248, w: 38, h: 145 },
+  { code: '11_lateral_arm_left', shape: 'rect',    x: 140, y: 255, w: 14, h: 150 },
+  { code: '11_lateral_arm_right',shape: 'rect',    x: 446, y: 255, w: 14, h: 150 },
+  { code: '05_forearm_left',     shape: 'rect',    x: 140, y: 400, w: 38, h: 100 },
+  { code: '05_forearm_right',    shape: 'rect',    x: 422, y: 400, w: 38, h: 100 },
+  { code: '10_lower_arm_left',   shape: 'rect',    x: 136, y: 500, w: 36, h: 50 },
+  { code: '10_lower_arm_right',  shape: 'rect',    x: 428, y: 500, w: 36, h: 50 },
+  { code: '12_lower_back_left',  shape: 'rect',    x: 222, y: 440, w: 78, h: 100 },
+  { code: '12_lower_back_right', shape: 'rect',    x: 300, y: 440, w: 78, h: 100 },
+  { code: '06_hip_left',         shape: 'rect',    x: 222, y: 548, w: 78, h: 60 },
+  { code: '06_hip_right',        shape: 'rect',    x: 300, y: 548, w: 78, h: 60 },
+  { code: '07_thigh_left',       shape: 'rect',    x: 242, y: 660, w: 56, h: 176 },
+  { code: '07_thigh_right',      shape: 'rect',    x: 302, y: 660, w: 56, h: 176 },
+  { code: '15_itband_left',      shape: 'rect',    x: 230, y: 680, w: 16, h: 160 },
+  { code: '15_itband_right',     shape: 'rect',    x: 354, y: 680, w: 16, h: 160 },
+  { code: '13_knee_left',        shape: 'ellipse', cx: 270, cy: 860, rx: 26, ry: 24 },
+  { code: '13_knee_right',       shape: 'ellipse', cx: 330, cy: 860, rx: 26, ry: 24 },
+  { code: '08_ankle_left',       shape: 'ellipse', cx: 266, cy: 1000, rx: 22, ry: 18 },
+  { code: '08_ankle_right',      shape: 'ellipse', cx: 334, cy: 1000, rx: 22, ry: 18 },
+  { code: '14_foot_left',        shape: 'ellipse', cx: 268, cy: 1038, rx: 24, ry: 12 },
+  { code: '14_foot_right',       shape: 'ellipse', cx: 332, cy: 1038, rx: 24, ry: 12 },
+];
+
+// Legacy alias for backward compatibility
+export const HOTSPOTS = HOTSPOTS_FRONT;
+
+// Placeholder duration (seconds) — real value will be read from <video> metadata on load
+export const DEFAULT_CLIP_SECONDS = 60;
+
+// BASE_URL prefix — '/' in dev, '/<repo>/' on GitHub Pages.
+// Use a getter so we can call this in modules that import this file.
+const baseUrl = () => (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BASE_URL) || '/';
+
+// Resolve which folder to pull a zone video from, based on selected lifestyle.
+export function zoneVideoPath(zoneCode, level, lifestyle) {
+  const b = baseUrl();
+  if (lifestyle) {
+    return `${b}videos/lifestyle_protocols/${lifestyle}/${zoneCode}/${level}/video.mp4`;
+  }
+  return `${b}videos/zones/${zoneCode}/${level}/video.mp4`;
+}
+
+export function testVideoPath(zoneGroup, testNumber) {
+  const nn = String(testNumber).padStart(2, '0');
+  return `${baseUrl()}videos/tests/${zoneGroup}/test_${nn}/test.mp4`;
+}
+
+export function testAnswerVideoPath(zoneGroup, testNumber, answer /* 'yes' | 'no' */) {
+  const nn = String(testNumber).padStart(2, '0');
+  return `${baseUrl()}videos/tests/${zoneGroup}/test_${nn}/${answer}/test.mp4`;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   media.json paths — Phase 2 (YouTube unlisted, no local mp4s)
+   ────────────────────────────────────────────────────────────── */
+
+export function zoneMediaPath(zoneCode, level, lifestyle) {
+  const b = baseUrl();
+  if (lifestyle) {
+    return `${b}videos/lifestyle_protocols/${lifestyle}/${zoneCode}/${level}/media.json`;
+  }
+  return `${b}videos/zones/${zoneCode}/${level}/media.json`;
+}
+
+export function lifestyleAllMediaPath(lifestyle, level) {
+  // _all is a synthetic zone for whole-body lifestyle protocols
+  return `${baseUrl()}videos/lifestyle_protocols/${lifestyle}/_all/${level}/media.json`;
+}
+
+export function moduleMediaPath(type /* 'audio' | etc */, slug) {
+  return `${baseUrl()}videos/modules/${type}/${slug}/media.json`;
+}
+
+/* Fetch a media.json with graceful fallback. Returns null if missing. */
+export async function loadMedia(path) {
+  try {
+    const r = await fetch(path, { cache: 'no-cache' });
+    if (!r.ok) return null;
+    const j = await r.json();
+    if (!j || !j.youtube_id) return null;
+    return j;
+  } catch (_) {
+    return null;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Fascia chain mapping — protocol JSON's body_zone_chain field
+   resolves to a list of canonical zone codes.
+   Refine over time; this is the v1 starting point.
+   ────────────────────────────────────────────────────────────── */
+export const FASCIA_CHAINS = {
+  superficial_back_line:  ['12_lower_back_left','12_lower_back_right','07_thigh_left','07_thigh_right','14_foot_left','14_foot_right'],
+  superficial_front_line: ['09_chest_left','09_chest_right','07_thigh_left','07_thigh_right','13_knee_left','13_knee_right'],
+  lateral_line:           ['02_neck_left','02_neck_right','15_itband_left','15_itband_right'],
+  spiral_line:            ['09_chest_left','12_lower_back_left','15_itband_right'],
+  deep_front_line:        ['06_hip_left','06_hip_right','07_thigh_left','07_thigh_right'],
+  arm_lines_front:        ['04_upper_arm_left','04_upper_arm_right','05_forearm_left','05_forearm_right'],
+  arm_lines_back:         ['11_lateral_arm_left','11_lateral_arm_right','10_lower_arm_left','10_lower_arm_right'],
+  functional_lines:       ['09_chest_left','12_lower_back_right'],
+};
+
+export const ZONE_TO_CHAIN = (() => {
+  const m = {};
+  for (const [chain, zones] of Object.entries(FASCIA_CHAINS)) {
+    for (const z of zones) {
+      if (!m[z]) m[z] = [];
+      m[z].push(chain);
+    }
+  }
+  return m;
+})();
+
+export function resolveRoutineZones(fascia_routine) {
+  if (!fascia_routine) return [];
+  if (fascia_routine.zones && fascia_routine.zones.length) return fascia_routine.zones;
+  if (fascia_routine.body_zone_chain && FASCIA_CHAINS[fascia_routine.body_zone_chain]) {
+    return FASCIA_CHAINS[fascia_routine.body_zone_chain];
+  }
+  return [];
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Chain overlay PNGs — produced by Sub-Chat 3 (PPW Protocol Agent).
+   Live in public/assets/body_zones/ and render on top of the body
+   silhouette in BodyMap when a chain is highlighted.
+
+   Default filename pattern: <chain_name>_<view>.png
+   Override an entry here if Sub-Chat 3 used a different filename.
+   Use chainOverlayUrl(chain, view) instead of hard-coding paths
+   so BASE_URL gets prefixed correctly under GitHub Pages subpath.
+   ────────────────────────────────────────────────────────────── */
+export const CHAIN_OVERLAY_FILES = {
+  // chain: { front: 'filename.png', back: 'filename.png' }
+  // (left empty → default <chain>_<view>.png pattern is used)
+};
+
+export function chainOverlayUrl(chain, view = 'front') {
+  if (!chain) return null;
+  const override = CHAIN_OVERLAY_FILES[chain];
+  const filename = (override && override[view]) || `${chain}_${view}.png`;
+  // import.meta.env.BASE_URL is '/' in dev, '/<repo>/' on GitHub Pages
+  const base = (import.meta && import.meta.env && import.meta.env.BASE_URL) || '/';
+  return `${base}assets/body_zones/${filename}`;
+}
+
+/* Pick the dominant fascia chain implied by a set of selected zones.
+   Returns null if no zone matches a chain, or if no single chain wins.
+   Used by BodyMap to fade in the right overlay. */
+export function dominantChainForZones(zoneCodes) {
+  if (!zoneCodes || !zoneCodes.length) return null;
+  const counts = {};
+  for (const code of zoneCodes) {
+    const chains = ZONE_TO_CHAIN[code] || [];
+    for (const c of chains) counts[c] = (counts[c] || 0) + 1;
+  }
+  let best = null, bestScore = 0;
+  for (const [chain, n] of Object.entries(counts)) {
+    if (n > bestScore) { best = chain; bestScore = n; }
+  }
+  return best;
+}

@@ -1,0 +1,6 @@
+Lifestyle: jujitsu
+Zone: 02_neck_left
+Level: intermediate
+
+Drop video here named: video.mp4
+(Overrides the default zone video when this lifestyle is selected)

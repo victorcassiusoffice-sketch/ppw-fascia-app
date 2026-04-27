@@ -1,0 +1,6 @@
+Lifestyle: cyclist
+Zone: 08_ankle_right
+Level: advanced
+
+Drop video here named: video.mp4
+(Overrides the default zone video when this lifestyle is selected)

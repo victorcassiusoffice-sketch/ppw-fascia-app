@@ -1,0 +1,6 @@
+Lifestyle: builder
+Zone: 04_upper_arm_left
+Level: intermediate
+
+Drop video here named: video.mp4
+(Overrides the default zone video when this lifestyle is selected)

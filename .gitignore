@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-fresh/
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Backups & quarantine
+*.backup
+_quarantine/
+screenshots/
+
+# Vite build artifacts (timestamp configs)
+vite.config.js.timestamp-*.mjs
+*.timestamp-*.mjs
+
+# Smoke / verification configs
+smoke_vite.config.mjs
+vite.verify.config.mjs
+scripts_build.mjs
+
+# Cowork notes (kept local — not for public repo)
+COWORK_NOTES.txt
+FIGMA_LINK.txt
+dist-build/

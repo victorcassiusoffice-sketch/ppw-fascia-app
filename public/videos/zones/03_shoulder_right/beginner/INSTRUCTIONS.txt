@@ -1,0 +1,4 @@
+Zone: 03_shoulder_right
+Level: beginner
+
+Drop video here named: video.mp4

@@ -1,0 +1,6 @@
+Lifestyle: driving
+Zone: 09_chest_left
+Level: advanced
+
+Drop video here named: video.mp4
+(Overrides the default zone video when this lifestyle is selected)

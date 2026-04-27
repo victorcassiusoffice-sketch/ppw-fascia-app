@@ -1,0 +1,6 @@
+Lifestyle: jujitsu
+Zone: 06_hip_left
+Level: beginner
+
+Drop video here named: video.mp4
+(Overrides the default zone video when this lifestyle is selected)

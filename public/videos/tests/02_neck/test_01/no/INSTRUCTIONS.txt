@@ -1,0 +1,6 @@
+Zone: 02_neck
+Test: test_01
+Branch: NO (user answered 'no')
+
+Drop test video here named: test.mp4
+(This video is played/added to the stack when the user answers NO to 'test_01')

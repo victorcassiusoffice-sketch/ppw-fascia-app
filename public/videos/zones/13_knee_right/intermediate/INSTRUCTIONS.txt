@@ -1,0 +1,4 @@
+Zone: 13_knee_right
+Level: intermediate
+
+Drop video here named: video.mp4

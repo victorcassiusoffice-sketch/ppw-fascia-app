@@ -1,0 +1,67 @@
+name: Build and deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Allow this workflow to publish a Pages artifact
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One in-flight deploy at a time, no queueing
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Build (with repo-name as base path)
+        env:
+          # Auto-derives '/<repo-name>/' so the same workflow works
+          # whatever Vic names the repo.
+          VITE_BASE_PATH: /${{ github.event.repository.name }}/
+        run: npm run build
+
+      - name: Add 404 fallback for SPA routing
+        # GitHub Pages serves 404.html for any unknown path. Copying
+        # index.html to 404.html lets React Router handle deep links
+        # like /today, /protocols, etc. on direct load.
+        run: cp dist/index.html dist/404.html
+
+      - name: Add .nojekyll
+        # Stops GitHub Pages from running Jekyll on the artifact,
+        # which would strip files starting with '_'.
+        run: touch dist/.nojekyll
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

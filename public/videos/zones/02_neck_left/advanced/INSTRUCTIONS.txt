@@ -1,0 +1,4 @@
+Zone: 02_neck_left
+Level: advanced
+
+Drop video here named: video.mp4

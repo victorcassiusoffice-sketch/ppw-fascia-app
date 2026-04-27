@@ -1,0 +1,6 @@
+Lifestyle: driving
+Zone: 11_lateral_arm_right
+Level: intermediate
+
+Drop video here named: video.mp4
+(Overrides the default zone video when this lifestyle is selected)

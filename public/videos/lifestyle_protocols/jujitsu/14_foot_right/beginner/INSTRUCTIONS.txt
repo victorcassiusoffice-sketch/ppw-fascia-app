@@ -1,0 +1,6 @@
+Lifestyle: jujitsu
+Zone: 14_foot_right
+Level: beginner
+
+Drop video here named: video.mp4
+(Overrides the default zone video when this lifestyle is selected)

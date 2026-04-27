@@ -1,0 +1,6 @@
+Zone: 10_lower_arm
+Test: test_01
+Branch: YES (user answered 'yes')
+
+Drop test video here named: test.mp4
+(This video is played/added to the stack when the user answers YES to 'test_01')
