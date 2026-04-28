@@ -19,8 +19,22 @@ const KNOWN_AUDIO_MODULES = [
 ];
 
 /* ────────────────────────────────────────────
-   BodyMap visual constants (Sub-Chat 5 polish)
+   BodyMap visual constants (Sub-Chat 6 alignment fix)
    ──────────────────────────────────────────── */
+
+// PNG figure-bounds → viewBox affine transform.
+// Source PNGs are 1024×1024 with a translucent A-pose figure that does NOT
+// fill the canvas (Sub-Chat 3 left margin around it). Measured opaque-pixel
+// bounds map onto the polygon grid's body extent (x∈[98,502], y∈[76,1198])
+// via an `<image>` rendered with preserveAspectRatio="none".
+//   Front PNG figure: x[341,689] y[64,988]  → asym 4.6%  (invisible at low op)
+//   Back  PNG figure: x[373,667] y[72,1023] → asym 16.5% (figure narrower
+//     in source so horizontal stretch is wider; acceptable on back view).
+// If either PNG is regenerated, re-measure opaque bounds and update.
+const BODY_IMAGE_TRANSFORMS = {
+  front: { x: -297.87, y:  -1.71, width: 1188.78, height: 1243.43 },
+  back:  { x: -414.56, y:  -8.95, width: 1407.13, height: 1208.13 },
+};
 
 // Hand-authored full-body silhouette path on the 600×1200 viewBox.
 // Smooth Bezier curves connecting the major anatomical landmarks of the
@@ -432,56 +446,95 @@ function BodyMap({ session, setSession }) {
                 </filter>
               </defs>
 
-              {/* Faint anatomical body PNG — subtle backdrop only.
-                  Three-stage fallback: new path → legacy path → omit (silhouette path covers it).
-                  Opacity drops further when zones are selected, so the gold pops. */}
-              {currentBodyImg && (
-                <image
-                  href={currentBodyImg}
-                  x="0" y="0" width="600" height="1200"
-                  preserveAspectRatio="xMidYMid meet"
-                  opacity={totalZones > 0 ? 0.08 : 0.18}
-                  style={{ pointerEvents: 'none', transition: 'opacity 0.4s ease' }}
-                  onError={() => setBodyImgState(s => s === 'primary' ? 'fallback' : 'none')}
-                />
-              )}
+              {/* LAYER 1 — anatomical body PNG, calibrated to the polygon grid.
+                  PNG is 1024×1024 with the figure inset; we use preserveAspectRatio
+                  ="none" plus the precomputed BODY_IMAGE_TRANSFORMS so the figure's
+                  opaque-pixel bounds land on viewBox body coords (head y≈80, feet
+                  y≈1198, x∈[98,502]). Three-stage fallback preserved: new path →
+                  legacy path → omit (silhouette path then carries the visual). */}
+              {currentBodyImg && (() => {
+                const t = BODY_IMAGE_TRANSFORMS[view];
+                return (
+                  <image
+                    href={currentBodyImg}
+                    x={t.x} y={t.y} width={t.width} height={t.height}
+                    preserveAspectRatio="none"
+                    opacity={totalZones > 0 ? 0.55 : 0.85}
+                    style={{ pointerEvents: 'none', transition: 'opacity 0.4s ease' }}
+                    onError={() => setBodyImgState(s => s === 'primary' ? 'fallback' : 'none')}
+                  />
+                );
+              })()}
 
-              {/* Faint full-body silhouette outline — gives the eye a "this is a body" cue */}
+              {/* Faint full-body silhouette outline — backup anatomical cue if PNG
+                  fails to load (legacy + new path both 404). Stroked-only, low op. */}
               <path className="body-silhouette" d={BODY_SILHOUETTE_PATH} />
 
-              {/* Fascia-chain overlay PNG (rendered via foreignObject so we can
-                  use mixBlendMode + onError; SVG <image> doesn't support those
-                  consistently across browsers). */}
-              {overlaySrc && overlayOk && (
-                <foreignObject x="0" y="0" width="600" height="1200" style={{ pointerEvents: 'none' }}>
-                  <img
-                    src={overlaySrc}
-                    alt={`fascia chain ${dominantChain}`}
-                    style={{ width: '100%', height: '100%', opacity: 0.75, mixBlendMode: 'screen', userSelect: 'none' }}
-                    draggable="false"
-                    onError={() => setOverlayOk(false)}
-                  />
-                </foreignObject>
-              )}
+              {/* Fascia-chain overlay PNG — rendered via foreignObject for
+                  mixBlendMode + onError support. Uses same calibrated transform
+                  as the base PNG so chain highlights track the figure. */}
+              {overlaySrc && overlayOk && (() => {
+                const t = BODY_IMAGE_TRANSFORMS[view];
+                return (
+                  <foreignObject
+                    x={t.x} y={t.y} width={t.width} height={t.height}
+                    style={{ pointerEvents: 'none' }}
+                  >
+                    <img
+                      src={overlaySrc}
+                      alt={`fascia chain ${dominantChain}`}
+                      style={{ width: '100%', height: '100%', opacity: 0.75, mixBlendMode: 'screen', userSelect: 'none' }}
+                      draggable="false"
+                      onError={() => setOverlayOk(false)}
+                    />
+                  </foreignObject>
+                );
+              })()}
 
-              {/* Anatomical polygon hotspots */}
+              {/* LAYER 2 — invisible click targets. One polygon per zone, no
+                  visible style at idle (figure shows through). Hover paints a
+                  teal stroke; tap toggles selection. ARIA + keyboard wired. */}
+              {hotspots.map(h => {
+                const z = ZONES.find(x => x.code === h.code);
+                const isSelected = !!selected[h.code];
+                const ariaLabel = z ? `${z.label}${z.side !== 'both' ? ' ' + z.side : ''}` : h.code;
+                return (
+                  <polygon
+                    key={`hit-${h.code}`}
+                    className={'hotspot-hit' + (isSelected ? ' is-selected' : '')}
+                    points={h.polygon}
+                    data-zone={h.code}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={ariaLabel}
+                    aria-pressed={isSelected}
+                    onClick={() => toggle(h.code)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        toggle(h.code);
+                      }
+                    }}
+                  />
+                );
+              })}
+
+              {/* LAYER 3 — visible feedback. Renders ONLY for selected zones:
+                  gold-filled polygon with glow filter + zone label. Pointer
+                  events disabled so taps fall through to LAYER 2. */}
               {hotspots.map(h => {
                 const isSelected = !!selected[h.code];
-                const cls = 'hotspot' + (isSelected ? ' selected' : '');
+                if (!isSelected) return null;
                 const label = zoneShortLabel(h.code, ZONES);
                 return (
-                  <g key={h.code}>
+                  <g key={`fb-${h.code}`} style={{ pointerEvents: 'none' }}>
                     <polygon
-                      className={cls}
+                      className="hotspot-feedback"
                       points={h.polygon}
-                      data-zone={h.code}
-                      onClick={() => toggle(h.code)}
                     />
-                    {isSelected && (
-                      <text className="hotspot-label" x={h.cx} y={h.cy}>
-                        {label}
-                      </text>
-                    )}
+                    <text className="hotspot-label" x={h.cx} y={h.cy}>
+                      {label}
+                    </text>
                   </g>
                 );
               })}
@@ -1128,6 +1181,60 @@ function SettingsView() {
     setActiveProtocols([]);
     setActiveModules([]);
     setActiveRoutines({ savedZones: [], level: 'beginner', lifestyle: null, scheduledTime: '08:00' });
+  };
+
+  return (
+    <main className="px-5 py-6 max-w-3xl mx-auto pb-16">
+      <Link to="/today" className="text-muted text-sm inline-block hover:text-accent mb-3">← Today</Link>
+      <h1 className="font-display text-3xl md:text-4xl mb-6">Settings</h1>
+
+      <Section title="Notifications">
+        <div className="card p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <div className="font-display">Daily reminders</div>
+              <div className="text-muted text-xs">Fires {NOTIFICATION_LEAD_TIME_MIN} min before each scheduled item.</div>
+            </div>
+            <div className="text-xs text-accent">{perm}</div>
+          </div>
+          {perm !== 'granted' && perm !== 'unsupported' && (
+            <button onClick={askPerm} className="btn-accent mt-4 w-full">Enable notifications</button>
+          )}
+          {perm === 'unsupported' && <div className="text-muted text-xs mt-3">This browser does not support notifications.</div>}
+        </div>
+      </Section>
+
+      <Section title="Data source">
+        <div className="card p-5">
+          <div className="font-display mb-2">Use mock protocol data</div>
+          <div className="text-muted text-xs mb-4">Off = pull from the GitHub protocol repo. On = read /mock-protocol.json bundled with the app.</div>
+          <div className="flex gap-2">
+            <button onClick={() => setMockOverride('true')}  className={`flex-1 py-2.5 rounded-full text-sm font-bold ${mockOverride === 'true'  ? 'btn-accent' : 'btn-ghost'}`}>Mock</button>
+            <button onClick={() => setMockOverride('false')} className={`flex-1 py-2.5 rounded-full text-sm font-bold ${mockOverride === 'false' ? 'btn-accent' : 'btn-ghost'}`}>Live</button>
+          </div>
+        </div>
+      </Section>
+
+      <Section title="Active state">
+        <div className="card p-5 space-y-2 text-sm">
+          <div>Protocols: <span className="text-accent">{activeProtocols.length}</span></div>
+          <div>Audio modules: <span className="text-accent">{activeModules.length}</span></div>
+          <div>Saved zones: <span className="text-accent">{activeRoutines.savedZones?.length || 0}</span></div>
+          <button onClick={clearAll} className="btn-ghost w-full mt-4">Clear all activations</button>
+        </div>
+      </Section>
+
+      <Section title="About">
+        <div className="card p-5 text-sm space-y-1.5">
+          <div>Version: <span className="text-accent">{APP_VERSION}</span></div>
+          <div>Theme: Option B — gold + navy</div>
+          <div className="text-muted text-xs pt-2">Peak Performance Wellness · ppwellness.co</div>
+        </div>
+      </Section>
+    </main>
+  );
+}
+ActiveRoutines({ savedZones: [], level: 'beginner', lifestyle: null, scheduledTime: '08:00' });
   };
 
   return (
