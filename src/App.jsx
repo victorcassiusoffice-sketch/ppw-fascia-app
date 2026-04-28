@@ -19,6 +19,71 @@ const KNOWN_AUDIO_MODULES = [
 ];
 
 /* ────────────────────────────────────────────
+   BodyMap visual constants (Sub-Chat 5 polish)
+   ──────────────────────────────────────────── */
+
+// Hand-authored full-body silhouette path on the 600×1200 viewBox.
+// Smooth Bezier curves connecting the major anatomical landmarks of the
+// hotspot grid — head, shoulders, arms, torso, hips, thighs, calves, feet.
+// Stroked-only at very low opacity (see .body-silhouette in index.css).
+const BODY_SILHOUETTE_PATH = [
+  'M 300 80',
+  'Q 358 82 360 118',
+  'Q 358 178 340 180',
+  'L 350 210',
+  'Q 380 225 408 260',
+  'L 470 310',
+  'Q 500 400 490 520',
+  'Q 480 610 460 650',
+  'Q 440 680 420 665',
+  'L 380 605',
+  'L 380 640',
+  'Q 380 820 378 950',
+  'L 360 1015',
+  'L 350 1130',
+  'Q 358 1188 320 1198',
+  'L 280 1198',
+  'Q 242 1188 250 1130',
+  'L 240 1015',
+  'L 222 950',
+  'Q 220 820 220 640',
+  'L 220 605',
+  'L 180 665',
+  'Q 160 680 140 650',
+  'Q 120 610 110 520',
+  'Q 100 400 130 310',
+  'L 192 260',
+  'Q 220 225 250 210',
+  'L 260 180',
+  'Q 242 178 240 118',
+  'Q 242 82 300 80',
+  'Z',
+].join(' ');
+
+// Short label rendered inside selected hotspot polygons. Abbreviates long
+// names so they fit narrow zones (lateral arm, IT band, etc).
+const ZONE_LABEL_OVERRIDES = {
+  '15_itband_left':       'ITB L',
+  '15_itband_right':      'ITB R',
+  '11_lateral_arm_left':  'Lat L',
+  '11_lateral_arm_right': 'Lat R',
+  '10_lower_arm_left':    'L.Arm L',
+  '10_lower_arm_right':   'L.Arm R',
+  '04_upper_arm_left':    'U.Arm L',
+  '04_upper_arm_right':   'U.Arm R',
+  '12_lower_back_left':   'L.Back L',
+  '12_lower_back_right':  'L.Back R',
+};
+
+function zoneShortLabel(code, zonesList) {
+  if (ZONE_LABEL_OVERRIDES[code]) return ZONE_LABEL_OVERRIDES[code];
+  const z = zonesList.find(x => x.code === code);
+  if (!z) return code;
+  const side = z.side === 'left' ? ' L' : z.side === 'right' ? ' R' : '';
+  return z.label + side;
+}
+
+/* ────────────────────────────────────────────
    Shared session state (lifted to App)
    ──────────────────────────────────────────── */
 const initialSession = {
@@ -354,18 +419,35 @@ function BodyMap({ session, setSession }) {
               className="absolute inset-0 w-full h-full"
               preserveAspectRatio="xMidYMid meet"
             >
-              {/* Body PNG, three-stage fallback. SVG <image> supports onError. */}
-              {currentBodyImg ? (
+              {/* Filter defs — gold glow for selected hotspots */}
+              <defs>
+                <filter id="hotspotGlow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur" />
+                  <feFlood floodColor="#f5b845" floodOpacity="0.65" />
+                  <feComposite in2="blur" operator="in" result="glow" />
+                  <feMerge>
+                    <feMergeNode in="glow" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+
+              {/* Faint anatomical body PNG — subtle backdrop only.
+                  Three-stage fallback: new path → legacy path → omit (silhouette path covers it).
+                  Opacity drops further when zones are selected, so the gold pops. */}
+              {currentBodyImg && (
                 <image
                   href={currentBodyImg}
                   x="0" y="0" width="600" height="1200"
                   preserveAspectRatio="xMidYMid meet"
-                  style={{ pointerEvents: 'none' }}
+                  opacity={totalZones > 0 ? 0.08 : 0.18}
+                  style={{ pointerEvents: 'none', transition: 'opacity 0.4s ease' }}
                   onError={() => setBodyImgState(s => s === 'primary' ? 'fallback' : 'none')}
                 />
-              ) : (
-                <rect x="0" y="0" width="600" height="1200" fill="#0a1628" />
               )}
+
+              {/* Faint full-body silhouette outline — gives the eye a "this is a body" cue */}
+              <path className="body-silhouette" d={BODY_SILHOUETTE_PATH} />
 
               {/* Fascia-chain overlay PNG (rendered via foreignObject so we can
                   use mixBlendMode + onError; SVG <image> doesn't support those
@@ -386,7 +468,7 @@ function BodyMap({ session, setSession }) {
               {hotspots.map(h => {
                 const isSelected = !!selected[h.code];
                 const cls = 'hotspot' + (isSelected ? ' selected' : '');
-                const pain = selected[h.code];
+                const label = zoneShortLabel(h.code, ZONES);
                 return (
                   <g key={h.code}>
                     <polygon
@@ -396,16 +478,8 @@ function BodyMap({ session, setSession }) {
                       onClick={() => toggle(h.code)}
                     />
                     {isSelected && (
-                      <text
-                        x={h.cx} y={h.cy + 8}
-                        textAnchor="middle"
-                        fill="#0a1628"
-                        fontSize="26"
-                        fontWeight="800"
-                        fontFamily="Syne, sans-serif"
-                        style={{ pointerEvents: 'none' }}
-                      >
-                        {pain}
+                      <text className="hotspot-label" x={h.cx} y={h.cy}>
+                        {label}
                       </text>
                     )}
                   </g>
