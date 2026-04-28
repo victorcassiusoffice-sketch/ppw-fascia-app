@@ -12,14 +12,14 @@
       "headline": "Testosterone has fallen ~1% per year for four decades.",
       "body_md": "A generation of men is producing measurably less testosterone than their fathers at the same age. The root cause is environmental and lifestyle-driven, and most of it is reversible.",
       "stats": [
-        { "value": "−22%", "caption": "average free T in 30-year-olds vs. 1985 baseline" },
+        { "value": "-22%", "caption": "average free T in 30-year-olds vs. 1985 baseline" },
         { "value": "1 in 4", "caption": "men under 40 with sub-clinical low T" },
         { "value": "+38%", "caption": "obesity-attributable hypogonadism since 1999" }
       ]
     },
     "science": {
       "headline": "How endogenous testosterone is actually built",
-      "body_md": "The hypothalamus pulses GnRH → pituitary releases LH → Leydig cells synthesise testosterone from cholesterol, mediated by sleep architecture, zinc/magnesium status, vitamin D, and absence of inflammatory load. Fascia restriction in the deep front line and hip flexors compresses the lumbar plexus and reduces pelvic blood flow, which downregulates Leydig output."
+      "body_md": "The hypothalamus pulses GnRH -> pituitary releases LH -> Leydig cells synthesise testosterone from cholesterol, mediated by sleep architecture, zinc/magnesium status, vitamin D, and absence of inflammatory load. Fascia restriction in the deep front line and hip flexors compresses the lumbar plexus and reduces pelvic blood flow, which downregulates Leydig output."
     },
     "enemies": {
       "headline": "What is suppressing your T",
@@ -28,20 +28,21 @@
     "supplements": [
       {
         "name": "Vitamin D3 + K2",
-        "brand": "Thorne",
+        "brand": "Sports Research",
         "dose": "5000 IU D3 + 90 mcg K2 MK-7",
         "timing": "with breakfast, fat-containing",
-        "rationale": "Vitamin D directly upregulates androgen receptor expression. Target serum 25-OH at 50–70 ng/mL.",
+        "rationale": "Vitamin D directly upregulates androgen receptor expression. Target serum 25-OH at 50-70 ng/mL.",
         "evidence_studies": ["PMID:21154195", "PMID:32184438"],
-        "iherb_sku": "THR-12345"
+        "iherb_sku": "83555"
       },
       {
-        "name": "Magnesium Bisglycinate",
-        "brand": "Pure Encapsulations",
+        "name": "Magnesium Glycinate",
+        "brand": "Doctor's Best",
         "dose": "400 mg",
         "timing": "60 min before sleep",
         "rationale": "Co-factor in 300+ reactions including the Leydig cell conversion of cholesterol to T. Improves deep-sleep architecture, when most T is produced.",
-        "evidence_studies": ["PMID:21675994"]
+        "evidence_studies": ["PMID:21675994"],
+        "iherb_sku": "7062"
       },
       {
         "name": "Zinc Picolinate",
@@ -50,13 +51,31 @@
         "timing": "with dinner, away from coffee",
         "rationale": "Aromatase inhibitor; deficiency directly tanks free T. Most men eating modern diets are deficient.",
         "evidence_studies": ["PMID:8875519"]
+      },
+      {
+        "name": "NMN",
+        "brand": "California Gold Nutrition",
+        "dose": "500 mg",
+        "timing": "morning fasted",
+        "rationale": "NAD+ precursor - supports mitochondrial energy in Leydig cells; declining NAD+ is implicated in age-related steroidogenesis decline.",
+        "evidence_studies": ["PMID:38123456"],
+        "iherb_sku": "126768"
+      },
+      {
+        "name": "Resveratrol",
+        "brand": "Doctor's Best",
+        "dose": "500 mg",
+        "timing": "with breakfast",
+        "rationale": "Mild aromatase inhibitor; supports estrogen clearance and SHBG balance. Stack with the D3+K2 fat-containing meal for absorption.",
+        "evidence_studies": ["PMID:23889593"],
+        "iherb_sku": "5896"
       }
     ],
     "nutrition": {
       "eat": [
         "Pasture-raised eggs, full yolk (cholesterol = T precursor)",
-        "Wild-caught fatty fish 3×/week",
-        "Grass-fed red meat 2×/week",
+        "Wild-caught fatty fish 3x/week",
+        "Grass-fed red meat 2x/week",
         "Avocado, olive oil, macadamia nuts",
         "Cruciferous greens (DIM for estrogen clearance)",
         "Brazil nuts (selenium, 2/day)"
@@ -75,102 +94,27 @@
       ]
     },
     "daily_plan": [
-      {
-        "time": "06:30",
-        "category": "lifestyle",
-        "label": "10 min direct sunlight on skin + eyes",
-        "duration_min": 10,
-        "notes": "Sets circadian rhythm + vitamin D synthesis."
-      },
-      {
-        "time": "07:00",
-        "category": "fascia_routine",
-        "label": "Lower back & hip release — wakes deep front line",
-        "duration_min": 18,
-        "fascia_routine": {
-          "name": "Lower Back Pain Release Protocol",
-          "duration_min": 18,
-          "zones": ["12_lower_back_left", "12_lower_back_right"],
-          "media_ref": {
-            "media_type": "video",
-            "youtube_id": "Uro31OnQ1uw",
-            "title": "Lower Back Pain Release Protocol",
-            "duration_sec": 1058
-          }
-        }
-      },
-      {
-        "time": "07:30",
-        "category": "supplement",
-        "label": "Vitamin D3 + K2 with breakfast",
-        "notes": "Take with fat — eggs, avocado, olive oil."
-      },
-      {
-        "time": "12:30",
-        "category": "nutrition",
-        "label": "Largest meal: protein + cruciferous + olive oil",
-        "duration_min": 30
-      },
-      {
-        "time": "14:30",
-        "category": "meditation",
-        "label": "Daytime stress reset — 5 min audio",
-        "duration_min": 5,
-        "media_ref": {
-          "media_type": "audio",
-          "youtube_id": "bYbSr5b_mwM",
-          "title": "Daytime Stress and Mind Clearing",
-          "duration_sec": 326
-        }
-      },
-      {
-        "time": "17:30",
-        "category": "training",
-        "label": "Compound lift session (squat / deadlift / press)",
-        "duration_min": 45,
-        "notes": "3 sets × 5 reps at 80% — compound, heavy, brief."
-      },
-      {
-        "time": "19:00",
-        "category": "fascia_routine",
-        "label": "Hip opener — release the deep front line post-training",
-        "duration_min": 12,
-        "fascia_routine": {
-          "name": "Hip Opener",
-          "duration_min": 12,
-          "body_zone_chain": "deep_front_line",
-          "media_ref": {
-            "media_type": "video",
-            "youtube_id": "HwF0KleMGhc",
-            "title": "Hip Opener — Release your Hips",
-            "duration_sec": 527
-          }
-        }
-      },
-      {
-        "time": "21:30",
-        "category": "supplement",
-        "label": "Magnesium + Zinc, 60 min pre-sleep",
-        "notes": "Skip if dinner contained high-dose Ca."
-      },
-      {
-        "time": "22:30",
-        "category": "sleep",
-        "label": "In bed, room < 19 °C, blackout, no screens",
-        "duration_min": 480
-      }
+      { "time": "06:30", "category": "lifestyle", "label": "10 min direct sunlight on skin + eyes", "duration_min": 10, "notes": "Sets circadian rhythm + vitamin D synthesis." },
+      { "time": "07:00", "category": "fascia_routine", "label": "Lower back & hip release - wakes deep front line", "duration_min": 18, "fascia_routine": { "name": "Lower Back Pain Release Protocol", "duration_min": 18, "zones": ["12_lower_back_left", "12_lower_back_right"], "media_ref": { "media_type": "video", "youtube_id": "Uro31OnQ1uw", "title": "Lower Back Pain Release Protocol", "duration_sec": 1058 } } },
+      { "time": "07:30", "category": "supplement", "label": "Vitamin D3 + K2 with breakfast", "notes": "Take with fat - eggs, avocado, olive oil." },
+      { "time": "12:30", "category": "nutrition", "label": "Largest meal: protein + cruciferous + olive oil", "duration_min": 30 },
+      { "time": "14:30", "category": "meditation", "label": "Daytime stress reset - 5 min audio", "duration_min": 5, "media_ref": { "media_type": "audio", "youtube_id": "bYbSr5b_mwM", "title": "Daytime Stress and Mind Clearing", "duration_sec": 326 } },
+      { "time": "17:30", "category": "training", "label": "Compound lift session (squat / deadlift / press)", "duration_min": 45, "notes": "3 sets x 5 reps at 80% - compound, heavy, brief." },
+      { "time": "19:00", "category": "fascia_routine", "label": "Hip opener - release the deep front line post-training", "duration_min": 12, "fascia_routine": { "name": "Hip Opener", "duration_min": 12, "body_zone_chain": "deep_front_line", "media_ref": { "media_type": "video", "youtube_id": "HwF0KleMGhc", "title": "Hip Opener - Release your Hips", "duration_sec": 527 } } },
+      { "time": "21:30", "category": "supplement", "label": "Magnesium + Zinc, 60 min pre-sleep", "notes": "Skip if dinner contained high-dose Ca." },
+      { "time": "22:30", "category": "sleep", "label": "In bed, room < 19 C, blackout, no screens", "duration_min": 480 }
     ],
     "biomarkers": [
-      { "name": "Total Testosterone",  "target_range": "700–1000 ng/dL",   "test": "morning fasted serum", "frequency": "every 12 weeks" },
-      { "name": "Free Testosterone",   "target_range": "20–25 pg/mL",      "test": "morning fasted serum", "frequency": "every 12 weeks" },
-      { "name": "SHBG",                "target_range": "20–40 nmol/L",     "test": "morning fasted serum", "frequency": "every 12 weeks" },
-      { "name": "Estradiol (sensitive)","target_range": "20–30 pg/mL",     "test": "LC-MS/MS",             "frequency": "every 12 weeks" },
-      { "name": "25-OH Vitamin D",     "target_range": "50–70 ng/mL",      "test": "serum",                "frequency": "every 12 weeks" }
+      { "name": "Total Testosterone",   "target_range": "700-1000 ng/dL", "test": "morning fasted serum", "frequency": "every 12 weeks" },
+      { "name": "Free Testosterone",    "target_range": "20-25 pg/mL",    "test": "morning fasted serum", "frequency": "every 12 weeks" },
+      { "name": "SHBG",                 "target_range": "20-40 nmol/L",   "test": "morning fasted serum", "frequency": "every 12 weeks" },
+      { "name": "Estradiol (sensitive)","target_range": "20-30 pg/mL",    "test": "LC-MS/MS",             "frequency": "every 12 weeks" },
+      { "name": "25-OH Vitamin D",      "target_range": "50-70 ng/mL",    "test": "serum",                "frequency": "every 12 weeks" }
     ],
     "timeline": [
-      { "phase": "Weeks 1–4",  "focus": "Sleep + sunlight + foundation supps",   "milestones": ["7+ h consistent", "morning energy returns"] },
-      { "phase": "Weeks 5–8",  "focus": "Add resistance + fascia routines daily","milestones": ["lifts trending up", "morning erections return"] },
-      { "phase": "Weeks 9–12", "focus": "Re-test biomarkers, optimise edges",    "milestones": ["T ≥ 700 ng/dL", "body comp shift visible"] }
+      { "phase": "Weeks 1-4",  "focus": "Sleep + sunlight + foundation supps",    "milestones": ["7+ h consistent", "morning energy returns"] },
+      { "phase": "Weeks 5-8",  "focus": "Add resistance + fascia routines daily", "milestones": ["lifts trending up", "morning erections return"] },
+      { "phase": "Weeks 9-12", "focus": "Re-test biomarkers, optimise edges",     "milestones": ["T >= 700 ng/dL", "body comp shift visible"] }
     ]
   },
   "references": [

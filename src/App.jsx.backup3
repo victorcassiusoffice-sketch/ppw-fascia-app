@@ -274,16 +274,7 @@ function BodyMap({ session, setSession }) {
   const hotspots = view === 'front' ? HOTSPOTS_FRONT : HOTSPOTS_BACK;
   // Subpath-aware: in dev BASE_URL is '/', on GitHub Pages it's '/<repo>/'
   const baseUrl = (import.meta.env && import.meta.env.BASE_URL) || '/';
-  // Sub-Chat 5: anatomical PNGs from Sub-Chat 3 live in body_zones/ now.
-  // Three-stage fallback: new path → legacy path → solid navy rect (graceful degrade).
-  const primaryBodyImg  = `${baseUrl}assets/body_zones/body_${view}.png`;
-  const fallbackBodyImg = `${baseUrl}assets/body_${view}.png`;
-  const [bodyImgState, setBodyImgState] = useState('primary'); // 'primary' | 'fallback' | 'none'
-  useEffect(() => { setBodyImgState('primary'); }, [view]);
-  const currentBodyImg =
-    bodyImgState === 'primary'  ? primaryBodyImg  :
-    bodyImgState === 'fallback' ? fallbackBodyImg :
-    null;
+  const bodyImg = `${baseUrl}assets/body_${view}.png`;
 
   // Dominant fascia chain implied by the user's selection — drives
   // the gold overlay PNG (rendered below the hotspots, above the silhouette).
@@ -345,68 +336,32 @@ function BodyMap({ session, setSession }) {
             <button onClick={() => setView('front')} className={`px-4 py-1.5 rounded-full text-xs font-display tracking-wider transition-all ${view === 'front' ? 'bg-accent text-bg' : 'bg-cream/5 text-muted hover:text-cream'}`}>FRONT</button>
             <button onClick={() => setView('back')}  className={`px-4 py-1.5 rounded-full text-xs font-display tracking-wider transition-all ${view === 'back'  ? 'bg-accent text-bg' : 'bg-cream/5 text-muted hover:text-cream'}`}>BACK</button>
           </div>
-          <div className="relative" style={{ aspectRatio: '600 / 1200' }}>
-            {/* Single SVG canvas — anatomical body PNG + polygon hotspots + chain overlay.
-                viewBox is sacred (600×1200). Body PNG fills the same coord space so
-                polygons sit exactly on the anatomy. */}
-            <svg
-              viewBox="0 0 600 1200"
-              className="absolute inset-0 w-full h-full"
-              preserveAspectRatio="xMidYMid meet"
-            >
-              {/* Body PNG, three-stage fallback. SVG <image> supports onError. */}
-              {currentBodyImg ? (
-                <image
-                  href={currentBodyImg}
-                  x="0" y="0" width="600" height="1200"
-                  preserveAspectRatio="xMidYMid meet"
-                  style={{ pointerEvents: 'none' }}
-                  onError={() => setBodyImgState(s => s === 'primary' ? 'fallback' : 'none')}
-                />
-              ) : (
-                <rect x="0" y="0" width="600" height="1200" fill="#0a1628" />
-              )}
-
-              {/* Fascia-chain overlay PNG (rendered via foreignObject so we can
-                  use mixBlendMode + onError; SVG <image> doesn't support those
-                  consistently across browsers). */}
-              {overlaySrc && overlayOk && (
-                <foreignObject x="0" y="0" width="600" height="1200" style={{ pointerEvents: 'none' }}>
-                  <img
-                    src={overlaySrc}
-                    alt={`fascia chain ${dominantChain}`}
-                    style={{ width: '100%', height: '100%', opacity: 0.75, mixBlendMode: 'screen', userSelect: 'none' }}
-                    draggable="false"
-                    onError={() => setOverlayOk(false)}
-                  />
-                </foreignObject>
-              )}
-
-              {/* Anatomical polygon hotspots */}
+          <div className="relative">
+            <img src={bodyImg} alt={`body map ${view}`} className="block w-full select-none pointer-events-none" draggable="false" />
+            {overlaySrc && overlayOk && (
+              <img
+                src={overlaySrc}
+                alt={`fascia chain ${dominantChain}`}
+                className="absolute inset-0 w-full h-full select-none pointer-events-none transition-opacity duration-500"
+                style={{ opacity: 0.75, mixBlendMode: 'screen' }}
+                draggable="false"
+                onError={() => setOverlayOk(false)}
+              />
+            )}
+            <svg viewBox="0 0 600 1200" className="absolute inset-0 w-full h-full">
               {hotspots.map(h => {
                 const isSelected = !!selected[h.code];
                 const cls = 'hotspot' + (isSelected ? ' selected' : '');
                 const pain = selected[h.code];
+                const common = { className: cls, onClick: () => toggle(h.code) };
                 return (
                   <g key={h.code}>
-                    <polygon
-                      className={cls}
-                      points={h.polygon}
-                      data-zone={h.code}
-                      onClick={() => toggle(h.code)}
-                    />
+                    {h.shape === 'ellipse'
+                      ? <ellipse {...common} cx={h.cx} cy={h.cy} rx={h.rx} ry={h.ry} />
+                      : <rect    {...common} x={h.x} y={h.y} width={h.w} height={h.h} rx="10" />
+                    }
                     {isSelected && (
-                      <text
-                        x={h.cx} y={h.cy + 8}
-                        textAnchor="middle"
-                        fill="#0a1628"
-                        fontSize="26"
-                        fontWeight="800"
-                        fontFamily="Syne, sans-serif"
-                        style={{ pointerEvents: 'none' }}
-                      >
-                        {pain}
-                      </text>
+                      <text x={h.cx || h.x + h.w / 2} y={(h.cy || h.y + h.h / 2) + 5} textAnchor="middle" fill="#0a1628" fontSize="22" fontWeight="800" fontFamily="Syne, sans-serif" style={{ pointerEvents: 'none' }}>{pain}</text>
                     )}
                   </g>
                 );
@@ -1073,37 +1028,4 @@ function SettingsView() {
           {perm !== 'granted' && perm !== 'unsupported' && (
             <button onClick={askPerm} className="btn-accent mt-4 w-full">Enable notifications</button>
           )}
-          {perm === 'unsupported' && <div className="text-muted text-xs mt-3">This browser does not support notifications.</div>}
-        </div>
-      </Section>
-
-      <Section title="Data source">
-        <div className="card p-5">
-          <div className="font-display mb-2">Use mock protocol data</div>
-          <div className="text-muted text-xs mb-4">Off = pull from the GitHub protocol repo. On = read /mock-protocol.json bundled with the app.</div>
-          <div className="flex gap-2">
-            <button onClick={() => setMockOverride('true')}  className={`flex-1 py-2.5 rounded-full text-sm font-bold ${mockOverride === 'true'  ? 'btn-accent' : 'btn-ghost'}`}>Mock</button>
-            <button onClick={() => setMockOverride('false')} className={`flex-1 py-2.5 rounded-full text-sm font-bold ${mockOverride === 'false' ? 'btn-accent' : 'btn-ghost'}`}>Live</button>
-          </div>
-        </div>
-      </Section>
-
-      <Section title="Active state">
-        <div className="card p-5 space-y-2 text-sm">
-          <div>Protocols: <span className="text-accent">{activeProtocols.length}</span></div>
-          <div>Audio modules: <span className="text-accent">{activeModules.length}</span></div>
-          <div>Saved zones: <span className="text-accent">{activeRoutines.savedZones?.length || 0}</span></div>
-          <button onClick={clearAll} className="btn-ghost w-full mt-4">Clear all activations</button>
-        </div>
-      </Section>
-
-      <Section title="About">
-        <div className="card p-5 text-sm space-y-1.5">
-          <div>Version: <span className="text-accent">{APP_VERSION}</span></div>
-          <div>Theme: Option B — gold + navy</div>
-          <div className="text-muted text-xs pt-2">Peak Performance Wellness · ppwellness.co</div>
-        </div>
-      </Section>
-    </main>
-  );
-}
+          {perm === 'unsupported' && <div className="text-muted text-xs mt-3">This browser does not support notificat

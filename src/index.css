@@ -134,3 +134,93 @@ h1,h2,h3,h4 { font-family: 'Syne', sans-serif; letter-spacing: -0.01em; }
   .btn-accent { padding: 12px 20px; font-size: 0.9rem; }
   .card       { border-radius: 16px; }
 }
+
+/* ──────────────────────────────────────────
+   Affiliate buttons (Sub-Chat 6)
+   Used on /protocol/:id supplement cards.
+   ────────────────────────────────────────── */
+.btn-iherb {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: #84cc16;
+  color: #0a1628;
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 8px 16px;
+  border-radius: 999px;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease;
+}
+.btn-iherb:hover {
+  background: #a3e635;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px -8px rgba(132,204,22,0.55);
+}
+.btn-iherb:active { transform: translateY(0); }
+
+.btn-amazon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--ppw-cream);
+  border: 1px solid rgba(245,184,69,0.45);
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 7px 15px;
+  border-radius: 999px;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: border-color .2s ease, color .2s ease, background-color .2s ease;
+}
+.btn-amazon:hover {
+  border-color: var(--ppw-gold);
+  color: var(--ppw-gold);
+  background: rgba(245,184,69,0.06);
+}
+
+.btn-iherb-all {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  background: var(--ppw-gold);
+  color: var(--ppw-bg-deep);
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 14px 20px;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: transform .15s ease, box-shadow .15s ease;
+  animation: pulse-iherb-all 2.4s ease-in-out 1;
+}
+.btn-iherb-all:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 32px -10px rgba(245,184,69,0.6);
+}
+
+@keyframes pulse-iherb-all {
+  0%   { box-shadow: 0 0 0 0 rgba(245,184,69,0.55); }
+  60%  { box-shadow: 0 0 0 14px rgba(245,184,69,0); }
+  100% { box-shadow: 0 0 0 0 rgba(245,184,69,0); }
+}
+
+.supplement-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: stretch;
+  flex-shrink: 0;
+}
+@media (min-width: 640px) {
+  .supplement-actions {
+    flex-direction: column;
+    align-items: flex-end;
+    min-width: 140px;
+  }
+}
