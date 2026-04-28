@@ -15,6 +15,8 @@ export const LS_KEYS = {
   COMPLETED_TODAY:     'ppw.completedToday',
   NOTIFICATIONS_OPTIN: 'ppw.notificationsOptIn',
   USE_MOCK_OVERRIDE:   'ppw.useMockOverride',
+  DAILY_ORDER:         'ppw.dailyOrder',
 };
 
 export const APP_VERSION = '0.2.0-phase2';
+port const APP_VERSION = '0.2.0-phase2';

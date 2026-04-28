@@ -12,6 +12,7 @@ import { listProtocols, fetchProtocol, mergeDailyItems, isMockActive } from './p
 import { iherbUrl, amazonUkUrl, iherbCartAllUrl } from './affiliate.js';
 import { LS_KEYS, APP_VERSION, USE_MOCK_DATA, NOTIFICATION_LEAD_TIME_MIN } from './config.js';
 import MediaPlayer, { DirectMediaPlayer } from './MediaPlayer.jsx';
+import SortableList from './SortableList.jsx';
 import { getPermissionState, requestPermission, scheduleNotifications, clearAllScheduled } from './notifications.js';
 
 const KNOWN_AUDIO_MODULES = [
@@ -670,10 +671,15 @@ function TestEngine({ session, setSession }) {
 
 /* ────────── Stack builder ────────── */
 function buildStack(session, answers) {
+  // Each item gets a stable `id` so SortableList (dnd-kit) can track it
+  // across reorders. Format: type-zoneCodeOrGroup-N where N is a counter.
   const stack = [];
+  let counter = 0;
+  const nextId = (prefix) => `${prefix}-${counter++}`;
   for (const [code, pain] of Object.entries(session.selected)) {
     const z = ZONES.find(x => x.code === code);
     const item = {
+      id: nextId(`zone-${code}`),
       type: 'zone',
       zoneCode: code,
       label: z.label,
@@ -685,10 +691,11 @@ function buildStack(session, answers) {
       repeat: pain === 3 ? 2 : 1,
     };
     stack.push(item);
-    if (pain === 3) stack.push({ ...item, marker: '×2' });
+    if (pain === 3) stack.push({ ...item, id: nextId(`zone-${code}`), marker: '×2' });
   }
   for (const a of answers) {
     stack.push({
+      id: nextId(`test-${a.group}-${a.testNumber}-${a.answer}`),
       type: 'test',
       zoneGroup: a.group,
       label: `${a.label} · Test ${a.testNumber} (${a.answer.toUpperCase()})`,
@@ -706,33 +713,56 @@ function buildStack(session, answers) {
 /* ═══════════════════════════════════════════
    Screen 6 — Summary
    ═══════════════════════════════════════════ */
-function Summary({ session }) {
+function Summary({ session, setSession }) {
   const nav = useNavigate();
   const totalSecs = session.stack.reduce((s, i) => s + i.duration, 0);
   const lifestyleLabel = session.lifestyle ? LIFESTYLES.find(l => l.code === session.lifestyle)?.label : null;
+
+  // Defensive: items missing an id (e.g. legacy session) get one assigned in-place
+  const items = useMemo(() => session.stack.map((it, i) =>
+    it.id ? it : { ...it, id: `legacy-${i}-${it.zoneCode || it.zoneGroup || 'x'}` }
+  ), [session.stack]);
+
+  const handleReorder = (newItems) => {
+    setSession((s) => ({ ...s, stack: newItems }));
+  };
+
   return (
     <main className="px-6 py-8 max-w-3xl mx-auto">
       <Link to="/body" className="text-muted text-sm mb-3 inline-block hover:text-accent">← Edit zones</Link>
       <h2 className="font-display text-3xl md:text-4xl mb-2">Your stack</h2>
       <p className="text-muted mb-6">
-        {session.stack.length} items · ~{Math.round(totalSecs / 60)} min
+        {items.length} items · ~{Math.round(totalSecs / 60)} min
         {lifestyleLabel && <span className="text-accent"> · {lifestyleLabel}</span>}
         <span> · {session.level}</span>
       </p>
-      <div className="space-y-2 mb-8">
-        {session.stack.map((it, i) => (
-          <div key={i} className="card p-4 flex items-center gap-4">
-            <div className="font-display text-accent text-lg w-8 text-center shrink-0">{i + 1}</div>
-            <div className="flex-1 min-w-0">
-              <div className="font-display text-sm md:text-base truncate">
-                {it.label}{it.marker && <span className="text-accent text-xs ml-2 font-bold">{it.marker}</span>}
+      <p className="text-muted text-xs mb-4 flex items-center gap-2">
+        <span className="text-accent">≡</span>
+        <span>Long-press the handle to drag and reorder.</span>
+      </p>
+
+      <div className="mb-8">
+        <SortableList items={items} onReorder={handleReorder} className="space-y-2">
+          {(it, dragHandleProps, i, isDragging) => (
+            <div className={`card p-4 flex items-center gap-3 ${isDragging ? 'border-accent' : ''}`}>
+              <button
+                {...dragHandleProps}
+                className="drag-handle font-display text-muted hover:text-accent w-11 h-11 flex items-center justify-center text-2xl shrink-0 -ml-1"
+                title="Drag to reorder"
+              >≡</button>
+              <div className="font-display text-accent text-lg w-8 text-center shrink-0">{i + 1}</div>
+              <div className="flex-1 min-w-0">
+                <div className="font-display text-sm md:text-base truncate">
+                  {it.label}{it.marker && <span className="text-accent text-xs ml-2 font-bold">{it.marker}</span>}
+                </div>
+                <div className="text-muted text-xs truncate">{it.side} · {it.level} · {it.type}</div>
               </div>
-              <div className="text-muted text-xs truncate">{it.side} · {it.level} · {it.type}</div>
+              <div className="text-muted text-sm shrink-0">{Math.round(it.duration)}s</div>
             </div>
-            <div className="text-muted text-sm shrink-0">{Math.round(it.duration)}s</div>
-          </div>
-        ))}
+          )}
+        </SortableList>
       </div>
+
       <button onClick={() => nav('/session')} className="btn-accent w-full text-center">Start Session →</button>
     </main>
   );
@@ -786,6 +816,7 @@ function TodayView() {
   const [activeModules] = useActiveModules();
   const [activeRoutines] = useActiveRoutines();
   const { isDone, toggle, completed } = useCompletedToday();
+  const [dailyOrder, setDailyOrder] = useLocalStorage(LS_KEYS.DAILY_ORDER, []);
 
   const [protocols, setProtocols] = useState([]);
   const [moduleEntries, setModuleEntries] = useState([]);
@@ -810,10 +841,30 @@ function TodayView() {
     return () => { cancelled = true; };
   }, [activeModules]);
 
-  const items = useMemo(
+  const baseItems = useMemo(
     () => mergeDailyItems({ protocols, activeRoutines, activeModuleEntries: moduleEntries }),
     [protocols, activeRoutines, moduleEntries]
   );
+
+  // Apply user-defined order: known ids first (in saved order), unknown ids
+  // appended at end. Keeps notification times intact (drag is display-only).
+  const items = useMemo(() => {
+    if (!dailyOrder || dailyOrder.length === 0) return baseItems;
+    const byId = new Map(baseItems.map(it => [it.id, it]));
+    const ordered = [];
+    for (const id of dailyOrder) {
+      if (byId.has(id)) {
+        ordered.push(byId.get(id));
+        byId.delete(id);
+      }
+    }
+    for (const it of baseItems) if (byId.has(it.id)) ordered.push(it);
+    return ordered;
+  }, [baseItems, dailyOrder]);
+
+  const handleReorder = (newItems) => {
+    setDailyOrder(newItems.map(it => it.id));
+  };
 
   useEffect(() => {
     if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
@@ -847,21 +898,35 @@ function TodayView() {
         </div>
       )}
 
-      <div className="space-y-2.5">
-        {items.map(it => {
+      {!empty && (
+        <p className="text-muted text-xs mb-3 flex items-center gap-2">
+          <span className="text-accent">≡</span>
+          <span>Long-press the handle to drag and reorder. Notification times stay scheduled to the clock.</span>
+        </p>
+      )}
+
+      <SortableList items={items} onReorder={handleReorder} className="space-y-2.5">
+        {(it, dragHandleProps, _i, isDragging) => {
           const done = isDone(it.id);
           const isOpen = expanded === it.id;
           return (
-            <div key={it.id} className={`card overflow-hidden transition-all ${done ? 'timeline-done opacity-80' : ''}`}>
-              <button onClick={() => setExpanded(isOpen ? null : it.id)} className="w-full flex items-center gap-3 p-4 text-left">
-                <span className={`timeline-dot timeline-${it.kind === 'protocol' ? 'protocol' : it.kind === 'audio' ? 'audio' : 'routine'}`}>
-                  {it.kind === 'protocol' ? '●' : it.kind === 'audio' ? '🎧' : '◆'}
-                </span>
-                <span className="font-display text-accent text-sm w-12 shrink-0">{it.time}</span>
-                <span className="timeline-label flex-1 min-w-0 truncate text-sm">{it.label}</span>
-                {it.duration_min ? <span className="text-muted text-xs shrink-0">{it.duration_min} min</span> : null}
-                <span className="text-muted text-xs">{isOpen ? '▴' : '▾'}</span>
-              </button>
+            <div className={`card overflow-hidden transition-all ${done ? 'timeline-done opacity-80' : ''} ${isDragging ? 'border-accent' : ''}`}>
+              <div className="flex items-center gap-2 p-4">
+                <button
+                  {...dragHandleProps}
+                  className="drag-handle font-display text-muted hover:text-accent w-11 h-11 flex items-center justify-center text-2xl shrink-0 -ml-2"
+                  title="Drag to reorder"
+                >≡</button>
+                <button onClick={() => setExpanded(isOpen ? null : it.id)} className="flex-1 min-w-0 flex items-center gap-3 text-left">
+                  <span className={`timeline-dot timeline-${it.kind === 'protocol' ? 'protocol' : it.kind === 'audio' ? 'audio' : 'routine'}`}>
+                    {it.kind === 'protocol' ? '●' : it.kind === 'audio' ? '🎧' : '◆'}
+                  </span>
+                  <span className="font-display text-accent text-sm w-12 shrink-0">{it.time}</span>
+                  <span className="timeline-label flex-1 min-w-0 truncate text-sm">{it.label}</span>
+                  {it.duration_min ? <span className="text-muted text-xs shrink-0">{it.duration_min} min</span> : null}
+                  <span className="text-muted text-xs">{isOpen ? '▴' : '▾'}</span>
+                </button>
+              </div>
               {isOpen && (
                 <div className="px-4 pb-4 space-y-3 border-t border-cream/5">
                   {it.notes && <p className="text-muted text-sm pt-3">{it.notes}</p>}
@@ -898,8 +963,8 @@ function TodayView() {
               )}
             </div>
           );
-        })}
-      </div>
+        }}
+      </SortableList>
     </main>
   );
 }
@@ -1227,61 +1292,6 @@ function SettingsView() {
       <Section title="About">
         <div className="card p-5 text-sm space-y-1.5">
           <div>Version: <span className="text-accent">{APP_VERSION}</span></div>
-          <div>Theme: Option B — gold + navy</div>
-          <div className="text-muted text-xs pt-2">Peak Performance Wellness · ppwellness.co</div>
-        </div>
-      </Section>
-    </main>
-  );
-}
-ActiveRoutines({ savedZones: [], level: 'beginner', lifestyle: null, scheduledTime: '08:00' });
-  };
-
-  return (
-    <main className="px-5 py-6 max-w-3xl mx-auto pb-16">
-      <Link to="/today" className="text-muted text-sm inline-block hover:text-accent mb-3">← Today</Link>
-      <h1 className="font-display text-3xl md:text-4xl mb-6">Settings</h1>
-
-      <Section title="Notifications">
-        <div className="card p-5">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <div className="font-display">Daily reminders</div>
-              <div className="text-muted text-xs">Fires {NOTIFICATION_LEAD_TIME_MIN} min before each scheduled item.</div>
-            </div>
-            <div className="text-xs text-accent">{perm}</div>
-          </div>
-          {perm !== 'granted' && perm !== 'unsupported' && (
-            <button onClick={askPerm} className="btn-accent mt-4 w-full">Enable notifications</button>
-          )}
-          {perm === 'unsupported' && <div className="text-muted text-xs mt-3">This browser does not support notifications.</div>}
-        </div>
-      </Section>
-
-      <Section title="Data source">
-        <div className="card p-5">
-          <div className="font-display mb-2">Use mock protocol data</div>
-          <div className="text-muted text-xs mb-4">Off = pull from the GitHub protocol repo. On = read /mock-protocol.json bundled with the app.</div>
-          <div className="flex gap-2">
-            <button onClick={() => setMockOverride('true')}  className={`flex-1 py-2.5 rounded-full text-sm font-bold ${mockOverride === 'true'  ? 'btn-accent' : 'btn-ghost'}`}>Mock</button>
-            <button onClick={() => setMockOverride('false')} className={`flex-1 py-2.5 rounded-full text-sm font-bold ${mockOverride === 'false' ? 'btn-accent' : 'btn-ghost'}`}>Live</button>
-          </div>
-        </div>
-      </Section>
-
-      <Section title="Active state">
-        <div className="card p-5 space-y-2 text-sm">
-          <div>Protocols: <span className="text-accent">{activeProtocols.length}</span></div>
-          <div>Audio modules: <span className="text-accent">{activeModules.length}</span></div>
-          <div>Saved zones: <span className="text-accent">{activeRoutines.savedZones?.length || 0}</span></div>
-          <button onClick={clearAll} className="btn-ghost w-full mt-4">Clear all activations</button>
-        </div>
-      </Section>
-
-      <Section title="About">
-        <div className="card p-5 text-sm space-y-1.5">
-          <div>Version: <span className="text-accent">{APP_VERSION}</span></div>
-          <div>Theme: Option B — gold + navy</div>
           <div className="text-muted text-xs pt-2">Peak Performance Wellness · ppwellness.co</div>
         </div>
       </Section>

@@ -19,6 +19,85 @@ const KNOWN_AUDIO_MODULES = [
 ];
 
 /* ────────────────────────────────────────────
+   BodyMap visual constants (Sub-Chat 6 alignment fix)
+   ──────────────────────────────────────────── */
+
+// PNG figure-bounds → viewBox affine transform.
+// Source PNGs are 1024×1024 with a translucent A-pose figure that does NOT
+// fill the canvas (Sub-Chat 3 left margin around it). Measured opaque-pixel
+// bounds map onto the polygon grid's body extent (x∈[98,502], y∈[76,1198])
+// via an `<image>` rendered with preserveAspectRatio="none".
+//   Front PNG figure: x[341,689] y[64,988]  → asym 4.6%  (invisible at low op)
+//   Back  PNG figure: x[373,667] y[72,1023] → asym 16.5% (figure narrower
+//     in source so horizontal stretch is wider; acceptable on back view).
+// If either PNG is regenerated, re-measure opaque bounds and update.
+const BODY_IMAGE_TRANSFORMS = {
+  front: { x: -297.87, y:  -1.71, width: 1188.78, height: 1243.43 },
+  back:  { x: -414.56, y:  -8.95, width: 1407.13, height: 1208.13 },
+};
+
+// Hand-authored full-body silhouette path on the 600×1200 viewBox.
+// Smooth Bezier curves connecting the major anatomical landmarks of the
+// hotspot grid — head, shoulders, arms, torso, hips, thighs, calves, feet.
+// Stroked-only at very low opacity (see .body-silhouette in index.css).
+const BODY_SILHOUETTE_PATH = [
+  'M 300 80',
+  'Q 358 82 360 118',
+  'Q 358 178 340 180',
+  'L 350 210',
+  'Q 380 225 408 260',
+  'L 470 310',
+  'Q 500 400 490 520',
+  'Q 480 610 460 650',
+  'Q 440 680 420 665',
+  'L 380 605',
+  'L 380 640',
+  'Q 380 820 378 950',
+  'L 360 1015',
+  'L 350 1130',
+  'Q 358 1188 320 1198',
+  'L 280 1198',
+  'Q 242 1188 250 1130',
+  'L 240 1015',
+  'L 222 950',
+  'Q 220 820 220 640',
+  'L 220 605',
+  'L 180 665',
+  'Q 160 680 140 650',
+  'Q 120 610 110 520',
+  'Q 100 400 130 310',
+  'L 192 260',
+  'Q 220 225 250 210',
+  'L 260 180',
+  'Q 242 178 240 118',
+  'Q 242 82 300 80',
+  'Z',
+].join(' ');
+
+// Short label rendered inside selected hotspot polygons. Abbreviates long
+// names so they fit narrow zones (lateral arm, IT band, etc).
+const ZONE_LABEL_OVERRIDES = {
+  '15_itband_left':       'ITB L',
+  '15_itband_right':      'ITB R',
+  '11_lateral_arm_left':  'Lat L',
+  '11_lateral_arm_right': 'Lat R',
+  '10_lower_arm_left':    'L.Arm L',
+  '10_lower_arm_right':   'L.Arm R',
+  '04_upper_arm_left':    'U.Arm L',
+  '04_upper_arm_right':   'U.Arm R',
+  '12_lower_back_left':   'L.Back L',
+  '12_lower_back_right':  'L.Back R',
+};
+
+function zoneShortLabel(code, zonesList) {
+  if (ZONE_LABEL_OVERRIDES[code]) return ZONE_LABEL_OVERRIDES[code];
+  const z = zonesList.find(x => x.code === code);
+  if (!z) return code;
+  const side = z.side === 'left' ? ' L' : z.side === 'right' ? ' R' : '';
+  return z.label + side;
+}
+
+/* ────────────────────────────────────────────
    Shared session state (lifted to App)
    ──────────────────────────────────────────── */
 const initialSession = {
@@ -274,7 +353,16 @@ function BodyMap({ session, setSession }) {
   const hotspots = view === 'front' ? HOTSPOTS_FRONT : HOTSPOTS_BACK;
   // Subpath-aware: in dev BASE_URL is '/', on GitHub Pages it's '/<repo>/'
   const baseUrl = (import.meta.env && import.meta.env.BASE_URL) || '/';
-  const bodyImg = `${baseUrl}assets/body_${view}.png`;
+  // Sub-Chat 5: anatomical PNGs from Sub-Chat 3 live in body_zones/ now.
+  // Three-stage fallback: new path → legacy path → solid navy rect (graceful degrade).
+  const primaryBodyImg  = `${baseUrl}assets/body_zones/body_${view}.png`;
+  const fallbackBodyImg = `${baseUrl}assets/body_${view}.png`;
+  const [bodyImgState, setBodyImgState] = useState('primary'); // 'primary' | 'fallback' | 'none'
+  useEffect(() => { setBodyImgState('primary'); }, [view]);
+  const currentBodyImg =
+    bodyImgState === 'primary'  ? primaryBodyImg  :
+    bodyImgState === 'fallback' ? fallbackBodyImg :
+    null;
 
   // Dominant fascia chain implied by the user's selection — drives
   // the gold overlay PNG (rendered below the hotspots, above the silhouette).
@@ -336,33 +424,117 @@ function BodyMap({ session, setSession }) {
             <button onClick={() => setView('front')} className={`px-4 py-1.5 rounded-full text-xs font-display tracking-wider transition-all ${view === 'front' ? 'bg-accent text-bg' : 'bg-cream/5 text-muted hover:text-cream'}`}>FRONT</button>
             <button onClick={() => setView('back')}  className={`px-4 py-1.5 rounded-full text-xs font-display tracking-wider transition-all ${view === 'back'  ? 'bg-accent text-bg' : 'bg-cream/5 text-muted hover:text-cream'}`}>BACK</button>
           </div>
-          <div className="relative">
-            <img src={bodyImg} alt={`body map ${view}`} className="block w-full select-none pointer-events-none" draggable="false" />
-            {overlaySrc && overlayOk && (
-              <img
-                src={overlaySrc}
-                alt={`fascia chain ${dominantChain}`}
-                className="absolute inset-0 w-full h-full select-none pointer-events-none transition-opacity duration-500"
-                style={{ opacity: 0.75, mixBlendMode: 'screen' }}
-                draggable="false"
-                onError={() => setOverlayOk(false)}
-              />
-            )}
-            <svg viewBox="0 0 600 1200" className="absolute inset-0 w-full h-full">
+          <div className="relative" style={{ aspectRatio: '600 / 1200' }}>
+            {/* Single SVG canvas — anatomical body PNG + polygon hotspots + chain overlay.
+                viewBox is sacred (600×1200). Body PNG fills the same coord space so
+                polygons sit exactly on the anatomy. */}
+            <svg
+              viewBox="0 0 600 1200"
+              className="absolute inset-0 w-full h-full"
+              preserveAspectRatio="xMidYMid meet"
+            >
+              {/* Filter defs — gold glow for selected hotspots */}
+              <defs>
+                <filter id="hotspotGlow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur" />
+                  <feFlood floodColor="#f5b845" floodOpacity="0.65" />
+                  <feComposite in2="blur" operator="in" result="glow" />
+                  <feMerge>
+                    <feMergeNode in="glow" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+
+              {/* LAYER 1 — anatomical body PNG, calibrated to the polygon grid.
+                  PNG is 1024×1024 with the figure inset; we use preserveAspectRatio
+                  ="none" plus the precomputed BODY_IMAGE_TRANSFORMS so the figure's
+                  opaque-pixel bounds land on viewBox body coords (head y≈80, feet
+                  y≈1198, x∈[98,502]). Three-stage fallback preserved: new path →
+                  legacy path → omit (silhouette path then carries the visual). */}
+              {currentBodyImg && (() => {
+                const t = BODY_IMAGE_TRANSFORMS[view];
+                return (
+                  <image
+                    href={currentBodyImg}
+                    x={t.x} y={t.y} width={t.width} height={t.height}
+                    preserveAspectRatio="none"
+                    opacity={totalZones > 0 ? 0.55 : 0.85}
+                    style={{ pointerEvents: 'none', transition: 'opacity 0.4s ease' }}
+                    onError={() => setBodyImgState(s => s === 'primary' ? 'fallback' : 'none')}
+                  />
+                );
+              })()}
+
+              {/* Faint full-body silhouette outline — backup anatomical cue if PNG
+                  fails to load (legacy + new path both 404). Stroked-only, low op. */}
+              <path className="body-silhouette" d={BODY_SILHOUETTE_PATH} />
+
+              {/* Fascia-chain overlay PNG — rendered via foreignObject for
+                  mixBlendMode + onError support. Uses same calibrated transform
+                  as the base PNG so chain highlights track the figure. */}
+              {overlaySrc && overlayOk && (() => {
+                const t = BODY_IMAGE_TRANSFORMS[view];
+                return (
+                  <foreignObject
+                    x={t.x} y={t.y} width={t.width} height={t.height}
+                    style={{ pointerEvents: 'none' }}
+                  >
+                    <img
+                      src={overlaySrc}
+                      alt={`fascia chain ${dominantChain}`}
+                      style={{ width: '100%', height: '100%', opacity: 0.75, mixBlendMode: 'screen', userSelect: 'none' }}
+                      draggable="false"
+                      onError={() => setOverlayOk(false)}
+                    />
+                  </foreignObject>
+                );
+              })()}
+
+              {/* LAYER 2 — invisible click targets. One polygon per zone, no
+                  visible style at idle (figure shows through). Hover paints a
+                  teal stroke; tap toggles selection. ARIA + keyboard wired. */}
+              {hotspots.map(h => {
+                const z = ZONES.find(x => x.code === h.code);
+                const isSelected = !!selected[h.code];
+                const ariaLabel = z ? `${z.label}${z.side !== 'both' ? ' ' + z.side : ''}` : h.code;
+                return (
+                  <polygon
+                    key={`hit-${h.code}`}
+                    className={'hotspot-hit' + (isSelected ? ' is-selected' : '')}
+                    points={h.polygon}
+                    data-zone={h.code}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={ariaLabel}
+                    aria-pressed={isSelected}
+                    onClick={() => toggle(h.code)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        toggle(h.code);
+                      }
+                    }}
+                  />
+                );
+              })}
+
+              {/* LAYER 3 — visible feedback. Renders ONLY for selected zones:
+                  gold-filled polygon with glow filter + zone label. Pointer
+                  events disabled so taps fall through to LAYER 2. */}
               {hotspots.map(h => {
                 const isSelected = !!selected[h.code];
-                const cls = 'hotspot' + (isSelected ? ' selected' : '');
-                const pain = selected[h.code];
-                const common = { className: cls, onClick: () => toggle(h.code) };
+                if (!isSelected) return null;
+                const label = zoneShortLabel(h.code, ZONES);
                 return (
-                  <g key={h.code}>
-                    {h.shape === 'ellipse'
-                      ? <ellipse {...common} cx={h.cx} cy={h.cy} rx={h.rx} ry={h.ry} />
-                      : <rect    {...common} x={h.x} y={h.y} width={h.w} height={h.h} rx="10" />
-                    }
-                    {isSelected && (
-                      <text x={h.cx || h.x + h.w / 2} y={(h.cy || h.y + h.h / 2) + 5} textAnchor="middle" fill="#0a1628" fontSize="22" fontWeight="800" fontFamily="Syne, sans-serif" style={{ pointerEvents: 'none' }}>{pain}</text>
-                    )}
+                  <g key={`fb-${h.code}`} style={{ pointerEvents: 'none' }}>
+                    <polygon
+                      className="hotspot-feedback"
+                      points={h.polygon}
+                    />
+                    <text className="hotspot-label" x={h.cx} y={h.cy}>
+                      {label}
+                    </text>
                   </g>
                 );
               })}
@@ -1028,4 +1200,91 @@ function SettingsView() {
           {perm !== 'granted' && perm !== 'unsupported' && (
             <button onClick={askPerm} className="btn-accent mt-4 w-full">Enable notifications</button>
           )}
-          {perm === 'unsupported' && <div className="text-muted text-xs mt-3">This browser does not support notificat
+          {perm === 'unsupported' && <div className="text-muted text-xs mt-3">This browser does not support notifications.</div>}
+        </div>
+      </Section>
+
+      <Section title="Data source">
+        <div className="card p-5">
+          <div className="font-display mb-2">Use mock protocol data</div>
+          <div className="text-muted text-xs mb-4">Off = pull from the GitHub protocol repo. On = read /mock-protocol.json bundled with the app.</div>
+          <div className="flex gap-2">
+            <button onClick={() => setMockOverride('true')}  className={`flex-1 py-2.5 rounded-full text-sm font-bold ${mockOverride === 'true'  ? 'btn-accent' : 'btn-ghost'}`}>Mock</button>
+            <button onClick={() => setMockOverride('false')} className={`flex-1 py-2.5 rounded-full text-sm font-bold ${mockOverride === 'false' ? 'btn-accent' : 'btn-ghost'}`}>Live</button>
+          </div>
+        </div>
+      </Section>
+
+      <Section title="Active state">
+        <div className="card p-5 space-y-2 text-sm">
+          <div>Protocols: <span className="text-accent">{activeProtocols.length}</span></div>
+          <div>Audio modules: <span className="text-accent">{activeModules.length}</span></div>
+          <div>Saved zones: <span className="text-accent">{activeRoutines.savedZones?.length || 0}</span></div>
+          <button onClick={clearAll} className="btn-ghost w-full mt-4">Clear all activations</button>
+        </div>
+      </Section>
+
+      <Section title="About">
+        <div className="card p-5 text-sm space-y-1.5">
+          <div>Version: <span className="text-accent">{APP_VERSION}</span></div>
+          <div>Theme: Option B — gold + navy</div>
+          <div className="text-muted text-xs pt-2">Peak Performance Wellness · ppwellness.co</div>
+        </div>
+      </Section>
+    </main>
+  );
+}
+ActiveRoutines({ savedZones: [], level: 'beginner', lifestyle: null, scheduledTime: '08:00' });
+  };
+
+  return (
+    <main className="px-5 py-6 max-w-3xl mx-auto pb-16">
+      <Link to="/today" className="text-muted text-sm inline-block hover:text-accent mb-3">← Today</Link>
+      <h1 className="font-display text-3xl md:text-4xl mb-6">Settings</h1>
+
+      <Section title="Notifications">
+        <div className="card p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <div className="font-display">Daily reminders</div>
+              <div className="text-muted text-xs">Fires {NOTIFICATION_LEAD_TIME_MIN} min before each scheduled item.</div>
+            </div>
+            <div className="text-xs text-accent">{perm}</div>
+          </div>
+          {perm !== 'granted' && perm !== 'unsupported' && (
+            <button onClick={askPerm} className="btn-accent mt-4 w-full">Enable notifications</button>
+          )}
+          {perm === 'unsupported' && <div className="text-muted text-xs mt-3">This browser does not support notifications.</div>}
+        </div>
+      </Section>
+
+      <Section title="Data source">
+        <div className="card p-5">
+          <div className="font-display mb-2">Use mock protocol data</div>
+          <div className="text-muted text-xs mb-4">Off = pull from the GitHub protocol repo. On = read /mock-protocol.json bundled with the app.</div>
+          <div className="flex gap-2">
+            <button onClick={() => setMockOverride('true')}  className={`flex-1 py-2.5 rounded-full text-sm font-bold ${mockOverride === 'true'  ? 'btn-accent' : 'btn-ghost'}`}>Mock</button>
+            <button onClick={() => setMockOverride('false')} className={`flex-1 py-2.5 rounded-full text-sm font-bold ${mockOverride === 'false' ? 'btn-accent' : 'btn-ghost'}`}>Live</button>
+          </div>
+        </div>
+      </Section>
+
+      <Section title="Active state">
+        <div className="card p-5 space-y-2 text-sm">
+          <div>Protocols: <span className="text-accent">{activeProtocols.length}</span></div>
+          <div>Audio modules: <span className="text-accent">{activeModules.length}</span></div>
+          <div>Saved zones: <span className="text-accent">{activeRoutines.savedZones?.length || 0}</span></div>
+          <button onClick={clearAll} className="btn-ghost w-full mt-4">Clear all activations</button>
+        </div>
+      </Section>
+
+      <Section title="About">
+        <div className="card p-5 text-sm space-y-1.5">
+          <div>Version: <span className="text-accent">{APP_VERSION}</span></div>
+          <div>Theme: Option B — gold + navy</div>
+          <div className="text-muted text-xs pt-2">Peak Performance Wellness · ppwellness.co</div>
+        </div>
+      </Section>
+    </main>
+  );
+}
