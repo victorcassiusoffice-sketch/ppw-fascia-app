@@ -1,0 +1,292 @@
+// Single source of truth for the folder-driven logic.
+// Everything here maps to the public/videos/** tree.
+// If you add a folder on disk, add its code here and the app picks it up.
+
+export const ZONES = [
+  { code: '01_head_both',       label: 'Head',           group: '01_head',       side: 'both'  },
+  { code: '02_neck_left',       label: 'Neck',           group: '02_neck',       side: 'left'  },
+  { code: '02_neck_right',      label: 'Neck',           group: '02_neck',       side: 'right' },
+  { code: '03_shoulder_left',   label: 'Shoulder',       group: '03_shoulder',   side: 'left'  },
+  { code: '03_shoulder_right',  label: 'Shoulder',       group: '03_shoulder',   side: 'right' },
+  { code: '04_upper_arm_left',  label: 'Upper Arm',      group: '04_upper_arm',  side: 'left'  },
+  { code: '04_upper_arm_right', label: 'Upper Arm',      group: '04_upper_arm',  side: 'right' },
+  { code: '05_forearm_left',    label: 'Forearm',        group: '05_forearm',    side: 'left'  },
+  { code: '05_forearm_right',   label: 'Forearm',        group: '05_forearm',    side: 'right' },
+  { code: '06_hip_left',        label: 'Hip',            group: '06_hip',        side: 'left'  },
+  { code: '06_hip_right',       label: 'Hip',            group: '06_hip',        side: 'right' },
+  { code: '07_thigh_left',      label: 'Thigh',          group: '07_thigh',      side: 'left'  },
+  { code: '07_thigh_right',     label: 'Thigh',          group: '07_thigh',      side: 'right' },
+  { code: '08_ankle_left',      label: 'Ankle',          group: '08_ankle',      side: 'left'  },
+  { code: '08_ankle_right',     label: 'Ankle',          group: '08_ankle',      side: 'right' },
+  { code: '09_chest_left',      label: 'Chest',          group: '09_chest',      side: 'left'  },
+  { code: '09_chest_right',     label: 'Chest',          group: '09_chest',      side: 'right' },
+  { code: '10_lower_arm_left',  label: 'Lower Arm',      group: '10_lower_arm',  side: 'left'  },
+  { code: '10_lower_arm_right', label: 'Lower Arm',      group: '10_lower_arm',  side: 'right' },
+  { code: '11_lateral_arm_left', label: 'Lateral Arm',   group: '11_lateral_arm', side: 'left'  },
+  { code: '11_lateral_arm_right',label: 'Lateral Arm',   group: '11_lateral_arm', side: 'right' },
+  { code: '12_lower_back_left', label: 'Lower Back',     group: '12_lower_back', side: 'left'  },
+  { code: '12_lower_back_right',label: 'Lower Back',     group: '12_lower_back', side: 'right' },
+  { code: '13_knee_left',       label: 'Knee',           group: '13_knee',       side: 'left'  },
+  { code: '13_knee_right',      label: 'Knee',           group: '13_knee',       side: 'right' },
+  { code: '14_foot_left',       label: 'Foot',           group: '14_foot',       side: 'left'  },
+  { code: '14_foot_right',      label: 'Foot',           group: '14_foot',       side: 'right' },
+  { code: '15_itband_left',     label: 'IT Band',        group: '15_itband',     side: 'left'  },
+  { code: '15_itband_right',    label: 'IT Band',        group: '15_itband',     side: 'right' },
+];
+
+// Number of tests per zone-group. Each test has a yes/no branch.
+export const TESTS_BY_GROUP = {
+  '01_head':        1,
+  '02_neck':        2,
+  '03_shoulder':    2,
+  '04_upper_arm':   1,
+  '05_forearm':     1,
+  '06_hip':         2,
+  '07_thigh':       1,
+  '08_ankle':       1,
+  '09_chest':       1,
+  '10_lower_arm':   1,
+  '11_lateral_arm': 1,
+  '12_lower_back':  3,
+  '13_knee':        2,
+  '14_foot':        1,
+  '15_itband':      2,
+};
+
+export const LIFESTYLES = [
+  { code: 'plumber',       label: 'Plumber',         icon: '🔧' },
+  { code: 'electrician',   label: 'Electrician',     icon: '⚡' },
+  { code: 'builder',       label: 'Builder',         icon: '🏗️' },
+  { code: 'cyclist',       label: 'Cyclist',         icon: '🚴' },
+  { code: 'racket_sports', label: 'Racket Sports',   icon: '🎾' },
+  { code: 'jujitsu',       label: 'Jiu-Jitsu',       icon: '🥋' },
+  { code: 'office',        label: 'Office',          icon: '💻' },
+  { code: 'standing_long', label: 'Standing Long',   icon: '🧍' },
+  { code: 'lifting_boxes', label: 'Lifting Boxes',   icon: '📦' },
+  { code: 'driving',       label: 'Driving',         icon: '🚗' },
+];
+
+// Which zones a lifestyle pre-selects (sensible defaults; folders still drive playback)
+export const LIFESTYLE_ZONES = {
+  plumber:       ['03_shoulder_left','03_shoulder_right','12_lower_back_left','12_lower_back_right','13_knee_left','13_knee_right'],
+  electrician:   ['02_neck_left','02_neck_right','03_shoulder_left','03_shoulder_right','05_forearm_left','05_forearm_right'],
+  builder:       ['12_lower_back_left','12_lower_back_right','03_shoulder_left','03_shoulder_right','06_hip_left','06_hip_right'],
+  cyclist:       ['06_hip_left','06_hip_right','07_thigh_left','07_thigh_right','12_lower_back_left','12_lower_back_right','15_itband_left','15_itband_right'],
+  racket_sports: ['03_shoulder_left','03_shoulder_right','05_forearm_left','05_forearm_right','11_lateral_arm_left','11_lateral_arm_right'],
+  jujitsu:       ['02_neck_left','02_neck_right','03_shoulder_left','03_shoulder_right','06_hip_left','06_hip_right','12_lower_back_left','12_lower_back_right'],
+  office:        ['01_head_both','02_neck_left','02_neck_right','03_shoulder_left','03_shoulder_right','12_lower_back_left','12_lower_back_right'],
+  standing_long: ['06_hip_left','06_hip_right','13_knee_left','13_knee_right','14_foot_left','14_foot_right','12_lower_back_left','12_lower_back_right'],
+  lifting_boxes: ['12_lower_back_left','12_lower_back_right','06_hip_left','06_hip_right','07_thigh_left','07_thigh_right','03_shoulder_left','03_shoulder_right'],
+  driving:       ['02_neck_left','02_neck_right','12_lower_back_left','12_lower_back_right','06_hip_left','06_hip_right'],
+};
+
+// SVG hotspot geometry for the body map (600x1200 viewBox).
+// Sub-Chat 5: anatomical polygon hotspots, replacing rect/ellipse wireframes.
+// Coordinates matched to body_front.png / body_back.png from Sub-Chat 3.
+// Left/right are from the VIEWER's perspective (figure faces you on FRONT view).
+
+export const HOTSPOTS_FRONT = [
+  { code: '01_head_both',         cx: 300, cy: 120, polygon: '262,82 320,76 348,90 360,118 358,148 340,178 300,190 260,178 240,148 240,118 252,90' },
+  { code: '02_neck_left',         cx: 270, cy: 210, polygon: '253,180 290,180 295,210 290,240 270,252 253,242 248,212' },
+  { code: '02_neck_right',        cx: 330, cy: 210, polygon: '310,180 347,180 352,212 347,242 330,252 310,242 305,210' },
+  { code: '03_shoulder_left',     cx: 200, cy: 270, polygon: '168,250 232,245 248,265 245,295 220,310 195,310 168,295 158,278' },
+  { code: '03_shoulder_right',    cx: 400, cy: 270, polygon: '368,245 432,250 442,278 432,295 405,310 380,310 355,295 352,265' },
+  { code: '09_chest_left',        cx: 250, cy: 340, polygon: '210,288 296,295 296,335 296,395 252,402 215,398 200,360 200,310' },
+  { code: '09_chest_right',       cx: 350, cy: 340, polygon: '304,295 390,288 400,310 400,360 385,398 348,402 304,395 304,335' },
+  { code: '04_upper_arm_left',    cx: 160, cy: 380, polygon: '140,302 190,302 195,345 195,400 188,455 168,465 145,460 130,420 130,360' },
+  { code: '04_upper_arm_right',   cx: 440, cy: 380, polygon: '410,302 460,302 470,360 470,420 455,460 432,465 412,455 405,400 405,345' },
+  { code: '11_lateral_arm_left',  cx: 120, cy: 440, polygon: '105,365 135,360 140,400 138,460 132,510 112,512 100,470 98,408' },
+  { code: '11_lateral_arm_right', cx: 480, cy: 440, polygon: '465,360 495,365 502,408 500,470 488,512 468,510 462,460 460,400' },
+  { code: '05_forearm_left',      cx: 140, cy: 520, polygon: '120,475 170,470 178,510 175,565 158,605 132,610 112,580 108,520' },
+  { code: '05_forearm_right',     cx: 460, cy: 520, polygon: '430,470 480,475 492,520 488,580 468,610 442,605 425,565 422,510' },
+  { code: '10_lower_arm_left',    cx: 130, cy: 600, polygon: '108,580 165,576 170,615 162,652 138,678 115,675 100,648 98,610' },
+  { code: '10_lower_arm_right',   cx: 470, cy: 600, polygon: '435,576 492,580 502,610 500,648 485,675 462,678 438,652 430,615' },
+  { code: '06_hip_left',          cx: 275, cy: 620, polygon: '228,580 296,580 298,620 290,660 268,672 240,668 222,640 220,605' },
+  { code: '06_hip_right',         cx: 325, cy: 620, polygon: '304,580 372,580 380,605 378,640 360,668 332,672 310,660 302,620' },
+  { code: '07_thigh_left',        cx: 260, cy: 820, polygon: '228,672 296,672 298,750 295,830 290,910 265,952 235,950 222,900 220,810 222,730' },
+  { code: '07_thigh_right',       cx: 340, cy: 820, polygon: '304,672 372,672 378,730 380,810 378,900 365,950 335,952 310,910 305,830 302,750' },
+  { code: '15_itband_left',       cx: 230, cy: 850, polygon: '215,720 240,718 245,800 244,880 240,950 220,955 210,890 208,810' },
+  { code: '15_itband_right',      cx: 370, cy: 850, polygon: '360,718 385,720 392,810 390,890 380,955 360,950 356,880 355,800' },
+  { code: '13_knee_left',         cx: 270, cy: 980, polygon: '240,955 296,955 298,980 296,1010 270,1030 245,1015 232,990' },
+  { code: '13_knee_right',        cx: 330, cy: 980, polygon: '304,955 360,955 368,990 355,1015 330,1030 304,1010 302,980' },
+  { code: '08_ankle_left',        cx: 275, cy: 1130, polygon: '255,1108 295,1108 296,1130 294,1155 275,1165 258,1158 252,1135' },
+  { code: '08_ankle_right',       cx: 325, cy: 1130, polygon: '305,1108 345,1108 348,1135 342,1158 325,1165 306,1155 304,1130' },
+  { code: '14_foot_left',         cx: 270, cy: 1182, polygon: '245,1170 295,1170 296,1188 280,1198 255,1198 240,1188' },
+  { code: '14_foot_right',        cx: 330, cy: 1182, polygon: '304,1170 355,1170 360,1188 345,1198 320,1198 304,1188' },
+];
+
+// Back view polygons — body-mirror of front for symmetric zones, with these
+// distinct back-only zones:
+//   12_lower_back_left/right — lumbar trapezoids (back-only)
+//   06_hip_left/right        — glute zones lower than front hip-flexor zones
+//   07_thigh_left/right      — hamstrings (lower-y polygon than quad)
+// Drops 09_chest_* (chest is front-only).
+export const HOTSPOTS_BACK = [
+  { code: '01_head_both',         cx: 300, cy: 120, polygon: '262,82 320,76 348,90 360,118 358,148 340,178 300,190 260,178 240,148 240,118 252,90' },
+  { code: '02_neck_left',         cx: 270, cy: 210, polygon: '253,180 290,180 295,210 290,240 270,252 253,242 248,212' },
+  { code: '02_neck_right',        cx: 330, cy: 210, polygon: '310,180 347,180 352,212 347,242 330,252 310,242 305,210' },
+  { code: '03_shoulder_left',     cx: 200, cy: 270, polygon: '168,250 232,245 248,265 245,295 220,310 195,310 168,295 158,278' },
+  { code: '03_shoulder_right',    cx: 400, cy: 270, polygon: '368,245 432,250 442,278 432,295 405,310 380,310 355,295 352,265' },
+  { code: '04_upper_arm_left',    cx: 160, cy: 380, polygon: '140,302 190,302 195,345 195,400 188,455 168,465 145,460 130,420 130,360' },
+  { code: '04_upper_arm_right',   cx: 440, cy: 380, polygon: '410,302 460,302 470,360 470,420 455,460 432,465 412,455 405,400 405,345' },
+  { code: '11_lateral_arm_left',  cx: 120, cy: 440, polygon: '105,365 135,360 140,400 138,460 132,510 112,512 100,470 98,408' },
+  { code: '11_lateral_arm_right', cx: 480, cy: 440, polygon: '465,360 495,365 502,408 500,470 488,512 468,510 462,460 460,400' },
+  { code: '05_forearm_left',      cx: 140, cy: 520, polygon: '120,475 170,470 178,510 175,565 158,605 132,610 112,580 108,520' },
+  { code: '05_forearm_right',     cx: 460, cy: 520, polygon: '430,470 480,475 492,520 488,580 468,610 442,605 425,565 422,510' },
+  { code: '10_lower_arm_left',    cx: 130, cy: 600, polygon: '108,580 165,576 170,615 162,652 138,678 115,675 100,648 98,610' },
+  { code: '10_lower_arm_right',   cx: 470, cy: 600, polygon: '435,576 492,580 502,610 500,648 485,675 462,678 438,652 430,615' },
+  { code: '12_lower_back_left',   cx: 265, cy: 620, polygon: '220,540 295,540 295,620 295,705 265,720 235,718 215,690 215,615' },
+  { code: '12_lower_back_right',  cx: 335, cy: 620, polygon: '304,540 380,540 385,615 385,690 365,718 335,720 304,705 304,620' },
+  { code: '06_hip_left',          cx: 260, cy: 720, polygon: '220,680 295,680 295,720 295,760 270,775 240,772 220,755 215,720' },
+  { code: '06_hip_right',         cx: 340, cy: 720, polygon: '304,680 380,680 385,720 380,755 360,772 330,775 304,760 304,720' },
+  { code: '07_thigh_left',        cx: 260, cy: 860, polygon: '228,778 295,778 295,820 295,890 290,940 268,962 235,958 222,910 222,830' },
+  { code: '07_thigh_right',       cx: 340, cy: 860, polygon: '304,778 372,778 378,830 378,910 365,958 335,962 310,940 304,890 304,820' },
+  { code: '15_itband_left',       cx: 230, cy: 850, polygon: '215,778 240,778 245,830 244,890 240,950 220,955 210,890 208,820' },
+  { code: '15_itband_right',      cx: 370, cy: 850, polygon: '360,778 385,778 392,820 390,890 380,955 360,950 356,890 355,830' },
+  { code: '13_knee_left',         cx: 270, cy: 980, polygon: '240,955 296,955 298,980 296,1010 270,1030 245,1015 232,990' },
+  { code: '13_knee_right',        cx: 330, cy: 980, polygon: '304,955 360,955 368,990 355,1015 330,1030 304,1010 302,980' },
+  { code: '08_ankle_left',        cx: 275, cy: 1130, polygon: '255,1108 295,1108 296,1130 294,1155 275,1165 258,1158 252,1135' },
+  { code: '08_ankle_right',       cx: 325, cy: 1130, polygon: '305,1108 345,1108 348,1135 342,1158 325,1165 306,1155 304,1130' },
+  { code: '14_foot_left',         cx: 270, cy: 1182, polygon: '245,1170 295,1170 296,1188 280,1198 255,1198 240,1188' },
+  { code: '14_foot_right',        cx: 330, cy: 1182, polygon: '304,1170 355,1170 360,1188 345,1198 320,1198 304,1188' },
+];
+
+// Legacy alias for backward compatibility
+export const HOTSPOTS = HOTSPOTS_FRONT;
+
+// Placeholder duration (seconds) — real value will be read from <video> metadata on load
+export const DEFAULT_CLIP_SECONDS = 60;
+
+// BASE_URL prefix — '/' in dev, '/<repo>/' on GitHub Pages.
+// Use a getter so we can call this in modules that import this file.
+const baseUrl = () => (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BASE_URL) || '/';
+
+// Resolve which folder to pull a zone video from, based on selected lifestyle.
+export function zoneVideoPath(zoneCode, level, lifestyle) {
+  const b = baseUrl();
+  if (lifestyle) {
+    return `${b}videos/lifestyle_protocols/${lifestyle}/${zoneCode}/${level}/video.mp4`;
+  }
+  return `${b}videos/zones/${zoneCode}/${level}/video.mp4`;
+}
+
+export function testVideoPath(zoneGroup, testNumber) {
+  const nn = String(testNumber).padStart(2, '0');
+  return `${baseUrl()}videos/tests/${zoneGroup}/test_${nn}/test.mp4`;
+}
+
+export function testAnswerVideoPath(zoneGroup, testNumber, answer /* 'yes' | 'no' */) {
+  const nn = String(testNumber).padStart(2, '0');
+  return `${baseUrl()}videos/tests/${zoneGroup}/test_${nn}/${answer}/test.mp4`;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   media.json paths — Phase 2 (YouTube unlisted, no local mp4s)
+   ────────────────────────────────────────────────────────────── */
+
+export function zoneMediaPath(zoneCode, level, lifestyle) {
+  const b = baseUrl();
+  if (lifestyle) {
+    return `${b}videos/lifestyle_protocols/${lifestyle}/${zoneCode}/${level}/media.json`;
+  }
+  return `${b}videos/zones/${zoneCode}/${level}/media.json`;
+}
+
+export function lifestyleAllMediaPath(lifestyle, level) {
+  // _all is a synthetic zone for whole-body lifestyle protocols
+  return `${baseUrl()}videos/lifestyle_protocols/${lifestyle}/_all/${level}/media.json`;
+}
+
+export function moduleMediaPath(type /* 'audio' | etc */, slug) {
+  return `${baseUrl()}videos/modules/${type}/${slug}/media.json`;
+}
+
+/* Fetch a media.json with graceful fallback. Returns null if missing. */
+export async function loadMedia(path) {
+  try {
+    const r = await fetch(path, { cache: 'no-cache' });
+    if (!r.ok) return null;
+    const j = await r.json();
+    if (!j || !j.youtube_id) return null;
+    return j;
+  } catch (_) {
+    return null;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Fascia chain mapping — protocol JSON's body_zone_chain field
+   resolves to a list of canonical zone codes.
+   Refine over time; this is the v1 starting point.
+   ────────────────────────────────────────────────────────────── */
+export const FASCIA_CHAINS = {
+  superficial_back_line:  ['12_lower_back_left','12_lower_back_right','07_thigh_left','07_thigh_right','14_foot_left','14_foot_right'],
+  superficial_front_line: ['09_chest_left','09_chest_right','07_thigh_left','07_thigh_right','13_knee_left','13_knee_right'],
+  lateral_line:           ['02_neck_left','02_neck_right','15_itband_left','15_itband_right'],
+  spiral_line:            ['09_chest_left','12_lower_back_left','15_itband_right'],
+  deep_front_line:        ['06_hip_left','06_hip_right','07_thigh_left','07_thigh_right'],
+  arm_lines_front:        ['04_upper_arm_left','04_upper_arm_right','05_forearm_left','05_forearm_right'],
+  arm_lines_back:         ['11_lateral_arm_left','11_lateral_arm_right','10_lower_arm_left','10_lower_arm_right'],
+  functional_lines:       ['09_chest_left','12_lower_back_right'],
+};
+
+export const ZONE_TO_CHAIN = (() => {
+  const m = {};
+  for (const [chain, zones] of Object.entries(FASCIA_CHAINS)) {
+    for (const z of zones) {
+      if (!m[z]) m[z] = [];
+      m[z].push(chain);
+    }
+  }
+  return m;
+})();
+
+export function resolveRoutineZones(fascia_routine) {
+  if (!fascia_routine) return [];
+  if (fascia_routine.zones && fascia_routine.zones.length) return fascia_routine.zones;
+  if (fascia_routine.body_zone_chain && FASCIA_CHAINS[fascia_routine.body_zone_chain]) {
+    return FASCIA_CHAINS[fascia_routine.body_zone_chain];
+  }
+  return [];
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Chain overlay PNGs — produced by Sub-Chat 3 (PPW Protocol Agent).
+   Live in public/assets/body_zones/ and render on top of the body
+   silhouette in BodyMap when a chain is highlighted.
+
+   Default filename pattern: <chain_name>_<view>.png
+   Override an entry here if Sub-Chat 3 used a different filename.
+   Use chainOverlayUrl(chain, view) instead of hard-coding paths
+   so BASE_URL gets prefixed correctly under GitHub Pages subpath.
+   ────────────────────────────────────────────────────────────── */
+export const CHAIN_OVERLAY_FILES = {
+  // chain: { front: 'filename.png', back: 'filename.png' }
+  // (left empty → default <chain>_<view>.png pattern is used)
+};
+
+export function chainOverlayUrl(chain, view = 'front') {
+  if (!chain) return null;
+  const override = CHAIN_OVERLAY_FILES[chain];
+  const filename = (override && override[view]) || `${chain}_${view}.png`;
+  // import.meta.env.BASE_URL is '/' in dev, '/<repo>/' on GitHub Pages
+  const base = (import.meta && import.meta.env && import.meta.env.BASE_URL) || '/';
+  return `${base}assets/body_zones/${filename}`;
+}
+
+/* Pick the dominant fascia chain implied by a set of selected zones.
+   Returns null if no zone matches a chain, or if no single chain wins.
+   Used by BodyMap to fade in the right overlay. */
+export function dominantChainForZones(zoneCodes) {
+  if (!zoneCodes || !zoneCodes.length) return null;
+  const counts = {};
+  for (const code of zoneCodes) {
+    const chains = ZONE_TO_CHAIN[code] || [];
+    for (const c of chains) counts[c] = (counts[c] || 0) + 1;
+  }
+  let best = null, bestScore = 0;
+  for (const [chain, n] of Object.entries(counts)) {
+    if (n > bestScore) { best = chain; bestScore = n; }
+  }
+  return best;
+}

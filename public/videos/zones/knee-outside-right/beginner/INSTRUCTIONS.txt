@@ -1,0 +1,4 @@
+Zone: knee-outside-right
+Level: beginner
+
+Drop video here named: video.mp4

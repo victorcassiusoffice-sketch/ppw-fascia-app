@@ -1,0 +1,8 @@
+# LEGACY — superseded by `hip-flexor-left + hamstrings-left + knee-inside-left` (PPW v2 taxonomy migration 2026-04-29)
+#
+# This folder is preserved as a stub. Do NOT add new media here.
+# INSTRUCTIONS.txt files in subfolders are kept (per Vic's rule) but no
+# longer drive the live BodyMap. New zone codes use kebab-case under
+# public/videos/zones/<new-code>/<level>/.
+#
+# See NEW_ZONE_MAP.md (App root) for full taxonomy + rationale.

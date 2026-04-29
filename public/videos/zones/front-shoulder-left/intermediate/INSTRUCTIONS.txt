@@ -1,0 +1,4 @@
+Zone: front-shoulder-left
+Level: intermediate
+
+Drop video here named: video.mp4

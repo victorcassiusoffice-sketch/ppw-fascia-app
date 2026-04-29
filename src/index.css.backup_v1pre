@@ -1,0 +1,295 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ──────────────────────────────────────────
+   PPW palette — Option B (locked)
+   ────────────────────────────────────────── */
+:root {
+  color-scheme: dark;
+  --ppw-bg-deep: #0a1628;
+  --ppw-gold:    #f5b845;
+  --ppw-cream:   #f0e8d8;
+  --ppw-teal:    #4a9eb8;
+
+  --ppw-text:        var(--ppw-cream);
+  --ppw-text-muted:  #7b8eaa;
+  --ppw-card-bg:     rgba(240, 232, 216, 0.04);
+  --ppw-card-border: rgba(240, 232, 216, 0.10);
+}
+
+html, body, #root { height: 100%; }
+body {
+  background: var(--ppw-bg-deep);
+  color: var(--ppw-text);
+  overscroll-behavior: none;
+}
+h1,h2,h3,h4 { font-family: 'Syne', sans-serif; letter-spacing: -0.01em; }
+
+.btn-accent {
+  background: var(--ppw-gold);
+  color: var(--ppw-bg-deep);
+  font-weight: 700;
+  padding: 14px 28px;
+  border-radius: 999px;
+  transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+}
+.btn-accent:hover { transform: translateY(-1px); box-shadow: 0 10px 30px -10px rgba(245,184,69,0.55); }
+.btn-accent:active { transform: translateY(0); }
+.btn-accent:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.btn-teal {
+  background: var(--ppw-teal);
+  color: var(--ppw-bg-deep);
+  font-weight: 700;
+  padding: 12px 24px;
+  border-radius: 999px;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.btn-teal:hover { transform: translateY(-1px); box-shadow: 0 10px 30px -10px rgba(74,158,184,0.55); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ppw-cream);
+  border: 1px solid var(--ppw-card-border);
+  font-weight: 600;
+  padding: 12px 22px;
+  border-radius: 999px;
+  transition: border-color .2s ease, color .2s ease;
+}
+.btn-ghost:hover { border-color: var(--ppw-gold); color: var(--ppw-gold); }
+
+.card {
+  background: linear-gradient(180deg, rgba(240,232,216,0.05), rgba(240,232,216,0.01));
+  border: 1px solid var(--ppw-card-border);
+  border-radius: 20px;
+  transition: border-color .2s ease, transform .2s ease;
+}
+.card:hover { border-color: rgba(245,184,69,0.45); }
+
+.card-cream {
+  background: var(--ppw-cream);
+  color: var(--ppw-bg-deep);
+  border-radius: 20px;
+}
+
+/* LAYER 2 — invisible click targets. The figure shows through; only on
+   hover/focus do we paint a subtle teal outline so the user can preview
+   what they're about to tap. Selected zones are handled by LAYER 3. */
+.hotspot-hit {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  cursor: pointer;
+  transition: stroke .15s ease, fill .15s ease;
+  /* iOS / Android — kill default touch highlight + double-tap zoom */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.hotspot-hit:hover,
+.hotspot-hit:focus-visible {
+  stroke: var(--ppw-teal);
+  fill: rgba(74,158,184,0.12);
+  outline: none;
+}
+.hotspot-hit:focus-visible {
+  stroke-width: 2.5;
+}
+/* While selected, the hit-target itself stays invisible — feedback layer
+   draws on top. Hover still nudges teal so the user knows it's deselectable. */
+.hotspot-hit.is-selected:hover {
+  stroke: rgba(74,158,184,0.55);
+  fill: transparent;
+}
+
+/* LAYER 3 — visible feedback for selected zones. Gold fill + glow + pulse. */
+.hotspot-feedback {
+  fill: rgba(245,184,69,0.42);
+  stroke: var(--ppw-gold);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  filter: url(#hotspotGlow);
+  animation: pulse-selected 2.4s ease-in-out infinite;
+}
+
+@keyframes pulse-selected {
+  0%, 100% { fill: rgba(245,184,69,0.38); }
+  50%      { fill: rgba(245,184,69,0.55); }
+}
+
+/* Faint full-body silhouette path — subtle anatomical hint behind hotspots */
+.body-silhouette {
+  fill: none;
+  stroke: rgba(240,232,216,0.07);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+.hotspot-label {
+  fill: var(--ppw-bg-deep);
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.animate-fadeIn { animation: fadeIn 0.3s ease-out; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.timeline-dot {
+  width: 14px; height: 14px; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 10px; line-height: 1;
+}
+.timeline-protocol { background: var(--ppw-gold);  color: var(--ppw-bg-deep); }
+.timeline-routine  { background: var(--ppw-teal);  color: var(--ppw-bg-deep); }
+.timeline-audio    { background: var(--ppw-cream); color: var(--ppw-bg-deep); }
+
+.timeline-done .timeline-label { text-decoration: line-through; opacity: 0.45; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(240,232,216,0.10); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(245,184,69,0.35); }
+
+.audio-only-wrap {
+  position: relative;
+  width: 100%;
+  height: 80px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--ppw-bg-deep), #14233e);
+  border: 1px solid var(--ppw-card-border);
+}
+.audio-only-wrap iframe {
+  position: absolute; inset: 0;
+  width: 100%; height: 320px;
+  pointer-events: auto;
+}
+
+@media (max-width: 640px) {
+  .btn-accent { padding: 12px 20px; font-size: 0.9rem; }
+  .card       { border-radius: 16px; }
+}
+
+/* ──────────────────────────────────────────
+   Affiliate buttons (Sub-Chat 6)
+   Used on /protocol/:id supplement cards.
+   ────────────────────────────────────────── */
+.btn-iherb {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: #84cc16;
+  color: #0a1628;
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 8px 16px;
+  border-radius: 999px;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease;
+}
+.btn-iherb:hover {
+  background: #a3e635;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px -8px rgba(132,204,22,0.55);
+}
+.btn-iherb:active { transform: translateY(0); }
+
+.btn-amazon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--ppw-cream);
+  border: 1px solid rgba(245,184,69,0.45);
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 7px 15px;
+  border-radius: 999px;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: border-color .2s ease, color .2s ease, background-color .2s ease;
+}
+.btn-amazon:hover {
+  border-color: var(--ppw-gold);
+  color: var(--ppw-gold);
+  background: rgba(245,184,69,0.06);
+}
+
+.btn-iherb-all {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  background: var(--ppw-gold);
+  color: var(--ppw-bg-deep);
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 14px 20px;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: transform .15s ease, box-shadow .15s ease;
+  animation: pulse-iherb-all 2.4s ease-in-out 1;
+}
+.btn-iherb-all:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 32px -10px rgba(245,184,69,0.6);
+}
+
+@keyframes pulse-iherb-all {
+  0%   { box-shadow: 0 0 0 0 rgba(245,184,69,0.55); }
+  60%  { box-shadow: 0 0 0 14px rgba(245,184,69,0); }
+  100% { box-shadow: 0 0 0 0 rgba(245,184,69,0); }
+}
+
+.supplement-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: stretch;
+  flex-shrink: 0;
+}
+@media (min-width: 640px) {
+  .supplement-actions {
+    flex-direction: column;
+    align-items: flex-end;
+    min-width: 140px;
+  }
+
+}
+/* ──────────────────────────────────────────
+   Drag handle (Sub-Chat 2 reorder)
+   ────────────────────────────────────────── */
+.drag-handle {
+  background: transparent;
+  border: none;
+  font-weight: 700;
+  border-radius: 12px;
+  transition: color .15s ease, background-color .15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.drag-handle:hover {
+  color: var(--ppw-gold);
+  background: rgba(245,184,69,0.08);
+}
+.drag-handle:active {
+  cursor: grabbing;
+  background: rgba(245,184,69,0.12);
+}
+.is-dragging .drag-handle {
+  color: var(--ppw-gold);
+}

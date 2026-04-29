@@ -1,0 +1,4 @@
+Zone: gluteal-right
+Level: beginner
+
+Drop video here named: video.mp4

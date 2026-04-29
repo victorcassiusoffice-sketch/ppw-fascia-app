@@ -2,6 +2,7 @@
 // Pulls from PROTOCOLS_JSON_URL or falls back to /mock-protocol.json when USE_MOCK_DATA is true.
 
 import { PROTOCOLS_JSON_URL, USE_MOCK_DATA, LS_KEYS } from './config.js';
+import { migrateZoneCodes } from './data.js';
 
 const memCache = new Map();
 
@@ -86,15 +87,18 @@ export function mergeDailyItems({ protocols, activeRoutines, activeModuleEntries
   }
 
   // 2. Body-zone routines (one consolidated entry, if any zones saved)
+  // v2 backwards-compat: migrate any legacy NN_name_side codes lingering in
+  // localStorage to the new kebab-case taxonomy on read. No-op on new codes.
   if (activeRoutines?.savedZones?.length) {
+    const migratedZones = migrateZoneCodes(activeRoutines.savedZones);
     items.push({
       kind: 'routine',
       id: `routine::saved::${activeRoutines.scheduledTime}`,
       time: activeRoutines.scheduledTime || '08:00',
       category: 'fascia_routine',
-      label: `My zones — ${activeRoutines.savedZones.length} zone${activeRoutines.savedZones.length === 1 ? '' : 's'} (${activeRoutines.level})`,
-      duration_min: activeRoutines.savedZones.length * 5,
-      zones: activeRoutines.savedZones,
+      label: `My zones — ${migratedZones.length} zone${migratedZones.length === 1 ? '' : 's'} (${activeRoutines.level})`,
+      duration_min: migratedZones.length * 5,
+      zones: migratedZones,
       level: activeRoutines.level,
       lifestyle: activeRoutines.lifestyle,
     });
