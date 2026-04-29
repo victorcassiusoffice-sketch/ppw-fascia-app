@@ -1,0 +1,8 @@
+# REMOVED v2.1 (2026-04-29)
+#
+# Reason (Vic): "ITB releasing is a solution but not area of pain."
+# IT band tightness gets addressed via knee-outside / lower-back / gluteal
+# protocols. ITB is a release technique target, not a pain location.
+#
+# This folder is preserved as a legacy stub. INSTRUCTIONS.txt files are
+# kept (per Vic's rule) but no longer drive the live BodyMap.

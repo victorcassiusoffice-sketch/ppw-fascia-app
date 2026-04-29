@@ -77,8 +77,7 @@ const BODY_SILHOUETTE_PATH = [
 ].join(' ');
 
 // Short label rendered inside selected hotspot polygons. Abbreviates long
-// names so they fit narrow zones. v2.1 taxonomy (kebab-case, no ITB,
-// single knee zone per side).
+// names so they fit narrow zones. v2 taxonomy (kebab-case codes).
 const ZONE_LABEL_OVERRIDES = {
   'headache':              'Head',
   'jaw-left':              'Jaw L',
@@ -97,10 +96,16 @@ const ZONE_LABEL_OVERRIDES = {
   'hip-flexor-right':      'Hip.F R',
   'gluteal-left':          'Glut L',
   'gluteal-right':         'Glut R',
+  'it-band-left':          'ITB L',
+  'it-band-right':         'ITB R',
   'hamstrings-left':       'Ham L',
   'hamstrings-right':      'Ham R',
-  'knee-left':             'Knee L',
-  'knee-right':            'Knee R',
+  'knee-inside-left':      'Kn.In L',
+  'knee-inside-right':     'Kn.In R',
+  'knee-outside-left':     'Kn.Out L',
+  'knee-outside-right':    'Kn.Out R',
+  'knee-back-left':        'Kn.Bk L',
+  'knee-back-right':       'Kn.Bk R',
   'calf-left':             'Calf L',
   'calf-right':            'Calf R',
 };
@@ -364,18 +369,23 @@ function BodyMap({ session, setSession }) {
   const [selected, setSelected] = useState(session.selected || {});
   const [painFor, setPainFor] = useState(null);
   const [view, setView] = useState('front');
+  // v2: sex toggle persisted to localStorage. Default 'male' (existing PNGs).
+  // 'female' loads female_front.png / female_back.png + applies female polygon overrides.
+  const [sex, setSex] = useLocalStorage('ppw.bodyFigure', 'male');
   const [, setActiveRoutines] = useActiveRoutines();
 
-  // v2.1: sex toggle removed (gender-neutral figure per Vic Stage 5).
-  // Hotspots resolve from view alone.
-  const hotspots = useMemo(() => getHotspots(view), [view]);
+  // Resolve hotspots for the current view + sex.
+  // For male sex returns shared array; for female overlays the 4 sex-specific
+  // overrides (front-shoulder, hip-flexor, gluteal, lower-back).
+  const hotspots = useMemo(() => getHotspots(view, sex), [view, sex]);
   // Subpath-aware: in dev BASE_URL is '/', on GitHub Pages it's '/<repo>/'
   const baseUrl = (import.meta.env && import.meta.env.BASE_URL) || '/';
-  // Three-stage fallback: new path → legacy path → silhouette path only.
-  const primaryBodyImg  = `${baseUrl}assets/body_zones/${bodyFigureFile(view)}`;
-  const fallbackBodyImg = `${baseUrl}assets/body_${view}.png`;
+  // Three-stage fallback: sex-specific PNG → legacy male PNG → solid navy rect.
+  // Female falls back to male if female_*.png isn't yet on disk.
+  const primaryBodyImg  = `${baseUrl}assets/body_zones/${bodyFigureFile(view, sex)}`;
+  const fallbackBodyImg = `${baseUrl}assets/body_zones/${bodyFigureFile(view, 'male')}`;
   const [bodyImgState, setBodyImgState] = useState('primary'); // 'primary' | 'fallback' | 'none'
-  useEffect(() => { setBodyImgState('primary'); }, [view]);
+  useEffect(() => { setBodyImgState('primary'); }, [view, sex]);
   const currentBodyImg =
     bodyImgState === 'primary'  ? primaryBodyImg  :
     bodyImgState === 'fallback' ? fallbackBodyImg :
@@ -437,27 +447,16 @@ function BodyMap({ session, setSession }) {
 
       <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
         <div className="mx-auto w-full" style={{ maxWidth: 400 }}>
-          {/* v2.1: gender-neutral figure (sex toggle removed Stage 5).
-              FRONT/BACK toggle + Select-all/Clear-all action button. */}
-          <div className="flex justify-center items-center gap-2 mb-3 flex-wrap">
+          {/* v2 — sex figure toggle (male/female). Persists to localStorage
+              key 'ppw.bodyFigure'. Drives base PNG + sex-specific polygon
+              overrides for shoulder, hip-flexor, gluteal, lower-back. */}
+          <div className="flex justify-center gap-2 mb-2">
+            <button onClick={() => setSex('male')}   className={`px-4 py-1.5 rounded-full text-xs font-display tracking-wider transition-all ${sex === 'male'   ? 'bg-teal text-bg' : 'bg-cream/5 text-muted hover:text-cream'}`} aria-pressed={sex === 'male'}>♂ MALE</button>
+            <button onClick={() => setSex('female')} className={`px-4 py-1.5 rounded-full text-xs font-display tracking-wider transition-all ${sex === 'female' ? 'bg-teal text-bg' : 'bg-cream/5 text-muted hover:text-cream'}`} aria-pressed={sex === 'female'}>♀ FEMALE</button>
+          </div>
+          <div className="flex justify-center gap-2 mb-3">
             <button onClick={() => setView('front')} className={`px-4 py-1.5 rounded-full text-xs font-display tracking-wider transition-all ${view === 'front' ? 'bg-accent text-bg' : 'bg-cream/5 text-muted hover:text-cream'}`}>FRONT</button>
             <button onClick={() => setView('back')}  className={`px-4 py-1.5 rounded-full text-xs font-display tracking-wider transition-all ${view === 'back'  ? 'bg-accent text-bg' : 'bg-cream/5 text-muted hover:text-cream'}`}>BACK</button>
-            <button
-              onClick={() => {
-                if (Object.keys(selected).length > 0) {
-                  setSelected({});
-                } else {
-                  // Select every zone in the current view, default pain rating 1
-                  const next = {};
-                  for (const h of hotspots) next[h.code] = 1;
-                  setSelected(next);
-                }
-              }}
-              className="px-4 py-1.5 rounded-full text-xs font-display tracking-wider transition-all border border-accent/60 text-accent hover:bg-accent/10 hover:border-accent"
-              aria-label={Object.keys(selected).length > 0 ? 'Clear all selected zones' : 'Select all zones in current view'}
-            >
-              {Object.keys(selected).length > 0 ? '× CLEAR ALL' : '✓ SELECT ALL'}
-            </button>
           </div>
           <div className="relative" style={{ aspectRatio: '600 / 1200' }}>
             {/* Single SVG canvas — anatomical body PNG + polygon hotspots + chain overlay.

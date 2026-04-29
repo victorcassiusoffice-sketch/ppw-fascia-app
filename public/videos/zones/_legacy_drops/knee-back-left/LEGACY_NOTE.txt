@@ -1,0 +1,6 @@
+# CONSOLIDATED v2.1 (2026-04-29)
+#
+# Reason (Vic): "knee - do the whole knee i will ask in the test
+# (inside or outside?)."
+# Replaced by single `knee-left` / `knee-right` zones. Inside vs
+# outside vs back differentiation moves to /tests engine.
