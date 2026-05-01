@@ -1,0 +1,37 @@
+{
+  "page": "BACK",
+  "frame": "back",
+  "frame_dims": {"w": 436, "h": 1203},
+  "layer_names_in_panel_order_top_to_bottom": [
+    "Gluteal L",
+    "Gluteal L",
+    "Wrist R",
+    "Back of Knee R",
+    "Back of Knee L",
+    "Wrist L",
+    "Elbow R",
+    "Elbow L",
+    "Upper back R",
+    "Lower Back R",
+    "Hamstring R",
+    "Calf to ankle R",
+    "Calf to ankle L",
+    "Hamstring L",
+    "Lower Back L",
+    "Upper Back L",
+    "Scapula R",
+    "Scapula L",
+    "Neck and Trap R",
+    "Neck and Trap L",
+    "Back of Head"
+  ],
+  "duplicate_typo": "Second 'Gluteal L' (index 1) is actually the right-side glute — should be 'Gluteal R'. Auto-fix per Vic's prior approval.",
+  "approved_decisions": {
+    "Solar_Plexus_FRONT": "DROP — no canonical zone",
+    "Neck_and_Trap_BACK": "Assign whole polygon to traps-left/right (not split with neck — neck is FRONT-only via Front Neck L/R)",
+    "Scapula_BACK": "DROP — upper-back already covers anatomically",
+    "Gluteal_L_duplicate": "AUTO-FIX to gluteal-right",
+    "Jaw": "DROP from data.js (Vic didn't draw)",
+    "Traps_FRONT": "Keep traps in data.js for BACK only (anatomically correct)"
+  }
+}
