@@ -490,7 +490,7 @@ function BodyMap({ session, setSession }) {
               {currentBodyImg && (
                 <image
                   href={currentBodyImg}
-                  x={0} y={0} width={vb.w} height={vb.h}
+                  x={-30 - vb.w * 0.05} y={-vb.h * 0.05} width={vb.w * 1.10} height={vb.h * 1.10}
                   preserveAspectRatio="xMidYMid slice"
                   opacity={totalZones > 0 ? 0.85 : 1}
                   style={{ pointerEvents: 'none', transition: 'opacity 0.4s ease' }}
@@ -1312,8 +1312,4 @@ function SettingsView() {
         <div className="card p-5 text-sm space-y-1.5">
           <div>Version: <span className="text-accent">{APP_VERSION}</span></div>
           <div className="text-muted text-xs pt-2">Peak Performance Wellness · ppwellness.co</div>
-        </div>
-      </Section>
-    </main>
-  );
-}
+        </div>
