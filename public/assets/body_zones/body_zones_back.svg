@@ -24,14 +24,14 @@
 </defs>
 <rect class="body-image" width="436" height="1203" fill="url(#backBodyPattern)"/>
 <g class="zones">
-  <path id="zone-headache" data-zone="headache" class="zone" fill="transparent" stroke="none" d="M186 119.5L171 66.5L186 41H252L273.5 66.5C269 84.1667 259.6 119.5 258 119.5H186Z"/>
+  <path id="zone-headache" data-zone="headache" class="zone" fill="transparent" stroke="none" d="M186 119.5L168.5 66.5L196 41H241.5L273.5 66.5C269 84.1667 259.6 119.5 258 119.5H186Z"/>
   <path id="zone-traps-left" data-zone="traps-left" class="zone" fill="transparent" stroke="none" d="M178.506 185.751L169.73 139.055V126H218V185.751C218 184.747 212.985 200.814 187.283 245C184.775 245 142.774 199.308 144.028 199.308C145.031 199.308 167.431 190.27 178.506 185.751Z"/>
   <path id="zone-traps-right" data-zone="traps-right" class="zone" fill="transparent" stroke="none" d="M262.561 185.751L271.575 139.055V126H222V185.751C222 184.747 227.151 200.814 253.548 245C256.123 245 299.259 199.308 297.972 199.308C296.942 199.308 273.935 190.27 262.561 185.751Z"/>
   <path id="zone-upper-back-left" data-zone="upper-back-left" class="zone" fill="transparent" stroke="none" d="M173 333.5V262.5H215.5V364L173 333.5Z"/>
   <path id="zone-lower-back-left" data-zone="lower-back-left" class="zone" fill="transparent" stroke="none" d="M140 475.926V371H206V521L140 475.926Z"/>
   <path id="zone-hamstrings-left" data-zone="hamstrings-left" class="zone" fill="transparent" stroke="none" d="M99 647C110.729 707.255 117.306 741.037 129.035 801.292M99 647H206L187.228 813L129.035 801.292M99 647L129.035 801.292"/>
-  <path id="zone-calf-left" data-zone="calf-left" class="zone" fill="transparent" stroke="none" d="M119 930C127.222 1015.66 131.831 1063.69 140.053 1149.36M119 930H194L180.842 1166L140.053 1149.36M119 930L140.053 1149.36"/>
-  <path id="zone-calf-right" data-zone="calf-right" class="zone" fill="transparent" stroke="none" d="M310 934C301.45 1018.21 296.656 1065.43 288.105 1149.64M310 934H232L245.684 1166L288.105 1149.64M310 934L288.105 1149.64"/>
+  <path id="zone-calf-left" data-zone="calf-left" class="zone" fill="transparent" stroke="none" d="M109 934C119.414 1018.94 125.253 1066.56 135.667 1151.5M109 934H204L187.333 1168L135.667 1151.5M109 934L135.667 1151.5"/>
+  <path id="zone-calf-right" data-zone="calf-right" class="zone" fill="transparent" stroke="none" d="M321 934C310.586 1018.94 304.747 1066.56 294.333 1151.5M321 934H226L242.667 1168L294.333 1151.5M321 934L294.333 1151.5"/>
   <path id="zone-hamstrings-right" data-zone="hamstrings-right" class="zone" fill="transparent" stroke="none" d="M340 647C327.065 707.255 319.812 741.037 306.877 801.292M340 647H222L242.702 813L306.877 801.292M340 647L306.877 801.292"/>
   <path id="zone-lower-back-right" data-zone="lower-back-right" class="zone" fill="transparent" stroke="none" d="M298 475.926V371H232V521L298 475.926Z"/>
   <path id="zone-upper-back-right" data-zone="upper-back-right" class="zone" fill="transparent" stroke="none" d="M264.5 334V263H222V364.5L264.5 334Z"/>

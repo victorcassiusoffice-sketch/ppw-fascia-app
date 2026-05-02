@@ -7,8 +7,8 @@
     "anchors": [
       {
         "code": "neck-right",
-        "cx": 237,
-        "cy": 158.8
+        "cx": 237.5,
+        "cy": 159.3
       },
       {
         "code": "neck-left",
@@ -17,48 +17,48 @@
       },
       {
         "code": "front-shoulder-left",
-        "cx": 107.6,
-        "cy": 238.3
+        "cx": 120.6,
+        "cy": 244.5
       },
       {
         "code": "elbow-left",
+        "cx": 310.4,
+        "cy": 244.5
+      },
+      {
+        "code": "elbow-right",
         "cx": 69.6,
         "cy": 403.3
       },
       {
-        "code": "elbow-right",
-        "cx": 357.6,
+        "code": "knee-left",
+        "cx": 357.5,
         "cy": 396.3
       },
       {
-        "code": "knee-left",
-        "cx": 150.6,
-        "cy": 766.3
-      },
-      {
         "code": "knee-right",
-        "cx": 277.6,
-        "cy": 766.3
+        "cx": 155.8,
+        "cy": 787.5
       },
       {
         "code": "front-shoulder-right",
-        "cx": 305.3,
-        "cy": 232.5
+        "cx": 263.8,
+        "cy": 787.5
       },
       {
         "code": "headache",
-        "cx": 216.3,
+        "cx": 214.3,
         "cy": 43.5
       },
       {
         "code": "calf-left",
-        "cx": 143.5,
-        "cy": 1065.8
+        "cx": 292.5,
+        "cy": 1073
       },
       {
         "code": "calf-right",
-        "cx": 283,
-        "cy": 1065.8
+        "cx": 129.5,
+        "cy": 1073
       },
       {
         "code": "hip-flexor-right",
@@ -90,7 +90,7 @@
     "anchors": [
       {
         "code": "headache",
-        "cx": 222.3,
+        "cx": 221,
         "cy": 80.3
       },
       {
@@ -121,12 +121,12 @@
       {
         "code": "calf-left",
         "cx": 156.5,
-        "cy": 1048
+        "cy": 1051
       },
       {
         "code": "calf-right",
-        "cx": 271,
-        "cy": 1050
+        "cx": 273.5,
+        "cy": 1051
       },
       {
         "code": "hamstrings-right",
