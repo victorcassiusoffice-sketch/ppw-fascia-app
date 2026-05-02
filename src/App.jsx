@@ -1312,4 +1312,8 @@ function SettingsView() {
         <div className="card p-5 text-sm space-y-1.5">
           <div>Version: <span className="text-accent">{APP_VERSION}</span></div>
           <div className="text-muted text-xs pt-2">Peak Performance Wellness · ppwellness.co</div>
-        </div>
+        </div>
+      </Section>
+    </main>
+  );
+}
