@@ -469,7 +469,7 @@ function BodyMap({ session, setSession }) {
             <svg
               viewBox={`0 0 ${vb.w} ${vb.h}`}
               className="absolute inset-0 w-full h-full"
-              preserveAspectRatio="xMidYMid meet"
+              preserveAspectRatio="none"
             >
               {/* Filter defs — gold glow for selected hotspots */}
               <defs>
@@ -491,7 +491,7 @@ function BodyMap({ session, setSession }) {
                 <image
                   href={currentBodyImg}
                   x={0} y={0} width={vb.w} height={vb.h}
-                  preserveAspectRatio="xMidYMid meet"
+                  preserveAspectRatio="none"
                   opacity={totalZones > 0 ? 0.85 : 1}
                   style={{ pointerEvents: 'none', transition: 'opacity 0.4s ease' }}
                   onError={() => setBodyImgState(s => s === 'primary' ? 'fallback' : 'none')}
