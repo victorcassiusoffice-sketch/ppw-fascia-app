@@ -69,10 +69,11 @@ export function mergeDailyItems({ protocols, activeRoutines, activeModuleEntries
   // 1. Protocol daily_plan items
   for (const p of protocols) {
     if (!p?.sections?.daily_plan) continue;
-    for (const e of p.sections.daily_plan) {
+    p.sections.daily_plan.forEach((e, idx) => {
       items.push({
         kind: 'protocol',
-        id: `proto::${p.protocol_id}::${e.time}::${e.category}`,
+        // Stable id — independent of time so user-editable times don't break done-tracking.
+        id: `proto::${p.protocol_id}::${idx}::${e.category}`,
         time: e.time,
         category: e.category,
         label: e.label,
@@ -83,7 +84,7 @@ export function mergeDailyItems({ protocols, activeRoutines, activeModuleEntries
         protocol_id: p.protocol_id,
         protocol_topic: p.topic,
       });
-    }
+    });
   }
 
   // 2. Body-zone routines (one consolidated entry, if any zones saved)
@@ -93,7 +94,8 @@ export function mergeDailyItems({ protocols, activeRoutines, activeModuleEntries
     const migratedZones = migrateZoneCodes(activeRoutines.savedZones);
     items.push({
       kind: 'routine',
-      id: `routine::saved::${activeRoutines.scheduledTime}`,
+      // Stable id — time stays editable without breaking done-tracking.
+      id: `routine::saved`,
       time: activeRoutines.scheduledTime || '08:00',
       category: 'fascia_routine',
       label: `My zones — ${migratedZones.length} zone${migratedZones.length === 1 ? '' : 's'} (${activeRoutines.level})`,

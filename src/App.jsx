@@ -778,15 +778,20 @@ function SessionPlayer({ session }) {
    NEW — /today
    ═══════════════════════════════════════════ */
 function TodayView() {
-  const [activeProtocols] = useActiveProtocols();
-  const [activeModules] = useActiveModules();
-  const [activeRoutines] = useActiveRoutines();
+  const [activeProtocols, setActiveProtocols] = useActiveProtocols();
+  const [activeModules, setActiveModules] = useActiveModules();
+  const [activeRoutines, setActiveRoutines] = useActiveRoutines();
   const { isDone, toggle, completed } = useCompletedToday();
   const [dailyOrder, setDailyOrder] = useLocalStorage(LS_KEYS.DAILY_ORDER, []);
+  // Per-item time overrides keyed by item id. Lets the user tap a time and pick
+  // a new one without touching the source protocol JSON.
+  const [timeOverrides, setTimeOverrides] = useLocalStorage(LS_KEYS.DAILY_TIMES, {});
 
   const [protocols, setProtocols] = useState([]);
   const [moduleEntries, setModuleEntries] = useState([]);
   const [expanded, setExpanded] = useState(null);
+  // id of item whose time picker is currently open
+  const [editingTimeId, setEditingTimeId] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -814,23 +819,68 @@ function TodayView() {
 
   // Apply user-defined order: known ids first (in saved order), unknown ids
   // appended at end. Keeps notification times intact (drag is display-only).
+  // Also overlays per-item time edits from `timeOverrides`.
   const items = useMemo(() => {
-    if (!dailyOrder || dailyOrder.length === 0) return baseItems;
+    const applyOverride = (it) => timeOverrides[it.id] ? { ...it, time: timeOverrides[it.id] } : it;
+    if (!dailyOrder || dailyOrder.length === 0) return baseItems.map(applyOverride);
     const byId = new Map(baseItems.map(it => [it.id, it]));
     const ordered = [];
     for (const id of dailyOrder) {
       if (byId.has(id)) {
-        ordered.push(byId.get(id));
+        ordered.push(applyOverride(byId.get(id)));
         byId.delete(id);
       }
     }
-    for (const it of baseItems) if (byId.has(it.id)) ordered.push(it);
+    for (const it of baseItems) if (byId.has(it.id)) ordered.push(applyOverride(it));
     return ordered;
-  }, [baseItems, dailyOrder]);
+  }, [baseItems, dailyOrder, timeOverrides]);
 
   const handleReorder = (newItems) => {
     setDailyOrder(newItems.map(it => it.id));
   };
+
+  // Persist a new time for an item. Routine items are special-cased so the
+  // change also updates the routine settings the rest of the app reads from.
+  const handleTimeChange = useCallback((it, newTime) => {
+    if (!newTime) return;
+    if (it.kind === 'routine') {
+      setActiveRoutines(prev => ({ ...prev, scheduledTime: newTime }));
+    }
+    setTimeOverrides(prev => ({ ...prev, [it.id]: newTime }));
+  }, [setActiveRoutines, setTimeOverrides]);
+
+  // Remove a single item from today's plan. For protocols this deactivates the
+  // whole protocol (its other daily items go too). For audio modules it
+  // deactivates that module. For the routine bundle it clears saved zones.
+  const handleRemoveItem = useCallback((it) => {
+    if (it.kind === 'protocol') {
+      setActiveProtocols(cur => cur.filter(id => id !== it.protocol_id));
+    } else if (it.kind === 'audio') {
+      setActiveModules(cur => cur.filter(s => s !== it.slug));
+    } else if (it.kind === 'routine') {
+      setActiveRoutines(prev => ({ ...prev, savedZones: [] }));
+    }
+    // Tidy up auxiliary state.
+    setDailyOrder(cur => (cur || []).filter(id => id !== it.id));
+    setTimeOverrides(cur => {
+      if (!cur || !(it.id in cur)) return cur;
+      const next = { ...cur };
+      delete next[it.id];
+      return next;
+    });
+    setExpanded(prev => prev === it.id ? null : prev);
+  }, [setActiveProtocols, setActiveModules, setActiveRoutines, setDailyOrder, setTimeOverrides]);
+
+  // Wipe the whole stack — used when every item is ticked. Mirrors the
+  // "Reset everything" action in Settings, but stays inline.
+  const handleRemoveStack = useCallback(() => {
+    setActiveProtocols([]);
+    setActiveModules([]);
+    setActiveRoutines(prev => ({ ...prev, savedZones: [] }));
+    setDailyOrder([]);
+    setTimeOverrides({});
+    setExpanded(null);
+  }, [setActiveProtocols, setActiveModules, setActiveRoutines, setDailyOrder, setTimeOverrides]);
 
   useEffect(() => {
     if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
@@ -842,6 +892,7 @@ function TodayView() {
   const todayDate = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
   const completedCount = items.filter(it => completed.includes(it.id)).length;
   const empty = items.length === 0;
+  const allDone = !empty && completedCount === items.length;
 
   return (
     <main className="px-5 py-6 max-w-3xl mx-auto pb-24">
@@ -867,7 +918,7 @@ function TodayView() {
       {!empty && (
         <p className="text-muted text-xs mb-3 flex items-center gap-2">
           <span className="text-accent">≡</span>
-          <span>Long-press the handle to drag and reorder. Notification times stay scheduled to the clock.</span>
+          <span>Drag to reorder · tap the time to change it · open an item for the remove button.</span>
         </p>
       )}
 
@@ -875,6 +926,7 @@ function TodayView() {
         {(it, dragHandleProps, _i, isDragging) => {
           const done = isDone(it.id);
           const isOpen = expanded === it.id;
+          const isEditingTime = editingTimeId === it.id;
           return (
             <div className={`card overflow-hidden transition-all ${done ? 'timeline-done opacity-80' : ''} ${isDragging ? 'border-accent' : ''}`}>
               <div className="flex items-center gap-2 p-4">
@@ -883,11 +935,31 @@ function TodayView() {
                   className="drag-handle font-display text-muted hover:text-accent w-11 h-11 flex items-center justify-center text-2xl shrink-0 -ml-2"
                   title="Drag to reorder"
                 >≡</button>
+                <span className={`timeline-dot timeline-${it.kind === 'protocol' ? 'protocol' : it.kind === 'audio' ? 'audio' : 'routine'} shrink-0`}>
+                  {it.kind === 'protocol' ? '●' : it.kind === 'audio' ? '🎧' : '◆'}
+                </span>
+                {isEditingTime ? (
+                  <input
+                    type="time"
+                    autoFocus
+                    defaultValue={it.time}
+                    onBlur={(e) => { handleTimeChange(it, e.target.value); setEditingTimeId(null); }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') { handleTimeChange(it, e.currentTarget.value); setEditingTimeId(null); }
+                      if (e.key === 'Escape') { setEditingTimeId(null); }
+                    }}
+                    onChange={(e) => handleTimeChange(it, e.target.value)}
+                    className="font-display text-accent text-sm bg-cream/5 border border-accent rounded px-2 py-1 w-[88px] shrink-0 focus:outline-none"
+                    aria-label="Edit time"
+                  />
+                ) : (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setEditingTimeId(it.id); }}
+                    className="font-display text-accent text-sm w-12 shrink-0 text-left hover:underline underline-offset-4"
+                    title="Tap to edit time"
+                  >{it.time}</button>
+                )}
                 <button onClick={() => setExpanded(isOpen ? null : it.id)} className="flex-1 min-w-0 flex items-center gap-3 text-left">
-                  <span className={`timeline-dot timeline-${it.kind === 'protocol' ? 'protocol' : it.kind === 'audio' ? 'audio' : 'routine'}`}>
-                    {it.kind === 'protocol' ? '●' : it.kind === 'audio' ? '🎧' : '◆'}
-                  </span>
-                  <span className="font-display text-accent text-sm w-12 shrink-0">{it.time}</span>
                   <span className="timeline-label flex-1 min-w-0 truncate text-sm">{it.label}</span>
                   {it.duration_min ? <span className="text-muted text-xs shrink-0">{it.duration_min} min</span> : null}
                   <span className="text-muted text-xs">{isOpen ? '▴' : '▾'}</span>
@@ -925,12 +997,42 @@ function TodayView() {
                   >
                     {done ? '✓ Done — tap to undo' : 'Mark done'}
                   </button>
+                  <button
+                    onClick={() => {
+                      const sourceLabel = it.kind === 'protocol' ? 'this protocol (and all its items)'
+                        : it.kind === 'audio' ? 'this audio module'
+                        : 'your saved zones routine';
+                      if (window.confirm(`Remove ${sourceLabel} from your daily plan?`)) {
+                        handleRemoveItem(it);
+                      }
+                    }}
+                    className="w-full text-center py-2 rounded-full text-xs font-bold border border-cream/10 text-muted hover:text-accent hover:border-accent transition-colors"
+                  >
+                    Remove from daily plan
+                  </button>
                 </div>
               )}
             </div>
           );
         }}
       </SortableList>
+
+      {allDone && (
+        <div className="mt-6 card p-5 text-center border-accent">
+          <div className="font-display text-lg mb-1">All ticked off ✓</div>
+          <p className="text-muted text-xs mb-4">Wipe the stack to start fresh — protocols, audio, and saved zones all clear.</p>
+          <button
+            onClick={() => {
+              if (window.confirm('Remove the whole stack? This deactivates all your protocols, audio modules, and saved zones.')) {
+                handleRemoveStack();
+              }
+            }}
+            className="btn-accent w-full"
+          >
+            Remove stack
+          </button>
+        </div>
+      )}
     </main>
   );
 }
