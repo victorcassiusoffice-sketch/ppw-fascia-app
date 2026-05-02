@@ -28,7 +28,7 @@ const KNOWN_AUDIO_MODULES = [
 // Source PNGs are 1024×1024 with a translucent A-pose figure that does NOT
 // fill the canvas (Sub-Chat 3 left margin around it). Measured opaque-pixel
 // bounds map onto the polygon grid's body extent (x∈[98,502], y∈[76,1198])
-// via an `<image>` rendered with preserveAspectRatio="none".
+// via an `<image>` rendered with preserveAspectRatio="xMidYMid slice".
 //   Front PNG figure: x[341,689] y[64,988]  → asym 4.6%  (invisible at low op)
 //   Back  PNG figure: x[373,667] y[72,1023] → asym 16.5% (figure narrower
 //     in source so horizontal stretch is wider; acceptable on back view).
@@ -469,7 +469,7 @@ function BodyMap({ session, setSession }) {
             <svg
               viewBox={`0 0 ${vb.w} ${vb.h}`}
               className="absolute inset-0 w-full h-full"
-              preserveAspectRatio="none"
+              preserveAspectRatio="xMidYMid slice"
             >
               {/* Filter defs — gold glow for selected hotspots */}
               <defs>
@@ -491,7 +491,7 @@ function BodyMap({ session, setSession }) {
                 <image
                   href={currentBodyImg}
                   x={0} y={0} width={vb.w} height={vb.h}
-                  preserveAspectRatio="none"
+                  preserveAspectRatio="xMidYMid slice"
                   opacity={totalZones > 0 ? 0.85 : 1}
                   style={{ pointerEvents: 'none', transition: 'opacity 0.4s ease' }}
                   onError={() => setBodyImgState(s => s === 'primary' ? 'fallback' : 'none')}
