@@ -1,0 +1,188 @@
+{
+  "front": {
+    "viewBox": {
+      "w": 432,
+      "h": 1113
+    },
+    "anchors": [
+      {
+        "code": "neck-right",
+        "cx": 237,
+        "cy": 158.8
+      },
+      {
+        "code": "neck-left",
+        "cx": 187.5,
+        "cy": 159.3
+      },
+      {
+        "code": "front-shoulder-left",
+        "cx": 107.6,
+        "cy": 238.3
+      },
+      {
+        "code": "elbow-left",
+        "cx": 69.6,
+        "cy": 403.3
+      },
+      {
+        "code": "elbow-right",
+        "cx": 357.6,
+        "cy": 396.3
+      },
+      {
+        "code": "knee-left",
+        "cx": 150.6,
+        "cy": 766.3
+      },
+      {
+        "code": "knee-right",
+        "cx": 277.6,
+        "cy": 766.3
+      },
+      {
+        "code": "front-shoulder-right",
+        "cx": 305.3,
+        "cy": 232.5
+      },
+      {
+        "code": "headache",
+        "cx": 216.3,
+        "cy": 43.5
+      },
+      {
+        "code": "calf-left",
+        "cx": 143.5,
+        "cy": 1065.8
+      },
+      {
+        "code": "calf-right",
+        "cx": 283,
+        "cy": 1065.8
+      },
+      {
+        "code": "hip-flexor-right",
+        "cx": 273.5,
+        "cy": 542.4
+      },
+      {
+        "code": "hip-flexor-left",
+        "cx": 156,
+        "cy": 542.4
+      },
+      {
+        "code": "forearm-left",
+        "cx": 32.5,
+        "cy": 529.8
+      },
+      {
+        "code": "forearm-right",
+        "cx": 389,
+        "cy": 520.3
+      }
+    ]
+  },
+  "back": {
+    "viewBox": {
+      "w": 436,
+      "h": 1203
+    },
+    "anchors": [
+      {
+        "code": "headache",
+        "cx": 222.3,
+        "cy": 80.3
+      },
+      {
+        "code": "traps-left",
+        "cx": 181,
+        "cy": 185.5
+      },
+      {
+        "code": "traps-right",
+        "cx": 260,
+        "cy": 185.5
+      },
+      {
+        "code": "upper-back-left",
+        "cx": 194.3,
+        "cy": 313.3
+      },
+      {
+        "code": "lower-back-left",
+        "cx": 173,
+        "cy": 446
+      },
+      {
+        "code": "hamstrings-left",
+        "cx": 152.5,
+        "cy": 730
+      },
+      {
+        "code": "calf-left",
+        "cx": 156.5,
+        "cy": 1048
+      },
+      {
+        "code": "calf-right",
+        "cx": 271,
+        "cy": 1050
+      },
+      {
+        "code": "hamstrings-right",
+        "cx": 281,
+        "cy": 730
+      },
+      {
+        "code": "lower-back-right",
+        "cx": 265,
+        "cy": 446
+      },
+      {
+        "code": "upper-back-right",
+        "cx": 243.3,
+        "cy": 313.8
+      },
+      {
+        "code": "elbow-left",
+        "cx": 58,
+        "cy": 456.3
+      },
+      {
+        "code": "elbow-right",
+        "cx": 372,
+        "cy": 455.8
+      },
+      {
+        "code": "forearm-left",
+        "cx": 30.8,
+        "cy": 583.3
+      },
+      {
+        "code": "knee-left",
+        "cx": 158,
+        "cy": 873.5
+      },
+      {
+        "code": "knee-right",
+        "cx": 274,
+        "cy": 873.5
+      },
+      {
+        "code": "forearm-right",
+        "cx": 404.3,
+        "cy": 582.3
+      },
+      {
+        "code": "gluteal-left",
+        "cx": 167,
+        "cy": 582.5
+      },
+      {
+        "code": "gluteal-right",
+        "cx": 280,
+        "cy": 582.5
+      }
+    ]
+  }
+}

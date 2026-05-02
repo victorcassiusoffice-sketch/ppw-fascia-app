@@ -1,13 +1,14 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { Routes, Route, useNavigate, Link, useLocation, Navigate, useParams } from 'react-router-dom';
 import {
-  ZONES, LIFESTYLES, LIFESTYLE_ZONES, HOTSPOTS_FRONT, HOTSPOTS_BACK, TESTS_BY_GROUP,
-  getHotspots, bodyFigureFile, migrateZoneCodes, BODY_VIEWBOX,
+  ZONES, LIFESTYLES, LIFESTYLE_ZONES, TESTS_BY_GROUP,
+  migrateZoneCodes,
   zoneVideoPath, testVideoPath, testAnswerVideoPath, DEFAULT_CLIP_SECONDS,
   zoneMediaPath, lifestyleAllMediaPath, moduleMediaPath, loadMedia,
   FASCIA_CHAINS, ZONE_TO_CHAIN, resolveRoutineZones,
   chainOverlayUrl, dominantChainForZones,
 } from './data.js';
+import { getBodyView, zoneCentroid } from './bodyZones.js';
 import { useActiveProtocols, useActiveModules, useActiveRoutines, useCompletedToday, useLocalStorage } from './state.js';
 import { listProtocols, fetchProtocol, mergeDailyItems, isMockActive } from './protocols.js';
 import { iherbUrl, amazonUkUrl, iherbCartAllUrl } from './affiliate.js';
@@ -21,60 +22,11 @@ const KNOWN_AUDIO_MODULES = [
 ];
 
 /* ────────────────────────────────────────────
-   BodyMap visual constants (Sub-Chat 6 alignment fix)
+   BodyMap — see src/bodyZones.js for the architecture comment.
+   The body image and the polygon zones BOTH come from the same per-view
+   Figma SVG (public/assets/body_zones/body_zones_{front,back}.svg) so they
+   live in the same coordinate space and can't drift out of alignment.
    ──────────────────────────────────────────── */
-
-// PNG figure-bounds → viewBox affine transform.
-// Source PNGs are 1024×1024 with a translucent A-pose figure that does NOT
-// fill the canvas (Sub-Chat 3 left margin around it). Measured opaque-pixel
-// bounds map onto the polygon grid's body extent (x∈[98,502], y∈[76,1198])
-// via an `<image>` rendered with preserveAspectRatio="xMidYMid slice".
-//   Front PNG figure: x[341,689] y[64,988]  → asym 4.6%  (invisible at low op)
-//   Back  PNG figure: x[373,667] y[72,1023] → asym 16.5% (figure narrower
-//     in source so horizontal stretch is wider; acceptable on back view).
-// If either PNG is regenerated, re-measure opaque bounds and update.
-const BODY_IMAGE_TRANSFORMS = {
-  front: { x: -297.87, y:  -1.71, width: 1188.78, height: 1243.43 },
-  back:  { x: -414.56, y:  -8.95, width: 1407.13, height: 1208.13 },
-};
-
-// Hand-authored full-body silhouette path on the 600×1200 viewBox.
-// Smooth Bezier curves connecting the major anatomical landmarks of the
-// hotspot grid — head, shoulders, arms, torso, hips, thighs, calves, feet.
-// Stroked-only at very low opacity (see .body-silhouette in index.css).
-const BODY_SILHOUETTE_PATH = [
-  'M 300 80',
-  'Q 358 82 360 118',
-  'Q 358 178 340 180',
-  'L 350 210',
-  'Q 380 225 408 260',
-  'L 470 310',
-  'Q 500 400 490 520',
-  'Q 480 610 460 650',
-  'Q 440 680 420 665',
-  'L 380 605',
-  'L 380 640',
-  'Q 380 820 378 950',
-  'L 360 1015',
-  'L 350 1130',
-  'Q 358 1188 320 1198',
-  'L 280 1198',
-  'Q 242 1188 250 1130',
-  'L 240 1015',
-  'L 222 950',
-  'Q 220 820 220 640',
-  'L 220 605',
-  'L 180 665',
-  'Q 160 680 140 650',
-  'Q 120 610 110 520',
-  'Q 100 400 130 310',
-  'L 192 260',
-  'Q 220 225 250 210',
-  'L 260 180',
-  'Q 242 178 240 118',
-  'Q 242 82 300 80',
-  'Z',
-].join(' ');
 
 // Short label rendered inside selected hotspot polygons. Abbreviates long
 // names so they fit narrow zones. v2.1 taxonomy (kebab-case, no ITB,
@@ -367,19 +319,12 @@ function BodyMap({ session, setSession }) {
   const [, setActiveRoutines] = useActiveRoutines();
 
   // v2.1: sex toggle removed (gender-neutral figure per Vic Stage 5).
-  // Hotspots resolve from view alone.
-  const hotspots = useMemo(() => getHotspots(view), [view]);
-  // Subpath-aware: in dev BASE_URL is '/', on GitHub Pages it's '/<repo>/'
-  const baseUrl = (import.meta.env && import.meta.env.BASE_URL) || '/';
-  // Three-stage fallback: new path → legacy path → silhouette path only.
-  const primaryBodyImg  = `${baseUrl}assets/body_zones/${bodyFigureFile(view)}`;
-  const fallbackBodyImg = `${baseUrl}assets/body_${view}.png`;
-  const [bodyImgState, setBodyImgState] = useState('primary'); // 'primary' | 'fallback' | 'none'
-  useEffect(() => { setBodyImgState('primary'); }, [view]);
-  const currentBodyImg =
-    bodyImgState === 'primary'  ? primaryBodyImg  :
-    bodyImgState === 'fallback' ? fallbackBodyImg :
-    null;
+  // Body view is the single source of truth — bodyZones.js parses the
+  // per-view Figma SVG (body image + tagged polygons in same coord space)
+  // and exposes geometry. No PNG-path fallback any more — the body lives
+  // INSIDE the SVG as a base64-embedded pattern fill.
+  const bodyView = useMemo(() => getBodyView(view), [view]);
+  const { viewBox: vb, defs: bodyDefs, patternId, polygons } = bodyView;
 
   // Dominant fascia chain implied by the user's selection — drives
   // the gold overlay PNG (rendered below the hotspots, above the silhouette).
@@ -449,7 +394,7 @@ function BodyMap({ session, setSession }) {
                 } else {
                   // Select every zone in the current view, default pain rating 1
                   const next = {};
-                  for (const h of hotspots) next[h.code] = 1;
+                  for (const p of polygons) next[p.code] = 1;
                   setSelected(next);
                 }
               }}
@@ -459,19 +404,25 @@ function BodyMap({ session, setSession }) {
               {Object.keys(selected).length > 0 ? '× CLEAR ALL' : '✓ SELECT ALL'}
             </button>
           </div>
-          {(() => {
-            const vb = BODY_VIEWBOX[view] || BODY_VIEWBOX.front;
-            return (
           <div className="relative" style={{ aspectRatio: `${vb.w} / ${vb.h}` }}>
-            {/* Single SVG canvas — Figma-source body PNG + polygon hotspots + chain overlay.
-                viewBox matches Vic's Figma frame (FRONT 432×1113 / BACK 436×1203) so
-                polygons sit exactly on the Figma-source anatomy. */}
+            {/* Single SVG canvas — body image (as base64-embedded pattern fill)
+                + polygon hotspots + chain overlay, all in the SAME coordinate
+                space (front 432×1113, back 436×1203). The body image and the
+                polygon geometry both come from the same per-view SVG generated
+                from Vic's Figma source by tools/build-zone-svgs.mjs, so the
+                polygons sit on the anatomy by construction. */}
             <svg
               viewBox={`0 0 ${vb.w} ${vb.h}`}
               className="absolute inset-0 w-full h-full"
-              preserveAspectRatio="xMidYMid slice"
+              preserveAspectRatio="xMidYMid meet"
             >
-              {/* Filter defs — gold glow for selected hotspots */}
+              {/* Combined defs: body pattern (from Figma SVG) + selection glow.
+                  The body pattern is injected via dangerouslySetInnerHTML
+                  because it contains a base64 PNG that React would otherwise
+                  attempt to JSX-parse. Pattern ids are namespaced per view
+                  (frontBodyPattern / backBodyPattern) by build-zone-svgs.mjs
+                  so both views can coexist. */}
+              <defs dangerouslySetInnerHTML={{ __html: bodyDefs }} />
               <defs>
                 <filter id="hotspotGlow" x="-50%" y="-50%" width="200%" height="200%">
                   <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur" />
@@ -484,19 +435,16 @@ function BodyMap({ session, setSession }) {
                 </filter>
               </defs>
 
-              {/* LAYER 1 — Figma-source body PNG. Rendered at full viewBox extent
-                  (no transform hack) since the PNG is rasterised from front.svg /
-                  back.svg at the SAME native frame size as the polygon coords. */}
-              {currentBodyImg && (
-                <image
-                  href={currentBodyImg}
-                  x={-30 - vb.w * 0.05} y={-vb.h * 0.05} width={vb.w * 1.10} height={vb.h * 1.10}
-                  preserveAspectRatio="xMidYMid slice"
-                  opacity={totalZones > 0 ? 0.85 : 1}
-                  style={{ pointerEvents: 'none', transition: 'opacity 0.4s ease' }}
-                  onError={() => setBodyImgState(s => s === 'primary' ? 'fallback' : 'none')}
-                />
-              )}
+              {/* LAYER 1 — Figma-source body image, rendered as a pattern fill
+                  on a viewBox-spanning rect. No PNG fetch, no figure-bounds
+                  measurement, no transform — the body is inside the SVG. */}
+              <rect
+                width={vb.w}
+                height={vb.h}
+                fill={`url(#${patternId})`}
+                opacity={totalZones > 0 ? 0.85 : 1}
+                style={{ pointerEvents: 'none', transition: 'opacity 0.4s ease' }}
+              />
 
               {/* Fascia-chain overlay PNG — rendered via foreignObject for
                   mixBlendMode + onError support. Aligned with body at full extent. */}
@@ -515,42 +463,43 @@ function BodyMap({ session, setSession }) {
                 </foreignObject>
               )}
 
-              {/* LAYER 2+3 — one <g class="hotspot"> per zone, containing hit
-                  polygon + (when selected) feedback polygon and label. Wrapper
-                  group enables :hover/.is-selected → label CSS so labels show
-                  only on tap/hover instead of overlapping when many zones are
-                  selected at once. */}
-              {hotspots.map(h => {
-                const z = ZONES.find(x => x.code === h.code);
-                const isSelected = !!selected[h.code];
-                const ariaLabel = z ? `${z.label}${z.side !== 'both' ? ' ' + z.side : ''}` : h.code;
-                const label = zoneShortLabel(h.code, ZONES);
+              {/* LAYER 2+3 — one <g class="hotspot"> per zone. The hit-target
+                  path comes verbatim from the Figma SVG (same `d` attribute),
+                  so click geometry sits on Vic's anatomy by construction.
+                  Wrapper :hover/.is-selected → label visibility CSS lives in
+                  index.css so labels surface only on tap/hover. */}
+              {polygons.map(({ code, d }) => {
+                const z = ZONES.find(x => x.code === code);
+                const isSelected = !!selected[code];
+                const ariaLabel = z ? `${z.label}${z.side !== 'both' ? ' ' + z.side : ''}` : code;
+                const label = zoneShortLabel(code, ZONES);
+                const [cx, cy] = zoneCentroid(view, code);
                 return (
-                  <g key={`zone-${h.code}`} className={'hotspot' + (isSelected ? ' is-selected' : '')}>
+                  <g key={`zone-${code}`} className={'hotspot' + (isSelected ? ' is-selected' : '')}>
                     {isSelected && (
-                      <polygon
+                      <path
                         className="hotspot-feedback"
-                        points={h.polygon}
+                        d={d}
                         style={{ pointerEvents: 'none' }}
                       />
                     )}
-                    <polygon
+                    <path
                       className={'hotspot-hit' + (isSelected ? ' is-selected' : '')}
-                      points={h.polygon}
-                      data-zone={h.code}
+                      d={d}
+                      data-zone={code}
                       role="button"
                       tabIndex={0}
                       aria-label={ariaLabel}
                       aria-pressed={isSelected}
-                      onClick={() => toggle(h.code)}
+                      onClick={() => toggle(code)}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault();
-                          toggle(h.code);
+                          toggle(code);
                         }
                       }}
                     />
-                    <text className="hotspot-label" x={h.cx} y={h.cy} style={{ pointerEvents: 'none' }}>
+                    <text className="hotspot-label" x={cx} y={cy} style={{ pointerEvents: 'none' }}>
                       {label}
                     </text>
                   </g>
@@ -558,8 +507,6 @@ function BodyMap({ session, setSession }) {
               })}
             </svg>
           </div>
-            );
-          })()}
         </div>
 
         <div className="flex-1 min-w-[260px] w-full md:w-auto">
