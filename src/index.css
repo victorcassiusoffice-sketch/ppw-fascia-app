@@ -103,9 +103,10 @@ h1,h2,h3,h4 { font-family: 'Syne', sans-serif; letter-spacing: -0.01em; }
   fill: transparent;
 }
 
-/* LAYER 3 — visible feedback for selected zones. Gold fill + glow + pulse. */
+/* LAYER 3 — visible feedback for selected zones. Translucent gold fill so
+   the body anatomy stays visible underneath. Gold stroke + glow remain. */
 .hotspot-feedback {
-  fill: rgba(245,184,69,0.42);
+  fill: rgba(245,184,69,0.25);
   stroke: var(--ppw-gold);
   stroke-width: 2.5;
   stroke-linejoin: round;
@@ -114,18 +115,20 @@ h1,h2,h3,h4 { font-family: 'Syne', sans-serif; letter-spacing: -0.01em; }
 }
 
 @keyframes pulse-selected {
-  0%, 100% { fill: rgba(245,184,69,0.38); }
-  50%      { fill: rgba(245,184,69,0.55); }
+  0%, 100% { fill: rgba(245,184,69,0.20); }
+  50%      { fill: rgba(245,184,69,0.32); }
 }
 
-/* Faint full-body silhouette path — subtle anatomical hint behind hotspots */
-.body-silhouette {
-  fill: none;
-  stroke: rgba(240,232,216,0.07);
-  stroke-width: 2;
-  stroke-linejoin: round;
-  stroke-linecap: round;
-  pointer-events: none;
+/* Hotspot wrapper <g> controls label visibility. Labels hidden by default;
+   visible only on hover/focus so they don't overlap when many zones are
+   picked. (Selection state shown by the gold polygon fill.) */
+.hotspot .hotspot-label {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.hotspot:hover .hotspot-label,
+.hotspot:focus-within .hotspot-label {
+  opacity: 1;
 }
 
 .hotspot-label {
@@ -137,6 +140,9 @@ h1,h2,h3,h4 { font-family: 'Syne', sans-serif; letter-spacing: -0.01em; }
   pointer-events: none;
   text-anchor: middle;
   dominant-baseline: middle;
+  paint-order: stroke;
+  stroke: rgba(255,247,232,0.85);
+  stroke-width: 3px;
 }
 
 .animate-fadeIn { animation: fadeIn 0.3s ease-out; }

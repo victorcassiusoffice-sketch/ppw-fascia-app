@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { Routes, Route, useNavigate, Link, useLocation, Navigate, useParams } from 'react-router-dom';
 import {
   ZONES, LIFESTYLES, LIFESTYLE_ZONES, HOTSPOTS_FRONT, HOTSPOTS_BACK, TESTS_BY_GROUP,
-  getHotspots, bodyFigureFile, migrateZoneCodes,
+  getHotspots, bodyFigureFile, migrateZoneCodes, BODY_VIEWBOX,
   zoneVideoPath, testVideoPath, testAnswerVideoPath, DEFAULT_CLIP_SECONDS,
   zoneMediaPath, lifestyleAllMediaPath, moduleMediaPath, loadMedia,
   FASCIA_CHAINS, ZONE_TO_CHAIN, resolveRoutineZones,
@@ -459,12 +459,15 @@ function BodyMap({ session, setSession }) {
               {Object.keys(selected).length > 0 ? '× CLEAR ALL' : '✓ SELECT ALL'}
             </button>
           </div>
-          <div className="relative" style={{ aspectRatio: '600 / 1200' }}>
-            {/* Single SVG canvas — anatomical body PNG + polygon hotspots + chain overlay.
-                viewBox is sacred (600×1200). Body PNG fills the same coord space so
-                polygons sit exactly on the anatomy. */}
+          {(() => {
+            const vb = BODY_VIEWBOX[view] || BODY_VIEWBOX.front;
+            return (
+          <div className="relative" style={{ aspectRatio: `${vb.w} / ${vb.h}` }}>
+            {/* Single SVG canvas — Figma-source body PNG + polygon hotspots + chain overlay.
+                viewBox matches Vic's Figma frame (FRONT 432×1113 / BACK 436×1203) so
+                polygons sit exactly on the Figma-source anatomy. */}
             <svg
-              viewBox="0 0 600 1200"
+              viewBox={`0 0 ${vb.w} ${vb.h}`}
               className="absolute inset-0 w-full h-full"
               preserveAspectRatio="xMidYMid meet"
             >
@@ -481,93 +484,73 @@ function BodyMap({ session, setSession }) {
                 </filter>
               </defs>
 
-              {/* LAYER 1 — anatomical body PNG, calibrated to the polygon grid.
-                  PNG is 1024×1024 with the figure inset; we use preserveAspectRatio
-                  ="none" plus the precomputed BODY_IMAGE_TRANSFORMS so the figure's
-                  opaque-pixel bounds land on viewBox body coords (head y≈80, feet
-                  y≈1198, x∈[98,502]). Three-stage fallback preserved: new path →
-                  legacy path → omit (silhouette path then carries the visual). */}
-              {currentBodyImg && (() => {
-                const t = BODY_IMAGE_TRANSFORMS[view];
-                return (
-                  <image
-                    href={currentBodyImg}
-                    x={t.x} y={t.y} width={t.width} height={t.height}
-                    preserveAspectRatio="none"
-                    opacity={totalZones > 0 ? 0.55 : 0.85}
-                    style={{ pointerEvents: 'none', transition: 'opacity 0.4s ease' }}
-                    onError={() => setBodyImgState(s => s === 'primary' ? 'fallback' : 'none')}
-                  />
-                );
-              })()}
-
-              {/* Faint full-body silhouette outline — backup anatomical cue if PNG
-                  fails to load (legacy + new path both 404). Stroked-only, low op. */}
-              <path className="body-silhouette" d={BODY_SILHOUETTE_PATH} />
+              {/* LAYER 1 — Figma-source body PNG. Rendered at full viewBox extent
+                  (no transform hack) since the PNG is rasterised from front.svg /
+                  back.svg at the SAME native frame size as the polygon coords. */}
+              {currentBodyImg && (
+                <image
+                  href={currentBodyImg}
+                  x={0} y={0} width={vb.w} height={vb.h}
+                  preserveAspectRatio="xMidYMid meet"
+                  opacity={totalZones > 0 ? 0.85 : 1}
+                  style={{ pointerEvents: 'none', transition: 'opacity 0.4s ease' }}
+                  onError={() => setBodyImgState(s => s === 'primary' ? 'fallback' : 'none')}
+                />
+              )}
 
               {/* Fascia-chain overlay PNG — rendered via foreignObject for
-                  mixBlendMode + onError support. Uses same calibrated transform
-                  as the base PNG so chain highlights track the figure. */}
-              {overlaySrc && overlayOk && (() => {
-                const t = BODY_IMAGE_TRANSFORMS[view];
-                return (
-                  <foreignObject
-                    x={t.x} y={t.y} width={t.width} height={t.height}
-                    style={{ pointerEvents: 'none' }}
-                  >
-                    <img
-                      src={overlaySrc}
-                      alt={`fascia chain ${dominantChain}`}
-                      style={{ width: '100%', height: '100%', opacity: 0.75, mixBlendMode: 'screen', userSelect: 'none' }}
-                      draggable="false"
-                      onError={() => setOverlayOk(false)}
-                    />
-                  </foreignObject>
-                );
-              })()}
+                  mixBlendMode + onError support. Aligned with body at full extent. */}
+              {overlaySrc && overlayOk && (
+                <foreignObject
+                  x={0} y={0} width={vb.w} height={vb.h}
+                  style={{ pointerEvents: 'none' }}
+                >
+                  <img
+                    src={overlaySrc}
+                    alt={`fascia chain ${dominantChain}`}
+                    style={{ width: '100%', height: '100%', opacity: 0.75, mixBlendMode: 'screen', userSelect: 'none' }}
+                    draggable="false"
+                    onError={() => setOverlayOk(false)}
+                  />
+                </foreignObject>
+              )}
 
-              {/* LAYER 2 — invisible click targets. One polygon per zone, no
-                  visible style at idle (figure shows through). Hover paints a
-                  teal stroke; tap toggles selection. ARIA + keyboard wired. */}
+              {/* LAYER 2+3 — one <g class="hotspot"> per zone, containing hit
+                  polygon + (when selected) feedback polygon and label. Wrapper
+                  group enables :hover/.is-selected → label CSS so labels show
+                  only on tap/hover instead of overlapping when many zones are
+                  selected at once. */}
               {hotspots.map(h => {
                 const z = ZONES.find(x => x.code === h.code);
                 const isSelected = !!selected[h.code];
                 const ariaLabel = z ? `${z.label}${z.side !== 'both' ? ' ' + z.side : ''}` : h.code;
-                return (
-                  <polygon
-                    key={`hit-${h.code}`}
-                    className={'hotspot-hit' + (isSelected ? ' is-selected' : '')}
-                    points={h.polygon}
-                    data-zone={h.code}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={ariaLabel}
-                    aria-pressed={isSelected}
-                    onClick={() => toggle(h.code)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        toggle(h.code);
-                      }
-                    }}
-                  />
-                );
-              })}
-
-              {/* LAYER 3 — visible feedback. Renders ONLY for selected zones:
-                  gold-filled polygon with glow filter + zone label. Pointer
-                  events disabled so taps fall through to LAYER 2. */}
-              {hotspots.map(h => {
-                const isSelected = !!selected[h.code];
-                if (!isSelected) return null;
                 const label = zoneShortLabel(h.code, ZONES);
                 return (
-                  <g key={`fb-${h.code}`} style={{ pointerEvents: 'none' }}>
+                  <g key={`zone-${h.code}`} className={'hotspot' + (isSelected ? ' is-selected' : '')}>
+                    {isSelected && (
+                      <polygon
+                        className="hotspot-feedback"
+                        points={h.polygon}
+                        style={{ pointerEvents: 'none' }}
+                      />
+                    )}
                     <polygon
-                      className="hotspot-feedback"
+                      className={'hotspot-hit' + (isSelected ? ' is-selected' : '')}
                       points={h.polygon}
+                      data-zone={h.code}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={ariaLabel}
+                      aria-pressed={isSelected}
+                      onClick={() => toggle(h.code)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          toggle(h.code);
+                        }
+                      }}
                     />
-                    <text className="hotspot-label" x={h.cx} y={h.cy}>
+                    <text className="hotspot-label" x={h.cx} y={h.cy} style={{ pointerEvents: 'none' }}>
                       {label}
                     </text>
                   </g>
@@ -575,6 +558,8 @@ function BodyMap({ session, setSession }) {
               })}
             </svg>
           </div>
+            );
+          })()}
         </div>
 
         <div className="flex-1 min-w-[260px] w-full md:w-auto">
