@@ -1674,4 +1674,26 @@ function SettingsView() {
           <div className="text-muted text-xs mb-4">Off = pull from the GitHub protocol repo. On = read /mock-protocol.json bundled with the app.</div>
           <div className="flex gap-2">
             <button onClick={() => setMockOverride('true')}  className={`flex-1 py-2.5 rounded-full text-sm font-bold ${mockOverride === 'true'  ? 'btn-accent' : 'btn-ghost'}`}>Mock</button>
-            <button onClick={() => setMockOverr
+            <button onClick={() => setMockOverride('false')} className={`flex-1 py-2.5 rounded-full text-sm font-bold ${mockOverride === 'false' ? 'btn-accent' : 'btn-ghost'}`}>Live</button>
+          </div>
+        </div>
+      </Section>
+
+      <Section title="Active state">
+        <div className="card p-5 space-y-2 text-sm">
+          <div>Protocols: <span className="text-accent">{activeProtocols.length}</span></div>
+          <div>Audio modules: <span className="text-accent">{activeModules.length}</span></div>
+          <div>Saved zones: <span className="text-accent">{activeRoutines.savedZones?.length || 0}</span></div>
+          <button onClick={clearAll} className="btn-ghost w-full mt-4">Clear all activations</button>
+        </div>
+      </Section>
+
+      <Section title="About">
+        <div className="card p-5 text-sm space-y-1.5">
+          <div>Version: <span className="text-accent">{APP_VERSION}</span></div>
+          <div className="text-muted text-xs pt-2">Peak Performance Wellness · ppwellness.co</div>
+        </div>
+      </Section>
+    </main>
+  );
+}
