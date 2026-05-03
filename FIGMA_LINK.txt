@@ -1,0 +1,5 @@
+PPW Body Zones — Figma File
+https://www.figma.com/design/C7CyNdQpC5o2OHCeUJyT4K
+
+Created: 2026-04-10
+Purpose: Victor adjusts teal zone rectangles over body reference images, exports as SVG for the ppw-app body map hotspots.
