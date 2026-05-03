@@ -1,0 +1,406 @@
+/* ──────────────────────────────────────────
+   PPW Cinematic Theme — N20
+   Layered ON TOP of index.css. Brings the app
+   in line with /space-designer.html aesthetic:
+   - deeper navy (#07080a) ambient base
+   - warm gold #dca957 + lime #c4f04c accents
+   - generous spacing, fade-in-on-scroll
+   - polished button + card states
+   - smooth route transitions
+   ────────────────────────────────────────── */
+
+:root {
+  /* Cinematic surface palette (extends Option B without overriding it) */
+  --ppw-bg-cinematic: #07080a;
+  --ppw-bg-elev-1:    #0c1320;
+  --ppw-bg-elev-2:    #111a2c;
+  --ppw-gold-warm:    #dca957;
+  --ppw-lime:         #c4f04c;
+  --ppw-lime-soft:    rgba(196, 240, 76, 0.18);
+  --ppw-gold-soft:    rgba(220, 169, 87, 0.16);
+  --ppw-glow-gold:    0 0 32px rgba(220, 169, 87, 0.35);
+  --ppw-glow-lime:    0 0 28px rgba(196, 240, 76, 0.45);
+  --ppw-glow-soft:    0 24px 60px -24px rgba(0, 0, 0, 0.7);
+
+  --ppw-fade-ms: 600ms;
+  --ppw-ease:    cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Tap target floor (Apple HIG) */
+  --ppw-tap-min: 44px;
+}
+
+/* Ambient body gradient — layered behind the existing solid bg.
+   Keeps the original navy as fallback. The radial spots add depth
+   without competing with content. Static (no animation in reduced-motion). */
+body {
+  background:
+    radial-gradient(circle at 20% 12%, rgba(220, 169, 87, 0.08), transparent 40%),
+    radial-gradient(circle at 82% 88%, rgba(196, 240, 76, 0.06), transparent 38%),
+    radial-gradient(circle at 50% 60%, rgba(74, 158, 184, 0.05), transparent 50%),
+    linear-gradient(180deg, #07080a 0%, #0a1628 65%, #060912 100%);
+  min-height: 100vh;
+}
+
+/* Subtle film-grain noise layer — sits behind everything, gives
+   the dark surfaces a non-flat texture. SVG inlined as data-uri. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.7'/></svg>");
+}
+
+#root { position: relative; z-index: 1; }
+
+/* ──────────────────────────────────────────
+   Typography polish
+   ────────────────────────────────────────── */
+.font-display, h1, h2, h3, h4 {
+  letter-spacing: -0.018em;
+  font-feature-settings: "ss01", "ss02";
+}
+h1 { line-height: 0.96; }
+h2 { line-height: 1.02; }
+
+/* Reuse Syne for hero numerals where the existing classes are utilities */
+.eyebrow {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--ppw-gold-warm);
+  font-weight: 500;
+}
+
+/* ──────────────────────────────────────────
+   Cinematic card lift — applied via .card
+   (extends existing .card without breaking)
+   ────────────────────────────────────────── */
+.card {
+  background:
+    linear-gradient(180deg, rgba(240, 232, 216, 0.055), rgba(240, 232, 216, 0.012)),
+    radial-gradient(120% 80% at 0% 0%, rgba(220, 169, 87, 0.05), transparent 60%);
+  border: 1px solid rgba(240, 232, 216, 0.085);
+  border-radius: 20px;
+  box-shadow: var(--ppw-glow-soft);
+  transition: border-color .25s var(--ppw-ease),
+              transform .25s var(--ppw-ease),
+              box-shadow .25s var(--ppw-ease);
+  position: relative;
+  overflow: hidden;
+}
+.card::after {
+  /* hairline highlight along the top edge */
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(240, 232, 216, 0.18), transparent);
+  pointer-events: none;
+}
+.card:hover {
+  border-color: rgba(220, 169, 87, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 28px 60px -24px rgba(0,0,0,0.75), 0 0 0 1px rgba(220,169,87,0.06);
+}
+
+/* ──────────────────────────────────────────
+   Buttons — refine all states
+   ────────────────────────────────────────── */
+button, a, .btn-accent, .btn-ghost, .btn-teal, .btn-iherb, .btn-amazon {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-accent {
+  background: linear-gradient(180deg, #f5b845 0%, #dca957 100%);
+  color: #07080a;
+  font-weight: 700;
+  padding: 14px 28px;
+  border-radius: 999px;
+  letter-spacing: 0.005em;
+  min-height: var(--ppw-tap-min);
+  box-shadow:
+    0 12px 28px -12px rgba(245, 184, 69, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: transform .2s var(--ppw-ease),
+              box-shadow .2s var(--ppw-ease),
+              filter .2s var(--ppw-ease);
+}
+.btn-accent:hover {
+  transform: translateY(-1.5px);
+  filter: brightness(1.06);
+  box-shadow:
+    0 18px 38px -14px rgba(245, 184, 69, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+.btn-accent:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(196, 240, 76, 0.5),
+    0 12px 28px -12px rgba(245, 184, 69, 0.55);
+}
+.btn-accent:active { transform: translateY(0); filter: brightness(0.96); }
+
+.btn-ghost {
+  background: rgba(240, 232, 216, 0.025);
+  color: var(--ppw-cream);
+  border: 1px solid rgba(240, 232, 216, 0.14);
+  min-height: var(--ppw-tap-min);
+  backdrop-filter: blur(8px);
+  transition: border-color .2s var(--ppw-ease),
+              color .2s var(--ppw-ease),
+              background .2s var(--ppw-ease);
+}
+.btn-ghost:hover {
+  border-color: var(--ppw-gold-warm);
+  color: var(--ppw-gold-warm);
+  background: rgba(220, 169, 87, 0.07);
+}
+.btn-ghost:focus-visible {
+  outline: none;
+  border-color: var(--ppw-lime);
+  box-shadow: 0 0 0 3px rgba(196, 240, 76, 0.35);
+}
+
+/* New CTA tint — lime, used for the "primary action of the moment" */
+.btn-lime {
+  background: var(--ppw-lime);
+  color: #07080a;
+  font-weight: 800;
+  padding: 14px 28px;
+  border-radius: 999px;
+  min-height: var(--ppw-tap-min);
+  box-shadow:
+    0 12px 30px -10px rgba(196, 240, 76, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  transition: transform .2s var(--ppw-ease), filter .2s var(--ppw-ease), box-shadow .2s var(--ppw-ease);
+}
+.btn-lime:hover { transform: translateY(-1.5px); filter: brightness(1.04); }
+.btn-lime:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(220, 169, 87, 0.5), 0 12px 30px -10px rgba(196, 240, 76, 0.55);
+}
+
+/* ──────────────────────────────────────────
+   Header polish — matches space-designer
+   ────────────────────────────────────────── */
+header {
+  background: rgba(7, 8, 10, 0.72) !important;
+  backdrop-filter: saturate(140%) blur(18px);
+  border-bottom: 1px solid rgba(240, 232, 216, 0.06) !important;
+}
+
+/* ──────────────────────────────────────────
+   Route transition — fade + tiny lift
+   ────────────────────────────────────────── */
+.animate-fadeIn {
+  animation: ppw-route-fade var(--ppw-fade-ms) var(--ppw-ease) both;
+}
+@keyframes ppw-route-fade {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ──────────────────────────────────────────
+   Scroll-triggered fade-in — applied via the
+   useScrollFadeIn hook. Element starts hidden,
+   becomes visible when .is-visible is added.
+   ────────────────────────────────────────── */
+.fade-in {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 700ms var(--ppw-ease), transform 700ms var(--ppw-ease);
+  will-change: opacity, transform;
+}
+.fade-in.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.fade-in-stagger > * {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 600ms var(--ppw-ease), transform 600ms var(--ppw-ease);
+}
+.fade-in-stagger.is-visible > *:nth-child(1) { transition-delay: 0ms; }
+.fade-in-stagger.is-visible > *:nth-child(2) { transition-delay: 80ms; }
+.fade-in-stagger.is-visible > *:nth-child(3) { transition-delay: 160ms; }
+.fade-in-stagger.is-visible > *:nth-child(4) { transition-delay: 240ms; }
+.fade-in-stagger.is-visible > *:nth-child(5) { transition-delay: 320ms; }
+.fade-in-stagger.is-visible > *:nth-child(6) { transition-delay: 400ms; }
+.fade-in-stagger.is-visible > *:nth-child(7) { transition-delay: 480ms; }
+.fade-in-stagger.is-visible > *:nth-child(n+8) { transition-delay: 560ms; }
+.fade-in-stagger.is-visible > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ──────────────────────────────────────────
+   Body Map — ambient gold glow on hover
+   ────────────────────────────────────────── */
+.hotspot-hit:hover,
+.hotspot-hit:focus-visible {
+  stroke: var(--ppw-gold-warm) !important;
+  stroke-width: 2.5;
+  fill: rgba(220, 169, 87, 0.10) !important;
+}
+.hotspot-feedback {
+  fill: rgba(220, 169, 87, 0.30) !important;
+  stroke: var(--ppw-gold-warm) !important;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 8px rgba(220, 169, 87, 0.45));
+}
+
+/* ──────────────────────────────────────────
+   Today screen — premium routine card hover
+   ────────────────────────────────────────── */
+.today-routine-card {
+  position: relative;
+}
+.today-routine-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 12%;
+  bottom: 12%;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(180deg, var(--ppw-gold-warm), transparent);
+  opacity: 0.55;
+}
+.today-routine-card.timeline-done::before {
+  background: linear-gradient(180deg, rgba(196,240,76,0.6), transparent);
+}
+
+/* Time chip — make it feel tappable */
+.today-time-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: rgba(220, 169, 87, 0.06);
+  border: 1px solid rgba(220, 169, 87, 0.20);
+  color: var(--ppw-gold-warm);
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  min-height: var(--ppw-tap-min);
+  min-width: var(--ppw-tap-min);
+  justify-content: center;
+  transition: background .2s var(--ppw-ease), border-color .2s var(--ppw-ease), transform .15s var(--ppw-ease);
+}
+.today-time-chip:hover {
+  background: rgba(220, 169, 87, 0.13);
+  border-color: rgba(220, 169, 87, 0.5);
+}
+.today-time-chip:active { transform: scale(0.97); }
+
+/* ──────────────────────────────────────────
+   Protocols — hero tile vibe
+   ────────────────────────────────────────── */
+.protocol-tile {
+  position: relative;
+  overflow: hidden;
+}
+.protocol-tile::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: radial-gradient(90% 60% at 100% 0%, rgba(220, 169, 87, 0.18), transparent 55%);
+  pointer-events: none;
+}
+.protocol-tile:hover {
+  transform: translateY(-2px);
+  border-color: rgba(220, 169, 87, 0.55);
+  box-shadow: 0 30px 60px -22px rgba(0,0,0,0.85), 0 0 0 1px rgba(220,169,87,0.08);
+}
+
+/* ──────────────────────────────────────────
+   Section dividers — soft, premium
+   ────────────────────────────────────────── */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(240, 232, 216, 0.18), transparent);
+  margin: 2.5rem 0;
+}
+
+/* ──────────────────────────────────────────
+   Empty state — brought to life
+   ────────────────────────────────────────── */
+.empty-orb {
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 18px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(220, 169, 87, 0.45), transparent 55%),
+    radial-gradient(circle at 70% 70%, rgba(196, 240, 76, 0.30), transparent 60%),
+    rgba(240, 232, 216, 0.04);
+  border: 1px solid rgba(240, 232, 216, 0.10);
+  filter: blur(0.3px);
+  animation: empty-pulse 4.6s ease-in-out infinite;
+}
+@keyframes empty-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(220,169,87,0.18); }
+  50%      { transform: scale(1.04); box-shadow: 0 0 60px rgba(220,169,87,0.32); }
+}
+
+/* ──────────────────────────────────────────
+   Bottom-nav (mobile) — make hover/active tasty
+   ────────────────────────────────────────── */
+.nav-item {
+  min-height: var(--ppw-tap-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ──────────────────────────────────────────
+   Reduced motion respect
+   ────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fadeIn,
+  .fade-in,
+  .fade-in-stagger > *,
+  .empty-orb,
+  .hotspot-feedback {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  body::before { display: none; }
+}
+
+/* ──────────────────────────────────────────
+   Mobile-first refinements (≤ 640px)
+   ────────────────────────────────────────── */
+@media (max-width: 640px) {
+  h1 { font-size: clamp(1.95rem, 8vw, 2.6rem); }
+  .card { border-radius: 18px; }
+  .btn-accent, .btn-ghost, .btn-lime { padding: 13px 22px; }
+  body {
+    /* tighter ambient on small screens to keep body content readable */
+    background:
+      radial-gradient(circle at 30% 8%, rgba(220, 169, 87, 0.10), transparent 38%),
+      radial-gradient(circle at 70% 92%, rgba(196, 240, 76, 0.06), transparent 38%),
+      linear-gradient(180deg, #07080a 0%, #0a1628 65%, #060912 100%);
+  }
+}
+
+/* ──────────────────────────────────────────
+   Focus rings — accessibility
+   ────────────────────────────────────────── */
+*:focus-visible {
+  outline: 2px solid rgba(196, 240, 76, 0.6);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+button:focus-visible, a:focus-visible {
+  outline: none; /* per-component focus rings handle this */
+}

@@ -16,6 +16,7 @@ import { LS_KEYS, APP_VERSION, USE_MOCK_DATA, NOTIFICATION_LEAD_TIME_MIN } from 
 import MediaPlayer, { DirectMediaPlayer } from './MediaPlayer.jsx';
 import SortableList from './SortableList.jsx';
 import { getPermissionState, requestPermission, scheduleNotifications, clearAllScheduled } from './notifications.js';
+import { useScrollFadeIn } from './useScrollFadeIn.js';
 
 const KNOWN_AUDIO_MODULES = [
   { slug: 'daytime_stress', label: 'Daytime Stress & Mind Clearing', defaultTime: '14:30' },
@@ -120,8 +121,9 @@ export default function App() {
 /* ────────── header ────────── */
 function Header({ onMenu }) {
   return (
-    <header className="px-5 py-4 flex items-center justify-between border-b border-cream/5 sticky top-0 z-40 bg-bg/90 backdrop-blur-lg">
-      <Link to="/" className="font-display text-xl tracking-tight">
+    <header className="px-5 py-4 flex items-center justify-between border-b border-cream/5 sticky top-0 z-40 bg-bg/80 backdrop-blur-lg">
+      <Link to="/" className="font-display text-xl tracking-tight inline-flex items-center gap-2">
+        <span className="inline-block w-2 h-2 rounded-full bg-accent shadow-[0_0_12px_rgba(220,169,87,0.7)]" aria-hidden="true" />
         PPW<span className="text-accent">.</span>
       </Link>
       <div className="text-xs text-muted uppercase tracking-[0.2em] hidden sm:block">Peak Performance Wellness</div>
@@ -222,26 +224,26 @@ function Entry({ session, setSession }) {
   const nav = useNavigate();
   const pick = (mode) => { setSession({ ...initialSession, mode }); nav(mode === 'lifestyle' ? '/lifestyle' : '/level'); };
   return (
-    <main className="px-6 py-12 md:py-20 max-w-5xl mx-auto">
-      <div className="mb-14">
-        <div className="text-xs text-accent uppercase tracking-[0.2em] mb-4">Session Builder</div>
-        <h1 className="font-display text-5xl md:text-7xl leading-[0.95] mb-4">
+    <main className="px-6 py-14 md:py-24 max-w-5xl mx-auto">
+      <div className="mb-16 fade-in is-visible">
+        <div className="eyebrow mb-5">Session Builder</div>
+        <h1 className="font-display text-5xl md:text-7xl leading-[0.95] mb-5">
           Unlock<br/>your body<span className="text-accent">.</span>
         </h1>
-        <p className="text-muted max-w-xl text-lg">Science-backed fascia protocols personalised to your body, your pain, your lifestyle.</p>
+        <p className="text-muted max-w-xl text-lg leading-relaxed">Science-backed fascia protocols personalised to your body, your pain, your lifestyle.</p>
       </div>
-      <div className="grid md:grid-cols-2 gap-5">
-        <button onClick={() => pick('zone')} className="card p-10 text-left group transition-all duration-300 hover:scale-[1.01]">
-          <div className="text-xs text-accent uppercase tracking-widest mb-4 font-display">01</div>
-          <div className="font-display text-2xl md:text-3xl mb-3">Select by Body Zone</div>
-          <div className="text-muted text-sm">Tap the body where it hurts. Build your own stack.</div>
-          <div className="text-accent text-sm mt-6 opacity-0 group-hover:opacity-100 transition-opacity">Get started →</div>
+      <div className="grid md:grid-cols-2 gap-5 fade-in fade-in-stagger is-visible">
+        <button onClick={() => pick('zone')} className="card protocol-tile p-10 text-left group transition-all duration-300">
+          <div className="eyebrow mb-4">01</div>
+          <div className="font-display text-2xl md:text-3xl mb-3 leading-tight">Select by Body Zone</div>
+          <div className="text-muted text-sm leading-relaxed">Tap the body where it hurts. Build your own stack.</div>
+          <div className="text-accent text-sm mt-6 inline-flex items-center gap-1 group-hover:gap-2 transition-all">Get started <span aria-hidden="true">→</span></div>
         </button>
-        <button onClick={() => pick('lifestyle')} className="card p-10 text-left group transition-all duration-300 hover:scale-[1.01]">
-          <div className="text-xs text-accent uppercase tracking-widest mb-4 font-display">02</div>
-          <div className="font-display text-2xl md:text-3xl mb-3">Select by Lifestyle</div>
-          <div className="text-muted text-sm">Pick your daily work. We preset the zones for you.</div>
-          <div className="text-accent text-sm mt-6 opacity-0 group-hover:opacity-100 transition-opacity">Get started →</div>
+        <button onClick={() => pick('lifestyle')} className="card protocol-tile p-10 text-left group transition-all duration-300">
+          <div className="eyebrow mb-4">02</div>
+          <div className="font-display text-2xl md:text-3xl mb-3 leading-tight">Select by Lifestyle</div>
+          <div className="text-muted text-sm leading-relaxed">Pick your daily work. We preset the zones for you.</div>
+          <div className="text-accent text-sm mt-6 inline-flex items-center gap-1 group-hover:gap-2 transition-all">Get started <span aria-hidden="true">→</span></div>
         </button>
       </div>
       <div className="mt-10">
@@ -968,18 +970,18 @@ function TodayView() {
   const allDone = !empty && completedCount === items.length;
 
   return (
-    <main className="px-5 py-6 max-w-3xl mx-auto pb-24">
-      <div className="flex items-baseline justify-between mb-1">
-        <div className="text-xs text-accent uppercase tracking-[0.25em]">Today</div>
-        <div className="text-xs text-muted">{completedCount}/{items.length} done</div>
+    <main className="px-5 py-8 max-w-3xl mx-auto pb-24">
+      <div className="flex items-baseline justify-between mb-2">
+        <div className="eyebrow">Today</div>
+        <div className="text-xs text-muted tracking-wide">{completedCount}/{items.length} done</div>
       </div>
-      <h1 className="font-display text-3xl md:text-4xl mb-6">{todayDate}</h1>
+      <h1 className="font-display text-4xl md:text-5xl mb-8 leading-[1.02]">{todayDate}</h1>
 
       {empty && (
-        <div className="card p-8 text-center">
-          <div className="text-5xl mb-4 opacity-40">○</div>
+        <div className="card p-10 text-center fade-in is-visible">
+          <div className="empty-orb" aria-hidden="true" />
           <div className="font-display text-xl mb-2">Nothing scheduled yet.</div>
-          <p className="text-muted text-sm mb-6">Activate a protocol, save a body-zone routine, or pick an audio module — they will all show up here.</p>
+          <p className="text-muted text-sm mb-6 max-w-sm mx-auto leading-relaxed">Activate a protocol, save a body-zone routine, or pick an audio module — they will all show up here.</p>
           <div className="flex flex-wrap gap-3 justify-center">
             <Link to="/protocols" className="btn-accent">Browse protocols</Link>
             <Link to="/welcome" className="btn-ghost">Create our Personalised Release Routine</Link>
@@ -995,13 +997,13 @@ function TodayView() {
         </p>
       )}
 
-      <SortableList items={items} onReorder={handleReorder} className="space-y-2.5">
+      <SortableList items={items} onReorder={handleReorder} className="space-y-3 fade-in fade-in-stagger is-visible">
         {(it, dragHandleProps, _i, isDragging) => {
           const done = isDone(it.id);
           const isOpen = expanded === it.id;
           const isEditingTime = editingTimeId === it.id;
           return (
-            <div className={`card overflow-hidden transition-all ${done ? 'timeline-done opacity-80' : ''} ${isDragging ? 'border-accent' : ''}`}>
+            <div className={`card today-routine-card overflow-hidden transition-all ${done ? 'timeline-done opacity-80' : ''} ${isDragging ? 'border-accent' : ''}`}>
               <div className="flex items-center gap-2 p-4">
                 <button
                   {...dragHandleProps}
@@ -1028,8 +1030,9 @@ function TodayView() {
                 ) : (
                   <button
                     onClick={(e) => { e.stopPropagation(); setEditingTimeId(it.id); }}
-                    className="font-display text-accent text-sm w-12 shrink-0 text-left hover:underline underline-offset-4"
+                    className="today-time-chip shrink-0"
                     title="Tap to edit time"
+                    aria-label={`Edit time, currently ${it.time}`}
                   >{it.time}</button>
                 )}
                 <button onClick={() => setExpanded(isOpen ? null : it.id)} className="flex-1 min-w-0 flex items-center gap-3 text-left">
@@ -1130,35 +1133,37 @@ function ProtocolsList() {
   };
 
   return (
-    <main className="px-5 py-6 max-w-3xl mx-auto pb-16">
-      <Link to="/today" className="text-muted text-sm inline-block hover:text-accent mb-3">← Today</Link>
-      <h1 className="font-display text-3xl md:text-4xl mb-2">Protocols</h1>
-      <p className="text-muted mb-6">Evidence-based, agent-generated. Tap to view, activate to merge into your day.</p>
+    <main className="px-5 py-8 max-w-3xl mx-auto pb-16">
+      <Link to="/today" className="text-muted text-sm inline-block hover:text-accent mb-4 transition-colors">← Today</Link>
+      <div className="eyebrow mb-3">Library</div>
+      <h1 className="font-display text-4xl md:text-5xl mb-3 leading-[1.02]">Protocols</h1>
+      <p className="text-muted mb-8 max-w-xl leading-relaxed">Evidence-based, agent-generated. Tap to view, activate to merge into your day.</p>
 
-      {list == null && <div className="text-muted text-sm">Loading…</div>}
+      {list == null && <div className="text-muted text-sm animate-pulse">Loading…</div>}
       {list && list.length === 0 && (
-        <div className="card p-6">
+        <div className="card p-8 text-center fade-in is-visible">
+          <div className="empty-orb" aria-hidden="true" />
           <div className="font-display text-lg mb-2">No protocols available yet.</div>
           <p className="text-muted text-sm">{isMockActive() ? 'Mock data is enabled but the mock file is unreachable.' : 'The remote protocol repo is empty. Flip mock mode on in Settings.'}</p>
         </div>
       )}
 
-      <div className="space-y-3">
+      <div className="space-y-4 fade-in fade-in-stagger is-visible">
         {list && list.map(p => {
           const isActive = activeProtocols.includes(p.protocol_id);
           return (
-            <div key={p.protocol_id} className={`card p-5 ${isActive ? 'border-accent' : ''}`}>
+            <div key={p.protocol_id} className={`card protocol-tile p-6 ${isActive ? 'border-accent' : ''}`}>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                  <div className="text-xs text-accent uppercase tracking-widest mb-1">{p.variant} · {p.kind}</div>
-                  <div className="font-display text-xl mb-1">{p.topic}</div>
-                  <div className="text-muted text-xs">{p.studies_used} studies · {p.sections.daily_plan?.length || 0} daily items</div>
+                  <div className="eyebrow mb-2">{p.variant} · {p.kind}</div>
+                  <div className="font-display text-2xl mb-2 leading-tight">{p.topic}</div>
+                  <div className="text-muted text-xs tracking-wide">{p.studies_used} studies · {p.sections.daily_plan?.length || 0} daily items</div>
                 </div>
-                <button onClick={() => toggle(p.protocol_id)} className={`px-4 py-2 rounded-full text-sm font-bold shrink-0 ${isActive ? 'bg-cream/10 text-cream border border-accent' : 'btn-accent'}`}>
+                <button onClick={() => toggle(p.protocol_id)} className={`shrink-0 px-5 py-2.5 rounded-full text-sm font-bold transition-all ${isActive ? 'bg-cream/8 text-cream border border-accent' : 'btn-accent'}`}>
                   {isActive ? '✓ Active' : 'Activate'}
                 </button>
               </div>
-              <Link to={`/protocol/${p.protocol_id}`} className="text-accent text-sm underline underline-offset-4 mt-4 inline-block">View full protocol →</Link>
+              <Link to={`/protocol/${p.protocol_id}`} className="text-accent text-sm font-medium mt-5 inline-flex items-center gap-1 hover:gap-2 transition-all">View full protocol <span aria-hidden="true">→</span></Link>
             </div>
           );
         })}
@@ -1182,12 +1187,12 @@ function ProtocolDetail() {
   const toggle = () => setActiveProtocols(cur => cur.includes(p.protocol_id) ? cur.filter(x => x !== p.protocol_id) : [...cur, p.protocol_id]);
 
   return (
-    <main className="px-5 py-6 max-w-3xl mx-auto pb-16">
-      <Link to="/protocols" className="text-muted text-sm inline-block hover:text-accent mb-3">← Protocols</Link>
-      <div className="text-xs text-accent uppercase tracking-widest mb-1">{p.variant} · {p.kind} · v{p.schema_version}</div>
-      <h1 className="font-display text-3xl md:text-4xl mb-2">{p.topic}</h1>
-      <p className="text-muted mb-5">{p.studies_used} studies · generated {new Date(p.generated_at).toLocaleDateString()}</p>
-      <button onClick={toggle} className={isActive ? 'btn-ghost mb-8' : 'btn-accent mb-8'}>{isActive ? '✓ Active — deactivate' : 'Activate this protocol'}</button>
+    <main className="px-5 py-8 max-w-3xl mx-auto pb-16">
+      <Link to="/protocols" className="text-muted text-sm inline-block hover:text-accent mb-4 transition-colors">← Protocols</Link>
+      <div className="eyebrow mb-3">{p.variant} · {p.kind} · v{p.schema_version}</div>
+      <h1 className="font-display text-4xl md:text-5xl mb-3 leading-[1.02]">{p.topic}</h1>
+      <p className="text-muted mb-6 max-w-xl leading-relaxed">{p.studies_used} studies · generated {new Date(p.generated_at).toLocaleDateString()}</p>
+      <button onClick={toggle} className={isActive ? 'btn-ghost mb-10' : 'btn-accent mb-10'}>{isActive ? '✓ Active — deactivate' : 'Activate this protocol'}</button>
 
       {(p.topic || '').toLowerCase().includes('fasting') && <FastingControls />}
 
@@ -1262,25 +1267,17 @@ function ProtocolDetail() {
         <div className="grid md:grid-cols-2 gap-3">
           <div className="card p-4">
             <div className="text-xs text-accent uppercase tracking-widest mb-2">Eat</div>
-            <ul className="space-y-1 text-sm">{(p.sections.nutrition.eat || []).map((x, i) => (<li key={i}>· {typeof x === 'string' ? x : (<span><span className="text-cream">{x.name}</span>{x.mechanism ? <span className="text-muted"> — {x.mechanism}</span> : null}</span>)}</li>))}</ul>
+            <ul className="space-y-1 text-sm">{p.sections.nutrition.eat.map((x, i) => <li key={i}>· {x}</li>)}</ul>
           </div>
           <div className="card p-4">
             <div className="text-xs text-muted uppercase tracking-widest mb-2">Avoid</div>
-            <ul className="space-y-1 text-sm">{(p.sections.nutrition.avoid || []).map((x, i) => (<li key={i}>· {typeof x === 'string' ? x : (<span><span className="text-cream">{x.name}</span>{x.mechanism ? <span className="text-muted"> — {x.mechanism}</span> : null}</span>)}</li>))}</ul>
+            <ul className="space-y-1 text-sm">{p.sections.nutrition.avoid.map((x, i) => <li key={i}>· {x}</li>)}</ul>
           </div>
         </div>
-        {p.sections.nutrition.windows && p.sections.nutrition.windows.length > 0 && (
-          <div className="card p-4 mt-3">
-            <div className="text-xs text-accent uppercase tracking-widest mb-2">Eating windows</div>
-            <ul className="space-y-1 text-sm">{p.sections.nutrition.windows.map((x, i) => (<li key={i}>· {typeof x === 'string' ? x : (<span><span className="text-cream">{x.name || x.label}</span>{x.mechanism ? <span className="text-muted"> — {x.mechanism}</span> : null}</span>)}</li>))}</ul>
-          </div>
-        )}
-        {p.sections.nutrition.special_notes && (
-          <div className="card p-4 mt-3">
-            <div className="text-xs text-accent uppercase tracking-widest mb-2">Notes</div>
-            <p className="text-cream/80 text-sm">{typeof p.sections.nutrition.special_notes === 'string' ? p.sections.nutrition.special_notes : JSON.stringify(p.sections.nutrition.special_notes)}</p>
-          </div>
-        )}
+        <div className="card p-4 mt-3">
+          <div className="text-xs text-accent uppercase tracking-widest mb-2">Eating windows</div>
+          <ul className="space-y-1 text-sm">{p.sections.nutrition.windows.map((x, i) => <li key={i}>· {x}</li>)}</ul>
+        </div>
       </Section>
 
       <Section title="Daily Plan">
@@ -1565,9 +1562,10 @@ function FastingControls() {
 }
 
 function Section({ title, children }) {
+  const ref = useScrollFadeIn();
   return (
-    <section className="mb-8">
-      <h2 className="font-display text-xl md:text-2xl mb-3">{title}</h2>
+    <section ref={ref} className="mb-10 fade-in">
+      <h2 className="font-display text-2xl md:text-3xl mb-4 leading-tight">{title}</h2>
       {children}
     </section>
   );
@@ -1592,17 +1590,18 @@ function ModulesList() {
   };
 
   return (
-    <main className="px-5 py-6 max-w-3xl mx-auto pb-16">
-      <Link to="/today" className="text-muted text-sm inline-block hover:text-accent mb-3">← Today</Link>
-      <h1 className="font-display text-3xl md:text-4xl mb-2">Audio & Modules</h1>
-      <p className="text-muted mb-6">Meditative, passive, screen-off-friendly. Add to your daily routine.</p>
+    <main className="px-5 py-8 max-w-3xl mx-auto pb-16">
+      <Link to="/today" className="text-muted text-sm inline-block hover:text-accent mb-4 transition-colors">← Today</Link>
+      <div className="eyebrow mb-3">Listen</div>
+      <h1 className="font-display text-4xl md:text-5xl mb-3 leading-[1.02]">Audio &amp; Modules</h1>
+      <p className="text-muted mb-8 max-w-xl leading-relaxed">Meditative, passive, screen-off-friendly. Add to your daily routine.</p>
 
-      <div className="space-y-3">
+      <div className="space-y-4 fade-in fade-in-stagger is-visible">
         {KNOWN_AUDIO_MODULES.map(m => {
           const media = resolved[m.slug];
           const isActive = activeModules.includes(m.slug);
           return (
-            <div key={m.slug} className={`card p-5 ${isActive ? 'border-accent' : ''}`}>
+            <div key={m.slug} className={`card protocol-tile p-6 ${isActive ? 'border-accent' : ''}`}>
               <div className="flex items-start justify-between gap-4 mb-3">
                 <div className="flex-1 min-w-0">
                   <div className="text-xs text-accent uppercase tracking-widest mb-1">🎧 audio · default {m.defaultTime}</div>
@@ -1640,9 +1639,10 @@ function SettingsView() {
   };
 
   return (
-    <main className="px-5 py-6 max-w-3xl mx-auto pb-16">
-      <Link to="/today" className="text-muted text-sm inline-block hover:text-accent mb-3">← Today</Link>
-      <h1 className="font-display text-3xl md:text-4xl mb-6">Settings</h1>
+    <main className="px-5 py-8 max-w-3xl mx-auto pb-16">
+      <Link to="/today" className="text-muted text-sm inline-block hover:text-accent mb-4 transition-colors">← Today</Link>
+      <div className="eyebrow mb-3">Configure</div>
+      <h1 className="font-display text-4xl md:text-5xl mb-8 leading-[1.02]">Settings</h1>
 
       <Section title="Notifications">
         <div className="card p-5">
@@ -1666,8 +1666,7 @@ function SettingsView() {
           <div className="text-muted text-xs mb-4">Off = pull from the GitHub protocol repo. On = read /mock-protocol.json bundled with the app.</div>
           <div className="flex gap-2">
             <button onClick={() => setMockOverride('true')}  className={`flex-1 py-2.5 rounded-full text-sm font-bold ${mockOverride === 'true'  ? 'btn-accent' : 'btn-ghost'}`}>Mock</button>
-            <button onClick={() => setMockOverride('true')}  className={'flex-1 py-2.5 rounded-full text-sm font-bold ' + (mockOverride === 'true'  ? 'btn-accent' : 'btn-ghost')}>Mock</button>
-            <button onClick={() => setMockOverride('false')} className={'flex-1 py-2.5 rounded-full text-sm font-bold ' + (mockOverride === 'false' ? 'btn-accent' : 'btn-ghost')}>Live</button>
+            <button onClick={() => setMockOverride('false')} className={`flex-1 py-2.5 rounded-full text-sm font-bold ${mockOverride === 'false' ? 'btn-accent' : 'btn-ghost'}`}>Live</button>
           </div>
         </div>
       </Section>
