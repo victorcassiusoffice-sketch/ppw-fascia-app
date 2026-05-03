@@ -4,7 +4,7 @@
   "topic": "fasting",
   "variant": "vegan",
   "kind": "protocol",
-  "generated_at": "2026-05-02T22:03:45Z",
+  "generated_at": "2026-05-03T09:46:56Z",
   "agent_version": "0.1.0",
   "studies_used": 25,
   "sections": {
@@ -17,12 +17,12 @@
           "caption": "Most fasters fail not from lack of willpower but from metabolic stress signals (hunger hormones, fatigue, mood disruption) that..."
         },
         {
-          "value": "Up to 35% of weight lost during naive fasting is lean...",
+          "value": "Up to 35% of weight lost during naive fasting is...",
           "caption": "Without sufficient plant-based protein intake during eating windows, your body catabolizes muscle tissue for amino acids,..."
         },
         {
-          "value": "Plant-based diets show 40-60% lower bioavailability of...",
-          "caption": "Vegan fasters lose access to heme iron and chelation-resistant zinc for 14-20 hours daily; without strategic supplementation and..."
+          "value": "Plant-based diets show 40-60% lower bioavailability...",
+          "caption": "Vegan fasters lose access to heme iron and chelation-resistant zinc for 14-20 hours daily; without strategic supplementation..."
         }
       ]
     },
