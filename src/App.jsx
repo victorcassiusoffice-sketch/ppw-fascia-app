@@ -1267,17 +1267,25 @@ function ProtocolDetail() {
         <div className="grid md:grid-cols-2 gap-3">
           <div className="card p-4">
             <div className="text-xs text-accent uppercase tracking-widest mb-2">Eat</div>
-            <ul className="space-y-1 text-sm">{p.sections.nutrition.eat.map((x, i) => <li key={i}>· {x}</li>)}</ul>
+            <ul className="space-y-1 text-sm">{(p.sections.nutrition.eat || []).map((x, i) => (<li key={i}>· {typeof x === 'string' ? x : (<span><span className="text-cream">{x.name}</span>{x.mechanism ? <span className="text-muted"> — {x.mechanism}</span> : null}</span>)}</li>))}</ul>
           </div>
           <div className="card p-4">
             <div className="text-xs text-muted uppercase tracking-widest mb-2">Avoid</div>
-            <ul className="space-y-1 text-sm">{p.sections.nutrition.avoid.map((x, i) => <li key={i}>· {x}</li>)}</ul>
+            <ul className="space-y-1 text-sm">{(p.sections.nutrition.avoid || []).map((x, i) => (<li key={i}>· {typeof x === 'string' ? x : (<span><span className="text-cream">{x.name}</span>{x.mechanism ? <span className="text-muted"> — {x.mechanism}</span> : null}</span>)}</li>))}</ul>
           </div>
         </div>
-        <div className="card p-4 mt-3">
-          <div className="text-xs text-accent uppercase tracking-widest mb-2">Eating windows</div>
-          <ul className="space-y-1 text-sm">{p.sections.nutrition.windows.map((x, i) => <li key={i}>· {x}</li>)}</ul>
-        </div>
+        {p.sections.nutrition.windows && p.sections.nutrition.windows.length > 0 && (
+          <div className="card p-4 mt-3">
+            <div className="text-xs text-accent uppercase tracking-widest mb-2">Eating windows</div>
+            <ul className="space-y-1 text-sm">{p.sections.nutrition.windows.map((x, i) => (<li key={i}>· {typeof x === 'string' ? x : (<span><span className="text-cream">{x.name || x.label}</span>{x.mechanism ? <span className="text-muted"> — {x.mechanism}</span> : null}</span>)}</li>))}</ul>
+          </div>
+        )}
+        {p.sections.nutrition.special_notes && (
+          <div className="card p-4 mt-3">
+            <div className="text-xs text-accent uppercase tracking-widest mb-2">Notes</div>
+            <p className="text-cream/80 text-sm">{typeof p.sections.nutrition.special_notes === 'string' ? p.sections.nutrition.special_notes : JSON.stringify(p.sections.nutrition.special_notes)}</p>
+          </div>
+        )}
       </Section>
 
       <Section title="Daily Plan">
@@ -1666,26 +1674,4 @@ function SettingsView() {
           <div className="text-muted text-xs mb-4">Off = pull from the GitHub protocol repo. On = read /mock-protocol.json bundled with the app.</div>
           <div className="flex gap-2">
             <button onClick={() => setMockOverride('true')}  className={`flex-1 py-2.5 rounded-full text-sm font-bold ${mockOverride === 'true'  ? 'btn-accent' : 'btn-ghost'}`}>Mock</button>
-            <button onClick={() => setMockOverride('false')} className={`flex-1 py-2.5 rounded-full text-sm font-bold ${mockOverride === 'false' ? 'btn-accent' : 'btn-ghost'}`}>Live</button>
-          </div>
-        </div>
-      </Section>
-
-      <Section title="Active state">
-        <div className="card p-5 space-y-2 text-sm">
-          <div>Protocols: <span className="text-accent">{activeProtocols.length}</span></div>
-          <div>Audio modules: <span className="text-accent">{activeModules.length}</span></div>
-          <div>Saved zones: <span className="text-accent">{activeRoutines.savedZones?.length || 0}</span></div>
-          <button onClick={clearAll} className="btn-ghost w-full mt-4">Clear all activations</button>
-        </div>
-      </Section>
-
-      <Section title="About">
-        <div className="card p-5 text-sm space-y-1.5">
-          <div>Version: <span className="text-accent">{APP_VERSION}</span></div>
-          <div className="text-muted text-xs pt-2">Peak Performance Wellness · ppwellness.co</div>
-        </div>
-      </Section>
-    </main>
-  );
-}
+            <button onClick={() => setMockOverr
