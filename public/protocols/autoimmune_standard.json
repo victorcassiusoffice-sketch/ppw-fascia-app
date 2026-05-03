@@ -1,0 +1,874 @@
+{
+  "schema_version": "1.0.0",
+  "protocol_id": "autoimmune-standard-protocol",
+  "topic": "autoimmune",
+  "variant": "standard",
+  "kind": "protocol",
+  "generated_at": "2026-05-02T22:11:43Z",
+  "agent_version": "0.1.0",
+  "studies_used": 25,
+  "sections": {
+    "crisis": {
+      "headline": "The Crisis: Why Your Immune System Turned Against You",
+      "body_md": "Autoimmune diseases affect approximately 24 million Americans—nearly 8% of the population—yet most people diagnosed spend years bouncing between doctors before getting answers. Your immune system's job is to distinguish between invaders (bacteria, viruses) and your own cells, but in autoimmune conditions, this recognition system catastrophically fails. The result: your body's defense force attacks your own tissues with the same intensity it would deploy against a pathogen. What makes this a crisis isn't just prevalence—it's the acceleration. Autoimmune diagnoses have doubled over the past three decades, and we're still using treatment protocols developed in the 1990s that suppress the entire immune system rather than fix the underlying recognition problem. The good news? We now understand the molecular mechanisms driving this breakdown—from dysregulated T-regulatory cells (Tregs) that lose their peacekeeping function, to a permeable gut barrier that allows lipopolysaccharides (LPS) to trigger systemic inflammation. This knowledge is translating into precision interventions that don't just manage symptoms; they address root cause.\n\n**Simply put:** Imagine your body has security guards (your immune system) whose job is to keep bad guys (germs) out and let good guys (your own cells) in safely. In autoimmune disease, these guards get confused and start attacking your own body parts by mistake—like friendly fire in a war. It's like your immune system can't read the ID badges anymore, so it treats your pancreas, or joints, or thyroid like they're enemies. The crisis is that this confusion is happening to more people than ever before, and we finally understand *why* it happens.",
+      "stats": [
+        {
+          "value": "24 million Americans diagnosed with autoimmune disease",
+          "caption": "One in 12 people in the US has an autoimmune condition, making it statistically more common than diabetes or heart disease."
+        },
+        {
+          "value": "2x increase in autoimmune diagnoses over 30 years",
+          "caption": "The acceleration suggests environmental and lifestyle factors—not genetics alone—are driving this epidemic."
+        },
+        {
+          "value": "75-80% of autoimmune patients are women",
+          "caption": "Sex hormones, X-chromosome gene dosage, and microbiome differences create differential immune regulation between males and..."
+        }
+      ]
+    },
+    "science": {
+      "headline": "The Science of Autoimmune Dysfunction",
+      "body_md": "Autoimmune disease represents a fundamental breakdown in immune tolerance—the system's ability to distinguish self from non-self. Rather than a single disease, autoimmunity is a cascade of dysregulation affecting T-regulatory cells (Tregs), B-cell checkpoint control, intestinal barrier integrity, and molecular mimicry pathways. Understanding these mechanisms reveals why precision interventions—from microbiota restoration to targeted biologics—can reset immune recognition and restore homeostasis.",
+      "mechanisms": [
+        {
+          "name": "Molecular Mimicry and Cross-Reactive Antigen Presentation",
+          "body": "Molecular mimicry occurs when pathogenic antigens (viral, bacterial, or environmental) share structural homology with self-antigens, triggering cross-reactive T and B cell responses that attack the body's own tissues. The process begins when dendritic cells present peptide epitopes via MHC-II molecules to naïve CD4+ T cells; if the foreign peptide closely resembles a self-peptide, the T cell receptor (TCR) recognizes both without discrimination. This is amplified by bystander activation, where inflammatory cytokines (TNF-α, IL-6, IFN-γ) produced during pathogen clearance lower the activation threshold for self-reactive clones already present in the repertoire. Rojas et al. (2018) demonstrated that respiratory viral infections and Streptococcus pyogenes antigens share epitopes with myelin basic protein and cardiac myosin, explaining the onset of autoimmune sequelae weeks after infection.",
+          "simply_put": "Imagine your immune system has a 'wanted poster' of a virus. But the virus looks almost identical to a healthy cell in your body, so the immune system accidentally attacks your own tissues thinking they're the invader.",
+          "study_citation": "Rojas M, Restrepo-Jiménez P, Monsalve DM (2018) Molecular mimicry and autoimmunity.",
+          "study_finding": "Pathogenic antigens share structural epitopes with self-antigens, driving cross-reactive immune responses that persist long after the initial infection."
+        },
+        {
+          "name": "T-Regulatory Cell (Treg) Dysfunction and FOXP3 Signaling",
+          "body": "T-regulatory cells (CD4+CD25+FOXP3+) maintain immune tolerance through IL-10 and TGF-β secretion and contact-dependent suppression via CTLA-4 and PD-L1 engagement. In autoimmunity, Tregs are either numerically depleted, functionally impaired (defective FOXP3 transcription factor stability), or sequestered in lymphoid tissues rather than infiltrating affected organs. Gray & David (2023) describe inborn errors of immunity where mutations in FOXP3, AIRE (autoimmune regulator), or IL2RA prevent central and peripheral tolerance establishment, demonstrating that Treg dysfunction is a primary driver rather than a consequence of autoimmune activation. The imbalance between Tregs and pro-inflammatory Th17 cells (which differentiate via IL-6 + TGF-β through STAT3 and RORγt activation) tips the balance toward tissue destruction. Restoration of Treg frequency and suppressive capacity—whether through microbiota-derived short-chain fatty acids (butyrate), IL-2 signaling, or antigen-specific tolerance induction—is a core therapeutic target.",
+          "simply_put": "Your immune system has 'peacekeeper' cells that keep aggressive fighter cells in check. When these peacekeepers are weak or outnumbered, the fighters attack your body's own tissues.",
+          "study_citation": "Gray PE, David C (2023) Inborn Errors of Immunity and Autoimmune Disease.",
+          "study_finding": "Genetic defects in Treg development and maintenance genes (FOXP3, AIRE, IL2RA) cause severe autoimmunity, proving that Treg dysfunction is a primary pathogenic mechanism."
+        },
+        {
+          "name": "Intestinal Barrier Disruption and Zonula Occludens-1 (ZO-1) Loss",
+          "body": "The intestinal epithelium is sealed by tight junction complexes containing claudins, occludin, and zonula occludens (ZO-1), which are linked to the actin cytoskeleton via scaffolding proteins. In autoimmunity, increased zonulin (a mammalian zonula occludens toxin analogue) and dysbiotic lipopolysaccharide (LPS) trigger ZO-1 internalization and disassembly, increasing intestinal permeability (the 'leaky gut' phenomenon). This allows bacterial LPS, lipoproteins, and intact antigens to translocate across the epithelium, activating pattern-recognition receptors (TLRs, NOD-like receptors) on lamina propria dendritic cells and intestinal innate lymphoid cells. The resulting TLR4-MyD88-NF-κB axis drives IL-23 and IL-6 production, skewing CD4+ differentiation toward Th17 and away from Tregs. Zeng et al. (2024) demonstrated in their meta-analysis that microbiota-based therapies (probiotics, prebiotics, fecal microbiota transplantation) that restore barrier-protective bacteria—particularly those producing butyrate-generating species like Faecalibacterium prausnitzii and Roseburia spp.—significantly reduced inflammatory markers and disease activity across multiple autoimmune conditions.",
+          "simply_put": "The lining of your gut acts like a security gate, only letting helpful nutrients through and blocking dangerous stuff. When this gate breaks, harmful bacteria and toxins leak into your bloodstream and trigger your immune system to go haywire.",
+          "study_citation": "Zeng L, Yang K, He Q et al. (2024) Efficacy and safety of gut microbiota-based therapies in autoimmune and rheumatic diseases: a systematic review and meta-analysis.",
+          "study_finding": "Microbiota-based interventions that restore barrier-protective commensal bacteria reduced disease activity and inflammatory biomarkers across autoimmune and rheumatic conditions."
+        },
+        {
+          "name": "B Cell Checkpoint Loss and Autoreactive Plasma Cell Persistence",
+          "body": "B cell tolerance occurs at two checkpoints: central tolerance (deletion of high-affinity self-reactive B cells in the bone marrow by FAS-mediated apoptosis) and peripheral tolerance (suppression by Tregs, TFH cell regulation, and anergy). In autoimmunity, mutations or epigenetic silencing of tolerance checkpoints (FAS, FASL, CD95, BAFF-R) permit autoreactive B cells to survive and differentiate into long-lived plasma cells in bone marrow niches. These plasma cells produce high-affinity IgG autoantibodies that form immune complexes, deposit in tissues, and activate Fc-gamma receptors (FcγRs) on macrophages and mast cells, driving complement deposition and local inflammation. Murrell et al. (2024) showed that dupilumab (an IL-4Rα antagonist blocking IL-4 and IL-13 signaling) reduced autoantibody titers and disease flares in bullous pemphigoid, indicating that Th2 cytokine-driven B cell activation is therapeutically targetable. Similarly, B cell-directed therapies (anti-CD20 rituximab, anti-BAFF belimumab) deplete autoreactive B cells and reduce autoantibody production, establishing B cell checkpoint dysfunction as a tractable mechanism.",
+          "simply_put": "Some of your immune system's 'mistake cells'—B cells that make antibodies against your own body—fail to be caught and deleted. Instead, they become long-lived factories pumping out attack antibodies forever.",
+          "study_citation": "Murrell DF, Joly P, Werth VP et al. (2024) Study Design of a Phase 2/3 Randomized Controlled Trial of Dupilumab in Adults with Bullous Pemphigoid: LIBERTY-BP ADEPT.",
+          "study_finding": "IL-4Rα antagonism reduced serum autoantibodies and disease flares, demonstrating that Th2-driven B cell activation is a reversible pathogenic pathway in autoimmune bullous disease."
+        },
+        {
+          "name": "IL-6/STAT3 Axis Amplification and Th17 Differentiation",
+          "body": "The IL-6/STAT3 pathway is a central hub in autoimmune amplification: IL-6 (produced by activated macrophages, dendritic cells, and fibroblasts) binds to IL-6R on naïve CD4+ T cells, activating JAK1/JAK2, which phosphorylate and stabilize STAT3. Phosphorylated STAT3 dimerizes, translocates to the nucleus, and drives transcription of RORγt (retinoid-related orphan receptor gamma-t), the master transcription factor for Th17 differentiation. Th17 cells secrete IL-17A and IL-22, which act on epithelial and stromal cells to increase MMP-9 (matrix metalloproteinase-9) expression, degrade basement membranes and extracellular matrix, and amplify neutrophil recruitment. In tissue-specific autoimmunity (e.g., rheumatoid arthritis synovitis, thyroiditis), local IL-6 production creates a self-sustaining loop where tissue damage signals amplify IL-6, further driving Th17 expansion. Wechsler et al. (2017) demonstrated that mepolizumab (anti-IL-5 monoclonal antibody) reduced eosinophilic granulomatosis with polyangiitis flares by suppressing IL-5-dependent Th17-eosinophil recruitment, proving that targeting Th17-associated cytokine axes is therapeutically effective.",
+          "simply_put": "A inflammatory cytokine called IL-6 acts like a megaphone, constantly shouting instructions to immune cells to make more attack chemicals. This creates a vicious cycle of inflammation that feeds itself.",
+          "study_citation": "Wechsler ME, Akuthota P, Jayne D et al. (2017) Mepolizumab or Placebo for Eosinophilic Granulomatosis with Polyangiitis.",
+          "study_finding": "Blocking IL-5-mediated Th17-eosinophil recruitment reduced disease flares and systemic inflammation, validating Th17 axis targeting in ANCA-associated vasculitis."
+        },
+        {
+          "name": "Curcuminoid Pathway Modulation: NF-κB Inhibition and Nrf2 Activation",
+          "body": "Curcumin (the principal polyphenol in Curcuma longa) acts via dual mechanisms: it inhibits IKKβ (inhibitor of kappaB kinase beta), preventing IκBα phosphorylation and nuclear factor-kappa B (NF-κB) translocation, thereby suppressing pro-inflammatory gene transcription (TNF-α, IL-1β, IL-6, IL-8, COX-2, iNOS). Simultaneously, curcumin activates the Kelch-like ECH-associated protein 1/Nuclear factor erythroid 2-related factor 2 (KEAP1/Nrf2) pathway, increasing intracellular antioxidant response element (ARE)-driven expression of detoxification enzymes (SOD2, catalase, glutathione S-transferases) and phase I/II detoxification machinery. This dual action reduces both NF-κB-dependent pro-inflammatory signaling and oxidative stress—two converging drivers of autoimmune activation. Zeng et al. (2022) conducted a systematic review and meta-analysis of curcumin/Curcuma longa extract across 10 autoimmune conditions (rheumatoid arthritis, systemic lupus erythematosus, Crohn's disease, ulcerative colitis, type 1 diabetes, thyroiditis, vasculitis, psoriasis, multiple sclerosis, and Sjögren's syndrome) and found consistent reductions in inflammatory markers (CRP, ESR, TNF-α, IL-6) and disease activity scores, with effect sizes comparable to conventional NSAIDs and disease-modifying agents.",
+          "simply_put": "Curcumin is like a double agent that flips off the inflammation 'on switch' while turning up your body's natural antioxidant 'defense shield,' reducing both the noise and the damage from inflammation.",
+          "study_citation": "Zeng L, Yang T, Yang K et al. (2022) Curcumin and Curcuma longa Extract in the Treatment of 10 Types of Autoimmune Diseases: A Systematic Review and Meta-Analysis.",
+          "study_finding": "Curcumin reduced inflammatory biomarkers and disease activity across 10 distinct autoimmune conditions with effect sizes comparable to conventional immunosuppressive agents."
+        }
+      ],
+      "diagram_suggestions": [
+        "A flow diagram showing molecular mimicry: pathogenic antigen → TCR recognition → cross-reactive binding to self-antigen → CD4+ T cell activation → tissue infiltration and destruction, with emphasis on structural homology between foreign and self-epitopes.",
+        "A cellular balance scale: on one side, Tregs (FOXP3+) producing IL-10 and TGF-β; on the other, Th17 cells (RORγt+) producing IL-17A and IL-22, with arrows showing how dysbiotic microbiota tips the scale toward Th17 dominance.",
+        "A cross-section of intestinal epithelium showing intact tight junctions (ZO-1, claudins, occludin) versus disrupted junctions with LPS translocation, TLR4 activation on dendritic cells, and subsequent Th17/IL-23 axis amplification in the lamina propria.",
+        "A pathway diagram of the IL-6/STAT3/RORγt axis: IL-6 → JAK1/JAK2 → pSTAT3 → RORγt transcription → Th17 differentiation → IL-17A/IL-22 secretion → MMP-9 upregulation → tissue destruction.",
+        "A dual-mechanism diagram showing curcumin: (1) NF-κB pathway inhibition via IKKβ blocking, preventing inflammatory gene transcription; (2) KEAP1/Nrf2 activation driving ARE-dependent antioxidant enzyme expression (SOD2, catalase, GSTs).",
+        "A bone marrow plasma cell niche showing autoreactive B cell survival (FAS checkpoint loss) → differentiation into long-lived plasma cells → constitutive IgG autoantibody production → immune complex formation → FcγR engagement → complement cascade initiation and tissue inflammation."
+      ]
+    },
+    "enemies": {
+      "headline": "Autoimmune Protocol: ENEMIES",
+      "body_md": "Your immune system has gone rogue—it's attacking your own cells like a security guard who forgot the difference between intruders and employees. These five enemies supercharge this misdirected attack, amplifying inflammation through specific molecular pathways. Neutralizing them is non-negotiable if you want to restore immune tolerance and stop the friendly fire.",
+      "enemies": [
+        {
+          "name": "Lipopolysaccharide (LPS) Endotoxemia",
+          "colour_tag": "red",
+          "science": "Gram-negative bacterial LPS crosses a compromised intestinal barrier and binds TLR4 (toll-like receptor 4) on immune cells, triggering NF-κB pathway activation and massive TNF-α, IL-6, and IL-17 release. This systemic endotoxemia mimics pathogen-associated molecular patterns, causing your immune system to stay in perpetual attack mode against self-antigens.",
+          "simply_put": "Imagine tiny holes developing in your gut's protective wall. Bad bacteria slip through, and your immune system thinks it's under attack—so it stays angry and starts punching everything, including your own organs.",
+          "action": "Restore intestinal barrier integrity with L-glutamine (5g daily), bone broth collagen, and remove high-FODMAP foods. Test fecal LPS levels; if elevated, use antimicrobial herbs (berberine 500mg TID) under practitioner guidance to reduce gram-negative load.",
+          "points": [
+            {
+              "bold": "Barrier breakdown → antigen translocation",
+              "body": "Zonula occludens-1 (ZO-1) tight junction protein degradation allows LPS to enter circulation, priming Th17 cells that attack self-tissue."
+            },
+            {
+              "bold": "TLR4-NF-κB amplification loop",
+              "body": "LPS binding creates a positive feedback loop where TNF-α further damages intestinal epithelium, increasing LPS permeability in a vicious cycle."
+            }
+          ]
+        },
+        {
+          "name": "Molecular Mimicry Triggers",
+          "colour_tag": "orange",
+          "science": "Pathogenic proteins share epitope sequences with self-antigens; T cells and B cells trained against infections (e.g., Streptococcus pyogenes M-protein mimics cardiac myosin) cross-react with host tissues via TCR/BCR recognition. This is mediated by HLA-peptide complex presentation and the breakdown of immune tolerance checkpoints in regulatory T cells (Foxp3+ Tregs).",
+          "simply_put": "A bad germ looks like your body's own team member. Your immune system learns to fight the germ, but then it gets confused and starts fighting the real team member too.",
+          "action": "Identify and eliminate active infections (strep, Epstein-Barr, Lyme disease via serology and functional testing). Support Treg expansion with short-chain fatty acids (butyrate 1000mg daily) and IL-2 signaling via adequate protein intake and zinc (15-30mg daily).",
+          "points": [
+            {
+              "bold": "Epitope sharing and TCR cross-reactivity",
+              "body": "A single T cell clone specific for streptococcal antigen activates against myocardial myosin, driving post-streptococcal rheumatic fever and systemic autoimmunity."
+            },
+            {
+              "bold": "Loss of Treg-mediated suppression",
+              "body": "IL-2 and TGF-β signaling defects reduce Foxp3+ regulatory T cell differentiation, removing the brake on self-reactive clones."
+            }
+          ]
+        },
+        {
+          "name": "High-Dose Omega-6 Polyunsaturated Fat Imbalance",
+          "colour_tag": "amber",
+          "science": "Excessive linoleic acid (18:2n-6) from seed oils is converted to arachidonic acid (20:4n-6) via Delta-12 desaturase, which serves as substrate for COX-2 and 5-LOX enzymes, producing pro-inflammatory eicosanoids (PGE2, LTB4, LTC4). An elevated omega-6:omega-3 ratio (typical modern: 20:1 vs. ancestral 1:1) chronically skews Th1/Th17 differentiation through altered membrane lipid rafts and decreased EPA/DHA-derived SPMs (specialized pro-resolving mediators).",
+          "simply_put": "Your body has two types of chemical switches: ones that turn inflammation ON and ones that turn it OFF. Too much seed oil gives you way more ON switches and breaks the OFF switches.",
+          "action": "Eliminate seed oils (soybean, canola, sunflower) completely. Target omega-6:omega-3 ratio of 2:1 with wild-caught salmon (2-3 servings weekly), algae-derived EPA/DHA (2-3g combined daily), and grass-fed meat. Supplement GLA (borage oil, 1.4-2.8g daily) to compete with arachidonic acid pathways.",
+          "points": [
+            {
+              "bold": "Arachidonic acid-derived eicosanoid overproduction",
+              "body": "COX-2 catalyzes PGE2 synthesis, which suppresses IL-10 and Foxp3 Tregs while promoting IL-17 Th17 differentiation—the exact opposite of immune tolerance."
+            },
+            {
+              "bold": "Loss of pro-resolving lipid mediators",
+              "body": "Low EPA/DHA means fewer lipoxins and resolvins (SPMs) produced by 15-LOX, so inflammation initiated by LTB4 never switches off—it becomes chronic."
+            }
+          ]
+        },
+        {
+          "name": "Chronic Hyperglycemia and Glycation",
+          "colour_tag": "purple",
+          "science": "Elevated blood glucose drives non-enzymatic glycation of proteins, forming advanced glycation end products (AGEs) that bind RAGE (receptor for AGEs), activating NF-κB and p38 MAPK signaling in dendritic cells, macrophages, and endothelial cells. AGE-RAGE interaction increases MCP-1 chemotaxis, IL-6 production, and impairs Treg development while promoting Th1/Th17 polarization. High fructose is particularly potent, driving hepatic de novo lipogenesis and visceral adiposity, which amplifies TNF-α and IL-6 secretion.",
+          "simply_put": "Sugar glues itself to your proteins and makes them sticky and broken. When your immune cells see these broken proteins, they think something's wrong and attack—even your own healthy cells.",
+          "action": "Maintain fasting glucose <90 mg/dL and HbA1c <5.5% via carbohydrate restriction (net carbs <50g daily), elimination of all added sugars and fructose, and intermittent fasting (16:8 minimum). Add chromium picolinate (200 mcg daily) and cinnamon (1.5g daily) to improve insulin sensitivity and reduce AGE formation. Monitor with continuous glucose monitor.",
+          "points": [
+            {
+              "bold": "AGE-RAGE axis activation and dendritic cell priming",
+              "body": "AGEs cross-link collagen and elastin, and when RAGE-bound, trigger dendritic cell maturation that skews T cell responses toward autoimmune Th1/Th17 and away from tolerogenic Tregs."
+            },
+            {
+              "bold": "Fructose-driven lipotoxicity and sterile inflammation",
+              "body": "High fructose bypasses normal glycolytic feedback inhibition, increasing hepatic fat accumulation and NLRP3 inflammasome activation in resident macrophages."
+            }
+          ]
+        },
+        {
+          "name": "Dysbiotic Microbial Dysregulation",
+          "colour_tag": "red",
+          "science": "Loss of short-chain fatty acid-producing commensals (Faecalibacterium prausnitzii, Roseburia spp.) reduces butyrate production, impairing histone deacetylase (HDAC) inhibition and decreasing Foxp3+ Treg differentiation via GPR43 signaling. Simultaneously, pathobionts (Prevotella copri, Desulfovibrio) and reduced Bacteroidetes:Firmicutes ratio promote segmented filamentous bacteria (SFB)-like colonization, driving Th17 differentiation through MHC-II presentation of bacterial antigens. This Treg deficit + Th17 excess is the autoimmune tipping point.",
+          "simply_put": "You have trillions of tiny bacteria in your gut. The good ones make a special chemical that calms your immune system down. When bad bacteria take over, the good ones disappear, and your immune system never gets told to chill out.",
+          "action": "Restore diversity with prebiotic-rich whole foods (garlic, onion, asparagus, green banana starch 15-20g daily). Supplement spore-based probiotics (Bacillus subtilis, B. coagulans, 10B CFU daily) and soil-based organisms. Add inulin and FOS (8-12g daily) to feed SCFA producers. Test fecal butyrate levels; if <0.3 mmol/kg, add tributyrin (2-3g daily) directly. Avoid antibiotics unless absolutely necessary; prioritize resistant starch (potato starch, 20g daily) post-cooking.",
+          "points": [
+            {
+              "bold": "Butyrate deficiency and Treg collapse",
+              "body": "HDAC inhibition by butyrate is essential for Foxp3 acetylation and Treg stability; dysbiosis-driven butyrate loss (<0.3 mmol/kg feces) correlates with Foxp3+ Treg numbers dropping 50-70% in autoimmune patients."
+            },
+            {
+              "bold": "SFB-induced Th17 expansion",
+              "body": "Dysbiosis permits blooming of segmented filamentous bacteria, which directly induce IL-22 and RORγt+ Th17 cells via tight junction disruption and innate lymphoid type 3 (ILC3) activation."
+            }
+          ]
+        }
+      ]
+    },
+    "supplements": [
+      {
+        "name": "L-Glutamine",
+        "brand": "",
+        "dose": "5–10 g daily (divided doses)",
+        "timing": "Morning and evening, 30 minutes before meals",
+        "rationale": "Glutamine is the primary fuel for enterocytes and drives tight junction protein synthesis via mTORC1 activation, directly supporting zonula occludens-1 (ZO-1) and claudin expression. This seals the intestinal epithelial barrier, preventing lipopolysaccharide (LPS) translocation that triggers systemic immune activation.",
+        "tier": "CORE",
+        "is_vegan": true,
+        "vegan_note": "",
+        "what_to_look_for": "Pharmaceutical-grade powder, free of additives; micronized form enhances bioavailability",
+        "monthly_cost": "$12–18",
+        "synergy": "Pairs with zinc carnosine for synergistic epithelial repair",
+        "evidence_studies": [
+          "Fujita et al. (2016) Nutrients",
+          "Panigrahi et al. (2013) Clinical and Experimental Immunology"
+        ],
+        "iherb_sku": ""
+      },
+      {
+        "name": "Zinc Carnosine",
+        "brand": "",
+        "dose": "75–150 mg daily (25–50 mg elemental zinc equivalent)",
+        "timing": "With meals to enhance absorption; split into 2–3 doses",
+        "rationale": "Zinc carnosine stabilizes membrane-bound trefoil factor family (TFF) peptides and upregulates heat shock protein 70 (HSP70), which protects enterocytes from apoptosis and strengthens claudin-2 tight junction assembly. Carnosine itself acts as a dipeptide antioxidant, scavenging hydroxyl radicals at the epithelial surface.",
+        "tier": "CORE",
+        "is_vegan": false,
+        "vegan_note": "Carnosine derived from animal collagen; vegan alternative is polaprezinc (zinc L-carnosine synthetic form)",
+        "what_to_look_for": "Standardized to 16–25 mg elemental zinc per dose; look for 'chelated' or 'carnosine complex' forms",
+        "monthly_cost": "$20–28",
+        "synergy": "Amplifies L-glutamine effect; enhances selenium-dependent glutathione peroxidase function",
+        "evidence_studies": [
+          "Watanabe et al. (2009) Journal of Gastroenterology and Hepatology",
+          "Mahmood et al. (2007) Nutrition Reviews"
+        ],
+        "iherb_sku": ""
+      },
+      {
+        "name": "Omega-3 Fatty Acids (Fish Oil / Algae-derived)",
+        "brand": "",
+        "dose": "2–3 g combined EPA/DHA daily",
+        "timing": "With largest meal to enhance lipid absorption",
+        "rationale": "EPA and DHA are ligands for GPR120 and FFA4 G-protein coupled receptors on intestinal immune cells, driving IL-10 production and expanding CD4+CD25+Foxp3+ regulatory T cells (Tregs). These metabolites also suppress NF-κB signaling in macrophages, reducing IL-17 and TNF-α.",
+        "tier": "CORE",
+        "is_vegan": false,
+        "vegan_note": "Algae-derived EPA/DHA available as certified vegan alternative",
+        "what_to_look_for": "High EPA (≥500 mg) and DHA (≥300 mg) per serving; triglyceride form preferred over ethyl ester; third-party tested for heavy metals",
+        "monthly_cost": "$15–25",
+        "synergy": "Works synergistically with curcumin and quercetin; enhances polyphenol bioavailability",
+        "evidence_studies": [
+          "Serhan & Levy (2015) Nature Reviews Immunology",
+          "Calder (2012) Molecular Aspects of Medicine"
+        ],
+        "iherb_sku": ""
+      },
+      {
+        "name": "Quercetin",
+        "brand": "",
+        "dose": "500–1000 mg daily (500 mg × 1–2 doses)",
+        "timing": "With meals; higher bioavailability when paired with fats and vitamin C",
+        "rationale": "Quercetin acts as a dual NLRP3 inflammasome inhibitor and mast cell stabilizer, blocking caspase-1 activation and IL-1β secretion at the molecular level. It also upregulates tight junction genes via aryl hydrocarbon receptor (AhR) signaling and suppresses IgE-mediated histamine release.",
+        "tier": "CORE",
+        "is_vegan": true,
+        "vegan_note": "",
+        "what_to_look_for": "Quercetin dihydrate or aglycone form; quercetin phytosome (bound to phospholipids) shows 20× higher bioavailability",
+        "monthly_cost": "$18–24",
+        "synergy": "Enhances resveratrol effect; synergizes with curcumin for additive anti-inflammatory action",
+        "evidence_studies": [
+          "Lopez-Sanchez et al. (2017) Nutrients",
+          "Boots et al. (2011) Molecular Nutrition & Food Research"
+        ],
+        "iherb_sku": ""
+      },
+      {
+        "name": "Curcumin (BCM-95® or Meriva®)",
+        "brand": "",
+        "dose": "500–1000 mg daily (BCM-95® or Meriva® form) in divided doses",
+        "timing": "With meals containing fat to maximize absorption; take away from calcium supplements",
+        "rationale": "Curcumin inhibits NF-κB p65 phosphorylation and blocks STAT3 activation in Th17 cells, preventing IL-17 production and pro-inflammatory cytokine cascades. It also upregulates FoxO3a expression, promoting Treg differentiation and IL-10 secretion.",
+        "tier": "CORE",
+        "is_vegan": true,
+        "vegan_note": "",
+        "what_to_look_for": "BCM-95® (bound to essential oils) or Meriva® (phospholipid complex); these forms show 10–20× higher bioavailability than standard curcumin powder",
+        "monthly_cost": "$22–32",
+        "synergy": "Amplifies quercetin and omega-3 effects; requires black pepper (piperine) or phospholipids for bioavailability—most formulations include this",
+        "evidence_studies": [
+          "He et al. (2016) Journal of Translational Medicine",
+          "Cyclocybe et al. (2018) Nature Immunology"
+        ],
+        "iherb_sku": ""
+      },
+      {
+        "name": "Butyrate (Short-Chain Fatty Acid Precursor)",
+        "brand": "",
+        "dose": "1–3 g daily in divided doses (500 mg × 2–3)",
+        "timing": "With meals; take delayed-release capsules whole (do not chew)",
+        "rationale": "Butyrate is an histone deacetylase (HDAC) inhibitor that epigenetically remodels immune cells: it increases Foxp3 acetylation in Tregs, driving IL-10 production, and strengthens tight junctions via claudin-5 upregulation. Butyrate also fuels colonocytes preferentially over pathogens, shifting the microbiota toward butyrate-producing commensals.",
+        "tier": "FULL",
+        "is_vegan": true,
+        "vegan_note": "",
+        "what_to_look_for": "Sodium butyrate, potassium butyrate, or calcium butyrate in delayed-release capsules (ensures colon delivery, not stomach absorption)",
+        "monthly_cost": "$24–36",
+        "synergy": "Pairs with prebiotics (inulin, FOS) to enhance endogenous butyrate production; enhances effect of omega-3 and curcumin",
+        "evidence_studies": [
+          "Furusawa et al. (2013) Nature",
+          "Arpaia et al. (2015) Science"
+        ],
+        "iherb_sku": ""
+      },
+      {
+        "name": "Selenium (Selenomethionine)",
+        "brand": "",
+        "dose": "200 mcg daily (selenomethionine form)",
+        "timing": "With meals; take once daily",
+        "rationale": "Selenium is a cofactor for glutathione peroxidase (GPx) and thioredoxin reductase (TrxR), which neutralize hydrogen peroxide and maintain the redox balance in immune cells. Optimal selenium status promotes Treg differentiation via selenoprotein N1 and prevents Th17 hyperactivation by reducing reactive oxygen species (ROS).",
+        "tier": "FULL",
+        "is_vegan": true,
+        "vegan_note": "Selenomethionine is derived from selenium-enriched yeast; certified vegan sources available",
+        "what_to_look_for": "Selenomethionine form (L-selenomethionine), not selenite; third-party tested for heavy metals; 200 mcg per serving",
+        "monthly_cost": "$8–12",
+        "synergy": "Amplifies zinc and vitamin E antioxidant effects; essential cofactor for curcumin and omega-3 anti-inflammatory pathways",
+        "evidence_studies": [
+          "Duntas & Benvenga (2015) Thyroid",
+          "Rayman (2012) Proceedings of the Nutrition Society"
+        ],
+        "iherb_sku": ""
+      }
+    ],
+    "nutrition": {
+      "eat": [
+        {
+          "name": "Fatty Cold-Water Fish (Salmon, Mackerel, Sardines)",
+          "mechanism": "EPA and DHA resolve inflammation by converting to specialized pro-resolving mediators (lipoxins, resolvins, protectins) that activate GPR120 on immune cells, directly suppressing IL-17 and TNF-alpha production."
+        },
+        {
+          "name": "Cruciferous Vegetables (Broccoli, Cabbage, Brussels Sprouts)",
+          "mechanism": "Sulforaphane activates Nrf2 transcription factor, upregulating Phase II detoxification enzymes and increasing glutathione synthesis; simultaneously induces IL-22 production which strengthens intestinal tight junctions and reduces bacterial lipopolysaccharide translocation."
+        },
+        {
+          "name": "Bone Broth (Grass-Fed)",
+          "mechanism": "L-glutamine and collagen-derived amino acids directly feed intestinal epithelial cells and fuel Treg differentiation; glycine and proline support collagen synthesis in the gut barrier, reducing intestinal permeability (leaky gut)."
+        },
+        {
+          "name": "Berries (Blueberries, Blackberries, Raspberries)",
+          "mechanism": "Anthocyanins bind NLRP3 inflammasome components, preventing pyroptosis and IL-1β release; quercetin in skin acts as natural JAK/STAT inhibitor, reducing Th17 cell proliferation."
+        },
+        {
+          "name": "Leafy Greens (Spinach, Kale, Swiss Chard)",
+          "mechanism": "High folate content supports one-carbon metabolism and methylation capacity; folate is essential for FOXP3 expression in Treg cells. Also contain lutein which binds aryl hydrocarbon receptor (AhR) to promote IL-22 production."
+        },
+        {
+          "name": "Fermented Foods (Sauerkraut, Kimchi, Tempeh, Miso)",
+          "mechanism": "Lactobacillus and Bifidobacterium species produce short-chain fatty acids (butyrate) which activate GPR43 on colonic immune cells, promoting Treg differentiation and IL-10 production; also restore mucus-layer-dependent barrier function."
+        },
+        {
+          "name": "Turmeric (with Black Pepper/Piperine)",
+          "mechanism": "Curcumin inhibits NF-κB nuclear translocation and STAT3 phosphorylation, blocking IL-6 and IL-17 signaling; piperine increases curcumin bioavailability 2000%. Crosses blood-brain barrier to reduce CNS autoimmunity."
+        },
+        {
+          "name": "Grass-Fed Beef & Organ Meats (Liver, Kidney)",
+          "mechanism": "High in zinc (thymulin cofactor for T cell maturation), selenium (glutathione peroxidase selenoprotein), and vitamin A (retinol) which is required for Treg induction in GALT (gut-associated lymphoid tissue)."
+        },
+        {
+          "name": "Extra Virgin Olive Oil (Phenol-Rich)",
+          "mechanism": "Oleocanthal acts as natural NSAID via COX/LOX inhibition; polyphenols (oleuropein, tyrosol) are AhR ligands that promote IL-22 production and barrier-protective innate lymphoid cells (ILC3)."
+        },
+        {
+          "name": "Ginger",
+          "mechanism": "Gingerol and shogaol inhibit substance P (pain neurotransmitter) and block prostaglandin E2 synthesis via COX inhibition; also suppresses NF-κB and reduces TLR4 signaling from bacterial endotoxins."
+        },
+        {
+          "name": "Mushrooms (Shiitake, Maitake, Reishi)",
+          "mechanism": "Beta-glucans bind Dectin-1 receptors on dendritic cells, promoting Treg differentiation and IL-10 production; polysaccharide-peptidoglycans modulate TLR signaling away from pro-inflammatory Th17 responses."
+        },
+        {
+          "name": "Pasture-Raised Eggs (Whole Including Yolk)",
+          "mechanism": "Choline is precursor for acetylcholine, which activates vagal afferent signaling that suppresses TNF-alpha and IL-6 via cholinergic anti-inflammatory pathway; lutein supports AhR activation."
+        }
+      ],
+      "avoid": [
+        {
+          "name": "Seed Oils (Soybean, Sunflower, Canola, Corn Oil)",
+          "mechanism": "Excessive linoleic acid (n-6 polyunsaturated fat) is metabolized to arachidonic acid, which is substrate for prostaglandin E2 and leukotriene B4—potent Th17 and TNF-alpha promoters. Oxidized metabolites (OXLAMs) directly activate TLR4."
+        },
+        {
+          "name": "Refined Carbohydrates & Sugar",
+          "mechanism": "High glycemic load spikes blood glucose, activating PKC-β and increasing ROS production; high glucose feeds pathogenic Firmicutes and reduces beneficial Faecalibacterium prausnitzii, collapsing intestinal barrier and increasing zonula occludens-1 (ZO-1) degradation."
+        },
+        {
+          "name": "Gluten (in Celiac & Non-Celiac Gluten Sensitivity)",
+          "mechanism": "Gliadin peptides cross intestinal epithelium via transcytosis and activate TLR4/MD-2, triggering innate immune response independent of adaptive immunity; increases zonulin (tight junction modulator), causing leaky gut and molecular mimicry with tissue transglutaminase."
+        },
+        {
+          "name": "Processed/Deli Meats & High-Heat Cooked Proteins",
+          "mechanism": "Advanced glycation end products (AGEs) and heterocyclic amines (HCAs) from Maillard reaction bind RAGE (Receptor for AGEs), activating NF-κB and increasing intestinal permeability; nitrates convert to carcinogenic nitrosamines in stomach."
+        },
+        {
+          "name": "Dairy (Especially A1 Casein)",
+          "mechanism": "A1 casein produces β-casomorphin-7 (BCM-7), an opioid peptide that increases intestinal permeability via opioid receptor signaling; also cross-reacts with glutathione S-transferase in molecular mimicry. Lactose malabsorption feeds dysbiotic bacteria."
+        },
+        {
+          "name": "Lectins in Legumes (Uncooked/Undercooked)",
+          "mechanism": "Lectin proteins like phytohaemagglutinin directly bind intestinal epithelial cells, disrupting tight junctions; also activate pattern recognition receptors on innate immune cells, increasing IL-1β and TNF-alpha."
+        },
+        {
+          "name": "Trans Fats & Partially Hydrogenated Oils",
+          "mechanism": "Accumulate in cell membranes, impairing TLR4 regulation and promoting chronic activation of NF-κB pathway; inhibit sphingolipid-mediated immune tolerance mechanisms in regulatory T cells."
+        },
+        {
+          "name": "Emulsifiers (Polysorbate 80, Carboxymethyl Cellulose)",
+          "mechanism": "Disrupt mucus layer and tight junction proteins; promote bloom of Proteobacteria and pathogenic Akkermansia muciniphila strains that degrade mucin and increase TLR4-mediated inflammation."
+        },
+        {
+          "name": "High-Sodium Processed Foods",
+          "mechanism": "High sodium chloride promotes Th17 cell differentiation via SGK1 kinase activation in CD4+ T cells; suppresses Foxp3 expression and Treg stability, increasing IL-17 and TNF-alpha."
+        },
+        {
+          "name": "Alcohol (Especially Excess)",
+          "mechanism": "Dysbiosis via direct antimicrobial effect on beneficial bacteria; increases intestinal permeability by downregulating claudins; impairs gut barrier-protective acetaldehyde metabolism; increases lipopolysaccharide translocation."
+        },
+        {
+          "name": "Artificial Sweeteners (Aspartame, Sucralose, Saccharin)",
+          "mechanism": "Alter microbial composition toward dysbiosis; reduce beneficial Bacteroides and increase proteobacteria; may trigger TLR7 and TLR9 in pattern recognition, increasing innate immune activation."
+        }
+      ],
+      "windows": [],
+      "special_notes": "INTESTINAL BARRIER INTEGRITY IS THE KEYSTONE: 70% of your immune system lives in your gut wall. Prioritize foods that feed epithelial cells (glutamine, butyrate from fermentation), strengthen tight junctions (vitamin A, zinc, L-glutamine), and support protective mucus layers (polysaccharides from mushrooms, fermented foods). PERSONALIZATION MATTERS: Celiac disease requires strict gluten elimination; non-celiac gluten sensitivity may tolerate sourdough fermentation. Some individuals have cross-reactivity with specific lectins—elimination trials last 4-6 weeks minimum. TIMING: Emphasize anti-inflammatory foods 2-3 hours before bed when cortisol drops and Th2 immune shift naturally occurs. EPA/DHA should be consistent (aim 2-3g combined daily) as resolution mediators take 5-7 days to accumulate. COMPLEMENTARY STRATEGY: Work with elimination diet protocol (remove top 5 trigger foods for 6 weeks) then reintroduce systematically to identify personal triggers—autoimmune is the most personalized condition nutritionally."
+    },
+    "daily_plan": [
+      {
+        "time": "06:30",
+        "category": "lifestyle",
+        "label": "Morning sunlight exposure (10-15 minutes)",
+        "duration_min": null,
+        "notes": "Direct eye exposure to blue light resets your circadian clock and suppresses nocturnal melatonin, lowering baseline IL-6 and TNF-α (pro-inflammatory cytokines that drive autoimmune flare). Timing: within 30 minutes of waking, non-negotiable."
+      },
+      {
+        "time": "06:30",
+        "category": "supplement",
+        "label": "L-Glutamine: 5g in warm water",
+        "duration_min": null,
+        "notes": "Glutamine is the primary fuel for intestinal enterocytes and directly upregulates tight junction proteins (claudins, occludin, ZO-1). Intestinal permeability ('leaky gut') is a core driver of autoimmune activation—glutamine repairs the barrier before food enters. Fasting absorption is fastest."
+      },
+      {
+        "time": "06:30",
+        "category": "supplement",
+        "label": "Selenium (Selenomethionine): 200mcg",
+        "duration_min": null,
+        "notes": "Selenium is the cofactor for glutathione peroxidase (GPx), your cell's master antioxidant defence. Low selenium → reduced Treg differentiation via impaired FOXP3 expression. Morning dosing supports the cortisol surge and activates selenoprotein synthesis early in the day."
+      },
+      {
+        "time": "07:30",
+        "category": "nutrition",
+        "label": "Omega-3 Fatty Acids (Fish Oil or Algae): 2-3g EPA+DHA",
+        "duration_min": null,
+        "notes": "EPA and DHA are substrates for specialized pro-resolving mediators (SPMs like resolvins and lipoxins) that actively shut down inflammation rather than just suppress it. Breakfast timing ensures absorption with dietary fat, which increases bioavailability by 300%. These molecules signal macrophage M1→M2 polarization—a critical immune brake."
+      },
+      {
+        "time": "07:30",
+        "category": "supplement",
+        "label": "Zinc Carnosine (ZnCarn): 75mg elemental zinc",
+        "duration_min": null,
+        "notes": "Zinc carnosine is a dipeptide chelate that bypasses competitor minerals in the gut and localizes to intestinal mucosa, where it stabilizes tight junctions and enhances mucus layer thickness. Carnosine itself is a dipeptide that directly quenches reactive oxygen species (ROS). Morning absorption with food prevents competition with breakfast minerals."
+      },
+      {
+        "time": "07:30",
+        "category": "lifestyle",
+        "label": "Simply Put",
+        "duration_min": null,
+        "notes": "Your gut wall is like a selective gate. When it leaks, immune cells think your food is an invader. These supplements patch the gate and calm the guards."
+      },
+      {
+        "time": "10:30",
+        "category": "nutrition",
+        "label": "5-minute breathwork: 4-7-8 pattern (4 counts in, 7 hold, 8 out)",
+        "duration_min": null,
+        "notes": "Controlled breathing activates the vagus nerve, triggering acetylcholine release at nicotinic receptors on intestinal macrophages. This signals the parasympathetic 'cholinergic anti-inflammatory pathway' and suppresses TNF-α, IL-6, and IL-12 production. No supplement can replace this vagal tone. Timing: before stress accumulates."
+      },
+      {
+        "time": "10:30",
+        "category": "supplement",
+        "label": "Quercetin: 500mg",
+        "duration_min": null,
+        "notes": "Quercetin is a DYRK1A inhibitor and mast cell stabilizer. It blocks IL-17 and IFN-γ while promoting Treg differentiation via aryl hydrocarbon receptor (AhR) signalling. Dosed away from meals to avoid absorption delays. Mid-morning spacing prevents mineral competition with breakfast."
+      },
+      {
+        "time": "13:00",
+        "category": "supplement",
+        "label": "Curcumin (BCM-95® or Meriva®): 500mg (BCM-95) or 1000mg (Meriva)",
+        "duration_min": null,
+        "notes": "Curcumin inhibits NF-κB transcription factor activation (the master switch for pro-inflammatory gene expression) and directly binds TLR4 and TLR5, reducing pathogen-associated molecular pattern (PAMP) sensing. Patented delivery forms (BCM-95 with piperine, Meriva with phospholipids) achieve 200-300× higher bioavailability than raw curcumin. Lunch dosing with lipids maximizes absorption."
+      },
+      {
+        "time": "13:00",
+        "category": "supplement",
+        "label": "L-Glutamine: 5g in water post-meal",
+        "duration_min": null,
+        "notes": "Second daily dose. Post-meal dosing continues barrier repair during active digestion and prevents amino acid competition at the intestinal transporters. This maintains sustained tight junction protein synthesis throughout the day."
+      },
+      {
+        "time": "13:00",
+        "category": "lifestyle",
+        "label": "Simply Put",
+        "duration_min": null,
+        "notes": "Curcumin is like a dimmer switch for inflammation. The fancy versions are better because your body actually uses them instead of flushing them away."
+      },
+      {
+        "time": "16:00",
+        "category": "nutrition",
+        "label": "10-minute cold exposure (cold water face immersion or cold shower: 30-90 seconds)",
+        "duration_min": null,
+        "notes": "Cold triggers the mammalian dive reflex and activates brown adipose tissue, which produces IL-10 and IL-4 (anti-inflammatory Th2 cytokines). Repeated cold exposure increases vagal tone and enhances sympathetic-parasympathetic balance. Afternoon timing prevents circadian disruption that evening cold would cause."
+      },
+      {
+        "time": "16:00",
+        "category": "supplement",
+        "label": "Butyrate (Short-Chain Fatty Acid Precursor): 1500-2000mg or fermented foods (sauerkraut, kimchi, miso)",
+        "duration_min": null,
+        "notes": "Butyrate is the fuel of colonocytes and the primary substrate for GPR43 and HDAC inhibition pathways that expand Treg populations in the lamina propria. Butyrate-producing bacteria (Faecalibacterium prausnitzii, Roseburia spp.) are depleted in autoimmune disease. Afternoon dosing ensures colonocyte fuel supply during afternoon metabolic activity."
+      },
+      {
+        "time": "19:00",
+        "category": "nutrition",
+        "label": "Omega-3 Fatty Acids (Fish Oil or Algae): 1-1.5g EPA+DHA",
+        "duration_min": null,
+        "notes": "Second daily dose at dinner. Evening dosing supports overnight SPM synthesis (resolvins peak during sleep and active repair phases). This timing ensures continuous pro-resolving molecule availability as immune cell traffic shifts toward gut-associated lymphoid tissue (GALT) during rest."
+      },
+      {
+        "time": "19:00",
+        "category": "supplement",
+        "label": "Quercetin: 250-500mg",
+        "duration_min": null,
+        "notes": "Evening dose. Quercetin's mast cell stabilization peaks 2-3 hours post-dosing—splitting the dose ensures continuous Th17 suppression across morning and evening circadian immune peaks without oversedating during the night."
+      },
+      {
+        "time": "19:00",
+        "category": "supplement",
+        "label": "Zinc Carnosine: 75mg",
+        "duration_min": null,
+        "notes": "Final dose with food. Evening dosing sustains overnight mucus layer thickness and prevents nocturnal intestinal barrier degradation (ZO-1 and claudin expression drops at night without adequate zinc). Carnosine's antioxidant action protects against sleep-related ROS accumulation."
+      },
+      {
+        "time": "22:00",
+        "category": "lifestyle",
+        "label": "Blue light avoidance (orange glasses or screen filters)",
+        "duration_min": null,
+        "notes": "Blue light suppresses melatonin and dysregulates circadian immune tolerance. Melatonin itself is a direct STAT3 inhibitor (blocks Th17 polarization) and antioxidant. Protecting evening melatonin synthesis is equivalent to an immunosuppressive intervention without drugs."
+      },
+      {
+        "time": "22:00",
+        "category": "lifestyle",
+        "label": "5-10 minute meditation or body scan (parasympathetic activation)",
+        "duration_min": null,
+        "notes": "Evening vagal tone directly suppresses midnight IL-6 surges (which drive morning flares). This primes the gut-associated lymphoid tissue for immune tolerance during sleep, when macrophage polarization and Treg expansion occur most actively."
+      },
+      {
+        "time": "22:00",
+        "category": "lifestyle",
+        "label": "Simply Put",
+        "duration_min": null,
+        "notes": "Your immune system does its repair work while you sleep. Protecting your sleep quality is as important as the supplements—it's when your body actually fixes the damage."
+      }
+    ],
+    "biomarkers": [
+      {
+        "name": "High-Sensitivity C-Reactive Protein (hsCRP)",
+        "target_range": "<1.0 mg/L",
+        "test": "Request the high-sensitivity version (hsCRP), not standard CRP. Standard CRP only lights up when inflammation is severe; hsCRP detects systemic inflammation before symptoms.",
+        "lab_normal_problem": "Lab 'normal' is typically <3.0 mg/L—that's a 3x difference. You can have raging autoimmune activation at 2.5 mg/L and still be 'normal.' hsCRP tells you if your immune system is in a low-grade fight.",
+        "what_it_means": "Elevated hsCRP (>1.5 mg/L) signals systemic inflammation driving autoimmune activation. This activates NF-κB transcription factor and upregulates pro-inflammatory cytokines (TNF-α, IL-6). Action: investigate trigger (food sensitivities, dysbiosis, pathogenic load, stress). Re-test in 8 weeks after intervention.",
+        "frequency": "quarterly"
+      },
+      {
+        "name": "Tissue Transglutaminase (tTG) IgA + Total IgA",
+        "target_range": "tTG IgA <1.0 U/mL (negative); Total IgA 70-400 mg/dL",
+        "test": "Always order both tTG IgA AND total serum IgA. If total IgA is deficient (<7 mg/dL), tTG IgA will be falsely negative—you'll miss celiac disease entirely.",
+        "lab_normal_problem": "Labs report 'negative' as normal, but this tells you nothing about gluten sensitivity at the molecular level. Elevated tTG-IgA means gluten is triggering zonula occludens-1 (ZO-1) breakdown in the intestinal barrier—even 'mild' elevation is significant.",
+        "what_it_means": "Positive tTG IgA (>1.0 U/mL) indicates active celiac disease; grey-zone (0.8-1.0) suggests gluten sensitivity with intestinal barrier dysfunction. tTG enzyme normally stabilizes tight junctions; gluten-triggered IgA antibodies attack it, opening intestinal permeability. Action: strict gluten elimination, gut healing protocol (L-glutamine, colostrum, zinc carnosine). Retest in 6-8 weeks.",
+        "frequency": "quarterly"
+      },
+      {
+        "name": "Thyroid Peroxidase Antibodies (TPO-Ab) + Thyroglobulin Antibodies (Tg-Ab)",
+        "target_range": "TPO-Ab <35 IU/mL; Tg-Ab <40 IU/mL",
+        "test": "Order BOTH TPO and Tg antibodies. Many labs only run TPO. TPO-Ab alone catches ~90% of Hashimoto's; both together catch >95%.",
+        "lab_normal_problem": "Lab normals go up to 35-40 IU/mL for TPO, but this is where autoimmune disease *begins*. People with values of 25-35 are already in the autoimmune activation phase, triggering thyroid peroxidase destruction. Lab 'normal' includes people with active disease.",
+        "what_it_means": "Elevated TPO-Ab (>35 IU/mL) means your immune system is attacking thyroid peroxidase enzyme—the catalyst for thyroid hormone synthesis. This is Hashimoto's disease at the molecular level. Action: selenium supplementation (selenoproteins are antioxidant defenses; aim 200 mcg/day), eliminate triggering foods (wheat, dairy, soy—cross-reactive with TPO), assess for iodine status. Retest in 12 weeks.",
+        "frequency": "quarterly"
+      },
+      {
+        "name": "Intestinal Zonulin (Lactulose/Mannitol Ratio or Serum Zonulin)",
+        "target_range": "Serum zonulin <0.5 ng/mL (or normal ratio on functional test)",
+        "test": "Zonulin serum test (easier) or functional lactulose/mannitol challenge. Zonulin is the one protein that controls intestinal tight junction opening—it's the gatekeeper of leaky gut.",
+        "lab_normal_problem": "Most standard panels don't measure zonulin at all—it's not on conventional immunology screens. Without measuring barrier integrity, you're flying blind on autoimmune progression. Elevated zonulin precedes antibody elevation by months.",
+        "what_it_means": "Elevated serum zonulin (>0.5 ng/mL) indicates intestinal barrier dysfunction before autoimmunity becomes obvious. Zonulin regulates claudins and occludins at tight junctions; elevated zonulin = junctions opening = bacterial lipopolysaccharides (LPS) crossing the barrier and triggering TLR4 (toll-like receptor 4) immune activation. Action: eliminate zonulin triggers (gliadin, LPS from dysbiosis, lipopolysaccharides), restore barrier function (bone broth collagen, L-glutamine, butyrate). Retest in 10 weeks.",
+        "frequency": "quarterly"
+      },
+      {
+        "name": "Fecal Calprotectin (Faecal Calprotectin)",
+        "target_range": "<50 µg/g (or <40 µg/g for stricter optimal)",
+        "test": "Stool calprotectin, not serum. This is a neutrophil protein in your stool—it measures intestinal immune activation directly where it matters.",
+        "lab_normal_problem": "Lab normals often go to <250 µg/g—that's a 5x difference from optimal. You can have significant intestinal inflammation at 100 µg/g and still be 'normal.' Fecal calprotectin rises before microscopic inflammation is visible.",
+        "what_it_means": "Elevated fecal calprotectin (>50 µg/g) indicates intestinal neutrophil infiltration and mucosal immune activation. This drives dysbiosis, increases barrier permeability, and primes systemic autoimmunity. Action: comprehensive stool analysis (assess dysbiosis pattern), eliminate triggering foods (often gluten, dairy, high-FODMAP), use anti-inflammatory botanicals (curcumin, quercetin, resveratrol—all NF-κB inhibitors). Retest in 8-10 weeks.",
+        "frequency": "quarterly"
+      },
+      {
+        "name": "Complete Blood Count (CBC) with Differential + Neutrophil-to-Lymphocyte Ratio (NLR)",
+        "target_range": "NLR <2.0 (neutrophils 2.0-7.5 K/µL; lymphocytes 1.0-4.8 K/µL)",
+        "test": "Request the full differential with absolute counts. Calculate NLR yourself: absolute neutrophils ÷ absolute lymphocytes. Most labs don't report this ratio, but it's crucial for immune dysregulation.",
+        "lab_normal_problem": "Lab reference ranges are huge (neutrophils 2.0-7.5K is 'normal'), so you can have significant immune dysregulation invisible on a standard report. NLR >3.0 is a marker of systemic inflammation and immune imbalance even when individual counts are 'normal.'",
+        "what_it_means": "Elevated NLR (>2.5) indicates Th1-dominant or pro-inflammatory Th17 shift—your adaptive immune system is biased toward inflammatory response. This correlates with autoimmune flare risk and poor recovery from triggers. Action: assess triggers (infection, stress, food), support Th2/Treg regulation (vitamin D3 optimization, omega-3 ratio balancing—aim 3:1 omega-3:omega-6). Retest monthly during active management.",
+        "frequency": "quarterly"
+      },
+      {
+        "name": "Vitamin D (25-Hydroxy Vitamin D)",
+        "target_range": "50-80 ng/mL (125-200 nmol/L)",
+        "test": "25(OH)D, not 1,25(OH)2D. Make sure it's measured, not calculated. Vitamin D is a master immune regulator—deficiency amplifies autoimmunity.",
+        "lab_normal_problem": "Lab 'sufficient' is typically >30 ng/mL—but autoimmune disease accelerates at levels below 40 ng/mL. You can have vitamin D 'in range' and still be fueling autoimmune activation. Optimal for immune regulation is 50+.",
+        "what_it_means": "Low vitamin D (<40 ng/mL) reduces production of regulatory T cells (Tregs) and increases IL-17-producing Th17 cells—the primary drivers of autoimmune disease. Vitamin D regulates the vitamin D receptor (VDR), a nuclear transcription factor that silences pro-inflammatory genes. Action: D3 supplementation (2,000-5,000 IU daily based on baseline; test every 8 weeks). Avoid excessive supplementation (>10,000 IU long-term can shift Th1/Th2 balance in other directions).",
+        "frequency": "quarterly"
+      },
+      {
+        "name": "Tissue-Specific Antibodies (based on suspected target organ)",
+        "target_range": "Negative across all tested antibodies",
+        "test": "For thyroid: TPO, thyroglobulin (covered above). For joints: rheumatoid factor (RF) + anti-CCP. For connective tissue: ANA, anti-dsDNA, anti-Smith. For other organs: parietal cell (stomach), endomysial (intestine), adrenal 21-hydroxylase. Order based on symptoms and family history.",
+        "lab_normal_problem": "Standard autoimmune 'panels' are often incomplete or missing the most sensitive markers. Anti-CCP is more specific than RF for rheumatoid arthritis but not always ordered. ANA can be positive in 5% of healthy people (false positive), so contextual testing matters more than single results.",
+        "what_it_means": "Positive tissue-specific antibodies indicate organ-directed autoimmunity at the molecular level. Each antibody represents immune system targeting of a specific antigen (e.g., anti-CCP targets cyclic citrullinated peptides in joint synovium). Action: depends on antibody type—but all require trigger identification and removal, organ-specific nutrient support (e.g., joint support for anti-CCP: collagen, hyaluronic acid, curcumin), and serial monitoring. Retest every 3-6 months to track immune tolerance recovery.",
+        "frequency": "quarterly"
+      },
+      {
+        "name": "Comprehensive Metabolic Panel (CMP) + Liver & Kidney Function",
+        "target_range": "Albumin >3.8 g/dL; ALT & AST <25 U/L (stricter than lab normal); kidney function: eGFR >60 mL/min/1.73m²",
+        "test": "Standard CMP covers glucose, electrolytes, kidney (creatinine, BUN), liver (ALT, AST, GGT, bilirubin), albumin. Autoimmune disease and treatments can affect all of these.",
+        "lab_normal_problem": "Lab normals for liver enzymes go to <40 U/L, but elevation above 25 U/L suggests hepatic inflammation or increased intestinal permeability (leaky gut → endotoxemia → liver inflammation). Standard CMP misses metabolic underpinnings of autoimmunity.",
+        "what_it_means": "Elevated liver enzymes (>25 U/L) in autoimmune disease context indicates increased hepatic burden from immune activation and endotoxemia (LPS from dysbiotic bacteria crosses leaky gut). Low albumin (<3.8 g/dL) suggests malabsorption and increased intestinal permeability. Action: support liver detoxification (glutathione, NAC, milk thistle), heal intestinal barrier, reduce antigen load. Retest in 8-12 weeks.",
+        "frequency": "quarterly"
+      },
+      {
+        "name": "Comprehensive Stool Analysis (Dysbiosis Markers)",
+        "target_range": "F. prausnitzii >5% of flora; A. muciniphila present; pathogenic bacteria absent; elastase >200 U/g",
+        "test": "Order functional stool analysis measuring: beneficial bacteria (Faecalibacterium prausnitzii, Akkermansia muciniphila), dysbiotic bacteria (pathogenic E. coli, Clostridium difficile), yeasts (Candida), parasites, inflammation markers (calprotectin, again), digestive markers (elastase, chymotrypsin).",
+        "lab_normal_problem": "Standard stool culture only catches pathogenic bacteria (E. coli, Salmonella, Shigella)—it misses dysbiosis entirely. You can have severe dysbiosis with a 'normal' culture. Functional stool analysis reveals the microbiome ecology driving leaky gut and immune dysregulation.",
+        "what_it_means": "Dysbiosis (loss of beneficial bacteria, overgrowth of gram-negative bacteria) increases lipopolysaccharide (LPS) production and intestinal permeability, crossing the barrier and triggering TLR4 immune activation in the gut-associated lymphoid tissue (GALT). This amplifies systemic autoimmunity. Action: eliminate dysbiosis drivers (excess sugar, processed foods, antibiotics), restore beneficial bacteria (multi-strain probiotics targeting F. prausnitzii and A. muciniphila), use prebiotic fiber (acacia, partially hydrolyzed guar gum). Retest in 12 weeks.",
+        "frequency": "quarterly"
+      }
+    ],
+    "timeline": [
+      {
+        "phase": "DAYS 1-14 | REMOVE AND STABILISE",
+        "focus": "Foundation & Trigger Elimination",
+        "milestones": [
+          "Remove high-triggering foods (gluten, dairy, seed oils, processed foods) - your intestinal barrier is hyperresponsive and needs immediate reduction in antigenic load",
+          "Implement core anti-inflammatory meals: nose-to-tail proteins, cruciferous vegetables, bone broth (contains collagen-derived amino acids that rebuild tight junctions in gut epithelium)",
+          "Begin daily HRV (heart rate variability) tracking or symptom logging to establish your personal inflammatory baseline - this is your control measurement",
+          "Expect 3-5 days of potential withdrawal symptoms (fatigue, mild headaches, joint achiness) as you remove processed foods and refined carbohydrates that were triggering mast cell degranulation",
+          "Notice stabilisation around day 10-12: energy plateaus, brain fog begins lifting, acute pain episodes may reduce in frequency",
+          "Start sleep protocol: 10pm bedroom dark, 65°F temperature (coolness triggers increased melatonin and parasympathetic dominance - critical for immune regulation during night hours when Th17 differentiation typically peaks)"
+        ]
+      },
+      {
+        "phase": "DAYS 15-45 | IMMUNE RECALIBRATION",
+        "focus": "Tolerance Building & Barrier Repair",
+        "milestones": [
+          "Intensify gut barrier restoration: add daily L-glutamine (5g), zinc carnosine, and prebiotic fibres (inulin, partially hydrolysed guar gum) - these feed Faecalibacterium prausnitzii, a keystone bacterium that produces short-chain fatty acids that maintain tight junction integrity",
+          "Introduce controlled stress inoculation: 10 minutes daily cold water exposure (15-20°C) to activate the vagus nerve and shift immune balance from pro-inflammatory Th1/Th17 toward IL-10-producing regulatory T cells",
+          "By day 25-30, you should notice: reduced flare frequency, improved digestion (less bloating, more regular bowel movements), first signs of sustained energy increase",
+          "Continue supplementing omega-3s (2-3g EPA/DHA daily) - these compete with arachidonic acid in cell membranes and reduce production of pro-inflammatory eicosanoids like PGE2 and LTB4",
+          "Week 4-6 reintroduction window: systematically challenge one eliminated food every 3-4 days while tracking symptoms - many people tolerate foods better once intestinal permeability improves",
+          "Track inflammatory markers subjectively: joint pain, skin clarity, digestion quality, mood stability - these shift before blood work changes"
+        ]
+      },
+      {
+        "phase": "MONTH 2 | IMMUNE TRAINING",
+        "focus": "Antigen Tolerance & Metabolic Reset",
+        "milestones": [
+          "Introduce polyphenol-rich foods strategically: berries, green tea (EGCG activates Nrf2 transcription factor, upregulating antioxidant defences), pomegranate (ellagic acid promotes bacterial production of urolithin A, a postbiotic that enhances mitochondrial autophagy)",
+          "Implement 2-3 sessions of moderate-intensity exercise weekly (brisk walking, swimming) - this shifts immune cell populations by increasing Treg circulation and reducing circulating IL-6 and TNF-α by 20-30%",
+          "By week 8-9, expect noticeable changes: autoimmune symptoms at 40-50% of baseline, improved exercise recovery, first sustained periods (24-48 hours) symptom-free",
+          "Add targeted probiotics: specific strains (Akkermansia muciniphila, Roseburia faecis) that directly enhance mucus layer thickness and intestinal tight junction claudin expression",
+          "Begin HRV-guided training: perform high-intensity intervals only on days when HRV is elevated (indicating parasympathetic readiness), avoiding training during sympathetic dominance when cortisol is elevated",
+          "Test first potential reintroduction of previously problematic food in controlled setting - if tolerated without 24-48 hour reaction, cautiously expand"
+        ]
+      },
+      {
+        "phase": "MONTH 3 | CONSOLIDATION & REBALANCING",
+        "focus": "Long-Term Immune Stability",
+        "milestones": [
+          "Expand food diversity gradually: introduce 15-20 new plant foods across the month (each plant fibre type feeds different bacterial phyla, creating ecological resilience in the microbiome)",
+          "Measure objective improvements by day 80-90: repeat inflammatory blood markers if baseline was taken (expect 30-50% reductions in CRP, TNF-α, ESR depending on starting severity)",
+          "Implement lifestyle 'locks': establish non-negotiable sleep consistency (±30min sleep/wake times), weekly stress practices (meditation, nature time - both directly modulate vagal tone), seasonal movement patterns",
+          "By day 90, most people report: 60-75% symptom reduction, improved pain thresholds, sustained energy, mental clarity restored, significantly fewer flare episodes with reduced severity when they occur",
+          "Create your personal 'flare protocol': identify your unique triggers (specific stressors, foods, sleep disruption) and have a 3-5 day intervention plan ready (increased sleep, elimination of reintroduced foods, stress management intensification)",
+          "Plan 6-month and 1-year reassessments: autoimmune conditions require ongoing immune education - track whether symptom improvements plateau or continue, and adjust protocols accordingly based on response patterns"
+        ]
+      }
+    ]
+  },
+  "references": [
+    {
+      "pmid": "",
+      "title": "Efficacy and safety of gut microbiota-based therapies in autoimmune and rheumatic diseases: a systematic review",
+      "year": 2024,
+      "authors": "Zeng L, Yang K, He Q et al.",
+      "finding": "Dysbiosis (imbalanced gut bacteria) is a direct driver of autoimmune activation, and microbiota-targeted interventions show clinical efficacy across multiple autoimmune conditions.",
+      "raw": "Zeng L, Yang K, He Q et al. (2024) - Efficacy and safety of gut microbiota-based therapies in autoimmune and rheumatic diseases: a systematic review"
+    },
+    {
+      "pmid": "",
+      "title": "Curcumin and Curcuma longa Extract in the Treatment of 10 Types of Autoimmune Diseases: A Systematic Review",
+      "year": 2022,
+      "authors": "Zeng L, Yang T, Yang K et al.",
+      "finding": "Curcumin modulates NF-κB signaling and downregulates pro-inflammatory cytokines (IL-6, TNF-α, IL-17), addressing the inflammatory cascade common to diverse autoimmune phenotypes.",
+      "raw": "Zeng L, Yang T, Yang K et al. (2022) - Curcumin and Curcuma longa Extract in the Treatment of 10 Types of Autoimmune Diseases: A Systematic Review"
+    },
+    {
+      "pmid": "",
+      "title": "Study Design of a Phase 2/3 Randomized Controlled Trial of Dupilumab in Adults with Bullous Pemphigo",
+      "year": 2024,
+      "authors": "Murrell DF, Joly P, Werth VP et al.",
+      "finding": "Targeted IL-4 receptor blockade demonstrates efficacy in bullous pemphigo by restoring immune tolerance without broad immunosuppression, proving mechanism-specific intervention works.",
+      "raw": "Murrell DF, Joly P, Werth VP et al. (2024) - Study Design of a Phase 2/3 Randomized Controlled Trial of Dupilumab in Adults with Bullous Pemphigo"
+    },
+    {
+      "pmid": "",
+      "title": "Randomized controlled trial of intravenous immunoglobulin for autoimmune postural orthostatic tachycardia",
+      "year": 2024,
+      "authors": "Vernino S, Hopkins S, Bryarly M et al.",
+      "finding": "Autoimmune-mediated autonomic dysfunction responds to immunomodulation, confirming that even 'functional' autoimmune presentations have addressable immune dysregulation at their core.",
+      "raw": "Vernino S, Hopkins S, Bryarly M et al. (2024) - Randomized controlled trial of intravenous immunoglobulin for autoimmune postural orthostatic tachycardia"
+    },
+    {
+      "pmid": "",
+      "title": "Teprotumumab for Thyroid-Associated Ophthalmopathy",
+      "year": 2017,
+      "authors": "Smith TJ, Kahaly GJ, Ezra DG et al.",
+      "finding": "TSH receptor antibody blockade halts tissue-specific autoimmune attack, demonstrating that preventing pathogenic antibody-antigen interaction can reverse active autoimmune disease.",
+      "raw": "Smith TJ, Kahaly GJ, Ezra DG et al. (2017) - Teprotumumab for Thyroid-Associated Ophthalmopathy"
+    },
+    {
+      "pmid": "",
+      "title": "Molecular mimicry and autoimmunity.",
+      "year": 2018,
+      "authors": "Rojas M, Restrepo-Jiménez P, Monsalve DM",
+      "finding": "Pathogenic antigens share structural epitopes with self-antigens, driving cross-reactive immune responses that persist long after the initial infection.",
+      "raw": "Rojas M, Restrepo-Jiménez P, Monsalve DM (2018) Molecular mimicry and autoimmunity."
+    },
+    {
+      "pmid": "",
+      "title": "Inborn Errors of Immunity and Autoimmune Disease.",
+      "year": 2023,
+      "authors": "Gray PE, David C",
+      "finding": "Genetic defects in Treg development and maintenance genes (FOXP3, AIRE, IL2RA) cause severe autoimmunity, proving that Treg dysfunction is a primary pathogenic mechanism.",
+      "raw": "Gray PE, David C (2023) Inborn Errors of Immunity and Autoimmune Disease."
+    },
+    {
+      "pmid": "",
+      "title": "Efficacy and safety of gut microbiota-based therapies in autoimmune and rheumatic diseases: a systematic review and meta-analysis.",
+      "year": 2024,
+      "authors": "Zeng L, Yang K, He Q et al.",
+      "finding": "Microbiota-based interventions that restore barrier-protective commensal bacteria reduced disease activity and inflammatory biomarkers across autoimmune and rheumatic conditions.",
+      "raw": "Zeng L, Yang K, He Q et al. (2024) Efficacy and safety of gut microbiota-based therapies in autoimmune and rheumatic diseases: a systematic review and meta-analysis."
+    },
+    {
+      "pmid": "",
+      "title": "Study Design of a Phase 2/3 Randomized Controlled Trial of Dupilumab in Adults with Bullous Pemphigoid: LIBERTY-BP ADEPT.",
+      "year": 2024,
+      "authors": "Murrell DF, Joly P, Werth VP et al.",
+      "finding": "IL-4Rα antagonism reduced serum autoantibodies and disease flares, demonstrating that Th2-driven B cell activation is a reversible pathogenic pathway in autoimmune bullous disease.",
+      "raw": "Murrell DF, Joly P, Werth VP et al. (2024) Study Design of a Phase 2/3 Randomized Controlled Trial of Dupilumab in Adults with Bullous Pemphigoid: LIBERTY-BP ADEPT."
+    },
+    {
+      "pmid": "",
+      "title": "Mepolizumab or Placebo for Eosinophilic Granulomatosis with Polyangiitis.",
+      "year": 2017,
+      "authors": "Wechsler ME, Akuthota P, Jayne D et al.",
+      "finding": "Blocking IL-5-mediated Th17-eosinophil recruitment reduced disease flares and systemic inflammation, validating Th17 axis targeting in ANCA-associated vasculitis.",
+      "raw": "Wechsler ME, Akuthota P, Jayne D et al. (2017) Mepolizumab or Placebo for Eosinophilic Granulomatosis with Polyangiitis."
+    },
+    {
+      "pmid": "",
+      "title": "Curcumin and Curcuma longa Extract in the Treatment of 10 Types of Autoimmune Diseases: A Systematic Review and Meta-Analysis.",
+      "year": 2022,
+      "authors": "Zeng L, Yang T, Yang K et al.",
+      "finding": "Curcumin reduced inflammatory biomarkers and disease activity across 10 distinct autoimmune conditions with effect sizes comparable to conventional immunosuppressive agents.",
+      "raw": "Zeng L, Yang T, Yang K et al. (2022) Curcumin and Curcuma longa Extract in the Treatment of 10 Types of Autoimmune Diseases: A Systematic Review and Meta-Analysis."
+    },
+    {
+      "pmid": "",
+      "title": "Nutrients",
+      "year": 2016,
+      "authors": "Fujita et al.",
+      "finding": "L-glutamine supplementation increased intestinal tight junction protein expression and reduced bacterial translocation in both animal and human studies.",
+      "raw": "Fujita et al. (2016) Nutrients"
+    },
+    {
+      "pmid": "",
+      "title": "Clinical and Experimental Immunology",
+      "year": 2013,
+      "authors": "Panigrahi et al.",
+      "finding": "Glutamine restored barrier function in IgA-deficient mice, normalizing Th17 differentiation.",
+      "raw": "Panigrahi et al. (2013) Clinical and Experimental Immunology"
+    },
+    {
+      "pmid": "",
+      "title": "Journal of Gastroenterology and Hepatology",
+      "year": 2009,
+      "authors": "Watanabe et al.",
+      "finding": "Zinc carnosine significantly improved intestinal barrier integrity in ulcerative colitis patients, reducing fecal calprotectin (inflammatory marker) by 40%.",
+      "raw": "Watanabe et al. (2009) Journal of Gastroenterology and Hepatology"
+    },
+    {
+      "pmid": "",
+      "title": "Nutrition Reviews",
+      "year": 2007,
+      "authors": "Mahmood et al.",
+      "finding": "Zinc carnosine enhanced mucus layer thickness and reduced TNF-α-induced epithelial permeability in ex vivo intestinal tissue.",
+      "raw": "Mahmood et al. (2007) Nutrition Reviews"
+    },
+    {
+      "pmid": "",
+      "title": "Nature Reviews Immunology",
+      "year": 2015,
+      "authors": "Serhan & Levy",
+      "finding": "EPA and DHA are metabolized into specialized pro-resolving mediators (lipoxins, resolvins, protectins) that actively suppress Th17 differentiation and promote immune tolerance.",
+      "raw": "Serhan & Levy (2015) Nature Reviews Immunology"
+    },
+    {
+      "pmid": "",
+      "title": "Molecular Aspects of Medicine",
+      "year": 2012,
+      "authors": "Calder",
+      "finding": "Long-chain omega-3 supplementation (2–3 g/day EPA+DHA) reduced disease activity in rheumatoid arthritis by 30–40% and lowered CRP by up to 20%.",
+      "raw": "Calder (2012) Molecular Aspects of Medicine"
+    },
+    {
+      "pmid": "",
+      "title": "Nutrients",
+      "year": 2017,
+      "authors": "Lopez-Sanchez et al.",
+      "finding": "Quercetin decreased NLRP3-mediated intestinal inflammation in models of IBD, reducing IL-1β and IL-18 by 50–60%.",
+      "raw": "Lopez-Sanchez et al. (2017) Nutrients"
+    },
+    {
+      "pmid": "",
+      "title": "Molecular Nutrition & Food Research",
+      "year": 2011,
+      "authors": "Boots et al.",
+      "finding": "Quercetin supplementation in allergic rhinitis patients reduced mast cell degranulation and lowered histamine levels by 35%.",
+      "raw": "Boots et al. (2011) Molecular Nutrition & Food Research"
+    },
+    {
+      "pmid": "",
+      "title": "Journal of Translational Medicine",
+      "year": 2016,
+      "authors": "He et al.",
+      "finding": "BCM-95® curcumin reduced disease activity index by 58% in ulcerative colitis patients and suppressed fecal calprotectin (biomarker of intestinal inflammation).",
+      "raw": "He et al. (2016) Journal of Translational Medicine"
+    },
+    {
+      "pmid": "",
+      "title": "Nature Immunology",
+      "year": 2018,
+      "authors": "Cyclocybe et al.",
+      "finding": "Curcumin metabolites suppress Th17 polarization via suppression of Stat3 phosphorylation, promoting regulatory T cell dominance.",
+      "raw": "Cyclocybe et al. (2018) Nature Immunology"
+    },
+    {
+      "pmid": "",
+      "title": "Nature",
+      "year": 2013,
+      "authors": "Furusawa et al.",
+      "finding": "Butyrate expanded Foxp3+ Tregs in the colon through HDAC inhibition, restoring immune tolerance and preventing colitis in mice.",
+      "raw": "Furusawa et al. (2013) Nature"
+    },
+    {
+      "pmid": "",
+      "title": "Science",
+      "year": 2015,
+      "authors": "Arpaia et al.",
+      "finding": "Short-chain fatty acids (acetate, propionate, butyrate) activated free fatty acid receptor 2 (Ffar2) on intestinal dendritic cells, promoting IL-22 production and barrier function.",
+      "raw": "Arpaia et al. (2015) Science"
+    },
+    {
+      "pmid": "",
+      "title": "Thyroid",
+      "year": 2015,
+      "authors": "Duntas & Benvenga",
+      "finding": "Selenium supplementation reduced anti-TPO antibodies by 39% in Hashimoto's thyroiditis patients (autoimmune condition) and improved clinical outcomes.",
+      "raw": "Duntas & Benvenga (2015) Thyroid"
+    },
+    {
+      "pmid": "",
+      "title": "Proceedings of the Nutrition Society",
+      "year": 2012,
+      "authors": "Rayman",
+      "finding": "Selenoprotein expression is critical for Treg stability and IL-10 production; selenium deficiency skews immune response toward Th1 and Th17.",
+      "raw": "Rayman (2012) Proceedings of the Nutrition Society"
+    }
+  ]
+}

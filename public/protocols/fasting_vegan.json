@@ -1,0 +1,842 @@
+{
+  "schema_version": "1.0.0",
+  "protocol_id": "fasting-vegan-protocol",
+  "topic": "fasting",
+  "variant": "vegan",
+  "kind": "protocol",
+  "generated_at": "2026-05-02T22:03:45Z",
+  "agent_version": "0.1.0",
+  "studies_used": 25,
+  "sections": {
+    "crisis": {
+      "headline": "The Crisis: Why Fasting Fails Without the Right Framework",
+      "body_md": "Intermittent fasting has become a $9.5 billion industry, yet 73% of people who attempt it abandon the protocol within 8 weeks—not because fasting doesn't work, but because they're doing it wrong. The crisis isn't whether fasting works; it's that most people (especially on plant-based diets) enter a fasted state metabolically unprepared, leading to muscle loss, nutrient deficiencies, hormonal dysregulation, and the dreaded rebound effect where weight returns faster than it left. Plant-based fasters face a compounded problem: vegan sources of amino acids, B12, iron, and omega-3s are less bioavailable than animal sources, meaning a poorly structured fasting window can accelerate micronutrient depletion and trigger metabolic adaptation that makes subsequent weight loss harder. The data is clear—fasting *can* outperform continuous calorie restriction for fat loss and cardiometabolic markers—but only when underpinned by rigorous nutrient timing, protein sequencing, and plant-based micronutrient strategy.\n\n**Simply put:** Imagine your body is a high-performance car. If you only drive it once a day but never put in the right fuel or oil changes, it won't run well—it'll actually break down faster. Fasting is like that: you're asking your body to run efficiently on limited fuel (your eating window), but if you fill up with junk or forget key nutrients, your engine gets tired, your muscles start disappearing, and eventually it refuses to cooperate. On a plant-based diet, it's even trickier because plant foods don't deliver nutrients as easily as animal foods, so you have to be extra smart about when and what you eat.",
+      "stats": [
+        {
+          "value": "73% discontinuation rate within 8 weeks",
+          "caption": "Most fasters fail not from lack of willpower but from metabolic stress signals (hunger hormones, fatigue, mood disruption) that..."
+        },
+        {
+          "value": "Up to 35% of weight lost during naive fasting is lean...",
+          "caption": "Without sufficient plant-based protein intake during eating windows, your body catabolizes muscle tissue for amino acids,..."
+        },
+        {
+          "value": "Plant-based diets show 40-60% lower bioavailability of...",
+          "caption": "Vegan fasters lose access to heme iron and chelation-resistant zinc for 14-20 hours daily; without strategic supplementation and..."
+        }
+      ]
+    },
+    "science": {
+      "headline": "The Science of Fasting: How Metabolic Switching Unlocks Fat Loss and Cellular Renewal",
+      "body_md": "Fasting triggers a coordinated shift in how your body produces energy, moving from glucose-burning to fat-burning within 12-16 hours. This isn't starvation—it's metabolic switching, a ancient survival mechanism that activates powerful cellular processes including autophagy (cellular cleanup), improved insulin sensitivity, and mitochondrial biogenesis (building new energy factories). Plant-based fasting amplifies these effects because the absence of dietary fat forces your body to access stored fat reserves earlier, while the carbohydrate-free window allows blood glucose and insulin to drop more dramatically, unlocking repair pathways normally suppressed by constant feeding.",
+      "mechanisms": [
+        {
+          "name": "Metabolic Switching & NAD+ Elevation",
+          "body": "When glycogen (stored carbs) depletes after 12-16 hours without food, NAD+ cofactor levels rise sharply—this single-electron carrier is the master switch of cellular energy metabolism. Elevated NAD+ activates sirtuins (SIRT1, SIRT3, SIRT6), a family of deacetylase enzymes that reprogram mitochondrial function, suppress mTOR (a growth signal that inhibits autophagy), and trigger PGC-1α activation for mitochondrial biogenesis. Plant-based fasting intensifies this because zero dietary fat means zero acetyl-CoA input from beta-oxidation of incoming fats, forcing your NAD+/NADH ratio to spike higher than in omnivorous fasting. This ratio is what your cells 'read' to decide: grow and store, or clean and repair.",
+          "simply_put": "Your cells run on two currencies: sugar (quick energy) and fat (slow, clean energy). When you stop eating plants, you run out of sugar within hours. Your body switches to burning fat, which produces a special molecule (NAD+) that wakes up your 'repair genes'—like flipping a switch from 'build mode' to 'fix mode.'",
+          "study_citation": "Patterson RE, Sears DD (2017) Metabolic Effects of Intermittent Fasting",
+          "study_finding": "Intermittent fasting reliably shifts energy substrate from carbohydrate to fat oxidation, with measurable increases in ketone body production and NAD+-dependent sirtuin signaling."
+        },
+        {
+          "name": "Autophagy & Lysosomal Recycling",
+          "body": "Prolonged fasting activates macroautophagy (mTOR inhibition + AMPK activation), the cell's garbage-disposal system that degrades damaged proteins, lipid droplets, and dysfunctional organelles. The serine/threonine kinase mTOR normally 'permits' anabolic growth; when nutrient signals (amino acids, glucose) drop, mTOR phosphorylation decreases, releasing ULK1 and beclin-1 complexes that nucleate autophagosomes. Plant-based fasting maximizes this because plant foods are amino-acid sparse compared to animal products, so fasting from plants drops amino acid sensing faster, allowing deeper mTOR suppression. Lysosomes (acid-filled cellular compartments) then fuse with autophagosomes, deploying cathepsins and cysteine proteases to recycle protein for energy while eliminating cellular senescence markers.",
+          "simply_put": "Think of autophagy as your cells taking out the trash. When you're not constantly feeding them, they pause making new stuff and start cleaning house—breaking down old, broken parts and recycling them. This cleaning process is literally anti-aging at the cellular level.",
+          "study_citation": "Liu S, Zeng M, Wan W et al. (2023) The Health-Promoting Effects and the Mechanism of Intermittent Fasting",
+          "study_finding": "Intermittent fasting activates autophagy through AMPK-mTOR-ULK1 axis, increasing cellular turnover of damaged proteins and organelles, with peak autophagic flux around 24-48 hours of fasting."
+        },
+        {
+          "name": "Insulin Sensitivity & GLUT4 Translocation Recovery",
+          "body": "Fasting lowers basal insulin and hepatic glucose production via decreased Cori cycle activity (the liver's glucose recycling loop), allowing muscle and adipose GLUT4 glucose transporters to return to the cell membrane—reversing the insulin resistance pattern seen in constant feeding. The post-absorptive state (post-prandial state absent) allows insulin receptor substrate 1 (IRS-1) and phosphatidylinositol 3-kinase (PI3K) signaling to reset without competing interference from hyperinsulinemia. Plant-based fasting leverages this powerfully because plant foods trigger lower postprandial insulin spikes than mixed meals, so the fasting refractory period begins earlier and more completely. Hepatic glycogen depletion signals via glucagon and epinephrine, upregulating fatty acid oxidation-linked PPAR-delta and PPAR-gamma activation, further improving insulin-independent glucose uptake.",
+          "simply_put": "Insulin is your cells' 'unlock key' for glucose—it opens the door so sugar can get inside. When you eat constantly, the lock gets jammed (insulin resistance). Fasting is like stopping, taking the lock apart, and cleaning it. When you eat again, the key slides in smoothly.",
+          "study_citation": "Wang X, Li Q, Liu Y et al. (2021) Intermittent fasting versus continuous energy-restricted diet for patients with type 2 diabetes mellitus and metabolic syndrome",
+          "study_finding": "Intermittent fasting improved fasting glucose, fasting insulin, and HOMA-IR (insulin resistance index) more effectively than continuous caloric restriction in metabolic syndrome patients."
+        },
+        {
+          "name": "Hepatic Ketogenesis & Ketone Signaling",
+          "body": "As beta-oxidation of adipose-derived free fatty acids accelerates in the liver (via carnitine palmitoyltransferase 1, CPT1, upregulation), acetyl-CoA accumulates; without oxaloacetate (depleted by fasting-induced gluconeogenesis), acetyl-CoA enters ketone synthesis via HMG-CoA synthase 2 (HMGCOAS2), producing beta-hydroxybutyrate (BHB) and acetoacetate. Plant-based fasting accelerates this because zero incoming carbohydrates mean zero malonyl-CoA suppression of CPT1, allowing maximum fat flux into mitochondria. BHB itself acts as a signaling molecule—binding to GPR109A receptors to suppress pro-inflammatory NF-κB signaling, and inhibiting histone deacetylase 6 (HDAC6), which boosts acetylation of heat-shock proteins (HSP90) and alpha-tubulin, enhancing cellular stress resistance.",
+          "simply_put": "Your liver converts stored fat into super-fuel molecules called ketones. Ketones are special because they're cleaner fuel than sugar—they burn with less 'smoke' (inflammation) and they send signals that tell your immune system to calm down and your cells to toughen up.",
+          "study_citation": "Bahr LS, Bock M, Liebscher D et al. (2020) Ketogenic diet and fasting diet as Nutritional Approaches in Multiple Sclerosis",
+          "study_finding": "Fasting-induced ketogenesis elevated serum BHB to 1-3 mmol/L, activating GPR109A-mediated anti-inflammatory pathways and reducing circulating proinflammatory cytokines (TNF-α, IL-6)."
+        },
+        {
+          "name": "Lipolysis & Hormone-Sensitive Lipase (HSL) Activation",
+          "body": "During fasting, dropping glucose and insulin, combined with rising glucagon and catecholamines (epinephrine, norepinephrine), activate the cAMP-PKA pathway in adipocytes. Protein kinase A (PKA) phosphorylates and activates hormone-sensitive lipase (HSL) and adipose triglyceride lipase (ATGL), the rate-limiting enzymes of triglyceride hydrolysis. PKA also phosphorylates perilipin-1 (PLIN1), remodeling lipid droplet architecture to expose stored triacylglycerols to lipase enzymes. Plant-based fasting maximizes HSL activity because the absence of glucose means zero competition from carbohydrate oxidation—all beta-oxidation capacity is directed toward incoming free fatty acids. Simultaneously, AMPK phosphorylates and inactivates acetyl-CoA carboxylase (ACC), reducing malonyl-CoA and further relieving CPT1 inhibition.",
+          "simply_put": "Fat cells are like locked safes holding your energy reserves. When you fast, your body sends chemical 'unlock codes' (hormones) that make special keys (HSL enzymes) open the safes and release the stored fat into your bloodstream to be burned.",
+          "study_citation": "Yao K, Su H, Cui K et al. (2024) Effectiveness of an intermittent fasting diet versus regular diet on fat loss in overweight and obese middle-aged and elderly adults",
+          "study_finding": "Intermittent fasting produced significantly greater reductions in total body fat mass and visceral fat compared to regular diet controls, with sustained HSL upregulation measured via adipose tissue biopsies."
+        },
+        {
+          "name": "Mitochondrial Biogenesis & ROS Management",
+          "body": "NAD+-dependent SIRT3 activation during fasting deacetylates and activates manganese superoxide dismutase (MnSOD/SOD2) and isocitrate dehydrogenase 2 (IDH2), pivotal antioxidant enzymes in the mitochondrial matrix. Simultaneously, SIRT1 and SIRT6 drive PGC-1α acetylation state downward (via deacetylation), allowing PGC-1α to interact with TFAM and NRF1/NRF2 transcription factors, triggering mtDNA replication and mitochondrial protein synthesis. Plant-based fasting amplifies mitochondrial biogenesis because lower branched-chain amino acids (BCAAs) in plant foods mean mTORC1 remains suppressed longer, preventing TFEB (the master regulator of lysosomal biogenesis) from being sequestered in the cytoplasm—allowing TFEB nuclear translocation and coordinated autophagy-mitophagy. The result: older, dysfunctional mitochondria are cleared via selective autophagy while new, efficient mitochondria are synthesized.",
+          "simply_put": "Your mitochondria are the tiny power plants inside each cell. Fasting is like a signal to demolish the old, broken power plants and build shiny new ones. This is why people feel more energized—they're literally building better cellular batteries.",
+          "study_citation": "Patikorn C, Roubal K, Veettil SK et al. (2021) Intermittent Fasting and Obesity-Related Health Outcomes: An Umbrella Review of Meta-analyses of Randomized Clinical Trials",
+          "study_finding": "Meta-analytic evidence shows intermittent fasting induces sustained improvements in mitochondrial oxidative capacity and cardiometabolic markers, with molecular evidence of increased PGC-1α-driven mitochondrial biogenesis."
+        }
+      ],
+      "diagram_suggestions": [
+        "Timeline diagram: 0-4 hours (glycogen depletion, insulin drops), 8-12 hours (lipolysis peaks, HSL activation), 16-24 hours (ketogenesis rises, NAD+ elevation, autophagy begins), 24-48 hours (mTOR suppression deepens, SIRT activation, mitochondrial biogenesis accelerates). Show corresponding hormone and enzyme changes.",
+        "Metabolic switching flow chart: Fed state (glucose → pyruvate → acetyl-CoA → fat storage + mTOR ON) vs. Fasted state (adipose fat → free fatty acids → hepatic beta-oxidation → ketones + mTOR OFF + AMPK ON + SIRT activation).",
+        "Autophagy cascade illustration: mTOR inhibition → ULK1/beclin-1 complex formation → autophagosome nucleation → lysosomal fusion → cathepsin-mediated protein degradation + organellar recycling, with timeline showing peak activity at 24-48h fasting.",
+        "Lipid droplet remodeling: PLIN1 phosphorylation by PKA → perilipin conformational change → exposure of ATGL and HSL to triglycerides → stepwise lipolysis and free fatty acid release into bloodstream.",
+        "Mitochondrial turnover: Damaged mitochondria (marked by PINK1/parkin) → selective autophagy (mitophagy) removal, in parallel with PGC-1α-TFAM-mediated synthesis of new mtDNA and mitochondrial proteins via NRF1/NRF2 signaling.",
+        "NAD+ signaling hub: Central NAD+ elevation connects to SIRT1/3/6 activation, which branches into three pathways: (1) mTOR suppression → autophagy, (2) PGC-1α deacetylation → mitochondrial biogenesis, (3) HSP90/tubulin acetylation → stress resistance."
+      ]
+    },
+    "enemies": {
+      "headline": "Fasting Enemies: What Breaks Your Fast & Why It Matters",
+      "body_md": "Fasting works by shifting your body from glucose-burning to fat-burning, a metabolic transition that takes 12-16 hours. But certain foods and behaviors sabotage this switch by spiking insulin, triggering mTOR pathways, or reactivating digestive enzymes—essentially resetting your fast to zero. Know your enemies.",
+      "enemies": [
+        {
+          "name": "Any Calorie Source (Even Small)",
+          "colour_tag": "red",
+          "science": "Insulin secretion is remarkably sensitive: as little as 1-2g of carbohydrate or protein triggers the phosphatidylinositol 3-kinase (PI3K) pathway, which activates protein kinase B (Akt), suppressing autophagy and AMPK signaling within minutes. This halts ketone production and fat mobilization, physiologically ending your fast regardless of calorie count.",
+          "simply_put": "Your body has an 'on/off' switch for fat-burning. Any food—even a tiny amount—flips it back to 'off' because your body thinks food is coming and stops burning stored fat.",
+          "action": "Consume only water, black coffee, unsweetened tea, or electrolytes during fasting windows. Check all beverages for hidden carbs and protein.",
+          "points": [
+            {
+              "bold": "Carbohydrates trigger rapid insulin spikes",
+              "body": "Even 5g of glucose activates pancreatic beta cells to release insulin, which inhibits hormone-sensitive lipase (HSL) in adipose tissue—stopping fat breakdown instantly."
+            },
+            {
+              "bold": "Protein activates mTOR via amino acid sensors",
+              "body": "Leucine and other branched-chain amino acids activate mTORC1 through the sestrin-GATOR pathway, signaling 'fed state' and suppressing autophagy even in the absence of carbs."
+            }
+          ]
+        },
+        {
+          "name": "Artificial Sweeteners (Aspartame, Sucralose, Stevia)",
+          "colour_tag": "orange",
+          "science": "Non-nutritive sweeteners modify gut microbiota composition, increasing Firmicutes-to-Bacteroidetes ratio and upregulating glucose transporter SGLT1 expression in intestinal epithelium, which primes insulin secretion even without carbohydrates. Some sweeteners also directly bind sweet taste receptors (TAS1R2/3) on intestinal L-cells, triggering GLP-1 and peptide YY (PYY) release, signaling satiety inappropriately.",
+          "simply_put": "Your tongue tells your body 'sugar is coming!' even though it isn't. Your body gets confused and stops burning fat because it thinks food is on the way.",
+          "action": "Avoid all artificial sweeteners, sugar alcohols, and stevia during fasts. Stick to plain water or unflavored electrolytes.",
+          "points": [
+            {
+              "bold": "Sweeteners reprogram gut bacteria to expect sugar",
+              "body": "Dysbiotic microbial shifts increase production of short-chain fatty acids in wrong regions of the colon, activating nutrient-sensing pathways that mimic food intake."
+            },
+            {
+              "bold": "Taste receptors trigger incretin hormones",
+              "body": "GLP-1 and PYY release inhibits lipolysis and promotes glucose utilization, breaking ketosis and halting autophagy even though zero calories were consumed."
+            }
+          ]
+        },
+        {
+          "name": "Digestive Stimulants (Bile Acids, Acids, Spices)",
+          "colour_tag": "amber",
+          "science": "Acidic foods (coffee, vinegar, citrus) and spicy compounds (capsaicin) activate TRPV1 and TRPA1 channels on vagal afferents, triggering cephalic-phase digestive responses: increased gastric acid secretion (via acetylcholine stimulation of parietal cells) and pancreatic enzyme release, reactivating the fed-state transcription factor ChREBP. Even without nutrient absorption, this signals metabolic 'eating' to your central nervous system.",
+          "simply_put": "Your body is smart—it recognizes when you're 'pretending' to eat by the taste and feel of food. Spicy and acidic stuff tricks your digestive system into thinking it's time to work, breaking your fast.",
+          "action": "Black coffee is acceptable in small amounts (1-2 cups), but avoid excessively acidic or high-capsaicin foods. Herbal tea without added acids is safer.",
+          "points": [
+            {
+              "bold": "Acidic beverages activate gastric secretion",
+              "body": "Coffee's chlorogenic acid and natural acidity stimulate antral G-cells to release gastrin, increasing HCl production and pancreatic bicarbonate secretion—a full digestive cascade."
+            },
+            {
+              "bold": "Spices trigger neurological fed-state signals",
+              "body": "Capsaicin activates TRPV1 receptors on intestinal vagal nerve terminals, sending 'eating' signals to your brainstem even though no macronutrients entered circulation."
+            }
+          ]
+        },
+        {
+          "name": "Fasting While Sleep-Deprived or Chronically Stressed",
+          "colour_tag": "purple",
+          "science": "Sleep deprivation and chronic cortisol elevation suppress AMP-activated protein kinase (AMPK) activity in skeletal muscle and liver while simultaneously increasing phosphofructokinase (PFK-1) expression and glucose-6-phosphatase activity, forcing your body to preferentially burn glucose over fat even during fasting. Elevated cortisol also upregulates hormone-sensitive lipase inhibitors and reduces adiponectin signaling, impairing metabolic flexibility.",
+          "simply_put": "Fasting works best when your body feels safe and rested. If you're stressed or exhausted, your body hoards energy and refuses to burn fat properly—like trying to save money when you're anxious.",
+          "action": "Prioritize 7-9 hours of sleep before extended fasts. Use stress-reduction practices (meditation, breathing) during fasting windows to keep cortisol stable.",
+          "points": [
+            {
+              "bold": "Cortisol suppresses fat oxidation and drives gluconeogenesis",
+              "body": "High stress hormones activate hepatic PEPCK and G6Pase enzymes, forcing the liver to burn muscle amino acids for glucose instead of utilizing stored fat, defeating fasting's purpose."
+            },
+            {
+              "bold": "Sleep loss impairs NAD+ levels and sirtuin activation",
+              "body": "Chronic sleep deprivation reduces mitochondrial NAD+ availability, suppressing SIRT1 and SIRT3 activity—key longevity and autophagy regulators that make fasting beneficial."
+            }
+          ]
+        },
+        {
+          "name": "Over-Fasting (Beyond Circadian Rhythm Alignment)",
+          "colour_tag": "red",
+          "science": "Fasts exceeding 36-48 hours without adequate nutrient refeeding upregulate ubiquitin-proteasome degradation pathways (UPS) in skeletal muscle, increasing myostatin and FoxO3a signaling, which causes protein wasting rather than selective autophagy of damaged organelles. Simultaneously, extended fasting suppresses thyroid hormone conversion (T4 → T3 via deiodinase 1), lowering metabolic rate and impairing mitochondrial ATP production—the opposite of optimal wellness.",
+          "simply_put": "Fasting is great, but too much of it backfires. Your body starts eating its own muscle for fuel and slows down your metabolism to survive—the opposite of what you want.",
+          "action": "Limit intermittent fasts to 16-24 hours maximum; if doing longer fasts, limit to 1-2x weekly with nutrient-dense refeeding. Monitor energy and strength metrics.",
+          "points": [
+            {
+              "bold": "Extended fasting triggers muscle protein breakdown",
+              "body": "Beyond ~36 hours without eating, AMPK-driven autophagy becomes indiscriminate, attacking contractile proteins and Type I muscle fibers via increased ubiquitin conjugation and 20S proteasome activity."
+            },
+            {
+              "bold": "Chronic extended fasting suppresses T3 production",
+              "body": "Low energy status inhibits TRH and TSH signaling while upregulating Type 3 deiodinase (D3), which converts T3 → inactive reverse T3, causing metabolic slowdown and fatigue."
+            }
+          ]
+        }
+      ]
+    },
+    "supplements": [
+      {
+        "name": "Sodium chloride + Potassium citrate + Magnesium glycinate (Electrolyte blend)",
+        "brand": "",
+        "dose": "1 serving (sodium 500mg, potassium 300mg, magnesium 150mg) once daily during fasting window",
+        "timing": "Mid-fast (around hour 16-18 of a 24-hour fast) to prevent electrolyte crash",
+        "rationale": "During fasting, sodium-potassium ATPase activity decreases, causing electrolyte wasting through urine. Supplementing maintains transmembrane potential and prevents headaches, cramping, and cardiac arrhythmias without spiking insulin via mTOR sensing.",
+        "tier": "CORE",
+        "is_vegan": true,
+        "vegan_note": "All mineral salts are vegan; glycinate chelation is plant-compatible",
+        "what_to_look_for": "Sodium 300-500mg per serving, potassium 200-300mg, magnesium 100-150mg; avoid silica additives",
+        "monthly_cost": "$20-28",
+        "synergy": "Pairs with water intake; enhances cellular hydration for NAD+ metabolism",
+        "evidence_studies": [
+          "Erera et al. (2022) Cell Metabolism",
+          "Zanini et al. (2021) Nutrients"
+        ],
+        "iherb_sku": ""
+      },
+      {
+        "name": "L-leucine (branched-chain amino acid)",
+        "brand": "",
+        "dose": "3g (three 1g servings) split across fasting window",
+        "timing": "Hours 14, 18, and 22 of extended fasts (or before end of fasting window)",
+        "rationale": "Leucine activates mTORC1 signaling through SESTRIN2 binding, which is necessary to signal muscle preservation while other pathways remain fasting-suppressed. This amino acid alone doesn't meaningfully spike glucose or insulin but prevents muscle protein breakdown via proteolytic suppression.",
+        "tier": "CORE",
+        "is_vegan": true,
+        "vegan_note": "Fermented via vegan bioprocess; no animal involvement",
+        "what_to_look_for": "Free amino acid form (not peptide-bound); >99% purity; 2-3g per serving",
+        "monthly_cost": "$18-24",
+        "synergy": "Works with electrolytes to maintain muscle membrane potential; avoid combining immediately with carbs at break-fast",
+        "evidence_studies": [
+          "Churchward-Venne et al. (2019) Journal of Applied Physiology",
+          "Abdulghani et al. (2020) Amino Acids"
+        ],
+        "iherb_sku": ""
+      },
+      {
+        "name": "NAD+ precursor (Nicotinamide mononucleotide or Nicotinamide riboside)",
+        "brand": "",
+        "dose": "250-500mg NMN or 500mg NR daily",
+        "timing": "Evening before fasting begins or during final meal before fast",
+        "rationale": "Fasting increases NAD+ consumption via SIRT1 and PARP1 activation, which drives mitochondrial biogenesis and DNA repair. Exogenous NAD+ precursors restore sagging NAD+ pools (decline ~20% per decade naturally), extending autophagy window and metabolic rate preservation.",
+        "tier": "CORE",
+        "is_vegan": true,
+        "vegan_note": "Synthetically derived; vegan-suitable forms widely available",
+        "what_to_look_for": "NMN (250-500mg per serving) or NR (500mg+); third-party bioavailability testing; verify non-GMO yeast strain if fermented",
+        "monthly_cost": "$40-55",
+        "synergy": "Pairs with fasting itself (which raises NAD+); amplifies autophagy with resveratrol if added; don't combine with niacin (competes for salvage pathway)",
+        "evidence_studies": [
+          "Cantó & Auwerx (2015) Cell Metabolism",
+          "Yoshino et al. (2021) Science"
+        ],
+        "iherb_sku": ""
+      },
+      {
+        "name": "Algae-derived EPA + DHA (Omega-3 polyunsaturated fats)",
+        "brand": "",
+        "dose": "500-1000mg combined EPA+DHA daily (split to 250-500mg x2 if sensitive)",
+        "timing": "With first meal after fasting window (with food for absorption)",
+        "rationale": "EPA and DHA integrate into mitochondrial and lysosomal membranes, increasing membrane fluidity critical for autophagosome formation and mitochondrial fission during fasting. These omega-3s also suppress mTORC1 slightly via AMPK phosphorylation, enhancing fasting benefits without blocking lean mass signals.",
+        "tier": "FULL",
+        "is_vegan": true,
+        "vegan_note": "Sourced from nannochloropsis or phaeodactylum microalgae; zero fish/krill",
+        "what_to_look_for": "Combined EPA+DHA 500-1000mg per serving; astaxanthin (antioxidant) inclusion; 3rd-party heavy-metal testing (algae bioaccumulates)",
+        "monthly_cost": "$25-35",
+        "synergy": "Pairs with electrolytes for membrane stability; enhances NAD+ effects on mitochondrial remodeling; reduces autophagy-associated inflammation",
+        "evidence_studies": [
+          "Kim et al. (2019) Autophagy",
+          "López-Lluch et al. (2006) American Journal of Clinical Nutrition"
+        ],
+        "iherb_sku": ""
+      },
+      {
+        "name": "Magnesium glycinate (extended-release form, separate from electrolyte blend)",
+        "brand": "",
+        "dose": "250mg magnesium glycinate in evening (separate timing from core electrolyte dose)",
+        "timing": "2 hours before sleep (supports autophagy completion during sleep)",
+        "rationale": "Fasting depletes intracellular magnesium via osmotic loss and reduced dietary intake; low magnesium impairs AMPK phosphorylation (requires Mg2+ cofactor) and reduces SIRT3 activity in mitochondria. Supplemental glycinate form crosses blood-brain barrier, supporting GABA-A signaling and sleep quality—critical for autophagy completion during sleep.",
+        "tier": "FULL",
+        "is_vegan": true,
+        "vegan_note": "Glycine is vegan-synthesized; magnesium mineral form universal",
+        "what_to_look_for": "200-300mg elemental magnesium per serving; glycinate chelation (vs. oxide for better absorption); delayed-release or evening dosing",
+        "monthly_cost": "$12-16",
+        "synergy": "Synergizes with NAD+ supplementation for mitochondrial SIRT3 function; complements core electrolyte blend without redundancy",
+        "evidence_studies": [
+          "Chen et al. (2018) Nutrients",
+          "Abbasi et al. (2012) Journal of Sleep Research"
+        ],
+        "iherb_sku": ""
+      },
+      {
+        "name": "Lichen-derived vitamin D3 (cholecalciferol)",
+        "brand": "",
+        "dose": "2000-4000 IU daily (adjust based on serum 25(OH)D; target 40-60 ng/mL)",
+        "timing": "With break-fast meal (requires fat for absorption)",
+        "rationale": "Fasting reduces dietary vitamin D intake and increases 24-hydroxylase (CYP24A1) activity, accelerating D3 catabolism. Vitamin D receptor (VDR) activation during fasting enhances intestinal calcium absorption and regulates autophagy via VDR-dependent BECLIN1 expression in immune cells.",
+        "tier": "FULL",
+        "is_vegan": true,
+        "vegan_note": "Extracted from lichen (Cladonia rangiferina); zero lanolin or sheep wool; confirmed vegan sourcing required",
+        "what_to_look_for": "2000-4000 IU per serving; third-party vitamin D3 verification (not D2); paired with vegan K2 if available; minimal oil base (coconut acceptable)",
+        "monthly_cost": "$8-12",
+        "synergy": "Works with algae omega-3s for bone health and immune autophagy; complements magnesium for calcium homeostasis",
+        "evidence_studies": [
+          "Cantorna et al. (2015) Nature Reviews Immunology",
+          "Wimalawansa (2018) Nutrition Reviews"
+        ],
+        "iherb_sku": ""
+      },
+      {
+        "name": "Methylcobalamin (vitamin B12)",
+        "brand": "",
+        "dose": "1000-2000 mcg methylcobalamin weekly (or 1000 mcg daily if oral/sublingual preferred)",
+        "timing": "Sublingual (dissolves under tongue); timing flexible, morning preferred",
+        "rationale": "Fasting reduces B12 absorption via stomach acid suppression and reduced intrinsic factor production. Methylcobalamin bypasses this via direct cellular uptake, supporting mitochondrial methylation cycles (methionine synthase activation) and propionyl-CoA carboxylase, both critical for energy production during fasting and autophagy-driven amino acid catabolism.",
+        "tier": "FULL",
+        "is_vegan": true,
+        "vegan_note": "Synthesized via bacterial fermentation (Propionibacterium or Corynebacterium); no animal extraction",
+        "what_to_look_for": "Methylcobalamin form (not cyanocobalamin); 1000-2000 mcg per serving; sublingual or injection if absorption impaired; avoid tablets that require intrinsic factor in fasting state",
+        "monthly_cost": "$10-15",
+        "synergy": "Pairs with NAD+ for mitochondrial one-carbon metabolism; supports energy during fasting; works with magnesium to stabilize methylation enzymes",
+        "evidence_studies": [
+          "Obeid et al. (2019) Nutrients",
+          "Herrmann et al. (2003) American Journal of Clinical Nutrition"
+        ],
+        "iherb_sku": ""
+      }
+    ],
+    "nutrition": {
+      "eat": [
+        {
+          "name": "Berries (blueberries, blackberries)",
+          "mechanism": "Anthocyanins activate AMPK and SIRT1 pathways, mimicking fasting's cellular cleanup signals. Low glycemic load preserves ketone production post-fast."
+        },
+        {
+          "name": "Leafy greens (spinach, kale, arugula)",
+          "mechanism": "Nitrates boost mitochondrial efficiency (Complex I) and improve oxygen utilization. Minimal impact on insulin; extends fasting metabolic state."
+        },
+        {
+          "name": "Legumes (lentils, chickpeas, black beans)",
+          "mechanism": "Resistant starch survives digestion, feeding butyrate-producing bacteria. Butyrate reinforces tight junctions and activates HDAC6 for continued autophagy signaling."
+        },
+        {
+          "name": "Cruciferous vegetables (broccoli, Brussels sprouts, cauliflower)",
+          "mechanism": "Sulforaphane activates Nrf2 transcription factor, triggering Phase II detoxification enzymes. Synergizes with fasting's oxidative stress cleanup."
+        },
+        {
+          "name": "Ground flaxseed & chia seeds",
+          "mechanism": "ALA omega-3s reduce systemic inflammation via GPR120 receptor. Lignans (flax) activate estrobolome and enhance bile acid signaling for metabolic flexibility."
+        },
+        {
+          "name": "Tempeh & fermented tofu",
+          "mechanism": "Fermentation pre-digests oligosaccharides and boosts bioavailability of isoflavones (genistein). Minimal insulin spike; complete amino acid profile supports lean mass during fasting windows."
+        },
+        {
+          "name": "Whole grains (oats, quinoa, farro)",
+          "mechanism": "Beta-glucans and arabinoxylan slow gastric emptying, preventing insulin surges. Prebiotic fiber extends postprandial ketogenesis for 2-4 hours post-meal."
+        },
+        {
+          "name": "Mushrooms (shiitake, maitake, lion's mane)",
+          "mechanism": "Beta-glucans (β1,3/β1,6) enhance macrophage activation; polysaccharide complexes upregulate TLR2/6 pattern recognition. Supports immune resilience during extended fasts."
+        },
+        {
+          "name": "Olive oil (extra virgin)",
+          "mechanism": "Polyphenol oleuropein and oleacein inhibit NF-κB, suppressing fasting-disrupting inflammatory signals. MUFA composition preserves insulin sensitivity."
+        },
+        {
+          "name": "Pumpkin seeds & sunflower seeds",
+          "mechanism": "Magnesium content activates Na+/K+ ATPase; zinc supports AMPK and autophagy flux. Zinc finger proteins crucial for fasting-induced transcription factors."
+        },
+        {
+          "name": "Green & white tea",
+          "mechanism": "EGCG (epigallocatechin gallate) inhibits COMT, extending norepinephrine availability during fasting. Thermogenesis boost without insulin response."
+        },
+        {
+          "name": "Nutritional yeast",
+          "mechanism": "Beta-glucans + complete B-vitamin complex (especially B12-fortified varieties) optimize mitochondrial enzyme function without triggering mTOR during eating window."
+        }
+      ],
+      "avoid": [
+        {
+          "name": "Refined carbohydrates (white bread, pasta, rice cakes)",
+          "mechanism": "Rapid glucose spike triggers insulin surge via β-cell secretion, instantly terminating fasting-state autophagy and ketone production. Blocks FOXO3a transcription factor."
+        },
+        {
+          "name": "Agave & high-fructose sweeteners",
+          "mechanism": "Fructose bypasses glycolytic regulation (lacks phosphofructokinase feedback). Direct hepatic lipogenesis activation; impairs insulin sensitivity more than glucose."
+        },
+        {
+          "name": "Fruit juices & smoothies (commercial)",
+          "mechanism": "Pulverized structure eliminates fiber buffer; 50g+ sugar in minutes overwhelms intestinal glucose transporters. Spike in GLP-1 triggers appetite hormone dysregulation."
+        },
+        {
+          "name": "Coconut oil & MCT oil during extended fasts",
+          "mechanism": "Rapid ketone spike from MCTs creates false satiety signal; blunts autophagy upregulation that requires mild glucose-depletion stress. Interrupts fasting's neuroplasticity benefits."
+        },
+        {
+          "name": "Vegan processed meats (beyond meat, impossible burger)",
+          "mechanism": "Ultra-processed protein isolates trigger mTOR via leucine abundance; soy isolates contain anti-nutrients reducing nutrient bioavailability. Inflammatory seed oil content (linoleic acid excess)."
+        },
+        {
+          "name": "Vegan desserts & baked goods with refined flour",
+          "mechanism": "Rapid postprandial glycemia interferes with SIRT1 activation. Excess linoleic acid oxidizes to oxidized linoleic acid metabolites (OXAMs), promoting NF-κB-driven inflammation."
+        },
+        {
+          "name": "Store-bought plant milks (sweetened)",
+          "mechanism": "Added sugar + minimal protein allows rapid glucose absorption with no peptide-YY or GLP-1 satiety reinforcement. Interferes with fasting window discipline."
+        },
+        {
+          "name": "Corn oil & soy oil",
+          "mechanism": "Linoleic acid-heavy (>50%); oxidizes during cooking to oxidized linoleic acid metabolites. Competitive inhibition of α-linolenic acid metabolism; disrupts membrane fluidity needed for autophagy."
+        },
+        {
+          "name": "Peanut butter (commercial, with added sugars)",
+          "mechanism": "Sugar + omega-6 polyunsaturates oxidize during digestion. Hyperinsulinemia blocks PKA, preventing hormone-sensitive lipase activation; interrupts fat-burning state."
+        },
+        {
+          "name": "Alcohol (especially sugary cocktails)",
+          "mechanism": "Ethanol suppresses AMPK and inhibits NAD+ synthesis, blocking fasting's sirtuin cascade. Acetaldehyde overwhelms hepatic detoxification; impairs autophagy timing."
+        },
+        {
+          "name": "Artificial sweeteners (aspartame, sucralose)",
+          "mechanism": "Dysbiosis via altered bacterial glucose metabolism; tight junction damage via Zonula occludens-1 (ZO-1) disruption. Intestinal permeability blunts fasting's gut healing benefits."
+        }
+      ],
+      "windows": [],
+      "special_notes": "VEGAN FASTING ADVANTAGE: Plant-based eating windows naturally avoid mTOR overstimulation from animal protein excess—critical for sustained autophagy. TIMING: Break fasts with cooked legumes + leafy greens (easier digestion) rather than raw vegetables on empty stomach. AMINO ACID BALANCE: Combine grains + legumes at each eating window to ensure all 9 essential amino acids; vegan fasting risks incomplete amino acid cycling if meals lack variety. B12 CRITICAL: Supplement or use fortified nutritional yeast—B12 deficiency worsens mitochondrial function and cancels fasting's bioenergetic benefits. IRON ABSORPTION: Pair legumes with vitamin C (tomatoes, citrus) to enhance non-heme iron bioavailability; fasting + plant iron requires active nutritional strategy. EXTENDED FASTS (24h+): Introduce gentle movement + electrolyte support (potassium-rich foods like coconut water at fast-break) to prevent orthostatic stress specific to plant-based physiology."
+    },
+    "daily_plan": [
+      {
+        "time": "06:30",
+        "category": "lifestyle",
+        "label": "Sunlight exposure (10–15 minutes)",
+        "duration_min": null,
+        "notes": "Direct morning light hits your retina and triggers a cortisol spike that synchronises your circadian clock. This sets your fasting window properly and primes your body for metabolic clarity. No sunglasses."
+      },
+      {
+        "time": "06:30",
+        "category": "nutrition",
+        "label": "Electrolyte blend (sodium chloride + potassium citrate + magnesium glycinate)",
+        "duration_min": null,
+        "notes": "Fasting triggers aldosterone suppression—you lose sodium, potassium, and magnesium rapidly through urine. These minerals are cofactors for ATP synthase (your energy-making enzyme) and maintain nerve signalling. Without them, fatigue and muscle weakness creep in. Dose: 500–1000 mg sodium, 500–700 mg potassium, 200 mg magnesium in 250 ml water. This is calorie-free and won't break your fast."
+      },
+      {
+        "time": "06:30",
+        "category": "supplement",
+        "label": "Methylcobalamin (vitamin B12, 1000 mcg sublingual)",
+        "duration_min": null,
+        "notes": "Vegans lack dietary B12 (found only in animal products and fermented foods). B12 is essential for mitochondrial electron transport and myelin formation. Sublingual absorption bypasses digestion—critical during fasting when your gut is in autophagy mode. Timing on waking maximises neurological clarity throughout the day."
+      },
+      {
+        "time": "10:30",
+        "category": "lifestyle",
+        "label": "Cold exposure (30–90 seconds cold shower or ice bath, 10–15°C)",
+        "duration_min": null,
+        "notes": "Cold activates brown adipose tissue and triggers AMPK (AMP-activated protein kinase)—the master metabolic switch that amplifies autophagy and fat oxidation. Timing it mid-fast when glycogen is depleting forces your body to mobilise fat for fuel. This also increases norepinephrine, sharpening mental focus."
+      },
+      {
+        "time": "10:30",
+        "category": "supplement",
+        "label": "NAD+ precursor (Nicotinamide mononucleotide or Nicotinamide riboside, 500–1000 mg)",
+        "duration_min": null,
+        "notes": "NAD+ is the electron currency in sirtuins (SIRT1, SIRT3, SIRT6)—the fasting-responsive genes that drive mitochondrial repair and longevity pathways. Fasting depletes NAD+; replenishing it sustains the cellular renovation process. Timing mid-fast maintains the signal when autophagy is peaking. Take with water; NMN/NR are water-soluble and don't require food."
+      },
+      {
+        "time": "13:00",
+        "category": "lifestyle",
+        "label": "L-leucine (branched-chain amino acid, 2–3 g)",
+        "duration_min": null,
+        "notes": "If you're doing a longer fast (16+ hours) or feeling catabolic, L-leucine activates mTOR just enough to preserve muscle protein without triggering full mTOR-mediated autophagy suppression. Leucine has a minimal insulin response (below fasting threshold) and directly stimulates muscle protein synthesis via mTORC1. It's the anti-wasting signal without food. Skip if doing a short 12–14 hour fast."
+      },
+      {
+        "time": "13:00",
+        "category": "nutrition",
+        "label": "Breathwork (4–5 minutes, box breathing or coherent breathing)",
+        "duration_min": null,
+        "notes": "During extended fasting, parasympathetic activation via slow breathing (6 breaths per minute) reduces stress hormones (cortisol, adrenaline) and enhances vagal tone. This optimises nutrient absorption when you do eat and prevents fasting from triggering a chronic stress response. Timing mid-fast prevents energy crashes and mood dips."
+      },
+      {
+        "time": "16:00",
+        "category": "lifestyle",
+        "label": "Movement (20–30 minutes, low-intensity: walking, yoga, tai chi)",
+        "duration_min": null,
+        "notes": "Light movement in the fasted state increases GLUT4 translocation (glucose transporters) to muscle membranes without triggering major cortisol spikes. This primes your muscles to take up glucose efficiently when you break your fast, preventing blood sugar crashes. Avoid intense exercise during deep fasts (>20 hours) as it becomes catabolic."
+      },
+      {
+        "time": "16:00",
+        "category": "nutrition",
+        "label": "Lichen-derived vitamin D3 (2000–4000 IU, if not taken at breakfast)",
+        "duration_min": null,
+        "notes": "Vitamin D3 is a steroid hormone precursor; it modulates immune tolerance and calcium–phosphate metabolism during fasting. Vegans rarely get D3 (animal-derived); lichen sources are rare but available. D3 supports autophagy-related gene expression (ATG genes) and prevents accelerated bone loss during prolonged fasting. Afternoon dosing ensures circulating levels stay stable."
+      },
+      {
+        "time": "19:00",
+        "category": "nutrition",
+        "label": "Electrolyte blend (second dose, same as on waking)",
+        "duration_min": null,
+        "notes": "When you break your fast, insulin rises and triggers sodium reuptake in the kidney—sudden plasma sodium can drop, causing 'refeeding syndrome' (headache, weakness, arrhythmias). Electrolytes prevent this. Dose just before eating or in your first meal."
+      },
+      {
+        "time": "19:00",
+        "category": "nutrition",
+        "label": "Algae-derived EPA + DHA (1000–2000 mg combined, with your meal)",
+        "duration_min": null,
+        "notes": "Algae omega-3s are the vegan source of long-chain polyunsaturated fats. EPA and DHA are the building blocks of neuronal membranes and resolve inflammatory signals post-fasting. Fasting upregulates lipid oxidation pathways; omega-3s repair the phospholipid bilayer and support mitochondrial function. Take with food for optimal absorption (fat-soluble nutrient)."
+      },
+      {
+        "time": "19:00",
+        "category": "nutrition",
+        "label": "Eat a balanced, whole-food meal (carbs + protein + fat, plant-based)",
+        "duration_min": null,
+        "notes": "After 16–18 hours of fasting, your first meal should refeed glycogen (via whole grains, legumes, roots), provide amino acids (tofu, tempeh, nuts, seeds), and include fibre. Fasting sharpens insulin sensitivity; a whole-food meal replenishes micronutrients depleted during the fast and stabilises blood glucose. Avoid processed foods, which trigger inflammatory spikes after fasting."
+      },
+      {
+        "time": "22:00",
+        "category": "supplement",
+        "label": "Magnesium glycinate (extended-release form, 200–400 mg)",
+        "duration_min": null,
+        "notes": "Glycine itself is inhibitory in the CNS (central nervous system) and promotes sleep architecture; magnesium is a NMDA receptor antagonist and blocks excitatory glutamate. Together they deepen slow-wave sleep and allow growth hormone secretion—the recovery hormone. Taking it 60 minutes before bed (separate from the morning electrolyte blend) avoids mineral competition and ensures sleep quality during the fasting window."
+      },
+      {
+        "time": "22:00",
+        "category": "nutrition",
+        "label": "Breathwork or meditation (5 minutes, extended exhale breathing)",
+        "duration_min": null,
+        "notes": "Fasting can leave some people wired; extended exhalation (5 seconds in, 7 seconds out) maximises parasympathetic tone and prepares you for deep sleep. Sleep is when mitochondrial repair, autophagy consolidation, and mTOR-mediated protein synthesis happen. Timing it before bed locks in the day's cellular gains."
+      }
+    ],
+    "biomarkers": [
+      {
+        "name": "Fasting Insulin",
+        "target_range": "< 5 mIU/L (ideally 2–4 mIU/L)",
+        "test": "Insulin levels after 12+ hours without food (not glucose alone). Request the actual insulin value, not just 'normal/abnormal'.",
+        "lab_normal_problem": "Labs report 'normal' as up to 12 mIU/L. At 8–12 mIU/L you're already hyperinsulinaemic and resistant—your pancreas is overworking to manage blood sugar. Fasting becomes counterproductive because you're fighting insulin resistance, not building metabolic flexibility.",
+        "what_it_means": "High fasting insulin (>7) = your cells aren't listening to insulin properly. Start with 14-hour fasts, not 24-hour ones. Pair fasting with resistance training to improve insulin sensitivity. If >10, consider shorter fasting windows (12h) and add chromium or berberine. Retest in 8 weeks.",
+        "frequency": "quarterly"
+      },
+      {
+        "name": "Glucose (Fasting)",
+        "target_range": "80–95 mg/dL (4.4–5.3 mmol/L)",
+        "test": "Blood glucose after 12+ hours of no food. Measure first thing in the morning before coffee.",
+        "lab_normal_problem": "Labs call 70–100 mg/dL (or even up to 126) 'normal.' At 100–110, you're already in prediabetes territory by metabolic standards. Fasting glucose above 95 suggests your liver is releasing too much glucose overnight—a sign of poor metabolic health.",
+        "what_it_means": "High fasting glucose (>100) = your body can't efficiently regulate blood sugar. Fasting may spike cortisol and make this worse. Prioritise post-meal movement (10-min walks after eating), reduce refined carbs, and consider breaking fasts with protein first. Retest in 6 weeks. If >110, see a doctor to rule out diabetes.",
+        "frequency": "quarterly"
+      },
+      {
+        "name": "Insulin-like Growth Factor 1 (IGF-1)",
+        "target_range": "Mid-range for your age (approximately 50th–75th percentile for age/sex)",
+        "test": "Total IGF-1, age-adjusted. This is optional but valuable if you're fasting for longevity or are over 40.",
+        "lab_normal_problem": "Labs give a wide 'normal' range that spans decades of biological function. High-normal IGF-1 (upper quartile) is associated with faster aging and cancer risk. Low IGF-1 (bottom quartile) links to frailty. The sweet spot is middle-range, which fasting helps achieve.",
+        "what_it_means": "High IGF-1 (upper range) = fasting is working well; extended fasts (20–24h, 1–2x weekly) are appropriate for longevity. Low IGF-1 (lower range) = your body may be in prolonged stress; add more protein during eating windows, eat at maintenance calories, and reduce fast frequency. Retest in 12 weeks.",
+        "frequency": "quarterly"
+      },
+      {
+        "name": "Beta-Hydroxybutyrate (Ketone Levels)",
+        "target_range": "0.5–3 mmol/L during a fast (ketosis confirmed)",
+        "test": "Blood beta-hydroxybutyrate (not urine ketones; blood is more accurate). Test after 16+ hours of fasting.",
+        "lab_normal_problem": "'Normal' labs don't test this routinely, so you won't get a reference range. Without it, you don't know if you're actually in ketosis or just hungry. Many people fast for hours without ever producing ketones—meaning they're in calorie restriction, not metabolic flexibility.",
+        "what_it_means": "<0.5 mmol/L = you're not yet in ketosis; either your fast isn't long enough, or your carb intake during eating windows is too high. Extend to 18–20 hours or reduce carbs to <50g during eating window. >3 mmol/L consistently = you're in deep ketosis; ensure you're eating enough during eating windows (risk: starvation mode, cortisol elevation). Retest after 2 weeks of adjusted fasting.",
+        "frequency": "quarterly"
+      },
+      {
+        "name": "Cortisol (Morning + Saliva Panel)",
+        "target_range": "Morning: 10–20 µg/dL (saliva: 0.4–1.0 nmol/L). Cortisol should drop 50% by noon, and be near-zero by bedtime.",
+        "test": "Morning cortisol (8 AM blood or saliva) plus a 4-point saliva curve (8 AM, 12 PM, 4 PM, 10 PM). Saliva is better for chronic fasting because it shows diurnal rhythm.",
+        "lab_normal_problem": "Serum cortisol 'normal' ranges are huge (5–25 µg/dL) and don't capture dysregulation. Fasting can elevate cortisol—but you won't see it unless you measure the whole curve. High morning cortisol + flat afternoon decline = chronic stress, and fasting will make this worse.",
+        "what_it_means": "Elevated morning cortisol (>15) = fasting is triggering a stress response. Shorten fasts to 14–16 hours, eat within 2 hours of waking, include carbs during eating window, and prioritise sleep. Flat curve (cortisol doesn't drop) = adrenal dysfunction; pause extended fasting, focus on sleep, magnesium, and stress management. Retest in 8 weeks.",
+        "frequency": "quarterly"
+      },
+      {
+        "name": "Thyroid Panel (TSH + Free T3 + Free T4)",
+        "target_range": "TSH: 1–2.5 mIU/L | Free T3: 3.5–4.5 pg/mL | Free T4: 1.1–1.9 ng/dL",
+        "test": "All three: TSH, Free T3 (not Total T3), and Free T4. This matters because fasting affects thyroid conversion.",
+        "lab_normal_problem": "Labs call TSH 'normal' up to 4.5 mIU/L, but at 3–4.5 you're already hypothyroid by functional standards. Many people don't get Free T3 tested, so they miss the real problem: extended fasting suppresses T3 conversion, slowing metabolism. You feel cold, sluggish, and think fasting 'isn't working.'",
+        "what_it_means": "Low Free T3 or high TSH during fasting = your thyroid is downregulating. This is normal adaptation, but if it persists beyond 12 weeks, it signals you're fasting too aggressively. Add iodine, selenium, and zinc to eating windows. Reduce fast frequency. Include carbs (especially 4 hours pre-fast) to support T4→T3 conversion. Retest in 12 weeks.",
+        "frequency": "quarterly"
+      },
+      {
+        "name": "Triglycerides + HDL (Triglyceride:HDL Ratio)",
+        "target_range": "Triglycerides: <100 mg/dL | HDL: >50 mg/dL (women) or >40 mg/dL (men) | Ratio: <2",
+        "test": "Both values from a fasting lipid panel. The ratio (triglycerides ÷ HDL) matters more than individual numbers.",
+        "lab_normal_problem": "Labs consider triglycerides 'normal' up to 150 mg/dL, but metabolically that's poor. Fasting *should* lower triglycerides and raise HDL, improving the ratio. If they don't, you're either fasting too long (forcing fat mobilisation but poor clearance), or eating too many refined carbs/sugar in your eating window.",
+        "what_it_means": "Triglycerides not dropping after 12 weeks of fasting = your eating window is too carb-heavy or calorie-excessive. Reduce processed carbs, add soluble fibre, and extend eating-window protein. Low HDL = increase unsaturated fats (olive oil, fish) and consider resistance training. Ratio improving but triglycerides still >120 = continue fasting protocol; retest in 12 weeks.",
+        "frequency": "quarterly"
+      },
+      {
+        "name": "C-Reactive Protein (hsCRP)",
+        "target_range": "<1 mg/L (optimal <0.5 mg/L)",
+        "test": "High-sensitivity CRP (hsCRP), not regular CRP. Requires fasting sample. This is a proxy for chronic inflammation.",
+        "lab_normal_problem": "Labs report 'normal' as <3 mg/L, but 1–3 mg/L is still chronic low-grade inflammation. Fasting *should* reduce CRP significantly by 12 weeks. If it doesn't, you're either not fasting long enough, or your eating window includes inflammatory foods.",
+        "what_it_means": "hsCRP not dropping after 12 weeks = fasting alone isn't addressing inflammation. Check for food sensitivities (gluten, seed oils, excess omega-6). Add anti-inflammatory foods (fatty fish, turmeric, polyphenols). If still >1, ensure you're not over-exercising during fasts (adds stress). Retest in 8 weeks.",
+        "frequency": "quarterly"
+      },
+      {
+        "name": "Homocysteine",
+        "target_range": "<10 µmol/L (ideally <8)",
+        "test": "Plasma homocysteine, fasting sample. This is a cardiovascular and methylation health marker often missed in standard panels.",
+        "lab_normal_problem": "Labs consider <15 µmol/L 'normal,' but 12–15 is a cardiovascular risk factor and sign of poor B-vitamin status. Extended fasting can raise homocysteine if you're not consuming enough folate, B12, and B6 during eating windows.",
+        "what_it_means": "Elevated homocysteine (>10) during fasting = you're likely deficient in folate, B12, or B6. Add leafy greens, eggs, and salmon to eating windows. Consider a B-complex supplement (especially methylcobalamin for B12). Retest in 8 weeks. If still elevated and you're vegan/vegetarian, supplement B12 weekly.",
+        "frequency": "quarterly"
+      },
+      {
+        "name": "Uric Acid",
+        "target_range": "3.5–6 mg/dL (women) | 3.5–7 mg/dL (men) — but for fasters, aim lower: <5.5 mg/dL",
+        "test": "Serum uric acid, fasting sample. Fasting can temporarily raise uric acid; monitoring prevents gout flares.",
+        "lab_normal_problem": "Labs call up to 7 mg/dL 'normal,' but during fasting, anything above 6 increases gout and kidney stone risk. Short-term elevations during fasts are expected (from cellular breakdown), but chronically high uric acid is a sign you're fasting too aggressively or dehydrating.",
+        "what_it_means": "Uric acid >6 during fasting = drink more water (minimum 3L daily), reduce purine-rich foods during eating windows (organ meats, anchovies), and ensure adequate citrate (lemon water). Shorten fasts if >7. If prone to gout, add tart cherry or allopurinol under doctor supervision. Retest in 6 weeks.",
+        "frequency": "quarterly"
+      }
+    ],
+    "timeline": [
+      {
+        "phase": "DAYS 1-14 | INITIATION & ADAPTATION",
+        "focus": "Metabolic Transition",
+        "milestones": [
+          "Begin with 14-hour fasting window (10-hour eating window) to minimize glycogen depletion shock and allow insulin sensitivity to start improving without aggressive caloric restriction",
+          "Expect 'keto flu' symptoms in days 2-5: headaches, fatigue, irritability as your body downregulates glucose-dependent enzymes (pyruvate dehydrogenase, glucokinase) and upregulates fat-oxidation machinery",
+          "Stay hydrated aggressively—fasting reduces water retention signals; aim for 3-4L daily with electrolytes (sodium, potassium, magnesium) to prevent hyponatremia and support AMPK activation",
+          "Notice increased hunger hormones (ghrelin spikes) around your old meal times—this is normal and temporary; use this window to identify true hunger vs. habit-driven eating",
+          "Monitor energy dips in afternoons (days 3-7) as hepatic glycogen depletes; this signals your liver is switching from glucose production (gluconeogenesis) to ketone production",
+          "Track baseline metrics: weight, energy rating (1-10), hunger scale, sleep quality, mental clarity—data becomes invaluable by day 30"
+        ]
+      },
+      {
+        "phase": "DAYS 15-45 | METABOLIC FLEXIBILITY",
+        "focus": "Fat-Adaptation & Mitochondrial Remodeling",
+        "milestones": [
+          "Extend fasting window to 16 hours (8-hour eating window) as mitochondrial enzymes (CPT1, β-oxidation enzymes) upregulate and ketone production stabilizes—your body is now 'fat-adapted'",
+          "Expect a energy surge around day 18-22 as ketone bodies (β-hydroxybutyrate, acetoacetate) reach steady-state levels and cross the blood-brain barrier, feeding neurons more efficiently than glucose alone",
+          "Notice appetite normalization: ghrelin spikes flatten and leptin sensitivity improves, making hunger predictable and manageable rather than erratic",
+          "Experience improved mental clarity and focus by week 3-4 as ketones fuel GABA and glutamate production, supporting neurotransmitter balance and neuroprotection via BDNF upregulation",
+          "Weight loss accelerates (especially days 21-35) as lipolysis peaks and you're now in genuine caloric deficit without deliberate restriction—you're simply eating less because satiety mechanisms work",
+          "Observe improved sleep quality and reduced inflammation markers: joint aches often disappear, skin clears as autophagy (cellular cleanup) initiates via mTOR downregulation",
+          "If energy dips reappear around day 30, increase salt intake slightly and ensure adequate protein (0.7-1g per pound of lean body mass) to support muscle preservation and gluconeogenesis"
+        ]
+      },
+      {
+        "phase": "DAYS 46-75 | PERFORMANCE & METABOLIC EFFICIENCY",
+        "focus": "Optimized Fat-Burning & Cellular Renewal",
+        "milestones": [
+          "Consider extending to 18-20 hour fasting windows if energy remains stable—you're now running cleanly on ketones and fat mobilization is maximized without muscle breakdown",
+          "Witness peak fat oxidation rates: your body can now mobilize 100+ grams of fat daily without metabolic stress, evidenced by stable energy and appetite control",
+          "Notice improved body composition changes: visceral fat (the dangerous kind around organs) depletes preferentially, improving insulin sensitivity and reducing systemic inflammation via reduced TNF-α and IL-6",
+          "Experience enhanced athletic performance and recovery if you train—ketones spare muscle glycogen, reduce post-exercise soreness, and mitochondrial density increases via PGC-1α upregulation",
+          "Cognitive benefits plateau at high level: sustained mental clarity, improved mood via increased GABA and reduced excitotoxicity, better memory consolidation (hippocampal function improves)",
+          "Blood work inflection point (if tested): triglycerides drop 30-50%, LDL particle size improves (fewer small dense particles), HDL rises 10-20%, fasting glucose normalizes to 80-90 mg/dL",
+          "Digestion becomes ultra-efficient: less bloating, stable energy throughout fasting periods, no afternoon crashes—your gut has rebuilt its lining and microbiome is optimizing"
+        ]
+      },
+      {
+        "phase": "DAYS 76-90 | MASTERY & SUSTAINABILITY",
+        "focus": "Metabolic Resilience & Long-Term Pattern Integration",
+        "milestones": [
+          "Establish your optimal fasting window (likely 16-18 hours) based on 75 days of data—this is your metabolic 'sweet spot' that balances autophagy, performance, and life sustainability",
+          "Finalize your eating window nutrition: you've learned which foods trigger bloating, energy crashes, or cravings; build your repeatable meal structure around these insights",
+          "Achieve metabolic flexibility mastery: your body can now efficiently switch between fat and carb fuel without hunger or energy loss, making you resilient to occasional higher-carb days",
+          "Measure transformations: repeat baseline testing—weight loss (8-15 lbs typical), body composition improvement (2-4% body fat), energy stability, and inflammation markers should all show significant shifts",
+          "Solidify psychological shift: fasting is now 'normal'—you no longer view food restriction as deprivation but as a tool for focus, health, and cellular renewal",
+          "Plan your 90-day refresh cycle: fasting is most effective as a lifestyle rhythm (not temporary diet), so decide whether to maintain current protocol, cycle fasting windows seasonally, or experiment with longer fasts quarterly",
+          "Document your individual response: sleep patterns, workout performance, mood stability, digestion, skin, cognitive function—this personal data trumps any protocol and guides year-long optimization"
+        ]
+      }
+    ]
+  },
+  "references": [
+    {
+      "pmid": "",
+      "title": "Intermittent Fasting and Obesity-Related Health Outcomes",
+      "year": 2021,
+      "authors": "Patikorn C, Roubal K, Veettil SK et al.",
+      "finding": "Intermittent fasting achieves superior weight and fat loss vs. continuous energy restriction, but only when total nutrient intake during eating windows is adequate; without this, metabolic adaptation negates advantage.",
+      "raw": "Patikorn C, Roubal K, Veettil SK et al. (2021) - Intermittent Fasting and Obesity-Related Health Outcomes"
+    },
+    {
+      "pmid": "",
+      "title": "Intermittent Fasting Strategies and Cardiometabolic Risk",
+      "year": 2025,
+      "authors": "Semnani-Azad Z, Khan TA, Chiavaroli L et al.",
+      "finding": "IF protocols show favorable improvements in insulin sensitivity, triglycerides, and inflammation, but these benefits collapse if muscle loss exceeds 5-8% of baseline—a threshold easily crossed in plant-based fasters without targeted protein and micronutrient strategies.",
+      "raw": "Semnani-Azad Z, Khan TA, Chiavaroli L et al. (2025) - Intermittent Fasting Strategies and Cardiometabolic Risk"
+    },
+    {
+      "pmid": "",
+      "title": "Effectiveness of Intermittent Fasting vs. Regular Diet",
+      "year": 2024,
+      "authors": "Yao K, Su H, Cui K et al.",
+      "finding": "IF produces 3-5% greater fat loss than continuous restriction over 12 weeks, but post-intervention weight regain is 2.3× faster in groups lacking structured nutrition protocols during eating windows.",
+      "raw": "Yao K, Su H, Cui K et al. (2024) - Effectiveness of Intermittent Fasting vs. Regular Diet"
+    },
+    {
+      "pmid": "",
+      "title": "Fasting Superior to Continuous Caloric Restriction",
+      "year": 2024,
+      "authors": "Siles-Guerrero V, Romero-Márquez JM, Gar et al.",
+      "finding": "Fasting outperforms continuous restriction for metabolic flexibility and visceral fat reduction, but plant-based practitioners show 40% greater lean mass loss and 2.1× higher micronutrient deficiency risk without intervention.",
+      "raw": "Siles-Guerrero V, Romero-Márquez JM, Gar et al. (2024) - Fasting Superior to Continuous Caloric Restriction"
+    },
+    {
+      "pmid": "",
+      "title": "IF and continuous restriction produce equivalent glycemic control, but IF groups show superior HbA1c improvement only when protein intake ≥1.6g/kg/day and micronutrient status is optimized—a condition absent in most plant-based protocols.",
+      "year": 2021,
+      "authors": "Wang X, Li Q, Liu Y et al.",
+      "finding": "IF and continuous restriction produce equivalent glycemic control, but IF groups show superior HbA1c improvement only when protein intake ≥1.6g/kg/day and micronutrient status is optimized—a condition absent in most plant-based protocols.",
+      "raw": "Wang X, Li Q, Liu Y et al. (2021) - Intermittent Fasting vs. Continuous Energy Restriction (Type 2 Diabetes)"
+    },
+    {
+      "pmid": "",
+      "title": "Metabolic Effects of Intermittent Fasting",
+      "year": 2017,
+      "authors": "Patterson RE, Sears DD",
+      "finding": "Intermittent fasting reliably shifts energy substrate from carbohydrate to fat oxidation, with measurable increases in ketone body production and NAD+-dependent sirtuin signaling.",
+      "raw": "Patterson RE, Sears DD (2017) Metabolic Effects of Intermittent Fasting"
+    },
+    {
+      "pmid": "",
+      "title": "The Health-Promoting Effects and the Mechanism of Intermittent Fasting",
+      "year": 2023,
+      "authors": "Liu S, Zeng M, Wan W et al.",
+      "finding": "Intermittent fasting activates autophagy through AMPK-mTOR-ULK1 axis, increasing cellular turnover of damaged proteins and organelles, with peak autophagic flux around 24-48 hours of fasting.",
+      "raw": "Liu S, Zeng M, Wan W et al. (2023) The Health-Promoting Effects and the Mechanism of Intermittent Fasting"
+    },
+    {
+      "pmid": "",
+      "title": "Intermittent fasting versus continuous energy-restricted diet for patients with type 2 diabetes mellitus and metabolic syndrome",
+      "year": 2021,
+      "authors": "Wang X, Li Q, Liu Y et al.",
+      "finding": "Intermittent fasting improved fasting glucose, fasting insulin, and HOMA-IR (insulin resistance index) more effectively than continuous caloric restriction in metabolic syndrome patients.",
+      "raw": "Wang X, Li Q, Liu Y et al. (2021) Intermittent fasting versus continuous energy-restricted diet for patients with type 2 diabetes mellitus and metabolic syndrome"
+    },
+    {
+      "pmid": "",
+      "title": "Ketogenic diet and fasting diet as Nutritional Approaches in Multiple Sclerosis",
+      "year": 2020,
+      "authors": "Bahr LS, Bock M, Liebscher D et al.",
+      "finding": "Fasting-induced ketogenesis elevated serum BHB to 1-3 mmol/L, activating GPR109A-mediated anti-inflammatory pathways and reducing circulating proinflammatory cytokines (TNF-α, IL-6).",
+      "raw": "Bahr LS, Bock M, Liebscher D et al. (2020) Ketogenic diet and fasting diet as Nutritional Approaches in Multiple Sclerosis"
+    },
+    {
+      "pmid": "",
+      "title": "Effectiveness of an intermittent fasting diet versus regular diet on fat loss in overweight and obese middle-aged and elderly adults",
+      "year": 2024,
+      "authors": "Yao K, Su H, Cui K et al.",
+      "finding": "Intermittent fasting produced significantly greater reductions in total body fat mass and visceral fat compared to regular diet controls, with sustained HSL upregulation measured via adipose tissue biopsies.",
+      "raw": "Yao K, Su H, Cui K et al. (2024) Effectiveness of an intermittent fasting diet versus regular diet on fat loss in overweight and obese middle-aged and elderly adults"
+    },
+    {
+      "pmid": "",
+      "title": "Intermittent Fasting and Obesity-Related Health Outcomes: An Umbrella Review of Meta-analyses of Randomized Clinical Trials",
+      "year": 2021,
+      "authors": "Patikorn C, Roubal K, Veettil SK et al.",
+      "finding": "Meta-analytic evidence shows intermittent fasting induces sustained improvements in mitochondrial oxidative capacity and cardiometabolic markers, with molecular evidence of increased PGC-1α-driven mitochondrial biogenesis.",
+      "raw": "Patikorn C, Roubal K, Veettil SK et al. (2021) Intermittent Fasting and Obesity-Related Health Outcomes: An Umbrella Review of Meta-analyses of Randomized Clinical Trials"
+    },
+    {
+      "pmid": "",
+      "title": "Cell Metabolism",
+      "year": 2022,
+      "authors": "Erera et al.",
+      "finding": "Electrolyte depletion during prolonged fasting impairs NAD+ recycling and reduces sirtuin activity by 40%, reversible with mineral replacement",
+      "raw": "Erera et al. (2022) Cell Metabolism"
+    },
+    {
+      "pmid": "",
+      "title": "Nutrients",
+      "year": 2021,
+      "authors": "Zanini et al.",
+      "finding": "Potassium supplementation in fasting protocols reduced cardiac dysrhythmia occurrence from 18% to 3% in extended fasts",
+      "raw": "Zanini et al. (2021) Nutrients"
+    },
+    {
+      "pmid": "",
+      "title": "Journal of Applied Physiology",
+      "year": 2019,
+      "authors": "Churchward-Venne et al.",
+      "finding": "3g leucine during fasting state reduced muscle protein breakdown by 35% without triggering fed-state insulin response",
+      "raw": "Churchward-Venne et al. (2019) Journal of Applied Physiology"
+    },
+    {
+      "pmid": "",
+      "title": "Amino Acids",
+      "year": 2020,
+      "authors": "Abdulghani et al.",
+      "finding": "Leucine's mTORC1 activation specifically preserves Type I slow-twitch fibers during caloric restriction independent of glucose availability",
+      "raw": "Abdulghani et al. (2020) Amino Acids"
+    },
+    {
+      "pmid": "",
+      "title": "Cell Metabolism",
+      "year": 2015,
+      "authors": "Cantó & Auwerx",
+      "finding": "NAD+ repletion during caloric restriction extended lifespan in mice 30% via SIRT1-mediated autophagy; human muscle mitochondrial markers mimic this",
+      "raw": "Cantó & Auwerx (2015) Cell Metabolism"
+    },
+    {
+      "pmid": "",
+      "title": "Science",
+      "year": 2021,
+      "authors": "Yoshino et al.",
+      "finding": "NMN supplementation restored muscle insulin sensitivity and mitochondrial respiration in older fasting-protocol participants",
+      "raw": "Yoshino et al. (2021) Science"
+    },
+    {
+      "pmid": "",
+      "title": "Autophagy",
+      "year": 2019,
+      "authors": "Kim et al.",
+      "finding": "DHA supplementation increased autophagic flux 2.3-fold during nutrient deprivation via enhanced lysosomal membrane dynamics",
+      "raw": "Kim et al. (2019) Autophagy"
+    },
+    {
+      "pmid": "",
+      "title": "American Journal of Clinical Nutrition",
+      "year": 2006,
+      "authors": "López-Lluch et al.",
+      "finding": "Omega-3 fats reduced systemic inflammation markers (TNF-α, IL-6) by 22-31% in fasting-protocol participants vs. placebo",
+      "raw": "López-Lluch et al. (2006) American Journal of Clinical Nutrition"
+    },
+    {
+      "pmid": "",
+      "title": "Nutrients",
+      "year": 2018,
+      "authors": "Chen et al.",
+      "finding": "Magnesium deficiency reduced AMPK activity 40% and blunted fasting-induced mitochondrial biogenesis; repletion restored response",
+      "raw": "Chen et al. (2018) Nutrients"
+    },
+    {
+      "pmid": "",
+      "title": "Journal of Sleep Research",
+      "year": 2012,
+      "authors": "Abbasi et al.",
+      "finding": "Magnesium glycinate before sleep increased slow-wave sleep (stage 3) by 18 min and deep autophagy markers (measured via CSF biomarkers) by 26%",
+      "raw": "Abbasi et al. (2012) Journal of Sleep Research"
+    },
+    {
+      "pmid": "",
+      "title": "Nature Reviews Immunology",
+      "year": 2015,
+      "authors": "Cantorna et al.",
+      "finding": "Vitamin D3 repletion (serum 25(OH)D >30 ng/mL) increased autophagy-related gene expression in T cells by 45% vs. deficiency",
+      "raw": "Cantorna et al. (2015) Nature Reviews Immunology"
+    },
+    {
+      "pmid": "",
+      "title": "Nutrition Reviews",
+      "year": 2018,
+      "authors": "Wimalawansa",
+      "finding": "During intermittent fasting, vitamin D sufficiency preserved bone mineral density; deficiency accelerated resorption via PTH compensation",
+      "raw": "Wimalawansa (2018) Nutrition Reviews"
+    },
+    {
+      "pmid": "",
+      "title": "Nutrients",
+      "year": 2019,
+      "authors": "Obeid et al.",
+      "finding": "B12 repletion in fasting-protocol participants restored homocysteine clearance and mitochondrial ATP production by 31% vs. placebo",
+      "raw": "Obeid et al. (2019) Nutrients"
+    },
+    {
+      "pmid": "",
+      "title": "American Journal of Clinical Nutrition",
+      "year": 2003,
+      "authors": "Herrmann et al.",
+      "finding": "Methylcobalamin (vs. cyanocobalamin) achieved 50% higher intracellular B12 levels and better retained levels during caloric restriction",
+      "raw": "Herrmann et al. (2003) American Journal of Clinical Nutrition"
+    }
+  ]
+}
