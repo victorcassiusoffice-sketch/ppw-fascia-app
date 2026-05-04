@@ -9,7 +9,7 @@ import {
   chainOverlayUrl, dominantChainForZones,
 } from './data.js';
 import { getBodyView, zoneCentroid } from './bodyZones.js';
-import { useActiveProtocols, useActiveModules, useActiveRoutines, useCompletedToday, useLocalStorage } from './state.js';
+import { useActiveProtocols, useActiveModules, useActiveRoutines, useCompletedToday, useLocalStorage, useDailyHidden, useDailyDuplicates, useFastingPrefs } from './state.js';
 import { listProtocols, fetchProtocol, mergeDailyItems, isMockActive } from './protocols.js';
 import { iherbUrl, amazonUkUrl, iherbCartAllUrl } from './affiliate.js';
 import { LS_KEYS, APP_VERSION, USE_MOCK_DATA, NOTIFICATION_LEAD_TIME_MIN } from './config.js';
@@ -135,7 +135,7 @@ function NavDrawer({ open, onClose }) {
     { to: '/today',     label: 'Today',           icon: '◐' },
     { to: '/protocols', label: 'Protocols',       icon: '●' },
     { to: '/modules',   label: 'Audio & Modules', icon: '🎧' },
-    { to: '/welcome',   label: 'Build a Session', icon: '◆' },
+    { to: '/welcome',   label: 'Create our Personalised Release Routine', icon: '◆' },
     { to: '/settings',  label: 'Settings',        icon: '⚙' },
   ];
   return (
@@ -786,6 +786,12 @@ function TodayView() {
   // Per-item time overrides keyed by item id. Lets the user tap a time and pick
   // a new one without touching the source protocol JSON.
   const [timeOverrides, setTimeOverrides] = useLocalStorage(LS_KEYS.DAILY_TIMES, {});
+  // N15: per-instance hide layer. Removes a single item from Today without
+  // deactivating its source protocol/module/routine (siblings stay).
+  const { isHidden, hide, unhideAll, hiddenIds } = useDailyHidden();
+  // N19: per-day duplicate stack — each entry has its own instanceId, time,
+  // and a snapshot of the source item's display fields.
+  const { duplicates, addDuplicate, removeDuplicate, updateDuplicateTime, clearDuplicates } = useDailyDuplicates();
 
   const [protocols, setProtocols] = useState([]);
   const [moduleEntries, setModuleEntries] = useState([]);
@@ -817,23 +823,55 @@ function TodayView() {
     [protocols, activeRoutines, moduleEntries]
   );
 
-  // Apply user-defined order: known ids first (in saved order), unknown ids
-  // appended at end. Keeps notification times intact (drag is display-only).
-  // Also overlays per-item time edits from `timeOverrides`.
+  // Resolve duplicate snapshots into "live" items. A duplicate carries its own
+  // instanceId so deleting it never affects siblings. We rehydrate display
+  // fields (label, kind, etc.) from the duplicate's own snapshot since the
+  // source item may have been hidden or edited since it was created.
+  const duplicateItems = useMemo(() => {
+    return duplicates.map(d => ({
+      kind: d.kind || 'duplicate',
+      id: d.instanceId,                // unique stable id used everywhere
+      isDuplicate: true,
+      sourceId: d.sourceId,
+      time: d.time,
+      category: d.category,
+      label: d.label,
+      duration_min: d.duration_min || 0,
+      notes: d.notes,
+      media_ref: d.media_ref || null,
+      fascia_routine: d.fascia_routine || null,
+      zones: d.zones || null,
+      level: d.level || null,
+      lifestyle: d.lifestyle || null,
+    }));
+  }, [duplicates]);
+
+  // Apply user-defined order, hidden filter, time overrides, and append
+  // per-day duplicates. Hidden filter is applied LAST so duplicates of hidden
+  // sources still show.
   const items = useMemo(() => {
     const applyOverride = (it) => timeOverrides[it.id] ? { ...it, time: timeOverrides[it.id] } : it;
-    if (!dailyOrder || dailyOrder.length === 0) return baseItems.map(applyOverride);
-    const byId = new Map(baseItems.map(it => [it.id, it]));
-    const ordered = [];
-    for (const id of dailyOrder) {
-      if (byId.has(id)) {
-        ordered.push(applyOverride(byId.get(id)));
-        byId.delete(id);
+    const all = [...baseItems, ...duplicateItems];
+    let ordered;
+    if (!dailyOrder || dailyOrder.length === 0) {
+      ordered = all.map(applyOverride);
+    } else {
+      const byId = new Map(all.map(it => [it.id, it]));
+      ordered = [];
+      for (const id of dailyOrder) {
+        if (byId.has(id)) {
+          ordered.push(applyOverride(byId.get(id)));
+          byId.delete(id);
+        }
       }
+      for (const it of all) if (byId.has(it.id)) ordered.push(applyOverride(it));
     }
-    for (const it of baseItems) if (byId.has(it.id)) ordered.push(applyOverride(it));
-    return ordered;
-  }, [baseItems, dailyOrder, timeOverrides]);
+    // N15: hide individual items without affecting siblings.
+    const filtered = ordered.filter(it => !hiddenIds.includes(it.id));
+    // Re-sort by time after merging duplicates in.
+    filtered.sort((a, b) => (a.time || '99:99').localeCompare(b.time || '99:99'));
+    return filtered;
+  }, [baseItems, duplicateItems, dailyOrder, timeOverrides, hiddenIds]);
 
   const handleReorder = (newItems) => {
     setDailyOrder(newItems.map(it => it.id));
@@ -841,26 +879,30 @@ function TodayView() {
 
   // Persist a new time for an item. Routine items are special-cased so the
   // change also updates the routine settings the rest of the app reads from.
+  // Duplicates store their own time on the duplicate record (per-instance).
   const handleTimeChange = useCallback((it, newTime) => {
     if (!newTime) return;
+    if (it.isDuplicate) {
+      updateDuplicateTime(it.id, newTime);
+      return;
+    }
     if (it.kind === 'routine') {
       setActiveRoutines(prev => ({ ...prev, scheduledTime: newTime }));
     }
     setTimeOverrides(prev => ({ ...prev, [it.id]: newTime }));
-  }, [setActiveRoutines, setTimeOverrides]);
+  }, [setActiveRoutines, setTimeOverrides, updateDuplicateTime]);
 
-  // Remove a single item from today's plan. For protocols this deactivates the
-  // whole protocol (its other daily items go too). For audio modules it
-  // deactivates that module. For the routine bundle it clears saved zones.
+  // N15: remove a SINGLE item from today's plan, leaving its siblings intact.
+  // Protocols/modules/routines stay active in localStorage; we just hide the
+  // individual id from the rolling "Today" view. Duplicates are removed from
+  // the duplicates list directly. Bulk-clear is the explicit "Remove stack"
+  // button, never a side effect.
   const handleRemoveItem = useCallback((it) => {
-    if (it.kind === 'protocol') {
-      setActiveProtocols(cur => cur.filter(id => id !== it.protocol_id));
-    } else if (it.kind === 'audio') {
-      setActiveModules(cur => cur.filter(s => s !== it.slug));
-    } else if (it.kind === 'routine') {
-      setActiveRoutines(prev => ({ ...prev, savedZones: [] }));
+    if (it.isDuplicate) {
+      removeDuplicate(it.id);
+    } else {
+      hide(it.id);
     }
-    // Tidy up auxiliary state.
     setDailyOrder(cur => (cur || []).filter(id => id !== it.id));
     setTimeOverrides(cur => {
       if (!cur || !(it.id in cur)) return cur;
@@ -869,18 +911,49 @@ function TodayView() {
       return next;
     });
     setExpanded(prev => prev === it.id ? null : prev);
-  }, [setActiveProtocols, setActiveModules, setActiveRoutines, setDailyOrder, setTimeOverrides]);
+  }, [hide, removeDuplicate, setDailyOrder, setTimeOverrides]);
+
+  // N19: duplicate a routine card. Default time = source time + 4h, capped at
+  // 23:59. Snapshot the display fields so the duplicate survives the source
+  // being hidden later. New per-instance ID — totally independent.
+  const handleDuplicate = useCallback((it) => {
+    const [hh, mm] = (it.time || '08:00').split(':').map(Number);
+    const total = (hh * 60 + mm + 4 * 60);
+    const capped = Math.min(total, 23 * 60 + 59);
+    const newH = String(Math.floor(capped / 60)).padStart(2, '0');
+    const newM = String(capped % 60).padStart(2, '0');
+    const newTime = `${newH}:${newM}`;
+    const instanceId = `dup::${it.id}::${Date.now()}::${Math.floor(Math.random() * 9999)}`;
+    addDuplicate({
+      instanceId,
+      sourceId: it.id,
+      kind: it.kind,
+      time: newTime,
+      category: it.category,
+      label: it.label,
+      duration_min: it.duration_min || 0,
+      notes: it.notes,
+      media_ref: it.media_ref || null,
+      fascia_routine: it.fascia_routine || null,
+      zones: it.zones || null,
+      level: it.level || null,
+      lifestyle: it.lifestyle || null,
+    });
+  }, [addDuplicate]);
 
   // Wipe the whole stack — used when every item is ticked. Mirrors the
-  // "Reset everything" action in Settings, but stays inline.
+  // "Reset everything" action in Settings, but stays inline. Also clears
+  // per-day hide + duplicate state so a fresh activation starts clean.
   const handleRemoveStack = useCallback(() => {
     setActiveProtocols([]);
     setActiveModules([]);
     setActiveRoutines(prev => ({ ...prev, savedZones: [] }));
     setDailyOrder([]);
     setTimeOverrides({});
+    unhideAll();
+    clearDuplicates();
     setExpanded(null);
-  }, [setActiveProtocols, setActiveModules, setActiveRoutines, setDailyOrder, setTimeOverrides]);
+  }, [setActiveProtocols, setActiveModules, setActiveRoutines, setDailyOrder, setTimeOverrides, unhideAll, clearDuplicates]);
 
   useEffect(() => {
     if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
@@ -909,7 +982,7 @@ function TodayView() {
           <p className="text-muted text-sm mb-6">Activate a protocol, save a body-zone routine, or pick an audio module — they will all show up here.</p>
           <div className="flex flex-wrap gap-3 justify-center">
             <Link to="/protocols" className="btn-accent">Browse protocols</Link>
-            <Link to="/welcome" className="btn-ghost">Build a session</Link>
+            <Link to="/welcome" className="btn-ghost">Create our Personalised Release Routine</Link>
             <Link to="/modules" className="btn-ghost">Audio modules</Link>
           </div>
         </div>
@@ -998,11 +1071,15 @@ function TodayView() {
                     {done ? '✓ Done — tap to undo' : 'Mark done'}
                   </button>
                   <button
+                    onClick={() => handleDuplicate(it)}
+                    className="w-full text-center py-2 rounded-full text-xs font-bold border border-accent/40 text-accent hover:bg-accent/5 transition-colors"
+                    title="Add a copy 4 hours later — drag to reorder, tap time to edit"
+                  >
+                    + Duplicate (later today)
+                  </button>
+                  <button
                     onClick={() => {
-                      const sourceLabel = it.kind === 'protocol' ? 'this protocol (and all its items)'
-                        : it.kind === 'audio' ? 'this audio module'
-                        : 'your saved zones routine';
-                      if (window.confirm(`Remove ${sourceLabel} from your daily plan?`)) {
+                      if (window.confirm('Remove just this item from today? Other items in your stack stay.')) {
                         handleRemoveItem(it);
                       }
                     }}
@@ -1111,6 +1188,8 @@ function ProtocolDetail() {
       <h1 className="font-display text-3xl md:text-4xl mb-2">{p.topic}</h1>
       <p className="text-muted mb-5">{p.studies_used} studies · generated {new Date(p.generated_at).toLocaleDateString()}</p>
       <button onClick={toggle} className={isActive ? 'btn-ghost mb-8' : 'btn-accent mb-8'}>{isActive ? '✓ Active — deactivate' : 'Activate this protocol'}</button>
+
+      {(p.topic || '').toLowerCase().includes('fasting') && <FastingControls />}
 
       <Section title="The Crisis">
         <p className="text-cream/80">{p.sections.crisis.body_md}</p>
@@ -1238,6 +1317,242 @@ function ProtocolDetail() {
         </div>
       </Section>
     </main>
+  );
+}
+
+/* ═══════════════════════════════════════════
+   N14 — Fasting interactive controls
+   ═══════════════════════════════════════════ */
+function FastingControls() {
+  const [prefs, setPrefs] = useFastingPrefs();
+  const { addDuplicate } = useDailyDuplicates();
+  const [perm, setPerm] = useState(getPermissionState());
+  const [now, setNow] = useState(Date.now());
+  const [banner, setBanner] = useState(null);
+
+  // Live tick — once per second so the countdown updates smoothly.
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const WINDOWS = [
+    { key: '16:8', label: '16:8',  fastH: 16, eatH: 8 },
+    { key: '18:6', label: '18:6',  fastH: 18, eatH: 6 },
+    { key: '20:4', label: '20:4',  fastH: 20, eatH: 4 },
+    { key: '24h',  label: '24h',   fastH: 24, eatH: 0 },
+    { key: '48h',  label: '48h',   fastH: 48, eatH: 0 },
+    { key: '72h',  label: '72h',   fastH: 72, eatH: 0 },
+    { key: '7day', label: '7-day', fastH: 168, eatH: 0 },
+  ];
+  const fastWindow = WINDOWS.find(w => w.key === prefs.windowKey) || WINDOWS[0];
+  const startMs = prefs.startISO ? new Date(prefs.startISO).getTime() : null;
+  const endMs   = startMs ? startMs + fastWindow.fastH * 3600000 : null;
+  const halfMs  = startMs && endMs ? startMs + (endMs - startMs) / 2 : null;
+  const oneHourBeforeMs = endMs ? endMs - 3600000 : null;
+
+  const fmtCountdown = (ms) => {
+    if (ms == null || ms <= 0) return '00:00:00';
+    const s = Math.floor(ms / 1000);
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    if (h >= 24) {
+      const d = Math.floor(h / 24);
+      const rh = h % 24;
+      return `${d}d ${String(rh).padStart(2, '0')}h ${String(m).padStart(2, '0')}m`;
+    }
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+  };
+
+  // Phase machine: idle / pre-fast / fasting / complete.
+  let phase = 'idle';
+  let countdownLabel = 'Pick a window and start';
+  let countdownValue = '—';
+  if (startMs && endMs) {
+    if (now < startMs) {
+      phase = 'pre-fast';
+      countdownLabel = 'Fast starts in';
+      countdownValue = fmtCountdown(startMs - now);
+    } else if (now >= startMs && now < endMs) {
+      phase = 'fasting';
+      countdownLabel = 'Break-fast in';
+      countdownValue = fmtCountdown(endMs - now);
+    } else {
+      phase = 'complete';
+      countdownLabel = 'Fast complete — eat well';
+      countdownValue = '00:00:00';
+    }
+  }
+
+  const startNow = () => {
+    setPrefs(p => ({ ...p, startISO: new Date().toISOString() }));
+    const breakAt = new Date(Date.now() + fastWindow.fastH * 3600000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    setBanner({ tone: 'ok', text: 'Fast started · ' + fastWindow.label + ' window · break-fast at ' + breakAt });
+  };
+  const startTonightAt8 = () => {
+    const d = new Date();
+    d.setHours(20, 0, 0, 0);
+    if (d.getTime() < Date.now()) d.setDate(d.getDate() + 1);
+    setPrefs(p => ({ ...p, startISO: d.toISOString() }));
+    setBanner({ tone: 'ok', text: 'Fast scheduled for ' + d.toLocaleString([], { weekday: 'short', hour: '2-digit', minute: '2-digit' }) });
+  };
+  const setCustomStart = (e) => {
+    const v = e.target.value;
+    if (!v) return;
+    const d = new Date(v);
+    setPrefs(p => ({ ...p, startISO: d.toISOString() }));
+  };
+  const cancelFast = () => {
+    setPrefs(p => ({ ...p, startISO: null }));
+    setBanner(null);
+  };
+
+  // Notification scheduling — same setTimeout approach as the daily
+  // notifications module. Service worker handles click events already.
+  const scheduledRef = useRef([]);
+  const clearScheduled = () => { scheduledRef.current.forEach(clearTimeout); scheduledRef.current = []; };
+  useEffect(() => () => clearScheduled(), []);
+
+  const scheduleAll = async () => {
+    let p = perm;
+    if (p !== 'granted') {
+      p = await requestPermission();
+      setPerm(p);
+    }
+    clearScheduled();
+    if (p !== 'granted') {
+      setBanner({ tone: 'warn', text: 'Notifications blocked — using in-app banners instead.' });
+      return;
+    }
+    if (!startMs || !endMs) {
+      setBanner({ tone: 'warn', text: 'Set a start time first.' });
+      return;
+    }
+    const fire = (when, title, body) => {
+      const delay = when - Date.now();
+      if (delay <= 0) return false;
+      const t = setTimeout(() => {
+        try {
+          new Notification(title, { body: body, tag: 'ppw-fast-' + when, icon: (import.meta.env.BASE_URL || '/') + 'assets/body_map.png' });
+        } catch (_) {}
+      }, delay);
+      scheduledRef.current.push(t);
+      return true;
+    };
+    let n = 0;
+    if (fire(startMs, 'PPW · Fast starting', fastWindow.label + ' window — see you on the other side.')) n++;
+    if (halfMs && fire(halfMs, 'PPW · Halfway there', 'Halfway through your ' + fastWindow.label + ' fast. Hydrate, salt, walk.')) n++;
+    if (oneHourBeforeMs && fire(oneHourBeforeMs, 'PPW · 1 hour to break-fast', 'Prep your meal — protein-forward, real food.')) n++;
+    if (fire(endMs, 'PPW · Break-fast time', 'Eat slowly, chew well. You earned it.')) n++;
+    setBanner({ tone: 'ok', text: n + ' notification' + (n === 1 ? '' : 's') + ' scheduled.' });
+  };
+
+  const addToPlan = () => {
+    if (!startMs || !endMs) {
+      setBanner({ tone: 'warn', text: 'Set a start time first.' });
+      return;
+    }
+    const startDate = new Date(startMs);
+    const endDate = new Date(endMs);
+    const startTimeStr = String(startDate.getHours()).padStart(2, '0') + ':' + String(startDate.getMinutes()).padStart(2, '0');
+    const endTimeStr   = String(endDate.getHours()).padStart(2, '0')   + ':' + String(endDate.getMinutes()).padStart(2, '0');
+    const stamp = Date.now();
+    addDuplicate({
+      instanceId: 'dup::fasting-start::' + stamp,
+      sourceId: 'fasting-protocol-block',
+      kind: 'fasting',
+      time: startTimeStr,
+      category: 'fasting_window',
+      label: 'Fast start — ' + fastWindow.label,
+      duration_min: 0,
+      notes: 'Begin ' + fastWindow.label + ' fast. Water, electrolytes, black coffee/tea OK.',
+    });
+    addDuplicate({
+      instanceId: 'dup::fasting-end::' + (stamp + 1),
+      sourceId: 'fasting-protocol-block',
+      kind: 'fasting',
+      time: endTimeStr,
+      category: 'break_fast',
+      label: 'Break-fast — ' + fastWindow.label,
+      duration_min: 0,
+      notes: 'Open your eating window. Protein-forward, real food.',
+    });
+    setPrefs(p => ({ ...p, addToPlan: true }));
+    setBanner({ tone: 'ok', text: "Added to today's plan — check the Today screen." });
+  };
+
+  // Default value for the datetime-local input.
+  const dtLocalValue = (() => {
+    const d = startMs ? new Date(startMs) : new Date();
+    const off = d.getTimezoneOffset();
+    const local = new Date(d.getTime() - off * 60000);
+    return local.toISOString().slice(0, 16);
+  })();
+
+  const phaseColour = phase === 'fasting' ? 'text-accent' : phase === 'complete' ? 'text-cream' : 'text-muted';
+
+  return (
+    <Section title="Live fasting timer">
+      <div className="card p-5 mb-4">
+        <div className="text-xs uppercase tracking-widest text-muted mb-2">Window</div>
+        <div className="flex flex-wrap gap-2 mb-5">
+          {WINDOWS.map(w => (
+            <button
+              key={w.key}
+              onClick={() => setPrefs(p => ({ ...p, windowKey: w.key }))}
+              className={'px-4 py-2 rounded-full text-xs font-bold transition-all ' + (prefs.windowKey === w.key ? 'btn-accent' : 'btn-ghost')}
+            >{w.label}</button>
+          ))}
+        </div>
+
+        <div className="text-xs uppercase tracking-widest text-muted mb-2">Start</div>
+        <div className="flex flex-col sm:flex-row gap-2 mb-5">
+          <button onClick={startNow} className="btn-accent flex-1 text-sm py-2.5">Start now</button>
+          <button onClick={startTonightAt8} className="btn-ghost flex-1 text-sm py-2.5">Start tonight 8pm</button>
+        </div>
+        <label className="block text-xs text-muted mb-2">Or pick a custom start time:</label>
+        <input
+          type="datetime-local"
+          value={dtLocalValue}
+          onChange={setCustomStart}
+          className="w-full bg-cream/5 border border-cream/15 rounded-lg px-3 py-2 text-sm font-display text-cream focus:outline-none focus:border-accent"
+          aria-label="Fast start time"
+        />
+      </div>
+
+      <div className="card p-5 mb-4 text-center">
+        <div className={'text-xs uppercase tracking-widest mb-2 ' + phaseColour}>{countdownLabel}</div>
+        <div className="font-display text-4xl md:text-5xl text-accent mb-2 tabular-nums">{countdownValue}</div>
+        {startMs && endMs && (
+          <div className="text-xs text-muted">
+            {new Date(startMs).toLocaleString([], { weekday: 'short', hour: '2-digit', minute: '2-digit' })}
+            {' → '}
+            {new Date(endMs).toLocaleString([], { weekday: 'short', hour: '2-digit', minute: '2-digit' })}
+          </div>
+        )}
+        {startMs && (
+          <button onClick={cancelFast} className="text-xs text-muted hover:text-accent mt-3 underline underline-offset-4">Cancel fast</button>
+        )}
+      </div>
+
+      <div className="card p-5">
+        <div className="font-display mb-1">Notifications & plan</div>
+        <p className="text-muted text-xs mb-4">
+          Schedule reminders for fast start, halfway, 1h before break-fast, and break-fast.
+          Permission state: <span className="text-accent">{perm}</span>.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <button onClick={scheduleAll} className="btn-accent flex-1 text-sm py-2.5">Schedule notifications</button>
+          <button onClick={addToPlan} className="btn-ghost flex-1 text-sm py-2.5">Add to today's plan</button>
+        </div>
+        {banner && (
+          <div className={'mt-3 text-xs px-3 py-2 rounded-lg ' + (banner.tone === 'ok' ? 'bg-accent/10 text-accent border border-accent/20' : 'bg-cream/5 text-cream border border-cream/10')}>
+            {banner.text}
+          </div>
+        )}
+      </div>
+    </Section>
   );
 }
 

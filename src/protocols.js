@@ -1,10 +1,28 @@
 // Protocol fetch + caching layer.
-// Pulls from PROTOCOLS_JSON_URL or falls back to /mock-protocol.json when USE_MOCK_DATA is true.
+// Pulls from PROTOCOLS_JSON_URL or falls back to public/*.json when USE_MOCK_DATA is true.
+// In mock mode the catalog below is the source of truth — every protocol_id maps
+// to a JSON file bundled in the app's `public/` directory.
 
 import { PROTOCOLS_JSON_URL, USE_MOCK_DATA, LS_KEYS } from './config.js';
 import { migrateZoneCodes } from './data.js';
 
 const memCache = new Map();
+
+// Local catalog of bundled protocols. Each entry maps a protocol_id to a path
+// under public/ — so the file is fetched relative to BASE_URL (works at root
+// or under a Pages subpath like /ppw-fascia-app/).
+const LOCAL_CATALOG = [
+  { protocol_id: 'testosterone_standard_v1',     file: 'mock-protocol.json' },
+  { protocol_id: 'fasting-standard-protocol',    file: 'protocols/fasting_standard.json' },
+  { protocol_id: 'fasting-vegan-protocol',       file: 'protocols/fasting_vegan.json' },
+  { protocol_id: 'autoimmune-standard-protocol', file: 'protocols/autoimmune_standard.json' },
+  { protocol_id: 'autoimmune-vegan-protocol',    file: 'protocols/autoimmune_vegan.json' },
+];
+
+function localCatalogFile(protocolId) {
+  const e = LOCAL_CATALOG.find(c => c.protocol_id === protocolId);
+  return e ? e.file : null;
+}
 
 function useMockOverride() {
   try {
@@ -20,12 +38,18 @@ export function isMockActive() {
   return o == null ? USE_MOCK_DATA : o;
 }
 
-/* List of protocols available — for now: just mock-protocol when in mock mode,
-   or a directory listing fetched from the GitHub raw endpoint. */
+/* List of protocols available. In mock mode this iterates over the LOCAL_CATALOG
+   so all bundled protocols (testosterone, fasting std/vegan, autoimmune std/vegan)
+   appear as cards on the Protocols screen. In live mode it tries the remote
+   index.json. */
 export async function listProtocols() {
   if (isMockActive()) {
-    const p = await fetchProtocol('testosterone_standard_v1');
-    return p ? [p] : [];
+    const out = [];
+    for (const entry of LOCAL_CATALOG) {
+      const p = await fetchProtocol(entry.protocol_id);
+      if (p) out.push(p);
+    }
+    return out;
   }
   try {
     const r = await fetch(`${PROTOCOLS_JSON_URL}index.json`, { cache: 'no-cache' });
@@ -42,11 +66,17 @@ export async function listProtocols() {
 
 export async function fetchProtocol(protocolId) {
   if (memCache.has(protocolId)) return memCache.get(protocolId);
+  const base = import.meta.env.BASE_URL || '/';
   let url;
   if (isMockActive()) {
-    url = `${import.meta.env.BASE_URL || '/'}mock-protocol.json`;
+    const file = localCatalogFile(protocolId);
+    if (!file) return null;
+    url = `${base}${file}`;
   } else {
-    url = `${PROTOCOLS_JSON_URL}${protocolId}.json`;
+    // Even in live mode, prefer the bundled catalog if we recognise the id —
+    // gives us offline-friendly behaviour without round-tripping GitHub.
+    const file = localCatalogFile(protocolId);
+    url = file ? `${base}${file}` : `${PROTOCOLS_JSON_URL}${protocolId}.json`;
   }
   try {
     const r = await fetch(url, { cache: 'no-cache' });

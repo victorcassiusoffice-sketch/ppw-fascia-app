@@ -17,6 +17,9 @@ export const LS_KEYS = {
   USE_MOCK_OVERRIDE:   'ppw.useMockOverride',
   DAILY_ORDER:         'ppw.dailyOrder',
   DAILY_TIMES:         'ppw.dailyTimes',
+  DAILY_HIDDEN:        'ppw.dailyHidden',
+  DAILY_DUPLICATES:    'ppw.dailyDuplicates',
+  FASTING_PREFS:       'ppw.fastingPrefs',
 };
 
-export const APP_VERSION = '0.2.0-phase2';
+export const APP_VERSION = '0.4.0-night-run';

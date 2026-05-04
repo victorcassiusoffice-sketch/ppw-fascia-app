@@ -1,6 +1,3 @@
-// Tiny localStorage-backed state primitives — no backend, no auth.
-// Keys live in src/config.ts (LS_KEYS).
-
 import { useEffect, useState, useCallback } from 'react';
 import { LS_KEYS } from './config.js';
 
@@ -21,39 +18,94 @@ export function useLocalStorage(key, initial) {
   return [val, setVal];
 }
 
-/* ─── Active protocols (string[] of protocol_id) ─── */
 export function useActiveProtocols() {
   return useLocalStorage(LS_KEYS.ACTIVE_PROTOCOLS, []);
 }
 
-/* ─── Active modules (string[] of slugs like 'daytime_stress') ─── */
 export function useActiveModules() {
   return useLocalStorage(LS_KEYS.ACTIVE_MODULES, []);
 }
 
-/* ─── Active body-zone routines ─── */
 export function useActiveRoutines() {
   return useLocalStorage(LS_KEYS.ACTIVE_ROUTINES, {
-    savedZones: [],     // ['12_lower_back_left', ...]
+    savedZones: [],
     level: 'beginner',
     lifestyle: null,
     scheduledTime: '08:00',
   });
 }
 
-/* ─── Completed-today checklist ─── */
-export function useCompletedToday() {
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const [state, setState] = useLocalStorage(LS_KEYS.COMPLETED_TODAY, { date: todayStr, ids: [] });
+function todayISO() { return new Date().toISOString().slice(0, 10); }
 
-  // Roll over at midnight
+export function useDailyHidden() {
+  const todayStr = todayISO();
+  const [state, setState] = useLocalStorage(LS_KEYS.DAILY_HIDDEN, { date: todayStr, ids: [] });
   useEffect(() => {
-    if (state.date !== todayStr) {
-      setState({ date: todayStr, ids: [] });
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (state.date !== todayStr) setState({ date: todayStr, ids: [] });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [todayStr]);
+  const isHidden = useCallback((id) => state.ids.includes(id), [state.ids]);
+  const hide = useCallback((id) => {
+    setState((s) => {
+      const date = todayISO();
+      const baseIds = s.date === date ? s.ids : [];
+      return { date, ids: baseIds.includes(id) ? baseIds : [...baseIds, id] };
+    });
+  }, [setState]);
+  const unhideAll = useCallback(() => setState({ date: todayISO(), ids: [] }), [setState]);
+  return { isHidden, hide, unhideAll, hiddenIds: state.date === todayStr ? state.ids : [] };
+}
 
+export function useDailyDuplicates() {
+  const todayStr = todayISO();
+  const [state, setState] = useLocalStorage(LS_KEYS.DAILY_DUPLICATES, { date: todayStr, items: [] });
+  useEffect(() => {
+    if (state.date !== todayStr) setState({ date: todayStr, items: [] });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [todayStr]);
+  const addDuplicate = useCallback((dup) => {
+    setState((s) => {
+      const date = todayISO();
+      const base = s.date === date ? s.items : [];
+      return { date, items: [...base, dup] };
+    });
+  }, [setState]);
+  const removeDuplicate = useCallback((instanceId) => {
+    setState((s) => {
+      const date = todayISO();
+      const base = s.date === date ? s.items : [];
+      return { date, items: base.filter(i => i.instanceId !== instanceId) };
+    });
+  }, [setState]);
+  const updateDuplicateTime = useCallback((instanceId, time) => {
+    setState((s) => {
+      const date = todayISO();
+      const base = s.date === date ? s.items : [];
+      return { date, items: base.map(i => i.instanceId === instanceId ? { ...i, time } : i) };
+    });
+  }, [setState]);
+  const clearDuplicates = useCallback(() => setState({ date: todayISO(), items: [] }), [setState]);
+  return {
+    duplicates: state.date === todayStr ? state.items : [],
+    addDuplicate, removeDuplicate, updateDuplicateTime, clearDuplicates,
+  };
+}
+
+export function useFastingPrefs() {
+  return useLocalStorage(LS_KEYS.FASTING_PREFS, {
+    windowKey: '16:8',
+    startISO: null,
+    addToPlan: false,
+  });
+}
+
+export function useCompletedToday() {
+  const todayStr = todayISO();
+  const [state, setState] = useLocalStorage(LS_KEYS.COMPLETED_TODAY, { date: todayStr, ids: [] });
+  useEffect(() => {
+    if (state.date !== todayStr) setState({ date: todayStr, ids: [] });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [todayStr]);
   const isDone = useCallback((id) => state.ids.includes(id), [state.ids]);
   const toggle = useCallback((id) => {
     setState((s) => {
@@ -61,6 +113,5 @@ export function useCompletedToday() {
       return { date: todayStr, ids: has ? s.ids.filter(x => x !== id) : [...s.ids, id] };
     });
   }, [setState, todayStr]);
-
   return { isDone, toggle, completed: state.ids };
 }
