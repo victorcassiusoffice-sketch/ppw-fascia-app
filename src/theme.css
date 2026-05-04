@@ -404,3 +404,33 @@ header {
 button:focus-visible, a:focus-visible {
   outline: none; /* per-component focus rings handle this */
 }
+
+/* ──────────────────────────────────────────
+   M14 — "Drop to merge" gold pulse on the
+   target card while the user holds another
+   card over its centre.
+   ────────────────────────────────────────── */
+@keyframes ppwMergePulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 1px rgba(245, 184, 69, 0.55) inset,
+      0 0 28px 4px rgba(245, 184, 69, 0.32);
+  }
+  50% {
+    box-shadow:
+      0 0 0 2px rgba(245, 184, 69, 0.95) inset,
+      0 0 42px 12px rgba(245, 184, 69, 0.55);
+  }
+}
+.merge-target-pulse {
+  animation: ppwMergePulse 0.85s ease-in-out infinite;
+  border-radius: 14px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .merge-target-pulse {
+    animation: none;
+    box-shadow:
+      0 0 0 2px rgba(245, 184, 69, 0.85) inset,
+      0 0 24px 6px rgba(245, 184, 69, 0.4);
+  }
+}

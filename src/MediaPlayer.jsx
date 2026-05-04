@@ -4,11 +4,35 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { loadMedia } from './data.js';
 
+// M14 — `enablejsapi=1` lets the YouTube IFrame API postMessage events
+// (including state-change → 0 = ended) reach our listener inside MergedStack
+// for video auto-play sequencing. The iframe needs a `listening` handshake
+// + an addEventListener('onStateChange') subscription, sent on load.
 function YouTubeEmbed({ youtube_id, autoplay = false }) {
-  const src = `https://www.youtube-nocookie.com/embed/${youtube_id}?rel=0&modestbranding=1&playsinline=1${autoplay ? '&autoplay=1' : ''}`;
+  const ref = useRef(null);
+  const src = `https://www.youtube-nocookie.com/embed/${youtube_id}?rel=0&modestbranding=1&playsinline=1&enablejsapi=1${autoplay ? '&autoplay=1' : ''}`;
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const onLoad = () => {
+      try {
+        node.contentWindow && node.contentWindow.postMessage(
+          JSON.stringify({ event: 'listening', id: 'ppw-yt' }),
+          '*'
+        );
+        node.contentWindow && node.contentWindow.postMessage(
+          JSON.stringify({ event: 'command', func: 'addEventListener', args: ['onStateChange'] }),
+          '*'
+        );
+      } catch (_) {}
+    };
+    node.addEventListener('load', onLoad);
+    return () => node.removeEventListener('load', onLoad);
+  }, [youtube_id]);
   return (
     <div className="w-full aspect-video rounded-xl overflow-hidden bg-black">
       <iframe
+        ref={ref}
         src={src}
         title="PPW video"
         allow="accelerometer; autoplay; encrypted-media; picture-in-picture"
@@ -22,7 +46,7 @@ function YouTubeEmbed({ youtube_id, autoplay = false }) {
 
 function YouTubeAudio({ youtube_id, autoplay = false }) {
   // Use the same nocookie embed but crop the video frame so only audio controls show.
-  const src = `https://www.youtube-nocookie.com/embed/${youtube_id}?rel=0&modestbranding=1&playsinline=1&controls=1${autoplay ? '&autoplay=1' : ''}`;
+  const src = `https://www.youtube-nocookie.com/embed/${youtube_id}?rel=0&modestbranding=1&playsinline=1&controls=1&enablejsapi=1${autoplay ? '&autoplay=1' : ''}`;
   return (
     <div className="audio-only-wrap">
       <iframe

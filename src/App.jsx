@@ -820,20 +820,25 @@ function InlineRename({ value, placeholder, onSave, className = '', inputClassNa
 }
 
 /* ═══════════════════════════════════════════
-   M9 — MergedStack
-   Parent card grouping multiple routines as TABS. Header has editable title
-   (default blank → "Name this stack…" placeholder), count badge, and
-   "Unstack" action. Tabs scroll horizontally on mobile (scroll-snap).
-   Drop targets: the whole stack accepts a dropped routine to add another tab.
+   M14 — MergedStack (compact-by-default, expandable)
+   ───────────────────────────────────────────
+   Parent card grouping multiple routines as TABS. Stays the SAME COMPACT
+   SIZE regardless of how many routines are merged — count badge + tab dots
+   only. Tap to expand → tabs visible + active tab body. Tap collapse → back
+   to compact.
+     - TIME LIVES ON THE STACK (single time chip; per-tab time hidden)
+     - editable title (default blank → "Name this stack…" placeholder)
+     - drop target: whole stack accepts a dropped routine to add a tab
+     - video auto-play: if every tab is a video routine, the active video
+       cascades into the next on `onEnded` per `merge.playOrder`
    ═══════════════════════════════════════════ */
 function MergedStack({
   mergeId,
   merge,
   itemsById,
   isDragOver,
-  onDragOver, onDragLeave, onDrop,
   onSetTitle, onSetActiveTab, onUnmergeItem, onDissolve,
-  onItemDragStart, onItemDragEnd,
+  onSetTime, onToggleCollapsed, onSetPlayOrder,
   renderTabBody,
 }) {
   const ids = (merge.itemIds || []).filter(id => itemsById.has(id));
@@ -841,67 +846,177 @@ function MergedStack({
   const activeTabId = merge.activeTabId && ids.includes(merge.activeTabId) ? merge.activeTabId : ids[0];
   const activeItem = itemsById.get(activeTabId);
 
+  // M14 — collapsed defaults to true. Tap card to expand.
+  const collapsed = merge.collapsed !== false;
+  // Stack time is the single source of truth. Fallback to first tab's time.
+  const stackTime = merge.time || (tabs[0] && tabs[0].time) || '';
+  // Detect video-only stack — every tab carries a non-audio media_ref.
+  const isVideoStack = tabs.length > 0 && tabs.every(t => {
+    const m = t.media_ref;
+    if (!m) return false;
+    return m.media_type !== 'audio';
+  });
+  // Auto-play sequence — defaults to itemIds order if playOrder absent or stale.
+  const playOrderRaw = (Array.isArray(merge.playOrder) && merge.playOrder.length > 0)
+    ? merge.playOrder.filter(id => ids.includes(id))
+    : ids;
+  const playOrderFull = playOrderRaw.length === ids.length
+    ? playOrderRaw
+    : [...playOrderRaw, ...ids.filter(id => !playOrderRaw.includes(id))];
+
+  // Edit time inline.
+  const [editingTime, setEditingTime] = useState(false);
+
+  // YouTube postMessage listener — when active tab's iframe reports state 0
+  // (ended), advance to the next tab in playOrder.
+  useEffect(() => {
+    if (!isVideoStack || collapsed) return;
+    const advance = () => {
+      const idx = playOrderFull.indexOf(activeTabId);
+      const nextId = (idx >= 0 && idx + 1 < playOrderFull.length) ? playOrderFull[idx + 1] : null;
+      if (nextId) onSetActiveTab(mergeId, nextId);
+    };
+    const onMsg = (event) => {
+      if (typeof event.data !== 'string') return;
+      try {
+        const d = JSON.parse(event.data);
+        if (d && d.event === 'onStateChange' && d.info === 0) advance();
+      } catch (_) { /* not a YT msg */ }
+    };
+    window.addEventListener('message', onMsg);
+    return () => window.removeEventListener('message', onMsg);
+  }, [isVideoStack, collapsed, activeTabId, mergeId, onSetActiveTab, playOrderFull]);
+
+  // Drag handler for reordering tabs (within expanded state) — affects playOrder.
+  const onTabDragStart = (e, tabId) => {
+    try { e.dataTransfer.setData('text/plain', 'ppw-tab-reorder:' + tabId); } catch (_) {}
+  };
+  const onTabDragOver = (e) => { e.preventDefault(); };
+  const onTabDrop = (e, dropOnTabId) => {
+    e.preventDefault();
+    let raw = '';
+    try { raw = e.dataTransfer.getData('text/plain') || ''; } catch (_) {}
+    if (!raw.startsWith('ppw-tab-reorder:')) return;
+    const fromId = raw.slice('ppw-tab-reorder:'.length);
+    if (!fromId || fromId === dropOnTabId) return;
+    const cur = [...playOrderFull];
+    const fi = cur.indexOf(fromId);
+    const ti = cur.indexOf(dropOnTabId);
+    if (fi < 0 || ti < 0) return;
+    cur.splice(fi, 1);
+    cur.splice(ti, 0, fromId);
+    onSetPlayOrder(mergeId, cur);
+  };
+
   return (
     <div
-      className={'card overflow-hidden border transition-all ' + (isDragOver ? 'border-accent ring-2 ring-accent/50' : 'border-accent/45')}
-      style={{ boxShadow: '0 0 0 1px rgba(245,184,69,0.18) inset' }}
-      onDragOver={onDragOver}
-      onDragLeave={onDragLeave}
-      onDrop={onDrop}
+      className={'card today-routine-card overflow-hidden transition-all ' + (isDragOver ? 'border-accent ring-2 ring-accent/60' : '')}
+      style={{ boxShadow: '0 0 0 1px rgba(245,184,69,0.22) inset' }}
     >
-      <div className="flex items-center gap-2 px-4 pt-3 pb-2 border-b border-cream/5">
-        <span className="text-accent text-base shrink-0" aria-hidden>◆◆</span>
+      {/* COMPACT HEADER — always visible */}
+      <div className="flex items-center gap-2 p-4">
+        {/* Visual stack-of-cards indicator */}
+        <span className="text-accent shrink-0 text-xl leading-none" aria-hidden>▤</span>
+        {/* Time chip — stack-level */}
+        {editingTime ? (
+          <input
+            type="time"
+            autoFocus
+            defaultValue={stackTime}
+            onBlur={(e) => { onSetTime(mergeId, e.target.value); setEditingTime(false); }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter')   { onSetTime(mergeId, e.currentTarget.value); setEditingTime(false); }
+              if (e.key === 'Escape')  { setEditingTime(false); }
+            }}
+            className="font-display text-accent text-sm bg-cream/5 border border-accent rounded px-2 py-1 w-[88px] shrink-0 focus:outline-none"
+            aria-label="Edit stack time"
+          />
+        ) : (
+          <button
+            onClick={(e) => { e.stopPropagation(); setEditingTime(true); }}
+            className="today-time-chip shrink-0"
+            title="Tap to edit stack time"
+            aria-label={`Edit stack time, currently ${stackTime}`}
+          >{stackTime || '—:—'}</button>
+        )}
         <div className="flex-1 min-w-0">
           <InlineRename
             value={merge.title}
             placeholder="Name this stack…"
             onSave={(v) => onSetTitle(mergeId, v)}
-            titleClassName="font-display text-lg"
+            titleClassName="font-display text-base block"
           />
-          <div className="text-xs text-muted">{tabs.length} routines stacked</div>
+          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+            <span className="text-[10px] uppercase tracking-widest text-accent/85 font-bold">{tabs.length} stacked</span>
+            <span className="flex gap-1">
+              {tabs.map((t) => (
+                <span
+                  key={t.id}
+                  className={'inline-block w-1.5 h-1.5 rounded-full ' + (t.id === activeTabId ? 'bg-accent' : 'bg-cream/30')}
+                  aria-hidden
+                />
+              ))}
+            </span>
+            {isVideoStack && (
+              <span className="text-[10px] uppercase tracking-widest text-lime-300/85 font-bold" title="Videos auto-play in sequence">▶ Auto-play</span>
+            )}
+          </div>
         </div>
         <button
           type="button"
-          onClick={() => {
-            if (window.confirm('Unstack? Routines return as separate cards.')) onDissolve(mergeId);
-          }}
-          className="text-xs text-muted hover:text-accent px-2 py-1 rounded"
-          title="Unstack"
-        >Unstack</button>
+          onClick={() => onToggleCollapsed(mergeId, !collapsed)}
+          className="text-muted text-base hover:text-accent w-9 h-9 flex items-center justify-center shrink-0"
+          aria-expanded={!collapsed}
+          aria-label={collapsed ? 'Expand stack' : 'Collapse stack'}
+          title={collapsed ? 'Tap to expand' : 'Tap to collapse'}
+        >{collapsed ? '▾' : '▴'}</button>
       </div>
 
-      <div
-        className="flex overflow-x-auto gap-1 px-2 pt-2 pb-1 border-b border-cream/5 scrollbar-thin"
-        style={{ scrollSnapType: 'x mandatory' }}
-      >
-        {tabs.map(t => {
-          const active = t.id === activeTabId;
-          return (
+      {/* EXPANDED — tabs + active body + actions */}
+      {!collapsed && (
+        <>
+          <div
+            className="flex overflow-x-auto gap-1 px-2 pt-2 pb-1 border-t border-cream/5 scrollbar-thin"
+            style={{ scrollSnapType: 'x mandatory' }}
+          >
+            {tabs.map(t => {
+              const active = t.id === activeTabId;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => onSetActiveTab(mergeId, t.id)}
+                  className={'shrink-0 px-3 py-2 rounded-t-lg text-xs font-display transition-colors min-h-[44px] ' + (active ? 'bg-accent/15 text-accent border border-accent/40 border-b-transparent' : 'text-muted hover:text-accent border border-transparent')}
+                  style={{ scrollSnapAlign: 'start' }}
+                  draggable
+                  onDragStart={(e) => onTabDragStart(e, t.id)}
+                  onDragOver={onTabDragOver}
+                  onDrop={(e) => onTabDrop(e, t.id)}
+                  title={isVideoStack ? 'Tap to view · drag to reorder play sequence' : 'Tap to view'}
+                >
+                  <span className="block truncate max-w-[160px]">{t.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="p-3 border-t border-cream/5">
+            {activeItem ? renderTabBody(activeItem, mergeId) : null}
+          </div>
+
+          <div className="flex items-center justify-between gap-2 px-4 py-2 border-t border-cream/5 text-[11px] text-muted">
+            <span>{isVideoStack ? 'Drag tabs to set play order. Drag another routine onto this card to add a tab.' : 'Drag another routine onto this card to add a tab.'}</span>
             <button
-              key={t.id}
               type="button"
-              onClick={() => onSetActiveTab(mergeId, t.id)}
-              className={'shrink-0 px-3 py-2 rounded-t-lg text-xs font-display transition-colors min-h-[44px] ' + (active ? 'bg-accent/15 text-accent border border-accent/40 border-b-transparent' : 'text-muted hover:text-accent border border-transparent')}
-              style={{ scrollSnapAlign: 'start' }}
-              draggable
-              onDragStart={(e) => onItemDragStart(e, t.id)}
-              onDragEnd={onItemDragEnd}
-              title="Tap to view · drag to move out"
-            >
-              <span className="block truncate max-w-[160px]">{t.label}</span>
-              {t.time && <span className="block text-[10px] opacity-70">{t.time}</span>}
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="p-3">
-        {activeItem ? renderTabBody(activeItem, mergeId) : null}
-      </div>
-
-      <div className="px-4 pb-3 text-[11px] text-muted">
-        Drag another routine onto this card to add a tab. Drag a tab out to remove it.
-      </div>
+              onClick={() => {
+                if (window.confirm('Unstack? Routines return as separate cards.')) onDissolve(mergeId);
+              }}
+              className="text-muted hover:text-accent px-2 py-1 rounded shrink-0"
+              title="Unstack"
+            >Unstack</button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -924,16 +1039,18 @@ function TodayView() {
   // N19: per-day duplicate stack — each entry has its own instanceId, time,
   // and a snapshot of the source item's display fields.
   const { duplicates, addDuplicate, removeDuplicate, updateDuplicateTime, clearDuplicates } = useDailyDuplicates();
-  // M9: drag-drop merge of routine cards into stacks with TAB navigation.
-  const { merges, mergeOnto, unmergeItem, dissolveMerge, setMergeTitle, setActiveTab, pruneMissing } = useDailyMerges();
+  // M9/M14: drag-drop merge of routine cards into stacks with TAB navigation.
+  const {
+    merges,
+    mergeOnto, unmergeItem, dissolveMerge,
+    setMergeTitle, setActiveTab, pruneMissing,
+    setMergeTime, setPlayOrder, setCollapsed,    // M14
+  } = useDailyMerges();
   // M9: rename any routine stack title (single OR merged).
   const { getTitle, setTitle: setItemTitle } = useDailyTitles();
-  // dragging payload — id of card currently being dragged via the merge handle
-  const [mergeDragId, setMergeDragId] = useState(null);
-  // hover target for visual feedback during drag
+  // M14 — visual feedback target during the drag-handle gesture.
+  // Set when SortableList tells us the dragged card's centre overlaps a target.
   const [mergeDragOverId, setMergeDragOverId] = useState(null);
-  // touch fallback — when user taps merge icon, show picker overlay
-  const [mergePickerForId, setMergePickerForId] = useState(null);
 
   const [protocols, setProtocols] = useState([]);
   const [moduleEntries, setModuleEntries] = useState([]);
@@ -1022,13 +1139,42 @@ function TodayView() {
     return m;
   }, [items]);
 
-  // Prune merges that reference items that no longer exist.
-  // IMPORTANT: only prune AFTER items have loaded — otherwise the first
-  // render (empty items) would wipe every merge before protocols arrive.
+  // M14 — Fully-loaded sentinel.
+  // The M9 v1 caveat: on reload, the FIRST `pruneMissing` could fire before
+  // every async data source had hydrated, occasionally wiping merges.
+  // Sentinel flips true ONLY after protocols, moduleEntries, and duplicates
+  // have ALL resolved at least once (i.e. all hydrators have fired).
+  // pruneMissing is gated until then. Single-shot guard.
+  const loadedSentinelRef = useRef(false);
+  const [hasProtocolsHydrated, setHasProtocolsHydrated] = useState(false);
+  const [hasModulesHydrated, setHasModulesHydrated] = useState(false);
+  const [hasDuplicatesHydrated, setHasDuplicatesHydrated] = useState(false);
+
   useEffect(() => {
-    if (!items || items.length === 0) return;
+    // setProtocols is called after the activeProtocols Promise resolves;
+    // mark the first such resolution. If the user has zero active
+    // protocols we still consider the source "hydrated" (empty array case).
+    if (!hasProtocolsHydrated) setHasProtocolsHydrated(true);
+  }, [protocols]);  // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!hasModulesHydrated) setHasModulesHydrated(true);
+  }, [moduleEntries]);  // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!hasDuplicatesHydrated) setHasDuplicatesHydrated(true);
+  }, [duplicates]);  // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (loadedSentinelRef.current) return;
+    if (hasProtocolsHydrated && hasModulesHydrated && hasDuplicatesHydrated) {
+      loadedSentinelRef.current = true;
+    }
+  }, [hasProtocolsHydrated, hasModulesHydrated, hasDuplicatesHydrated]);
+
+  useEffect(() => {
+    if (!loadedSentinelRef.current) return;       // gate prune until hydrated
+    if (!items) return;
     pruneMissing(items.map(it => it.id));
-  }, [items, pruneMissing]);
+  }, [items, pruneMissing, hasProtocolsHydrated, hasModulesHydrated, hasDuplicatesHydrated]);
 
   // For the top-level list, each merge appears as ONE row anchored to its
   // first member's id. Other merge members are hidden from the top list
@@ -1078,7 +1224,7 @@ function TodayView() {
         )}
         {it.media_ref && (
           <div className="pt-2">
-            <DirectMediaPlayer media={it.media_ref} />
+            <DirectMediaPlayer media={it.media_ref} autoplay={inMerge} />
           </div>
         )}
         {it.fascia_routine && it.fascia_routine.body_zone_chain && (
@@ -1126,55 +1272,27 @@ function TodayView() {
     );
   };
 
-  // M9 — merge drag-drop handlers (HTML5 native, separate channel from the
-  // dnd-kit reorder handle so the two don't fight each other).
-  const handleMergeDragStart = useCallback((e, itemId) => {
-    setMergeDragId(itemId);
-    try {
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', 'ppw-merge:' + itemId);
-    } catch (_) {}
-  }, []);
-  const handleMergeDragEnd = useCallback(() => {
-    setMergeDragId(null);
-    setMergeDragOverId(null);
-  }, []);
-  const handleMergeDragOver = useCallback((e, targetId) => {
-    if (!mergeDragId || mergeDragId === targetId) return;
-    e.preventDefault();
-    try { e.dataTransfer.dropEffect = 'move'; } catch (_) {}
-    if (mergeDragOverId !== targetId) setMergeDragOverId(targetId);
-  }, [mergeDragId, mergeDragOverId]);
-  const handleMergeDragLeave = useCallback((targetId) => {
-    setMergeDragOverId(cur => (cur === targetId ? null : cur));
-  }, []);
-  const handleMergeDrop = useCallback((e, targetId) => {
-    e.preventDefault();
-    const draggedId = mergeDragId;
-    setMergeDragId(null);
-    setMergeDragOverId(null);
-    if (!draggedId || draggedId === targetId) return;
-    const draggedItem = itemsById.get(draggedId);
-    const targetItem  = itemsById.get(targetId);
+  // M14 — drag-handle gesture: SortableList computes overlap and tells us
+  // when the dragged card's centre is over another card. We commit a merge
+  // on drop in `handleSortableMergeDrop`. No confirm dialog — Vic wants it
+  // fluid; Undo toast is the safety net.
+  const handleSortableMergeDrop = useCallback((activeId, overId) => {
+    if (!activeId || !overId || activeId === overId) return;
+    const draggedItem = itemsById.get(activeId);
+    const targetItem  = itemsById.get(overId);
     if (!draggedItem || !targetItem) return;
-    const dLabel = titleFor(draggedItem);
-    const tLabel = titleFor(targetItem);
-    if (window.confirm('Merge "' + dLabel + '" into "' + tLabel + '"?')) {
-      mergeOnto(draggedId, targetId);
-    }
-  }, [mergeDragId, itemsById, titleFor, mergeOnto]);
+    // M14 — TIME LIVES ON THE PARENT STACK. The destination's time wins.
+    const targetTime = targetItem.time || null;
+    mergeOnto(activeId, overId, { time: targetTime });
+  }, [itemsById, mergeOnto]);
 
-  // Touch fallback — open picker, then user taps a target.
-  const handleMergePick = useCallback((sourceId, targetId) => {
-    setMergePickerForId(null);
-    if (!sourceId || !targetId || sourceId === targetId) return;
-    const s = itemsById.get(sourceId);
-    const t = itemsById.get(targetId);
-    if (!s || !t) return;
-    if (window.confirm('Merge "' + titleFor(s) + '" into "' + titleFor(t) + '"?')) {
-      mergeOnto(sourceId, targetId);
+  const handleSortableDragOverChange = useCallback((info) => {
+    if (info && info.isMergeZone) {
+      setMergeDragOverId(info.overId);
+    } else {
+      setMergeDragOverId(null);
     }
-  }, [itemsById, titleFor, mergeOnto]);
+  }, []);
 
   // Persist a new time for an item. Routine items are special-cased so the
   // change also updates the routine settings the rest of the app reads from.
@@ -1290,57 +1408,67 @@ function TodayView() {
       {!empty && (
         <p className="text-muted text-xs mb-3 flex items-center gap-2 flex-wrap">
           <span className="text-accent">≡</span>
-          <span>Drag handle to reorder.</span>
-          <span className="text-accent">⛓</span>
-          <span>Drag merge icon onto another routine to stack them — or tap to pick.</span>
+          <span>Drag handle to reorder. Drop on another routine to merge them into a stack.</span>
           <span>Tap any title to rename.</span>
         </p>
       )}
 
-      <SortableList items={visibleItems} onReorder={handleReorder} className="space-y-3 fade-in fade-in-stagger is-visible">
+      <SortableList
+        items={visibleItems}
+        onReorder={handleReorder}
+        onMergeDrop={handleSortableMergeDrop}
+        onDragOverChange={handleSortableDragOverChange}
+        className="space-y-3 fade-in fade-in-stagger is-visible"
+      >
         {(it, dragHandleProps, _i, isDragging) => {
           // M9 — render the parent MergedStack instead of a plain card when
           // this item is the LEAD member of a merge.
           const leadMergeId = mergeLeadByItemId.lead.get(it.id);
           if (leadMergeId) {
             const m = merges[leadMergeId];
+            const mergeIsDragOver = mergeDragOverId === it.id;
             return (
-              <MergedStack
-                mergeId={leadMergeId}
-                merge={m}
-                itemsById={itemsById}
-                isDragOver={mergeDragOverId === leadMergeId}
-                onDragOver={(e) => handleMergeDragOver(e, leadMergeId)}
-                onDragLeave={() => handleMergeDragLeave(leadMergeId)}
-                onDrop={(e) => handleMergeDrop(e, (m.itemIds || [])[0])}
-                onSetTitle={setMergeTitle}
-                onSetActiveTab={setActiveTab}
-                onUnmergeItem={unmergeItem}
-                onDissolve={dissolveMerge}
-                onItemDragStart={handleMergeDragStart}
-                onItemDragEnd={handleMergeDragEnd}
-                renderTabBody={(tabItem) => renderItemBody(tabItem, true)}
-              />
+              <div className={mergeIsDragOver ? 'merge-target-pulse' : ''}>
+                <div className="flex items-stretch gap-2">
+                  <button
+                    {...dragHandleProps}
+                    className="drag-handle font-display text-muted hover:text-accent w-11 self-stretch flex items-center justify-center text-2xl shrink-0"
+                    title="Drag to reorder · drop on another routine to merge"
+                  >≡</button>
+                  <div className="flex-1 min-w-0">
+                    <MergedStack
+                      mergeId={leadMergeId}
+                      merge={m}
+                      itemsById={itemsById}
+                      isDragOver={mergeIsDragOver}
+                      onSetTitle={setMergeTitle}
+                      onSetActiveTab={setActiveTab}
+                      onUnmergeItem={unmergeItem}
+                      onDissolve={dissolveMerge}
+                      onSetTime={setMergeTime}
+                      onToggleCollapsed={setCollapsed}
+                      onSetPlayOrder={setPlayOrder}
+                      renderTabBody={(tabItem) => renderItemBody(tabItem, true)}
+                    />
+                  </div>
+                </div>
+              </div>
             );
           }
           const done = isDone(it.id);
           const isOpen = expanded === it.id;
           const isEditingTime = editingTimeId === it.id;
           const isDragOver = mergeDragOverId === it.id;
-          const isPickingMerge = mergePickerForId === it.id;
           const customTitle = titleFor(it);
           return (
             <div
-              className={`card today-routine-card overflow-hidden transition-all ${done ? 'timeline-done opacity-80' : ''} ${isDragging ? 'border-accent' : ''} ${isDragOver ? 'ring-2 ring-accent/60 border-accent' : ''}`}
-              onDragOver={(e) => handleMergeDragOver(e, it.id)}
-              onDragLeave={() => handleMergeDragLeave(it.id)}
-              onDrop={(e) => handleMergeDrop(e, it.id)}
+              className={`card today-routine-card overflow-hidden transition-all ${done ? 'timeline-done opacity-80' : ''} ${isDragging ? 'border-accent' : ''} ${isDragOver ? 'merge-target-pulse ring-2 ring-accent/60 border-accent' : ''}`}
             >
               <div className="flex items-center gap-2 p-4">
                 <button
                   {...dragHandleProps}
                   className="drag-handle font-display text-muted hover:text-accent w-11 h-11 flex items-center justify-center text-2xl shrink-0 -ml-2"
-                  title="Drag to reorder"
+                  title="Drag to reorder · drop on another routine to merge"
                 >≡</button>
                 <span className={`timeline-dot timeline-${it.kind === 'protocol' ? 'protocol' : it.kind === 'audio' ? 'audio' : 'routine'} shrink-0`}>
                   {it.kind === 'protocol' ? '●' : it.kind === 'audio' ? '🎧' : '◆'}
@@ -1375,49 +1503,11 @@ function TodayView() {
                     titleClassName="timeline-label flex-1 min-w-0 text-sm"
                   />
                   {it.duration_min ? <span className="text-muted text-xs shrink-0">{it.duration_min} min</span> : null}
-                  <button
-                    type="button"
-                    draggable
-                    onDragStart={(e) => handleMergeDragStart(e, it.id)}
-                    onDragEnd={handleMergeDragEnd}
-                    onClick={(e) => { e.stopPropagation(); setMergePickerForId(isPickingMerge ? null : it.id); }}
-                    className="w-9 h-9 rounded-full flex items-center justify-center text-accent hover:bg-accent/10 border border-accent/30 shrink-0 text-sm font-bold cursor-grab active:cursor-grabbing"
-                    title="Merge — drag onto another routine, or tap to pick"
-                    aria-label="Merge with another routine"
-                  >⛓</button>
                   <button onClick={() => setExpanded(isOpen ? null : it.id)} className="text-muted text-xs px-1 py-1 shrink-0" aria-label="Toggle details">
                     {isOpen ? '▴' : '▾'}
                   </button>
                 </div>
               </div>
-
-              {isPickingMerge && (
-                <div className="px-4 pb-3 border-t border-cream/5 pt-3">
-                  <div className="text-xs text-accent uppercase tracking-widest mb-2">Merge with…</div>
-                  <div className="flex flex-col gap-1.5 max-h-56 overflow-y-auto">
-                    {visibleItems.filter(o => o.id !== it.id).map(o => (
-                      <button
-                        key={o.id}
-                        type="button"
-                        onClick={() => handleMergePick(it.id, o.id)}
-                        className="text-left px-3 py-2.5 min-h-[44px] rounded-lg border border-cream/10 hover:border-accent text-sm flex items-center gap-2"
-                      >
-                        <span className="text-accent">→</span>
-                        <span className="flex-1 truncate">{titleFor(o)}</span>
-                        <span className="text-muted text-xs shrink-0">{o.time}</span>
-                      </button>
-                    ))}
-                    {visibleItems.length <= 1 && (
-                      <div className="text-muted text-xs">Need at least one other routine to merge.</div>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setMergePickerForId(null)}
-                    className="mt-2 text-xs text-muted hover:text-accent"
-                  >Cancel</button>
-                </div>
-              )}
 
               {isOpen && renderItemBody(it, false)}
             </div>

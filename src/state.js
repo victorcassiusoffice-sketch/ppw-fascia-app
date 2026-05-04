@@ -92,8 +92,11 @@ export function useDailyDuplicates() {
 }
 
 /* M9 — useDailyMerges. Schema:
-     { [mergeId]: { title, itemIds:[...], collapsed, activeTabId? } }
-   Persists across days; user-organised. */
+     { [mergeId]: { title, itemIds:[...], collapsed, activeTabId?, time?, playOrder? } }
+   Persists across days; user-organised.
+   M14 additions:
+     - `time` — single time string ("HH:MM") for the whole stack (overrides per-tab time)
+     - `playOrder` — ordered tab ids for video auto-play sequence */
 export function useDailyMerges() {
   const [merges, setMerges] = useLocalStorage(LS_KEYS.DAILY_MERGES, {});
   const findMergeFor = useCallback((itemId) => {
@@ -102,8 +105,11 @@ export function useDailyMerges() {
     }
     return null;
   }, [merges]);
-  const mergeOnto = useCallback((draggedItemId, targetItemId) => {
+  // M14 — optional `opts.time` sets the stack time at the moment of merging
+  // (caller passes the destination card's current time so the stack inherits it).
+  const mergeOnto = useCallback((draggedItemId, targetItemId, opts) => {
     if (draggedItemId === targetItemId) return null;
+    const inheritedTime = opts && opts.time ? opts.time : null;
     let resultId = null;
     setMerges((cur) => {
       const next = { ...cur };
@@ -111,21 +117,37 @@ export function useDailyMerges() {
       const mB = Object.entries(next).find(([_, m]) => m.itemIds?.includes(targetItemId));
       if (mA && mB && mA[0] === mB[0]) { resultId = mA[0]; return cur; }
       if (mA && mB) {
-        const merged = { ...mB[1], itemIds: [...mB[1].itemIds, ...mA[1].itemIds.filter(id => !mB[1].itemIds.includes(id))] };
+        const merged = {
+          ...mB[1],
+          itemIds: [...mB[1].itemIds, ...mA[1].itemIds.filter(id => !mB[1].itemIds.includes(id))],
+        };
+        if (inheritedTime && !merged.time) merged.time = inheritedTime;
         next[mB[0]] = merged;
         delete next[mA[0]];
         resultId = mB[0];
       } else if (mB) {
         const m = mB[1];
-        if (!m.itemIds.includes(draggedItemId)) next[mB[0]] = { ...m, itemIds: [...m.itemIds, draggedItemId] };
+        const updated = { ...m };
+        if (!m.itemIds.includes(draggedItemId)) updated.itemIds = [...m.itemIds, draggedItemId];
+        if (inheritedTime && !updated.time) updated.time = inheritedTime;
+        next[mB[0]] = updated;
         resultId = mB[0];
       } else if (mA) {
         const m = mA[1];
-        if (!m.itemIds.includes(targetItemId)) next[mA[0]] = { ...m, itemIds: [...m.itemIds, targetItemId] };
+        const updated = { ...m };
+        if (!m.itemIds.includes(targetItemId)) updated.itemIds = [...m.itemIds, targetItemId];
+        if (inheritedTime) updated.time = inheritedTime;
+        next[mA[0]] = updated;
         resultId = mA[0];
       } else {
         const newId = 'merge::' + Date.now() + '::' + Math.floor(Math.random() * 9999);
-        next[newId] = { title: '', itemIds: [targetItemId, draggedItemId], collapsed: false };
+        next[newId] = {
+          title: '',
+          itemIds: [targetItemId, draggedItemId],
+          collapsed: true,                              // M14: stacks default to compact
+          time: inheritedTime || null,                  // M14: inherit destination's time
+          playOrder: [targetItemId, draggedItemId],     // default play order = creation order
+        };
         resultId = newId;
       }
       return next;
@@ -163,6 +185,18 @@ export function useDailyMerges() {
   const reorderTabs = useCallback((mergeId, newItemIds) => {
     setMerges((cur) => (cur[mergeId] ? { ...cur, [mergeId]: { ...cur[mergeId], itemIds: newItemIds } } : cur));
   }, [setMerges]);
+  // M14 — single source of truth for stack time
+  const setMergeTime = useCallback((mergeId, time) => {
+    setMerges((cur) => (cur[mergeId] ? { ...cur, [mergeId]: { ...cur[mergeId], time } } : cur));
+  }, [setMerges]);
+  // M14 — video auto-play sequence
+  const setPlayOrder = useCallback((mergeId, newOrder) => {
+    setMerges((cur) => (cur[mergeId] ? { ...cur, [mergeId]: { ...cur[mergeId], playOrder: newOrder } } : cur));
+  }, [setMerges]);
+  // M14 — toggle compact vs expanded
+  const setCollapsed = useCallback((mergeId, collapsed) => {
+    setMerges((cur) => (cur[mergeId] ? { ...cur, [mergeId]: { ...cur[mergeId], collapsed } } : cur));
+  }, [setMerges]);
   const pruneMissing = useCallback((existingIds) => {
     setMerges((cur) => {
       let changed = false;
@@ -179,7 +213,20 @@ export function useDailyMerges() {
       return changed ? next : cur;
     });
   }, [setMerges]);
-  return { merges, findMergeFor, mergeOnto, unmergeItem, dissolveMerge, setMergeTitle, setActiveTab, reorderTabs, pruneMissing };
+  return {
+    merges,
+    findMergeFor,
+    mergeOnto,
+    unmergeItem,
+    dissolveMerge,
+    setMergeTitle,
+    setActiveTab,
+    reorderTabs,
+    pruneMissing,
+    setMergeTime,    // M14
+    setPlayOrder,    // M14
+    setCollapsed,    // M14
+  };
 }
 
 /* M9 — useDailyTitles. Single map: { [itemIdOrMergeId]: customTitle } */
