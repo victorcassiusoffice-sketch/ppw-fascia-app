@@ -19,6 +19,8 @@ export const LS_KEYS = {
   DAILY_TIMES:         'ppw.dailyTimes',
   DAILY_HIDDEN:        'ppw.dailyHidden',
   DAILY_DUPLICATES:    'ppw.dailyDuplicates',
+  DAILY_MERGES:        'ppw.dailyMerges',
+  DAILY_TITLES:        'ppw.dailyTitles',
   FASTING_PREFS:       'ppw.fastingPrefs',
 };
 
