@@ -1023,7 +1023,10 @@ function TodayView() {
   }, [items]);
 
   // Prune merges that reference items that no longer exist.
+  // IMPORTANT: only prune AFTER items have loaded — otherwise the first
+  // render (empty items) would wipe every merge before protocols arrive.
   useEffect(() => {
+    if (!items || items.length === 0) return;
     pruneMissing(items.map(it => it.id));
   }, [items, pruneMissing]);
 
