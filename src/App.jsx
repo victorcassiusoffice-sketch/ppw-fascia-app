@@ -1063,6 +1063,8 @@ function TodayView() {
     Promise.all(activeProtocols.map(id => fetchProtocol(id))).then(arr => {
       if (cancelled) return;
       setProtocols(arr.filter(Boolean));
+      // M14 — sentinel: mark hydrated only AFTER the async fetch resolved.
+      setHasProtocolsHydrated(true);
     });
     return () => { cancelled = true; };
   }, [activeProtocols]);
@@ -1073,7 +1075,12 @@ function TodayView() {
       const known = KNOWN_AUDIO_MODULES.find(m => m.slug === slug);
       const media = await loadMedia(moduleMediaPath('audio', slug));
       return { slug, media, scheduledTime: known?.defaultTime || '14:30' };
-    })).then(arr => { if (!cancelled) setModuleEntries(arr); });
+    })).then(arr => {
+      if (cancelled) return;
+      setModuleEntries(arr);
+      // M14 — sentinel: mark hydrated only AFTER the async fetch resolved.
+      setHasModulesHydrated(true);
+    });
     return () => { cancelled = true; };
   }, [activeModules]);
 
@@ -1150,18 +1157,20 @@ function TodayView() {
   const [hasModulesHydrated, setHasModulesHydrated] = useState(false);
   const [hasDuplicatesHydrated, setHasDuplicatesHydrated] = useState(false);
 
+  // M14 fixed — protocols/modules hydration is set inside the .then() of
+  // their respective fetch useEffects (above). duplicates comes from
+  // useLocalStorage which hydrates synchronously, so we mark it on mount.
+  useEffect(() => { setHasDuplicatesHydrated(true); }, []);
+  // If the user has zero active protocols/modules, the fetch effect's .then()
+  // still resolves immediately with [] — but we set a fallback timer here in
+  // case .then never fires (e.g. cancelled before resolve).
   useEffect(() => {
-    // setProtocols is called after the activeProtocols Promise resolves;
-    // mark the first such resolution. If the user has zero active
-    // protocols we still consider the source "hydrated" (empty array case).
-    if (!hasProtocolsHydrated) setHasProtocolsHydrated(true);
-  }, [protocols]);  // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    if (!hasModulesHydrated) setHasModulesHydrated(true);
-  }, [moduleEntries]);  // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    if (!hasDuplicatesHydrated) setHasDuplicatesHydrated(true);
-  }, [duplicates]);  // eslint-disable-line react-hooks/exhaustive-deps
+    const t = setTimeout(() => {
+      setHasProtocolsHydrated(true);
+      setHasModulesHydrated(true);
+    }, 1500);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     if (loadedSentinelRef.current) return;

@@ -199,6 +199,12 @@ export function useDailyMerges() {
   }, [setMerges]);
   const pruneMissing = useCallback((existingIds) => {
     setMerges((cur) => {
+      // M14 defensive guards — refuse to prune in obvious partial-load states:
+      //   • no merges at all → nothing to do
+      //   • caller passed an empty id list while we DO have merges → almost
+      //     certainly a partial-hydration race; bail out and try later.
+      if (Object.keys(cur).length === 0) return cur;
+      if (!existingIds || existingIds.length === 0) return cur;
       let changed = false;
       const next = { ...cur };
       const set = new Set(existingIds);
