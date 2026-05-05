@@ -59,6 +59,8 @@ const ZONE_LABEL_OVERRIDES = {
   'knee-right':            'Knee R',
   'calf-left':             'Calf L',
   'calf-right':            'Calf R',
+  'foot-left':             'Foot L',
+  'foot-right':            'Foot R',
 };
 
 function zoneShortLabel(code, zonesList) {

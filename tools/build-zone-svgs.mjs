@@ -43,31 +43,39 @@ const BACK_OUT  = path.join(OUT_DIR, 'body_zones_back.svg');
 const MATCH_TOLERANCE_PX = 80;
 
 // Target zone centroids in Figma SVG space.
-//   FRONT: 432×1113, slug naming follows image-position (slug 'foo-left'
-//          appears at low-x, mirroring is handled by Vic naming his
-//          Figma layers from his own perspective — image-left = Vic's R).
-//   BACK:  436×1203, slug = anatomical side = image side (no mirror).
+//   FRONT: 432×1113, slug naming follows ANATOMICAL convention — when the
+//          user faces the screen, image-left (low-x) = the user's RIGHT
+//          side, so the slug 'foo-right' lives at low-x (2026-05-05 fix).
+//          The previous version named slugs from the screen's perspective,
+//          which inverted L/R for every paired front zone.
+//   BACK:  436×1203, slug = anatomical side = image side (no mirror —
+//          when the user faces away, image-left already = user's left).
 //
 // Add a new entry when Vic adds a new zone in Figma. The cx/cy come from
 // the bbox centre of the new polygon — read it off paths_meta.json or
 // from the build-time diagnostic this script prints.
 const FRONT_TARGETS = [
+  // 2026-05-05 anatomical-naming fix: paired L/R codes swapped so that
+  // (low-x = image-left = user's RIGHT) matches the convention every
+  // anatomy reference uses. BACK_TARGETS untouched.
   { code: 'headache',              cx: 214, cy:   43 },
-  { code: 'neck-left',             cx: 187, cy:  159 },  // image-left
-  { code: 'neck-right',            cx: 237, cy:  159 },  // image-right
-  { code: 'front-shoulder-left',   cx: 120, cy:  244 },
-  { code: 'front-shoulder-right',  cx: 310, cy:  244 },
+  { code: 'neck-right',            cx: 187, cy:  159 },  // image-left = user R
+  { code: 'neck-left',             cx: 237, cy:  159 },  // image-right = user L
+  { code: 'front-shoulder-right',  cx: 120, cy:  244 },
+  { code: 'front-shoulder-left',   cx: 310, cy:  244 },
   { code: 'solar-plexus',          cx: 215, cy:  322 },  // re-enabled 2026-05-05
-  { code: 'elbow-left',            cx:  70, cy:  403 },
-  { code: 'elbow-right',           cx: 357, cy:  396 },
-  { code: 'forearm-left',          cx:  32, cy:  530 },
-  { code: 'forearm-right',         cx: 389, cy:  520 },
-  { code: 'hip-flexor-left',       cx: 156, cy:  542 },
-  { code: 'hip-flexor-right',      cx: 273, cy:  542 },
-  { code: 'knee-left',             cx: 156, cy:  787 },
-  { code: 'knee-right',            cx: 264, cy:  787 },
-  { code: 'calf-left',             cx: 130, cy: 1073 },  // foot/ankle area
-  { code: 'calf-right',            cx: 292, cy: 1073 },
+  { code: 'elbow-right',           cx:  70, cy:  403 },
+  { code: 'elbow-left',            cx: 357, cy:  396 },
+  { code: 'forearm-right',         cx:  32, cy:  530 },
+  { code: 'forearm-left',          cx: 389, cy:  520 },
+  { code: 'hip-flexor-right',      cx: 156, cy:  542 },
+  { code: 'hip-flexor-left',       cx: 273, cy:  542 },
+  { code: 'knee-right',            cx: 156, cy:  787 },
+  { code: 'knee-left',             cx: 264, cy:  787 },
+  // Renamed 2026-05-05: front 'calf-*' polygons were actually drawn at
+  // foot/ankle level — re-slugged to 'foot-*' (anatomical L/R applied).
+  { code: 'foot-right',            cx: 130, cy: 1073 },
+  { code: 'foot-left',             cx: 292, cy: 1073 },
 ];
 
 const BACK_TARGETS = [

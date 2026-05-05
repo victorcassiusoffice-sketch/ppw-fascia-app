@@ -6,42 +6,42 @@
     },
     "anchors": [
       {
-        "code": "neck-right",
+        "code": "neck-left",
         "cx": 237.5,
         "cy": 159.3
       },
       {
-        "code": "neck-left",
+        "code": "neck-right",
         "cx": 187.5,
         "cy": 159.3
       },
       {
-        "code": "front-shoulder-left",
+        "code": "front-shoulder-right",
         "cx": 120.6,
         "cy": 244.5
       },
       {
-        "code": "front-shoulder-right",
+        "code": "front-shoulder-left",
         "cx": 310.4,
         "cy": 244.5
       },
       {
-        "code": "elbow-left",
+        "code": "elbow-right",
         "cx": 69.6,
         "cy": 403.3
       },
       {
-        "code": "elbow-right",
+        "code": "elbow-left",
         "cx": 357.5,
         "cy": 396.3
       },
       {
-        "code": "knee-left",
+        "code": "knee-right",
         "cx": 155.8,
         "cy": 787.5
       },
       {
-        "code": "knee-right",
+        "code": "knee-left",
         "cx": 263.8,
         "cy": 787.5
       },
@@ -51,32 +51,32 @@
         "cy": 43.5
       },
       {
-        "code": "calf-right",
+        "code": "foot-left",
         "cx": 292.5,
         "cy": 1073
       },
       {
-        "code": "calf-left",
+        "code": "foot-right",
         "cx": 129.5,
         "cy": 1073
       },
       {
-        "code": "hip-flexor-right",
+        "code": "hip-flexor-left",
         "cx": 273.5,
         "cy": 542.4
       },
       {
-        "code": "hip-flexor-left",
+        "code": "hip-flexor-right",
         "cx": 156,
         "cy": 542.4
       },
       {
-        "code": "forearm-left",
+        "code": "forearm-right",
         "cx": 32.5,
         "cy": 529.8
       },
       {
-        "code": "forearm-right",
+        "code": "forearm-left",
         "cx": 389,
         "cy": 520.3
       },

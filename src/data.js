@@ -50,6 +50,11 @@ export const ZONES = [
   { code: 'knee-right',            label: 'Knee',         group: 'knee',           side: 'right' },
   { code: 'calf-left',             label: 'Calf',         group: 'calf',           side: 'left'  },
   { code: 'calf-right',            label: 'Calf',         group: 'calf',           side: 'right' },
+
+  // Group F — Foot (FRONT view only — was mis-named 'calf-*' on FRONT before
+  // the 2026-05-05 anatomical-naming fix; the polygons are at foot/ankle level)
+  { code: 'foot-left',             label: 'Foot',         group: 'foot',           side: 'left'  },
+  { code: 'foot-right',            label: 'Foot',         group: 'foot',           side: 'right' },
 ];
 
 // Number of tests per zone-group. Each test has a yes/no branch.
@@ -71,6 +76,7 @@ export const TESTS_BY_GROUP = {
   'hamstrings':     1,
   'knee':           3,
   'calf':           2,
+  'foot':           1,
 };
 
 export const LIFESTYLES = [
