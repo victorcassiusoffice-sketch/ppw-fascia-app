@@ -5,7 +5,7 @@
    file works at root ('/') and under a GitHub Pages repo subpath
    (e.g. '/ppw-fascia-app/').
 */
-const CACHE_NAME = 'ppw-cache-v0.5.0-merge-m14';
+const CACHE_NAME = 'ppw-cache-v0.5.2-zones-bust-2026-05-05';
 
 // BASE includes the leading and trailing slash. Examples:
 //   served at /sw.js                -> BASE = '/'
