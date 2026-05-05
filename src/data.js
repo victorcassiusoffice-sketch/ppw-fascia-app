@@ -21,6 +21,8 @@ export const ZONES = [
   { code: 'traps-right',           label: 'Traps',        group: 'traps',          side: 'right' },
   { code: 'upper-back-left',       label: 'Upper Back',   group: 'upper-back',     side: 'left'  },
   { code: 'upper-back-right',      label: 'Upper Back',   group: 'upper-back',     side: 'right' },
+  { code: 'scapula-left',          label: 'Scapula',      group: 'scapula',        side: 'left'  },
+  { code: 'scapula-right',         label: 'Scapula',      group: 'scapula',        side: 'right' },
 
   // Group B — Arm
   { code: 'front-shoulder-left',   label: 'Front Shoulder', group: 'front-shoulder', side: 'left'  },
@@ -31,6 +33,7 @@ export const ZONES = [
   { code: 'forearm-right',         label: 'Forearm',      group: 'forearm',        side: 'right' },
 
   // Group C — Trunk
+  { code: 'solar-plexus',          label: 'Solar Plexus', group: 'solar-plexus',   side: 'both'  },
   { code: 'lower-back-left',       label: 'Lower Back',   group: 'lower-back',     side: 'left'  },
   { code: 'lower-back-right',      label: 'Lower Back',   group: 'lower-back',     side: 'right' },
 
@@ -57,6 +60,8 @@ export const TESTS_BY_GROUP = {
   'neck':           2,
   'traps':          1,
   'upper-back':     1,
+  'scapula':        1,
+  'solar-plexus':   1,
   'front-shoulder': 2,
   'elbow':          2,
   'forearm':        1,
@@ -108,9 +113,9 @@ export const LIFESTYLE_ZONES = {
 // Source: Figma file C7CyNdQpC5o2OHCeUJyT4K, FRONT + BACK frames.
 // Build:  node tools/build-zone-svgs.mjs (after re-exporting from Figma).
 // Approved Vic decisions (2026-05-01):
-//   - Solar Plexus (FRONT): dropped, no canonical zone
+//   - Solar Plexus (FRONT): polygon → 'solar-plexus' (re-enabled 2026-05-05)
 //   - Neck and Trap L/R (BACK): assigned to traps-left/right (neck on FRONT only)
-//   - Scapula L/R (BACK): dropped, upper-back covers
+//   - Scapula L/R (BACK): polygons → 'scapula-left' / 'scapula-right' (re-enabled 2026-05-05)
 //   - Gluteal L duplicate (BACK): second occurrence remapped to gluteal-right
 //   - Jaw L/R: not drawn in Figma, dropped from polygons (still in ZONES)
 

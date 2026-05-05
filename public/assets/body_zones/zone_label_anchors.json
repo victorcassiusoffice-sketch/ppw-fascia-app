@@ -21,27 +21,27 @@
         "cy": 244.5
       },
       {
-        "code": "elbow-left",
+        "code": "front-shoulder-right",
         "cx": 310.4,
         "cy": 244.5
       },
       {
-        "code": "elbow-right",
+        "code": "elbow-left",
         "cx": 69.6,
         "cy": 403.3
       },
       {
-        "code": "knee-left",
+        "code": "elbow-right",
         "cx": 357.5,
         "cy": 396.3
       },
       {
-        "code": "knee-right",
+        "code": "knee-left",
         "cx": 155.8,
         "cy": 787.5
       },
       {
-        "code": "front-shoulder-right",
+        "code": "knee-right",
         "cx": 263.8,
         "cy": 787.5
       },
@@ -51,12 +51,12 @@
         "cy": 43.5
       },
       {
-        "code": "calf-left",
+        "code": "calf-right",
         "cx": 292.5,
         "cy": 1073
       },
       {
-        "code": "calf-right",
+        "code": "calf-left",
         "cx": 129.5,
         "cy": 1073
       },
@@ -79,6 +79,11 @@
         "code": "forearm-right",
         "cx": 389,
         "cy": 520.3
+      },
+      {
+        "code": "solar-plexus",
+        "cx": 215.5,
+        "cy": 322.5
       }
     ]
   },
@@ -102,6 +107,16 @@
         "code": "traps-right",
         "cx": 260,
         "cy": 185.5
+      },
+      {
+        "code": "scapula-left",
+        "cx": 119.3,
+        "cy": 283.3
+      },
+      {
+        "code": "scapula-right",
+        "cx": 316.8,
+        "cy": 283.3
       },
       {
         "code": "upper-back-left",
