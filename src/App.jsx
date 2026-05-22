@@ -11,6 +11,7 @@ import {
 import { getBodyView, zoneCentroid } from './bodyZones.js';
 import { useActiveProtocols, useActiveModules, useActiveRoutines, useCompletedToday, useLocalStorage, useDateScopedStorage, useDailyHidden, useDailyDuplicates, useDailyMerges, useDailyTitles, useFastingPrefs, useUserStacks, useIfPrefs, todayISO } from './state.js';
 import { getMediaUrl, parseYouTubeId } from './lib/mediaStore.js';
+import { isSupplementItem, isAccessoryItem, affiliateUrlFor, applyIfWindow, scheduleIfNotifications, clearIfNotifications } from './lib/tags.js';
 import AddStackModal from './AddStackModal.jsx';
 import { listProtocols, fetchProtocol, mergeDailyItems, isMockActive } from './protocols.js';
 import { iherbUrl, amazonUkUrl, iherbCartAllUrl } from './affiliate.js';
@@ -1278,6 +1279,8 @@ function TodayView() {
   // Phase 2 (2026-05-23) — user-created stacks per-date.
   const { stacks: userStacks, addStack: addUserStack, updateStack: updateUserStack, removeStack: removeUserStack } = useUserStacks(selectedDate);
   const [addModalOpen, setAddModalOpen] = useState(false);
+  // Phase 3.1 (2026-05-23) — IF prefs (eating window + auto-arrange + notifications).
+  const [ifPrefs] = useIfPrefs();
   // M9: rename any routine stack title (single OR merged).
   const { getTitle, setTitle: setItemTitle } = useDailyTitles();
   // M14 — visual feedback target during the drag-handle gesture.
@@ -1387,8 +1390,9 @@ function TodayView() {
     if (!dailyOrder || dailyOrder.length === 0) {
       filtered.sort((a, b) => (a.time || '99:99').localeCompare(b.time || '99:99'));
     }
-    return filtered;
-  }, [baseItems, duplicateItems, userStackItems, dailyOrder, timeOverrides, hiddenIds]);
+    // Phase 3.1 — IF auto-arranger: move food items inside the eating window.
+    return applyIfWindow(filtered, ifPrefs);
+  }, [baseItems, duplicateItems, userStackItems, dailyOrder, timeOverrides, hiddenIds, ifPrefs]);
 
   // Lookup table for tab body rendering inside MergedStack.
   const itemsById = useMemo(() => {
@@ -1660,6 +1664,14 @@ function TodayView() {
     return () => clearAllScheduled();
   }, [items]);
 
+  // Phase 3.1 — schedule IF window open / pre-close / close notifications.
+  useEffect(() => {
+    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+      scheduleIfNotifications(ifPrefs);
+    }
+    return () => clearIfNotifications();
+  }, [ifPrefs]);
+
   // Phase 1.4 — heading reflects the selected date, not always "today".
   const headingDate = new Date(selectedDate + 'T12:00:00').toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
   const completedCount = items.filter(it => completed.includes(it.id)).length;
@@ -1803,6 +1815,25 @@ function TodayView() {
                     titleClassName="timeline-label flex-1 min-w-0 text-sm"
                   />
                   {it.duration_min ? <span className="text-muted text-xs shrink-0">{it.duration_min} min</span> : null}
+                  {/* Phase 3.2 (2026-05-23) — affiliate cart icon for supplement/accessory items */}
+                  {(isSupplementItem(it) || isAccessoryItem(it)) && (
+                    <a
+                      href={affiliateUrlFor(it) || '#'}
+                      target="_blank"
+                      rel="noopener nofollow sponsored"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const url = affiliateUrlFor(it);
+                        if (!url || url.startsWith('TODO_')) {
+                          e.preventDefault();
+                          window.alert('Affiliate link not yet configured — Vic to fill in src/config/affiliates.json.');
+                        }
+                      }}
+                      className="text-muted hover:text-accent w-8 h-8 flex items-center justify-center shrink-0 transition-colors"
+                      aria-label="Buy this product"
+                      title="Buy via affiliate link"
+                    ><IconShoppingCart /></a>
+                  )}
                   {/* Phase 1.3 (2026-05-23) — inline duplicate + delete icons */}
                   <button
                     onClick={(e) => { e.stopPropagation(); handleDuplicate(it); }}
@@ -2390,6 +2421,8 @@ function SettingsView() {
   const [activeProtocols, setActiveProtocols] = useActiveProtocols();
   const [activeModules, setActiveModules] = useActiveModules();
   const [activeRoutines, setActiveRoutines] = useActiveRoutines();
+  // Phase 3.1 (2026-05-23) — IF (Intermittent Fasting) eating-window prefs.
+  const [ifPrefs, setIfPrefs] = useIfPrefs();
 
   const askPerm = async () => { const r = await requestPermission(); setPerm(r); };
   const clearAll = () => {
@@ -2417,6 +2450,44 @@ function SettingsView() {
             <button onClick={askPerm} className="btn-accent mt-4 w-full">Enable notifications</button>
           )}
           {perm === 'unsupported' && <div className="text-muted text-xs mt-3">This browser does not support notifications.</div>}
+        </div>
+      </Section>
+
+      <Section title="Intermittent Fasting">
+        <div className="card p-5">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <div>
+              <div className="font-display">Auto-arrange food into eating window</div>
+              <div className="text-muted text-xs mt-1">When enabled, food items outside the window move inside automatically. Notifications fire at open · 15 min pre-close · close.</div>
+            </div>
+            <button
+              onClick={() => setIfPrefs(p => ({ ...p, enabled: !p.enabled }))}
+              className={`px-4 py-2 rounded-full text-sm font-bold shrink-0 ${ifPrefs.enabled ? 'btn-accent' : 'btn-ghost'}`}
+              aria-pressed={ifPrefs.enabled}
+            >
+              {ifPrefs.enabled ? '✓ On' : 'Off'}
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <label className="block">
+              <span className="text-xs text-muted uppercase tracking-widest mb-1 block">Window opens</span>
+              <input
+                type="time"
+                value={ifPrefs.windowStart}
+                onChange={(e) => setIfPrefs(p => ({ ...p, windowStart: e.target.value }))}
+                className="w-full bg-cream/5 border border-cream/15 rounded-lg px-3 py-2 text-sm font-display text-cream focus:outline-none focus:border-accent"
+              />
+            </label>
+            <label className="block">
+              <span className="text-xs text-muted uppercase tracking-widest mb-1 block">Window closes</span>
+              <input
+                type="time"
+                value={ifPrefs.windowEnd}
+                onChange={(e) => setIfPrefs(p => ({ ...p, windowEnd: e.target.value }))}
+                className="w-full bg-cream/5 border border-cream/15 rounded-lg px-3 py-2 text-sm font-display text-cream focus:outline-none focus:border-accent"
+              />
+            </label>
+          </div>
         </div>
       </Section>
 
