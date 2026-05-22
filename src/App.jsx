@@ -9,7 +9,9 @@ import {
   chainOverlayUrl, dominantChainForZones,
 } from './data.js';
 import { getBodyView, zoneCentroid } from './bodyZones.js';
-import { useActiveProtocols, useActiveModules, useActiveRoutines, useCompletedToday, useLocalStorage, useDateScopedStorage, useDailyHidden, useDailyDuplicates, useDailyMerges, useDailyTitles, useFastingPrefs, todayISO } from './state.js';
+import { useActiveProtocols, useActiveModules, useActiveRoutines, useCompletedToday, useLocalStorage, useDateScopedStorage, useDailyHidden, useDailyDuplicates, useDailyMerges, useDailyTitles, useFastingPrefs, useUserStacks, useIfPrefs, todayISO } from './state.js';
+import { getMediaUrl, parseYouTubeId } from './lib/mediaStore.js';
+import AddStackModal from './AddStackModal.jsx';
 import { listProtocols, fetchProtocol, mergeDailyItems, isMockActive } from './protocols.js';
 import { iherbUrl, amazonUkUrl, iherbCartAllUrl } from './affiliate.js';
 import { LS_KEYS, APP_VERSION, USE_MOCK_DATA, NOTIFICATION_LEAD_TIME_MIN } from './config.js';
@@ -1055,6 +1057,125 @@ function IconShoppingCart() {
 }
 
 /* ═══════════════════════════════════════════
+   Phase 2 (2026-05-23) — UserStackBody
+   Renders an inline player for a user-created stack inside the expanded
+   card body. Calls onEnded when media playback completes so the parent
+   can auto-advance to the next stack.
+   ═══════════════════════════════════════════ */
+function UserStackBody({ stack, onEnded, onPatch }) {
+  const [blobUrl, setBlobUrl] = useState(null);
+  const [editFields, setEditFields] = useState(false);
+
+  useEffect(() => {
+    let revoked = false;
+    let url = null;
+    (async () => {
+      if (stack.mediaStoreId) {
+        url = await getMediaUrl(stack.mediaStoreId);
+        if (!revoked) setBlobUrl(url);
+      }
+    })();
+    return () => {
+      revoked = true;
+      if (url) URL.revokeObjectURL(url);
+    };
+  }, [stack.mediaStoreId]);
+
+  const startSec = Number(stack.startAtSec) || 0;
+  const endSec = stack.endAtSec != null ? Number(stack.endAtSec) : null;
+
+  // Auto-honour endAt for HTML5 media — pause + onEnded when timeUpdate hits endSec.
+  const handleTimeUpdate = useCallback((e) => {
+    if (endSec == null) return;
+    const t = e.target.currentTime;
+    if (t >= endSec) {
+      try { e.target.pause(); } catch (_) {}
+      if (onEnded) onEnded();
+    }
+  }, [endSec, onEnded]);
+
+  const handleLoaded = useCallback((e) => {
+    if (startSec > 0) {
+      try { e.target.currentTime = startSec; } catch (_) {}
+    }
+  }, [startSec]);
+
+  let player = null;
+  if (stack.type === 'link') {
+    if (stack.youtubeId) {
+      const src = `https://www.youtube-nocookie.com/embed/${stack.youtubeId}?rel=0&modestbranding=1&playsinline=1&start=${startSec}${endSec != null ? `&end=${endSec}` : ''}`;
+      player = (
+        <div className="w-full aspect-video rounded-xl overflow-hidden bg-black">
+          <iframe src={src} title={stack.title || 'Stack video'} allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowFullScreen className="w-full h-full" loading="lazy" />
+        </div>
+      );
+    } else if (stack.url) {
+      // Direct media URL or general embed.
+      const isVideo = /\.(mp4|webm|mov)(\?|$)/i.test(stack.url);
+      const isAudio = /\.(mp3|m4a|wav|ogg)(\?|$)/i.test(stack.url);
+      if (isVideo) {
+        player = <video src={stack.url} controls playsInline className="w-full rounded-xl bg-black" onLoadedMetadata={handleLoaded} onTimeUpdate={handleTimeUpdate} onEnded={onEnded} />;
+      } else if (isAudio) {
+        player = <audio src={stack.url} controls className="w-full" onLoadedMetadata={handleLoaded} onTimeUpdate={handleTimeUpdate} onEnded={onEnded} />;
+      } else {
+        player = <a href={stack.url} target="_blank" rel="noopener" className="text-accent underline underline-offset-4 break-all">{stack.url}</a>;
+      }
+    }
+  } else if (stack.type === 'image' && blobUrl) {
+    player = <img src={blobUrl} alt={stack.title || ''} className="w-full rounded-xl" />;
+  } else if (stack.type === 'video' && blobUrl) {
+    player = <video src={blobUrl} controls playsInline className="w-full rounded-xl bg-black" onLoadedMetadata={handleLoaded} onTimeUpdate={handleTimeUpdate} onEnded={onEnded} />;
+  } else if (stack.type === 'audio' && blobUrl) {
+    player = <audio src={blobUrl} controls className="w-full" onLoadedMetadata={handleLoaded} onTimeUpdate={handleTimeUpdate} onEnded={onEnded} />;
+  } else if (stack.type === 'text') {
+    player = (
+      <div className="card p-4 bg-cream/5">
+        <p className="text-cream whitespace-pre-wrap">{stack.text}</p>
+        <div className="text-muted text-[10px] mt-2 uppercase tracking-widest">Stays until next stack opens</div>
+      </div>
+    );
+  } else if ((stack.type === 'image' || stack.type === 'video' || stack.type === 'audio') && !blobUrl) {
+    player = <div className="text-muted text-sm">Loading media…</div>;
+  }
+
+  return (
+    <div className="space-y-3">
+      {player}
+      <div className="flex items-center justify-between gap-2">
+        <button
+          type="button"
+          onClick={() => setEditFields(v => !v)}
+          className="text-xs text-muted hover:text-accent underline underline-offset-4"
+        >
+          {editFields ? 'Hide fields' : 'Edit stack fields'}
+        </button>
+        {stack.durationSec ? <span className="text-[10px] text-muted">{stack.durationSec}s</span> : null}
+      </div>
+      {editFields && (
+        <div className="card p-3 bg-cream/[0.02] space-y-2">
+          <label className="grid grid-cols-2 gap-2 items-center text-xs">
+            <span className="text-muted uppercase tracking-widest">Duration (sec)</span>
+            <input type="number" min="0" value={stack.durationSec || 0} onChange={(e) => onPatch({ durationSec: Number(e.target.value) || 0 })} className="bg-cream/5 border border-cream/15 rounded px-2 py-1 text-cream focus:outline-none focus:border-accent" />
+          </label>
+          {(stack.type === 'link' || stack.type === 'video' || stack.type === 'audio') && (
+            <>
+              <label className="grid grid-cols-2 gap-2 items-center text-xs">
+                <span className="text-muted uppercase tracking-widest">Start at (sec)</span>
+                <input type="number" min="0" value={stack.startAtSec || 0} onChange={(e) => onPatch({ startAtSec: Number(e.target.value) || 0 })} className="bg-cream/5 border border-cream/15 rounded px-2 py-1 text-cream focus:outline-none focus:border-accent" />
+              </label>
+              <label className="grid grid-cols-2 gap-2 items-center text-xs">
+                <span className="text-muted uppercase tracking-widest">End at (sec)</span>
+                <input type="number" min="0" value={stack.endAtSec == null ? '' : stack.endAtSec} placeholder="(optional)" onChange={(e) => onPatch({ endAtSec: e.target.value === '' ? null : Number(e.target.value) })} className="bg-cream/5 border border-cream/15 rounded px-2 py-1 text-cream focus:outline-none focus:border-accent" />
+              </label>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════
    Phase 1.4 (2026-05-23) — DateStrip
    Horizontal scrollable date list: previous 7 days through next 30 days.
    Today is highlighted with navy #232C3B (brand ink). The user-selected
@@ -1154,6 +1275,9 @@ function TodayView() {
     setMergeTitle, setActiveTab, pruneMissing,
     setMergeTime, setPlayOrder, setCollapsed,
   } = useDailyMerges(selectedDate);
+  // Phase 2 (2026-05-23) — user-created stacks per-date.
+  const { stacks: userStacks, addStack: addUserStack, updateStack: updateUserStack, removeStack: removeUserStack } = useUserStacks(selectedDate);
+  const [addModalOpen, setAddModalOpen] = useState(false);
   // M9: rename any routine stack title (single OR merged).
   const { getTitle, setTitle: setItemTitle } = useDailyTitles();
   // M14 — visual feedback target during the drag-handle gesture.
@@ -1197,6 +1321,21 @@ function TodayView() {
     [protocols, activeRoutines, moduleEntries]
   );
 
+  // Phase 2 (2026-05-23) — user-created stacks projected into the items list.
+  const userStackItems = useMemo(() => {
+    return userStacks.map(s => ({
+      kind: 'user',
+      id: s.id,
+      isUserStack: true,
+      userStack: s,
+      time: s.time,
+      category: 'user_' + s.type,
+      label: s.title || s.text || s.url || '(Untitled)',
+      duration_min: Math.max(0, Math.ceil((s.durationSec || 0) / 60)),
+      notes: null,
+    }));
+  }, [userStacks]);
+
   // Resolve duplicate snapshots into "live" items. A duplicate carries its own
   // instanceId so deleting it never affects siblings. We rehydrate display
   // fields (label, kind, etc.) from the duplicate's own snapshot since the
@@ -1225,7 +1364,7 @@ function TodayView() {
   // sources still show.
   const items = useMemo(() => {
     const applyOverride = (it) => timeOverrides[it.id] ? { ...it, time: timeOverrides[it.id] } : it;
-    const all = [...baseItems, ...duplicateItems];
+    const all = [...baseItems, ...duplicateItems, ...userStackItems];
     let ordered;
     if (!dailyOrder || dailyOrder.length === 0) {
       ordered = all.map(applyOverride);
@@ -1249,7 +1388,7 @@ function TodayView() {
       filtered.sort((a, b) => (a.time || '99:99').localeCompare(b.time || '99:99'));
     }
     return filtered;
-  }, [baseItems, duplicateItems, dailyOrder, timeOverrides, hiddenIds]);
+  }, [baseItems, duplicateItems, userStackItems, dailyOrder, timeOverrides, hiddenIds]);
 
   // Lookup table for tab body rendering inside MergedStack.
   const itemsById = useMemo(() => {
@@ -1326,10 +1465,28 @@ function TodayView() {
 
   // Shared body renderer — used for top-level cards (when expanded) AND for
   // merged-stack tab content. `inMerge` adds a "remove from stack" button.
+  // Phase 2 (2026-05-23) — auto-advance: when a stack's media ends, expand
+  // the next visible item so the user sees the next stack inline.
+  const advanceToNext = useCallback((currentId) => {
+    const idx = items.findIndex(x => x.id === currentId);
+    if (idx < 0 || idx + 1 >= items.length) return;
+    const next = items[idx + 1];
+    setExpanded(next.id);
+  }, [items]);
+
   const renderItemBody = (it, inMerge) => {
     const done = isDone(it.id);
     return (
       <div className={(inMerge ? '' : 'px-4 pb-4') + ' space-y-3 ' + (inMerge ? '' : 'border-t border-cream/5')}>
+        {it.isUserStack && it.userStack && (
+          <div className="pt-3">
+            <UserStackBody
+              stack={it.userStack}
+              onEnded={() => advanceToNext(it.id)}
+              onPatch={(patch) => updateUserStack(it.id, patch)}
+            />
+          </div>
+        )}
         {it.notes && <p className="text-muted text-sm pt-3">{it.notes}</p>}
         {it.kind === 'routine' && it.zones && (
           <div className="pt-3">
@@ -1437,7 +1594,9 @@ function TodayView() {
   // the duplicates list directly. Bulk-clear is the explicit "Remove stack"
   // button, never a side effect.
   const handleRemoveItem = useCallback((it) => {
-    if (it.isDuplicate) {
+    if (it.isUserStack) {
+      removeUserStack(it.id);
+    } else if (it.isDuplicate) {
       removeDuplicate(it.id);
     } else {
       hide(it.id);
@@ -1450,7 +1609,7 @@ function TodayView() {
       return next;
     });
     setExpanded(prev => prev === it.id ? null : prev);
-  }, [hide, removeDuplicate, setDailyOrder, setTimeOverrides]);
+  }, [hide, removeDuplicate, removeUserStack, setDailyOrder, setTimeOverrides]);
 
   // N19: duplicate a routine card. Default time = source time + 4h, capped at
   // 23:59. Snapshot the display fields so the duplicate survives the source
@@ -1688,6 +1847,24 @@ function TodayView() {
           </button>
         </div>
       )}
+
+      {/* Phase 2 (2026-05-23) — + Add Stack button */}
+      <button
+        type="button"
+        onClick={() => setAddModalOpen(true)}
+        className="mt-8 w-full py-3 rounded-full font-display text-base flex items-center justify-center gap-2 transition-all hover:opacity-90"
+        style={{ backgroundColor: '#232C3B', color: '#F5EBD7' }}
+      >
+        <IconPlus />
+        <span>Add Stack</span>
+      </button>
+
+      <AddStackModal
+        open={addModalOpen}
+        onClose={() => setAddModalOpen(false)}
+        onSave={(stack) => addUserStack(stack)}
+        defaultTime={(items[items.length - 1]?.time) || '08:00'}
+      />
     </main>
   );
 }

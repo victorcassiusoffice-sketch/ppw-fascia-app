@@ -248,6 +248,31 @@ export function useFastingPrefs() {
   });
 }
 
+// Phase 2 (2026-05-23) — user-created stacks, per-date.
+export function useUserStacks(date) {
+  const [stacks, setStacks] = useDateScopedStorage(LS_KEYS.USER_STACKS, date, []);
+  const addStack = useCallback((stack) => {
+    setStacks((cur) => [...cur, stack]);
+  }, [setStacks]);
+  const updateStack = useCallback((id, patch) => {
+    setStacks((cur) => cur.map(s => s.id === id ? { ...s, ...patch } : s));
+  }, [setStacks]);
+  const removeStack = useCallback((id) => {
+    setStacks((cur) => cur.filter(s => s.id !== id));
+  }, [setStacks]);
+  return { stacks, addStack, updateStack, removeStack };
+}
+
+// Phase 3 (2026-05-23) — intermittent fasting daily window prefs.
+// Distinct from useFastingPrefs which is for one-off long-fasts.
+export function useIfPrefs() {
+  return useLocalStorage(LS_KEYS.IF_PREFS, {
+    enabled: false,
+    windowStart: '12:00',  // eating window opens
+    windowEnd:   '20:00',  // eating window closes
+  });
+}
+
 export function useCompletedToday(date) {
   const [ids, setIds] = useDateScopedStorage(LS_KEYS.COMPLETED_TODAY, date, []);
   const isDone = useCallback((id) => ids.includes(id), [ids]);
