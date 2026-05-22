@@ -35,58 +35,44 @@ export function useActiveRoutines() {
   });
 }
 
-function todayISO() { return new Date().toISOString().slice(0, 10); }
+export function todayISO() { return new Date().toISOString().slice(0, 10); }
 
-export function useDailyHidden() {
-  const todayStr = todayISO();
-  const [state, setState] = useLocalStorage(LS_KEYS.DAILY_HIDDEN, { date: todayStr, ids: [] });
-  useEffect(() => {
-    if (state.date !== todayStr) setState({ date: todayStr, ids: [] });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [todayStr]);
-  const isHidden = useCallback((id) => state.ids.includes(id), [state.ids]);
-  const hide = useCallback((id) => {
-    setState((s) => {
-      const date = todayISO();
-      const baseIds = s.date === date ? s.ids : [];
-      return { date, ids: baseIds.includes(id) ? baseIds : [...baseIds, id] };
-    });
-  }, [setState]);
-  const unhideAll = useCallback(() => setState({ date: todayISO(), ids: [] }), [setState]);
-  return { isHidden, hide, unhideAll, hiddenIds: state.date === todayStr ? state.ids : [] };
+// Phase 1.4 (2026-05-23) — date-scoped keys so each date holds its own
+// stack state (order, hidden, duplicates, merges, completed, times).
+function dateKey(base, date) {
+  return `${base}::${date || todayISO()}`;
 }
 
-export function useDailyDuplicates() {
-  const todayStr = todayISO();
-  const [state, setState] = useLocalStorage(LS_KEYS.DAILY_DUPLICATES, { date: todayStr, items: [] });
-  useEffect(() => {
-    if (state.date !== todayStr) setState({ date: todayStr, items: [] });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [todayStr]);
+// Phase 1.4 — generic date-scoped useLocalStorage wrapper.
+export function useDateScopedStorage(baseKey, date, initial) {
+  const key = dateKey(baseKey, date);
+  return useLocalStorage(key, initial);
+}
+
+export function useDailyHidden(date) {
+  const [ids, setIds] = useDateScopedStorage(LS_KEYS.DAILY_HIDDEN, date, []);
+  const isHidden = useCallback((id) => ids.includes(id), [ids]);
+  const hide = useCallback((id) => {
+    setIds((cur) => cur.includes(id) ? cur : [...cur, id]);
+  }, [setIds]);
+  const unhideAll = useCallback(() => setIds([]), [setIds]);
+  return { isHidden, hide, unhideAll, hiddenIds: ids };
+}
+
+export function useDailyDuplicates(date) {
+  const [items, setItems] = useDateScopedStorage(LS_KEYS.DAILY_DUPLICATES, date, []);
   const addDuplicate = useCallback((dup) => {
-    setState((s) => {
-      const date = todayISO();
-      const base = s.date === date ? s.items : [];
-      return { date, items: [...base, dup] };
-    });
-  }, [setState]);
+    setItems((cur) => [...cur, dup]);
+  }, [setItems]);
   const removeDuplicate = useCallback((instanceId) => {
-    setState((s) => {
-      const date = todayISO();
-      const base = s.date === date ? s.items : [];
-      return { date, items: base.filter(i => i.instanceId !== instanceId) };
-    });
-  }, [setState]);
+    setItems((cur) => cur.filter(i => i.instanceId !== instanceId));
+  }, [setItems]);
   const updateDuplicateTime = useCallback((instanceId, time) => {
-    setState((s) => {
-      const date = todayISO();
-      const base = s.date === date ? s.items : [];
-      return { date, items: base.map(i => i.instanceId === instanceId ? { ...i, time } : i) };
-    });
-  }, [setState]);
-  const clearDuplicates = useCallback(() => setState({ date: todayISO(), items: [] }), [setState]);
+    setItems((cur) => cur.map(i => i.instanceId === instanceId ? { ...i, time } : i));
+  }, [setItems]);
+  const clearDuplicates = useCallback(() => setItems([]), [setItems]);
   return {
-    duplicates: state.date === todayStr ? state.items : [],
+    duplicates: items,
     addDuplicate, removeDuplicate, updateDuplicateTime, clearDuplicates,
   };
 }
@@ -97,8 +83,8 @@ export function useDailyDuplicates() {
    M14 additions:
      - `time` — single time string ("HH:MM") for the whole stack (overrides per-tab time)
      - `playOrder` — ordered tab ids for video auto-play sequence */
-export function useDailyMerges() {
-  const [merges, setMerges] = useLocalStorage(LS_KEYS.DAILY_MERGES, {});
+export function useDailyMerges(date) {
+  const [merges, setMerges] = useDateScopedStorage(LS_KEYS.DAILY_MERGES, date, {});
   const findMergeFor = useCallback((itemId) => {
     for (const [mid, m] of Object.entries(merges)) {
       if (m.itemIds && m.itemIds.includes(itemId)) return mid;
@@ -262,19 +248,11 @@ export function useFastingPrefs() {
   });
 }
 
-export function useCompletedToday() {
-  const todayStr = todayISO();
-  const [state, setState] = useLocalStorage(LS_KEYS.COMPLETED_TODAY, { date: todayStr, ids: [] });
-  useEffect(() => {
-    if (state.date !== todayStr) setState({ date: todayStr, ids: [] });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [todayStr]);
-  const isDone = useCallback((id) => state.ids.includes(id), [state.ids]);
+export function useCompletedToday(date) {
+  const [ids, setIds] = useDateScopedStorage(LS_KEYS.COMPLETED_TODAY, date, []);
+  const isDone = useCallback((id) => ids.includes(id), [ids]);
   const toggle = useCallback((id) => {
-    setState((s) => {
-      const has = s.ids.includes(id);
-      return { date: todayStr, ids: has ? s.ids.filter(x => x !== id) : [...s.ids, id] };
-    });
-  }, [setState, todayStr]);
-  return { isDone, toggle, completed: state.ids };
+    setIds((cur) => cur.includes(id) ? cur.filter(x => x !== id) : [...cur, id]);
+  }, [setIds]);
+  return { isDone, toggle, completed: ids };
 }

@@ -9,7 +9,7 @@ import {
   chainOverlayUrl, dominantChainForZones,
 } from './data.js';
 import { getBodyView, zoneCentroid } from './bodyZones.js';
-import { useActiveProtocols, useActiveModules, useActiveRoutines, useCompletedToday, useLocalStorage, useDailyHidden, useDailyDuplicates, useDailyMerges, useDailyTitles, useFastingPrefs } from './state.js';
+import { useActiveProtocols, useActiveModules, useActiveRoutines, useCompletedToday, useLocalStorage, useDateScopedStorage, useDailyHidden, useDailyDuplicates, useDailyMerges, useDailyTitles, useFastingPrefs, todayISO } from './state.js';
 import { listProtocols, fetchProtocol, mergeDailyItems, isMockActive } from './protocols.js';
 import { iherbUrl, amazonUkUrl, iherbCartAllUrl } from './affiliate.js';
 import { LS_KEYS, APP_VERSION, USE_MOCK_DATA, NOTIFICATION_LEAD_TIME_MIN } from './config.js';
@@ -842,76 +842,30 @@ function MergedStack({
   merge,
   itemsById,
   isDragOver,
-  onSetTitle, onSetActiveTab, onUnmergeItem, onDissolve,
-  onSetTime, onToggleCollapsed, onSetPlayOrder,
+  onSetTitle, onUnmergeItem, onDissolve,
+  onSetTime, onToggleCollapsed,
   renderTabBody,
+  onDelete, onDuplicate,
 }) {
   const ids = (merge.itemIds || []).filter(id => itemsById.has(id));
-  const tabs = ids.map(id => itemsById.get(id));
-  const activeTabId = merge.activeTabId && ids.includes(merge.activeTabId) ? merge.activeTabId : ids[0];
-  const activeItem = itemsById.get(activeTabId);
+  const children = ids.map(id => itemsById.get(id));
 
-  // M14 — collapsed defaults to true. Tap card to expand.
   const collapsed = merge.collapsed !== false;
-  // Stack time is the single source of truth. Fallback to first tab's time.
-  const stackTime = merge.time || (tabs[0] && tabs[0].time) || '';
-  // Detect video-only stack — every tab carries a non-audio media_ref.
-  const isVideoStack = tabs.length > 0 && tabs.every(t => {
-    const m = t.media_ref;
-    if (!m) return false;
-    return m.media_type !== 'audio';
-  });
-  // Auto-play sequence — defaults to itemIds order if playOrder absent or stale.
-  const playOrderRaw = (Array.isArray(merge.playOrder) && merge.playOrder.length > 0)
-    ? merge.playOrder.filter(id => ids.includes(id))
-    : ids;
-  const playOrderFull = playOrderRaw.length === ids.length
-    ? playOrderRaw
-    : [...playOrderRaw, ...ids.filter(id => !playOrderRaw.includes(id))];
 
-  // Edit time inline.
+  // Phase 1.2 (2026-05-23) — stack time is the EARLIEST of children's times,
+  // unless the user has explicitly set merge.time. Duration is the LONGEST.
+  const earliestChildTime = useMemo(() => {
+    const times = children.map(c => c.time).filter(Boolean);
+    if (times.length === 0) return '';
+    return times.reduce((a, b) => (a.localeCompare(b) <= 0 ? a : b));
+  }, [children]);
+  const stackTime = merge.time || earliestChildTime || '';
+  const totalDurationMin = useMemo(() => {
+    const ds = children.map(c => c.duration_min || 0);
+    return ds.length ? Math.max(...ds) : 0;
+  }, [children]);
+
   const [editingTime, setEditingTime] = useState(false);
-
-  // YouTube postMessage listener — when active tab's iframe reports state 0
-  // (ended), advance to the next tab in playOrder.
-  useEffect(() => {
-    if (!isVideoStack || collapsed) return;
-    const advance = () => {
-      const idx = playOrderFull.indexOf(activeTabId);
-      const nextId = (idx >= 0 && idx + 1 < playOrderFull.length) ? playOrderFull[idx + 1] : null;
-      if (nextId) onSetActiveTab(mergeId, nextId);
-    };
-    const onMsg = (event) => {
-      if (typeof event.data !== 'string') return;
-      try {
-        const d = JSON.parse(event.data);
-        if (d && d.event === 'onStateChange' && d.info === 0) advance();
-      } catch (_) { /* not a YT msg */ }
-    };
-    window.addEventListener('message', onMsg);
-    return () => window.removeEventListener('message', onMsg);
-  }, [isVideoStack, collapsed, activeTabId, mergeId, onSetActiveTab, playOrderFull]);
-
-  // Drag handler for reordering tabs (within expanded state) — affects playOrder.
-  const onTabDragStart = (e, tabId) => {
-    try { e.dataTransfer.setData('text/plain', 'ppw-tab-reorder:' + tabId); } catch (_) {}
-  };
-  const onTabDragOver = (e) => { e.preventDefault(); };
-  const onTabDrop = (e, dropOnTabId) => {
-    e.preventDefault();
-    let raw = '';
-    try { raw = e.dataTransfer.getData('text/plain') || ''; } catch (_) {}
-    if (!raw.startsWith('ppw-tab-reorder:')) return;
-    const fromId = raw.slice('ppw-tab-reorder:'.length);
-    if (!fromId || fromId === dropOnTabId) return;
-    const cur = [...playOrderFull];
-    const fi = cur.indexOf(fromId);
-    const ti = cur.indexOf(dropOnTabId);
-    if (fi < 0 || ti < 0) return;
-    cur.splice(fi, 1);
-    cur.splice(ti, 0, fromId);
-    onSetPlayOrder(mergeId, cur);
-  };
 
   return (
     <div
@@ -920,9 +874,7 @@ function MergedStack({
     >
       {/* COMPACT HEADER — always visible */}
       <div className="flex items-center gap-2 p-4">
-        {/* Visual stack-of-cards indicator */}
         <span className="text-accent shrink-0 text-xl leading-none" aria-hidden>▤</span>
-        {/* Time chip — stack-level */}
         {editingTime ? (
           <input
             type="time"
@@ -952,21 +904,31 @@ function MergedStack({
             titleClassName="font-display text-base block"
           />
           <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-            <span className="text-[10px] uppercase tracking-widest text-accent/85 font-bold">{tabs.length} stacked</span>
-            <span className="flex gap-1">
-              {tabs.map((t) => (
-                <span
-                  key={t.id}
-                  className={'inline-block w-1.5 h-1.5 rounded-full ' + (t.id === activeTabId ? 'bg-accent' : 'bg-cream/30')}
-                  aria-hidden
-                />
-              ))}
-            </span>
-            {isVideoStack && (
-              <span className="text-[10px] uppercase tracking-widest text-lime-300/85 font-bold" title="Videos auto-play in sequence">▶ Auto-play</span>
+            <span className="text-[10px] uppercase tracking-widest text-accent/85 font-bold">{children.length} parallel</span>
+            {totalDurationMin > 0 && (
+              <span className="text-[10px] uppercase tracking-widest text-muted">{totalDurationMin} min total</span>
             )}
           </div>
         </div>
+        {/* Phase 1.3 (2026-05-23) — inline duplicate + delete icons on EVERY stack */}
+        {onDuplicate && (
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onDuplicate(mergeId); }}
+            className="text-muted hover:text-accent w-9 h-9 flex items-center justify-center shrink-0 transition-colors"
+            aria-label="Duplicate stack"
+            title="Duplicate stack"
+          ><IconCopy /></button>
+        )}
+        {onDelete && (
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onDelete(mergeId); }}
+            className="text-muted hover:text-red-400 w-9 h-9 flex items-center justify-center shrink-0 transition-colors"
+            aria-label="Delete stack"
+            title="Delete stack"
+          ><IconTrash /></button>
+        )}
         <button
           type="button"
           onClick={() => onToggleCollapsed(mergeId, !collapsed)}
@@ -977,40 +939,26 @@ function MergedStack({
         >{collapsed ? '▾' : '▴'}</button>
       </div>
 
-      {/* EXPANDED — tabs + active body + actions */}
+      {/* EXPANDED — side-by-side full info per child (parallel-play) */}
       {!collapsed && (
         <>
-          <div
-            className="flex overflow-x-auto gap-1 px-2 pt-2 pb-1 border-t border-cream/5 scrollbar-thin"
-            style={{ scrollSnapType: 'x mandatory' }}
-          >
-            {tabs.map(t => {
-              const active = t.id === activeTabId;
-              return (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => onSetActiveTab(mergeId, t.id)}
-                  className={'shrink-0 px-3 py-2 rounded-t-lg text-xs font-display transition-colors min-h-[44px] ' + (active ? 'bg-accent/15 text-accent border border-accent/40 border-b-transparent' : 'text-muted hover:text-accent border border-transparent')}
-                  style={{ scrollSnapAlign: 'start' }}
-                  draggable
-                  onDragStart={(e) => onTabDragStart(e, t.id)}
-                  onDragOver={onTabDragOver}
-                  onDrop={(e) => onTabDrop(e, t.id)}
-                  title={isVideoStack ? 'Tap to view · drag to reorder play sequence' : 'Tap to view'}
-                >
-                  <span className="block truncate max-w-[160px]">{t.label}</span>
-                </button>
-              );
-            })}
+          <div className="border-t border-cream/5 p-3">
+            <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${Math.min(children.length, 2)}, minmax(0, 1fr))` }}>
+              {children.map(child => (
+                <div key={child.id} className="card p-3 bg-cream/[0.02]">
+                  <div className="flex items-baseline justify-between gap-2 mb-2">
+                    <div className="font-display text-sm truncate" title={child.label}>{child.label}</div>
+                    {child.duration_min ? (
+                      <span className="text-muted text-[10px] shrink-0">{child.duration_min} min</span>
+                    ) : null}
+                  </div>
+                  {renderTabBody(child, mergeId)}
+                </div>
+              ))}
+            </div>
           </div>
-
-          <div className="p-3 border-t border-cream/5">
-            {activeItem ? renderTabBody(activeItem, mergeId) : null}
-          </div>
-
           <div className="flex items-center justify-between gap-2 px-4 py-2 border-t border-cream/5 text-[11px] text-muted">
-            <span>{isVideoStack ? 'Drag tabs to set play order. Drag another routine onto this card to add a tab.' : 'Drag another routine onto this card to add a tab.'}</span>
+            <span>Children play in parallel · drag another routine onto this card to add a child.</span>
             <button
               type="button"
               onClick={() => {
@@ -1026,31 +974,186 @@ function MergedStack({
   );
 }
 
+/* ─── Phase 1.3 — Lucide-style inline icons (no new dep) ─── */
+function IconTrash() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 6h18" />
+      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+      <line x1="10" y1="11" x2="10" y2="17" />
+      <line x1="14" y1="11" x2="14" y2="17" />
+    </svg>
+  );
+}
+function IconCopy() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </svg>
+  );
+}
+function IconPlus() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  );
+}
+function IconLink2() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M9 17H7A5 5 0 0 1 7 7h2" />
+      <path d="M15 7h2a5 5 0 0 1 0 10h-2" />
+      <line x1="8" y1="12" x2="16" y2="12" />
+    </svg>
+  );
+}
+function IconImage() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+      <circle cx="8.5" cy="8.5" r="1.5" />
+      <polyline points="21 15 16 10 5 21" />
+    </svg>
+  );
+}
+function IconVideo() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <polygon points="23 7 16 12 23 17 23 7" />
+      <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+    </svg>
+  );
+}
+function IconMusic() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M9 18V5l12-2v13" />
+      <circle cx="6" cy="18" r="3" />
+      <circle cx="18" cy="16" r="3" />
+    </svg>
+  );
+}
+function IconMessageSquare() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
+function IconShoppingCart() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="9" cy="21" r="1" />
+      <circle cx="20" cy="21" r="1" />
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+    </svg>
+  );
+}
+
+/* ═══════════════════════════════════════════
+   Phase 1.4 (2026-05-23) — DateStrip
+   Horizontal scrollable date list: previous 7 days through next 30 days.
+   Today is highlighted with navy #232C3B (brand ink). The user-selected
+   date is highlighted with an accent ring + accent text.
+   ═══════════════════════════════════════════ */
+function DateStrip({ selectedDate, onSelect }) {
+  const today = todayISO();
+  const stripRef = useRef(null);
+  const todayRef = useRef(null);
+
+  const days = useMemo(() => {
+    const out = [];
+    const base = new Date(today + 'T12:00:00');
+    for (let i = -7; i <= 30; i++) {
+      const d = new Date(base);
+      d.setDate(d.getDate() + i);
+      const iso = d.toISOString().slice(0, 10);
+      out.push({
+        iso,
+        weekday: d.toLocaleDateString(undefined, { weekday: 'short' }).toUpperCase(),
+        day: d.getDate(),
+        month: d.toLocaleDateString(undefined, { month: 'short' }),
+      });
+    }
+    return out;
+  }, [today]);
+
+  useEffect(() => {
+    if (todayRef.current && stripRef.current) {
+      const node = todayRef.current;
+      const parent = stripRef.current;
+      const left = node.offsetLeft - parent.clientWidth / 2 + node.clientWidth / 2;
+      parent.scrollTo({ left: Math.max(0, left), behavior: 'auto' });
+    }
+  }, []);
+
+  return (
+    <div
+      ref={stripRef}
+      className="flex gap-2 overflow-x-auto pb-3 mb-6 scrollbar-thin"
+      style={{ scrollSnapType: 'x mandatory' }}
+      role="tablist"
+      aria-label="Date navigation"
+    >
+      {days.map(d => {
+        const isToday = d.iso === today;
+        const isSelected = d.iso === selectedDate;
+        const baseClasses = 'shrink-0 flex flex-col items-center justify-center rounded-lg px-3 py-2 min-w-[56px] transition-all';
+        const styleClasses = isToday
+          ? 'text-cream'
+          : isSelected
+            ? 'text-accent border border-accent bg-cream/5'
+            : 'text-muted hover:text-cream border border-cream/10';
+        const inlineStyle = isToday
+          ? { backgroundColor: '#232C3B', boxShadow: isSelected ? '0 0 0 2px #f5b845' : undefined }
+          : {};
+        return (
+          <button
+            key={d.iso}
+            ref={isToday ? todayRef : null}
+            type="button"
+            role="tab"
+            aria-selected={isSelected}
+            onClick={() => onSelect(d.iso)}
+            className={`${baseClasses} ${styleClasses}`}
+            style={{ ...inlineStyle, scrollSnapAlign: 'center' }}
+            title={d.iso}
+          >
+            <span className="text-[10px] uppercase tracking-widest font-bold">{d.weekday}</span>
+            <span className="font-display text-lg leading-none mt-0.5">{d.day}</span>
+            <span className="text-[9px] uppercase mt-0.5 opacity-70">{d.month}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 /* ═══════════════════════════════════════════
    NEW — /today
    ═══════════════════════════════════════════ */
 function TodayView() {
+  // Phase 1.4 (2026-05-23) — selected date drives every per-date state hook.
+  const [selectedDate, setSelectedDate] = useState(() => todayISO());
+
   const [activeProtocols, setActiveProtocols] = useActiveProtocols();
   const [activeModules, setActiveModules] = useActiveModules();
   const [activeRoutines, setActiveRoutines] = useActiveRoutines();
-  const { isDone, toggle, completed } = useCompletedToday();
-  const [dailyOrder, setDailyOrder] = useLocalStorage(LS_KEYS.DAILY_ORDER, []);
-  // Per-item time overrides keyed by item id. Lets the user tap a time and pick
-  // a new one without touching the source protocol JSON.
-  const [timeOverrides, setTimeOverrides] = useLocalStorage(LS_KEYS.DAILY_TIMES, {});
-  // N15: per-instance hide layer. Removes a single item from Today without
-  // deactivating its source protocol/module/routine (siblings stay).
-  const { isHidden, hide, unhideAll, hiddenIds } = useDailyHidden();
-  // N19: per-day duplicate stack — each entry has its own instanceId, time,
-  // and a snapshot of the source item's display fields.
-  const { duplicates, addDuplicate, removeDuplicate, updateDuplicateTime, clearDuplicates } = useDailyDuplicates();
-  // M9/M14: drag-drop merge of routine cards into stacks with TAB navigation.
+  const { isDone, toggle, completed } = useCompletedToday(selectedDate);
+  const [dailyOrder, setDailyOrder] = useDateScopedStorage(LS_KEYS.DAILY_ORDER, selectedDate, []);
+  const [timeOverrides, setTimeOverrides] = useDateScopedStorage(LS_KEYS.DAILY_TIMES, selectedDate, {});
+  const { isHidden, hide, unhideAll, hiddenIds } = useDailyHidden(selectedDate);
+  const { duplicates, addDuplicate, removeDuplicate, updateDuplicateTime, clearDuplicates } = useDailyDuplicates(selectedDate);
   const {
     merges,
     mergeOnto, unmergeItem, dissolveMerge,
     setMergeTitle, setActiveTab, pruneMissing,
-    setMergeTime, setPlayOrder, setCollapsed,    // M14
-  } = useDailyMerges();
+    setMergeTime, setPlayOrder, setCollapsed,
+  } = useDailyMerges(selectedDate);
   // M9: rename any routine stack title (single OR merged).
   const { getTitle, setTitle: setItemTitle } = useDailyTitles();
   // M14 — visual feedback target during the drag-handle gesture.
@@ -1139,8 +1242,12 @@ function TodayView() {
     }
     // N15: hide individual items without affecting siblings.
     const filtered = ordered.filter(it => !hiddenIds.includes(it.id));
-    // Re-sort by time after merging duplicates in.
-    filtered.sort((a, b) => (a.time || '99:99').localeCompare(b.time || '99:99'));
+    // Phase 1.1 fix (2026-05-23): only sort by time when the user has NOT
+    // manually reordered. Sorting always would clobber dailyOrder on every
+    // memo recompute — the "stacks snap back" bug Vic flagged.
+    if (!dailyOrder || dailyOrder.length === 0) {
+      filtered.sort((a, b) => (a.time || '99:99').localeCompare(b.time || '99:99'));
+    }
     return filtered;
   }, [baseItems, duplicateItems, dailyOrder, timeOverrides, hiddenIds]);
 
@@ -1286,18 +1393,19 @@ function TodayView() {
     );
   };
 
-  // M14 — drag-handle gesture: SortableList computes overlap and tells us
-  // when the dragged card's centre is over another card. We commit a merge
-  // on drop in `handleSortableMergeDrop`. No confirm dialog — Vic wants it
-  // fluid; Undo toast is the safety net.
+  // Phase 1.2 (2026-05-23) — drag-merge inherits the EARLIER start time
+  // of the two cards (Vic spec: "Merged stack inherits the EARLIER start
+  // time and TOTAL duration is the longer of the two — they play in
+  // parallel, side by side"). Replaces M14's "destination time wins" rule.
   const handleSortableMergeDrop = useCallback((activeId, overId) => {
     if (!activeId || !overId || activeId === overId) return;
     const draggedItem = itemsById.get(activeId);
     const targetItem  = itemsById.get(overId);
     if (!draggedItem || !targetItem) return;
-    // M14 — TIME LIVES ON THE PARENT STACK. The destination's time wins.
-    const targetTime = targetItem.time || null;
-    mergeOnto(activeId, overId, { time: targetTime });
+    const a = draggedItem.time || null;
+    const b = targetItem.time || null;
+    const earlier = (a && b) ? (a.localeCompare(b) <= 0 ? a : b) : (a || b || null);
+    mergeOnto(activeId, overId, { time: earlier });
   }, [itemsById, mergeOnto]);
 
   const handleSortableDragOverChange = useCallback((info) => {
@@ -1393,7 +1501,8 @@ function TodayView() {
     return () => clearAllScheduled();
   }, [items]);
 
-  const todayDate = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+  // Phase 1.4 — heading reflects the selected date, not always "today".
+  const headingDate = new Date(selectedDate + 'T12:00:00').toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
   const completedCount = items.filter(it => completed.includes(it.id)).length;
   const empty = items.length === 0;
   const allDone = !empty && completedCount === items.length;
@@ -1404,7 +1513,10 @@ function TodayView() {
         <div className="eyebrow">Today</div>
         <div className="text-xs text-muted tracking-wide">{completedCount}/{items.length} done</div>
       </div>
-      <h1 className="font-display text-4xl md:text-5xl mb-8 leading-[1.02]">{todayDate}</h1>
+      <h1 className="font-display text-4xl md:text-5xl mb-4 leading-[1.02]">{headingDate}</h1>
+
+      <DateStrip selectedDate={selectedDate} onSelect={setSelectedDate} />
+
 
       {empty && (
         <div className="card p-10 text-center fade-in is-visible">
@@ -1456,13 +1568,28 @@ function TodayView() {
                       itemsById={itemsById}
                       isDragOver={mergeIsDragOver}
                       onSetTitle={setMergeTitle}
-                      onSetActiveTab={setActiveTab}
                       onUnmergeItem={unmergeItem}
                       onDissolve={dissolveMerge}
                       onSetTime={setMergeTime}
                       onToggleCollapsed={setCollapsed}
-                      onSetPlayOrder={setPlayOrder}
                       renderTabBody={(tabItem) => renderItemBody(tabItem, true)}
+                      onDelete={(mid) => {
+                        if (window.confirm('Delete this stack? All children are removed from today.')) {
+                          const childIds = m.itemIds || [];
+                          childIds.forEach(cid => {
+                            const child = itemsById.get(cid);
+                            if (child) handleRemoveItem(child);
+                          });
+                          dissolveMerge(mid);
+                        }
+                      }}
+                      onDuplicate={() => {
+                        const childIds = m.itemIds || [];
+                        childIds.forEach(cid => {
+                          const child = itemsById.get(cid);
+                          if (child) handleDuplicate(child);
+                        });
+                      }}
                     />
                   </div>
                 </div>
@@ -1517,6 +1644,22 @@ function TodayView() {
                     titleClassName="timeline-label flex-1 min-w-0 text-sm"
                   />
                   {it.duration_min ? <span className="text-muted text-xs shrink-0">{it.duration_min} min</span> : null}
+                  {/* Phase 1.3 (2026-05-23) — inline duplicate + delete icons */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleDuplicate(it); }}
+                    className="text-muted hover:text-accent w-8 h-8 flex items-center justify-center shrink-0 transition-colors"
+                    aria-label="Duplicate stack"
+                    title="Duplicate"
+                  ><IconCopy /></button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (window.confirm('Delete this stack?')) handleRemoveItem(it);
+                    }}
+                    className="text-muted hover:text-red-400 w-8 h-8 flex items-center justify-center shrink-0 transition-colors"
+                    aria-label="Delete stack"
+                    title="Delete"
+                  ><IconTrash /></button>
                   <button onClick={() => setExpanded(isOpen ? null : it.id)} className="text-muted text-xs px-1 py-1 shrink-0" aria-label="Toggle details">
                     {isOpen ? '▴' : '▾'}
                   </button>
