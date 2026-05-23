@@ -56,7 +56,17 @@ export function useDailyHidden(date) {
     setIds((cur) => cur.includes(id) ? cur : [...cur, id]);
   }, [setIds]);
   const unhideAll = useCallback(() => setIds([]), [setIds]);
-  return { isHidden, hide, unhideAll, hiddenIds: ids };
+  // Iter 2 patch 1 — bulk hide for the Clear flow (avoids 20+ separate
+  // functional setIds calls when wiping a busy day).
+  const hideMany = useCallback((idList) => {
+    if (!Array.isArray(idList) || idList.length === 0) return;
+    setIds((cur) => {
+      const set = new Set(cur);
+      for (const id of idList) set.add(id);
+      return Array.from(set);
+    });
+  }, [setIds]);
+  return { isHidden, hide, hideMany, unhideAll, hiddenIds: ids };
 }
 
 export function useDailyDuplicates(date) {
@@ -193,6 +203,8 @@ export function useDailyMerges(date) {
   const setMergeMode = useCallback((mergeId, mode) => {
     setMerges((cur) => (cur[mergeId] ? { ...cur, [mergeId]: { ...cur[mergeId], mode } } : cur));
   }, [setMerges]);
+  // Iter 2 patch 1 — wipe every merge for the day (used by Clear flow).
+  const dissolveAll = useCallback(() => setMerges({}), [setMerges]);
   const pruneMissing = useCallback((existingIds) => {
     setMerges((cur) => {
       // M14 defensive guards — refuse to prune in obvious partial-load states:
@@ -229,6 +241,7 @@ export function useDailyMerges(date) {
     setPlayOrder,    // M14
     setCollapsed,    // M14
     setMergeMode,    // Iter 2
+    dissolveAll,     // Iter 2 patch 1
   };
 }
 
@@ -271,7 +284,9 @@ export function useUserStacks(date) {
   const removeStack = useCallback((id) => {
     setStacks((cur) => cur.filter(s => s.id !== id));
   }, [setStacks]);
-  return { stacks, addStack, updateStack, removeStack };
+  // Iter 2 patch 1 — wipe every user stack for the day (used by Clear flow).
+  const clearStacks = useCallback(() => setStacks([]), [setStacks]);
+  return { stacks, addStack, updateStack, removeStack, clearStacks };
 }
 
 // Phase 3 (2026-05-23) — intermittent fasting daily window prefs.
