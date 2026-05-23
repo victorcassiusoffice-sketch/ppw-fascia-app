@@ -849,6 +849,9 @@ function MergedStack({
   onSetTime, onToggleCollapsed,
   renderTabBody,
   onDelete, onDuplicate,
+  // Iter 2 Phase 5 — selection + tab-mode props (all optional for back-compat).
+  selectionChecked, onToggleSelection, selectionAriaLabel,
+  onSetActiveTab,
 }) {
   const ids = (merge.itemIds || []).filter(id => itemsById.has(id));
   const children = ids.map(id => itemsById.get(id));
@@ -870,14 +873,33 @@ function MergedStack({
 
   const [editingTime, setEditingTime] = useState(false);
 
+  // Iter 2 Phase 5.3 — tabbed mode for multi-select merges.
+  const mode = merge.mode || 'parallel';
+  const activeTabId = merge.activeTabId || (ids[0] || null);
+  const activeChild = children.find(c => c.id === activeTabId) || children[0];
+
   return (
     <div
-      className={'card today-routine-card overflow-hidden transition-all ' + (isDragOver ? 'border-accent ring-2 ring-accent/60' : '')}
+      className={
+        'card today-routine-card overflow-hidden transition-all relative '
+        + (isDragOver ? 'border-accent ring-2 ring-accent/60 ' : '')
+        + (selectionChecked ? 'ring-2 ring-accent/40 ' : '')
+      }
       style={{ boxShadow: '0 0 0 1px rgba(245,184,69,0.22) inset' }}
     >
+      {isDragOver && <DragMergePlusOverlay />}
       {/* COMPACT HEADER — always visible */}
       <div className="flex items-center gap-2 p-4">
-        <span className="text-accent shrink-0 text-xl leading-none" aria-hidden>▤</span>
+        {onToggleSelection ? (
+          <Tickbox
+            checked={!!selectionChecked}
+            onChange={onToggleSelection}
+            ariaLabel={selectionAriaLabel || `Select stack: ${merge.title || 'merged stack'}`}
+            kindClass="timeline-routine"
+          />
+        ) : (
+          <span className="text-accent shrink-0 text-xl leading-none" aria-hidden>▤</span>
+        )}
         {editingTime ? (
           <input
             type="time"
@@ -942,8 +964,56 @@ function MergedStack({
         >{collapsed ? '▾' : '▴'}</button>
       </div>
 
-      {/* EXPANDED — side-by-side full info per child (parallel-play) */}
-      {!collapsed && (
+      {/* EXPANDED — tabbed view (Iter 2 Phase 5.3) OR parallel-play (M14 default) */}
+      {!collapsed && mode === 'tabs' && (
+        <>
+          <div className="border-t border-cream/5">
+            <div className="flex gap-1 overflow-x-auto px-3 pt-3 pb-2" role="tablist" aria-label="Stack tabs">
+              {children.map(child => {
+                const active = child.id === (activeChild?.id);
+                return (
+                  <button
+                    key={child.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => onSetActiveTab && onSetActiveTab(mergeId, child.id)}
+                    className={'shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all ' + (active ? 'bg-accent text-bg' : 'bg-cream/5 text-muted hover:text-cream')}
+                    title={child.label}
+                  >
+                    {(child.label || '').slice(0, 24)}
+                  </button>
+                );
+              })}
+            </div>
+            {activeChild && (
+              <div className="p-3">
+                <div className="card p-3 bg-cream/[0.02]">
+                  <div className="flex items-baseline justify-between gap-2 mb-2">
+                    <div className="font-display text-sm truncate" title={activeChild.label}>{activeChild.label}</div>
+                    {activeChild.duration_min ? (
+                      <span className="text-muted text-[10px] shrink-0">{activeChild.duration_min} min</span>
+                    ) : null}
+                  </div>
+                  {renderTabBody(activeChild, mergeId)}
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="flex items-center justify-between gap-2 px-4 py-2 border-t border-cream/5 text-[11px] text-muted">
+            <span>Tabbed stack · tap a tab to switch · drag another routine onto this card to add a tab.</span>
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm('Unstack? Routines return as separate cards.')) onDissolve(mergeId);
+              }}
+              className="text-muted hover:text-accent px-2 py-1 rounded shrink-0"
+              title="Unstack"
+            >Unstack</button>
+          </div>
+        </>
+      )}
+      {!collapsed && mode !== 'tabs' && (
         <>
           <div className="border-t border-cream/5 p-3">
             <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${Math.min(children.length, 2)}, minmax(0, 1fr))` }}>
@@ -1054,6 +1124,136 @@ function IconShoppingCart() {
       <circle cx="20" cy="21" r="1" />
       <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
     </svg>
+  );
+}
+
+/* ─── Iter 2 Phase 5.1 — Tickbox + kind-dot pill ───
+   Replaces the kind dot in the row between drag handle and time chip.
+   Kind dot survives as a small coloured pill BEHIND the checkbox so
+   category remains visible at a glance. 18×18 box, 24×24 tap target. */
+function Tickbox({ checked, onChange, ariaLabel, kindClass }) {
+  return (
+    <button
+      type="button"
+      onClick={(e) => { e.stopPropagation(); onChange(); }}
+      className="relative w-6 h-6 shrink-0 flex items-center justify-center"
+      role="checkbox"
+      aria-checked={checked}
+      aria-label={ariaLabel}
+      title={ariaLabel}
+    >
+      {kindClass && (
+        <span
+          className={`absolute inset-0 m-auto w-[22px] h-[22px] rounded-full opacity-40 ${kindClass}`}
+          aria-hidden="true"
+        />
+      )}
+      <span
+        className="relative inline-block"
+        style={{
+          width: 18,
+          height: 18,
+          borderRadius: 4,
+          border: '1.5px solid #232C3B',
+          backgroundColor: checked ? '#FFBB58' : '#F5EBD7',
+          transition: 'background-color 120ms ease',
+        }}
+      >
+        {checked && (
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#232C3B" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        )}
+      </span>
+    </button>
+  );
+}
+
+/* ─── Iter 2 Phase 5.2 — Selection Action Bar ───
+   Floats above the +Add Stack button when ≥1 tickbox is on. Merge enabled
+   ≥2; Delete enabled ≥1. Right side: count chip + X clear. Brand-pack
+   navy bg, cream text, gold accent on enabled buttons. */
+function SelectionActionBar({ count, onMerge, onDelete, onClear }) {
+  if (count === 0) return null;
+  const mergeEnabled = count >= 2;
+  return (
+    <div
+      className="fixed left-1/2 -translate-x-1/2 bottom-20 z-40 w-[calc(100%-2rem)] max-w-md"
+      role="region"
+      aria-label="Bulk action bar"
+    >
+      <div
+        className="card flex items-center gap-2 px-3 py-2 shadow-lg"
+        style={{ backgroundColor: '#232C3B', border: '1px solid #FFBB58' }}
+      >
+        <button
+          type="button"
+          onClick={onMerge}
+          disabled={!mergeEnabled}
+          className="px-3 py-2 rounded-full text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{
+            backgroundColor: mergeEnabled ? '#FFBB58' : 'transparent',
+            color: mergeEnabled ? '#232C3B' : '#F5EBD7',
+            border: '1px solid #FFBB58',
+          }}
+          title={mergeEnabled ? 'Merge selected into one tabbed stack' : 'Select 2 or more to merge'}
+        >
+          Merge ({count})
+        </button>
+        <button
+          type="button"
+          onClick={onDelete}
+          className="px-3 py-2 rounded-full text-xs font-bold transition-all"
+          style={{
+            backgroundColor: 'transparent',
+            color: '#F5EBD7',
+            border: '1px solid #F5EBD7',
+          }}
+          title="Delete selected stacks from this day"
+        >
+          Delete
+        </button>
+        <div className="flex-1" />
+        <span className="text-[11px] text-cream/80 font-bold">{count} selected</span>
+        <button
+          type="button"
+          onClick={onClear}
+          className="w-7 h-7 flex items-center justify-center text-cream/70 hover:text-cream"
+          aria-label="Clear selection"
+          title="Clear selection"
+        >×</button>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Iter 2 Phase 5.5 — Drag-to-merge gold (+) overlay ───
+   Renders centred over a card while its drag-over candidate state is set
+   by SortableList (mergeDragOverId). pointer-events:none so it never
+   intercepts drag. */
+function DragMergePlusOverlay() {
+  return (
+    <div
+      className="absolute inset-0 flex items-center justify-center"
+      style={{ pointerEvents: 'none', zIndex: 20 }}
+      aria-hidden="true"
+    >
+      <span
+        className="rounded-full flex items-center justify-center"
+        style={{
+          width: 56,
+          height: 56,
+          backgroundColor: 'rgba(255, 187, 88, 0.92)',
+          boxShadow: '0 8px 28px -6px rgba(255,187,88,0.7)',
+          color: '#0E0E10',
+        }}
+      >
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+      </span>
+    </div>
   );
 }
 
@@ -1275,6 +1475,7 @@ function TodayView() {
     mergeOnto, unmergeItem, dissolveMerge,
     setMergeTitle, setActiveTab, pruneMissing,
     setMergeTime, setPlayOrder, setCollapsed,
+    setMergeMode,
   } = useDailyMerges(selectedDate);
   // Phase 2 (2026-05-23) — user-created stacks per-date.
   const { stacks: userStacks, addStack: addUserStack, updateStack: updateUserStack, removeStack: removeUserStack } = useUserStacks(selectedDate);
@@ -1292,6 +1493,19 @@ function TodayView() {
   const [expanded, setExpanded] = useState(null);
   // id of item whose time picker is currently open
   const [editingTimeId, setEditingTimeId] = useState(null);
+  // Iter 2 Phase 5 — multi-select state. Tickbox in every row toggles ids
+  // into this Set; Selection Action Bar lifts above + Add Stack when any
+  // tickbox is on; Merge/Delete operate on the full set then clear.
+  const [selectedIds, setSelectedIds] = useState(() => new Set());
+  const isSelected = useCallback((id) => selectedIds.has(id), [selectedIds]);
+  const toggleSelected = useCallback((id) => {
+    setSelectedIds(cur => {
+      const next = new Set(cur);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }, []);
+  const clearSelection = useCallback(() => setSelectedIds(new Set()), []);
 
   useEffect(() => {
     let cancelled = false;
@@ -1657,6 +1871,45 @@ function TodayView() {
     setExpanded(null);
   }, [setActiveProtocols, setActiveModules, setActiveRoutines, setDailyOrder, setTimeOverrides, unhideAll, clearDuplicates]);
 
+  // Iter 2 Phase 5.3 — multi-select Merge. Take all selected ids, treat the
+  // earliest-time card as the LEAD (target), and merge the rest onto it with
+  // mode='tabs' so the expanded stack shows a tab strip instead of parallel-
+  // play. Lead stack's time + duration become the merged defaults. Clears
+  // selection on completion.
+  const handleBulkMerge = useCallback(() => {
+    if (selectedIds.size < 2) return;
+    const ids = Array.from(selectedIds);
+    const visible = ids
+      .map(id => itemsById.get(id))
+      .filter(Boolean)
+      .sort((a, b) => (a.time || '99:99').localeCompare(b.time || '99:99'));
+    if (visible.length < 2) { clearSelection(); return; }
+    const lead = visible[0];
+    const rest = visible.slice(1);
+    // First merge creates the stack with tabs mode + lead time inherited.
+    // Subsequent merges append into the existing stack (mode preserved).
+    rest.forEach((it, i) => {
+      const opts = i === 0 ? { time: lead.time || null, mode: 'tabs' } : {};
+      mergeOnto(it.id, lead.id, opts);
+    });
+    clearSelection();
+  }, [selectedIds, itemsById, mergeOnto, clearSelection]);
+
+  // Iter 2 Phase 5.4 — multi-select Delete. Single confirmation modal then
+  // hide() each. Per Vic Protocol HARD STOP: ALWAYS confirm. Clears selection.
+  const handleBulkDelete = useCallback(() => {
+    if (selectedIds.size < 1) return;
+    const n = selectedIds.size;
+    const msg = `Delete ${n} stack${n === 1 ? '' : 's'} for this day?\n\nThis won't remove the protocol routine, just hide it from this day.`;
+    if (!window.confirm(msg)) return;
+    const ids = Array.from(selectedIds);
+    ids.forEach(id => {
+      const it = itemsById.get(id);
+      if (it) handleRemoveItem(it);
+    });
+    clearSelection();
+  }, [selectedIds, itemsById, handleRemoveItem, clearSelection]);
+
   useEffect(() => {
     if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
       scheduleNotifications(items);
@@ -1743,6 +1996,10 @@ function TodayView() {
                       onDissolve={dissolveMerge}
                       onSetTime={setMergeTime}
                       onToggleCollapsed={setCollapsed}
+                      onSetActiveTab={setActiveTab}
+                      selectionChecked={isSelected(it.id)}
+                      onToggleSelection={() => toggleSelected(it.id)}
+                      selectionAriaLabel={`Select stack: ${m.title || titleFor(it)}`}
                       renderTabBody={(tabItem) => renderItemBody(tabItem, true)}
                       onDelete={(mid) => {
                         if (window.confirm('Delete this stack? All children are removed from today.')) {
@@ -1772,19 +2029,24 @@ function TodayView() {
           const isEditingTime = editingTimeId === it.id;
           const isDragOver = mergeDragOverId === it.id;
           const customTitle = titleFor(it);
+          const kindClass = `timeline-${it.kind === 'protocol' ? 'protocol' : it.kind === 'audio' ? 'audio' : 'routine'}`;
           return (
             <div
-              className={`card today-routine-card overflow-hidden transition-all ${done ? 'timeline-done opacity-80' : ''} ${isDragging ? 'border-accent' : ''} ${isDragOver ? 'merge-target-pulse ring-2 ring-accent/60 border-accent' : ''}`}
+              className={`card today-routine-card overflow-hidden transition-all relative ${done ? 'timeline-done opacity-80' : ''} ${isDragging ? 'border-accent' : ''} ${isDragOver ? 'merge-target-pulse ring-2 ring-accent/60 border-accent' : ''} ${isSelected(it.id) ? 'ring-2 ring-accent/40' : ''}`}
             >
+              {isDragOver && <DragMergePlusOverlay />}
               <div className="flex items-center gap-2 p-4">
                 <button
                   {...dragHandleProps}
                   className="drag-handle font-display text-muted hover:text-accent w-11 h-11 flex items-center justify-center text-2xl shrink-0 -ml-2"
                   title="Drag to reorder · drop on another routine to merge"
                 >≡</button>
-                <span className={`timeline-dot timeline-${it.kind === 'protocol' ? 'protocol' : it.kind === 'audio' ? 'audio' : 'routine'} shrink-0`}>
-                  {it.kind === 'protocol' ? '●' : it.kind === 'audio' ? '🎧' : '◆'}
-                </span>
+                <Tickbox
+                  checked={isSelected(it.id)}
+                  onChange={() => toggleSelected(it.id)}
+                  ariaLabel={`Select stack: ${customTitle || it.label}`}
+                  kindClass={kindClass}
+                />
                 {isEditingTime ? (
                   <input
                     type="time"
@@ -1895,6 +2157,13 @@ function TodayView() {
         onClose={() => setAddModalOpen(false)}
         onSave={(stack) => addUserStack(stack)}
         defaultTime={(items[items.length - 1]?.time) || '08:00'}
+      />
+
+      <SelectionActionBar
+        count={selectedIds.size}
+        onMerge={handleBulkMerge}
+        onDelete={handleBulkDelete}
+        onClear={clearSelection}
       />
     </main>
   );
