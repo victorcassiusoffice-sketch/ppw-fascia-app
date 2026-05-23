@@ -1,0 +1,13 @@
+{
+  "_note": "Phase 3 placeholder — Vic to replace TODO_AFFILIATE_URL values with real Amazon Associates / partner affiliate URLs before public launch. Match keys are kebab-case slugs that the app substring-matches against item labels and supplement names. Add more entries as products land.",
+  "supplements": {
+    "magnesium-glycinate":    "TODO_AFFILIATE_URL",
+    "vitamin-d3-k2":          "TODO_AFFILIATE_URL",
+    "creatine-monohydrate":   "TODO_AFFILIATE_URL",
+    "ashwagandha":            "TODO_AFFILIATE_URL",
+    "fish-oil-omega3":        "TODO_AFFILIATE_URL"
+  },
+  "accessories": {
+    "blue-light-blocking-glasses": "TODO_AFFILIATE_URL_AMAZON"
+  }
+}
