@@ -1,13 +1,29 @@
 {
-  "_note": "Phase 3 placeholder — Vic to replace TODO_AFFILIATE_URL values with real Amazon Associates / partner affiliate URLs before public launch. Match keys are kebab-case slugs that the app substring-matches against item labels and supplement names. Add more entries as products land.",
+  "_note": "PPW Affiliate Registry — canonical source of truth for affiliate URLs across App + Website + Marketing. Edits here propagate to the Fascia App at build time (prebuild script in ppw-fascia-app: tools/sync-affiliates.mjs). Schema: each entry is either a plain URL string (back-compat) OR an object with a 'default' URL and optional ISO country-code overrides (mu / us / gb / de / fr / etc.). Country routing scaffold is passive (navigator.language); per-country URLs require Vic-Y before adding. See _handoff/fascia-app-iter-2-progress.md for the dept proposal. [synced from vault by tools/sync-affiliates.mjs]",
+  "_version": 2,
+  "_updated": "2026-05-24",
   "supplements": {
-    "magnesium-glycinate":    "TODO_AFFILIATE_URL",
-    "vitamin-d3-k2":          "TODO_AFFILIATE_URL",
-    "creatine-monohydrate":   "TODO_AFFILIATE_URL",
-    "ashwagandha":            "TODO_AFFILIATE_URL",
-    "fish-oil-omega3":        "TODO_AFFILIATE_URL"
+    "magnesium-glycinate": {
+      "default": "TODO_AFFILIATE_URL"
+    },
+    "vitamin-d3-k2": {
+      "default": "TODO_AFFILIATE_URL"
+    },
+    "creatine-monohydrate": {
+      "default": "TODO_AFFILIATE_URL"
+    },
+    "ashwagandha": {
+      "default": "TODO_AFFILIATE_URL"
+    },
+    "fish-oil-omega3": {
+      "default": "TODO_AFFILIATE_URL"
+    }
   },
   "accessories": {
-    "blue-light-blocking-glasses": "TODO_AFFILIATE_URL_AMAZON"
-  }
+    "blue-light-blocking-glasses": {
+      "default": "TODO_AFFILIATE_URL_AMAZON"
+    }
+  },
+  "_synced_at": "2026-05-23T21:24:48.211Z",
+  "_synced_from": "C:/Users/Victor/Documents/PPW-Second-Brain/06-Roadmap/affiliate-dept/affiliate-registry.json"
 }
