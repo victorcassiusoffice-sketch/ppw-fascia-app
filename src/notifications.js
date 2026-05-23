@@ -1,5 +1,9 @@
 // Local notifications scheduler — no backend.
-// Reads merged daily items, schedules setTimeout fires `NOTIFICATION_LEAD_TIME_MIN` minutes before each.
+// Iter 2 Phase 7 (2026-05-24) — scheduler now fires AT stack time and calls
+// an `onFire` callback so the caller can render an in-app overlay with
+// Open / Skip / Autoplay. Native Notification still fires for OS-level
+// reminder. The Iter-1 lead-time scheduler is preserved as
+// scheduleNotifications (legacy) for back-compat.
 
 import { NOTIFICATION_LEAD_TIME_MIN, LS_KEYS } from './config.js';
 
@@ -32,6 +36,8 @@ function timeStrToTodayDate(hhmm) {
   return d;
 }
 
+// Legacy lead-time scheduler — kept for Phase 6.5's gate while Phase 7
+// transitions. New callers should use scheduleStackNotifications.
 export function scheduleNotifications(items, opts = {}) {
   clearAllScheduled();
   if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return 0;
@@ -55,6 +61,43 @@ export function scheduleNotifications(items, opts = {}) {
           icon: `${import.meta.env.BASE_URL || '/'}assets/body_map.png`,
         });
       } catch (_) {}
+    }, delay);
+    scheduledTimers.push(timer);
+    count++;
+  }
+  return count;
+}
+
+// Iter 2 Phase 7.1 / 7.2 — stack-time scheduler. Fires AT each stack's
+// HH:MM today, dispatching:
+//   (a) native Notification (OS reminder),
+//   (b) `onFire(item)` so the caller can render an in-app overlay.
+// Caller is responsible for autoplay branching at fire time (see
+// TodayView's NotificationOverlay flow).
+export function scheduleStackNotifications(items, opts = {}) {
+  clearAllScheduled();
+  const onFire = opts.onFire || (() => {});
+  const now = Date.now();
+  let count = 0;
+
+  for (const item of items) {
+    if (!item.time) continue;
+    const t = timeStrToTodayDate(item.time).getTime();
+    const delay = t - now;
+    if (delay < 0) continue;
+
+    const timer = setTimeout(() => {
+      try {
+        if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+          const tag = item.id || `${item.kind}-${item.time}`;
+          new Notification('PPW · ' + (item.label || 'Reminder'), {
+            body: `${item.time} — Open / Skip / Autoplay`,
+            tag,
+            icon: `${import.meta.env.BASE_URL || '/'}assets/body_map.png`,
+          });
+        }
+      } catch (_) {}
+      try { onFire(item); } catch (_) {}
     }, delay);
     scheduledTimers.push(timer);
     count++;

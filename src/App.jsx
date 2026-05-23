@@ -18,7 +18,7 @@ import { iherbUrl, amazonUkUrl, iherbCartAllUrl } from './affiliate.js';
 import { LS_KEYS, APP_VERSION, USE_MOCK_DATA, NOTIFICATION_LEAD_TIME_MIN } from './config.js';
 import MediaPlayer, { DirectMediaPlayer } from './MediaPlayer.jsx';
 import SortableList from './SortableList.jsx';
-import { getPermissionState, requestPermission, scheduleNotifications, clearAllScheduled } from './notifications.js';
+import { getPermissionState, requestPermission, scheduleNotifications, scheduleStackNotifications, clearAllScheduled } from './notifications.js';
 import { useScrollFadeIn } from './useScrollFadeIn.js';
 
 const KNOWN_AUDIO_MODULES = [
@@ -1245,6 +1245,77 @@ function IconBookOpen() {
   );
 }
 
+/* ─── Iter 2 Phase 7.2 — Notification Overlay ───
+   Renders when a stack timer fires. Modal takes focus until user picks
+   Open / Skip / Autoplay. Autoplay switch flips to ON triggers a secondary
+   prompt asking whether to opt this stack+time pattern into "all future
+   calendars" (Phase 7.3). */
+function NotificationOverlay({ item, onOpen, onSkip, onAutoplay }) {
+  const [askingFuture, setAskingFuture] = useState(false);
+  if (!item) return null;
+  const handleAutoplayClick = () => setAskingFuture(true);
+  if (askingFuture) {
+    return (
+      <div className="fixed inset-0 z-[60] bg-bg/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+        <div
+          className="card w-full max-w-sm p-5"
+          style={{ backgroundColor: '#0a1628', border: '1px solid #FFBB58' }}
+        >
+          <div className="font-display text-lg mb-2">Autoplay this stack</div>
+          <p className="text-muted text-sm mb-5">
+            Is this for all future calendars? If yes, this stack at <span className="text-accent">{item.time}</span> will autoplay on future days too.
+          </p>
+          <div className="flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={() => { onAutoplay({ allFuture: true }); setAskingFuture(false); }}
+              className="btn-accent w-full"
+            >Yes — all future</button>
+            <button
+              type="button"
+              onClick={() => { onAutoplay({ allFuture: false }); setAskingFuture(false); }}
+              className="btn-ghost w-full"
+            >Just this one</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="fixed inset-0 z-[60] bg-bg/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Stack reminder">
+      <div
+        className="card w-full max-w-sm p-5"
+        style={{ backgroundColor: '#0a1628', border: '1px solid #FFBB58' }}
+      >
+        <div className="text-xs uppercase tracking-widest text-accent mb-1">{item.time} · Stack reminder</div>
+        <div className="font-display text-xl mb-1 leading-tight">{item.label}</div>
+        {item.duration_min ? (
+          <div className="text-muted text-xs mb-4">{item.duration_min} min</div>
+        ) : <div className="mb-4" />}
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={onOpen}
+            className="w-full py-3 rounded-full font-bold transition-all"
+            style={{ backgroundColor: '#232C3B', color: '#F5EBD7' }}
+          >Open</button>
+          <button
+            type="button"
+            onClick={onSkip}
+            className="w-full py-3 rounded-full font-bold transition-all"
+            style={{ backgroundColor: '#F5EBD7', color: '#232C3B' }}
+          >Skip</button>
+          <button
+            type="button"
+            onClick={handleAutoplayClick}
+            className="w-full py-2 rounded-full text-xs font-bold border border-accent/40 text-accent hover:bg-accent/10 transition-all"
+          >Autoplay this stack now</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Iter 2 Phase 6.4 — Add Protocol modal ───
    Lists every locally-available protocol from protocols.js LOCAL_CATALOG.
    Tap a row → activate (push id into activeProtocols). Existing TodayView
@@ -1581,6 +1652,8 @@ function TodayView() {
   // Iter 2 Phase 6.5 / 7.0 — notification prefs (bell icon + scheduling gate).
   const [notifPrefs, setNotifPrefs] = useNotificationPrefs();
   const [autoplayPatterns, setAutoplayPatterns] = useAutoplayPatterns();
+  // Iter 2 Phase 7.2 — currently-firing stack (drives in-app overlay).
+  const [firedItem, setFiredItem] = useState(null);
   // Phase 3.1 (2026-05-23) — IF prefs (eating window + auto-arrange + notifications).
   const [ifPrefs] = useIfPrefs();
   // M9: rename any routine stack title (single OR merged).
@@ -2054,16 +2127,27 @@ function TodayView() {
     clearSelection();
   }, [selectedIds, itemsById, handleRemoveItem, clearSelection]);
 
-  // Iter 2 Phase 6.5 / 7 — schedule only when the bell is ON. Phase 7 will
-  // swap scheduleNotifications for an in-app-overlay-aware scheduler; this
-  // gate stays.
+  // Iter 2 Phase 7.1 — schedule stack-time fires when the bell is ON AND
+  // the user is viewing today. Past days never fire; future days never
+  // fire (selectedDate !== todayISO). Native Notification + onFire run
+  // inside scheduleStackNotifications.
   useEffect(() => {
     if (!notifPrefs.enabled) return;
-    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-      scheduleNotifications(items);
-    }
+    if (selectedDate !== todayISO()) return;
+    scheduleStackNotifications(items, {
+      onFire: (item) => {
+        const key = `${item.id}__${item.time}`;
+        const autoplayOptedIn = !!(autoplayPatterns && autoplayPatterns[key]);
+        if (autoplayOptedIn || notifPrefs.autoplayAll) {
+          // Auto-expand inline — no overlay.
+          setExpanded(item.id);
+        } else {
+          setFiredItem(item);
+        }
+      },
+    });
     return () => clearAllScheduled();
-  }, [items, notifPrefs.enabled]);
+  }, [items, notifPrefs.enabled, notifPrefs.autoplayAll, autoplayPatterns, selectedDate]);
 
   // Phase 3.1 — schedule IF window open / pre-close / close notifications.
   useEffect(() => {
@@ -2392,6 +2476,25 @@ function TodayView() {
         onMerge={handleBulkMerge}
         onDelete={handleBulkDelete}
         onClear={clearSelection}
+      />
+
+      <NotificationOverlay
+        item={firedItem}
+        onOpen={() => {
+          if (firedItem) setExpanded(firedItem.id);
+          setFiredItem(null);
+        }}
+        onSkip={() => setFiredItem(null)}
+        onAutoplay={({ allFuture }) => {
+          if (firedItem) {
+            if (allFuture) {
+              const key = `${firedItem.id}__${firedItem.time}`;
+              setAutoplayPatterns(prev => ({ ...prev, [key]: true }));
+            }
+            setExpanded(firedItem.id);
+          }
+          setFiredItem(null);
+        }}
       />
     </main>
   );
