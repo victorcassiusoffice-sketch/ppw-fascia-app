@@ -93,9 +93,13 @@ export function useDailyMerges(date) {
   }, [merges]);
   // M14 — optional `opts.time` sets the stack time at the moment of merging
   // (caller passes the destination card's current time so the stack inherits it).
+  // Iter 2 (2026-05-24) — optional `opts.mode` = 'parallel' (M14 default) or
+  // 'tabs' (Phase 5.3 multi-select merge). Stored on the merge record; only
+  // applied at creation time — subsequent appends preserve the existing mode.
   const mergeOnto = useCallback((draggedItemId, targetItemId, opts) => {
     if (draggedItemId === targetItemId) return null;
     const inheritedTime = opts && opts.time ? opts.time : null;
+    const mode = opts && opts.mode ? opts.mode : 'parallel';
     let resultId = null;
     setMerges((cur) => {
       const next = { ...cur };
@@ -133,6 +137,8 @@ export function useDailyMerges(date) {
           collapsed: true,                              // M14: stacks default to compact
           time: inheritedTime || null,                  // M14: inherit destination's time
           playOrder: [targetItemId, draggedItemId],     // default play order = creation order
+          mode,                                         // Iter 2: 'parallel' | 'tabs'
+          activeTabId: targetItemId,                    // Iter 2: default tab when mode='tabs'
         };
         resultId = newId;
       }
@@ -183,6 +189,10 @@ export function useDailyMerges(date) {
   const setCollapsed = useCallback((mergeId, collapsed) => {
     setMerges((cur) => (cur[mergeId] ? { ...cur, [mergeId]: { ...cur[mergeId], collapsed } } : cur));
   }, [setMerges]);
+  // Iter 2 — switch between parallel-play and tabbed multi-merge view.
+  const setMergeMode = useCallback((mergeId, mode) => {
+    setMerges((cur) => (cur[mergeId] ? { ...cur, [mergeId]: { ...cur[mergeId], mode } } : cur));
+  }, [setMerges]);
   const pruneMissing = useCallback((existingIds) => {
     setMerges((cur) => {
       // M14 defensive guards — refuse to prune in obvious partial-load states:
@@ -218,6 +228,7 @@ export function useDailyMerges(date) {
     setMergeTime,    // M14
     setPlayOrder,    // M14
     setCollapsed,    // M14
+    setMergeMode,    // Iter 2
   };
 }
 
@@ -271,6 +282,19 @@ export function useIfPrefs() {
     windowStart: '12:00',  // eating window opens
     windowEnd:   '20:00',  // eating window closes
   });
+}
+
+// Iter 2 Phase 7.0 — notification prefs. Tracks whether the bell is on,
+// whether autoplay applies globally, and a map of stack/time keys whose
+// autoplay was opted into for "all future calendars".
+export function useNotificationPrefs() {
+  return useLocalStorage(LS_KEYS.NOTIFICATION_PREFS, {
+    enabled: false,
+    autoplayAll: false,
+  });
+}
+export function useAutoplayPatterns() {
+  return useLocalStorage(LS_KEYS.AUTOPLAY_PATTERNS, {});
 }
 
 export function useCompletedToday(date) {

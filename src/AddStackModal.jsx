@@ -42,16 +42,81 @@ const Icon = {
   ),
 };
 
+/* Iter 2 Phase 8.2 — Spotify placeholder (legal-gated; disabled). */
+const SpotifyIcon = (
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="10" />
+    <path d="M7 9.5c3-1 7-1 10 1" />
+    <path d="M7 12.5c2.5-0.7 6-0.7 8.5 0.8" />
+    <path d="M7 15.5c2-0.5 5-0.5 7 0.6" />
+  </svg>
+);
+
 const TYPES = [
   { key: 'link',  title: 'Link',           icon: Icon.link  },
   { key: 'image', title: 'Image',          icon: Icon.image },
   { key: 'video', title: 'Video',          icon: Icon.video },
   { key: 'audio', title: 'Audio',          icon: Icon.audio },
   { key: 'text',  title: 'Text Reminder',  icon: Icon.text  },
+  // Iter 2 Phase 8.2 — disabled tile, renders body with the "legal review
+  // pending" notice. Spotify Web Playback SDK + Premium + Developer Terms
+  // review all required before activation. NO Spotify request fires.
+  { key: 'spotify', title: 'Spotify',      icon: SpotifyIcon, disabled: true },
 ];
 
 function newId() {
   return 'user::' + Date.now() + '::' + Math.floor(Math.random() * 999999);
+}
+
+/* Iter 2 Phase 8.1 — inline YouTube search popover.
+   Tap "Search YouTube" to reveal a small query input + Open button. Open
+   launches youtube.com/results?search_query=<encoded> in a new tab. User
+   copies the URL of their pick and pastes back into the URL field above
+   (the existing onPasteUrl + oEmbed fetch handles the rest). */
+function YouTubeSearchPopover({ onPickUrl }) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const doSearch = () => {
+    if (!query.trim()) return;
+    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query.trim())}`;
+    if (typeof window !== 'undefined') window.open(url, '_blank', 'noopener,noreferrer');
+  };
+  return (
+    <div className="space-y-2">
+      <button
+        type="button"
+        onClick={() => setOpen(v => !v)}
+        className="flex items-center gap-2 text-xs text-accent hover:underline underline-offset-4"
+      >
+        <span aria-hidden>▶</span>
+        {open ? 'Hide YouTube search' : 'Search YouTube'}
+      </button>
+      {open && (
+        <div className="card p-3 bg-cream/[0.02] border border-accent/20 space-y-2">
+          <label className="block">
+            <span className="text-[10px] text-muted uppercase tracking-widest mb-1 block">Query</span>
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); doSearch(); } }}
+              placeholder="e.g. 10 min sciatica stretch"
+              className="w-full bg-cream/5 border border-cream/15 rounded-lg px-3 py-2 text-sm font-display text-cream focus:outline-none focus:border-accent"
+            />
+          </label>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={doSearch}
+              disabled={!query.trim()}
+              className="btn-accent text-xs px-3 py-1.5 disabled:opacity-40"
+            >Open YouTube</button>
+            <span className="text-[10px] text-muted">Copy the chosen video URL back into the URL field above.</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function AddStackModal({ open, onClose, onSave, defaultTime = '08:00' }) {
@@ -154,6 +219,9 @@ export default function AddStackModal({ open, onClose, onSave, defaultTime = '08
     }
   }, [chosen, time, duration, startAt, endAt, url, titlePreview, filePicked, text, onSave, handleClose]);
 
+  // Iter 2 Phase 8.2 — block Save when on the disabled Spotify tile.
+  const chosenIsDisabled = TYPES.find(t => t.key === chosen)?.disabled;
+
   if (!open) return null;
 
   const chosenType = TYPES.find(t => t.key === chosen);
@@ -172,18 +240,20 @@ export default function AddStackModal({ open, onClose, onSave, defaultTime = '08
           <button onClick={handleClose} className="text-muted hover:text-accent text-2xl leading-none" aria-label="Close">×</button>
         </div>
 
-        {/* 5-icon row — always visible at top */}
-        <div className="flex justify-around px-3 py-4 border-b border-cream/10">
+        {/* 5-icon row — always visible at top (+ Spotify placeholder tile, disabled) */}
+        <div className="flex justify-around px-2 py-4 border-b border-cream/10 gap-1">
           {TYPES.map(t => {
             const active = chosen === t.key;
+            const disabled = !!t.disabled;
             return (
               <button
                 key={t.key}
                 type="button"
                 onClick={() => setChosen(t.key)}
-                className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${active ? 'text-accent bg-accent/15 ring-2 ring-accent' : 'text-muted hover:text-cream'}`}
-                aria-label={t.title}
-                title={t.title}
+                disabled={false /* tap allowed so the disabled body's note can show */}
+                className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${active ? 'text-accent bg-accent/15 ring-2 ring-accent' : disabled ? 'text-muted/40 hover:text-muted' : 'text-muted hover:text-cream'}`}
+                aria-label={t.title + (disabled ? ' (coming soon)' : '')}
+                title={t.title + (disabled ? ' (coming soon — legal review pending)' : '')}
               >
                 {t.icon}
               </button>
@@ -210,6 +280,8 @@ export default function AddStackModal({ open, onClose, onSave, defaultTime = '08
                   autoFocus
                 />
               </label>
+              {/* Iter 2 Phase 8.1 — explicit YouTube search popover */}
+              <YouTubeSearchPopover onPickUrl={(picked) => onPasteUrl(picked)} />
               {titlePreview && (
                 <div className="card p-3 flex items-center gap-3">
                   {thumbPreview && <img src={thumbPreview} alt="" className="w-20 h-12 object-cover rounded" />}
@@ -217,6 +289,20 @@ export default function AddStackModal({ open, onClose, onSave, defaultTime = '08
                 </div>
               )}
             </>
+          )}
+
+          {chosen === 'spotify' && (
+            <div className="card p-4 bg-cream/[0.02] border border-accent/30">
+              <div className="font-display text-base mb-1 text-accent">Spotify — coming soon</div>
+              <p className="text-muted text-xs leading-relaxed">
+                Spotify playback is pending legal review. Activation requires a Spotify Developer App,
+                Spotify Premium for full tracks, oEmbed-preview disclosure, and Developer Terms compliance.
+                No request to Spotify is made until Vic approves the activation.
+              </p>
+              <p className="text-muted text-[10px] mt-3 uppercase tracking-widest">
+                Legal Dept gap (proposed) · see handoff
+              </p>
+            </div>
           )}
 
           {(chosen === 'image' || chosen === 'video' || chosen === 'audio') && (
@@ -312,10 +398,11 @@ export default function AddStackModal({ open, onClose, onSave, defaultTime = '08
           <button onClick={handleClose} className="btn-ghost flex-1">Cancel</button>
           <button
             onClick={handleSave}
-            disabled={!chosen || busy}
+            disabled={!chosen || busy || chosenIsDisabled}
             className="btn-accent flex-1 disabled:opacity-40 disabled:cursor-not-allowed"
+            title={chosenIsDisabled ? 'Spotify is gated on legal review' : undefined}
           >
-            {busy ? 'Saving…' : 'Add to today'}
+            {busy ? 'Saving…' : chosenIsDisabled ? 'Locked' : 'Add to today'}
           </button>
         </div>
       </div>

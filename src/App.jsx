@@ -9,7 +9,7 @@ import {
   chainOverlayUrl, dominantChainForZones,
 } from './data.js';
 import { getBodyView, zoneCentroid } from './bodyZones.js';
-import { useActiveProtocols, useActiveModules, useActiveRoutines, useCompletedToday, useLocalStorage, useDateScopedStorage, useDailyHidden, useDailyDuplicates, useDailyMerges, useDailyTitles, useFastingPrefs, useUserStacks, useIfPrefs, todayISO } from './state.js';
+import { useActiveProtocols, useActiveModules, useActiveRoutines, useCompletedToday, useLocalStorage, useDateScopedStorage, useDailyHidden, useDailyDuplicates, useDailyMerges, useDailyTitles, useFastingPrefs, useUserStacks, useIfPrefs, useNotificationPrefs, useAutoplayPatterns, todayISO } from './state.js';
 import { getMediaUrl, parseYouTubeId } from './lib/mediaStore.js';
 import { isSupplementItem, isAccessoryItem, affiliateUrlFor, applyIfWindow, scheduleIfNotifications, clearIfNotifications } from './lib/tags.js';
 import AddStackModal from './AddStackModal.jsx';
@@ -18,7 +18,7 @@ import { iherbUrl, amazonUkUrl, iherbCartAllUrl } from './affiliate.js';
 import { LS_KEYS, APP_VERSION, USE_MOCK_DATA, NOTIFICATION_LEAD_TIME_MIN } from './config.js';
 import MediaPlayer, { DirectMediaPlayer } from './MediaPlayer.jsx';
 import SortableList from './SortableList.jsx';
-import { getPermissionState, requestPermission, scheduleNotifications, clearAllScheduled } from './notifications.js';
+import { getPermissionState, requestPermission, scheduleNotifications, scheduleStackNotifications, clearAllScheduled } from './notifications.js';
 import { useScrollFadeIn } from './useScrollFadeIn.js';
 
 const KNOWN_AUDIO_MODULES = [
@@ -849,6 +849,9 @@ function MergedStack({
   onSetTime, onToggleCollapsed,
   renderTabBody,
   onDelete, onDuplicate,
+  // Iter 2 Phase 5 — selection + tab-mode props (all optional for back-compat).
+  selectionChecked, onToggleSelection, selectionAriaLabel,
+  onSetActiveTab,
 }) {
   const ids = (merge.itemIds || []).filter(id => itemsById.has(id));
   const children = ids.map(id => itemsById.get(id));
@@ -870,14 +873,33 @@ function MergedStack({
 
   const [editingTime, setEditingTime] = useState(false);
 
+  // Iter 2 Phase 5.3 — tabbed mode for multi-select merges.
+  const mode = merge.mode || 'parallel';
+  const activeTabId = merge.activeTabId || (ids[0] || null);
+  const activeChild = children.find(c => c.id === activeTabId) || children[0];
+
   return (
     <div
-      className={'card today-routine-card overflow-hidden transition-all ' + (isDragOver ? 'border-accent ring-2 ring-accent/60' : '')}
+      className={
+        'card today-routine-card overflow-hidden transition-all relative '
+        + (isDragOver ? 'border-accent ring-2 ring-accent/60 ' : '')
+        + (selectionChecked ? 'ring-2 ring-accent/40 ' : '')
+      }
       style={{ boxShadow: '0 0 0 1px rgba(245,184,69,0.22) inset' }}
     >
+      {isDragOver && <DragMergePlusOverlay />}
       {/* COMPACT HEADER — always visible */}
       <div className="flex items-center gap-2 p-4">
-        <span className="text-accent shrink-0 text-xl leading-none" aria-hidden>▤</span>
+        {onToggleSelection ? (
+          <Tickbox
+            checked={!!selectionChecked}
+            onChange={onToggleSelection}
+            ariaLabel={selectionAriaLabel || `Select stack: ${merge.title || 'merged stack'}`}
+            kindClass="timeline-routine"
+          />
+        ) : (
+          <span className="text-accent shrink-0 text-xl leading-none" aria-hidden>▤</span>
+        )}
         {editingTime ? (
           <input
             type="time"
@@ -942,8 +964,56 @@ function MergedStack({
         >{collapsed ? '▾' : '▴'}</button>
       </div>
 
-      {/* EXPANDED — side-by-side full info per child (parallel-play) */}
-      {!collapsed && (
+      {/* EXPANDED — tabbed view (Iter 2 Phase 5.3) OR parallel-play (M14 default) */}
+      {!collapsed && mode === 'tabs' && (
+        <>
+          <div className="border-t border-cream/5">
+            <div className="flex gap-1 overflow-x-auto px-3 pt-3 pb-2" role="tablist" aria-label="Stack tabs">
+              {children.map(child => {
+                const active = child.id === (activeChild?.id);
+                return (
+                  <button
+                    key={child.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => onSetActiveTab && onSetActiveTab(mergeId, child.id)}
+                    className={'shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all ' + (active ? 'bg-accent text-bg' : 'bg-cream/5 text-muted hover:text-cream')}
+                    title={child.label}
+                  >
+                    {(child.label || '').slice(0, 24)}
+                  </button>
+                );
+              })}
+            </div>
+            {activeChild && (
+              <div className="p-3">
+                <div className="card p-3 bg-cream/[0.02]">
+                  <div className="flex items-baseline justify-between gap-2 mb-2">
+                    <div className="font-display text-sm truncate" title={activeChild.label}>{activeChild.label}</div>
+                    {activeChild.duration_min ? (
+                      <span className="text-muted text-[10px] shrink-0">{activeChild.duration_min} min</span>
+                    ) : null}
+                  </div>
+                  {renderTabBody(activeChild, mergeId)}
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="flex items-center justify-between gap-2 px-4 py-2 border-t border-cream/5 text-[11px] text-muted">
+            <span>Tabbed stack · tap a tab to switch · drag another routine onto this card to add a tab.</span>
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm('Unstack? Routines return as separate cards.')) onDissolve(mergeId);
+              }}
+              className="text-muted hover:text-accent px-2 py-1 rounded shrink-0"
+              title="Unstack"
+            >Unstack</button>
+          </div>
+        </>
+      )}
+      {!collapsed && mode !== 'tabs' && (
         <>
           <div className="border-t border-cream/5 p-3">
             <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${Math.min(children.length, 2)}, minmax(0, 1fr))` }}>
@@ -1054,6 +1124,287 @@ function IconShoppingCart() {
       <circle cx="20" cy="21" r="1" />
       <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
     </svg>
+  );
+}
+
+/* ─── Iter 2 Phase 5.1 — Tickbox + kind-dot pill ───
+   Replaces the kind dot in the row between drag handle and time chip.
+   Kind dot survives as a small coloured pill BEHIND the checkbox so
+   category remains visible at a glance. 18×18 box, 24×24 tap target. */
+function Tickbox({ checked, onChange, ariaLabel, kindClass }) {
+  return (
+    <button
+      type="button"
+      onClick={(e) => { e.stopPropagation(); onChange(); }}
+      className="relative w-6 h-6 shrink-0 flex items-center justify-center"
+      role="checkbox"
+      aria-checked={checked}
+      aria-label={ariaLabel}
+      title={ariaLabel}
+    >
+      {kindClass && (
+        <span
+          className={`absolute inset-0 m-auto w-[22px] h-[22px] rounded-full opacity-40 ${kindClass}`}
+          aria-hidden="true"
+        />
+      )}
+      <span
+        className="relative inline-block"
+        style={{
+          width: 18,
+          height: 18,
+          borderRadius: 4,
+          border: '1.5px solid #232C3B',
+          backgroundColor: checked ? '#FFBB58' : '#F5EBD7',
+          transition: 'background-color 120ms ease',
+        }}
+      >
+        {checked && (
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#232C3B" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        )}
+      </span>
+    </button>
+  );
+}
+
+/* ─── Iter 2 Phase 5.2 — Selection Action Bar ───
+   Floats above the +Add Stack button when ≥1 tickbox is on. Merge enabled
+   ≥2; Delete enabled ≥1. Right side: count chip + X clear. Brand-pack
+   navy bg, cream text, gold accent on enabled buttons. */
+function SelectionActionBar({ count, onMerge, onDelete, onClear }) {
+  if (count === 0) return null;
+  const mergeEnabled = count >= 2;
+  return (
+    <div
+      className="fixed left-1/2 -translate-x-1/2 bottom-20 z-40 w-[calc(100%-2rem)] max-w-md"
+      role="region"
+      aria-label="Bulk action bar"
+    >
+      <div
+        className="card flex items-center gap-2 px-3 py-2 shadow-lg"
+        style={{ backgroundColor: '#232C3B', border: '1px solid #FFBB58' }}
+      >
+        <button
+          type="button"
+          onClick={onMerge}
+          disabled={!mergeEnabled}
+          className="px-3 py-2 rounded-full text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{
+            backgroundColor: mergeEnabled ? '#FFBB58' : 'transparent',
+            color: mergeEnabled ? '#232C3B' : '#F5EBD7',
+            border: '1px solid #FFBB58',
+          }}
+          title={mergeEnabled ? 'Merge selected into one tabbed stack' : 'Select 2 or more to merge'}
+        >
+          Merge ({count})
+        </button>
+        <button
+          type="button"
+          onClick={onDelete}
+          className="px-3 py-2 rounded-full text-xs font-bold transition-all"
+          style={{
+            backgroundColor: 'transparent',
+            color: '#F5EBD7',
+            border: '1px solid #F5EBD7',
+          }}
+          title="Delete selected stacks from this day"
+        >
+          Delete
+        </button>
+        <div className="flex-1" />
+        <span className="text-[11px] text-cream/80 font-bold">{count} selected</span>
+        <button
+          type="button"
+          onClick={onClear}
+          className="w-7 h-7 flex items-center justify-center text-cream/70 hover:text-cream"
+          aria-label="Clear selection"
+          title="Clear selection"
+        >×</button>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Iter 2 Phase 6.5 — Bell icon for notifications toggle ─── */
+function IconBell({ filled }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </svg>
+  );
+}
+function IconBookOpen() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+    </svg>
+  );
+}
+
+/* ─── Iter 2 Phase 7.2 — Notification Overlay ───
+   Renders when a stack timer fires. Modal takes focus until user picks
+   Open / Skip / Autoplay. Autoplay switch flips to ON triggers a secondary
+   prompt asking whether to opt this stack+time pattern into "all future
+   calendars" (Phase 7.3). */
+function NotificationOverlay({ item, onOpen, onSkip, onAutoplay }) {
+  const [askingFuture, setAskingFuture] = useState(false);
+  if (!item) return null;
+  const handleAutoplayClick = () => setAskingFuture(true);
+  if (askingFuture) {
+    return (
+      <div className="fixed inset-0 z-[60] bg-bg/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+        <div
+          className="card w-full max-w-sm p-5"
+          style={{ backgroundColor: '#0a1628', border: '1px solid #FFBB58' }}
+        >
+          <div className="font-display text-lg mb-2">Autoplay this stack</div>
+          <p className="text-muted text-sm mb-5">
+            Is this for all future calendars? If yes, this stack at <span className="text-accent">{item.time}</span> will autoplay on future days too.
+          </p>
+          <div className="flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={() => { onAutoplay({ allFuture: true }); setAskingFuture(false); }}
+              className="btn-accent w-full"
+            >Yes — all future</button>
+            <button
+              type="button"
+              onClick={() => { onAutoplay({ allFuture: false }); setAskingFuture(false); }}
+              className="btn-ghost w-full"
+            >Just this one</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="fixed inset-0 z-[60] bg-bg/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Stack reminder">
+      <div
+        className="card w-full max-w-sm p-5"
+        style={{ backgroundColor: '#0a1628', border: '1px solid #FFBB58' }}
+      >
+        <div className="text-xs uppercase tracking-widest text-accent mb-1">{item.time} · Stack reminder</div>
+        <div className="font-display text-xl mb-1 leading-tight">{item.label}</div>
+        {item.duration_min ? (
+          <div className="text-muted text-xs mb-4">{item.duration_min} min</div>
+        ) : <div className="mb-4" />}
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={onOpen}
+            className="w-full py-3 rounded-full font-bold transition-all"
+            style={{ backgroundColor: '#232C3B', color: '#F5EBD7' }}
+          >Open</button>
+          <button
+            type="button"
+            onClick={onSkip}
+            className="w-full py-3 rounded-full font-bold transition-all"
+            style={{ backgroundColor: '#F5EBD7', color: '#232C3B' }}
+          >Skip</button>
+          <button
+            type="button"
+            onClick={handleAutoplayClick}
+            className="w-full py-2 rounded-full text-xs font-bold border border-accent/40 text-accent hover:bg-accent/10 transition-all"
+          >Autoplay this stack now</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Iter 2 Phase 6.4 — Add Protocol modal ───
+   Lists every locally-available protocol from protocols.js LOCAL_CATALOG.
+   Tap a row → activate (push id into activeProtocols). Existing TodayView
+   useEffect re-fetches the protocol and merges its daily_plan into today.
+   Already-active protocols render disabled with "✓ Active" badge. */
+function AddProtocolModal({ open, onClose, onActivate }) {
+  const [list, setList] = useState(null);
+  const [activeProtocols] = useActiveProtocols();
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    listProtocols().then(arr => { if (!cancelled) setList(arr || []); });
+    return () => { cancelled = true; };
+  }, [open]);
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 bg-bg/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-4" onClick={onClose}>
+      <div
+        className="card w-full max-w-md max-h-[90vh] overflow-y-auto"
+        style={{ backgroundColor: '#0a1628' }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-5 py-4 border-b border-cream/10">
+          <div className="font-display text-xl">Add Protocol</div>
+          <button onClick={onClose} className="text-muted hover:text-accent text-2xl leading-none" aria-label="Close">×</button>
+        </div>
+        <div className="p-4 space-y-2">
+          {list == null && <div className="text-muted text-sm animate-pulse text-center py-6">Loading protocols…</div>}
+          {list && list.length === 0 && (
+            <div className="text-muted text-sm text-center py-6">No protocols available. Check Settings → Data source.</div>
+          )}
+          {list && list.map(p => {
+            const isActive = activeProtocols.includes(p.protocol_id);
+            const n = p.sections?.daily_plan?.length || 0;
+            return (
+              <button
+                key={p.protocol_id}
+                type="button"
+                onClick={() => !isActive && onActivate(p)}
+                disabled={isActive}
+                className={'w-full text-left card p-4 transition-all ' + (isActive ? 'opacity-60 cursor-not-allowed' : 'hover:border-accent')}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-display text-base leading-tight truncate">{p.topic}</div>
+                    <div className="text-muted text-xs mt-1">{n} daily item{n === 1 ? '' : 's'} · {p.variant || ''}</div>
+                  </div>
+                  {isActive ? (
+                    <span className="text-xs text-accent shrink-0">✓ Active</span>
+                  ) : (
+                    <span className="text-xs text-accent shrink-0">Add →</span>
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Iter 2 Phase 5.5 — Drag-to-merge gold (+) overlay ───
+   Renders centred over a card while its drag-over candidate state is set
+   by SortableList (mergeDragOverId). pointer-events:none so it never
+   intercepts drag. */
+function DragMergePlusOverlay() {
+  return (
+    <div
+      className="absolute inset-0 flex items-center justify-center"
+      style={{ pointerEvents: 'none', zIndex: 20 }}
+      aria-hidden="true"
+    >
+      <span
+        className="rounded-full flex items-center justify-center"
+        style={{
+          width: 56,
+          height: 56,
+          backgroundColor: 'rgba(255, 187, 88, 0.92)',
+          boxShadow: '0 8px 28px -6px rgba(255,187,88,0.7)',
+          color: '#0E0E10',
+        }}
+      >
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+      </span>
+    </div>
   );
 }
 
@@ -1182,10 +1533,23 @@ function UserStackBody({ stack, onEnded, onPatch }) {
    Today is highlighted with navy #232C3B (brand ink). The user-selected
    date is highlighted with an accent ring + accent text.
    ═══════════════════════════════════════════ */
-function DateStrip({ selectedDate, onSelect }) {
+const DateStrip = React.forwardRef(function DateStrip({ selectedDate, onSelect }, jumpRef) {
   const today = todayISO();
   const stripRef = useRef(null);
   const todayRef = useRef(null);
+  // Iter 2 Phase 6.2 — expose jumpToToday() to parent via imperative ref.
+  React.useImperativeHandle(jumpRef, () => ({
+    jumpToToday: () => {
+      if (todayRef.current && stripRef.current) {
+        const node = todayRef.current;
+        const parent = stripRef.current;
+        const left = node.offsetLeft - parent.clientWidth / 2 + node.clientWidth / 2;
+        parent.scrollTo({ left: Math.max(0, left), behavior: 'smooth' });
+      }
+      onSelect(today);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+  }), [today, onSelect]);
 
   const days = useMemo(() => {
     const out = [];
@@ -1253,7 +1617,7 @@ function DateStrip({ selectedDate, onSelect }) {
       })}
     </div>
   );
-}
+});
 
 /* ═══════════════════════════════════════════
    NEW — /today
@@ -1275,10 +1639,21 @@ function TodayView() {
     mergeOnto, unmergeItem, dissolveMerge,
     setMergeTitle, setActiveTab, pruneMissing,
     setMergeTime, setPlayOrder, setCollapsed,
+    setMergeMode,
   } = useDailyMerges(selectedDate);
   // Phase 2 (2026-05-23) — user-created stacks per-date.
   const { stacks: userStacks, addStack: addUserStack, updateStack: updateUserStack, removeStack: removeUserStack } = useUserStacks(selectedDate);
   const [addModalOpen, setAddModalOpen] = useState(false);
+  // Iter 2 Phase 6.4 — Add Protocol modal + transient toast.
+  const [addProtocolOpen, setAddProtocolOpen] = useState(false);
+  const [toast, setToast] = useState(null);
+  // Iter 2 Phase 6.2 — imperative ref into DateStrip for the Today jump.
+  const dateStripRef = useRef(null);
+  // Iter 2 Phase 6.5 / 7.0 — notification prefs (bell icon + scheduling gate).
+  const [notifPrefs, setNotifPrefs] = useNotificationPrefs();
+  const [autoplayPatterns, setAutoplayPatterns] = useAutoplayPatterns();
+  // Iter 2 Phase 7.2 — currently-firing stack (drives in-app overlay).
+  const [firedItem, setFiredItem] = useState(null);
   // Phase 3.1 (2026-05-23) — IF prefs (eating window + auto-arrange + notifications).
   const [ifPrefs] = useIfPrefs();
   // M9: rename any routine stack title (single OR merged).
@@ -1292,6 +1667,19 @@ function TodayView() {
   const [expanded, setExpanded] = useState(null);
   // id of item whose time picker is currently open
   const [editingTimeId, setEditingTimeId] = useState(null);
+  // Iter 2 Phase 5 — multi-select state. Tickbox in every row toggles ids
+  // into this Set; Selection Action Bar lifts above + Add Stack when any
+  // tickbox is on; Merge/Delete operate on the full set then clear.
+  const [selectedIds, setSelectedIds] = useState(() => new Set());
+  const isSelected = useCallback((id) => selectedIds.has(id), [selectedIds]);
+  const toggleSelected = useCallback((id) => {
+    setSelectedIds(cur => {
+      const next = new Set(cur);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }, []);
+  const clearSelection = useCallback(() => setSelectedIds(new Set()), []);
 
   useEffect(() => {
     let cancelled = false;
@@ -1657,12 +2045,109 @@ function TodayView() {
     setExpanded(null);
   }, [setActiveProtocols, setActiveModules, setActiveRoutines, setDailyOrder, setTimeOverrides, unhideAll, clearDuplicates]);
 
-  useEffect(() => {
-    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-      scheduleNotifications(items);
+  // Iter 2 Phase 5.3 — multi-select Merge. Take all selected ids, treat the
+  // earliest-time card as the LEAD (target), and merge the rest onto it with
+  // mode='tabs' so the expanded stack shows a tab strip instead of parallel-
+  // play. Lead stack's time + duration become the merged defaults. Clears
+  // selection on completion.
+  const handleBulkMerge = useCallback(() => {
+    if (selectedIds.size < 2) return;
+    const ids = Array.from(selectedIds);
+    const visible = ids
+      .map(id => itemsById.get(id))
+      .filter(Boolean)
+      .sort((a, b) => (a.time || '99:99').localeCompare(b.time || '99:99'));
+    if (visible.length < 2) { clearSelection(); return; }
+    const lead = visible[0];
+    const rest = visible.slice(1);
+    // First merge creates the stack with tabs mode + lead time inherited.
+    // Subsequent merges append into the existing stack (mode preserved).
+    rest.forEach((it, i) => {
+      const opts = i === 0 ? { time: lead.time || null, mode: 'tabs' } : {};
+      mergeOnto(it.id, lead.id, opts);
+    });
+    clearSelection();
+  }, [selectedIds, itemsById, mergeOnto, clearSelection]);
+
+  // Iter 2 Phase 5.4 — multi-select Delete. Single confirmation modal then
+  // hide() each. Per Vic Protocol HARD STOP: ALWAYS confirm. Clears selection.
+  // Iter 2 Phase 6.4 — activate a protocol from the modal. Existing
+  // TodayView useEffect on [activeProtocols] will re-fetch + merge its
+  // daily_plan into items. Toast confirms count after re-hydration.
+  const handleActivateProtocol = useCallback((p) => {
+    setActiveProtocols(cur => cur.includes(p.protocol_id) ? cur : [...cur, p.protocol_id]);
+    const n = p.sections?.daily_plan?.length || 0;
+    setToast({ tone: 'ok', text: `${p.topic} added — ${n} stack${n === 1 ? '' : 's'} created today` });
+    setAddProtocolOpen(false);
+    setTimeout(() => setToast(null), 3500);
+  }, [setActiveProtocols]);
+
+  // Iter 2 Phase 6.5 / 7.0 — notifications toggle. First tap requests
+  // Notification.permission. If granted -> enabled=true and the existing
+  // scheduleNotifications useEffect handles per-stack timers. If denied,
+  // show a brief banner explaining the user must enable in browser settings.
+  // When toggled OFF, manual expand only — schedulers are cleared by the
+  // existing useEffect cleanup when items deps change.
+  const handleToggleNotifications = useCallback(async () => {
+    if (notifPrefs.enabled) {
+      setNotifPrefs(p => ({ ...p, enabled: false }));
+      setToast({ tone: 'ok', text: 'Notifications off — routines stay manual.' });
+      setTimeout(() => setToast(null), 2500);
+      return;
     }
+    if (typeof Notification === 'undefined') {
+      setToast({ tone: 'warn', text: 'This browser does not support notifications.' });
+      setTimeout(() => setToast(null), 3500);
+      return;
+    }
+    let perm = Notification.permission;
+    if (perm === 'default') {
+      perm = await requestPermission();
+    }
+    if (perm === 'granted') {
+      setNotifPrefs(p => ({ ...p, enabled: true }));
+      setToast({ tone: 'ok', text: 'Notifications on. Reminders fire at each stack time.' });
+      setTimeout(() => setToast(null), 3000);
+    } else {
+      setToast({ tone: 'warn', text: 'Notifications require permission. Open browser settings to enable.' });
+      setTimeout(() => setToast(null), 4500);
+    }
+  }, [notifPrefs.enabled, setNotifPrefs]);
+
+  const handleBulkDelete = useCallback(() => {
+    if (selectedIds.size < 1) return;
+    const n = selectedIds.size;
+    const msg = `Delete ${n} stack${n === 1 ? '' : 's'} for this day?\n\nThis won't remove the protocol routine, just hide it from this day.`;
+    if (!window.confirm(msg)) return;
+    const ids = Array.from(selectedIds);
+    ids.forEach(id => {
+      const it = itemsById.get(id);
+      if (it) handleRemoveItem(it);
+    });
+    clearSelection();
+  }, [selectedIds, itemsById, handleRemoveItem, clearSelection]);
+
+  // Iter 2 Phase 7.1 — schedule stack-time fires when the bell is ON AND
+  // the user is viewing today. Past days never fire; future days never
+  // fire (selectedDate !== todayISO). Native Notification + onFire run
+  // inside scheduleStackNotifications.
+  useEffect(() => {
+    if (!notifPrefs.enabled) return;
+    if (selectedDate !== todayISO()) return;
+    scheduleStackNotifications(items, {
+      onFire: (item) => {
+        const key = `${item.id}__${item.time}`;
+        const autoplayOptedIn = !!(autoplayPatterns && autoplayPatterns[key]);
+        if (autoplayOptedIn || notifPrefs.autoplayAll) {
+          // Auto-expand inline — no overlay.
+          setExpanded(item.id);
+        } else {
+          setFiredItem(item);
+        }
+      },
+    });
     return () => clearAllScheduled();
-  }, [items]);
+  }, [items, notifPrefs.enabled, notifPrefs.autoplayAll, autoplayPatterns, selectedDate]);
 
   // Phase 3.1 — schedule IF window open / pre-close / close notifications.
   useEffect(() => {
@@ -1679,14 +2164,97 @@ function TodayView() {
   const allDone = !empty && completedCount === items.length;
 
   return (
-    <main className="px-5 py-8 max-w-3xl mx-auto pb-24">
-      <div className="flex items-baseline justify-between mb-2">
-        <div className="eyebrow">Today</div>
-        <div className="text-xs text-muted tracking-wide">{completedCount}/{items.length} done</div>
+    <main className="px-5 pt-2 pb-24 max-w-3xl mx-auto">
+      {/* Iter 2 Phase 6 — sticky top bar (title · date strip · action row).
+          Lives below the global Header (z-40); uses z-30. Brand-pack navy
+          background + 1px gold separator. Negative-x margin extends to viewport
+          edges so the bar feels full-bleed inside the main column. */}
+      <div
+        className="sticky z-30 -mx-5 px-5 pt-2 pb-2"
+        style={{
+          top: 60,
+          backgroundColor: '#0E0E10',
+          borderBottom: '1px solid #FFBB58',
+        }}
+      >
+        <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center gap-2 min-w-0">
+            <span
+              className="font-display lowercase truncate"
+              style={{ fontSize: 14, color: 'rgba(245,235,215,0.78)' }}
+            >{headingDate}</span>
+            <button
+              type="button"
+              onClick={() => dateStripRef.current?.jumpToToday()}
+              className="shrink-0"
+              style={{
+                width: 50,
+                height: 24,
+                borderRadius: 12,
+                backgroundColor: '#232C3B',
+                color: '#F5EBD7',
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                border: selectedDate === todayISO() ? '1px solid #FFBB58' : '1px solid transparent',
+              }}
+              aria-label="Jump to today"
+              title="Jump to today"
+            >Today</button>
+          </div>
+          <div className="text-xs text-muted tracking-wide shrink-0">{completedCount}/{items.length} done</div>
+        </div>
+        <DateStrip ref={dateStripRef} selectedDate={selectedDate} onSelect={setSelectedDate} />
+        {/* Iter 2 Phase 6.3 — action row: +Add Stack, +Add Protocol, spacer, Notifications */}
+        <div className="flex items-center gap-2 mt-1">
+          <button
+            type="button"
+            onClick={() => setAddModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
+            style={{ backgroundColor: '#232C3B', color: '#F5EBD7', border: '1px solid rgba(255,187,88,0.4)' }}
+            title="Add a custom stack"
+          >
+            <IconPlus />
+            <span>Stack</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setAddProtocolOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
+            style={{ backgroundColor: '#232C3B', color: '#F5EBD7', border: '1px solid rgba(255,187,88,0.4)' }}
+            title="Add a science protocol from your library"
+          >
+            <IconBookOpen />
+            <span>Protocol</span>
+          </button>
+          <div className="flex-1" />
+          <button
+            type="button"
+            onClick={handleToggleNotifications}
+            className="w-9 h-9 rounded-full flex items-center justify-center transition-all"
+            style={{
+              backgroundColor: notifPrefs.enabled ? 'rgba(255,187,88,0.18)' : 'transparent',
+              color: notifPrefs.enabled ? '#FFBB58' : 'rgba(245,235,215,0.65)',
+              border: '1px solid ' + (notifPrefs.enabled ? '#FFBB58' : 'rgba(245,235,215,0.2)'),
+            }}
+            aria-label={notifPrefs.enabled ? 'Notifications on — tap to disable' : 'Notifications off — tap to enable'}
+            aria-pressed={notifPrefs.enabled}
+            title={notifPrefs.enabled ? 'Notifications on' : 'Notifications off'}
+          >
+            <IconBell filled={notifPrefs.enabled} />
+          </button>
+        </div>
       </div>
-      <h1 className="font-display text-4xl md:text-5xl mb-4 leading-[1.02]">{headingDate}</h1>
 
-      <DateStrip selectedDate={selectedDate} onSelect={setSelectedDate} />
+      {toast && (
+        <div
+          className={'mt-3 text-xs px-3 py-2 rounded-lg border ' + (toast.tone === 'ok' ? 'bg-accent/10 text-accent border-accent/30' : 'bg-cream/5 text-cream border-cream/15')}
+          role="status"
+        >
+          {toast.text}
+        </div>
+      )}
 
 
       {empty && (
@@ -1743,6 +2311,10 @@ function TodayView() {
                       onDissolve={dissolveMerge}
                       onSetTime={setMergeTime}
                       onToggleCollapsed={setCollapsed}
+                      onSetActiveTab={setActiveTab}
+                      selectionChecked={isSelected(it.id)}
+                      onToggleSelection={() => toggleSelected(it.id)}
+                      selectionAriaLabel={`Select stack: ${m.title || titleFor(it)}`}
                       renderTabBody={(tabItem) => renderItemBody(tabItem, true)}
                       onDelete={(mid) => {
                         if (window.confirm('Delete this stack? All children are removed from today.')) {
@@ -1772,19 +2344,24 @@ function TodayView() {
           const isEditingTime = editingTimeId === it.id;
           const isDragOver = mergeDragOverId === it.id;
           const customTitle = titleFor(it);
+          const kindClass = `timeline-${it.kind === 'protocol' ? 'protocol' : it.kind === 'audio' ? 'audio' : 'routine'}`;
           return (
             <div
-              className={`card today-routine-card overflow-hidden transition-all ${done ? 'timeline-done opacity-80' : ''} ${isDragging ? 'border-accent' : ''} ${isDragOver ? 'merge-target-pulse ring-2 ring-accent/60 border-accent' : ''}`}
+              className={`card today-routine-card overflow-hidden transition-all relative ${done ? 'timeline-done opacity-80' : ''} ${isDragging ? 'border-accent' : ''} ${isDragOver ? 'merge-target-pulse ring-2 ring-accent/60 border-accent' : ''} ${isSelected(it.id) ? 'ring-2 ring-accent/40' : ''}`}
             >
+              {isDragOver && <DragMergePlusOverlay />}
               <div className="flex items-center gap-2 p-4">
                 <button
                   {...dragHandleProps}
                   className="drag-handle font-display text-muted hover:text-accent w-11 h-11 flex items-center justify-center text-2xl shrink-0 -ml-2"
                   title="Drag to reorder · drop on another routine to merge"
                 >≡</button>
-                <span className={`timeline-dot timeline-${it.kind === 'protocol' ? 'protocol' : it.kind === 'audio' ? 'audio' : 'routine'} shrink-0`}>
-                  {it.kind === 'protocol' ? '●' : it.kind === 'audio' ? '🎧' : '◆'}
-                </span>
+                <Tickbox
+                  checked={isSelected(it.id)}
+                  onChange={() => toggleSelected(it.id)}
+                  ariaLabel={`Select stack: ${customTitle || it.label}`}
+                  kindClass={kindClass}
+                />
                 {isEditingTime ? (
                   <input
                     type="time"
@@ -1879,22 +2456,45 @@ function TodayView() {
         </div>
       )}
 
-      {/* Phase 2 (2026-05-23) — + Add Stack button */}
-      <button
-        type="button"
-        onClick={() => setAddModalOpen(true)}
-        className="mt-8 w-full py-3 rounded-full font-display text-base flex items-center justify-center gap-2 transition-all hover:opacity-90"
-        style={{ backgroundColor: '#232C3B', color: '#F5EBD7' }}
-      >
-        <IconPlus />
-        <span>Add Stack</span>
-      </button>
+      {/* +Add Stack + +Add Protocol moved to top action bar (Iter 2 Phase 6.3). */}
 
       <AddStackModal
         open={addModalOpen}
         onClose={() => setAddModalOpen(false)}
         onSave={(stack) => addUserStack(stack)}
         defaultTime={(items[items.length - 1]?.time) || '08:00'}
+      />
+
+      <AddProtocolModal
+        open={addProtocolOpen}
+        onClose={() => setAddProtocolOpen(false)}
+        onActivate={handleActivateProtocol}
+      />
+
+      <SelectionActionBar
+        count={selectedIds.size}
+        onMerge={handleBulkMerge}
+        onDelete={handleBulkDelete}
+        onClear={clearSelection}
+      />
+
+      <NotificationOverlay
+        item={firedItem}
+        onOpen={() => {
+          if (firedItem) setExpanded(firedItem.id);
+          setFiredItem(null);
+        }}
+        onSkip={() => setFiredItem(null)}
+        onAutoplay={({ allFuture }) => {
+          if (firedItem) {
+            if (allFuture) {
+              const key = `${firedItem.id}__${firedItem.time}`;
+              setAutoplayPatterns(prev => ({ ...prev, [key]: true }));
+            }
+            setExpanded(firedItem.id);
+          }
+          setFiredItem(null);
+        }}
       />
     </main>
   );
