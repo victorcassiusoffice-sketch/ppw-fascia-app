@@ -9,7 +9,7 @@ import {
   chainOverlayUrl, dominantChainForZones,
 } from './data.js';
 import { getBodyView, zoneCentroid } from './bodyZones.js';
-import { useActiveProtocols, useActiveModules, useActiveRoutines, useCompletedToday, useLocalStorage, useDateScopedStorage, useDailyHidden, useDailyDuplicates, useDailyMerges, useDailyTitles, useFastingPrefs, useUserStacks, useIfPrefs, todayISO } from './state.js';
+import { useActiveProtocols, useActiveModules, useActiveRoutines, useCompletedToday, useLocalStorage, useDateScopedStorage, useDailyHidden, useDailyDuplicates, useDailyMerges, useDailyTitles, useFastingPrefs, useUserStacks, useIfPrefs, useNotificationPrefs, useAutoplayPatterns, todayISO } from './state.js';
 import { getMediaUrl, parseYouTubeId } from './lib/mediaStore.js';
 import { isSupplementItem, isAccessoryItem, affiliateUrlFor, applyIfWindow, scheduleIfNotifications, clearIfNotifications } from './lib/tags.js';
 import AddStackModal from './AddStackModal.jsx';
@@ -1227,6 +1227,86 @@ function SelectionActionBar({ count, onMerge, onDelete, onClear }) {
   );
 }
 
+/* ─── Iter 2 Phase 6.5 — Bell icon for notifications toggle ─── */
+function IconBell({ filled }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </svg>
+  );
+}
+function IconBookOpen() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+    </svg>
+  );
+}
+
+/* ─── Iter 2 Phase 6.4 — Add Protocol modal ───
+   Lists every locally-available protocol from protocols.js LOCAL_CATALOG.
+   Tap a row → activate (push id into activeProtocols). Existing TodayView
+   useEffect re-fetches the protocol and merges its daily_plan into today.
+   Already-active protocols render disabled with "✓ Active" badge. */
+function AddProtocolModal({ open, onClose, onActivate }) {
+  const [list, setList] = useState(null);
+  const [activeProtocols] = useActiveProtocols();
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    listProtocols().then(arr => { if (!cancelled) setList(arr || []); });
+    return () => { cancelled = true; };
+  }, [open]);
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 bg-bg/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-4" onClick={onClose}>
+      <div
+        className="card w-full max-w-md max-h-[90vh] overflow-y-auto"
+        style={{ backgroundColor: '#0a1628' }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-5 py-4 border-b border-cream/10">
+          <div className="font-display text-xl">Add Protocol</div>
+          <button onClick={onClose} className="text-muted hover:text-accent text-2xl leading-none" aria-label="Close">×</button>
+        </div>
+        <div className="p-4 space-y-2">
+          {list == null && <div className="text-muted text-sm animate-pulse text-center py-6">Loading protocols…</div>}
+          {list && list.length === 0 && (
+            <div className="text-muted text-sm text-center py-6">No protocols available. Check Settings → Data source.</div>
+          )}
+          {list && list.map(p => {
+            const isActive = activeProtocols.includes(p.protocol_id);
+            const n = p.sections?.daily_plan?.length || 0;
+            return (
+              <button
+                key={p.protocol_id}
+                type="button"
+                onClick={() => !isActive && onActivate(p)}
+                disabled={isActive}
+                className={'w-full text-left card p-4 transition-all ' + (isActive ? 'opacity-60 cursor-not-allowed' : 'hover:border-accent')}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-display text-base leading-tight truncate">{p.topic}</div>
+                    <div className="text-muted text-xs mt-1">{n} daily item{n === 1 ? '' : 's'} · {p.variant || ''}</div>
+                  </div>
+                  {isActive ? (
+                    <span className="text-xs text-accent shrink-0">✓ Active</span>
+                  ) : (
+                    <span className="text-xs text-accent shrink-0">Add →</span>
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Iter 2 Phase 5.5 — Drag-to-merge gold (+) overlay ───
    Renders centred over a card while its drag-over candidate state is set
    by SortableList (mergeDragOverId). pointer-events:none so it never
@@ -1382,10 +1462,23 @@ function UserStackBody({ stack, onEnded, onPatch }) {
    Today is highlighted with navy #232C3B (brand ink). The user-selected
    date is highlighted with an accent ring + accent text.
    ═══════════════════════════════════════════ */
-function DateStrip({ selectedDate, onSelect }) {
+const DateStrip = React.forwardRef(function DateStrip({ selectedDate, onSelect }, jumpRef) {
   const today = todayISO();
   const stripRef = useRef(null);
   const todayRef = useRef(null);
+  // Iter 2 Phase 6.2 — expose jumpToToday() to parent via imperative ref.
+  React.useImperativeHandle(jumpRef, () => ({
+    jumpToToday: () => {
+      if (todayRef.current && stripRef.current) {
+        const node = todayRef.current;
+        const parent = stripRef.current;
+        const left = node.offsetLeft - parent.clientWidth / 2 + node.clientWidth / 2;
+        parent.scrollTo({ left: Math.max(0, left), behavior: 'smooth' });
+      }
+      onSelect(today);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+  }), [today, onSelect]);
 
   const days = useMemo(() => {
     const out = [];
@@ -1453,7 +1546,7 @@ function DateStrip({ selectedDate, onSelect }) {
       })}
     </div>
   );
-}
+});
 
 /* ═══════════════════════════════════════════
    NEW — /today
@@ -1480,6 +1573,14 @@ function TodayView() {
   // Phase 2 (2026-05-23) — user-created stacks per-date.
   const { stacks: userStacks, addStack: addUserStack, updateStack: updateUserStack, removeStack: removeUserStack } = useUserStacks(selectedDate);
   const [addModalOpen, setAddModalOpen] = useState(false);
+  // Iter 2 Phase 6.4 — Add Protocol modal + transient toast.
+  const [addProtocolOpen, setAddProtocolOpen] = useState(false);
+  const [toast, setToast] = useState(null);
+  // Iter 2 Phase 6.2 — imperative ref into DateStrip for the Today jump.
+  const dateStripRef = useRef(null);
+  // Iter 2 Phase 6.5 / 7.0 — notification prefs (bell icon + scheduling gate).
+  const [notifPrefs, setNotifPrefs] = useNotificationPrefs();
+  const [autoplayPatterns, setAutoplayPatterns] = useAutoplayPatterns();
   // Phase 3.1 (2026-05-23) — IF prefs (eating window + auto-arrange + notifications).
   const [ifPrefs] = useIfPrefs();
   // M9: rename any routine stack title (single OR merged).
@@ -1897,6 +1998,49 @@ function TodayView() {
 
   // Iter 2 Phase 5.4 — multi-select Delete. Single confirmation modal then
   // hide() each. Per Vic Protocol HARD STOP: ALWAYS confirm. Clears selection.
+  // Iter 2 Phase 6.4 — activate a protocol from the modal. Existing
+  // TodayView useEffect on [activeProtocols] will re-fetch + merge its
+  // daily_plan into items. Toast confirms count after re-hydration.
+  const handleActivateProtocol = useCallback((p) => {
+    setActiveProtocols(cur => cur.includes(p.protocol_id) ? cur : [...cur, p.protocol_id]);
+    const n = p.sections?.daily_plan?.length || 0;
+    setToast({ tone: 'ok', text: `${p.topic} added — ${n} stack${n === 1 ? '' : 's'} created today` });
+    setAddProtocolOpen(false);
+    setTimeout(() => setToast(null), 3500);
+  }, [setActiveProtocols]);
+
+  // Iter 2 Phase 6.5 / 7.0 — notifications toggle. First tap requests
+  // Notification.permission. If granted -> enabled=true and the existing
+  // scheduleNotifications useEffect handles per-stack timers. If denied,
+  // show a brief banner explaining the user must enable in browser settings.
+  // When toggled OFF, manual expand only — schedulers are cleared by the
+  // existing useEffect cleanup when items deps change.
+  const handleToggleNotifications = useCallback(async () => {
+    if (notifPrefs.enabled) {
+      setNotifPrefs(p => ({ ...p, enabled: false }));
+      setToast({ tone: 'ok', text: 'Notifications off — routines stay manual.' });
+      setTimeout(() => setToast(null), 2500);
+      return;
+    }
+    if (typeof Notification === 'undefined') {
+      setToast({ tone: 'warn', text: 'This browser does not support notifications.' });
+      setTimeout(() => setToast(null), 3500);
+      return;
+    }
+    let perm = Notification.permission;
+    if (perm === 'default') {
+      perm = await requestPermission();
+    }
+    if (perm === 'granted') {
+      setNotifPrefs(p => ({ ...p, enabled: true }));
+      setToast({ tone: 'ok', text: 'Notifications on. Reminders fire at each stack time.' });
+      setTimeout(() => setToast(null), 3000);
+    } else {
+      setToast({ tone: 'warn', text: 'Notifications require permission. Open browser settings to enable.' });
+      setTimeout(() => setToast(null), 4500);
+    }
+  }, [notifPrefs.enabled, setNotifPrefs]);
+
   const handleBulkDelete = useCallback(() => {
     if (selectedIds.size < 1) return;
     const n = selectedIds.size;
@@ -1910,12 +2054,16 @@ function TodayView() {
     clearSelection();
   }, [selectedIds, itemsById, handleRemoveItem, clearSelection]);
 
+  // Iter 2 Phase 6.5 / 7 — schedule only when the bell is ON. Phase 7 will
+  // swap scheduleNotifications for an in-app-overlay-aware scheduler; this
+  // gate stays.
   useEffect(() => {
+    if (!notifPrefs.enabled) return;
     if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
       scheduleNotifications(items);
     }
     return () => clearAllScheduled();
-  }, [items]);
+  }, [items, notifPrefs.enabled]);
 
   // Phase 3.1 — schedule IF window open / pre-close / close notifications.
   useEffect(() => {
@@ -1932,14 +2080,97 @@ function TodayView() {
   const allDone = !empty && completedCount === items.length;
 
   return (
-    <main className="px-5 py-8 max-w-3xl mx-auto pb-24">
-      <div className="flex items-baseline justify-between mb-2">
-        <div className="eyebrow">Today</div>
-        <div className="text-xs text-muted tracking-wide">{completedCount}/{items.length} done</div>
+    <main className="px-5 pt-2 pb-24 max-w-3xl mx-auto">
+      {/* Iter 2 Phase 6 — sticky top bar (title · date strip · action row).
+          Lives below the global Header (z-40); uses z-30. Brand-pack navy
+          background + 1px gold separator. Negative-x margin extends to viewport
+          edges so the bar feels full-bleed inside the main column. */}
+      <div
+        className="sticky z-30 -mx-5 px-5 pt-2 pb-2"
+        style={{
+          top: 60,
+          backgroundColor: '#0E0E10',
+          borderBottom: '1px solid #FFBB58',
+        }}
+      >
+        <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center gap-2 min-w-0">
+            <span
+              className="font-display lowercase truncate"
+              style={{ fontSize: 14, color: 'rgba(245,235,215,0.78)' }}
+            >{headingDate}</span>
+            <button
+              type="button"
+              onClick={() => dateStripRef.current?.jumpToToday()}
+              className="shrink-0"
+              style={{
+                width: 50,
+                height: 24,
+                borderRadius: 12,
+                backgroundColor: '#232C3B',
+                color: '#F5EBD7',
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                border: selectedDate === todayISO() ? '1px solid #FFBB58' : '1px solid transparent',
+              }}
+              aria-label="Jump to today"
+              title="Jump to today"
+            >Today</button>
+          </div>
+          <div className="text-xs text-muted tracking-wide shrink-0">{completedCount}/{items.length} done</div>
+        </div>
+        <DateStrip ref={dateStripRef} selectedDate={selectedDate} onSelect={setSelectedDate} />
+        {/* Iter 2 Phase 6.3 — action row: +Add Stack, +Add Protocol, spacer, Notifications */}
+        <div className="flex items-center gap-2 mt-1">
+          <button
+            type="button"
+            onClick={() => setAddModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
+            style={{ backgroundColor: '#232C3B', color: '#F5EBD7', border: '1px solid rgba(255,187,88,0.4)' }}
+            title="Add a custom stack"
+          >
+            <IconPlus />
+            <span>Stack</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setAddProtocolOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
+            style={{ backgroundColor: '#232C3B', color: '#F5EBD7', border: '1px solid rgba(255,187,88,0.4)' }}
+            title="Add a science protocol from your library"
+          >
+            <IconBookOpen />
+            <span>Protocol</span>
+          </button>
+          <div className="flex-1" />
+          <button
+            type="button"
+            onClick={handleToggleNotifications}
+            className="w-9 h-9 rounded-full flex items-center justify-center transition-all"
+            style={{
+              backgroundColor: notifPrefs.enabled ? 'rgba(255,187,88,0.18)' : 'transparent',
+              color: notifPrefs.enabled ? '#FFBB58' : 'rgba(245,235,215,0.65)',
+              border: '1px solid ' + (notifPrefs.enabled ? '#FFBB58' : 'rgba(245,235,215,0.2)'),
+            }}
+            aria-label={notifPrefs.enabled ? 'Notifications on — tap to disable' : 'Notifications off — tap to enable'}
+            aria-pressed={notifPrefs.enabled}
+            title={notifPrefs.enabled ? 'Notifications on' : 'Notifications off'}
+          >
+            <IconBell filled={notifPrefs.enabled} />
+          </button>
+        </div>
       </div>
-      <h1 className="font-display text-4xl md:text-5xl mb-4 leading-[1.02]">{headingDate}</h1>
 
-      <DateStrip selectedDate={selectedDate} onSelect={setSelectedDate} />
+      {toast && (
+        <div
+          className={'mt-3 text-xs px-3 py-2 rounded-lg border ' + (toast.tone === 'ok' ? 'bg-accent/10 text-accent border-accent/30' : 'bg-cream/5 text-cream border-cream/15')}
+          role="status"
+        >
+          {toast.text}
+        </div>
+      )}
 
 
       {empty && (
@@ -2141,22 +2372,19 @@ function TodayView() {
         </div>
       )}
 
-      {/* Phase 2 (2026-05-23) — + Add Stack button */}
-      <button
-        type="button"
-        onClick={() => setAddModalOpen(true)}
-        className="mt-8 w-full py-3 rounded-full font-display text-base flex items-center justify-center gap-2 transition-all hover:opacity-90"
-        style={{ backgroundColor: '#232C3B', color: '#F5EBD7' }}
-      >
-        <IconPlus />
-        <span>Add Stack</span>
-      </button>
+      {/* +Add Stack + +Add Protocol moved to top action bar (Iter 2 Phase 6.3). */}
 
       <AddStackModal
         open={addModalOpen}
         onClose={() => setAddModalOpen(false)}
         onSave={(stack) => addUserStack(stack)}
         defaultTime={(items[items.length - 1]?.time) || '08:00'}
+      />
+
+      <AddProtocolModal
+        open={addProtocolOpen}
+        onClose={() => setAddProtocolOpen(false)}
+        onActivate={handleActivateProtocol}
       />
 
       <SelectionActionBar

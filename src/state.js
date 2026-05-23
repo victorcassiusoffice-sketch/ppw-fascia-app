@@ -284,6 +284,19 @@ export function useIfPrefs() {
   });
 }
 
+// Iter 2 Phase 7.0 — notification prefs. Tracks whether the bell is on,
+// whether autoplay applies globally, and a map of stack/time keys whose
+// autoplay was opted into for "all future calendars".
+export function useNotificationPrefs() {
+  return useLocalStorage(LS_KEYS.NOTIFICATION_PREFS, {
+    enabled: false,
+    autoplayAll: false,
+  });
+}
+export function useAutoplayPatterns() {
+  return useLocalStorage(LS_KEYS.AUTOPLAY_PATTERNS, {});
+}
+
 export function useCompletedToday(date) {
   const [ids, setIds] = useDateScopedStorage(LS_KEYS.COMPLETED_TODAY, date, []);
   const isDone = useCallback((id) => ids.includes(id), [ids]);

@@ -24,6 +24,8 @@ export const LS_KEYS = {
   FASTING_PREFS:       'ppw.fastingPrefs',
   USER_STACKS:         'ppw.userStacks',         // Phase 2 (2026-05-23) — user-created stacks per-date
   IF_PREFS:            'ppw.ifPrefs',            // Phase 3 (2026-05-23) — intermittent fasting daily window
+  NOTIFICATION_PREFS:  'ppw.notificationPrefs',  // Iter 2 Phase 7 — { enabled, autoplayAll }
+  AUTOPLAY_PATTERNS:   'ppw.autoplayPatterns',   // Iter 2 Phase 7.3 — { '<stack-id>__<HH:MM>': true }
 };
 
 export const APP_VERSION = '0.4.0-night-run';
