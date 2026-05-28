@@ -2610,7 +2610,16 @@ function TodayView() {
 
       {empty && (
         <div className="card p-10 text-center fade-in is-visible">
-          <div className="empty-orb" aria-hidden="true" />
+          <img
+            src={`${import.meta.env.BASE_URL}images/science/dna-helix.webp`}
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            width="116"
+            height="116"
+            className="mx-auto mb-4 rounded-2xl"
+            style={{ objectFit: 'cover', boxShadow: '0 20px 50px -20px rgba(0,0,0,0.75)' }}
+          />
           <div className="font-display text-xl mb-2">Nothing scheduled yet.</div>
           <p className="text-muted text-sm mb-6 max-w-sm mx-auto leading-relaxed">Activate a protocol, save a body-zone routine, or pick an audio module — they will all show up here.</p>
           <div className="flex flex-wrap gap-3 justify-center">
