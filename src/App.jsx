@@ -1169,64 +1169,6 @@ function Tickbox({ checked, onChange, ariaLabel, kindClass }) {
   );
 }
 
-/* ─── Iter 2 Phase 5.2 — Selection Action Bar ───
-   Floats above the +Add Stack button when ≥1 tickbox is on. Merge enabled
-   ≥2; Delete enabled ≥1. Right side: count chip + X clear. Brand-pack
-   navy bg, cream text, gold accent on enabled buttons. */
-function SelectionActionBar({ count, onMerge, onDelete, onClear }) {
-  if (count === 0) return null;
-  const mergeEnabled = count >= 2;
-  return (
-    <div
-      className="fixed left-1/2 -translate-x-1/2 bottom-20 z-40 w-[calc(100%-2rem)] max-w-md"
-      role="region"
-      aria-label="Bulk action bar"
-    >
-      <div
-        className="card flex items-center gap-2 px-3 py-2 shadow-lg"
-        style={{ backgroundColor: '#232C3B', border: '1px solid #FFBB58' }}
-      >
-        <button
-          type="button"
-          onClick={onMerge}
-          disabled={!mergeEnabled}
-          className="px-3 py-2 rounded-full text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-          style={{
-            backgroundColor: mergeEnabled ? '#FFBB58' : 'transparent',
-            color: mergeEnabled ? '#232C3B' : '#F5EBD7',
-            border: '1px solid #FFBB58',
-          }}
-          title={mergeEnabled ? 'Merge selected into one tabbed stack' : 'Select 2 or more to merge'}
-        >
-          Merge ({count})
-        </button>
-        <button
-          type="button"
-          onClick={onDelete}
-          className="px-3 py-2 rounded-full text-xs font-bold transition-all"
-          style={{
-            backgroundColor: 'transparent',
-            color: '#F5EBD7',
-            border: '1px solid #F5EBD7',
-          }}
-          title="Delete selected stacks from this day"
-        >
-          Delete
-        </button>
-        <div className="flex-1" />
-        <span className="text-[11px] text-cream/80 font-bold">{count} selected</span>
-        <button
-          type="button"
-          onClick={onClear}
-          className="w-7 h-7 flex items-center justify-center text-cream/70 hover:text-cream"
-          aria-label="Clear selection"
-          title="Clear selection"
-        >×</button>
-      </div>
-    </div>
-  );
-}
-
 /* ─── Iter 2 Phase 6.5 — Bell icon for notifications toggle ─── */
 function IconBell({ filled }) {
   return (
@@ -1242,6 +1184,265 @@ function IconBookOpen() {
       <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
       <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
     </svg>
+  );
+}
+/* Iter 2 patch 1 — calendar icon for the Clear button. */
+function IconCalendar() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+  );
+}
+
+/* ─── Iter 2 patch 1 — Master tickbox for the toolbar ───
+   State machine (Gmail-style):
+     - empty  (size === 0)        → tap selects all visible
+     - mixed  (0 < size < visible) → tap clears (indeterminate marker)
+     - full   (size === visible)   → tap clears
+   Visual mirrors the per-row Tickbox: navy border, cream fill, gold tick
+   when "full"; dash glyph when "mixed". */
+function MasterTickbox({ selectedCount, visibleCount, onToggle }) {
+  const state = visibleCount === 0
+    ? 'empty'
+    : selectedCount === 0
+      ? 'empty'
+      : selectedCount >= visibleCount
+        ? 'full'
+        : 'mixed';
+  const filled = state === 'full' || state === 'mixed';
+  const label = state === 'full'
+    ? 'Unselect all'
+    : state === 'mixed'
+      ? 'Clear selection (' + selectedCount + ' selected)'
+      : 'Select all on this day';
+  return (
+    <button
+      type="button"
+      onClick={(e) => { e.stopPropagation(); onToggle(state); }}
+      className="w-9 h-9 shrink-0 flex items-center justify-center"
+      role="checkbox"
+      aria-checked={state === 'full' ? 'true' : state === 'mixed' ? 'mixed' : 'false'}
+      aria-label={label}
+      title={label}
+    >
+      <span
+        className="relative inline-block"
+        style={{
+          width: 18,
+          height: 18,
+          borderRadius: 4,
+          border: '1.5px solid #232C3B',
+          backgroundColor: filled ? '#FFBB58' : '#F5EBD7',
+          transition: 'background-color 120ms ease',
+        }}
+      >
+        {state === 'full' && (
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#232C3B" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        )}
+        {state === 'mixed' && (
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#232C3B" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+            <line x1="4" y1="12" x2="20" y2="12" />
+          </svg>
+        )}
+      </span>
+    </button>
+  );
+}
+
+/* ─── Iter 2 patch 1 — ClearCalendarModal ───
+   Pops from tapping the Clear button in the sticky toolbar.
+   Two modes:
+     - 'day'   single tap → one ISO date string.
+     - 'range' first tap = start, second tap = end. Re-tap start before
+                 end re-anchors the start.
+   Confirm fires onConfirm({ mode, day, start, end }). Modal closes;
+   caller wipes per-date storage for each impacted date.
+   Visual: month grid (Mon-Sun), prev/next arrows. Selected day(s) lit
+   in gold; range fill is a faint gold band; today carries a navy chip. */
+function ClearCalendarModal({ open, onClose, onConfirm }) {
+  const today = todayISO();
+  const initialMonth = useMemo(() => {
+    const d = new Date(today + 'T12:00:00');
+    return { y: d.getFullYear(), m: d.getMonth() };
+  }, [today]);
+
+  const [mode, setMode] = useState('day');
+  const [day, setDay] = useState(null);
+  const [start, setStart] = useState(null);
+  const [end, setEnd] = useState(null);
+  const [{ y, m }, setMonth] = useState(initialMonth);
+
+  // Reset when opening.
+  useEffect(() => {
+    if (open) {
+      setMode('day');
+      setDay(null);
+      setStart(null);
+      setEnd(null);
+      setMonth(initialMonth);
+    }
+  }, [open, initialMonth]);
+
+  const monthLabel = useMemo(() => {
+    const d = new Date(y, m, 1);
+    return d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+  }, [y, m]);
+
+  const grid = useMemo(() => {
+    const first = new Date(y, m, 1);
+    const last  = new Date(y, m + 1, 0);
+    // Mon=0..Sun=6 offset.
+    const dayOfWeek = (first.getDay() + 6) % 7;
+    const cells = [];
+    for (let i = 0; i < dayOfWeek; i++) cells.push(null);
+    for (let d = 1; d <= last.getDate(); d++) {
+      const date = new Date(y, m, d);
+      const iso = date.toISOString().slice(0, 10);
+      cells.push({ d, iso });
+    }
+    while (cells.length % 7 !== 0) cells.push(null);
+    return cells;
+  }, [y, m]);
+
+  const prevMonth = () => {
+    const d = new Date(y, m - 1, 1);
+    setMonth({ y: d.getFullYear(), m: d.getMonth() });
+  };
+  const nextMonth = () => {
+    const d = new Date(y, m + 1, 1);
+    setMonth({ y: d.getFullYear(), m: d.getMonth() });
+  };
+
+  const pick = (iso) => {
+    if (!iso) return;
+    if (mode === 'day') {
+      setDay(iso);
+      return;
+    }
+    // range mode
+    if (!start || (start && end)) {
+      setStart(iso);
+      setEnd(null);
+      return;
+    }
+    // start set, no end yet
+    if (iso < start) {
+      // re-anchor
+      setStart(iso);
+      return;
+    }
+    setEnd(iso);
+  };
+
+  const inRange = (iso) => {
+    if (mode !== 'range') return false;
+    if (!start || !end) return false;
+    return iso >= start && iso <= end;
+  };
+  const isStart = (iso) => mode === 'range' && start === iso;
+  const isEnd   = (iso) => mode === 'range' && end === iso;
+  const isDay   = (iso) => mode === 'day' && day === iso;
+
+  const canConfirm = (mode === 'day' && day) || (mode === 'range' && start && end);
+
+  const summary = mode === 'day'
+    ? (day ? `Clear stacks for ${day}` : 'Pick a day')
+    : (start && end ? `Clear stacks for ${start} → ${end}` : start ? 'Pick an end day' : 'Pick a start day');
+
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-[55] bg-bg/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-4" onClick={onClose}>
+      <div
+        className="card w-full max-w-md max-h-[92vh] overflow-y-auto"
+        style={{ backgroundColor: '#0a1628', border: '1px solid rgba(255,187,88,0.4)' }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-5 py-3 border-b border-cream/10">
+          <div className="font-display text-lg">Clear stacks</div>
+          <button onClick={onClose} className="text-muted hover:text-accent text-2xl leading-none" aria-label="Close">×</button>
+        </div>
+
+        <div className="flex gap-1 p-3 border-b border-cream/10">
+          <button
+            type="button"
+            onClick={() => { setMode('day'); setStart(null); setEnd(null); }}
+            className={'flex-1 py-2 rounded-full text-xs font-bold transition-all ' + (mode === 'day' ? 'btn-accent' : 'bg-cream/5 text-muted')}
+          >Single day</button>
+          <button
+            type="button"
+            onClick={() => { setMode('range'); setDay(null); }}
+            className={'flex-1 py-2 rounded-full text-xs font-bold transition-all ' + (mode === 'range' ? 'btn-accent' : 'bg-cream/5 text-muted')}
+          >Date range</button>
+        </div>
+
+        <div className="flex items-center justify-between px-4 py-3 border-b border-cream/10">
+          <button onClick={prevMonth} className="w-9 h-9 flex items-center justify-center text-muted hover:text-accent" aria-label="Previous month">‹</button>
+          <div className="font-display text-sm uppercase tracking-widest">{monthLabel}</div>
+          <button onClick={nextMonth} className="w-9 h-9 flex items-center justify-center text-muted hover:text-accent" aria-label="Next month">›</button>
+        </div>
+
+        <div className="px-3 pt-2">
+          <div className="grid grid-cols-7 gap-1 text-[10px] uppercase tracking-widest text-muted text-center mb-1">
+            {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => <div key={d}>{d}</div>)}
+          </div>
+          <div className="grid grid-cols-7 gap-1">
+            {grid.map((cell, i) => {
+              if (!cell) return <div key={'gap-' + i} />;
+              const isT = cell.iso === today;
+              const sel = isDay(cell.iso) || isStart(cell.iso) || isEnd(cell.iso);
+              const inR = inRange(cell.iso);
+              return (
+                <button
+                  key={cell.iso}
+                  type="button"
+                  onClick={() => pick(cell.iso)}
+                  className="aspect-square rounded-md flex items-center justify-center text-sm font-display transition-all"
+                  style={{
+                    backgroundColor: sel
+                      ? '#FFBB58'
+                      : inR
+                        ? 'rgba(255,187,88,0.18)'
+                        : isT
+                          ? '#232C3B'
+                          : 'transparent',
+                    color: sel ? '#232C3B' : isT ? '#F5EBD7' : 'rgba(245,235,215,0.8)',
+                    border: '1px solid ' + (sel ? '#FFBB58' : isT ? 'rgba(255,187,88,0.6)' : 'transparent'),
+                  }}
+                  title={cell.iso}
+                >
+                  {cell.d}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="p-4 border-t border-cream/10 space-y-3">
+          <div className="text-xs text-muted text-center">{summary}</div>
+          <p className="text-[10px] text-muted leading-relaxed">
+            Clearing hides every stack on the chosen day(s) — your protocols, modules, and saved zones stay active on other days.
+          </p>
+          <div className="flex gap-2">
+            <button onClick={onClose} className="btn-ghost flex-1">Cancel</button>
+            <button
+              type="button"
+              onClick={() => {
+                if (!canConfirm) return;
+                onConfirm({ mode, day, start, end });
+              }}
+              disabled={!canConfirm}
+              className="btn-accent flex-1 disabled:opacity-40 disabled:cursor-not-allowed"
+            >Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -1622,6 +1823,29 @@ const DateStrip = React.forwardRef(function DateStrip({ selectedDate, onSelect }
 /* ═══════════════════════════════════════════
    NEW — /today
    ═══════════════════════════════════════════ */
+// Daily completion ring — gold progress arc + count. Reads already-computed
+// counts (no new persisted state). Reduced-motion users still get the static arc.
+function CompletionRing({ done, total }) {
+  const pct = total > 0 ? done / total : 0;
+  const r = 11;
+  const circ = 2 * Math.PI * r;
+  const allDone = total > 0 && done === total;
+  return (
+    <div className="flex items-center gap-1.5 shrink-0" title={`${done} of ${total} done`} aria-label={`${done} of ${total} done`}>
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true" style={{ transform: 'rotate(-90deg)' }}>
+        <circle cx="14" cy="14" r={r} fill="none" stroke="rgba(245,235,215,0.14)" strokeWidth="3" />
+        <circle
+          cx="14" cy="14" r={r} fill="none"
+          stroke="#FFBB58" strokeWidth="3" strokeLinecap="round"
+          strokeDasharray={circ} strokeDashoffset={circ * (1 - pct)}
+          style={{ transition: 'stroke-dashoffset 500ms cubic-bezier(0.22,1,0.36,1)' }}
+        />
+      </svg>
+      <span className="text-xs text-muted tracking-wide tabular-nums">{done}/{total}{allDone ? ' ✓' : ''}</span>
+    </div>
+  );
+}
+
 function TodayView() {
   // Phase 1.4 (2026-05-23) — selected date drives every per-date state hook.
   const [selectedDate, setSelectedDate] = useState(() => todayISO());
@@ -1632,17 +1856,17 @@ function TodayView() {
   const { isDone, toggle, completed } = useCompletedToday(selectedDate);
   const [dailyOrder, setDailyOrder] = useDateScopedStorage(LS_KEYS.DAILY_ORDER, selectedDate, []);
   const [timeOverrides, setTimeOverrides] = useDateScopedStorage(LS_KEYS.DAILY_TIMES, selectedDate, {});
-  const { isHidden, hide, unhideAll, hiddenIds } = useDailyHidden(selectedDate);
+  const { isHidden, hide, hideMany, unhideAll, hiddenIds } = useDailyHidden(selectedDate);
   const { duplicates, addDuplicate, removeDuplicate, updateDuplicateTime, clearDuplicates } = useDailyDuplicates(selectedDate);
   const {
     merges,
     mergeOnto, unmergeItem, dissolveMerge,
     setMergeTitle, setActiveTab, pruneMissing,
     setMergeTime, setPlayOrder, setCollapsed,
-    setMergeMode,
+    setMergeMode, dissolveAll,
   } = useDailyMerges(selectedDate);
   // Phase 2 (2026-05-23) — user-created stacks per-date.
-  const { stacks: userStacks, addStack: addUserStack, updateStack: updateUserStack, removeStack: removeUserStack } = useUserStacks(selectedDate);
+  const { stacks: userStacks, addStack: addUserStack, updateStack: updateUserStack, removeStack: removeUserStack, clearStacks: clearUserStacks } = useUserStacks(selectedDate);
   const [addModalOpen, setAddModalOpen] = useState(false);
   // Iter 2 Phase 6.4 — Add Protocol modal + transient toast.
   const [addProtocolOpen, setAddProtocolOpen] = useState(false);
@@ -1668,8 +1892,10 @@ function TodayView() {
   // id of item whose time picker is currently open
   const [editingTimeId, setEditingTimeId] = useState(null);
   // Iter 2 Phase 5 — multi-select state. Tickbox in every row toggles ids
-  // into this Set; Selection Action Bar lifts above + Add Stack when any
-  // tickbox is on; Merge/Delete operate on the full set then clear.
+  // into this Set; Merge/Delete operate on the full set then clear.
+  // Patch 1 (2026-05-24): Merge/Delete promoted to the top sticky toolbar;
+  // floating SelectionActionBar removed. Master tickbox added with Gmail
+  // empty/mixed/full semantics.
   const [selectedIds, setSelectedIds] = useState(() => new Set());
   const isSelected = useCallback((id) => selectedIds.has(id), [selectedIds]);
   const toggleSelected = useCallback((id) => {
@@ -1680,6 +1906,8 @@ function TodayView() {
     });
   }, []);
   const clearSelection = useCallback(() => setSelectedIds(new Set()), []);
+  // Patch 1 — Clear calendar modal.
+  const [clearOpen, setClearOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -2127,6 +2355,74 @@ function TodayView() {
     clearSelection();
   }, [selectedIds, itemsById, handleRemoveItem, clearSelection]);
 
+  // Patch 1 — master tickbox: select-all-visible / clear depending on state.
+  const handleMasterToggle = useCallback((state) => {
+    if (state === 'empty') {
+      setSelectedIds(new Set(visibleItems.map(it => it.id)));
+    } else {
+      clearSelection();
+    }
+  }, [visibleItems, clearSelection]);
+
+  // Patch 1 — Clear handler. Wipes per-date storage for the picked day or
+  // every date in the picked range. Underlying protocols/modules/routines
+  // stay active globally; only that date's view of them is hidden.
+  // - For selectedDate: use the React hooks so state updates synchronously.
+  // - For OTHER dates: write directly to localStorage; hooks re-read on
+  //   the next navigation to that date.
+  const handleClearConfirm = useCallback(({ mode, day, start, end }) => {
+    const dates = [];
+    if (mode === 'day' && day) {
+      dates.push(day);
+    } else if (mode === 'range' && start && end) {
+      const a = new Date(start + 'T12:00:00');
+      const b = new Date(end   + 'T12:00:00');
+      const d = new Date(a);
+      while (d <= b) {
+        dates.push(d.toISOString().slice(0, 10));
+        d.setDate(d.getDate() + 1);
+      }
+    }
+    if (dates.length === 0) { setClearOpen(false); return; }
+
+    // Hide-list = every date-independent id currently visible. Protocols /
+    // audio / routines use stable, date-independent ids; user stacks and
+    // duplicates are date-scoped and get wiped via the userStacks /
+    // duplicates lanes instead.
+    const dateIndependentIds = items
+      .filter(it => !it.isUserStack && !it.isDuplicate)
+      .map(it => it.id);
+
+    const safeWrite = (key, value) => {
+      try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {}
+    };
+
+    for (const dt of dates) {
+      if (dt === selectedDate) {
+        hideMany(dateIndependentIds);
+        clearDuplicates();
+        clearUserStacks();
+        dissolveAll();
+        setDailyOrder([]);
+        setTimeOverrides({});
+        setExpanded(null);
+        clearSelection();
+      } else {
+        safeWrite(`ppw.dailyHidden::${dt}`,     dateIndependentIds);
+        safeWrite(`ppw.dailyDuplicates::${dt}`, []);
+        safeWrite(`ppw.dailyMerges::${dt}`,     {});
+        safeWrite(`ppw.userStacks::${dt}`,      []);
+        safeWrite(`ppw.dailyOrder::${dt}`,      []);
+        safeWrite(`ppw.dailyTimes::${dt}`,      {});
+      }
+    }
+
+    setClearOpen(false);
+    const summary = mode === 'day' ? day : `${start} → ${end}`;
+    setToast({ tone: 'ok', text: `Cleared stacks for ${summary} (${dates.length} day${dates.length === 1 ? '' : 's'}).` });
+    setTimeout(() => setToast(null), 3500);
+  }, [items, selectedDate, hideMany, clearDuplicates, clearUserStacks, dissolveAll, setDailyOrder, setTimeOverrides, clearSelection]);
+
   // Iter 2 Phase 7.1 — schedule stack-time fires when the bell is ON AND
   // the user is viewing today. Past days never fire; future days never
   // fire (selectedDate !== todayISO). Native Notification + onFire run
@@ -2203,11 +2499,19 @@ function TodayView() {
               title="Jump to today"
             >Today</button>
           </div>
-          <div className="text-xs text-muted tracking-wide shrink-0">{completedCount}/{items.length} done</div>
+          {items.length > 0 && <CompletionRing done={completedCount} total={items.length} />}
         </div>
         <DateStrip ref={dateStripRef} selectedDate={selectedDate} onSelect={setSelectedDate} />
-        {/* Iter 2 Phase 6.3 — action row: +Add Stack, +Add Protocol, spacer, Notifications */}
-        <div className="flex items-center gap-2 mt-1">
+        {/* Patch 1 (2026-05-24) — action row restructure.
+            Row 1: master tickbox + Stack/Protocol pills + Clear pill + Bell (right).
+            Row 2 (only when any tickbox is on): Merge / Delete pills, count chip, "deselect all" link.
+            SelectionActionBar floating bar removed; bulk controls live in the sticky toolbar (Gmail-inbox pattern per Vic 2026-05-24). */}
+        <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+          <MasterTickbox
+            selectedCount={selectedIds.size}
+            visibleCount={visibleItems.length}
+            onToggle={handleMasterToggle}
+          />
           <button
             type="button"
             onClick={() => setAddModalOpen(true)}
@@ -2228,6 +2532,16 @@ function TodayView() {
             <IconBookOpen />
             <span>Protocol</span>
           </button>
+          <button
+            type="button"
+            onClick={() => setClearOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
+            style={{ backgroundColor: 'transparent', color: '#F5EBD7', border: '1px solid rgba(245,235,215,0.25)' }}
+            title="Clear stacks for a day or range"
+          >
+            <IconCalendar />
+            <span>Clear</span>
+          </button>
           <div className="flex-1" />
           <button
             type="button"
@@ -2245,6 +2559,43 @@ function TodayView() {
             <IconBell filled={notifPrefs.enabled} />
           </button>
         </div>
+        {selectedIds.size > 0 && (
+          <div className="flex items-center gap-1.5 mt-1.5 pt-1.5 border-t border-cream/5 flex-wrap">
+            <button
+              type="button"
+              onClick={handleBulkMerge}
+              disabled={selectedIds.size < 2}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{
+                backgroundColor: selectedIds.size >= 2 ? '#FFBB58' : 'transparent',
+                color: selectedIds.size >= 2 ? '#232C3B' : '#F5EBD7',
+                border: '1px solid #FFBB58',
+              }}
+              title={selectedIds.size >= 2 ? 'Merge selected into one tabbed stack' : 'Select 2 or more to merge'}
+            >
+              <span>Merge ({selectedIds.size})</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleBulkDelete}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
+              style={{ backgroundColor: 'transparent', color: '#F5EBD7', border: '1px solid #F5EBD7' }}
+              title="Delete selected stacks from this day"
+            >
+              <IconTrash />
+              <span>Delete</span>
+            </button>
+            <div className="flex-1" />
+            <span className="text-[11px] text-cream/80 font-bold">{selectedIds.size} selected</span>
+            <button
+              type="button"
+              onClick={clearSelection}
+              className="w-7 h-7 flex items-center justify-center text-cream/70 hover:text-cream"
+              aria-label="Clear selection"
+              title="Clear selection"
+            >×</button>
+          </div>
+        )}
       </div>
 
       {toast && (
@@ -2259,7 +2610,16 @@ function TodayView() {
 
       {empty && (
         <div className="card p-10 text-center fade-in is-visible">
-          <div className="empty-orb" aria-hidden="true" />
+          <img
+            src={`${import.meta.env.BASE_URL}images/science/dna-helix.webp`}
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            width="116"
+            height="116"
+            className="mx-auto mb-4 rounded-2xl"
+            style={{ objectFit: 'cover', boxShadow: '0 20px 50px -20px rgba(0,0,0,0.75)' }}
+          />
           <div className="font-display text-xl mb-2">Nothing scheduled yet.</div>
           <p className="text-muted text-sm mb-6 max-w-sm mx-auto leading-relaxed">Activate a protocol, save a body-zone routine, or pick an audio module — they will all show up here.</p>
           <div className="flex flex-wrap gap-3 justify-center">
@@ -2471,11 +2831,12 @@ function TodayView() {
         onActivate={handleActivateProtocol}
       />
 
-      <SelectionActionBar
-        count={selectedIds.size}
-        onMerge={handleBulkMerge}
-        onDelete={handleBulkDelete}
-        onClear={clearSelection}
+      {/* Patch 1 (2026-05-24) — floating SelectionActionBar removed; Merge/Delete now live in the sticky toolbar. */}
+
+      <ClearCalendarModal
+        open={clearOpen}
+        onClose={() => setClearOpen(false)}
+        onConfirm={handleClearConfirm}
       />
 
       <NotificationOverlay

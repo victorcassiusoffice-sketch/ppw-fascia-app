@@ -8,8 +8,8 @@
 :root {
   color-scheme: dark;
   --ppw-bg-deep: #0a1628;
-  --ppw-gold:    #f5b845;
-  --ppw-cream:   #f0e8d8;
+  --ppw-gold:    #FFBB58;
+  --ppw-cream:   #F5EBD7;
   --ppw-teal:    #4a9eb8;
 
   --ppw-text:        var(--ppw-cream);
