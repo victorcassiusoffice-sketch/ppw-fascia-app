@@ -3,7 +3,7 @@
    Layered ON TOP of index.css. Brings the app
    in line with /space-designer.html aesthetic:
    - deeper navy (#07080a) ambient base
-   - warm gold #dca957 + lime #c4f04c accents
+   - warm gold #dca957 accent (lime retired 2026-05-29 → brand gold)
    - generous spacing, fade-in-on-scroll
    - polished button + card states
    - smooth route transitions
@@ -15,11 +15,12 @@
   --ppw-bg-elev-1:    #0c1320;
   --ppw-bg-elev-2:    #111a2c;
   --ppw-gold-warm:    #dca957;
-  --ppw-lime:         #c4f04c;
-  --ppw-lime-soft:    rgba(196, 240, 76, 0.18);
+  /* lime retired → repointed to brand gold (Wave 1 palette alignment 2026-05-29) */
+  --ppw-lime:         #FFBB58;
+  --ppw-lime-soft:    rgba(255, 187, 88, 0.18);
   --ppw-gold-soft:    rgba(220, 169, 87, 0.16);
   --ppw-glow-gold:    0 0 32px rgba(220, 169, 87, 0.35);
-  --ppw-glow-lime:    0 0 28px rgba(196, 240, 76, 0.45);
+  --ppw-glow-lime:    0 0 28px rgba(255, 187, 88, 0.45);
   --ppw-glow-soft:    0 24px 60px -24px rgba(0, 0, 0, 0.7);
 
   --ppw-fade-ms: 600ms;
@@ -35,8 +36,7 @@
 body {
   background:
     radial-gradient(circle at 20% 12%, rgba(220, 169, 87, 0.08), transparent 40%),
-    radial-gradient(circle at 82% 88%, rgba(196, 240, 76, 0.06), transparent 38%),
-    radial-gradient(circle at 50% 60%, rgba(74, 158, 184, 0.05), transparent 50%),
+    radial-gradient(circle at 82% 88%, rgba(255, 187, 88, 0.06), transparent 38%),
     linear-gradient(180deg, #07080a 0%, #0a1628 65%, #060912 100%);
   min-height: 100vh;
 }
@@ -116,7 +116,7 @@ button, a, .btn-accent, .btn-ghost, .btn-teal, .btn-iherb, .btn-amazon {
 }
 
 .btn-accent {
-  background: linear-gradient(180deg, #f5b845 0%, #dca957 100%);
+  background: linear-gradient(180deg, #FFBB58 0%, #dca957 100%);
   color: #07080a;
   font-weight: 700;
   padding: 14px 28px;
@@ -140,7 +140,7 @@ button, a, .btn-accent, .btn-ghost, .btn-teal, .btn-iherb, .btn-amazon {
 .btn-accent:focus-visible {
   outline: none;
   box-shadow:
-    0 0 0 3px rgba(196, 240, 76, 0.5),
+    0 0 0 3px rgba(255, 187, 88, 0.5),
     0 12px 28px -12px rgba(245, 184, 69, 0.55);
 }
 .btn-accent:active { transform: translateY(0); filter: brightness(0.96); }
@@ -163,10 +163,10 @@ button, a, .btn-accent, .btn-ghost, .btn-teal, .btn-iherb, .btn-amazon {
 .btn-ghost:focus-visible {
   outline: none;
   border-color: var(--ppw-lime);
-  box-shadow: 0 0 0 3px rgba(196, 240, 76, 0.35);
+  box-shadow: 0 0 0 3px rgba(255, 187, 88, 0.35);
 }
 
-/* New CTA tint — lime, used for the "primary action of the moment" */
+/* CTA tint — brand gold, used for the "primary action of the moment" (was lime) */
 .btn-lime {
   background: var(--ppw-lime);
   color: #07080a;
@@ -175,14 +175,14 @@ button, a, .btn-accent, .btn-ghost, .btn-teal, .btn-iherb, .btn-amazon {
   border-radius: 999px;
   min-height: var(--ppw-tap-min);
   box-shadow:
-    0 12px 30px -10px rgba(196, 240, 76, 0.55),
+    0 12px 30px -10px rgba(255, 187, 88, 0.55),
     inset 0 1px 0 rgba(255, 255, 255, 0.45);
   transition: transform .2s var(--ppw-ease), filter .2s var(--ppw-ease), box-shadow .2s var(--ppw-ease);
 }
 .btn-lime:hover { transform: translateY(-1.5px); filter: brightness(1.04); }
 .btn-lime:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(220, 169, 87, 0.5), 0 12px 30px -10px rgba(196, 240, 76, 0.55);
+  box-shadow: 0 0 0 3px rgba(220, 169, 87, 0.5), 0 12px 30px -10px rgba(255, 187, 88, 0.55);
 }
 
 /* ──────────────────────────────────────────
@@ -272,7 +272,7 @@ header {
   opacity: 0.55;
 }
 .today-routine-card.timeline-done::before {
-  background: linear-gradient(180deg, rgba(196,240,76,0.6), transparent);
+  background: linear-gradient(180deg, rgba(255,187,88,0.6), transparent);
 }
 
 /* Time chip — make it feel tappable */
@@ -339,7 +339,7 @@ header {
   border-radius: 999px;
   background:
     radial-gradient(circle at 35% 30%, rgba(220, 169, 87, 0.45), transparent 55%),
-    radial-gradient(circle at 70% 70%, rgba(196, 240, 76, 0.30), transparent 60%),
+    radial-gradient(circle at 70% 70%, rgba(255, 187, 88, 0.30), transparent 60%),
     rgba(240, 232, 216, 0.04);
   border: 1px solid rgba(240, 232, 216, 0.10);
   filter: blur(0.3px);
@@ -388,7 +388,7 @@ header {
     /* tighter ambient on small screens to keep body content readable */
     background:
       radial-gradient(circle at 30% 8%, rgba(220, 169, 87, 0.10), transparent 38%),
-      radial-gradient(circle at 70% 92%, rgba(196, 240, 76, 0.06), transparent 38%),
+      radial-gradient(circle at 70% 92%, rgba(255, 187, 88, 0.06), transparent 38%),
       linear-gradient(180deg, #07080a 0%, #0a1628 65%, #060912 100%);
   }
 }
@@ -397,7 +397,7 @@ header {
    Focus rings — accessibility
    ────────────────────────────────────────── */
 *:focus-visible {
-  outline: 2px solid rgba(196, 240, 76, 0.6);
+  outline: 2px solid rgba(255, 187, 88, 0.6);
   outline-offset: 2px;
   border-radius: 6px;
 }

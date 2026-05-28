@@ -5,14 +5,14 @@ export default {
     extend: {
       colors: {
         bg:     '#0a1628',
-        accent: '#f5b845',
-        cream:  '#f0e8d8',
+        accent: '#FFBB58',
+        cream:  '#F5EBD7',
         teal:   '#4a9eb8',
-        ink:    '#f0e8d8',
+        ink:    '#F5EBD7',
         muted:  '#7b8eaa',
         'ppw-bg':    '#0a1628',
-        'ppw-gold':  '#f5b845',
-        'ppw-cream': '#f0e8d8',
+        'ppw-gold':  '#FFBB58',
+        'ppw-cream': '#F5EBD7',
         'ppw-teal':  '#4a9eb8',
       },
       fontFamily: {
