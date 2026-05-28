@@ -1823,6 +1823,29 @@ const DateStrip = React.forwardRef(function DateStrip({ selectedDate, onSelect }
 /* ═══════════════════════════════════════════
    NEW — /today
    ═══════════════════════════════════════════ */
+// Daily completion ring — gold progress arc + count. Reads already-computed
+// counts (no new persisted state). Reduced-motion users still get the static arc.
+function CompletionRing({ done, total }) {
+  const pct = total > 0 ? done / total : 0;
+  const r = 11;
+  const circ = 2 * Math.PI * r;
+  const allDone = total > 0 && done === total;
+  return (
+    <div className="flex items-center gap-1.5 shrink-0" title={`${done} of ${total} done`} aria-label={`${done} of ${total} done`}>
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true" style={{ transform: 'rotate(-90deg)' }}>
+        <circle cx="14" cy="14" r={r} fill="none" stroke="rgba(245,235,215,0.14)" strokeWidth="3" />
+        <circle
+          cx="14" cy="14" r={r} fill="none"
+          stroke="#FFBB58" strokeWidth="3" strokeLinecap="round"
+          strokeDasharray={circ} strokeDashoffset={circ * (1 - pct)}
+          style={{ transition: 'stroke-dashoffset 500ms cubic-bezier(0.22,1,0.36,1)' }}
+        />
+      </svg>
+      <span className="text-xs text-muted tracking-wide tabular-nums">{done}/{total}{allDone ? ' ✓' : ''}</span>
+    </div>
+  );
+}
+
 function TodayView() {
   // Phase 1.4 (2026-05-23) — selected date drives every per-date state hook.
   const [selectedDate, setSelectedDate] = useState(() => todayISO());
@@ -2476,7 +2499,7 @@ function TodayView() {
               title="Jump to today"
             >Today</button>
           </div>
-          <div className="text-xs text-muted tracking-wide shrink-0">{completedCount}/{items.length} done</div>
+          {items.length > 0 && <CompletionRing done={completedCount} total={items.length} />}
         </div>
         <DateStrip ref={dateStripRef} selectedDate={selectedDate} onSelect={setSelectedDate} />
         {/* Patch 1 (2026-05-24) — action row restructure.
