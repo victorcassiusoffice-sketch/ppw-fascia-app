@@ -228,18 +228,65 @@ function ProgressBar({ current, total }) {
 /* ═══════════════════════════════════════════
    Screen 1 — Entry
    ═══════════════════════════════════════════ */
+// Wave-2 — cinematic science divider. Register B (bioluminescent cyan on deep
+// black) is correct here: this is embedded content imagery, NOT surface chrome.
+// Uses `fade-in is-visible` (both classes) so it paints immediately even where
+// the scroll-reveal hook isn't wired — avoids an invisible band.
+function ScienceDivider({ src, label, aspect = '16 / 3' }) {
+  return (
+    <div className="relative my-10 rounded-xl overflow-hidden fade-in is-visible" style={{ aspectRatio: aspect }}>
+      <img
+        src={`${import.meta.env.BASE_URL}images/science/${src}`}
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        className="w-full h-full object-cover"
+      />
+      <div
+        className="absolute inset-0"
+        style={{ background: 'linear-gradient(90deg, rgba(10,22,40,0.88) 0%, rgba(10,22,40,0.18) 48%, rgba(10,22,40,0.88) 100%)' }}
+      />
+      {label && (
+        <div className="absolute inset-0 flex items-center px-5">
+          <span className="eyebrow">{label}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Entry({ session, setSession }) {
   const nav = useNavigate();
   const pick = (mode) => { setSession({ ...initialSession, mode }); nav(mode === 'lifestyle' ? '/lifestyle' : '/level'); };
   return (
     <main className="px-6 py-14 md:py-24 max-w-5xl mx-auto">
-      <div className="mb-16 fade-in is-visible">
+      <div className="mb-10 fade-in is-visible">
         <div className="eyebrow mb-5">Session Builder</div>
         <h1 className="font-display text-5xl md:text-7xl leading-[0.95] mb-5">
           Unlock<br/>your body<span className="text-accent">.</span>
         </h1>
         <p className="text-muted max-w-xl text-lg leading-relaxed">Science-backed fascia protocols personalised to your body, your pain, your lifestyle.</p>
       </div>
+
+      {/* Wave-2 — cinematic fascia hero (Register B: embedded science art). */}
+      <div className="relative mb-12 rounded-3xl overflow-hidden fade-in is-visible" style={{ aspectRatio: '16 / 7' }}>
+        <img
+          src={`${import.meta.env.BASE_URL}images/science/fascia-hero.webp`}
+          alt=""
+          aria-hidden="true"
+          className="science-hero-img w-full h-full object-cover"
+          style={{ objectPosition: 'center' }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(180deg, rgba(10,22,40,0.08) 0%, rgba(10,22,40,0.30) 55%, rgba(10,22,40,0.72) 100%)' }}
+        />
+        <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7">
+          <div className="eyebrow mb-1">The fascia network</div>
+          <div className="font-display text-lg md:text-2xl text-cream leading-tight">Your body's living connective architecture.</div>
+        </div>
+      </div>
+
       <div className="grid md:grid-cols-2 gap-5 fade-in fade-in-stagger is-visible">
         <button onClick={() => pick('zone')} className="card protocol-tile p-10 text-left group transition-all duration-300">
           <div className="eyebrow mb-4">01</div>
@@ -254,7 +301,9 @@ function Entry({ session, setSession }) {
           <div className="text-accent text-sm mt-6 inline-flex items-center gap-1 group-hover:gap-2 transition-all">Get started <span aria-hidden="true">→</span></div>
         </button>
       </div>
-      <div className="mt-10">
+      <ScienceDivider src="microtubule-divider.webp" label="Cellular mechanotransduction" aspect="16 / 2.6" />
+
+      <div className="mt-2">
         <Link to="/protocols" className="text-accent text-sm underline underline-offset-4">Or browse evidence-based protocols →</Link>
       </div>
     </main>
@@ -2957,7 +3006,20 @@ function ProtocolsList() {
         />
       </div>
 
-      {list == null && <div className="text-muted text-sm animate-pulse">Loading…</div>}
+      {list == null && (
+        <>
+          <span className="sr-only" role="status">Loading protocols…</span>
+          <div className="space-y-4" aria-hidden="true">
+            {[0, 1, 2].map(i => (
+              <div key={i} className="card p-6 animate-pulse">
+                <div className="h-3 w-24 rounded bg-cream/10 mb-3" />
+                <div className="h-6 w-2/3 rounded bg-cream/10 mb-3" />
+                <div className="h-3 w-32 rounded bg-cream/5" />
+              </div>
+            ))}
+          </div>
+        </>
+      )}
       {list && list.length === 0 && (
         <div className="card p-8 text-center fade-in is-visible">
           <div className="empty-orb" aria-hidden="true" />

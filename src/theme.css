@@ -351,6 +351,22 @@ header {
 }
 
 /* ──────────────────────────────────────────
+   Wave-2 — cinematic hero drift (ken-burns).
+   Subtle slow scale on the splash science hero
+   so the first screen feels alive. Reduced-motion
+   users get a static image (handled below).
+   ────────────────────────────────────────── */
+.science-hero-img {
+  animation: ppw-hero-drift 22s ease-in-out infinite alternate;
+  transform-origin: 50% 45%;
+  will-change: transform;
+}
+@keyframes ppw-hero-drift {
+  from { transform: scale(1); }
+  to   { transform: scale(1.06); }
+}
+
+/* ──────────────────────────────────────────
    Bottom-nav (mobile) — make hover/active tasty
    ────────────────────────────────────────── */
 .nav-item {
@@ -368,6 +384,7 @@ header {
   .fade-in,
   .fade-in-stagger > *,
   .empty-orb,
+  .science-hero-img,
   .hotspot-feedback {
     animation: none !important;
     transition: none !important;
