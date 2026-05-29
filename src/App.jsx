@@ -984,25 +984,9 @@ function MergedStack({
             )}
           </div>
         </div>
-        {/* Phase 1.3 (2026-05-23) — inline duplicate + delete icons on EVERY stack */}
-        {onDuplicate && (
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); onDuplicate(mergeId); }}
-            className="text-muted hover:text-accent w-9 h-9 flex items-center justify-center shrink-0 transition-colors"
-            aria-label="Duplicate stack"
-            title="Duplicate stack"
-          ><IconCopy /></button>
-        )}
-        {onDelete && (
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); onDelete(mergeId); }}
-            className="text-muted hover:text-red-400 w-9 h-9 flex items-center justify-center shrink-0 transition-colors"
-            aria-label="Delete stack"
-            title="Delete stack"
-          ><IconTrash /></button>
-        )}
+        {/* Patch 2 (2026-05-29) — inline duplicate/delete icons retired for
+            cleaner rows. Both actions now live in the sticky bulk toolbar:
+            select the stack (tickbox) → Duplicate (single-select) / Delete. */}
         <button
           type="button"
           onClick={() => onToggleCollapsed(mergeId, !collapsed)}
@@ -2449,11 +2433,45 @@ function TodayView() {
     if (!window.confirm(msg)) return;
     const ids = Array.from(selectedIds);
     ids.forEach(id => {
-      const it = itemsById.get(id);
-      if (it) handleRemoveItem(it);
+      // Patch 2 (2026-05-29) — merge-aware: a selected stack (lead item id)
+      // removes ALL its children + dissolves, matching the old inline stack
+      // delete icon. A plain item just hides itself.
+      const leadMergeId = mergeLeadByItemId.lead.get(id);
+      if (leadMergeId) {
+        const m = merges[leadMergeId];
+        (m?.itemIds || []).forEach(cid => {
+          const child = itemsById.get(cid);
+          if (child) handleRemoveItem(child);
+        });
+        dissolveMerge(leadMergeId);
+      } else {
+        const it = itemsById.get(id);
+        if (it) handleRemoveItem(it);
+      }
     });
     clearSelection();
-  }, [selectedIds, itemsById, handleRemoveItem, clearSelection]);
+  }, [selectedIds, itemsById, handleRemoveItem, clearSelection, mergeLeadByItemId, merges, dissolveMerge]);
+
+  // Patch 2 (2026-05-29) — single-select Duplicate in the bulk toolbar, so the
+  // inline per-stack duplicate icon can be retired for cleaner rows. Mirrors the
+  // old inline behavior: a merged stack duplicates each child (+4h); a single
+  // item duplicates itself.
+  const handleBulkDuplicate = useCallback(() => {
+    if (selectedIds.size !== 1) return;
+    const id = Array.from(selectedIds)[0];
+    const leadMergeId = mergeLeadByItemId.lead.get(id);
+    if (leadMergeId) {
+      const m = merges[leadMergeId];
+      (m?.itemIds || []).forEach(cid => {
+        const child = itemsById.get(cid);
+        if (child) handleDuplicate(child);
+      });
+    } else {
+      const it = itemsById.get(id);
+      if (it) handleDuplicate(it);
+    }
+    clearSelection();
+  }, [selectedIds, mergeLeadByItemId, merges, itemsById, handleDuplicate, clearSelection]);
 
   // Patch 1 — master tickbox: select-all-visible / clear depending on state.
   const handleMasterToggle = useCallback((state) => {
@@ -2680,6 +2698,18 @@ function TodayView() {
             >
               <span>Merge ({selectedIds.size})</span>
             </button>
+            {selectedIds.size === 1 && (
+              <button
+                type="button"
+                onClick={handleBulkDuplicate}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
+                style={{ backgroundColor: 'transparent', color: '#F5EBD7', border: '1px solid rgba(255,187,88,0.6)' }}
+                title="Duplicate the selected stack (adds a copy 4h later)"
+              >
+                <IconCopy />
+                <span>Duplicate</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={handleBulkDelete}
@@ -2781,23 +2811,6 @@ function TodayView() {
                       onToggleSelection={() => toggleSelected(it.id)}
                       selectionAriaLabel={`Select stack: ${m.title || titleFor(it)}`}
                       renderTabBody={(tabItem) => renderItemBody(tabItem, true)}
-                      onDelete={(mid) => {
-                        if (window.confirm('Delete this stack? All children are removed from today.')) {
-                          const childIds = m.itemIds || [];
-                          childIds.forEach(cid => {
-                            const child = itemsById.get(cid);
-                            if (child) handleRemoveItem(child);
-                          });
-                          dissolveMerge(mid);
-                        }
-                      }}
-                      onDuplicate={() => {
-                        const childIds = m.itemIds || [];
-                        childIds.forEach(cid => {
-                          const child = itemsById.get(cid);
-                          if (child) handleDuplicate(child);
-                        });
-                      }}
                     />
                   </div>
                 </div>
@@ -3048,6 +3061,12 @@ function ProtocolsList() {
           );
         })}
       </div>
+
+      {/* Wave-2 — closing science divider (ecm-mesh, Register B). Completes the
+          5-asset science set; only shown once protocols have loaded. */}
+      {list && list.length > 0 && (
+        <ScienceDivider src="ecm-mesh.webp" label="Extracellular matrix" aspect="16 / 3" />
+      )}
     </main>
   );
 }
