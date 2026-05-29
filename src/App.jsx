@@ -1846,6 +1846,57 @@ function CompletionRing({ done, total }) {
   );
 }
 
+// Consecutive-day completion streak, read from the existing
+// ppw.completedToday::<DATE> storage (no new persisted state, no backend).
+// A day counts toward the streak if it has >=1 completed item. Anchored to
+// today, or yesterday when today is still empty, so a fresh morning doesn't
+// read 0 before the first tick of the day.
+function isoMinusDays(iso, n) {
+  const d = new Date(iso + 'T00:00:00Z');
+  d.setUTCDate(d.getUTCDate() - n);
+  return d.toISOString().slice(0, 10);
+}
+function computeCompletionStreak() {
+  if (typeof localStorage === 'undefined') return 0;
+  const prefix = LS_KEYS.COMPLETED_TODAY + '::';
+  const doneDays = new Set();
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (!k || k.indexOf(prefix) !== 0) continue;
+    try {
+      const arr = JSON.parse(localStorage.getItem(k) || 'null');
+      if (Array.isArray(arr) && arr.length > 0) doneDays.add(k.slice(prefix.length));
+    } catch (_) { /* skip malformed */ }
+  }
+  const today = todayISO();
+  let anchor = doneDays.has(today) ? today : isoMinusDays(today, 1);
+  let streak = 0;
+  while (doneDays.has(anchor)) { streak++; anchor = isoMinusDays(anchor, 1); }
+  return streak;
+}
+
+// Gold flame chip — surfaces the active streak. Hidden when streak < 1 so a
+// fresh user never sees a discouraging zero.
+function StreakChip({ count }) {
+  if (!count || count < 1) return null;
+  return (
+    <div
+      className="inline-flex items-center gap-1 shrink-0 rounded-full px-2 py-1 transition-transform"
+      style={{ backgroundColor: 'rgba(255,187,88,0.10)', border: '1px solid rgba(255,187,88,0.30)', minHeight: 28 }}
+      title={`${count}-day streak`}
+      aria-label={`${count} day streak`}
+    >
+      <svg width="11" height="13" viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          fill="#FFBB58"
+          d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"
+        />
+      </svg>
+      <span className="text-xs font-bold tabular-nums" style={{ color: '#FFBB58' }}>{count}</span>
+    </div>
+  );
+}
+
 function TodayView() {
   // Phase 1.4 (2026-05-23) — selected date drives every per-date state hook.
   const [selectedDate, setSelectedDate] = useState(() => todayISO());
@@ -2458,6 +2509,8 @@ function TodayView() {
   const completedCount = items.filter(it => completed.includes(it.id)).length;
   const empty = items.length === 0;
   const allDone = !empty && completedCount === items.length;
+  // Streak recomputes whenever today's completion set changes (toggle a tick).
+  const streak = useMemo(() => computeCompletionStreak(), [completed, selectedDate]);
 
   return (
     <main className="px-5 pt-2 pb-24 max-w-3xl mx-auto">
@@ -2499,7 +2552,10 @@ function TodayView() {
               title="Jump to today"
             >Today</button>
           </div>
-          {items.length > 0 && <CompletionRing done={completedCount} total={items.length} />}
+          <div className="flex items-center gap-2 shrink-0">
+            <StreakChip count={streak} />
+            {items.length > 0 && <CompletionRing done={completedCount} total={items.length} />}
+          </div>
         </div>
         <DateStrip ref={dateStripRef} selectedDate={selectedDate} onSelect={setSelectedDate} />
         {/* Patch 1 (2026-05-24) — action row restructure.
@@ -2881,7 +2937,25 @@ function ProtocolsList() {
       <Link to="/today" className="text-muted text-sm inline-block hover:text-accent mb-4 transition-colors">← Today</Link>
       <div className="eyebrow mb-3">Library</div>
       <h1 className="font-display text-4xl md:text-5xl mb-3 leading-[1.02]">Protocols</h1>
-      <p className="text-muted mb-8 max-w-xl leading-relaxed">Evidence-based, agent-generated. Tap to view, activate to merge into your day.</p>
+      <p className="text-muted mb-6 max-w-xl leading-relaxed">Evidence-based, agent-generated. Tap to view, activate to merge into your day.</p>
+
+      {/* Wave-2 — cinematic science banner. Register B (bioluminescent cyan on
+          deep black) is correct here: this is embedded content imagery, not
+          surface chrome. */}
+      <div className="relative mb-8 rounded-2xl overflow-hidden fade-in is-visible" style={{ aspectRatio: '16 / 6' }}>
+        <img
+          src={`${import.meta.env.BASE_URL}images/science/muscle-divider.webp`}
+          alt=""
+          aria-hidden="true"
+          loading="lazy"
+          className="w-full h-full object-cover"
+          style={{ objectPosition: 'center' }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(180deg, rgba(10,22,40,0.05) 0%, rgba(10,22,40,0.55) 100%)' }}
+        />
+      </div>
 
       {list == null && <div className="text-muted text-sm animate-pulse">Loading…</div>}
       {list && list.length === 0 && (
