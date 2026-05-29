@@ -66,9 +66,9 @@ body::before {
 h1 { line-height: 0.96; }
 h2 { line-height: 1.02; }
 
-/* Reuse Syne for hero numerals where the existing classes are utilities */
+/* Eyebrow label — Inter caps, brand caption register */
 .eyebrow {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
   font-size: 0.72rem;
   letter-spacing: 0.32em;
   text-transform: uppercase;
@@ -285,7 +285,7 @@ header {
   background: rgba(220, 169, 87, 0.06);
   border: 1px solid rgba(220, 169, 87, 0.20);
   color: var(--ppw-gold-warm);
-  font-family: 'Syne', sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
   font-weight: 700;
   font-size: 0.85rem;
   letter-spacing: 0.02em;

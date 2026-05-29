@@ -65,7 +65,7 @@ The app launches full-screen, gets its own icon, and works offline for previousl
 | Cream           | `#f0e8d8` | `text-cream`, `--ppw-cream`     |
 | Teal            | `#4a9eb8` | `bg-teal`, `--ppw-teal`         |
 
-Headings: Syne. Body: DM Sans. Both load from Google Fonts.
+Headings: EB Garamond. Body: Inter. Both load from Google Fonts.
 
 ## The 12 routes
 

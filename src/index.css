@@ -24,7 +24,7 @@ body {
   color: var(--ppw-text);
   overscroll-behavior: none;
 }
-h1,h2,h3,h4 { font-family: 'Syne', sans-serif; letter-spacing: -0.01em; }
+h1,h2,h3,h4 { font-family: 'EB Garamond', Georgia, serif; letter-spacing: -0.01em; }
 
 .btn-accent {
   background: var(--ppw-gold);
@@ -133,7 +133,7 @@ h1,h2,h3,h4 { font-family: 'Syne', sans-serif; letter-spacing: -0.01em; }
 
 .hotspot-label {
   fill: var(--ppw-bg-deep);
-  font-family: 'Syne', sans-serif;
+  font-family: 'EB Garamond', Georgia, serif;
   font-weight: 800;
   font-size: 18px;
   letter-spacing: 0.02em;

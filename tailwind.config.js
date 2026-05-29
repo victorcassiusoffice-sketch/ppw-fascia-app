@@ -16,8 +16,8 @@ export default {
         'ppw-teal':  '#4a9eb8',
       },
       fontFamily: {
-        display: ['Syne', 'sans-serif'],
-        body:    ['"DM Sans"', 'sans-serif'],
+        display: ['"EB Garamond"', 'Georgia', 'serif'],
+        body:    ['Inter', 'system-ui', 'sans-serif'],
       },
     },
   },
