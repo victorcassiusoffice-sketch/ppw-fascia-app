@@ -525,27 +525,48 @@ button:focus-visible, a:focus-visible {
 :root {
   /* Cool spatial-glass tokens. */
   --cream-bg:       #ECEBE9;   /* cool light-grey page canvas (NOT warm beige) */
-  --glass:          rgba(255, 255, 255, 0.55);  /* frosted card fill */
-  --glass-strong:   rgba(255, 255, 255, 0.72);  /* drawer / top-bar fill */
+  --glass:          rgba(255, 255, 255, 0.62);  /* frosted card fill (luminous) */
+  --glass-strong:   rgba(255, 255, 255, 0.74);  /* drawer / top-bar fill */
   --glass-solid:    #FFFFFF;
-  --ink:            #1A1A1A;   /* primary text */
-  --slate:          #5B6472;   /* secondary text, times */
+  --ink:            #15171A;   /* primary text — near-black, clean contrast */
+  --slate:          #5A6473;   /* secondary text, times */
   --gold-warm-2:    #DCA957;   /* primary accent */
   --amber:          #F5B845;   /* warm tile gradient start */
   --amber-deep:     #E8893A;   /* warm tile gradient end */
   --emerald:        #1E7A52;   /* toggle ON / feature tile */
   --emerald-deep:   #14613F;   /* green tile gradient end */
   --coral:          #D9655B;   /* destructive only */
-  --glass-border:   rgba(255, 255, 255, 0.6);   /* bright frosted hairline */
-  --glass-hairline-ink: rgba(26, 26, 26, 0.08); /* subtle ink edge where needed */
-  /* Layered soft shadow → real spatial depth on the light canvas. */
+  --glass-border:   rgba(255, 255, 255, 0.45);  /* light, near-invisible hairline */
+  --glass-hairline-ink: rgba(21, 23, 26, 0.06); /* very subtle ink edge where needed */
+  /* Unified soft-edge radius. */
+  --radius-card:    28px;
+  /* Inset top highlight → the bright "lit from above" glass sheen. */
+  --glass-sheen:    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  /* Layered, diffuse, low-alpha elevation → cards genuinely FLOAT above the
+     bloom (reference depth): tight contact shadow + progressively larger,
+     softer ambient layers at low opacity + big blur radius. */
   --ppw-shadow-light:
-    0 1px 1px rgba(20, 28, 45, 0.05),
-    0 10px 24px -12px rgba(20, 28, 45, 0.18),
-    0 30px 60px -30px rgba(20, 28, 45, 0.24);
-  /* Gradient accent tiles (reference: warm orange→amber + deep green→emerald). */
-  --tile-amber: linear-gradient(150deg, #F7C56A 0%, #F5B845 45%, #E8893A 100%);
-  --tile-green: linear-gradient(150deg, #2E9C6B 0%, #1E7A52 55%, #14613F 100%);
+    0 1px 2px rgba(26, 36, 54, 0.045),
+    0 4px 10px -6px rgba(26, 36, 54, 0.08),
+    0 14px 30px -14px rgba(26, 36, 54, 0.12),
+    0 32px 60px -30px rgba(26, 36, 54, 0.16),
+    0 60px 110px -60px rgba(26, 36, 54, 0.18);
+  /* Lifted (active/hover) — same shape, a touch deeper + wider. */
+  --ppw-shadow-lift:
+    0 2px 4px rgba(26, 36, 54, 0.05),
+    0 10px 22px -10px rgba(26, 36, 54, 0.12),
+    0 26px 50px -20px rgba(26, 36, 54, 0.18),
+    0 56px 100px -50px rgba(26, 36, 54, 0.22);
+  /* Premium gradient accent tiles. A soft white radial sheen over a smooth
+     multi-stop linear ramp → glossy + luminous, no banding (reference waves). */
+  --tile-amber:
+    radial-gradient(130% 90% at 50% -10%, rgba(255, 255, 255, 0.42), transparent 56%),
+    radial-gradient(120% 70% at 115% 115%, rgba(196, 90, 30, 0.45), transparent 60%),
+    linear-gradient(178deg, #FBD79A 0%, #F7BE55 34%, #F1A23E 60%, #E6852F 84%, #DA7322 100%);
+  --tile-green:
+    radial-gradient(130% 90% at 50% -10%, rgba(255, 255, 255, 0.20), transparent 56%),
+    radial-gradient(120% 80% at 110% 120%, rgba(46, 200, 130, 0.30), transparent 58%),
+    linear-gradient(178deg, #34B07A 0%, #229968 38%, #1A7B52 70%, #135E3E 100%);
 }
 
 /* Full-bleed COOL canvas behind the whole app + a soft light bloom top-right
@@ -586,22 +607,25 @@ button:focus-visible, a:focus-visible {
    layered soft shadow, real backdrop blur. */
 .app-glass .card,
 .app-glass [class*="bg-bg"] {
-  background: var(--glass) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.30), rgba(255, 255, 255, 0) 42%),
+    var(--glass) !important;
   border: 1px solid var(--glass-border) !important;
-  border-radius: 24px;
-  box-shadow: var(--ppw-shadow-light) !important;
-  -webkit-backdrop-filter: saturate(150%) blur(20px);
-  backdrop-filter: saturate(150%) blur(20px);
+  border-radius: var(--radius-card);
+  box-shadow: var(--ppw-shadow-light), var(--glass-sheen) !important;
+  -webkit-backdrop-filter: saturate(185%) brightness(1.06) blur(28px);
+  backdrop-filter: saturate(185%) brightness(1.06) blur(28px);
   color: var(--ink);
 }
-.app-glass .card { border-radius: 24px !important; }
+.app-glass .card { border-radius: var(--radius-card) !important; }
 .app-glass .card:hover {
-  border-color: rgba(220, 169, 87, 0.55) !important;
+  border-color: rgba(255, 255, 255, 0.7) !important;
+  box-shadow: var(--ppw-shadow-lift), var(--glass-sheen) !important;
 }
 /* Active / dragged cards keep the gold glow on the light base. */
 .app-glass .today-routine-card.is-open,
 .app-glass .today-routine-card.is-dragging {
-  box-shadow: var(--ppw-shadow-light), var(--ppw-glow-gold) !important;
+  box-shadow: var(--ppw-shadow-lift), var(--glass-sheen), var(--ppw-glow-gold) !important;
 }
 
 /* Form fields need a visible boundary on white. */
@@ -657,10 +681,19 @@ button:focus-visible, a:focus-visible {
 /* ── Top bar = light glass pill; hamburger = glass circle ─────────────────
    The header is global (every route). v1 left it `bg-bg/80` (navy). */
 .app-glass header.app-topbar {
-  background: var(--glass-strong) !important;
-  -webkit-backdrop-filter: saturate(150%) blur(20px);
-  backdrop-filter: saturate(150%) blur(20px);
-  border-bottom: 1px solid var(--glass-border) !important;
+  margin: 10px 10px 0;
+  border-radius: 9999px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0) 60%),
+    var(--glass-strong) !important;
+  -webkit-backdrop-filter: saturate(185%) brightness(1.06) blur(26px);
+  backdrop-filter: saturate(185%) brightness(1.06) blur(26px);
+  border: 1px solid var(--glass-border) !important;
+  box-shadow:
+    0 1px 2px rgba(26, 36, 54, 0.05),
+    0 10px 26px -14px rgba(26, 36, 54, 0.16),
+    0 24px 50px -30px rgba(26, 36, 54, 0.18),
+    var(--glass-sheen) !important;
   color: var(--ink);
 }
 .app-glass .app-topbar a,
@@ -672,13 +705,20 @@ button:focus-visible, a:focus-visible {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--glass-solid);
+  background: linear-gradient(180deg, #ffffff, #f4f4f6);
   border: 1px solid var(--glass-border);
-  box-shadow: var(--ppw-shadow-light);
+  box-shadow:
+    0 1px 2px rgba(26, 36, 54, 0.06),
+    0 6px 16px -8px rgba(26, 36, 54, 0.18),
+    var(--glass-sheen);
   color: var(--ink);
-  transition: border-color .2s var(--ppw-ease), transform .15s var(--ppw-ease);
+  transition: border-color .2s var(--ppw-ease), transform .15s var(--ppw-ease), box-shadow .2s var(--ppw-ease);
 }
-.app-glass .hamburger-glass:hover { border-color: var(--gold-warm-2); transform: translateY(-1px); }
+.app-glass .hamburger-glass:hover {
+  border-color: rgba(220, 169, 87, 0.65);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(26,36,54,0.07), 0 12px 24px -8px rgba(26,36,54,0.22), var(--glass-sheen);
+}
 
 /* ── Menu drawer = light frosted-glass panel (the single biggest v1 fix) ── */
 .app-glass .app-drawer-scrim {
@@ -687,11 +727,17 @@ button:focus-visible, a:focus-visible {
   backdrop-filter: blur(4px);
 }
 .app-glass .app-drawer-panel {
-  background: var(--glass-strong) !important;
-  -webkit-backdrop-filter: saturate(160%) blur(26px);
-  backdrop-filter: saturate(160%) blur(26px);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.30), rgba(255, 255, 255, 0) 30%),
+    var(--glass-strong) !important;
+  -webkit-backdrop-filter: saturate(190%) brightness(1.06) blur(30px);
+  backdrop-filter: saturate(190%) brightness(1.06) blur(30px);
   border-left: 1px solid var(--glass-border) !important;
-  box-shadow: -30px 0 60px -30px rgba(20, 28, 45, 0.35);
+  box-shadow:
+    -1px 0 2px rgba(26, 36, 54, 0.04),
+    -24px 0 50px -28px rgba(26, 36, 54, 0.28),
+    -48px 0 90px -50px rgba(26, 36, 54, 0.22),
+    var(--glass-sheen) !important;
   color: var(--ink);
 }
 .app-glass .app-drawer-panel .font-display { color: var(--ink); }
@@ -700,18 +746,26 @@ button:focus-visible, a:focus-visible {
    Reserved for the primary action / hero card per the reference. */
 .app-glass .tile-amber {
   background: var(--tile-amber) !important;
-  color: #2A1A07 !important;
+  color: #3A2206 !important;
   border: none !important;
-  box-shadow: 0 12px 30px -12px rgba(232, 137, 58, 0.55) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 2px 6px -2px rgba(196, 96, 28, 0.35),
+    0 14px 30px -12px rgba(218, 115, 34, 0.45),
+    0 30px 56px -28px rgba(196, 96, 28, 0.40) !important;
 }
-.app-glass .tile-amber:hover { filter: brightness(1.04); }
+.app-glass .tile-amber:hover { filter: brightness(1.04) saturate(1.04); }
 .app-glass .tile-green {
   background: var(--tile-green) !important;
   color: #EAFBF1 !important;
   border: none !important;
-  box-shadow: 0 12px 30px -12px rgba(20, 97, 63, 0.5) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 2px 6px -2px rgba(16, 76, 50, 0.40),
+    0 14px 30px -12px rgba(20, 97, 63, 0.42),
+    0 30px 56px -28px rgba(16, 76, 50, 0.38) !important;
 }
-.app-glass .tile-green:hover { filter: brightness(1.06); }
+.app-glass .tile-green:hover { filter: brightness(1.05) saturate(1.04); }
 
 /* Embedded dark "science" imagery stays dark by design (Register B art) — keep
    it readable on the light canvas with a soft contained frame. */
