@@ -74,6 +74,13 @@ export function scheduleNotifications(items, opts = {}) {
 //   (b) `onFire(item)` so the caller can render an in-app overlay.
 // Caller is responsible for autoplay branching at fire time (see
 // TodayView's NotificationOverlay flow).
+//
+// FOREGROUND-ONLY (documented P0a 2026-06-02): this is an in-page setTimeout.
+// It is frozen when the tab is backgrounded or the phone is locked, and the
+// `new Notification()` path does not exist on iOS Safari. Treat this as an
+// in-session enhancement ONLY. Reliable closed-app / locked-phone reminders
+// come from the .ics calendar export (src/lib/ics.js) or Web Push on an
+// installed PWA (src/lib/push.js + the [VIC-SETUP] Cloudflare Worker).
 export function scheduleStackNotifications(items, opts = {}) {
   clearAllScheduled();
   const onFire = opts.onFire || (() => {});

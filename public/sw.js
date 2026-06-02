@@ -5,7 +5,7 @@
    file works at root ('/') and under a GitHub Pages repo subpath
    (e.g. '/ppw-fascia-app/').
 */
-const CACHE_NAME = 'ppw-cache-v0.5.5-anatomical-naming-2026-05-05';
+const CACHE_NAME = 'ppw-cache-v0.6.0-reminders-2026-06-02';
 
 // BASE includes the leading and trailing slash. Examples:
 //   served at /sw.js                -> BASE = '/'
@@ -86,14 +86,35 @@ self.addEventListener('fetch', (e) => {
   );
 });
 
+// P0b (2026-06-02) — Web Push handler. iOS REQUIRES showNotification on every
+// push or it silently revokes the subscription, so we always show one. Payload
+// (JSON) shape: { title, body, url }. Falls back to sensible defaults.
+self.addEventListener('push', (e) => {
+  let data = {};
+  try { data = e.data ? e.data.json() : {}; } catch (_) {
+    try { data = { body: e.data && e.data.text() }; } catch (_) {}
+  }
+  const title = data.title || 'PPW · Reminder';
+  const options = {
+    body: data.body || 'Time for your next stack.',
+    icon: BASE + 'assets/icon-192.png',
+    badge: BASE + 'assets/icon-192.png',
+    tag: data.tag || 'ppw-push',
+    data: { url: data.url || (BASE + 'today') },
+    requireInteraction: false,
+  };
+  e.waitUntil(self.registration.showNotification(title, options));
+});
+
 self.addEventListener('notificationclick', (e) => {
   e.notification.close();
+  const target = (e.notification.data && e.notification.data.url) || (BASE + 'today');
   e.waitUntil(
     self.clients.matchAll({ type: 'window' }).then((all) => {
       for (const client of all) {
         if ('focus' in client) return client.focus();
       }
-      return self.clients.openWindow(BASE + 'today');
+      return self.clients.openWindow(target);
     })
   );
 });

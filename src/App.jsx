@@ -20,6 +20,9 @@ import MediaPlayer, { DirectMediaPlayer } from './MediaPlayer.jsx';
 import SortableList from './SortableList.jsx';
 import { getPermissionState, requestPermission, scheduleNotifications, scheduleStackNotifications, clearAllScheduled } from './notifications.js';
 import { useScrollFadeIn } from './useScrollFadeIn.js';
+import { downloadSlotIcs } from './lib/ics.js';
+import { ensurePersistentStorage } from './lib/storagePersist.js';
+import { getPushState, subscribeToPush, INSTALL_HELP } from './lib/push.js';
 
 const KNOWN_AUDIO_MODULES = [
   { slug: 'daytime_stress', label: 'Daytime Stress & Mind Clearing', defaultTime: '14:30' },
@@ -897,7 +900,7 @@ function MergedStack({
   onSetTitle, onUnmergeItem, onDissolve,
   onSetTime, onToggleCollapsed,
   renderTabBody,
-  onDelete, onDuplicate,
+  onDelete, onDuplicate, onAddToCalendar,
   // Iter 2 Phase 5 — selection + tab-mode props (all optional for back-compat).
   selectionChecked, onToggleSelection, selectionAriaLabel,
   onSetActiveTab,
@@ -987,6 +990,16 @@ function MergedStack({
         {/* Patch 2 (2026-05-29) — inline duplicate/delete icons retired for
             cleaner rows. Both actions now live in the sticky bulk toolbar:
             select the stack (tickbox) → Duplicate (single-select) / Delete. */}
+        {/* P0a (2026-06-02) — add merged stack to phone calendar. */}
+        {stackTime && onAddToCalendar && (
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onAddToCalendar(mergeId, merge.title || 'Stack', stackTime, totalDurationMin || 15); }}
+            className="text-muted hover:text-accent w-9 h-9 flex items-center justify-center shrink-0 transition-colors"
+            aria-label="Add stack to phone calendar"
+            title="Add to phone calendar (reliable lock-screen reminder)"
+          ><IconCalendar /></button>
+        )}
         <button
           type="button"
           onClick={() => onToggleCollapsed(mergeId, !collapsed)}
@@ -1479,7 +1492,15 @@ function ClearCalendarModal({ open, onClose, onConfirm }) {
   );
 }
 
-/* ─── Iter 2 Phase 7.2 — Notification Overlay ───
+/* ─── Iter 2 Phase 7.2 — Notification Overlay (FOREGROUND-ONLY) ───
+   IMPORTANT (P0a 2026-06-02): this overlay is an IN-SESSION enhancement only.
+   It is driven by an in-page setTimeout (scheduleStackNotifications) which is
+   FROZEN when the tab is backgrounded or the phone is locked, and does not
+   exist on iOS at all. It must NOT be presented as "the phone will remind you".
+   For a reliable lock-screen reminder with the app closed, the user adds the
+   slot to their phone calendar (the IconCalendar action on each row → .ics) or,
+   on an installed PWA, opts into Web Push (P0b). This overlay only fires while
+   the app is open and in the foreground.
    Renders when a stack timer fires. Modal takes focus until user picks
    Open / Skip / Autoplay. Autoplay switch flips to ON triggers a secondary
    prompt asking whether to opt this stack+time pattern into "all future
@@ -1521,7 +1542,7 @@ function NotificationOverlay({ item, onOpen, onSkip, onAutoplay }) {
         className="card w-full max-w-sm p-5"
         style={{ backgroundColor: '#0a1628', border: '1px solid #FFBB58' }}
       >
-        <div className="text-xs uppercase tracking-widest text-accent mb-1">{item.time} · Stack reminder</div>
+        <div className="text-xs uppercase tracking-widest text-accent mb-1">{item.time} · In-app reminder</div>
         <div className="font-display text-xl mb-1 leading-tight">{item.label}</div>
         {item.duration_min ? (
           <div className="text-muted text-xs mb-4">{item.duration_min} min</div>
@@ -2541,6 +2562,26 @@ function TodayView() {
     setTimeout(() => setToast(null), 3500);
   }, [items, selectedDate, hideMany, clearDuplicates, clearUserStacks, dissolveAll, setDailyOrder, setTimeOverrides, clearSelection]);
 
+  // P1 (2026-06-02) — ask the browser to make storage persistent so iOS / under
+  // pressure can't silently evict saved routines (the likely "added then gone
+  // on mobile" cause). Best-effort, one-time on mount. If it can't be granted
+  // (e.g. not installed yet) we surface a one-time hint.
+  useEffect(() => {
+    let on = true;
+    ensurePersistentStorage().then((r) => {
+      if (!on) return;
+      if (r.supported && !r.persisted) {
+        // Don't nag — only hint once per device that installing protects data.
+        try {
+          if (!localStorage.getItem('ppw.persistHintShown')) {
+            localStorage.setItem('ppw.persistHintShown', '1');
+          }
+        } catch (_) {}
+      }
+    });
+    return () => { on = false; };
+  }, []);
+
   // Iter 2 Phase 7.1 — schedule stack-time fires when the bell is ON AND
   // the user is viewing today. Past days never fire; future days never
   // fire (selectedDate !== todayISO). Native Notification + onFire run
@@ -2755,7 +2796,7 @@ function TodayView() {
             className="mx-auto mb-4 rounded-2xl"
             style={{ objectFit: 'cover', boxShadow: '0 20px 50px -20px rgba(0,0,0,0.75)' }}
           />
-          <div className="font-display text-xl mb-2">Nothing scheduled yet.</div>
+          <div className="font-display slot-empty-title text-2xl mb-2">Nothing scheduled yet.</div>
           <p className="text-muted text-sm mb-6 max-w-sm mx-auto leading-relaxed">Activate a protocol, save a body-zone routine, or pick an audio module — they will all show up here.</p>
           <div className="flex flex-wrap gap-3 justify-center">
             <Link to="/protocols" className="btn-accent">Browse protocols</Link>
@@ -2806,6 +2847,18 @@ function TodayView() {
                       onDissolve={dissolveMerge}
                       onSetTime={setMergeTime}
                       onToggleCollapsed={setCollapsed}
+                      onAddToCalendar={(mid, title, time, durationMin) => {
+                        const ok = downloadSlotIcs({
+                          itemId: `merge-${mid}`,
+                          title: title || 'Stack',
+                          dateISO: selectedDate,
+                          time,
+                          durationMin,
+                          description: 'Merged stack',
+                        });
+                        setToast({ tone: ok ? 'ok' : 'err', text: ok ? 'Calendar reminder downloaded — open it to add the alarm.' : 'Could not create calendar file.' });
+                        setTimeout(() => setToast(null), 3500);
+                      }}
                       onSetActiveTab={setActiveTab}
                       selectionChecked={isSelected(it.id)}
                       onToggleSelection={() => toggleSelected(it.id)}
@@ -2825,7 +2878,7 @@ function TodayView() {
           const kindClass = `timeline-${it.kind === 'protocol' ? 'protocol' : it.kind === 'audio' ? 'audio' : 'routine'}`;
           return (
             <div
-              className={`card today-routine-card overflow-hidden transition-all relative ${done ? 'timeline-done opacity-80' : ''} ${isDragging ? 'border-accent' : ''} ${isDragOver ? 'merge-target-pulse ring-2 ring-accent/60 border-accent' : ''} ${isSelected(it.id) ? 'ring-2 ring-accent/40' : ''}`}
+              className={`card today-routine-card overflow-hidden transition-all relative ${done ? 'timeline-done opacity-80' : ''} ${isOpen ? 'is-open' : ''} ${isDragging ? 'border-accent is-dragging' : ''} ${isDragOver ? 'merge-target-pulse ring-2 ring-accent/60 border-accent' : ''} ${isSelected(it.id) ? 'ring-2 ring-accent/40' : ''}`}
             >
               {isDragOver && <DragMergePlusOverlay />}
               <div className="flex items-center gap-2 p-4">
@@ -2889,6 +2942,29 @@ function TodayView() {
                       title="Buy via affiliate link"
                     ><IconShoppingCart /></a>
                   )}
+                  {/* P0a (2026-06-02) — add this slot to the phone's own calendar.
+                      The phone Calendar/Clock then fires a reliable lock-screen
+                      alarm at slot time with the app fully closed. */}
+                  {it.time && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const ok = downloadSlotIcs({
+                          itemId: it.id,
+                          title: customTitle || it.label || 'Reminder',
+                          dateISO: selectedDate,
+                          time: it.time,
+                          durationMin: it.duration_min || 15,
+                          description: `${it.category || ''}${it.duration_min ? ` · ${it.duration_min} min` : ''}`.trim(),
+                        });
+                        setToast({ tone: ok ? 'ok' : 'err', text: ok ? 'Calendar reminder downloaded — open it to add the alarm.' : 'Could not create calendar file.' });
+                        setTimeout(() => setToast(null), 3500);
+                      }}
+                      className="text-muted hover:text-accent w-8 h-8 flex items-center justify-center shrink-0 transition-colors"
+                      aria-label="Add to phone calendar"
+                      title="Add to phone calendar (reliable lock-screen reminder)"
+                    ><IconCalendar /></button>
+                  )}
                   {/* Phase 1.3 (2026-05-23) — inline duplicate + delete icons */}
                   <button
                     onClick={(e) => { e.stopPropagation(); handleDuplicate(it); }}
@@ -2939,7 +3015,13 @@ function TodayView() {
       <AddStackModal
         open={addModalOpen}
         onClose={() => setAddModalOpen(false)}
-        onSave={(stack) => addUserStack(stack)}
+        onSave={(stack) => {
+          addUserStack(stack);
+          // P1 (2026-06-02) — explicit success confirmation so mobile users
+          // see the add landed (the "did it save?" uncertainty was a repro lead).
+          setToast({ tone: 'ok', text: `Saved ✓ ${stack.title ? '— ' + String(stack.title).slice(0, 40) : ''}` });
+          setTimeout(() => setToast(null), 3000);
+        }}
         defaultTime={(items[items.length - 1]?.time) || '08:00'}
       />
 
@@ -3528,6 +3610,93 @@ function ModulesList() {
   );
 }
 
+/* P0b (2026-06-02) — "Reliable reminders" card. Explains the two delivery
+   paths that ACTUALLY fire on a locked phone (calendar .ics + Web Push on an
+   installed PWA) vs the in-app overlay which is foreground-only. */
+function ReliableRemindersCard() {
+  const [state, setState] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState(null);
+
+  useEffect(() => { let on = true; getPushState().then(s => { if (on) setState(s); }); return () => { on = false; }; }, []);
+
+  const refresh = async () => setState(await getPushState());
+
+  const enablePush = async () => {
+    setBusy(true); setMsg(null);
+    try {
+      const r = await subscribeToPush();
+      if (!r.ok && r.reason === 'ios-needs-install') {
+        setMsg({ tone: 'warn', text: r.help });
+      } else if (!r.ok) {
+        setMsg({ tone: 'warn', text: 'Could not enable push (' + r.reason + ').' });
+      } else if (r.reason === 'subscribed-local-only' || r.senderConfigured === false) {
+        setMsg({ tone: 'warn', text: 'Subscribed on this device. The push SENDER is not live yet (one-time setup pending) — until then use "Add to phone calendar" for guaranteed lock-screen alerts.' });
+      } else {
+        setMsg({ tone: 'ok', text: 'Lock-screen push enabled on this device.' });
+      }
+    } finally {
+      setBusy(false);
+      refresh();
+    }
+  };
+
+  if (!state) return null;
+  const iosNeedsInstall = state.ios && !state.standalone;
+
+  return (
+    <Section title="Reminders that actually fire">
+      <div className="card p-5 space-y-4">
+        <div>
+          <div className="font-display">1 · Add to phone calendar (most reliable)</div>
+          <div className="text-muted text-xs mt-1">
+            Tap the calendar icon on any timed stack to add it to your phone's own
+            Calendar. The phone then alarms on the lock screen at the slot time —
+            app fully closed, works on iPhone, Android and desktop, no install needed.
+          </div>
+        </div>
+
+        <div className="border-t border-cream/10 pt-4">
+          <div className="font-display">2 · Lock-screen push (installed app)</div>
+          <div className="text-muted text-xs mt-1">
+            {iosNeedsInstall
+              ? INSTALL_HELP.ios
+              : state.standalone
+                ? 'Installed. Enable push to get reminders pushed to this device even when the app is closed.'
+                : 'Install the app to your home screen first, then enable push for closed-app reminders.'}
+          </div>
+          {!iosNeedsInstall && state.supported && (
+            <button onClick={enablePush} disabled={busy || state.subscribed} className="btn-accent mt-3 w-full">
+              {state.subscribed ? '✓ Push enabled on this device' : busy ? 'Enabling…' : 'Enable lock-screen push'}
+            </button>
+          )}
+          {!state.supported && (
+            <div className="text-muted text-xs mt-3">This browser does not support Web Push.</div>
+          )}
+          {msg && (
+            <div className="text-xs mt-3" style={{ color: msg.tone === 'ok' ? '#7CCB8E' : '#F5C56B' }}>{msg.text}</div>
+          )}
+          {!state.senderConfigured && (
+            <div className="text-muted text-[11px] mt-3 leading-relaxed">
+              Note: the off-device push sender (a free background service) is a
+              one-time setup that's still pending. Until it's live, path 1
+              (calendar) is the guaranteed option.
+            </div>
+          )}
+        </div>
+
+        <div className="border-t border-cream/10 pt-4">
+          <div className="text-muted text-[11px] leading-relaxed">
+            The in-app pop-up reminder only appears while the app is open in the
+            foreground — it can't wake a locked phone. Use path 1 or 2 above for
+            reminders that fire when the app is closed.
+          </div>
+        </div>
+      </div>
+    </Section>
+  );
+}
+
 /* ═══════════════════════════════════════════
    NEW — /settings
    ═══════════════════════════════════════════ */
@@ -3566,8 +3735,11 @@ function SettingsView() {
             <button onClick={askPerm} className="btn-accent mt-4 w-full">Enable notifications</button>
           )}
           {perm === 'unsupported' && <div className="text-muted text-xs mt-3">This browser does not support notifications.</div>}
+          <div className="text-muted text-[11px] mt-3 leading-relaxed">In-app reminders only fire while the app is open. For lock-screen reminders with the app closed, see "Reminders that actually fire" below.</div>
         </div>
       </Section>
+
+      <ReliableRemindersCard />
 
       <Section title="Intermittent Fasting">
         <div className="card p-5">

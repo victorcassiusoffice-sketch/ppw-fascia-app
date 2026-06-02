@@ -423,6 +423,59 @@ button:focus-visible, a:focus-visible {
 }
 
 /* ──────────────────────────────────────────
+   P2 (2026-06-02) — Slot Calendar design tokens.
+   Additive re-skin on the established dark brand surface (navy/gold + EB
+   Garamond/Inter). Applies the design-plan v1.0 tokens: 24px card/sheet
+   radius, tabular figures on times, gold active-glow + lift on the expanded
+   card, design easing. No structural/green-field changes.
+   ────────────────────────────────────────── */
+
+/* 24px radius on cards + bottom sheets (was 20 / mobile 18). */
+.card { border-radius: 24px; }
+@media (max-width: 640px) { .card { border-radius: 24px; } }
+
+/* Tabular figures so times never jitter as digits change (Inter feature). */
+.today-time-chip,
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Time chip → full pill, 44px target, gold hairline (design-plan chip spec). */
+.today-time-chip { border-radius: 999px; }
+
+/* Finish state 2 — expanded routine card lifts with a soft gold glow. */
+.today-routine-card.is-open {
+  border-color: rgba(220, 169, 87, 0.55);
+  box-shadow:
+    0 24px 60px -24px rgba(0, 0, 0, 0.55),
+    var(--ppw-glow-gold);
+  transform: translateY(-1px);
+}
+
+/* Finish state 5 — card being dragged for reorder gets the same gold glow
+   so the "picked up" affordance reads premium. */
+.today-routine-card.is-dragging {
+  box-shadow: 0 28px 64px -20px rgba(0,0,0,0.7), var(--ppw-glow-gold);
+}
+
+/* Finish state 7 — empty state copy uses the display face at a calmer size. */
+.slot-empty-title {
+  font-family: 'EB Garamond', Georgia, serif;
+  letter-spacing: -0.01em;
+}
+
+/* Bottom-sheet expand/slide honour the design easing token. */
+.slot-sheet-enter { animation: slot-sheet-in .32s var(--ppw-ease) both; }
+@keyframes slot-sheet-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .slot-sheet-enter { animation: none; }
+}
+
+/* ──────────────────────────────────────────
    M14 — "Drop to merge" gold pulse on the
    target card while the user holds another
    card over its centre.
