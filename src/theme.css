@@ -459,10 +459,11 @@ button:focus-visible, a:focus-visible {
   box-shadow: 0 28px 64px -20px rgba(0,0,0,0.7), var(--ppw-glow-gold);
 }
 
-/* Finish state 7 — empty state copy uses the display face at a calmer size. */
+/* Finish state 7 — empty state copy (v2: sans, no serif). */
 .slot-empty-title {
-  font-family: 'EB Garamond', Georgia, serif;
-  letter-spacing: -0.01em;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  letter-spacing: -0.02em;
+  font-weight: 600;
 }
 
 /* Bottom-sheet expand/slide honour the design easing token. */
@@ -506,138 +507,217 @@ button:focus-visible, a:focus-visible {
 }
 
 /* ══════════════════════════════════════════════════════════════════════
-   P3 (2026-06-02) — Slot Calendar re-skin · cream / "Vision-Pro" surface.
+   v2 (2026-06-02) — APP-WIDE "Vision-Pro" spatial-glass re-skin.
 
-   A *surface inversion* of the /today screen only: dark-navy → cream, with
-   frosted-white glass cards, ink-on-cream text, and the brand gold accent
-   consolidated to #DCA957. Scoped under `.slot-cream` (TodayView's <main>)
-   so every other route keeps the established dark theme untouched — this is
-   purely additive / restyle-in-place per the design plan v1.0 §1 + §5.
+   Re-analysis after v1 (commit 9fb7d24) read as the Bonny "Listening Body"
+   brand: it used WARM cream (#F4F1EA) + EB-Garamond serif and only re-skinned
+   the /today cards, leaving the Menu drawer dark-navy — inconsistent + wrong.
+
+   v2 fixes all three: COOL light-grey canvas (#ECEBE9) + radial light bloom,
+   frosted-WHITE glass cards (rgba .55 + blur 20px + bright hairline), and the
+   treatment is promoted from `.slot-cream` (one screen) to `.app-glass` (the
+   App root) so EVERY screen — header, hamburger, Menu drawer, modals — inverts
+   together. Serif is retired globally in tailwind.config + index.css.
 
    Anchor: 09-Fascia-App/refs/vision-pro-look.jpg.
    ────────────────────────────────────────────────────────────────────── */
 
 :root {
-  /* Design-plan §1.1 colour tokens (resolve in the compiled bundle). */
-  --cream-bg:       #F4F1EA;   /* page canvas */
-  --glass:          rgba(255, 255, 255, 0.92);  /* frosted card fill */
+  /* Cool spatial-glass tokens. */
+  --cream-bg:       #ECEBE9;   /* cool light-grey page canvas (NOT warm beige) */
+  --glass:          rgba(255, 255, 255, 0.55);  /* frosted card fill */
+  --glass-strong:   rgba(255, 255, 255, 0.72);  /* drawer / top-bar fill */
   --glass-solid:    #FFFFFF;
   --ink:            #1A1A1A;   /* primary text */
   --slate:          #5B6472;   /* secondary text, times */
-  --gold-warm-2:    #DCA957;   /* primary accent (consolidated) */
+  --gold-warm-2:    #DCA957;   /* primary accent */
   --amber:          #F5B845;   /* warm tile gradient start */
   --amber-deep:     #E8893A;   /* warm tile gradient end */
   --emerald:        #1E7A52;   /* toggle ON / feature tile */
+  --emerald-deep:   #14613F;   /* green tile gradient end */
   --coral:          #D9655B;   /* destructive only */
-  --glass-border:   rgba(26, 26, 26, 0.10);     /* §1.3 hairline */
-  /* §1.3 — light soft shadow (re-pointed from the dark rgba(0,0,0,0.7)). */
-  --ppw-shadow-light: 0 24px 60px -24px rgba(0, 0, 0, 0.30);
+  --glass-border:   rgba(255, 255, 255, 0.6);   /* bright frosted hairline */
+  --glass-hairline-ink: rgba(26, 26, 26, 0.08); /* subtle ink edge where needed */
+  /* Layered soft shadow → real spatial depth on the light canvas. */
+  --ppw-shadow-light:
+    0 1px 1px rgba(20, 28, 45, 0.05),
+    0 10px 24px -12px rgba(20, 28, 45, 0.18),
+    0 30px 60px -30px rgba(20, 28, 45, 0.24);
+  /* Gradient accent tiles (reference: warm orange→amber + deep green→emerald). */
+  --tile-amber: linear-gradient(150deg, #F7C56A 0%, #F5B845 45%, #E8893A 100%);
+  --tile-green: linear-gradient(150deg, #2E9C6B 0%, #1E7A52 55%, #14613F 100%);
 }
 
-/* Full-bleed cream backdrop behind /today (covers the dark body without a
-   global flip). Fixed pseudo sits inside #root's stacking context, below the
-   page content but above the body navy + film-grain. Pure CSS, no JS. */
-.slot-cream {
+/* Full-bleed COOL canvas behind the whole app + a soft light bloom top-right
+   (mirrors the Vision-Pro reference). Fixed pseudo sits in #root's stacking
+   context, below page content but above the dark body + film-grain. CSS only. */
+.app-glass {
   position: relative;
   color: var(--ink);
 }
-.slot-cream::before {
+.app-glass::before {
   content: '';
   position: fixed;
   inset: 0;
-  background: var(--cream-bg);
   z-index: -1;
   pointer-events: none;
+  background:
+    radial-gradient(48% 38% at 84% 6%, rgba(255, 255, 255, 0.95), transparent 70%),
+    radial-gradient(38% 30% at 88% 2%, rgba(248, 210, 158, 0.30), transparent 70%),
+    var(--cream-bg);
 }
 
-/* Text register: ink primary, slate secondary, gold accent. The bracketed
-   selectors catch Tailwind's opacity variants (text-cream/80 etc.). */
-.slot-cream [class*="text-cream"] { color: var(--ink) !important; }
-.slot-cream .text-muted           { color: var(--slate) !important; }
-.slot-cream .text-accent          { color: var(--gold-warm-2) !important; }
-.slot-cream h1,
-.slot-cream h2,
-.slot-cream h3,
-.slot-cream h4,
-.slot-cream .font-display         { color: var(--ink); }
+/* Text register: ink primary, slate secondary, gold accent. Bracketed
+   selectors catch Tailwind opacity variants (text-cream/80 etc.). */
+.app-glass [class*="text-cream"] { color: var(--ink) !important; }
+.app-glass [class*="text-ink"]   { color: var(--ink) !important; }
+.app-glass .text-muted           { color: var(--slate) !important; }
+.app-glass [class*="text-muted"] { color: var(--slate) !important; }
+.app-glass .text-accent          { color: #B07F2E !important; }
+.app-glass h1,
+.app-glass h2,
+.app-glass h3,
+.app-glass h4,
+.app-glass .font-display         { color: var(--ink); }
 
-/* Frosted-glass cards — §1.3. The !important beats the modals' inline
-   `background:#0a1628`, so AddStack / AddProtocol / alert cards all invert
-   without per-file edits. 24px radius, hairline border, light soft shadow. */
-.slot-cream .card {
+/* Frosted-glass cards. The !important beats the modals' inline
+   `background:#0a1628`, so AddStack / AddProtocol / alert / autoplay / month
+   cards all invert without per-file edits. 24px radius, bright hairline,
+   layered soft shadow, real backdrop blur. */
+.app-glass .card,
+.app-glass [class*="bg-bg"] {
   background: var(--glass) !important;
   border: 1px solid var(--glass-border) !important;
-  border-radius: 24px !important;
+  border-radius: 24px;
   box-shadow: var(--ppw-shadow-light) !important;
-  -webkit-backdrop-filter: saturate(140%) blur(14px);
-  backdrop-filter: saturate(140%) blur(14px);
+  -webkit-backdrop-filter: saturate(150%) blur(20px);
+  backdrop-filter: saturate(150%) blur(20px);
   color: var(--ink);
 }
-.slot-cream .card:hover {
+.app-glass .card { border-radius: 24px !important; }
+.app-glass .card:hover {
   border-color: rgba(220, 169, 87, 0.55) !important;
 }
-/* Active / dragged cards keep the gold glow, but lift off cream (light base). */
-.slot-cream .today-routine-card.is-open,
-.slot-cream .today-routine-card.is-dragging {
+/* Active / dragged cards keep the gold glow on the light base. */
+.app-glass .today-routine-card.is-open,
+.app-glass .today-routine-card.is-dragging {
   box-shadow: var(--ppw-shadow-light), var(--ppw-glow-gold) !important;
 }
 
-/* Form fields need a visible boundary on white (the dark theme's cream/5
-   fills + cream/15 borders vanish on glass). */
-.slot-cream input,
-.slot-cream textarea,
-.slot-cream select {
+/* Form fields need a visible boundary on white. */
+.app-glass input,
+.app-glass textarea,
+.app-glass select {
   background: var(--glass-solid) !important;
-  border-color: var(--glass-border) !important;
+  border-color: var(--glass-hairline-ink) !important;
   color: var(--ink) !important;
 }
-.slot-cream input::placeholder,
-.slot-cream textarea::placeholder { color: rgba(91, 100, 114, 0.6) !important; }
-.slot-cream input:focus,
-.slot-cream textarea:focus { border-color: var(--gold-warm-2) !important; }
+.app-glass input::placeholder,
+.app-glass textarea::placeholder { color: rgba(91, 100, 114, 0.6) !important; }
+.app-glass input:focus,
+.app-glass textarea:focus { border-color: var(--gold-warm-2) !important; }
 
-/* Time chip — slate text on a glass pill with a gold hairline (§1.4). */
-.slot-cream .today-time-chip {
+/* Time chip — slate on a glass pill with a gold hairline. */
+.app-glass .today-time-chip {
   background: var(--glass-solid);
   border: 1px solid rgba(220, 169, 87, 0.35);
   color: var(--slate);
 }
-.slot-cream .today-time-chip:hover {
+.app-glass .today-time-chip:hover {
   background: #fff;
   border-color: rgba(220, 169, 87, 0.6);
   color: var(--ink);
 }
 
-/* Primary pill (gold) reads on cream as-is; ghost pill → glass + ink hairline. */
-.slot-cream .btn-ghost {
+/* Ghost pill → glass + ink hairline. */
+.app-glass .btn-ghost {
   background: var(--glass-solid);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--glass-hairline-ink);
   color: var(--ink);
 }
-.slot-cream .btn-ghost:hover {
+.app-glass .btn-ghost:hover {
   border-color: var(--gold-warm-2);
   color: var(--gold-warm-2);
   background: #fff;
 }
 
 /* Left timeline tick on each routine card — gold on cream. */
-.slot-cream .today-routine-card::before {
+.app-glass .today-routine-card::before {
   background: linear-gradient(180deg, var(--gold-warm-2), transparent);
   opacity: 0.45;
 }
 
-/* Drag handle hover tint on cream. */
-.slot-cream .drag-handle:hover { background: rgba(220, 169, 87, 0.12); }
+/* Drag handle hover tint. */
+.app-glass .drag-handle:hover { background: rgba(220, 169, 87, 0.12); }
 
-/* Empty-state orb on cream (the dark-tuned translucent gold reads faint). */
-.slot-cream .empty-orb {
-  background:
-    radial-gradient(circle at 35% 30%, rgba(245, 184, 69, 0.55), transparent 55%),
-    radial-gradient(circle at 70% 70%, rgba(232, 137, 58, 0.40), transparent 60%),
-    rgba(255, 255, 255, 0.6);
-  border: 1px solid var(--glass-border);
+/* Selection / merge ring → gold. */
+.app-glass .ring-accent\/40,
+.app-glass .ring-accent\/60 { --tw-ring-color: rgba(220, 169, 87, 0.45); }
+
+/* ── Top bar = light glass pill; hamburger = glass circle ─────────────────
+   The header is global (every route). v1 left it `bg-bg/80` (navy). */
+.app-glass header.app-topbar {
+  background: var(--glass-strong) !important;
+  -webkit-backdrop-filter: saturate(150%) blur(20px);
+  backdrop-filter: saturate(150%) blur(20px);
+  border-bottom: 1px solid var(--glass-border) !important;
+  color: var(--ink);
 }
+.app-glass .app-topbar a,
+.app-glass .app-topbar .topbar-title { color: var(--ink); }
+.app-glass .hamburger-glass {
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--glass-solid);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--ppw-shadow-light);
+  color: var(--ink);
+  transition: border-color .2s var(--ppw-ease), transform .15s var(--ppw-ease);
+}
+.app-glass .hamburger-glass:hover { border-color: var(--gold-warm-2); transform: translateY(-1px); }
 
-/* Selection / merge ring → gold on cream. */
-.slot-cream .ring-accent\/40,
-.slot-cream .ring-accent\/60 { --tw-ring-color: rgba(220, 169, 87, 0.45); }
+/* ── Menu drawer = light frosted-glass panel (the single biggest v1 fix) ── */
+.app-glass .app-drawer-scrim {
+  background: rgba(28, 32, 40, 0.28) !important;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+.app-glass .app-drawer-panel {
+  background: var(--glass-strong) !important;
+  -webkit-backdrop-filter: saturate(160%) blur(26px);
+  backdrop-filter: saturate(160%) blur(26px);
+  border-left: 1px solid var(--glass-border) !important;
+  box-shadow: -30px 0 60px -30px rgba(20, 28, 45, 0.35);
+  color: var(--ink);
+}
+.app-glass .app-drawer-panel .font-display { color: var(--ink); }
+
+/* ── Gradient accent tiles (orange→amber / green→emerald) ────────────────
+   Reserved for the primary action / hero card per the reference. */
+.app-glass .tile-amber {
+  background: var(--tile-amber) !important;
+  color: #2A1A07 !important;
+  border: none !important;
+  box-shadow: 0 12px 30px -12px rgba(232, 137, 58, 0.55) !important;
+}
+.app-glass .tile-amber:hover { filter: brightness(1.04); }
+.app-glass .tile-green {
+  background: var(--tile-green) !important;
+  color: #EAFBF1 !important;
+  border: none !important;
+  box-shadow: 0 12px 30px -12px rgba(20, 97, 63, 0.5) !important;
+}
+.app-glass .tile-green:hover { filter: brightness(1.06); }
+
+/* Embedded dark "science" imagery stays dark by design (Register B art) — keep
+   it readable on the light canvas with a soft contained frame. */
+.app-glass .science-hero-img,
+.app-glass .audio-only-wrap { box-shadow: var(--ppw-shadow-light); }
+
+/* Light scrollbar thumb on the cool canvas. */
+.app-glass ::-webkit-scrollbar-thumb { background: rgba(26, 26, 26, 0.14); }
+.app-glass ::-webkit-scrollbar-thumb:hover { background: rgba(220, 169, 87, 0.5); }

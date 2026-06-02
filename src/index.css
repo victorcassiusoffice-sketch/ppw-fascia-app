@@ -24,7 +24,8 @@ body {
   color: var(--ppw-text);
   overscroll-behavior: none;
 }
-h1,h2,h3,h4 { font-family: 'EB Garamond', Georgia, serif; letter-spacing: -0.01em; }
+/* v2 (2026-06-02) — serif retired app-wide → sans (Vision-Pro look). */
+h1,h2,h3,h4 { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif; letter-spacing: -0.02em; font-weight: 600; }
 
 .btn-accent {
   background: var(--ppw-gold);
@@ -133,7 +134,7 @@ h1,h2,h3,h4 { font-family: 'EB Garamond', Georgia, serif; letter-spacing: -0.01e
 
 .hotspot-label {
   fill: var(--ppw-bg-deep);
-  font-family: 'EB Garamond', Georgia, serif;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   font-weight: 800;
   font-size: 18px;
   letter-spacing: 0.02em;

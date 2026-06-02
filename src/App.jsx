@@ -10,7 +10,7 @@ import {
 } from './data.js';
 import { getBodyView, zoneCentroid } from './bodyZones.js';
 import { useActiveProtocols, useActiveModules, useActiveRoutines, useCompletedToday, useLocalStorage, useDateScopedStorage, useDailyHidden, useDailyDuplicates, useDailyMerges, useDailyTitles, useFastingPrefs, useUserStacks, useIfPrefs, useNotificationPrefs, useAutoplayPatterns, todayISO } from './state.js';
-import { getMediaUrl, parseYouTubeId } from './lib/mediaStore.js';
+import { getMediaUrl, parseYouTubeId, resolveLaunchHref } from './lib/mediaStore.js';
 import { isSupplementItem, isAccessoryItem, affiliateUrlFor, applyIfWindow, scheduleIfNotifications, clearIfNotifications } from './lib/tags.js';
 import AddStackModal from './AddStackModal.jsx';
 import { listProtocols, fetchProtocol, mergeDailyItems, isMockActive } from './protocols.js';
@@ -102,7 +102,7 @@ export default function App() {
     (activeRoutines.savedZones?.length || 0) > 0;
 
   return (
-    <div className="min-h-screen text-ink">
+    <div className="app-glass min-h-screen text-ink">
       <Header onMenu={() => setDrawerOpen(true)} />
       <NavDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
       <div key={location.pathname} className="animate-fadeIn">
@@ -132,13 +132,13 @@ export default function App() {
 /* ────────── header ────────── */
 function Header({ onMenu }) {
   return (
-    <header className="px-5 py-4 flex items-center justify-between border-b border-cream/5 sticky top-0 z-40 bg-bg/80 backdrop-blur-lg">
-      <Link to="/" className="font-display text-xl tracking-tight inline-flex items-center gap-2">
+    <header className="app-topbar px-5 py-3 flex items-center justify-between sticky top-0 z-40">
+      <Link to="/" className="topbar-title font-display text-xl tracking-tight inline-flex items-center gap-2 font-semibold">
         <span className="inline-block w-2 h-2 rounded-full bg-accent shadow-[0_0_12px_rgba(220,169,87,0.7)]" aria-hidden="true" />
         PPW<span className="text-accent">.</span>
       </Link>
       <div className="text-xs text-muted uppercase tracking-[0.2em] hidden sm:block">Peak Performance Wellness</div>
-      <button onClick={onMenu} aria-label="Menu" className="card px-3 py-2 text-sm hover:border-accent transition-colors">☰</button>
+      <button onClick={onMenu} aria-label="Menu" className="hamburger-glass text-base">☰</button>
     </header>
   );
 }
@@ -154,14 +154,14 @@ function NavDrawer({ open, onClose }) {
   return (
     <>
       <div
-        className={`fixed inset-0 z-50 bg-bg/80 backdrop-blur-sm transition-opacity ${open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        className={`app-drawer-scrim fixed inset-0 z-50 transition-opacity ${open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         onClick={onClose}
       />
       <aside
-        className={`fixed top-0 right-0 z-50 h-full w-[280px] max-w-[85vw] bg-bg border-l border-cream/10 p-6 transition-transform ${open ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`app-drawer-panel fixed top-0 right-0 z-50 h-full w-[280px] max-w-[85vw] p-6 transition-transform ${open ? 'translate-x-0' : 'translate-x-full'}`}
       >
         <div className="flex items-center justify-between mb-8">
-          <div className="font-display text-xl">Menu</div>
+          <div className="font-display text-xl font-semibold">Menu</div>
           <button onClick={onClose} aria-label="Close" className="text-muted hover:text-accent text-2xl leading-none">×</button>
         </div>
         <nav className="flex flex-col gap-2">
@@ -1169,6 +1169,16 @@ function IconShoppingCart() {
       <circle cx="9" cy="21" r="1" />
       <circle cx="20" cy="21" r="1" />
       <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+    </svg>
+  );
+}
+/* Bug C (2026-06-02) — one-tap "open" launch icon on a slot row. */
+function IconExternalLink() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      <polyline points="15 3 21 3 21 9" />
+      <line x1="10" y1="14" x2="21" y2="3" />
     </svg>
   );
 }
@@ -2630,10 +2640,10 @@ function TodayView() {
         className="sticky z-30 -mx-5 px-5 pt-2 pb-2"
         style={{
           top: 60,
-          backgroundColor: 'rgba(244,241,234,0.86)',
-          backdropFilter: 'saturate(140%) blur(14px)',
-          WebkitBackdropFilter: 'saturate(140%) blur(14px)',
-          borderBottom: '1px solid rgba(220,169,87,0.45)',
+          backgroundColor: 'rgba(236,235,233,0.78)',
+          backdropFilter: 'saturate(150%) blur(20px)',
+          WebkitBackdropFilter: 'saturate(150%) blur(20px)',
+          borderBottom: '1px solid rgba(255,255,255,0.6)',
         }}
       >
         <div className="flex items-center justify-between mb-1">
@@ -2681,8 +2691,7 @@ function TodayView() {
           <button
             type="button"
             onClick={() => setAddModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
-            style={{ backgroundColor: '#FFFFFF', color: '#1A1A1A', border: '1px solid rgba(220,169,87,0.45)' }}
+            className="tile-amber flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
             title="Add a custom stack"
           >
             <IconPlus />
@@ -2801,8 +2810,8 @@ function TodayView() {
           <div className="font-display slot-empty-title text-2xl mb-2">Nothing scheduled yet.</div>
           <p className="text-muted text-sm mb-6 max-w-sm mx-auto leading-relaxed">Activate a protocol, save a body-zone routine, or pick an audio module — they will all show up here.</p>
           <div className="flex flex-wrap gap-3 justify-center">
-            <Link to="/protocols" className="btn-accent">Browse protocols</Link>
-            <Link to="/welcome" className="btn-ghost">Create our Personalised Release Routine</Link>
+            <Link to="/protocols" className="btn-accent tile-amber">Browse protocols</Link>
+            <Link to="/welcome" className="btn-accent tile-green">Create our Personalised Release Routine</Link>
             <Link to="/modules" className="btn-ghost">Audio modules</Link>
           </div>
         </div>
@@ -2858,8 +2867,8 @@ function TodayView() {
                           durationMin,
                           description: 'Merged stack',
                         });
-                        setToast({ tone: ok ? 'ok' : 'err', text: ok ? 'Calendar reminder downloaded — open it to add the alarm.' : 'Could not create calendar file.' });
-                        setTimeout(() => setToast(null), 3500);
+                        setToast({ tone: ok ? 'ok' : 'err', text: ok ? 'Opening your phone calendar — confirm to add the lock-screen alarm.' : 'Could not create calendar file.' });
+                        setTimeout(() => setToast(null), 4000);
                       }}
                       onSetActiveTab={setActiveTab}
                       selectionChecked={isSelected(it.id)}
@@ -2925,6 +2934,21 @@ function TodayView() {
                     titleClassName="timeline-label flex-1 min-w-0 text-sm"
                   />
                   {it.duration_min ? <span className="text-muted text-xs shrink-0">{it.duration_min} min</span> : null}
+                  {/* Bug C (2026-06-02) — one-tap "open" launch. Opens the EXACT
+                      stored href (youtu.be short-links normalised to the real
+                      watch URL) in a new tab. Independent of expand/selection. */}
+                  {it.isUserStack && resolveLaunchHref(it.userStack) && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const href = resolveLaunchHref(it.userStack);
+                        if (href) window.open(href, '_blank', 'noopener');
+                      }}
+                      className="text-muted hover:text-accent w-8 h-8 flex items-center justify-center shrink-0 transition-colors"
+                      aria-label="Open link in a new tab"
+                      title="Open"
+                    ><IconExternalLink /></button>
+                  )}
                   {/* Phase 3.2 (2026-05-23) — affiliate cart icon for supplement/accessory items */}
                   {(isSupplementItem(it) || isAccessoryItem(it)) && (
                     <a
@@ -2959,12 +2983,12 @@ function TodayView() {
                           durationMin: it.duration_min || 15,
                           description: `${it.category || ''}${it.duration_min ? ` · ${it.duration_min} min` : ''}`.trim(),
                         });
-                        setToast({ tone: ok ? 'ok' : 'err', text: ok ? 'Calendar reminder downloaded — open it to add the alarm.' : 'Could not create calendar file.' });
-                        setTimeout(() => setToast(null), 3500);
+                        setToast({ tone: ok ? 'ok' : 'err', text: ok ? 'Opening your phone calendar — confirm to add the lock-screen alarm.' : 'Could not create calendar file.' });
+                        setTimeout(() => setToast(null), 4000);
                       }}
                       className="text-muted hover:text-accent w-8 h-8 flex items-center justify-center shrink-0 transition-colors"
-                      aria-label="Add to phone calendar"
-                      title="Add to phone calendar (reliable lock-screen reminder)"
+                      aria-label="Tap to add this reminder to your phone calendar"
+                      title="Tap to add this reminder to your phone calendar — your phone fires the lock-screen alarm"
                     ><IconCalendar /></button>
                   )}
                   {/* Phase 1.3 (2026-05-23) — inline duplicate + delete icons */}

@@ -119,6 +119,34 @@ export function parseYouTubeId(url) {
   return null;
 }
 
+// Canonical watch URL for a YouTube id. Used by the one-tap "open" launch
+// button so a short youtu.be link opens the ACTUAL video (not the homepage).
+// Optionally seeds a start offset (?t=<sec>s) when the slot trims the clip.
+export function youtubeWatchUrl(id, startSec) {
+  if (!id) return null;
+  const t = Number(startSec) > 0 ? `&t=${Math.floor(Number(startSec))}s` : '';
+  return `https://www.youtube.com/watch?v=${id}${t}`;
+}
+
+// Normalise ANY YouTube URL form (youtu.be / m.youtube.com / youtube.com/watch
+// ?v= / shorts / embed) to a canonical watch URL that reliably opens the video.
+// Non-YouTube URLs are returned verbatim — we never drop the path/query.
+export function normalizeYouTubeWatchUrl(url) {
+  if (!url) return url;
+  const id = parseYouTubeId(url);
+  return id ? youtubeWatchUrl(id) : url;
+}
+
+// Resolve the href the "open" launch button should hit for a stored stack.
+// Prefers a canonical YouTube watch URL (fixes the homepage-redirect bug),
+// otherwise opens the EXACT stored url verbatim. Returns null if neither.
+export function resolveLaunchHref(stack) {
+  if (!stack) return null;
+  if (stack.youtubeId) return youtubeWatchUrl(stack.youtubeId, stack.startAtSec);
+  if (stack.url) return normalizeYouTubeWatchUrl(stack.url);
+  return null;
+}
+
 // Fetch YouTube oembed metadata (title + thumbnail). No auth needed.
 export async function fetchYouTubeOEmbed(url) {
   try {
