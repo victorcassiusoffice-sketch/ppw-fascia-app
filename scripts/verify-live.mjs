@@ -131,10 +131,15 @@ const browser = await chromium.launch({ channel: 'chrome', headless: true });
   await page.goto(`${LIVE}/today`, { waitUntil: 'networkidle' });
   await page.waitForTimeout(1200);
 
-  // Add a stack due in ~8 seconds and turn the bell on, then wait for the fire.
+  // The app schedules at HH:MM:00. Seed the NEXT full minute so the fire time is
+  // genuinely in the future (avoid landing in the current minute whose :00 is
+  // already past). If that boundary is <8s away, skip to the minute after.
   const fireResult = await page.evaluate(async () => {
     const d = new Date();
-    const due = new Date(d.getTime() + 8000);
+    let due = new Date(d.getTime());
+    due.setSeconds(0, 0);
+    due = new Date(due.getTime() + 60000); // next minute boundary
+    if (due.getTime() - d.getTime() < 8000) due = new Date(due.getTime() + 60000);
     const hh = String(due.getHours()).padStart(2, '0');
     const mm = String(due.getMinutes()).padStart(2, '0');
     const dISO = d.toISOString().slice(0, 10);
@@ -145,10 +150,12 @@ const browser = await chromium.launch({ channel: 'chrome', headless: true });
     localStorage.setItem(key, JSON.stringify(cur));
     // Turn the bell on.
     localStorage.setItem('ppw.notificationPrefs', JSON.stringify({ enabled: true, autoplayAll: false }));
-    return { due: `${hh}:${mm}` };
+    return { due: `${hh}:${mm}`, dueEpoch: due.getTime() };
   });
   await page.reload({ waitUntil: 'networkidle' });
-  await page.waitForTimeout(12000); // wait past the due time
+  // Wait until ~4s past the due boundary (boundary can be up to ~68s out).
+  const waitMs = Math.max(3000, fireResult.dueEpoch - Date.now() + 4000);
+  await page.waitForTimeout(Math.min(waitMs, 75000));
   const notifs = await page.evaluate(() => window.__notifs || []);
   // Overlay OR native notification counts as foreground fire.
   const overlay = await page.locator('text=/In-app reminder|Stack reminder/i').count().catch(() => 0);
