@@ -504,3 +504,140 @@ button:focus-visible, a:focus-visible {
       0 0 24px 6px rgba(245, 184, 69, 0.4);
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   P3 (2026-06-02) — Slot Calendar re-skin · cream / "Vision-Pro" surface.
+
+   A *surface inversion* of the /today screen only: dark-navy → cream, with
+   frosted-white glass cards, ink-on-cream text, and the brand gold accent
+   consolidated to #DCA957. Scoped under `.slot-cream` (TodayView's <main>)
+   so every other route keeps the established dark theme untouched — this is
+   purely additive / restyle-in-place per the design plan v1.0 §1 + §5.
+
+   Anchor: 09-Fascia-App/refs/vision-pro-look.jpg.
+   ────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Design-plan §1.1 colour tokens (resolve in the compiled bundle). */
+  --cream-bg:       #F4F1EA;   /* page canvas */
+  --glass:          rgba(255, 255, 255, 0.92);  /* frosted card fill */
+  --glass-solid:    #FFFFFF;
+  --ink:            #1A1A1A;   /* primary text */
+  --slate:          #5B6472;   /* secondary text, times */
+  --gold-warm-2:    #DCA957;   /* primary accent (consolidated) */
+  --amber:          #F5B845;   /* warm tile gradient start */
+  --amber-deep:     #E8893A;   /* warm tile gradient end */
+  --emerald:        #1E7A52;   /* toggle ON / feature tile */
+  --coral:          #D9655B;   /* destructive only */
+  --glass-border:   rgba(26, 26, 26, 0.10);     /* §1.3 hairline */
+  /* §1.3 — light soft shadow (re-pointed from the dark rgba(0,0,0,0.7)). */
+  --ppw-shadow-light: 0 24px 60px -24px rgba(0, 0, 0, 0.30);
+}
+
+/* Full-bleed cream backdrop behind /today (covers the dark body without a
+   global flip). Fixed pseudo sits inside #root's stacking context, below the
+   page content but above the body navy + film-grain. Pure CSS, no JS. */
+.slot-cream {
+  position: relative;
+  color: var(--ink);
+}
+.slot-cream::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: var(--cream-bg);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Text register: ink primary, slate secondary, gold accent. The bracketed
+   selectors catch Tailwind's opacity variants (text-cream/80 etc.). */
+.slot-cream [class*="text-cream"] { color: var(--ink) !important; }
+.slot-cream .text-muted           { color: var(--slate) !important; }
+.slot-cream .text-accent          { color: var(--gold-warm-2) !important; }
+.slot-cream h1,
+.slot-cream h2,
+.slot-cream h3,
+.slot-cream h4,
+.slot-cream .font-display         { color: var(--ink); }
+
+/* Frosted-glass cards — §1.3. The !important beats the modals' inline
+   `background:#0a1628`, so AddStack / AddProtocol / alert cards all invert
+   without per-file edits. 24px radius, hairline border, light soft shadow. */
+.slot-cream .card {
+  background: var(--glass) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 24px !important;
+  box-shadow: var(--ppw-shadow-light) !important;
+  -webkit-backdrop-filter: saturate(140%) blur(14px);
+  backdrop-filter: saturate(140%) blur(14px);
+  color: var(--ink);
+}
+.slot-cream .card:hover {
+  border-color: rgba(220, 169, 87, 0.55) !important;
+}
+/* Active / dragged cards keep the gold glow, but lift off cream (light base). */
+.slot-cream .today-routine-card.is-open,
+.slot-cream .today-routine-card.is-dragging {
+  box-shadow: var(--ppw-shadow-light), var(--ppw-glow-gold) !important;
+}
+
+/* Form fields need a visible boundary on white (the dark theme's cream/5
+   fills + cream/15 borders vanish on glass). */
+.slot-cream input,
+.slot-cream textarea,
+.slot-cream select {
+  background: var(--glass-solid) !important;
+  border-color: var(--glass-border) !important;
+  color: var(--ink) !important;
+}
+.slot-cream input::placeholder,
+.slot-cream textarea::placeholder { color: rgba(91, 100, 114, 0.6) !important; }
+.slot-cream input:focus,
+.slot-cream textarea:focus { border-color: var(--gold-warm-2) !important; }
+
+/* Time chip — slate text on a glass pill with a gold hairline (§1.4). */
+.slot-cream .today-time-chip {
+  background: var(--glass-solid);
+  border: 1px solid rgba(220, 169, 87, 0.35);
+  color: var(--slate);
+}
+.slot-cream .today-time-chip:hover {
+  background: #fff;
+  border-color: rgba(220, 169, 87, 0.6);
+  color: var(--ink);
+}
+
+/* Primary pill (gold) reads on cream as-is; ghost pill → glass + ink hairline. */
+.slot-cream .btn-ghost {
+  background: var(--glass-solid);
+  border: 1px solid var(--glass-border);
+  color: var(--ink);
+}
+.slot-cream .btn-ghost:hover {
+  border-color: var(--gold-warm-2);
+  color: var(--gold-warm-2);
+  background: #fff;
+}
+
+/* Left timeline tick on each routine card — gold on cream. */
+.slot-cream .today-routine-card::before {
+  background: linear-gradient(180deg, var(--gold-warm-2), transparent);
+  opacity: 0.45;
+}
+
+/* Drag handle hover tint on cream. */
+.slot-cream .drag-handle:hover { background: rgba(220, 169, 87, 0.12); }
+
+/* Empty-state orb on cream (the dark-tuned translucent gold reads faint). */
+.slot-cream .empty-orb {
+  background:
+    radial-gradient(circle at 35% 30%, rgba(245, 184, 69, 0.55), transparent 55%),
+    radial-gradient(circle at 70% 70%, rgba(232, 137, 58, 0.40), transparent 60%),
+    rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--glass-border);
+}
+
+/* Selection / merge ring → gold on cream. */
+.slot-cream .ring-accent\/40,
+.slot-cream .ring-accent\/60 { --tw-ring-color: rgba(220, 169, 87, 0.45); }

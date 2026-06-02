@@ -1200,13 +1200,13 @@ function Tickbox({ checked, onChange, ariaLabel, kindClass }) {
           width: 18,
           height: 18,
           borderRadius: 4,
-          border: '1.5px solid #232C3B',
-          backgroundColor: checked ? '#FFBB58' : '#F5EBD7',
+          border: '1.5px solid #1A1A1A',
+          backgroundColor: checked ? '#DCA957' : '#FFFFFF',
           transition: 'background-color 120ms ease',
         }}
       >
         {checked && (
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#232C3B" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
             <polyline points="20 6 9 17 4 12" />
           </svg>
         )}
@@ -1281,18 +1281,18 @@ function MasterTickbox({ selectedCount, visibleCount, onToggle }) {
           width: 18,
           height: 18,
           borderRadius: 4,
-          border: '1.5px solid #232C3B',
-          backgroundColor: filled ? '#FFBB58' : '#F5EBD7',
+          border: '1.5px solid #1A1A1A',
+          backgroundColor: filled ? '#DCA957' : '#FFFFFF',
           transition: 'background-color 120ms ease',
         }}
       >
         {state === 'full' && (
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#232C3B" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
             <polyline points="20 6 9 17 4 12" />
           </svg>
         )}
         {state === 'mixed' && (
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#232C3B" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
             <line x1="4" y1="12" x2="20" y2="12" />
           </svg>
         )}
@@ -1552,13 +1552,13 @@ function NotificationOverlay({ item, onOpen, onSkip, onAutoplay }) {
             type="button"
             onClick={onOpen}
             className="w-full py-3 rounded-full font-bold transition-all"
-            style={{ backgroundColor: '#232C3B', color: '#F5EBD7' }}
+            style={{ backgroundImage: 'linear-gradient(180deg, #F5B845 0%, #E8893A 100%)', color: '#1A1A1A' }}
           >Open</button>
           <button
             type="button"
             onClick={onSkip}
             className="w-full py-3 rounded-full font-bold transition-all"
-            style={{ backgroundColor: '#F5EBD7', color: '#232C3B' }}
+            style={{ backgroundColor: '#FFFFFF', color: '#1A1A1A', border: '1px solid rgba(26,26,26,0.10)' }}
           >Skip</button>
           <button
             type="button"
@@ -2621,7 +2621,7 @@ function TodayView() {
   const streak = useMemo(() => computeCompletionStreak(), [completed, selectedDate]);
 
   return (
-    <main className="px-5 pt-2 pb-24 max-w-3xl mx-auto">
+    <main className="slot-cream px-5 pt-2 pb-24 max-w-3xl mx-auto">
       {/* Iter 2 Phase 6 — sticky top bar (title · date strip · action row).
           Lives below the global Header (z-40); uses z-30. Brand-pack navy
           background + 1px gold separator. Negative-x margin extends to viewport
@@ -2630,15 +2630,17 @@ function TodayView() {
         className="sticky z-30 -mx-5 px-5 pt-2 pb-2"
         style={{
           top: 60,
-          backgroundColor: '#0E0E10',
-          borderBottom: '1px solid #FFBB58',
+          backgroundColor: 'rgba(244,241,234,0.86)',
+          backdropFilter: 'saturate(140%) blur(14px)',
+          WebkitBackdropFilter: 'saturate(140%) blur(14px)',
+          borderBottom: '1px solid rgba(220,169,87,0.45)',
         }}
       >
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2 min-w-0">
             <span
               className="font-display lowercase truncate"
-              style={{ fontSize: 14, color: 'rgba(245,235,215,0.78)' }}
+              style={{ fontSize: 14, color: '#5B6472' }}
             >{headingDate}</span>
             <button
               type="button"
@@ -2648,13 +2650,13 @@ function TodayView() {
                 width: 50,
                 height: 24,
                 borderRadius: 12,
-                backgroundColor: '#232C3B',
-                color: '#F5EBD7',
+                backgroundColor: '#FFFFFF',
+                color: '#1A1A1A',
                 fontSize: 11,
                 fontWeight: 700,
                 letterSpacing: '0.08em',
                 textTransform: 'uppercase',
-                border: selectedDate === todayISO() ? '1px solid #FFBB58' : '1px solid transparent',
+                border: selectedDate === todayISO() ? '1px solid #DCA957' : '1px solid rgba(26,26,26,0.10)',
               }}
               aria-label="Jump to today"
               title="Jump to today"
@@ -2680,7 +2682,7 @@ function TodayView() {
             type="button"
             onClick={() => setAddModalOpen(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
-            style={{ backgroundColor: '#232C3B', color: '#F5EBD7', border: '1px solid rgba(255,187,88,0.4)' }}
+            style={{ backgroundColor: '#FFFFFF', color: '#1A1A1A', border: '1px solid rgba(220,169,87,0.45)' }}
             title="Add a custom stack"
           >
             <IconPlus />
@@ -2690,7 +2692,7 @@ function TodayView() {
             type="button"
             onClick={() => setAddProtocolOpen(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
-            style={{ backgroundColor: '#232C3B', color: '#F5EBD7', border: '1px solid rgba(255,187,88,0.4)' }}
+            style={{ backgroundColor: '#FFFFFF', color: '#1A1A1A', border: '1px solid rgba(220,169,87,0.45)' }}
             title="Add a science protocol from your library"
           >
             <IconBookOpen />
@@ -2700,7 +2702,7 @@ function TodayView() {
             type="button"
             onClick={() => setClearOpen(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
-            style={{ backgroundColor: 'transparent', color: '#F5EBD7', border: '1px solid rgba(245,235,215,0.25)' }}
+            style={{ backgroundColor: 'transparent', color: '#1A1A1A', border: '1px solid rgba(26,26,26,0.18)' }}
             title="Clear stacks for a day or range"
           >
             <IconCalendar />
@@ -2712,9 +2714,9 @@ function TodayView() {
             onClick={handleToggleNotifications}
             className="w-9 h-9 rounded-full flex items-center justify-center transition-all"
             style={{
-              backgroundColor: notifPrefs.enabled ? 'rgba(255,187,88,0.18)' : 'transparent',
-              color: notifPrefs.enabled ? '#FFBB58' : 'rgba(245,235,215,0.65)',
-              border: '1px solid ' + (notifPrefs.enabled ? '#FFBB58' : 'rgba(245,235,215,0.2)'),
+              backgroundColor: notifPrefs.enabled ? 'rgba(220,169,87,0.18)' : '#FFFFFF',
+              color: notifPrefs.enabled ? '#B07F2E' : '#5B6472',
+              border: '1px solid ' + (notifPrefs.enabled ? '#DCA957' : 'rgba(26,26,26,0.12)'),
             }}
             aria-label={notifPrefs.enabled ? 'Notifications on — tap to disable' : 'Notifications off — tap to enable'}
             aria-pressed={notifPrefs.enabled}
@@ -2731,9 +2733,9 @@ function TodayView() {
               disabled={selectedIds.size < 2}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               style={{
-                backgroundColor: selectedIds.size >= 2 ? '#FFBB58' : 'transparent',
-                color: selectedIds.size >= 2 ? '#232C3B' : '#F5EBD7',
-                border: '1px solid #FFBB58',
+                backgroundColor: selectedIds.size >= 2 ? '#DCA957' : 'transparent',
+                color: selectedIds.size >= 2 ? '#1A1A1A' : '#1A1A1A',
+                border: '1px solid #DCA957',
               }}
               title={selectedIds.size >= 2 ? 'Merge selected into one tabbed stack' : 'Select 2 or more to merge'}
             >
@@ -2744,7 +2746,7 @@ function TodayView() {
                 type="button"
                 onClick={handleBulkDuplicate}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
-                style={{ backgroundColor: 'transparent', color: '#F5EBD7', border: '1px solid rgba(255,187,88,0.6)' }}
+                style={{ backgroundColor: 'transparent', color: '#1A1A1A', border: '1px solid rgba(220,169,87,0.6)' }}
                 title="Duplicate the selected stack (adds a copy 4h later)"
               >
                 <IconCopy />
@@ -2755,7 +2757,7 @@ function TodayView() {
               type="button"
               onClick={handleBulkDelete}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
-              style={{ backgroundColor: 'transparent', color: '#F5EBD7', border: '1px solid #F5EBD7' }}
+              style={{ backgroundColor: 'transparent', color: '#D9655B', border: '1px solid rgba(217,101,91,0.6)' }}
               title="Delete selected stacks from this day"
             >
               <IconTrash />
