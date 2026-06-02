@@ -2627,6 +2627,12 @@ function TodayView() {
   const completedCount = items.filter(it => completed.includes(it.id)).length;
   const empty = items.length === 0;
   const allDone = !empty && completedCount === items.length;
+  // v3 bento — the soonest still-pending slot drives the green "Next up" hero
+  // tile. Presentation-only derivation off existing state (no new persistence).
+  const nextSlot = [...visibleItems]
+    .filter(it => !isDone(it.id))
+    .sort((a, b) => String(a.time || '99:99').localeCompare(String(b.time || '99:99')))[0]
+    || visibleItems[0] || null;
   // Streak recomputes whenever today's completion set changes (toggle a tick).
   const streak = useMemo(() => computeCompletionStreak(), [completed, selectedDate]);
 
@@ -2794,6 +2800,66 @@ function TodayView() {
         </div>
       )}
 
+
+      {/* v3 BENTO HERO — two gradient feature tiles (orange→amber "Today's
+          routine + progress", green→emerald "Next up") in the Vision-Pro bento
+          language. Presentation only; reads existing derived state + reuses the
+          existing setExpanded / ↗-launch handlers. */}
+      {!empty && (
+        <div className="bento-grid mt-3 mb-1 fade-in is-visible">
+          <div className="tile-amber bento-hero bento-span-2">
+            <div>
+              <div className="bento-eyebrow">Today’s routine</div>
+              <div className="bento-hero-title">{headingDate}</div>
+            </div>
+            <div className="bento-hero-bottom">
+              <div className="bento-progress-num">{completedCount}<span>/{items.length}</span></div>
+              <div className="bento-progress-sub">
+                {allDone
+                  ? 'All done — beautiful work.'
+                  : `${items.length - completedCount} to go${streak > 1 ? ` · ${streak}-day streak` : ''}`}
+              </div>
+              <div className="bento-progress-track">
+                <div className="bento-progress-fill" style={{ width: `${items.length ? (completedCount / items.length) * 100 : 0}%` }} />
+              </div>
+            </div>
+          </div>
+
+          <div className="tile-green bento-next bento-span-2">
+            {nextSlot && !allDone ? (
+              <>
+                <div>
+                  <div className="bento-eyebrow">Next up</div>
+                  <div className="bento-next-time">{nextSlot.time || '—'}</div>
+                  <div className="bento-next-title">{titleFor(nextSlot)}</div>
+                </div>
+                <div className="bento-next-actions">
+                  <button type="button" onClick={() => setExpanded(nextSlot.id)} className="bento-next-btn">
+                    Open
+                  </button>
+                  {nextSlot.isUserStack && resolveLaunchHref(nextSlot.userStack) && (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); const h = resolveLaunchHref(nextSlot.userStack); if (h) window.open(h, '_blank', 'noopener'); }}
+                      className="bento-next-icon"
+                      aria-label="Open link in a new tab"
+                      title="Open"
+                    ><IconExternalLink /></button>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div>
+                <div className="bento-eyebrow">Today</div>
+                <div className="bento-next-time">All done ✓</div>
+                <div className="bento-next-title">Every slot ticked off — enjoy the calm.</div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {!empty && <div className="bento-section-label">Your stacks</div>}
 
       {empty && (
         <div className="card p-10 text-center fade-in is-visible">

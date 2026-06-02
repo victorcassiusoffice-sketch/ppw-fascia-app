@@ -775,3 +775,159 @@ button:focus-visible, a:focus-visible {
 /* Light scrollbar thumb on the cool canvas. */
 .app-glass ::-webkit-scrollbar-thumb { background: rgba(26, 26, 26, 0.14); }
 .app-glass ::-webkit-scrollbar-thumb:hover { background: rgba(220, 169, 87, 0.5); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   v3 (2026-06-03) — /today BENTO-GLASS LAYOUT.
+
+   Full re-layout of the Slot Calendar into the Vision-Pro bento language
+   (refs/vision-pro-look.jpg): two gradient HERO tiles (orange→amber "Today's
+   routine + progress", green→emerald "Next up") sit above the functional slot
+   list. Presentation only — every handler/state/feature is unchanged; the slot
+   list keeps the dnd-kit drag-reorder/merge mechanism (single column so the
+   sortable strategy is untouched) and just reads as richer bento glass cards.
+   ────────────────────────────────────────────────────────────────────── */
+
+/* Bento grid that holds the two hero tiles. 2-col on phones; the orange hero
+   spans both columns, the green "next up" sits below full-width. */
+.app-glass .bento-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.app-glass .bento-span-2 { grid-column: 1 / -1; }
+
+/* Shared hero tile chrome (the gradient fill comes from .tile-amber/.tile-green). */
+.app-glass .bento-hero,
+.app-glass .bento-next {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  padding: 18px 20px;
+  min-height: 132px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: left;
+  isolation: isolate;
+}
+.app-glass .bento-hero { min-height: 150px; }
+
+.app-glass .bento-eyebrow {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.78;
+}
+.app-glass .bento-hero-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin-top: 2px;
+}
+.app-glass .bento-hero-bottom { margin-top: 14px; }
+.app-glass .bento-progress-num {
+  font-size: 2.4rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.app-glass .bento-progress-num span { font-size: 1.1rem; font-weight: 600; opacity: 0.6; }
+.app-glass .bento-progress-sub { font-size: 0.8rem; font-weight: 600; opacity: 0.82; margin-top: 2px; }
+
+/* Thin progress track inside the orange hero. */
+.app-glass .bento-progress-track {
+  margin-top: 12px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(58, 34, 6, 0.16);
+  overflow: hidden;
+}
+.app-glass .bento-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: rgba(58, 34, 6, 0.78);
+  transition: width .5s var(--ppw-ease);
+}
+
+/* Green "next up" tile. */
+.app-glass .bento-next-time {
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}
+.app-glass .bento-next-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-top: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.app-glass .bento-next-actions { display: flex; gap: 8px; align-items: center; margin-top: 14px; }
+.app-glass .bento-next-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.92);
+  color: #135E3E;
+  box-shadow: 0 6px 16px -8px rgba(16, 76, 50, 0.5), inset 0 1px 0 rgba(255,255,255,0.6);
+  transition: transform .15s var(--ppw-ease), filter .15s var(--ppw-ease);
+}
+.app-glass .bento-next-btn:hover { transform: translateY(-1px); filter: brightness(1.02); }
+.app-glass .bento-next-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #EAFBF1;
+  transition: background .15s var(--ppw-ease);
+}
+.app-glass .bento-next-icon:hover { background: rgba(255, 255, 255, 0.30); }
+
+/* Soft "wave" sheen overlay so the gradient heroes read glossy like the ref. */
+.app-glass .bento-hero::after,
+.app-glass .bento-next::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(120% 80% at 12% 0%, rgba(255,255,255,0.28), transparent 46%);
+  pointer-events: none;
+}
+
+/* Section label above the slot list. */
+.app-glass .bento-section-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--slate);
+  margin: 18px 2px 8px;
+}
+
+/* Slot rows read as generous bento glass cards (chrome only; internals/handlers
+   unchanged). Slightly more breathing room + the standard glass elevation. */
+.app-glass .today-routine-card { padding: 2px; }
+.app-glass .today-routine-card > .flex { padding: 14px 16px; }
+
+@media (max-width: 360px) {
+  .app-glass .bento-progress-num { font-size: 2rem; }
+  .app-glass .bento-hero-title { font-size: 1.3rem; }
+}
