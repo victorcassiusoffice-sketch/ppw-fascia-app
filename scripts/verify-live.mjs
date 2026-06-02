@@ -75,10 +75,11 @@ const browser = await chromium.launch({ channel: 'chrome', headless: true });
   await ctx.close();
 }
 
-// ───────────────────────────────────────── (B) .ics download validity (mobile ctx)
+// ───────────────────────────────────────── (B) .ics download validity (desktop ctx)
+// NOTE: iOS now uses a data:URL navigation (no download event), so we verify the
+// Blob-download path on a DESKTOP/Android-style context where it applies.
 {
-  const iphone = devices['iPhone 13'];
-  const ctx = await browser.newContext({ ...iphone, acceptDownloads: true });
+  const ctx = await browser.newContext({ acceptDownloads: true });
   const page = await ctx.newPage();
   await page.goto(`${LIVE}/today`, { waitUntil: 'networkidle' });
   await page.waitForTimeout(1500);

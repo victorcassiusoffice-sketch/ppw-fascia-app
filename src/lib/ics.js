@@ -117,11 +117,44 @@ export function slotUid(itemId, dateISO, time) {
  * Trigger a client-side download of an .ics file for a slot. iOS Safari opens
  * it directly in the Calendar add-event sheet; Android/desktop download then
  * import. Returns true on success.
+ *
+ * iOS NOTE: iOS Safari frequently ignores a Blob URL + `download` attribute and
+ * will NOT hand the file to Calendar — the tap appears to do nothing. The
+ * reliable iOS path is to NAVIGATE to a `data:text/calendar` URL, which iOS
+ * recognises and opens in the "Add Event" sheet. So we branch on iOS.
  */
+function isIOSDevice() {
+  if (typeof navigator === 'undefined') return false;
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
 export function downloadSlotIcs({ itemId, title, dateISO, time, durationMin, description }) {
   try {
     const uid = slotUid(itemId, dateISO, time);
     const ics = buildSlotIcs({ uid, title, dateISO, time, durationMin, description });
+
+    // iOS: navigate to a data: URL so Safari opens the Calendar add-event sheet.
+    if (isIOSDevice()) {
+      const dataUrl = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
+      // A real anchor click (user-gesture context) is the most reliable trigger.
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.rel = 'noopener';
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      // Fallback: if the anchor click was swallowed, force navigation.
+      setTimeout(() => {
+        try {
+          if (document.visibilityState === 'visible') window.location.href = dataUrl;
+        } catch (_) {}
+      }, 350);
+      return true;
+    }
+
+    // Android / desktop: Blob download then the OS offers to import to Calendar.
     const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
