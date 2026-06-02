@@ -39,9 +39,13 @@ within Vic Protocol. The determination is **stable and final** as of `92941b4`.
 - A · mobile (iPhone-emulated) add-URL **persists across reload** — PASS
 - B · `.ics` downloads as a **valid VEVENT + at-time VALARM** — PASS
 - C · **desktop reminder fires** when a slot comes due (native + overlay) — PASS
+- D · **desktop fires a REAL OS notification** (`scripts/verify-desktop-fire.mjs`,
+  unmocked `new Notification()` → genuine Windows toast, `realOsNotificationsFired=1`)
+  — PASS. This is a true OS-level desktop notification, not just the in-app overlay.
 
-This proves the gate halves **"add-URL works on mobile"** and **desktop fire**,
-plus the validity/deliverability of the reminder artifact.
+This **closes the gate's desktop third with real OS-level evidence**, and proves
+**"add-URL works on mobile"** plus the validity/deliverability of the reminder
+artifact. Remaining: locked iPhone + Android only (hardware-impossible here).
 
 ---
 
