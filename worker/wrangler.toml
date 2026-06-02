@@ -1,0 +1,20 @@
+# PPW Fascia App — Web Push sender Worker. [VIC-SETUP] — NOT YET DEPLOYED.
+# Free tier. Deploy: see worker/README-VIC-SETUP.md.
+
+name = "ppw-push-sender"
+main = "src/index.js"
+compatibility_date = "2026-06-01"
+
+# 1-minute cron (free tier supports minute granularity).
+[triggers]
+crons = ["* * * * *"]
+
+# KV namespace for subscriptions. Create with:
+#   wrangler kv namespace create PPW_PUSH
+# then paste the returned id below.
+[[kv_namespaces]]
+binding = "PPW_PUSH"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+# Secrets are set via `wrangler secret put` (NOT here):
+#   VAPID_PRIVATE_KEY  VAPID_PUBLIC_KEY  VAPID_SUBJECT

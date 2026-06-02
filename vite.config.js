@@ -9,6 +9,12 @@ export default defineConfig({
   base,
   plugins: [react()],
   server: { port: 3000, host: true, open: true },
+  // P1 (2026-06-02) — vitest config for the add-URL regression guard.
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    include: ['src/**/*.test.{js,jsx}'],
+  },
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
