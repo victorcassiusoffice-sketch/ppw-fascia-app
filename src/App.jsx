@@ -9,7 +9,8 @@ import {
   chainOverlayUrl, dominantChainForZones,
 } from './data.js';
 import { getBodyView, zoneCentroid } from './bodyZones.js';
-import { useActiveProtocols, useActiveModules, useActiveRoutines, useCompletedToday, useLocalStorage, useDateScopedStorage, useDailyHidden, useDailyDuplicates, useDailyMerges, useDailyTitles, useFastingPrefs, useUserStacks, useIfPrefs, useNotificationPrefs, useAutoplayPatterns, todayISO } from './state.js';
+import { useActiveProtocols, useActiveModules, useActiveRoutines, useCompletedToday, useLocalStorage, useDateScopedStorage, useDailyHidden, useDailyDuplicates, useDailyMerges, useDailyTitles, useFastingPrefs, useUserStacks, useIfPrefs, useNotificationPrefs, useAutoplayPatterns, useRecurrenceRules, useRecurrenceOverrides, migrateRecurrenceData, todayISO } from './state.js';
+import { recurringStacksForDate, makeRule } from './recurrence.js';
 import { getMediaUrl, parseYouTubeId, resolveLaunchHref } from './lib/mediaStore.js';
 import { isSupplementItem, isAccessoryItem, affiliateUrlFor, applyIfWindow, scheduleIfNotifications, clearIfNotifications } from './lib/tags.js';
 import AddStackModal from './AddStackModal.jsx';
@@ -1982,6 +1983,13 @@ function TodayView() {
   } = useDailyMerges(selectedDate);
   // Phase 2 (2026-05-23) — user-created stacks per-date.
   const { stacks: userStacks, addStack: addUserStack, updateStack: updateUserStack, removeStack: removeUserStack, clearStacks: clearUserStacks } = useUserStacks(selectedDate);
+  // 2026-06-03 — recurrence: global rules + per-date overrides for selectedDate.
+  const { rules: recurrenceRules, addRule: addRecurrenceRule, removeRule: removeRecurrenceRule } = useRecurrenceRules();
+  const { overrides: recurrenceOverrides, deleteOccurrence, patchOccurrence } = useRecurrenceOverrides(selectedDate);
+  // Run-once non-destructive migration on first load.
+  useEffect(() => { migrateRecurrenceData(); }, []);
+  // Scope sheet for deleting a recurring item (This day only / All occurrences).
+  const [pendingRecurringDelete, setPendingRecurringDelete] = useState(null);
   const [addModalOpen, setAddModalOpen] = useState(false);
   // Iter 2 Phase 6.4 — Add Protocol modal + transient toast.
   const [addProtocolOpen, setAddProtocolOpen] = useState(false);
@@ -2070,6 +2078,26 @@ function TodayView() {
     }));
   }, [userStacks]);
 
+  // 2026-06-03 — recurring stacks projected onto selectedDate. Each rule that
+  // occurs today (minus per-date {deleted}, plus per-date {patch}) becomes a
+  // user-stack-shaped item. The id is rule-id + date so completed / order /
+  // time state is naturally per-date and never bleeds across dates.
+  const recurringStackItems = useMemo(() => {
+    return recurringStacksForDate(recurrenceRules, recurrenceOverrides, selectedDate).map(({ ruleId, stack }) => ({
+      kind: 'user',
+      id: `${ruleId}::${selectedDate}`,
+      isUserStack: true,
+      isRecurring: true,
+      ruleId,
+      userStack: stack,
+      time: stack.time,
+      category: 'user_' + stack.type,
+      label: stack.title || stack.text || stack.url || '(Untitled)',
+      duration_min: Math.max(0, Math.ceil((stack.durationSec || 0) / 60)),
+      notes: null,
+    }));
+  }, [recurrenceRules, recurrenceOverrides, selectedDate]);
+
   // Resolve duplicate snapshots into "live" items. A duplicate carries its own
   // instanceId so deleting it never affects siblings. We rehydrate display
   // fields (label, kind, etc.) from the duplicate's own snapshot since the
@@ -2098,7 +2126,7 @@ function TodayView() {
   // sources still show.
   const items = useMemo(() => {
     const applyOverride = (it) => timeOverrides[it.id] ? { ...it, time: timeOverrides[it.id] } : it;
-    const all = [...baseItems, ...duplicateItems, ...userStackItems];
+    const all = [...baseItems, ...duplicateItems, ...userStackItems, ...recurringStackItems];
     let ordered;
     if (!dailyOrder || dailyOrder.length === 0) {
       ordered = all.map(applyOverride);
@@ -2123,7 +2151,7 @@ function TodayView() {
     }
     // Phase 3.1 — IF auto-arranger: move food items inside the eating window.
     return applyIfWindow(filtered, ifPrefs);
-  }, [baseItems, duplicateItems, userStackItems, dailyOrder, timeOverrides, hiddenIds, ifPrefs]);
+  }, [baseItems, duplicateItems, userStackItems, recurringStackItems, dailyOrder, timeOverrides, hiddenIds, ifPrefs]);
 
   // Lookup table for tab body rendering inside MergedStack.
   const itemsById = useMemo(() => {
@@ -2218,7 +2246,7 @@ function TodayView() {
             <UserStackBody
               stack={it.userStack}
               onEnded={() => advanceToNext(it.id)}
-              onPatch={(patch) => updateUserStack(it.id, patch)}
+              onPatch={(patch) => it.isRecurring ? patchOccurrence(it.ruleId, patch) : updateUserStack(it.id, patch)}
             />
           </div>
         )}
@@ -2273,6 +2301,9 @@ function TodayView() {
         )}
         <button
           onClick={() => {
+            // Recurring items open the scope sheet (This day only / All
+            // occurrences). One-off items keep the simple confirm.
+            if (it.isRecurring) { setPendingRecurringDelete(it); return; }
             if (window.confirm('Remove just this item from today? Other items in your stack stay.')) {
               handleRemoveItem(it);
             }
@@ -2329,7 +2360,13 @@ function TodayView() {
   // the duplicates list directly. Bulk-clear is the explicit "Remove stack"
   // button, never a side effect.
   const handleRemoveItem = useCallback((it) => {
-    if (it.isUserStack) {
+    if (it.isRecurring) {
+      // Safe default (Vic's law): a plain delete of a recurring item only
+      // skips THIS date via a per-date override — it never cascades. The
+      // explicit scope sheet is what offers "All occurrences". This default
+      // also makes bulk-delete of recurring items non-destructive.
+      deleteOccurrence(it.ruleId);
+    } else if (it.isUserStack) {
       removeUserStack(it.id);
     } else if (it.isDuplicate) {
       removeDuplicate(it.id);
@@ -2344,7 +2381,24 @@ function TodayView() {
       return next;
     });
     setExpanded(prev => prev === it.id ? null : prev);
-  }, [hide, removeDuplicate, removeUserStack, setDailyOrder, setTimeOverrides]);
+  }, [hide, removeDuplicate, removeUserStack, deleteOccurrence, setDailyOrder, setTimeOverrides]);
+
+  // 2026-06-03 — resolve the recurring-delete scope sheet choice.
+  const handleConfirmRecurringDelete = useCallback((mode) => {
+    const it = pendingRecurringDelete;
+    if (!it) return;
+    if (mode === 'all') removeRecurrenceRule(it.ruleId);   // cascade: drop the rule
+    else deleteOccurrence(it.ruleId);                       // this day only
+    setDailyOrder(cur => (cur || []).filter(id => id !== it.id));
+    setTimeOverrides(cur => {
+      if (!cur || !(it.id in cur)) return cur;
+      const next = { ...cur };
+      delete next[it.id];
+      return next;
+    });
+    setExpanded(prev => prev === it.id ? null : prev);
+    setPendingRecurringDelete(null);
+  }, [pendingRecurringDelete, removeRecurrenceRule, deleteOccurrence, setDailyOrder, setTimeOverrides]);
 
   // N19: duplicate a routine card. Default time = source time + 4h, capped at
   // 23:59. Snapshot the display fields so the duplicate survives the source
@@ -2934,6 +2988,11 @@ function TodayView() {
                     titleClassName="timeline-label flex-1 min-w-0 text-sm"
                   />
                   {it.duration_min ? <span className="text-muted text-xs shrink-0">{it.duration_min} min</span> : null}
+                  {/* 2026-06-03 — recurring badge so the user knows a scope
+                      choice (this day / all) is coming on delete. */}
+                  {it.isRecurring && (
+                    <span className="text-accent text-xs shrink-0" title="Recurring routine" aria-label="Recurring routine">↻</span>
+                  )}
                   {/* Bug C (2026-06-02) — one-tap "open" launch. Opens the EXACT
                       stored href (youtu.be short-links normalised to the real
                       watch URL) in a new tab. Independent of expand/selection. */}
@@ -3001,6 +3060,7 @@ function TodayView() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
+                      if (it.isRecurring) { setPendingRecurringDelete(it); return; }
                       if (window.confirm('Delete this stack?')) handleRemoveItem(it);
                     }}
                     className="text-muted hover:text-red-400 w-8 h-8 flex items-center justify-center shrink-0 transition-colors"
@@ -3042,7 +3102,21 @@ function TodayView() {
         open={addModalOpen}
         onClose={() => setAddModalOpen(false)}
         onSave={(stack) => {
-          addUserStack(stack);
+          const { recurrence, ...stackPayload } = stack;
+          if (recurrence) {
+            // Recurring → one rule record anchored to the selected date. The
+            // rule is expanded on read; not copied into 30 day-buckets.
+            addRecurrenceRule(makeRule({
+              id: `rule::${stackPayload.id}`,
+              stack: stackPayload,
+              anchorDate: selectedDate,
+              freq: recurrence.freq,
+              interval: recurrence.interval,
+              createdAt: Date.now(),
+            }));
+          } else {
+            addUserStack(stackPayload);            // one-off, this day only
+          }
           // P1 (2026-06-02) — explicit success confirmation so mobile users
           // see the add landed (the "did it save?" uncertainty was a repro lead).
           setToast({ tone: 'ok', text: `Saved ✓ ${stack.title ? '— ' + String(stack.title).slice(0, 40) : ''}` });
@@ -3050,6 +3124,38 @@ function TodayView() {
         }}
         defaultTime={(items[items.length - 1]?.time) || '08:00'}
       />
+
+      {/* 2026-06-03 — recurring-delete scope sheet. Default highlighted choice
+          is "This day only" so the destructive cascade is never accidental. */}
+      {pendingRecurringDelete && (
+        <div
+          className="fixed inset-0 z-50 bg-bg/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-4"
+          onClick={() => setPendingRecurringDelete(null)}
+        >
+          <div className="card w-full max-w-sm p-5" style={{ backgroundColor: '#0a1628' }} onClick={(e) => e.stopPropagation()}>
+            <div className="font-display text-lg mb-1">Remove recurring routine</div>
+            <p className="text-muted text-xs mb-4">This routine repeats. Remove it from just this day, or from every day it appears?</p>
+            <button
+              onClick={() => handleConfirmRecurringDelete('this-day')}
+              className="w-full text-center py-2.5 rounded-full text-sm font-bold bg-accent text-bg mb-2"
+            >
+              This day only
+            </button>
+            <button
+              onClick={() => handleConfirmRecurringDelete('all')}
+              className="w-full text-center py-2.5 rounded-full text-sm font-bold border border-cream/15 text-muted hover:text-accent hover:border-accent transition-colors mb-2"
+            >
+              All occurrences
+            </button>
+            <button
+              onClick={() => setPendingRecurringDelete(null)}
+              className="w-full text-center py-2 rounded-full text-xs font-bold text-muted hover:text-cream"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       <AddProtocolModal
         open={addProtocolOpen}

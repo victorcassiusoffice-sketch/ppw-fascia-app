@@ -12,10 +12,28 @@ function writeJSON(key, value) {
   try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {}
 }
 
+// 2026-06-03 — FIXED primitive (was the root cause of cross-date bleed).
+// The old version ran the useState initializer ONCE on mount and never
+// re-read when `key` changed; worse, its persist effect depended on [key,val]
+// so a key change stamped the STALE in-memory value onto the new date's key.
+// Net: every date shared one stack and deletes cascaded.
+//
+// The fix uses the React "adjust state during render" pattern: when the key
+// changes we synchronously re-read the new key's value (no stale persist), and
+// the persist effect writes the value back under the SAME key it was read from.
 export function useLocalStorage(key, initial) {
-  const [val, setVal] = useState(() => readJSON(key, initial));
-  useEffect(() => { writeJSON(key, val); }, [key, val]);
-  return [val, setVal];
+  const [state, setState] = useState(() => ({ key, val: readJSON(key, initial) }));
+  if (state.key !== key) {
+    // Key changed this render → re-read synchronously. Because we update
+    // `state.key` in the same set, the persist effect below fires for the NEW
+    // key with the NEWLY-READ value, so no stale value is ever written across.
+    setState({ key, val: readJSON(key, initial) });
+  }
+  useEffect(() => { writeJSON(state.key, state.val); }, [state.key, state.val]);
+  const setVal = useCallback((update) => {
+    setState((s) => ({ key: s.key, val: typeof update === 'function' ? update(s.val) : update }));
+  }, []);
+  return [state.val, setVal];
 }
 
 export function useActiveProtocols() {
@@ -319,4 +337,78 @@ export function useCompletedToday(date) {
     setIds((cur) => cur.includes(id) ? cur.filter(x => x !== id) : [...cur, id]);
   }, [setIds]);
   return { isDone, toggle, completed: ids };
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Recurrence (2026-06-03) — global rule list + per-date override layer.
+// Rules live ONCE in ppw.recurrenceRules and are expanded on read; per-date
+// exceptions ("this day only" deletes / patches) live in
+// ppw.recurrenceOverrides::<ISO>. One-off ("this day") stacks stay in
+// ppw.userStacks::<ISO> as before. See src/recurrence.js for the pure engine.
+// ──────────────────────────────────────────────────────────────────────────
+
+// Global list of recurring routine rules (not date-scoped).
+export function useRecurrenceRules() {
+  const [rules, setRules] = useLocalStorage(LS_KEYS.RECURRENCE_RULES, []);
+  const addRule = useCallback((rule) => {
+    setRules((cur) => [...cur, rule]);
+  }, [setRules]);
+  const updateRule = useCallback((id, patchStack) => {
+    setRules((cur) => cur.map(r => r.id === id ? { ...r, stack: { ...r.stack, ...patchStack } } : r));
+  }, [setRules]);
+  const removeRule = useCallback((id) => {
+    setRules((cur) => cur.filter(r => r.id !== id));
+  }, [setRules]);
+  return { rules, addRule, updateRule, removeRule, setRules };
+}
+
+// Per-date override map for a single date: { [ruleId]: { deleted?, patch? } }.
+export function useRecurrenceOverrides(date) {
+  const [overrides, setOverrides] = useDateScopedStorage(LS_KEYS.RECURRENCE_OVERRIDES, date, {});
+  // Mark a rule's occurrence on THIS date as deleted (does not touch the rule
+  // or any other date — this is the structural guarantee of "this day only").
+  const deleteOccurrence = useCallback((ruleId) => {
+    setOverrides((cur) => ({ ...cur, [ruleId]: { ...(cur[ruleId] || {}), deleted: true } }));
+  }, [setOverrides]);
+  // Patch a rule's occurrence on THIS date only.
+  const patchOccurrence = useCallback((ruleId, patch) => {
+    setOverrides((cur) => ({
+      ...cur,
+      [ruleId]: { ...(cur[ruleId] || {}), patch: { ...((cur[ruleId] || {}).patch || {}), ...patch } },
+    }));
+  }, [setOverrides]);
+  const clearOverride = useCallback((ruleId) => {
+    setOverrides((cur) => {
+      if (!(ruleId in cur)) return cur;
+      const next = { ...cur };
+      delete next[ruleId];
+      return next;
+    });
+  }, [setOverrides]);
+  return { overrides, deleteOccurrence, patchOccurrence, clearOverride };
+}
+
+// Non-destructive, run-once migration. Existing data already lives under
+// ppw.userStacks::<ISO> (one-off stacks) and stays readable as-is; the
+// stale-write bug is cured by the useLocalStorage fix above, so no data needs
+// to move. This pass only (a) verifies existing userStacks keys still parse
+// without throwing and (b) seeds the new recurrenceRules key if absent, then
+// stamps a flag so it never runs twice. Safe to call on every app load.
+export function migrateRecurrenceData() {
+  if (typeof localStorage === 'undefined') return;
+  try {
+    if (localStorage.getItem(LS_KEYS.MIGRATION_FLAG)) return;
+    // (a) touch every userStacks::* key non-destructively to confirm readability.
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith(LS_KEYS.USER_STACKS + '::')) {
+        try { JSON.parse(localStorage.getItem(k)); } catch (_) { /* leave as-is */ }
+      }
+    }
+    // (b) ensure the new global rule list exists.
+    if (localStorage.getItem(LS_KEYS.RECURRENCE_RULES) == null) {
+      localStorage.setItem(LS_KEYS.RECURRENCE_RULES, '[]');
+    }
+    localStorage.setItem(LS_KEYS.MIGRATION_FLAG, String(1));
+  } catch (_) { /* never throw on load */ }
 }

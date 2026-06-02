@@ -26,6 +26,9 @@ export const LS_KEYS = {
   IF_PREFS:            'ppw.ifPrefs',            // Phase 3 (2026-05-23) — intermittent fasting daily window
   NOTIFICATION_PREFS:  'ppw.notificationPrefs',  // Iter 2 Phase 7 — { enabled, autoplayAll }
   AUTOPLAY_PATTERNS:   'ppw.autoplayPatterns',   // Iter 2 Phase 7.3 — { '<stack-id>__<HH:MM>': true }
+  RECURRENCE_RULES:    'ppw.recurrenceRules',       // 2026-06-03 — global list of recurring routine rules
+  RECURRENCE_OVERRIDES:'ppw.recurrenceOverrides',   // 2026-06-03 — per-date exceptions, key ::<ISO>
+  MIGRATION_FLAG:      'ppw.migration.recurrence.v1',// 2026-06-03 — run-once migration marker
 };
 
 export const APP_VERSION = '0.4.0-night-run';

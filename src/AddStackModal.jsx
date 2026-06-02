@@ -155,6 +155,10 @@ export default function AddStackModal({ open, onClose, onSave, defaultTime = '08
   const [titlePreview, setTitlePreview] = useState('');
   const [thumbPreview, setThumbPreview] = useState(null);
   const [filePicked, setFilePicked] = useState(null);
+  // 2026-06-03 — recurrence scope. 'this-day' (default, one-off) · 'everyday' ·
+  // 'weekly' · 'everyN' (reveals the 1..30 stepper).
+  const [scope, setScope] = useState('this-day');
+  const [everyN, setEveryN] = useState(2);
 
   const reset = useCallback(() => {
     setChosen(null);
@@ -162,6 +166,7 @@ export default function AddStackModal({ open, onClose, onSave, defaultTime = '08
     setUrl(''); setText(''); setDuration(60);
     setStartAt(0); setEndAt(''); setBusy(false); setError(null);
     setTitlePreview(''); setThumbPreview(null); setFilePicked(null);
+    setScope('this-day'); setEveryN(2);
   }, [defaultTime]);
 
   const handleClose = useCallback(() => { reset(); onClose(); }, [reset, onClose]);
@@ -215,6 +220,11 @@ export default function AddStackModal({ open, onClose, onSave, defaultTime = '08
         startAtSec: Number(startAt) || 0,
         endAtSec: endAt === '' ? null : Number(endAt),
       };
+      // 2026-06-03 — recurrence scope rides along on the saved stack. The
+      // parent reads `recurrence` to decide one-off (null) vs rule creation.
+      baseStack.recurrence = scope === 'this-day'
+        ? null
+        : { freq: scope, interval: scope === 'everyN' ? Math.min(30, Math.max(1, Number(everyN) || 1)) : (scope === 'weekly' ? 7 : 1) };
       if (chosen === 'link') {
         if (!url) throw new Error('Paste a URL.');
         const yt = parseYouTubeId(url);
@@ -240,7 +250,7 @@ export default function AddStackModal({ open, onClose, onSave, defaultTime = '08
       setError(err.message || String(err));
       setBusy(false);
     }
-  }, [chosen, time, duration, startAt, endAt, url, titlePreview, filePicked, text, onSave, handleClose]);
+  }, [chosen, time, duration, startAt, endAt, url, titlePreview, filePicked, text, scope, everyN, onSave, handleClose]);
 
   // Iter 2 Phase 8.2 — block Save when on the disabled Spotify tile.
   const chosenIsDisabled = TYPES.find(t => t.key === chosen)?.disabled;
@@ -374,6 +384,57 @@ export default function AddStackModal({ open, onClose, onSave, defaultTime = '08
                   className="bg-cream/5 border border-cream/15 rounded-lg px-3 py-2 text-sm font-display text-cream focus:outline-none focus:border-accent"
                 />
               </label>
+
+              {/* 2026-06-03 — recurrence scope picker */}
+              <div className="space-y-2">
+                <span className="text-xs text-muted uppercase tracking-widest block">Repeat</span>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {[
+                    { key: 'this-day', label: 'This day' },
+                    { key: 'everyday', label: 'Everyday' },
+                    { key: 'weekly',   label: 'Weekly' },
+                    { key: 'everyN',   label: 'Every N' },
+                  ].map(opt => (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => setScope(opt.key)}
+                      className={`text-xs px-2 py-2 rounded-lg border transition-all ${scope === opt.key ? 'border-accent text-accent bg-accent/15' : 'border-cream/15 text-muted hover:text-cream'}`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                {scope === 'everyN' && (
+                  <div className="flex items-center gap-3 pt-1">
+                    <span className="text-xs text-muted">Every</span>
+                    <button
+                      type="button"
+                      onClick={() => setEveryN(n => Math.max(1, Number(n) - 1))}
+                      className="w-8 h-8 rounded-lg border border-cream/15 text-cream hover:border-accent"
+                      aria-label="Fewer days"
+                    >−</button>
+                    <input
+                      type="number"
+                      min="1"
+                      max="30"
+                      value={everyN}
+                      onChange={(e) => setEveryN(Math.min(30, Math.max(1, Number(e.target.value) || 1)))}
+                      className="w-16 bg-cream/5 border border-cream/15 rounded-lg px-2 py-1.5 text-sm text-center font-display text-cream focus:outline-none focus:border-accent"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setEveryN(n => Math.min(30, Number(n) + 1))}
+                      className="w-8 h-8 rounded-lg border border-cream/15 text-cream hover:border-accent"
+                      aria-label="More days"
+                    >+</button>
+                    <span className="text-xs text-muted">days</span>
+                  </div>
+                )}
+                {scope !== 'this-day' && (
+                  <p className="text-[10px] text-muted">Recurring routines fill your calendar up to 30 days ahead.</p>
+                )}
+              </div>
               {chosen !== 'text' && (
                 <label className="grid grid-cols-2 gap-3 items-center">
                   <span className="text-xs text-muted uppercase tracking-widest">Duration (sec)</span>
