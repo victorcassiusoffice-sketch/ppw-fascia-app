@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PPW · /today — dual-theme mockup</title>
+<style>
+/* ───────────────── SHARED GEOMETRY (theme-independent) ───────────────── */
+:root{
+  --sp-1:6px; --sp-2:10px; --sp-3:14px; --sp-4:20px; --sp-5:28px; --sp-6:36px;
+  --r-8:8px; --r-12:12px; --r-16:16px; --r-24:24px; --r-pill:999px;
+  --page-max:480px; --gutter:20px; --rail-gap:12px;
+  --dur-mid:200ms;
+  /* candy data-viz gradients (both themes) */
+  --g-relax: linear-gradient(180deg,#4FB3F2,#7C5CF2);
+  --g-cardio: linear-gradient(180deg,#2BD4C4,#1E9AA8);
+  --g-strength: linear-gradient(180deg,#F5A623,#F2792B);
+  --g-stretch: linear-gradient(180deg,#F25C8A,#E2685E);
+  font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* ───────────────── DARK THEME ───────────────── */
+html[data-theme="dark"]{
+  --bg-base:#15171C; --surface-raised:#1E2128; --surface-active:#262A33; --surface-inset:#121419;
+  --hairline:rgba(255,255,255,.07); --top-highlight:rgba(255,255,255,.06);
+  --ink-hi:#F1F3F8; --ink-mid:#AEB6C4; --ink-low:#6E7787;
+  --accent:#E8772E; --accent-bright:#F58B3C; --accent-soft:rgba(232,119,46,.16);
+  --on-accent:#1A130C;
+  --status-done:#5FB87C; --status-now:#F58B3C; --status-later:#6E7787; --status-alert:#E2685E;
+  --elv-1:0 1px 0 var(--top-highlight) inset, 0 2px 6px -4px rgba(0,0,0,.6);
+  --elv-2:0 1px 0 var(--top-highlight) inset, 0 8px 20px -12px rgba(0,0,0,.7);
+  --elv-3:0 1px 0 var(--top-highlight) inset, 0 16px 32px -16px rgba(0,0,0,.75);
+  --elv-inset:inset 0 2px 6px rgba(0,0,0,.5);
+  --bg-art-opacity:.10; --bg-art-blend:screen;
+  --pill-unsel:#1E2128;
+}
+/* ───────────────── LIGHT THEME (neumorphic) ───────────────── */
+html[data-theme="light"]{
+  --bg-base:#E7ECF3; --surface-raised:#E7ECF3; --surface-active:#EDF1F7; --surface-inset:#E7ECF3;
+  --hairline:rgba(15,30,60,.05); --top-highlight:rgba(255,255,255,.9);
+  --ink-hi:#2B3242; --ink-mid:#5B6678; --ink-low:#95A0B2;
+  --accent:#F2792B; --accent-bright:#FF8C3E; --accent-soft:rgba(242,121,43,.14);
+  --on-accent:#FFFFFF;
+  --status-done:#57C08A; --status-now:#F2792B; --status-later:#95A0B2; --status-alert:#E2685E;
+  --nm-light:rgba(255,255,255,.92); --nm-dark:rgba(163,177,198,.55);
+  --elv-1:3px 3px 6px var(--nm-dark), -3px -3px 6px var(--nm-light);
+  --elv-2:6px 6px 12px var(--nm-dark), -6px -6px 12px var(--nm-light);
+  --elv-3:9px 9px 18px var(--nm-dark), -9px -9px 18px var(--nm-light);
+  --elv-inset:inset 3px 3px 6px var(--nm-dark), inset -3px -3px 6px var(--nm-light);
+  --bg-art-opacity:.06; --bg-art-blend:multiply;
+  --pill-unsel:#E7ECF3;
+}
+
+body{background:var(--bg-base);color:var(--ink-hi);min-height:100vh;transition:background var(--dur-mid)}
+.bg-art{position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(120% 70% at 50% -10%, rgba(232,119,46,.10), transparent 60%);
+  opacity:.9;}
+/* fascia-web suggestion (CSS stand-in for the real png in-app) */
+.bg-art::after{content:"";position:absolute;inset:0;
+  background:
+    repeating-linear-gradient(60deg, rgba(232,119,46,.10) 0 1px, transparent 1px 26px),
+    repeating-linear-gradient(-60deg, rgba(232,119,46,.10) 0 1px, transparent 1px 26px);
+  opacity:var(--bg-art-opacity); mix-blend-mode:var(--bg-art-blend);
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.3) 50%,transparent 80%);
+          mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.3) 50%,transparent 80%);}
+
+.phone{max-width:var(--page-max);margin:0 auto;padding:0 var(--gutter) 120px;min-height:100vh;position:relative}
+
+/* Header */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 0 8px;position:sticky;top:0;z-index:20;
+  background:linear-gradient(180deg,var(--bg-base) 70%, transparent);}
+.logo{display:flex;align-items:center}
+.logo svg{width:30px;height:30px}
+.toggle{display:flex;align-items:center;gap:8px;border:none;cursor:pointer;
+  background:var(--surface-raised);box-shadow:var(--elv-1);color:var(--ink-mid);
+  border-radius:var(--r-pill);padding:8px 14px;font:600 12px/1 Inter;}
+.toggle:active{box-shadow:var(--elv-inset)}
+
+/* Month line */
+.monthline{display:flex;align-items:flex-end;justify-content:space-between;margin:8px 0 14px}
+.month{font:600 28px/1 Inter;letter-spacing:-.02em}
+.month span{color:var(--ink-low);font-size:15px;font-weight:500;margin-left:6px}
+.glance{display:flex;align-items:center;gap:10px}
+.streak{display:flex;align-items:center;gap:6px;background:var(--surface-raised);box-shadow:var(--elv-1);
+  border-radius:var(--r-pill);padding:7px 12px;font:600 12px/1 Inter;color:var(--accent)}
+.ring{width:42px;height:42px}
+
+/* Day strip */
+.daystrip{display:flex;gap:10px;overflow-x:auto;padding:4px 0 14px;scroll-snap-type:x mandatory;-ms-overflow-style:none;scrollbar-width:none}
+.daystrip::-webkit-scrollbar{display:none}
+.daypill{flex:0 0 auto;width:50px;border-radius:var(--r-16);padding:10px 0;display:flex;flex-direction:column;
+  align-items:center;gap:3px;background:var(--pill-unsel);box-shadow:var(--elv-1);cursor:pointer;scroll-snap-align:center;
+  transition:transform var(--dur-mid)}
+.daypill .wd{font:600 10px/1 Inter;letter-spacing:.08em;color:var(--ink-low)}
+.daypill .dn{font:600 18px/1 Inter;color:var(--ink-hi)}
+.daypill .dot{width:5px;height:5px;border-radius:50%;background:var(--accent);opacity:.0}
+.daypill.has .dot{opacity:.7}
+.daypill.today{box-shadow:var(--elv-1),0 0 0 2px var(--accent) inset}
+.daypill.sel{background:var(--accent);box-shadow:var(--elv-2);transform:translateY(-2px)}
+.daypill.sel .wd,.daypill.sel .dn{color:var(--on-accent)}
+.daypill.sel .dot{background:var(--on-accent);opacity:.85}
+
+/* Next-up hero */
+.hero{display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--surface-raised);
+  box-shadow:var(--elv-2);border-radius:var(--r-24);padding:20px 22px;margin-bottom:16px}
+.hero .eyebrow{font:600 11px/1 Inter;letter-spacing:.08em;color:var(--status-now);text-transform:uppercase}
+.hero .time{font:700 32px/1 Inter;margin:8px 0 2px}
+.hero .title{font:600 16px/1.2 Inter;color:var(--ink-mid)}
+.hero .open{margin-top:14px;display:inline-flex;align-items:center;gap:6px;border:none;cursor:pointer;
+  background:var(--accent);color:var(--on-accent);font:600 13px/1 Inter;border-radius:var(--r-pill);padding:11px 20px;box-shadow:var(--elv-1)}
+.herring{width:96px;height:96px;flex:0 0 auto;position:relative}
+.herring .pct{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.herring .pct b{font:700 22px/1 Inter}
+.herring .pct s{font:600 9px/1 Inter;letter-spacing:.1em;color:var(--ink-low);text-transform:uppercase;margin-top:3px;text-decoration:none}
+
+/* Action row */
+.actions{display:grid;grid-template-columns:1fr 1fr auto;gap:14px;margin-bottom:8px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;border:none;cursor:pointer;height:46px;border-radius:var(--r-pill);
+  font:600 14px/1 Inter}
+.btn.primary{background:var(--accent);color:var(--on-accent);box-shadow:var(--elv-1)}
+.btn.secondary{background:var(--surface-raised);color:var(--ink-hi);box-shadow:var(--elv-1)}
+.btn.icon{width:46px;background:var(--surface-raised);color:var(--ink-mid);box-shadow:var(--elv-1);font-size:20px}
+.btn:active{box-shadow:var(--elv-inset)}
+
+.section-label{font:600 11px/1 Inter;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-low);margin:20px 2px 12px}
+
+/* Time-rail + cards */
+.rail{position:relative;padding-left:22px}
+.rail::before{content:"";position:absolute;left:6px;top:8px;bottom:8px;width:2px;background:var(--hairline)}
+.card{position:relative;background:var(--surface-raised);box-shadow:var(--elv-2);border-radius:var(--r-24);
+  padding:16px 16px 16px 18px;margin-bottom:var(--rail-gap);overflow:hidden}
+.card::before{content:"";position:absolute;left:0;top:18px;bottom:18px;width:4px;border-radius:var(--r-pill);background:var(--kind,var(--accent))}
+.node{position:absolute;left:-19px;top:24px;width:11px;height:11px;border-radius:50%;background:var(--kind,var(--accent));box-shadow:0 0 0 3px var(--bg-base)}
+.crow{display:flex;align-items:center;gap:10px}
+.pill{font:600 10px/1 Inter;letter-spacing:.06em;text-transform:uppercase;padding:5px 9px;border-radius:var(--r-pill)}
+.pill.now{background:var(--accent-soft);color:var(--status-now)}
+.pill.done{background:rgba(95,184,124,.16);color:var(--status-done)}
+.pill.later{background:var(--surface-inset);color:var(--ink-low);box-shadow:var(--elv-inset)}
+.menu{margin-left:auto;color:var(--ink-low);font-size:20px;cursor:pointer;line-height:.6;letter-spacing:1px}
+.cmid{display:flex;align-items:center;gap:12px;margin-top:12px}
+.diamond{width:30px;height:30px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;border-radius:8px;
+  transform:rotate(45deg);background:var(--surface-inset);box-shadow:var(--elv-inset)}
+.diamond svg{transform:rotate(-45deg);width:16px;height:16px;color:var(--kind,var(--accent))}
+.timechip{font:600 13px/1 Inter;color:var(--ink-hi);background:var(--surface-inset);box-shadow:var(--elv-inset);
+  border-radius:var(--r-12);padding:7px 10px}
+.ctitle{font:600 16px/1.15 Inter}
+.csub{font:400 12px/1.3 Inter;color:var(--ink-mid);margin-top:2px}
+.cright{margin-left:auto;text-align:right}
+.cpct{font:700 15px/1 Inter;color:var(--ink-hi)}
+.track{width:64px;height:6px;border-radius:var(--r-pill);background:var(--surface-inset);box-shadow:var(--elv-inset);margin-top:6px;overflow:hidden}
+.track i{display:block;height:100%;border-radius:var(--r-pill);background:var(--kind,var(--accent))}
+.check{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(95,184,124,.16);color:var(--status-done);font-size:14px}
+
+/* Bottom nav */
+.botwrap{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;pointer-events:none}
+.botnav{pointer-events:auto;width:100%;max-width:var(--page-max);margin:0 auto;height:64px;
+  background:var(--surface-raised);box-shadow:var(--elv-3);border-top:1px solid var(--hairline);
+  display:grid;grid-template-columns:repeat(5,1fr);align-items:center;padding-bottom:env(safe-area-inset-bottom)}
+.nav{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--ink-low);cursor:pointer;font:600 10px/1 Inter}
+.nav svg{width:22px;height:22px}
+.nav.active{color:var(--accent)}
+.bellslot{position:relative}
+.bell{position:absolute;left:50%;top:-26px;transform:translateX(-50%);width:56px;height:56px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  background:var(--surface-raised);box-shadow:var(--elv-3);border:1px solid var(--hairline);color:var(--ink-mid);transition:all var(--dur-mid)}
+.bell svg{width:26px;height:26px}
+.bell.on{background:var(--accent);color:var(--on-accent);box-shadow:var(--elv-2),0 0 0 4px var(--accent-soft)}
+.belllabel{margin-top:30px;color:var(--ink-low);font:600 10px/1 Inter}
+
+.hint{font:400 11px/1.5 Inter;color:var(--ink-low);text-align:center;margin:2px 0 8px}
+</style>
+</head>
+<body>
+<div class="bg-art"></div>
+
+<div class="phone">
+  <!-- Header -->
+  <div class="hdr">
+    <div class="logo" title="DNA-helix mark (replaces PPW wordmark)">
+      <svg viewBox="0 0 24 40" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round">
+        <path d="M5 2c0 8 14 12 14 18S5 30 5 38"/>
+        <path d="M19 2c0 8-14 12-14 18s14 12 14 18"/>
+        <line x1="7" y1="8" x2="17" y2="8"/><line x1="9.5" y1="14" x2="14.5" y2="14"/>
+        <line x1="9.5" y1="26" x2="14.5" y2="26"/><line x1="7" y1="32" x2="17" y2="32"/>
+      </svg>
+    </div>
+    <button class="toggle" onclick="flip()">
+      <span id="tglIcon">🌙</span><span id="tglText">Dark</span>
+    </button>
+  </div>
+
+  <!-- Month line -->
+  <div class="monthline">
+    <div class="month">June<span>2026</span></div>
+    <div class="glance">
+      <div class="streak">🔥 4</div>
+      <svg class="ring" viewBox="0 0 42 42">
+        <circle cx="21" cy="21" r="17" fill="none" stroke="var(--surface-inset)" stroke-width="5"/>
+        <circle cx="21" cy="21" r="17" fill="none" stroke="var(--accent)" stroke-width="5" stroke-linecap="round"
+          stroke-dasharray="107" stroke-dashoffset="38" transform="rotate(-90 21 21)"/>
+        <text x="21" y="25" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink-hi)">64</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Day strip -->
+  <div class="daystrip" id="strip"></div>
+
+  <!-- Next-up hero -->
+  <div class="hero">
+    <div>
+      <div class="eyebrow">Next up</div>
+      <div class="time tnum">08:30</div>
+      <div class="title">Lower-back fascia release</div>
+      <button class="open">Open ▸</button>
+    </div>
+    <div class="herring">
+      <svg viewBox="0 0 96 96">
+        <circle cx="48" cy="48" r="38" fill="none" stroke="var(--surface-inset)" stroke-width="9"/>
+        <circle cx="48" cy="48" r="38" fill="none" stroke="url(#hg)" stroke-width="9" stroke-linecap="round"
+          stroke-dasharray="239" stroke-dashoffset="86" transform="rotate(-90 48 48)"/>
+        <defs><linearGradient id="hg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#F5A623"/><stop offset="1" stop-color="#F2792B"/></linearGradient></defs>
+      </svg>
+      <div class="pct"><b class="tnum">64%</b><s>today</s></div>
+    </div>
+  </div>
+
+  <!-- Action row (rebalanced; bell removed) -->
+  <div class="actions">
+    <button class="btn primary">＋ Stack</button>
+    <button class="btn secondary">▤ Protocol</button>
+    <button class="btn icon" title="More (Clear, Select…)">⋯</button>
+  </div>
+  <div class="hint">Bell moved to the bottom · two balanced actions · rare actions under ⋯</div>
+
+  <div class="section-label">Your stacks</div>
+
+  <!-- Time-rail -->
+  <div class="rail">
+    <!-- card: NOW -->
+    <div class="card" style="--kind:#F58B3C">
+      <span class="node"></span>
+      <div class="crow">
+        <span class="pill now">Now</span>
+        <span class="menu">⋮</span>
+      </div>
+      <div class="cmid">
+        <span class="timechip tnum">08:30</span>
+        <div class="diamond"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
+        <div>
+          <div class="ctitle">Lower-back release</div>
+          <div class="csub">Fascia routine · 12 min</div>
+        </div>
+        <div class="cright"><div class="cpct tnum">40%</div><div class="track"><i style="width:40%"></i></div></div>
+      </div>
+    </div>
+
+    <!-- card: merged / parallel -->
+    <div class="card" style="--kind:#7C5CF2">
+      <span class="node"></span>
+      <div class="crow">
+        <span class="pill later">Later</span>
+        <span class="menu">⋮</span>
+      </div>
+      <div class="cmid">
+        <span class="timechip tnum">13:00</span>
+        <div class="diamond"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 15l5-5 4 4 3-3 6 6"/></svg></div>
+        <div>
+          <div class="ctitle">Midday stack</div>
+          <div class="csub">2 parallel · 18 min total</div>
+        </div>
+        <div class="cright"><div class="cpct tnum">0%</div><div class="track"><i style="width:0%"></i></div></div>
+      </div>
+    </div>
+
+    <!-- card: audio -->
+    <div class="card" style="--kind:#2BD4C4">
+      <span class="node"></span>
+      <div class="crow">
+        <span class="pill later">Later</span>
+        <span class="menu">⋮</span>
+      </div>
+      <div class="cmid">
+        <span class="timechip tnum">14:30</span>
+        <div class="diamond"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h3l3-7 4 14 3-7h5"/></svg></div>
+        <div>
+          <div class="ctitle">Breath &amp; down-regulate</div>
+          <div class="csub">Audio module · 9 min</div>
+        </div>
+        <div class="cright"><div class="cpct tnum">0%</div><div class="track"><i style="width:0%"></i></div></div>
+      </div>
+    </div>
+
+    <!-- card: DONE -->
+    <div class="card" style="--kind:#5FB87C">
+      <span class="node"></span>
+      <div class="crow">
+        <span class="pill done">Done</span>
+        <span class="menu">⋮</span>
+      </div>
+      <div class="cmid">
+        <span class="timechip tnum">07:00</span>
+        <div class="diamond"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <div>
+          <div class="ctitle">Morning mobiliser</div>
+          <div class="csub">Text reminder</div>
+        </div>
+        <div class="cright"><div class="check">✓</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom nav + enlarged center bell -->
+<div class="botwrap"><div class="botnav">
+  <div class="nav active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Today</div>
+  <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h13a2 2 0 0 1 2 2v14H6a2 2 0 0 1-2-2z"/><line x1="8" y1="8" x2="15" y2="8"/></svg>Protocols</div>
+  <div class="nav bellslot">
+    <div class="bell on" id="bell" onclick="bell()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+    </div>
+    <div class="belllabel">Alerts</div>
+  </div>
+  <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Modules</div>
+  <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.5-2.4 1a7 7 0 0 0-1.7-1L16 2h-4l-.8 2.5a7 7 0 0 0-1.7 1l-2.4-1-2 3.5L7 10a7 7 0 0 0 0 2l-2 1.5 2 3.5 2.4-1a7 7 0 0 0 1.7 1L12 22h4l.8-2.5"/></svg>Settings</div>
+</div></div>
+
+<script>
+const days=[['SAT',31],['SUN',1],['MON',2],['TUE',3],['WED',4],['THU',5],['FRI',6],['SAT',7]];
+const strip=document.getElementById('strip');
+days.forEach((d,i)=>{
+  const sel=i===3, today=i===3, has=[1,3,4,6].includes(i);
+  const el=document.createElement('div');
+  el.className='daypill'+(sel?' sel':'')+(today&&!sel?' today':'')+(has?' has':'');
+  el.innerHTML=`<span class="wd">${d[0]}</span><span class="dn tnum">${d[1]}</span><span class="dot"></span>`;
+  el.onclick=()=>{document.querySelectorAll('.daypill').forEach(p=>p.classList.remove('sel'));el.classList.add('sel');};
+  strip.appendChild(el);
+});
+function flip(){
+  const h=document.documentElement, dark=h.getAttribute('data-theme')==='dark';
+  h.setAttribute('data-theme',dark?'light':'dark');
+  document.getElementById('tglIcon').textContent=dark?'☀️':'🌙';
+  document.getElementById('tglText').textContent=dark?'Light':'Dark';
+}
+function bell(){document.getElementById('bell').classList.toggle('on');}
+</script>
+</body>
+</html>
