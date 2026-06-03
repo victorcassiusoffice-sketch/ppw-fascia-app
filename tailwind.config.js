@@ -1,22 +1,42 @@
 /** @type {import('tailwindcss').Config} */
+
+// Dual-theme (2026-06-03): semantic colour names resolve to CSS-variable RGB
+// channel triplets defined per [data-theme] in src/index.css. Using the
+// rgb(var(--x) / <alpha-value>) form keeps every Tailwind opacity utility
+// (bg-cream/5, text-muted/80, border-accent/40) working AND theme-aware, so the
+// existing JSX utility classes re-skin on a single data-theme flip with no churn.
+const tok = (v) => `rgb(var(${v}) / <alpha-value>)`;
+
 export default {
   content: ['./index.html', './src/**/*.{js,jsx,ts,tsx}'],
   theme: {
     extend: {
       colors: {
-        bg:     '#0a1628',
-        accent: '#FFBB58',
-        cream:  '#F5EBD7',
-        teal:   '#4a9eb8',
-        ink:    '#F5EBD7',
-        muted:  '#7b8eaa',
-        'ppw-bg':    '#0a1628',
-        'ppw-gold':  '#FFBB58',
-        'ppw-cream': '#F5EBD7',
-        'ppw-teal':  '#4a9eb8',
-        /* Slot Calendar re-skin (2026-06-02) — cream / "Vision-Pro" tokens.
-           Additive: scoped to the /today surface via the .slot-cream class.
-           Existing dark tokens above are untouched so other routes are unaffected. */
+        // Core semantic tokens (theme-flipped)
+        bg:               tok('--c-bg-base'),
+        surface:          tok('--c-surface'),
+        'surface-active': tok('--c-surface-active'),
+        'surface-inset':  tok('--c-surface-inset'),
+        accent:           tok('--c-accent'),
+        'accent-bright':  tok('--c-accent-bright'),
+        'on-accent':      tok('--c-on-accent'),
+        cream:            tok('--c-ink-hi'),   // legacy name → primary ink
+        ink:              tok('--c-ink-hi'),
+        muted:            tok('--c-ink-mid'),
+        'ink-low':        tok('--c-ink-low'),
+        teal:             tok('--c-alt-teal'),
+        'status-done':    tok('--c-status-done'),
+        'status-now':     tok('--c-status-now'),
+        'status-later':   tok('--c-status-later'),
+        'status-alert':   tok('--c-status-alert'),
+
+        // Legacy ppw-* aliases (kept; now theme-aware)
+        'ppw-bg':    tok('--c-bg-base'),
+        'ppw-gold':  tok('--c-accent'),
+        'ppw-cream': tok('--c-ink-hi'),
+        'ppw-teal':  tok('--c-alt-teal'),
+
+        // Static brand candy values (used by gradient tiles; not theme-flipped)
         'cream-bg':   '#ECEBE9',
         glass:        '#FFFFFF',
         'ink-dark':   '#1A1A1A',
@@ -28,11 +48,6 @@ export default {
         coral:        '#D9655B',
       },
       fontFamily: {
-        // v2 (2026-06-02) — serif retired app-wide. EB Garamond headers read
-        // as the Bonny "Listening Body" brand; the Vision-Pro target is
-        // sans-serif throughout. `display` now points at the same sans stack
-        // as `body`, so every existing `font-display` header renders clean
-        // sans with no per-call JSX churn.
         display: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
         body:    ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
       },

@@ -5,7 +5,11 @@
    file works at root ('/') and under a GitHub Pages repo subpath
    (e.g. '/ppw-fascia-app/').
 */
-const CACHE_NAME = 'ppw-cache-v0.6.0-reminders-2026-06-02';
+// Bump on EVERY release so the browser sees sw.js as changed, installs the new
+// SW, skipWaiting()+clients.claim() activate it immediately, and the activate
+// handler purges the old cache — returning visitors get the new build, never a
+// stale cached index.html. (2026-06-03: dual-theme redesign.)
+const CACHE_NAME = 'ppw-cache-v0.7.0-dual-theme-2026-06-03';
 
 // BASE includes the leading and trailing slash. Examples:
 //   served at /sw.js                -> BASE = '/'

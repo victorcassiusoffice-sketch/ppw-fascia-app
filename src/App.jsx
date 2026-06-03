@@ -24,6 +24,9 @@ import { useScrollFadeIn } from './useScrollFadeIn.js';
 import { downloadSlotIcs } from './lib/ics.js';
 import { ensurePersistentStorage } from './lib/storagePersist.js';
 import { getPushState, subscribeToPush, INSTALL_HELP } from './lib/push.js';
+import { LazyMotion, domAnimation, m, AnimatePresence, useReducedMotion, motionPresets } from './motion.js';
+import { HelixLogo, ThemeToggle, BottomNav } from './chrome.jsx';
+import { useTheme } from './theme.js';
 
 const KNOWN_AUDIO_MODULES = [
   { slug: 'daytime_stress', label: 'Daytime Stress & Mind Clearing', defaultTime: '14:30' },
@@ -91,8 +94,9 @@ const initialSession = {
 
 export default function App() {
   const [session, setSession] = useState(initialSession);
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const location = useLocation();
+  const reduced = useReducedMotion();
+  const presets = motionPresets(reduced);
 
   const [activeProtocols] = useActiveProtocols();
   const [activeModules] = useActiveModules();
@@ -103,79 +107,68 @@ export default function App() {
     (activeRoutines.savedZones?.length || 0) > 0;
 
   return (
-    <div className="app-glass min-h-screen text-ink">
-      <Header onMenu={() => setDrawerOpen(true)} />
-      <NavDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
-      <div key={location.pathname} className="animate-fadeIn">
-        <Routes>
-          <Route path="/"           element={hasActiveState ? <Navigate to="/today" replace /> : <VideoIntro><Entry session={session} setSession={setSession} /></VideoIntro>} />
-          <Route path="/welcome"    element={<VideoIntro><Entry session={session} setSession={setSession} /></VideoIntro>} />
-          <Route path="/lifestyle"  element={<LifestyleSelect session={session} setSession={setSession} />} />
-          <Route path="/level"      element={<LevelSelect session={session} setSession={setSession} />} />
-          <Route path="/body"       element={<BodyMap session={session} setSession={setSession} />} />
-          <Route path="/tests"      element={<TestEngine session={session} setSession={setSession} />} />
-          <Route path="/summary"    element={<Summary session={session} setSession={setSession} />} />
-          <Route path="/session"    element={<SessionPlayer session={session} />} />
-
-          <Route path="/today"          element={<TodayView />} />
-          <Route path="/protocols"      element={<ProtocolsList />} />
-          <Route path="/protocol/:id"   element={<ProtocolDetail />} />
-          <Route path="/modules"        element={<ModulesList />} />
-          <Route path="/settings"       element={<SettingsView />} />
-
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </div>
-    </div>
-  );
-}
-
-/* ────────── header ────────── */
-function Header({ onMenu }) {
-  return (
-    <header className="app-topbar px-5 py-3 flex items-center justify-between sticky top-0 z-40">
-      <Link to="/" className="topbar-title font-display text-xl tracking-tight inline-flex items-center gap-2 font-semibold">
-        <span className="inline-block w-2 h-2 rounded-full bg-accent shadow-[0_0_12px_rgba(220,169,87,0.7)]" aria-hidden="true" />
-        PPW<span className="text-accent">.</span>
-      </Link>
-      <div className="text-xs text-muted uppercase tracking-[0.2em] hidden sm:block">Peak Performance Wellness</div>
-      <button onClick={onMenu} aria-label="Menu" className="hamburger-glass text-base">☰</button>
-    </header>
-  );
-}
-
-function NavDrawer({ open, onClose }) {
-  const items = [
-    { to: '/today',     label: 'Today',           icon: '◐' },
-    { to: '/protocols', label: 'Protocols',       icon: '●' },
-    { to: '/modules',   label: 'Audio & Modules', icon: '🎧' },
-    { to: '/welcome',   label: 'Create our Personalised Release Routine', icon: '◆' },
-    { to: '/settings',  label: 'Settings',        icon: '⚙' },
-  ];
-  return (
-    <>
-      <div
-        className={`app-drawer-scrim fixed inset-0 z-50 transition-opacity ${open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
-        onClick={onClose}
-      />
-      <aside
-        className={`app-drawer-panel fixed top-0 right-0 z-50 h-full w-[280px] max-w-[85vw] p-6 transition-transform ${open ? 'translate-x-0' : 'translate-x-full'}`}
-      >
-        <div className="flex items-center justify-between mb-8">
-          <div className="font-display text-xl font-semibold">Menu</div>
-          <button onClick={onClose} aria-label="Close" className="text-muted hover:text-accent text-2xl leading-none">×</button>
+    <LazyMotion features={domAnimation}>
+      <div className="min-h-screen text-ink">
+        {/* Faded fascia background (buildspec §2) — interim CSS web + optional PNG. */}
+        <div className="bg-art" aria-hidden="true">
+          <img
+            src={`${import.meta.env.BASE_URL}assets/backgrounds/fascia_web_field.png`}
+            alt=""
+            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+          />
         </div>
-        <nav className="flex flex-col gap-2">
-          {items.map(it => (
-            <Link key={it.to} to={it.to} onClick={onClose} className="card px-4 py-3 flex items-center gap-3 hover:border-accent transition-all">
-              <span className="text-accent text-lg w-6 text-center">{it.icon}</span>
-              <span className="font-display text-sm">{it.label}</span>
-            </Link>
-          ))}
-        </nav>
-        <div className="mt-10 text-xs text-muted">PPW · v{APP_VERSION}</div>
-      </aside>
-    </>
+
+        <Header />
+
+        {/* Enter-only keyed route transition. (AnimatePresence mode="wait" is
+            avoided here: a held exit can block the next route from mounting on
+            SPA navigation — the new screen must always appear immediately.) */}
+        <m.div
+          key={location.pathname}
+          initial={presets.route.initial}
+          animate={presets.route.animate}
+          transition={presets.route.transition}
+          style={{ paddingBottom: 'calc(72px + env(safe-area-inset-bottom))' }}
+        >
+          <Routes location={location}>
+            <Route path="/"           element={hasActiveState ? <Navigate to="/today" replace /> : <VideoIntro><Entry session={session} setSession={setSession} /></VideoIntro>} />
+            <Route path="/welcome"    element={<VideoIntro><Entry session={session} setSession={setSession} /></VideoIntro>} />
+            <Route path="/lifestyle"  element={<LifestyleSelect session={session} setSession={setSession} />} />
+            <Route path="/level"      element={<LevelSelect session={session} setSession={setSession} />} />
+            <Route path="/body"       element={<BodyMap session={session} setSession={setSession} />} />
+            <Route path="/tests"      element={<TestEngine session={session} setSession={setSession} />} />
+            <Route path="/summary"    element={<Summary session={session} setSession={setSession} />} />
+            <Route path="/session"    element={<SessionPlayer session={session} />} />
+
+            <Route path="/today"          element={<TodayView />} />
+            <Route path="/protocols"      element={<ProtocolsList />} />
+            <Route path="/protocol/:id"   element={<ProtocolDetail />} />
+            <Route path="/modules"        element={<ModulesList />} />
+            <Route path="/settings"       element={<SettingsView />} />
+
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </m.div>
+
+        <BottomNav />
+      </div>
+    </LazyMotion>
+  );
+}
+
+/* ────────── header — spare: DNA-helix mark (home) + theme toggle.
+   Wordmark + hamburger drawer retired (Vic explicit changes #2 + drawer→
+   bottom-nav). Routine builder stays reachable via the Today empty state,
+   the Today overflow ⋮ menu, and Settings → Personalised routine. ────────── */
+function Header() {
+  return (
+    <header
+      className="px-5 py-3 flex items-center justify-between sticky top-0 z-40"
+      style={{ background: 'linear-gradient(180deg, var(--col-bg) 72%, transparent)' }}
+    >
+      <Link to="/" aria-label="PPW home"><HelixLogo size={30} draw /></Link>
+      <ThemeToggle />
+    </header>
   );
 }
 
@@ -596,7 +589,7 @@ function BodyMap({ session, setSession }) {
       </div>
 
       {painFor && (
-        <div className="fixed inset-0 bg-bg/85 flex items-center justify-center z-50 p-4" onClick={() => setPainFor(null)}>
+        <div className="fixed inset-0 ppw-scrim flex items-center justify-center z-50 p-4" onClick={() => setPainFor(null)}>
           <div className="card p-6 md:p-8 w-full max-w-[340px] animate-fadeIn" onClick={e => e.stopPropagation()}>
             <div className="text-xs text-muted uppercase tracking-widest mb-2">Pain level</div>
             <div className="font-display text-xl mb-5">
@@ -1211,13 +1204,13 @@ function Tickbox({ checked, onChange, ariaLabel, kindClass }) {
           width: 18,
           height: 18,
           borderRadius: 4,
-          border: '1.5px solid #1A1A1A',
-          backgroundColor: checked ? '#DCA957' : '#FFFFFF',
-          transition: 'background-color 120ms ease',
+          border: '1.5px solid ' + (checked ? 'var(--col-accent)' : 'var(--col-mid)'),
+          backgroundColor: checked ? 'var(--col-accent)' : 'var(--col-inset)',
+          transition: 'background-color 120ms ease, border-color 120ms ease',
         }}
       >
         {checked && (
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgb(var(--c-on-accent))" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
             <polyline points="20 6 9 17 4 12" />
           </svg>
         )}
@@ -1292,18 +1285,18 @@ function MasterTickbox({ selectedCount, visibleCount, onToggle }) {
           width: 18,
           height: 18,
           borderRadius: 4,
-          border: '1.5px solid #1A1A1A',
-          backgroundColor: filled ? '#DCA957' : '#FFFFFF',
-          transition: 'background-color 120ms ease',
+          border: '1.5px solid ' + (filled ? 'var(--col-accent)' : 'var(--col-mid)'),
+          backgroundColor: filled ? 'var(--col-accent)' : 'var(--col-inset)',
+          transition: 'background-color 120ms ease, border-color 120ms ease',
         }}
       >
         {state === 'full' && (
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgb(var(--c-on-accent))" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
             <polyline points="20 6 9 17 4 12" />
           </svg>
         )}
         {state === 'mixed' && (
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgb(var(--c-on-accent))" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
             <line x1="4" y1="12" x2="20" y2="12" />
           </svg>
         )}
@@ -1414,10 +1407,10 @@ function ClearCalendarModal({ open, onClose, onConfirm }) {
 
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-[55] bg-bg/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[55] ppw-scrim flex items-end sm:items-center justify-center p-4" onClick={onClose}>
       <div
         className="card w-full max-w-md max-h-[92vh] overflow-y-auto"
-        style={{ backgroundColor: '#0a1628', border: '1px solid rgba(255,187,88,0.4)' }}
+        style={{ backgroundColor: 'var(--col-surface-a)', border: '1px solid rgb(var(--c-accent) / 0.4)' }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-3 border-b border-cream/10">
@@ -1462,14 +1455,14 @@ function ClearCalendarModal({ open, onClose, onConfirm }) {
                   className="aspect-square rounded-md flex items-center justify-center text-sm font-display transition-all"
                   style={{
                     backgroundColor: sel
-                      ? '#FFBB58'
+                      ? 'var(--col-accent)'
                       : inR
-                        ? 'rgba(255,187,88,0.18)'
+                        ? 'var(--accent-soft)'
                         : isT
-                          ? '#232C3B'
+                          ? 'var(--col-inset)'
                           : 'transparent',
-                    color: sel ? '#232C3B' : isT ? '#F5EBD7' : 'rgba(245,235,215,0.8)',
-                    border: '1px solid ' + (sel ? '#FFBB58' : isT ? 'rgba(255,187,88,0.6)' : 'transparent'),
+                    color: sel ? 'var(--col-on-accent)' : 'var(--col-ink)',
+                    border: '1px solid ' + (sel ? 'var(--col-accent)' : isT ? 'rgb(var(--c-accent) / 0.6)' : 'transparent'),
                   }}
                   title={cell.iso}
                 >
@@ -1522,10 +1515,10 @@ function NotificationOverlay({ item, onOpen, onSkip, onAutoplay }) {
   const handleAutoplayClick = () => setAskingFuture(true);
   if (askingFuture) {
     return (
-      <div className="fixed inset-0 z-[60] bg-bg/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+      <div className="fixed inset-0 z-[60] ppw-scrim flex items-end sm:items-center justify-center p-4">
         <div
           className="card w-full max-w-sm p-5"
-          style={{ backgroundColor: '#0a1628', border: '1px solid #FFBB58' }}
+          style={{ backgroundColor: 'var(--col-surface-a)', border: '1px solid var(--col-accent)' }}
         >
           <div className="font-display text-lg mb-2">Autoplay this stack</div>
           <p className="text-muted text-sm mb-5">
@@ -1548,10 +1541,10 @@ function NotificationOverlay({ item, onOpen, onSkip, onAutoplay }) {
     );
   }
   return (
-    <div className="fixed inset-0 z-[60] bg-bg/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Stack reminder">
+    <div className="fixed inset-0 z-[60] ppw-scrim flex items-end sm:items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Stack reminder">
       <div
         className="card w-full max-w-sm p-5"
-        style={{ backgroundColor: '#0a1628', border: '1px solid #FFBB58' }}
+        style={{ backgroundColor: 'var(--col-surface-a)', border: '1px solid var(--col-accent)' }}
       >
         <div className="text-xs uppercase tracking-widest text-accent mb-1">{item.time} · In-app reminder</div>
         <div className="font-display text-xl mb-1 leading-tight">{item.label}</div>
@@ -1598,10 +1591,10 @@ function AddProtocolModal({ open, onClose, onActivate }) {
   }, [open]);
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 bg-bg/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 ppw-scrim flex items-end sm:items-center justify-center p-4" onClick={onClose}>
       <div
         className="card w-full max-w-md max-h-[90vh] overflow-y-auto"
-        style={{ backgroundColor: '#0a1628' }}
+        style={{ backgroundColor: 'var(--col-surface-a)' }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-cream/10">
@@ -1660,9 +1653,9 @@ function DragMergePlusOverlay() {
         style={{
           width: 56,
           height: 56,
-          backgroundColor: 'rgba(255, 187, 88, 0.92)',
-          boxShadow: '0 8px 28px -6px rgba(255,187,88,0.7)',
-          color: '#0E0E10',
+          backgroundColor: 'var(--col-accent)',
+          boxShadow: '0 8px 28px -6px var(--accent-soft)',
+          color: 'var(--col-on-accent)',
         }}
       >
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -1853,31 +1846,31 @@ const DateStrip = React.forwardRef(function DateStrip({ selectedDate, onSelect }
     >
       {days.map(d => {
         const isToday = d.iso === today;
-        const isSelected = d.iso === selectedDate;
-        const baseClasses = 'shrink-0 flex flex-col items-center justify-center rounded-lg px-3 py-2 min-w-[56px] transition-all';
-        const styleClasses = isToday
-          ? 'text-cream'
-          : isSelected
-            ? 'text-accent border border-accent bg-cream/5'
-            : 'text-muted hover:text-cream border border-cream/10';
-        const inlineStyle = isToday
-          ? { backgroundColor: '#232C3B', boxShadow: isSelected ? '0 0 0 2px #f5b845' : undefined }
-          : {};
+        const sel = d.iso === selectedDate;
         return (
           <button
             key={d.iso}
             ref={isToday ? todayRef : null}
             type="button"
             role="tab"
-            aria-selected={isSelected}
+            aria-selected={sel}
             onClick={() => onSelect(d.iso)}
-            className={`${baseClasses} ${styleClasses}`}
-            style={{ ...inlineStyle, scrollSnapAlign: 'center' }}
+            className="shrink-0 flex flex-col items-center justify-center transition-all"
+            style={{
+              width: 54, padding: '9px 0', borderRadius: 'var(--r-16)',
+              background: sel ? 'var(--col-accent)' : 'var(--col-surface)',
+              color: sel ? 'var(--col-on-accent)' : 'var(--col-ink)',
+              boxShadow: sel
+                ? 'var(--elv-2)'
+                : isToday ? 'var(--elv-1), 0 0 0 2px var(--col-accent) inset' : 'var(--elv-1)',
+              transform: sel ? 'translateY(-2px)' : 'none',
+              scrollSnapAlign: 'center',
+            }}
             title={d.iso}
           >
-            <span className="text-[10px] uppercase tracking-widest font-bold">{d.weekday}</span>
-            <span className="font-display text-lg leading-none mt-0.5">{d.day}</span>
-            <span className="text-[9px] uppercase mt-0.5 opacity-70">{d.month}</span>
+            <span className={sel ? '' : 'text-muted'} style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em' }}>{d.weekday}</span>
+            <span className="font-display tnum" style={{ fontSize: 18, lineHeight: 1, marginTop: 3 }}>{d.day}</span>
+            <span className={sel ? '' : 'text-muted'} style={{ fontSize: 9, marginTop: 2, opacity: 0.75, textTransform: 'uppercase' }}>{d.month}</span>
           </button>
         );
       })}
@@ -1890,18 +1883,47 @@ const DateStrip = React.forwardRef(function DateStrip({ selectedDate, onSelect }
    ═══════════════════════════════════════════ */
 // Daily completion ring — gold progress arc + count. Reads already-computed
 // counts (no new persisted state). Reduced-motion users still get the static arc.
-function CompletionRing({ done, total }) {
+function CompletionRing({ done, total, hero = false }) {
   const pct = total > 0 ? done / total : 0;
+  const allDone = total > 0 && done === total;
+  if (hero) {
+    // Large gradient ring for the Next-up hero (buildspec §4.1.4).
+    const r = 38;
+    const circ = 2 * Math.PI * r;
+    const pctNum = Math.round(pct * 100);
+    return (
+      <div className="relative shrink-0" style={{ width: 92, height: 92 }} aria-label={`${pctNum}% of today done`}>
+        <svg width="92" height="92" viewBox="0 0 96 96" aria-hidden="true">
+          <circle cx="48" cy="48" r={r} fill="none" stroke="var(--col-inset)" strokeWidth="9" />
+          <circle
+            cx="48" cy="48" r={r} fill="none"
+            stroke="url(#ppwHeroRing)" strokeWidth="9" strokeLinecap="round"
+            strokeDasharray={circ} strokeDashoffset={circ * (1 - pct)}
+            transform="rotate(-90 48 48)"
+            style={{ transition: 'stroke-dashoffset 600ms cubic-bezier(0.22,1,0.36,1)' }}
+          />
+          <defs>
+            <linearGradient id="ppwHeroRing" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stopColor="#F5A623" /><stop offset="1" stopColor="rgb(var(--c-accent))" />
+            </linearGradient>
+          </defs>
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <b className="tnum" style={{ fontSize: 22, fontWeight: 700 }}>{pctNum}%</b>
+          <span className="text-muted" style={{ fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: 2 }}>today</span>
+        </div>
+      </div>
+    );
+  }
   const r = 11;
   const circ = 2 * Math.PI * r;
-  const allDone = total > 0 && done === total;
   return (
     <div className="flex items-center gap-1.5 shrink-0" title={`${done} of ${total} done`} aria-label={`${done} of ${total} done`}>
       <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true" style={{ transform: 'rotate(-90deg)' }}>
-        <circle cx="14" cy="14" r={r} fill="none" stroke="rgba(245,235,215,0.14)" strokeWidth="3" />
+        <circle cx="14" cy="14" r={r} fill="none" stroke="var(--col-inset)" strokeWidth="3" />
         <circle
           cx="14" cy="14" r={r} fill="none"
-          stroke="#FFBB58" strokeWidth="3" strokeLinecap="round"
+          stroke="rgb(var(--c-accent))" strokeWidth="3" strokeLinecap="round"
           strokeDasharray={circ} strokeDashoffset={circ * (1 - pct)}
           style={{ transition: 'stroke-dashoffset 500ms cubic-bezier(0.22,1,0.36,1)' }}
         />
@@ -1947,17 +1969,17 @@ function StreakChip({ count }) {
   return (
     <div
       className="inline-flex items-center gap-1 shrink-0 rounded-full px-2 py-1 transition-transform"
-      style={{ backgroundColor: 'rgba(255,187,88,0.10)', border: '1px solid rgba(255,187,88,0.30)', minHeight: 28 }}
+      style={{ backgroundColor: 'var(--accent-soft)', border: '1px solid rgb(var(--c-accent) / 0.3)', minHeight: 28 }}
       title={`${count}-day streak`}
       aria-label={`${count} day streak`}
     >
       <svg width="11" height="13" viewBox="0 0 24 24" aria-hidden="true">
         <path
-          fill="#FFBB58"
+          fill="rgb(var(--c-accent))"
           d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"
         />
       </svg>
-      <span className="text-xs font-bold tabular-nums" style={{ color: '#FFBB58' }}>{count}</span>
+      <span className="text-xs font-bold tabular-nums" style={{ color: 'rgb(var(--c-accent))' }}>{count}</span>
     </div>
   );
 }
@@ -2031,6 +2053,12 @@ function TodayView() {
   const clearSelection = useCallback(() => setSelectedIds(new Set()), []);
   // Patch 1 — Clear calendar modal.
   const [clearOpen, setClearOpen] = useState(false);
+  // Redesign (2026-06-03) — overflow ⋮ menu for rare actions (select-all,
+  // clear, create routine) so the action row stays to two balanced pills.
+  const [overflowOpen, setOverflowOpen] = useState(false);
+  const nav = useNavigate();
+  const reduced = useReducedMotion();
+  const presets = motionPresets(reduced);
 
   useEffect(() => {
     let cancelled = false;
@@ -2684,44 +2712,44 @@ function TodayView() {
   // Streak recomputes whenever today's completion set changes (toggle a tick).
   const streak = useMemo(() => computeCompletionStreak(), [completed, selectedDate]);
 
+  // Redesign — month/year header line + the "Next up" hero source item.
+  const monthLabel = new Date(selectedDate + 'T12:00:00').toLocaleDateString(undefined, { month: 'long' });
+  const yearLabel = new Date(selectedDate + 'T12:00:00').getFullYear();
+  const nextUp = useMemo(() => {
+    const pending = visibleItems.filter(it => !completed.includes(it.id));
+    if (pending.length === 0) return null;
+    const nowHM = new Date().toTimeString().slice(0, 5);
+    const upcoming = pending.find(it => (it.time || '99:99') >= nowHM);
+    return upcoming || pending[0];
+  }, [visibleItems, completed]);
+
   return (
-    <main className="slot-cream px-5 pt-2 pb-24 max-w-3xl mx-auto">
-      {/* Iter 2 Phase 6 — sticky top bar (title · date strip · action row).
-          Lives below the global Header (z-40); uses z-30. Brand-pack navy
-          background + 1px gold separator. Negative-x margin extends to viewport
-          edges so the bar feels full-bleed inside the main column. */}
+    <main className="px-5 pt-1 pb-28 max-w-3xl mx-auto">
+      {/* Sticky top bar — month line · date strip · rebalanced action row.
+          Token-driven surface so it flips light↔dark. Sits below the global
+          Header (z-40); uses z-30. Full-bleed via negative-x margin. */}
       <div
         className="sticky z-30 -mx-5 px-5 pt-2 pb-2"
         style={{
-          top: 60,
-          backgroundColor: 'rgba(236,235,233,0.78)',
+          top: 56,
+          background: 'rgb(var(--c-bg-base) / 0.86)',
           backdropFilter: 'saturate(150%) blur(20px)',
           WebkitBackdropFilter: 'saturate(150%) blur(20px)',
-          borderBottom: '1px solid rgba(255,255,255,0.6)',
+          borderBottom: '1px solid var(--hairline)',
         }}
       >
-        <div className="flex items-center justify-between mb-1">
-          <div className="flex items-center gap-2 min-w-0">
-            <span
-              className="font-display lowercase truncate"
-              style={{ fontSize: 14, color: '#5B6472' }}
-            >{headingDate}</span>
+        {/* Month line — big display month + year (left), glance cluster (right). */}
+        <div className="flex items-end justify-between mb-1.5">
+          <div className="min-w-0">
+            <div className="font-display leading-none" style={{ fontSize: 26, letterSpacing: '-0.02em' }}>
+              {monthLabel}<span className="text-muted ml-1.5" style={{ fontSize: 15, fontWeight: 500 }}>{yearLabel}</span>
+            </div>
             <button
               type="button"
               onClick={() => dateStripRef.current?.jumpToToday()}
-              className="shrink-0"
-              style={{
-                width: 50,
-                height: 24,
-                borderRadius: 12,
-                backgroundColor: '#FFFFFF',
-                color: '#1A1A1A',
-                fontSize: 11,
-                fontWeight: 700,
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                border: selectedDate === todayISO() ? '1px solid #DCA957' : '1px solid rgba(26,26,26,0.10)',
-              }}
+              className="mt-1 inline-flex items-center gap-1 today-time-chip"
+              style={{ height: 26, minHeight: 26, padding: '0 12px', fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase',
+                borderColor: selectedDate === todayISO() ? 'var(--col-accent)' : 'var(--hairline)' }}
               aria-label="Jump to today"
               title="Jump to today"
             >Today</button>
@@ -2732,74 +2760,71 @@ function TodayView() {
           </div>
         </div>
         <DateStrip ref={dateStripRef} selectedDate={selectedDate} onSelect={setSelectedDate} />
-        {/* Patch 1 (2026-05-24) — action row restructure.
-            Row 1: master tickbox + Stack/Protocol pills + Clear pill + Bell (right).
-            Row 2 (only when any tickbox is on): Merge / Delete pills, count chip, "deselect all" link.
-            SelectionActionBar floating bar removed; bulk controls live in the sticky toolbar (Gmail-inbox pattern per Vic 2026-05-24). */}
-        <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-          <MasterTickbox
-            selectedCount={selectedIds.size}
-            visibleCount={visibleItems.length}
-            onToggle={handleMasterToggle}
-          />
+
+        {/* Rebalanced action row — two equal pills + ⋮ overflow (bell moved to
+            bottom nav per Vic change #1). Rare actions (select-all, clear,
+            create routine) live under ⋮ so nothing crowds at 360px. */}
+        <div className="grid items-center gap-2.5" style={{ gridTemplateColumns: '1fr 1fr auto' }}>
           <button
             type="button"
             onClick={() => setAddModalOpen(true)}
-            className="tile-amber flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
+            className="btn-accent flex items-center justify-center gap-2"
+            style={{ height: 44, padding: 0 }}
             title="Add a custom stack"
           >
-            <IconPlus />
-            <span>Stack</span>
+            <IconPlus /><span className="text-sm">Stack</span>
           </button>
           <button
             type="button"
             onClick={() => setAddProtocolOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
-            style={{ backgroundColor: '#FFFFFF', color: '#1A1A1A', border: '1px solid rgba(220,169,87,0.45)' }}
+            className="btn-secondary flex items-center justify-center gap-2"
+            style={{ height: 44, padding: 0 }}
             title="Add a science protocol from your library"
           >
-            <IconBookOpen />
-            <span>Protocol</span>
+            <IconBookOpen /><span className="text-sm">Protocol</span>
           </button>
-          <button
-            type="button"
-            onClick={() => setClearOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
-            style={{ backgroundColor: 'transparent', color: '#1A1A1A', border: '1px solid rgba(26,26,26,0.18)' }}
-            title="Clear stacks for a day or range"
-          >
-            <IconCalendar />
-            <span>Clear</span>
-          </button>
-          <div className="flex-1" />
-          <button
-            type="button"
-            onClick={handleToggleNotifications}
-            className="w-9 h-9 rounded-full flex items-center justify-center transition-all"
-            style={{
-              backgroundColor: notifPrefs.enabled ? 'rgba(220,169,87,0.18)' : '#FFFFFF',
-              color: notifPrefs.enabled ? '#B07F2E' : '#5B6472',
-              border: '1px solid ' + (notifPrefs.enabled ? '#DCA957' : 'rgba(26,26,26,0.12)'),
-            }}
-            aria-label={notifPrefs.enabled ? 'Notifications on — tap to disable' : 'Notifications off — tap to enable'}
-            aria-pressed={notifPrefs.enabled}
-            title={notifPrefs.enabled ? 'Notifications on' : 'Notifications off'}
-          >
-            <IconBell filled={notifPrefs.enabled} />
-          </button>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setOverflowOpen(v => !v)}
+              className="btn-secondary flex items-center justify-center"
+              style={{ height: 44, width: 44, padding: 0, fontSize: 20 }}
+              aria-haspopup="menu"
+              aria-expanded={overflowOpen}
+              aria-label="More actions"
+              title="More — select all, clear, create routine"
+            >⋯</button>
+            {overflowOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setOverflowOpen(false)} aria-hidden="true" />
+                <div
+                  role="menu"
+                  className="absolute right-0 mt-2 z-50 card p-1.5"
+                  style={{ minWidth: 208 }}
+                >
+                  <button role="menuitem" type="button" onClick={() => { handleMasterToggle(selectedIds.size === 0 ? 'empty' : 'full'); setOverflowOpen(false); }} className="w-full text-left px-3 py-2.5 rounded-xl text-sm hover:bg-cream/5 flex items-center gap-2">
+                    <span aria-hidden="true">☑</span>{selectedIds.size === 0 ? 'Select all on this day' : 'Clear selection'}
+                  </button>
+                  <button role="menuitem" type="button" onClick={() => { setClearOpen(true); setOverflowOpen(false); }} className="w-full text-left px-3 py-2.5 rounded-xl text-sm hover:bg-cream/5 flex items-center gap-2">
+                    <IconCalendar /> Clear a day or range…
+                  </button>
+                  <button role="menuitem" type="button" onClick={() => { setOverflowOpen(false); nav('/welcome'); }} className="w-full text-left px-3 py-2.5 rounded-xl text-sm hover:bg-cream/5 flex items-center gap-2">
+                    <span aria-hidden="true">◆</span> Create personalised routine
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
+
         {selectedIds.size > 0 && (
-          <div className="flex items-center gap-1.5 mt-1.5 pt-1.5 border-t border-cream/5 flex-wrap">
+          <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-cream/10 flex-wrap">
             <button
               type="button"
               onClick={handleBulkMerge}
               disabled={selectedIds.size < 2}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-              style={{
-                backgroundColor: selectedIds.size >= 2 ? '#DCA957' : 'transparent',
-                color: selectedIds.size >= 2 ? '#1A1A1A' : '#1A1A1A',
-                border: '1px solid #DCA957',
-              }}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{ backgroundColor: selectedIds.size >= 2 ? 'var(--col-accent)' : 'transparent', color: selectedIds.size >= 2 ? 'var(--col-on-accent)' : 'var(--col-ink)', border: '1px solid var(--col-accent)' }}
               title={selectedIds.size >= 2 ? 'Merge selected into one tabbed stack' : 'Select 2 or more to merge'}
             >
               <span>Merge ({selectedIds.size})</span>
@@ -2808,36 +2833,65 @@ function TodayView() {
               <button
                 type="button"
                 onClick={handleBulkDuplicate}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
-                style={{ backgroundColor: 'transparent', color: '#1A1A1A', border: '1px solid rgba(220,169,87,0.6)' }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold transition-all"
+                style={{ backgroundColor: 'transparent', color: 'var(--col-ink)', border: '1px solid var(--col-accent)' }}
                 title="Duplicate the selected stack (adds a copy 4h later)"
               >
-                <IconCopy />
-                <span>Duplicate</span>
+                <IconCopy /><span>Duplicate</span>
               </button>
             )}
             <button
               type="button"
               onClick={handleBulkDelete}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
-              style={{ backgroundColor: 'transparent', color: '#D9655B', border: '1px solid rgba(217,101,91,0.6)' }}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold transition-all"
+              style={{ backgroundColor: 'transparent', color: 'rgb(var(--c-status-alert))', border: '1px solid rgb(var(--c-status-alert) / 0.6)' }}
               title="Delete selected stacks from this day"
             >
-              <IconTrash />
-              <span>Delete</span>
+              <IconTrash /><span>Delete</span>
             </button>
             <div className="flex-1" />
-            <span className="text-[11px] text-cream/80 font-bold">{selectedIds.size} selected</span>
+            <span className="text-[11px] text-muted font-bold">{selectedIds.size} selected</span>
             <button
               type="button"
               onClick={clearSelection}
-              className="w-7 h-7 flex items-center justify-center text-cream/70 hover:text-cream"
+              className="w-7 h-7 flex items-center justify-center text-muted hover:text-cream"
               aria-label="Clear selection"
               title="Clear selection"
             >×</button>
           </div>
         )}
       </div>
+
+      {/* Next-up hero (buildspec §4.1.4) — oversized asymmetric anchor. */}
+      {!empty && (
+        <div className="card flex items-center justify-between gap-4 mt-4" style={{ padding: '18px 20px' }}>
+          {nextUp ? (
+            <>
+              <div className="min-w-0">
+                <div className="eyebrow" style={{ color: 'rgb(var(--c-status-now))' }}>Next up</div>
+                <div className="font-display tnum" style={{ fontSize: 30, lineHeight: 1, margin: '8px 0 4px' }}>{nextUp.time || '—:—'}</div>
+                <div className="text-muted text-sm truncate" style={{ maxWidth: '52vw' }}>{titleFor(nextUp)}</div>
+                <button
+                  type="button"
+                  onClick={() => setExpanded(nextUp.id)}
+                  className="btn-accent mt-3 inline-flex items-center gap-1"
+                  style={{ height: 38, padding: '0 18px', fontSize: 13 }}
+                >Open ▸</button>
+              </div>
+              <CompletionRing done={completedCount} total={items.length} hero />
+            </>
+          ) : (
+            <>
+              <div className="min-w-0">
+                <div className="eyebrow" style={{ color: 'rgb(var(--c-status-done))' }}>All done</div>
+                <div className="font-display" style={{ fontSize: 22, lineHeight: 1.1, margin: '8px 0 2px' }}>Nice work today ✓</div>
+                <div className="text-muted text-sm">Everything on this day is ticked off.</div>
+              </div>
+              <CompletionRing done={completedCount} total={items.length} hero />
+            </>
+          )}
+        </div>
+      )}
 
       {toast && (
         <div
@@ -3073,7 +3127,20 @@ function TodayView() {
                 </div>
               </div>
 
-              {isOpen && renderItemBody(it, false)}
+              <AnimatePresence initial={false}>
+                {isOpen && (
+                  <m.div
+                    key="body"
+                    initial={presets.expand.initial}
+                    animate={presets.expand.animate}
+                    exit={presets.expand.exit}
+                    transition={presets.expand.transition}
+                    style={{ overflow: 'hidden' }}
+                  >
+                    {renderItemBody(it, false)}
+                  </m.div>
+                )}
+              </AnimatePresence>
             </div>
           );
         }}
@@ -3129,10 +3196,10 @@ function TodayView() {
           is "This day only" so the destructive cascade is never accidental. */}
       {pendingRecurringDelete && (
         <div
-          className="fixed inset-0 z-50 bg-bg/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-4"
+          className="fixed inset-0 z-50 ppw-scrim flex items-end sm:items-center justify-center p-4"
           onClick={() => setPendingRecurringDelete(null)}
         >
-          <div className="card w-full max-w-sm p-5" style={{ backgroundColor: '#0a1628' }} onClick={(e) => e.stopPropagation()}>
+          <div className="card w-full max-w-sm p-5" style={{ backgroundColor: 'var(--col-surface-a)' }} onClick={(e) => e.stopPropagation()}>
             <div className="font-display text-lg mb-1">Remove recurring routine</div>
             <p className="text-muted text-xs mb-4">This routine repeats. Remove it from just this day, or from every day it appears?</p>
             <button
@@ -3833,6 +3900,7 @@ function ReliableRemindersCard() {
    NEW — /settings
    ═══════════════════════════════════════════ */
 function SettingsView() {
+  const { choice: themeChoice, setChoice: setThemeChoice } = useTheme();
   const [perm, setPerm] = useState(getPermissionState());
   const [mockOverride, setMockOverride] = useLocalStorage(LS_KEYS.USE_MOCK_OVERRIDE, USE_MOCK_DATA ? 'true' : 'false');
   const [activeProtocols, setActiveProtocols] = useActiveProtocols();
@@ -3853,6 +3921,40 @@ function SettingsView() {
       <Link to="/today" className="text-muted text-sm inline-block hover:text-accent mb-4 transition-colors">← Today</Link>
       <div className="eyebrow mb-3">Configure</div>
       <h1 className="font-display text-4xl md:text-5xl mb-8 leading-[1.02]">Settings</h1>
+
+      <Section title="Appearance">
+        <div className="card p-5">
+          <div className="font-display mb-1">Theme</div>
+          <div className="text-muted text-xs mb-4">Light is neumorphic soft-UI · Dark is slate + orange · System follows your device.</div>
+          <div className="grid grid-cols-3 gap-2" role="group" aria-label="Theme">
+            {[
+              { key: 'light',  label: 'Light',  icon: '☀' },
+              { key: 'dark',   label: 'Dark',   icon: '☾' },
+              { key: 'system', label: 'System', icon: '⌖' },
+            ].map(opt => {
+              const active = themeChoice === opt.key;
+              return (
+                <button
+                  key={opt.key}
+                  type="button"
+                  onClick={() => setThemeChoice(opt.key)}
+                  aria-pressed={active}
+                  className="py-3 rounded-2xl text-sm font-bold flex flex-col items-center gap-1 transition-all"
+                  style={{
+                    background: active ? 'var(--col-accent)' : 'var(--col-inset)',
+                    color: active ? 'var(--col-on-accent)' : 'var(--col-ink)',
+                    boxShadow: active ? 'var(--elv-1)' : 'var(--elv-inset)',
+                    border: '1px solid var(--hairline)',
+                  }}
+                >
+                  <span aria-hidden="true" style={{ fontSize: 18 }}>{opt.icon}</span>
+                  <span>{opt.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </Section>
 
       <Section title="Notifications">
         <div className="card p-5">

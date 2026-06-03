@@ -260,10 +260,10 @@ export default function AddStackModal({ open, onClose, onSave, defaultTime = '08
   const chosenType = TYPES.find(t => t.key === chosen);
 
   return (
-    <div className="fixed inset-0 z-50 bg-bg/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-4" onClick={handleClose}>
+    <div className="fixed inset-0 z-50 ppw-scrim flex items-end sm:items-center justify-center p-4" onClick={handleClose}>
       <div
         className="card slot-sheet-enter w-full max-w-md flex flex-col"
-        style={{ backgroundColor: '#0a1628', maxHeight: '90vh', marginBottom: keyboardInset ? keyboardInset : undefined }}
+        style={{ backgroundColor: 'var(--col-surface-a)', maxHeight: '90vh', marginBottom: keyboardInset ? keyboardInset : undefined }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-cream/10 shrink-0">

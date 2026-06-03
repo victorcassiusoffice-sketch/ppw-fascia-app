@@ -15,6 +15,22 @@
     <!-- v2 (2026-06-02) — EB Garamond dropped; Inter only (sans-serif Vision-Pro look). -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <title>PPW · Peak Performance Wellness</title>
+    <!-- Dual-theme anti-flash: resolve + apply data-theme BEFORE first paint so
+         the page never flashes the wrong palette. Mirrors src/theme.js. -->
+    <script>
+      (function () {
+        try {
+          var c = localStorage.getItem('ppw.theme');
+          if (c !== 'light' && c !== 'dark' && c !== 'system') c = 'dark';
+          var resolved = c === 'system'
+            ? (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+            : c;
+          document.documentElement.setAttribute('data-theme', resolved);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      })();
+    </script>
   </head>
   <body class="bg-bg text-ink font-body antialiased">
     <div id="root"></div>
