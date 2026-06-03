@@ -31,4 +31,4 @@ export const LS_KEYS = {
   MIGRATION_FLAG:      'ppw.migration.recurrence.v1',// 2026-06-03 — run-once migration marker
 };
 
-export const APP_VERSION = '0.4.0-night-run';
+export const APP_VERSION = '0.5.0-dual-theme';
