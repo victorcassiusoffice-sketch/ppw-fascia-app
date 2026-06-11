@@ -226,6 +226,42 @@ h1, h2, h3, h4 {
   .ppw-scrim { -webkit-backdrop-filter: none; backdrop-filter: none; }
 }
 
+/* ── App-wide user-selectable background (Refinement 2, REF-01/04/05) ──
+   Fixed ground layer behind ALL glass. The scrim tier keeps glass legible
+   over any image (defaults AND arbitrary user photos). Static — never
+   animated. data-bg on <html> drives per-kind treatment. */
+.app-bg {
+  position: fixed; inset: 0; z-index: -2; overflow: hidden;
+  background: var(--col-bg);
+}
+.app-bg img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: center;
+}
+.app-bg-scrim { position: absolute; inset: 0; background: var(--bg-image-scrim, transparent); }
+
+html[data-theme="dark"]  { --bg-image-scrim: linear-gradient(180deg, rgba(13,15,19,.62), rgba(13,15,19,.78)); }
+html[data-theme="light"] { --bg-image-scrim: linear-gradient(180deg, rgba(231,236,243,.70), rgba(231,236,243,.84)); }
+
+/* The REF-05 soft-grey ground — a calm radial wash, no image needed. */
+html[data-bg="grey"] .app-bg {
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(255,255,255,.10), transparent 60%),
+    linear-gradient(180deg, #6E7686 0%, #5B6472 100%);
+}
+html[data-theme="light"][data-bg="grey"] .app-bg {
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(255,255,255,.85), transparent 65%),
+    linear-gradient(180deg, #EDF1F7 0%, #DDE4EE 100%);
+}
+html[data-bg="grey"] .app-bg-scrim { background: transparent; }
+
+/* Full-bleed image grounds replace the hero-art zone + the legacy bg-art web
+   (no texture-on-texture; one organic surface at a time). */
+html[data-bg="nature"] .hero-art, html[data-bg="custom"] .hero-art { display: none; }
+html[data-bg="nature"] .bg-art,  html[data-bg="custom"] .bg-art  { display: none; }
+html[data-bg="grey"] .bg-art { display: none; }
+
 /* ── Organic hero zone (clip 6, dark theme only via --hero-art-opacity) ──
    Bleeds past the hero card so the frosted glass visibly floats ON the
    texture (clip 6's weather-widget-on-foliage move), fading out at the

@@ -10,6 +10,7 @@ import { getPushState, subscribeToPush, INSTALL_HELP } from '../lib/push.js';
 import { Section } from '../components/shared.jsx';
 import { m, glideIndicator, pressScale } from '../lib/motion';
 import { getPairingState, pairDevice, unpairDevice } from '../lib/assistantSync.js';
+import { useBackground, BG_OPTIONS } from '../lib/background.js';
 
 /* P0b (2026-06-02) — "Reliable reminders" card. Explains the two delivery
    paths that ACTUALLY fire on a locked phone (calendar .ics + Web Push on an
@@ -189,7 +190,10 @@ function ConnectAssistantCard() {
    NEW — /settings
    ═══════════════════════════════════════════ */
 function SettingsView() {
-  const { choice: themeChoice, setChoice: setThemeChoice } = useTheme();
+  const { choice: themeChoice, setChoice: setThemeChoice, resolved: resolvedTheme } = useTheme();
+  // Refinement 2 (REF-01/04/05) — user-selectable background behind the glass.
+  const { choice: bgChoice, setChoice: setBgChoice, pickCustom } = useBackground(resolvedTheme);
+  const [bgMsg, setBgMsg] = useState(null);
   const [perm, setPerm] = useState(getPermissionState());
   const [mockOverride, setMockOverride] = useLocalStorage(LS_KEYS.USE_MOCK_OVERRIDE, USE_MOCK_DATA ? 'true' : 'false');
   const [activeProtocols, setActiveProtocols] = useActiveProtocols();
@@ -252,6 +256,68 @@ function SettingsView() {
               );
             })}
           </div>
+        </div>
+
+        {/* Refinement 2 (REF-01/04/05) — the surface behind the glass.
+            Defaults: dark-nature (organic fascia) + soft grey; Auto follows
+            the theme; Custom = the user's own photo (stored on-device). */}
+        <div className="card p-5 mt-4">
+          <div className="font-display mb-1">Background</div>
+          <div className="text-muted text-xs mb-4">The scene behind the glass. Auto follows your theme — nature in dark, soft grey in light. Custom uses a photo from your device (stays on this device).</div>
+          <div className="grid grid-cols-4 gap-2" role="group" aria-label="Background">
+            {BG_OPTIONS.map(opt => {
+              const active = bgChoice.kind === opt.kind;
+              return (
+                <m.button
+                  key={opt.kind}
+                  type="button"
+                  onClick={() => { if (opt.kind !== 'custom') { setBgChoice({ kind: opt.kind }); setBgMsg(null); } }}
+                  aria-pressed={active}
+                  className="seg-opt py-3 rounded-2xl text-xs font-bold flex flex-col items-center gap-1.5"
+                  style={{
+                    background: 'var(--col-inset)',
+                    color: active ? 'var(--col-on-accent)' : 'var(--col-ink)',
+                    boxShadow: active ? 'none' : 'var(--elv-inset)',
+                    border: '1px solid var(--hairline)',
+                    transition: 'color var(--dur-mid) var(--ease)',
+                    position: 'relative',
+                    overflow: opt.kind === 'custom' ? 'visible' : undefined,
+                  }}
+                  title={opt.hint}
+                  {...pressScale()}
+                >
+                  {active && (
+                    <m.span className="glide-pill" aria-hidden="true" style={{ borderRadius: 'var(--r-16)' }} {...glideIndicator('bg-seg')} />
+                  )}
+                  {/* Custom is a label over a real file input so one tap opens the picker. */}
+                  {opt.kind === 'custom' && (
+                    <input
+                      type="file"
+                      accept="image/*"
+                      aria-label="Pick a custom background photo"
+                      onChange={async (e) => {
+                        const f = e.target.files && e.target.files[0];
+                        if (!f) return;
+                        try {
+                          await pickCustom(f);
+                          setBgMsg({ tone: 'ok', text: 'Background updated ✓' });
+                        } catch (_) {
+                          setBgMsg({ tone: 'warn', text: 'Could not store that photo on this device.' });
+                        }
+                        e.target.value = '';
+                      }}
+                      style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', zIndex: 2 }}
+                    />
+                  )}
+                  <span aria-hidden="true" style={{ fontSize: 16 }}>{opt.kind === 'auto' ? '◑' : opt.kind === 'nature' ? '❧' : opt.kind === 'grey' ? '◻' : '🖼'}</span>
+                  <span className="seg-label">{opt.label}</span>
+                </m.button>
+              );
+            })}
+          </div>
+          {bgMsg && (
+            <div className="text-xs mt-3" style={{ color: bgMsg.tone === 'ok' ? 'rgb(var(--c-status-done))' : 'rgb(var(--c-status-alert))' }}>{bgMsg.text}</div>
+          )}
         </div>
       </Section>
 

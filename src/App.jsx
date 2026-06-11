@@ -35,6 +35,7 @@ import { ProtocolsList, ProtocolDetail } from './pages/Protocols.jsx';
 import ModulesList from './pages/Modules.jsx';
 import SettingsView from './pages/Settings.jsx';
 import { ScienceDivider } from './components/shared.jsx';
+import AppBackground from './components/AppBackground.jsx';
 
 /* ────────────────────────────────────────────
    BodyMap — see src/bodyZones.js for the architecture comment.
@@ -116,14 +117,9 @@ export default function App() {
   return (
     <LazyMotion features={domAnimation}>
       <div className="min-h-screen text-ink">
-        {/* Faded fascia background (buildspec §2) — interim CSS web + optional PNG. */}
-        <div className="bg-art" aria-hidden="true">
-          <img
-            src={`${import.meta.env.BASE_URL}assets/backgrounds/fascia_web_field.png`}
-            alt=""
-            onError={(e) => { e.currentTarget.style.display = 'none'; }}
-          />
-        </div>
+        {/* Refinement 2 (REF-01/04/05): user-selectable ground behind the
+            glass — replaces the old fixed bg-art web. */}
+        <AppBackground />
 
         <Header />
 
