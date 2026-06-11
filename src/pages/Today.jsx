@@ -1275,22 +1275,25 @@ function TodayView() {
         onReorder={handleReorder}
         onMergeDrop={handleSortableMergeDrop}
         onDragOverChange={handleSortableDragOverChange}
-        className="space-y-3"
+        className="stack-deck"
       >
         {(it, dragHandleProps, _i, isDragging) => {
           // Liquid-glass (board 01, clip 4): rows enter staggered — rise +
           // fade on the locked tokens, keyed on selectedDate so a day switch
           // re-runs the cascade. Solid cards (they drag → no blur, perf law).
-          // Reduced motion → static (no initial offset, no delay).
-          const rowEnter = reduced ? {} : {
+          // Reduced motion → static (no initial offset, no delay, no lift).
+          // REF-07 lift-to-front: the open/selected card scales to the deck
+          // front on SPRING.glide (transform only); enter keeps the stagger.
+          const rowDelay = Math.min(_i, 8) * (STAGGER.list / 1000);
+          const deckProps = (lifted) => (reduced ? {} : {
             initial: { opacity: 0, y: 14 },
-            animate: { opacity: 1, y: 0 },
+            animate: { opacity: 1, y: 0, scale: lifted ? 1.02 : 1 },
             transition: {
-              duration: DUR.base / 1000,
-              ease: EASE.standard,
-              delay: Math.min(_i, 8) * (STAGGER.list / 1000),
+              opacity: { duration: DUR.base / 1000, ease: EASE.standard, delay: rowDelay },
+              y: { duration: DUR.base / 1000, ease: EASE.standard, delay: rowDelay },
+              scale: SPRING.glide,
             },
-          };
+          });
           // M9 — render the parent MergedStack instead of a plain card when
           // this item is the LEAD member of a merge.
           const leadMergeId = mergeLeadByItemId.lead.get(it.id);
@@ -1298,8 +1301,14 @@ function TodayView() {
             // NB: named mergeRec, NOT m — `m` is the motion component import.
             const mergeRec = merges[leadMergeId];
             const mergeIsDragOver = mergeDragOverId === it.id;
+            const mergeLifted = mergeRec.collapsed === false || isSelected(it.id);
             return (
-              <m.div key={selectedDate} {...rowEnter} className={mergeIsDragOver ? 'merge-target-pulse' : ''}>
+              <m.div
+                key={selectedDate}
+                {...deckProps(mergeLifted)}
+                style={{ position: 'relative', zIndex: mergeLifted ? 30 : undefined }}
+                className={mergeIsDragOver ? 'merge-target-pulse' : ''}
+              >
                 <div className="flex items-stretch gap-2">
                   <button
                     {...dragHandleProps}
@@ -1346,10 +1355,12 @@ function TodayView() {
           const isDragOver = mergeDragOverId === it.id;
           const customTitle = titleFor(it);
           const kindClass = `timeline-${it.kind === 'protocol' ? 'protocol' : it.kind === 'audio' ? 'audio' : 'routine'}`;
+          const lifted = isOpen || isSelected(it.id);
           return (
             <m.div
               key={selectedDate}
-              {...rowEnter}
+              {...deckProps(lifted)}
+              style={{ zIndex: lifted ? 30 : undefined }}
               className={`card today-routine-card overflow-hidden transition-all relative ${done ? 'timeline-done opacity-80' : ''} ${isOpen ? 'is-open' : ''} ${isDragging ? 'border-accent is-dragging' : ''} ${isDragOver ? 'merge-target-pulse ring-2 ring-accent/60 border-accent' : ''} ${isSelected(it.id) ? 'ring-2 ring-accent/40' : ''}`}
             >
               {isDragOver && <DragMergePlusOverlay />}

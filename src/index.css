@@ -467,6 +467,20 @@ button, a, .btn-accent, .btn-ghost, .btn-secondary, .btn-teal, .btn-lime { -webk
 .timeline-done .timeline-label { text-decoration: line-through; opacity: 0.5; }
 .timeline-label { color: var(--col-ink); }
 
+/* ── REF-07 — stack deck (Refinement 2) ──
+   Rows overlap like a deck of glass capsules; the open/selected card LIFTS
+   to the front (FM scale, transform-only) while the rest sit behind. The
+   bright top rim is the REF-01/07 specular edge. */
+.stack-deck > * + * { margin-top: -12px; }
+.stack-deck .today-routine-card {
+  border-radius: 26px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.16) inset, 0 -1px 0 rgba(255, 255, 255, 0.04) inset,
+              var(--elv-2);
+}
+html[data-theme="light"] .stack-deck .today-routine-card {
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.95) inset, var(--elv-2);
+}
+
 /* Status-card on the rail — kind colour drives the left edge + node. */
 .today-routine-card { position: relative; }
 .today-routine-card::before {
