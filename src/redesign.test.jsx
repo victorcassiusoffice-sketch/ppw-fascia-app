@@ -71,8 +71,23 @@ describe('dual-theme controller (theme toggle)', () => {
 });
 
 describe('no feature lost — App.jsx wiring guard', () => {
-  const src = readFileSync(join(process.cwd(), 'src', 'App.jsx'), 'utf8');
-  const chrome = readFileSync(join(process.cwd(), 'src', 'chrome.jsx'), 'utf8');
+  // Phase 2.4 (2026-06-11) — the page components were mechanically extracted
+  // from App.jsx into src/pages/ + src/components/. The guard's contract is
+  // unchanged (every capability's wiring still mounted); it now scans the
+  // whole extracted surface, not just App.jsx.
+  const read = (...p) => readFileSync(join(process.cwd(), 'src', ...p), 'utf8');
+  const src = [
+    read('App.jsx'),
+    read('pages', 'Today.jsx'),
+    read('pages', 'Protocols.jsx'),
+    read('pages', 'Modules.jsx'),
+    read('pages', 'Settings.jsx'),
+    read('components', 'today', 'MergedStack.jsx'),
+    read('components', 'today', 'UserStackBody.jsx'),
+    read('components', 'today', 'overlays.jsx'),
+    read('components', 'shared.jsx'),
+  ].join('\n');
+  const chrome = read('chrome.jsx');
 
   // Each entry is a capability from the redesign brief's "must remain" list,
   // mapped to a string that proves its wiring is still present in source.

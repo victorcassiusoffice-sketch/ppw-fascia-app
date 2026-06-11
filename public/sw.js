@@ -8,8 +8,8 @@
 // Bump on EVERY release so the browser sees sw.js as changed, installs the new
 // SW, skipWaiting()+clients.claim() activate it immediately, and the activate
 // handler purges the old cache — returning visitors get the new build, never a
-// stale cached index.html. (2026-06-03: dual-theme redesign.)
-const CACHE_NAME = 'ppw-cache-v0.7.0-dual-theme-2026-06-03';
+// stale cached index.html. (2026-06-11: liquid-glass redesign.)
+const CACHE_NAME = 'ppw-cache-v0.8.0-liquid-glass-2026-06-11';
 
 // BASE includes the leading and trailing slash. Examples:
 //   served at /sw.js                -> BASE = '/'
