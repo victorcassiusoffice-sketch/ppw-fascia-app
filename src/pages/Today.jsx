@@ -1071,10 +1071,11 @@ function TodayView() {
           >
             <IconPlus /><span className="text-sm">Stack</span>
           </m.button>
+          {/* REF-08: labelled secondary action = glass capsule. */}
           <m.button
             type="button"
             onClick={() => setAddProtocolOpen(true)}
-            className="btn-secondary flex items-center justify-center gap-2"
+            className="glass-capsule flex items-center justify-center gap-2 text-sm font-bold"
             style={{ height: 44, padding: 0 }}
             title="Add a science protocol from your library"
             {...pressScale()}
@@ -1082,11 +1083,12 @@ function TodayView() {
             <IconBookOpen /><span className="text-sm">Protocol</span>
           </m.button>
           <div className="relative">
+            {/* REF-08: icon-only action = circular glass disc. */}
             <button
               type="button"
               onClick={() => setOverflowOpen(v => !v)}
-              className="btn-secondary flex items-center justify-center"
-              style={{ height: 44, width: 44, padding: 0, fontSize: 20 }}
+              className="glass-disc"
+              style={{ height: 44, width: 44, padding: 0, fontSize: 20, color: 'var(--col-ink)' }}
               aria-haspopup="menu"
               aria-expanded={overflowOpen}
               aria-label="More actions"
@@ -1419,7 +1421,7 @@ function TodayView() {
                         const href = resolveLaunchHref(it.userStack);
                         if (href) window.open(href, '_blank', 'noopener');
                       }}
-                      className="text-muted hover:text-accent w-8 h-8 flex items-center justify-center shrink-0 transition-colors"
+                      className="glass-disc text-muted hover:text-accent w-8 h-8 shrink-0"
                       aria-label="Open link in a new tab"
                       title="Open"
                     ><IconExternalLink /></button>
@@ -1438,7 +1440,7 @@ function TodayView() {
                           window.alert('Affiliate link not yet configured — Vic to fill in src/config/affiliates.json.');
                         }
                       }}
-                      className="text-muted hover:text-accent w-8 h-8 flex items-center justify-center shrink-0 transition-colors"
+                      className="glass-disc text-muted hover:text-accent w-8 h-8 shrink-0"
                       aria-label="Buy this product"
                       title="Buy via affiliate link"
                     ><IconShoppingCart /></a>
@@ -1461,7 +1463,7 @@ function TodayView() {
                         setToast({ tone: ok ? 'ok' : 'err', text: ok ? 'Opening your phone calendar — confirm to add the lock-screen alarm.' : 'Could not create calendar file.' });
                         setTimeout(() => setToast(null), 4000);
                       }}
-                      className="text-muted hover:text-accent w-8 h-8 flex items-center justify-center shrink-0 transition-colors"
+                      className="glass-disc text-muted hover:text-accent w-8 h-8 shrink-0"
                       aria-label="Tap to add this reminder to your phone calendar"
                       title="Tap to add this reminder to your phone calendar — your phone fires the lock-screen alarm"
                     ><IconCalendar /></button>
@@ -1473,7 +1475,7 @@ function TodayView() {
                       toolbar and the expanded card body. */}
                   <button
                     onClick={(e) => { e.stopPropagation(); handleDuplicate(it); }}
-                    className="text-muted hover:text-accent w-8 h-8 hidden sm:flex items-center justify-center shrink-0 transition-colors"
+                    className="glass-disc text-muted hover:text-accent w-8 h-8 hidden sm:inline-flex shrink-0"
                     aria-label="Duplicate stack"
                     title="Duplicate"
                   ><IconCopy /></button>
@@ -1483,7 +1485,7 @@ function TodayView() {
                       if (it.isRecurring) { setPendingRecurringDelete(it); return; }
                       if (window.confirm('Delete this stack?')) handleRemoveItem(it);
                     }}
-                    className="text-muted hover:text-red-400 w-8 h-8 hidden sm:flex items-center justify-center shrink-0 transition-colors"
+                    className="glass-disc text-muted hover:text-red-400 w-8 h-8 hidden sm:inline-flex shrink-0"
                     aria-label="Delete stack"
                     title="Delete"
                   ><IconTrash /></button>

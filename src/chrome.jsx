@@ -11,7 +11,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from './theme.js';
 import { useNotificationPrefs } from './state.js';
 import { requestPermission } from './notifications.js';
-import { m, AnimatePresence, glideIndicator, pressScale, toastIn } from './lib/motion';
+import { m, AnimatePresence, glideIndicator, pressScale, toastIn, SPRING, reduced } from './lib/motion';
 
 /* ── DNA-helix mark — single inline SVG, theme-aware stroke (accent token). ── */
 export function HelixLogo({ size = 30, draw = false, spin = false, title = 'PPW home' }) {
@@ -32,7 +32,9 @@ export function HelixLogo({ size = 30, draw = false, spin = false, title = 'PPW 
   );
 }
 
-/* ── Theme toggle puck (sun/moon). Quick light↔dark flip; the full
+/* ── Theme toggle — REF-09 refractive glass switch (Refinement 2). Pill
+   track + glass knob sliding Dark↔Light with the icon etched in the knob.
+   Knob slide = transform only; quick flip stays here, the full
    Light/Dark/System control lives in Settings → Appearance. ── */
 export function ThemeToggle() {
   const { resolved, toggle } = useTheme();
@@ -41,12 +43,21 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={toggle}
-      className="theme-toggle"
+      className={'glass-switch' + (isDark ? ' on' : '')}
+      role="switch"
+      aria-checked={isDark}
       aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
       title={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
     >
-      <span aria-hidden="true">{isDark ? '☾' : '☀'}</span>
-      <span>{isDark ? 'Dark' : 'Light'}</span>
+      <m.span
+        className="glass-knob"
+        initial={false}
+        animate={{ x: isDark ? 34 : 3 }}
+        transition={reduced() ? { duration: 0 } : SPRING.glide}
+        aria-hidden="true"
+      >
+        {isDark ? '☾' : '☀'}
+      </m.span>
     </button>
   );
 }

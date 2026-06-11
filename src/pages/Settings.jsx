@@ -8,7 +8,7 @@ import { useLocalStorage, useActiveProtocols, useActiveModules, useActiveRoutine
 import { LS_KEYS, APP_VERSION, USE_MOCK_DATA, NOTIFICATION_LEAD_TIME_MIN } from '../config.js';
 import { getPushState, subscribeToPush, INSTALL_HELP } from '../lib/push.js';
 import { Section } from '../components/shared.jsx';
-import { m, glideIndicator, pressScale } from '../lib/motion';
+import { m, glideIndicator, pressScale, SPRING, reduced } from '../lib/motion';
 import { getPairingState, pairDevice, unpairDevice } from '../lib/assistantSync.js';
 import { useBackground, BG_OPTIONS } from '../lib/background.js';
 
@@ -347,14 +347,25 @@ function SettingsView() {
               <div className="font-display">Auto-arrange food into eating window</div>
               <div className="text-muted text-xs mt-1">When enabled, food items outside the window move inside automatically. Notifications fire at open · 15 min pre-close · close.</div>
             </div>
-            <m.button
+            {/* REF-09 — refractive glass switch (knob slide = transform only). */}
+            <button
+              type="button"
               onClick={() => setIfPrefs(p => ({ ...p, enabled: !p.enabled }))}
-              className={`px-4 py-2 rounded-full text-sm font-bold shrink-0 ${ifPrefs.enabled ? 'btn-accent' : 'btn-ghost'}`}
-              aria-pressed={ifPrefs.enabled}
-              {...pressScale()}
+              className={'glass-switch shrink-0' + (ifPrefs.enabled ? ' on' : '')}
+              role="switch"
+              aria-checked={ifPrefs.enabled}
+              aria-label={ifPrefs.enabled ? 'Auto-arrange on — tap to turn off' : 'Auto-arrange off — tap to turn on'}
             >
-              {ifPrefs.enabled ? '✓ On' : 'Off'}
-            </m.button>
+              <m.span
+                className="glass-knob"
+                initial={false}
+                animate={{ x: ifPrefs.enabled ? 34 : 3 }}
+                transition={reduced() ? { duration: 0 } : SPRING.glide}
+                aria-hidden="true"
+              >
+                {ifPrefs.enabled ? '✓' : ''}
+              </m.span>
+            </button>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <label className="block">
