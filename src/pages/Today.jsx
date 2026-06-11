@@ -22,6 +22,7 @@ import { requestPermission, scheduleStackNotifications, clearAllScheduled } from
 import { downloadSlotIcs } from '../lib/ics.js';
 import { ensurePersistentStorage } from '../lib/storagePersist.js';
 import { m, AnimatePresence, useReducedMotion, motionPresets } from '../motion.js';
+import { DUR, STAGGER, EASE, SPRING, glideIndicator, toastIn, borderTrace, sheetUp, pressScale } from '../lib/motion';
 import { IconTrash, IconCopy, IconPlus, IconShoppingCart, IconExternalLink, IconBookOpen, IconCalendar, Tickbox } from '../components/icons.jsx';
 import { InlineRename } from '../components/shared.jsx';
 import MergedStack from '../components/today/MergedStack.jsx';
@@ -87,6 +88,9 @@ const DateStrip = React.forwardRef(function DateStrip({ selectedDate, onSelect }
       role="tablist"
       aria-label="Date navigation"
     >
+      {/* Liquid-glass (board 01, clip 3): selection is ONE pill that GLIDES
+          between days via layoutId — buttons stay still, labels colour-fade.
+          The pill is solid accent (it moves → no blur, perf law). */}
       {days.map(d => {
         const isToday = d.iso === today;
         const sel = d.iso === selectedDate;
@@ -98,22 +102,30 @@ const DateStrip = React.forwardRef(function DateStrip({ selectedDate, onSelect }
             role="tab"
             aria-selected={sel}
             onClick={() => onSelect(d.iso)}
-            className="shrink-0 flex flex-col items-center justify-center transition-all"
+            className="seg-opt shrink-0 flex flex-col items-center justify-center"
             style={{
               width: 54, padding: '9px 0', borderRadius: 'var(--r-16)',
-              background: sel ? 'var(--col-accent)' : 'var(--col-surface)',
+              background: 'var(--col-surface)',
               color: sel ? 'var(--col-on-accent)' : 'var(--col-ink)',
-              boxShadow: sel
-                ? 'var(--elv-2)'
-                : isToday ? 'var(--elv-1), 0 0 0 2px var(--col-accent) inset' : 'var(--elv-1)',
-              transform: sel ? 'translateY(-2px)' : 'none',
+              boxShadow: isToday && !sel
+                ? 'var(--elv-1), 0 0 0 2px var(--col-accent) inset'
+                : 'var(--elv-1)',
               scrollSnapAlign: 'center',
+              transition: 'color var(--dur-mid) var(--ease)',
             }}
             title={d.iso}
           >
-            <span className={sel ? '' : 'text-muted'} style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em' }}>{d.weekday}</span>
+            {sel && (
+              <m.span
+                className="glide-pill"
+                aria-hidden="true"
+                style={{ borderRadius: 'var(--r-16)' }}
+                {...glideIndicator('day-pill')}
+              />
+            )}
+            <span className={'seg-label ' + (sel ? '' : 'text-muted')} style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em' }}>{d.weekday}</span>
             <span className="font-display tnum" style={{ fontSize: 18, lineHeight: 1, marginTop: 3 }}>{d.day}</span>
-            <span className={sel ? '' : 'text-muted'} style={{ fontSize: 9, marginTop: 2, opacity: 0.75, textTransform: 'uppercase' }}>{d.month}</span>
+            <span className={'seg-label ' + (sel ? '' : 'text-muted')} style={{ fontSize: 9, marginTop: 2, opacity: 0.75, textTransform: 'uppercase' }}>{d.month}</span>
           </button>
         );
       })}
@@ -545,12 +557,15 @@ function TodayView() {
             {' '}({resolveRoutineZones(it.fascia_routine).length} zones)
           </div>
         )}
-        <button
+        {/* Morph CTA (board 01, clip 1): Mark done ↔ Done cross-fades colour
+            in place with a squishy press — reshape, not swap. */}
+        <m.button
           onClick={() => toggle(it.id)}
           className={'w-full text-center py-2.5 rounded-full text-sm font-bold transition-all ' + (done ? 'bg-cream/10 text-muted' : 'bg-accent text-bg')}
+          {...pressScale()}
         >
           {done ? '✓ Done — tap to undo' : 'Mark done'}
-        </button>
+        </m.button>
         <button
           onClick={() => handleDuplicate(it)}
           className="w-full text-center py-2 rounded-full text-xs font-bold border border-accent/40 text-accent hover:bg-accent/5 transition-colors"
@@ -975,10 +990,11 @@ function TodayView() {
         className="sticky z-30 -mx-5 px-5 pt-2 pb-2"
         style={{
           top: 56,
-          background: 'rgb(var(--c-bg-base) / 0.86)',
-          backdropFilter: 'saturate(150%) blur(20px)',
-          WebkitBackdropFilter: 'saturate(150%) blur(20px)',
-          borderBottom: '1px solid var(--hairline)',
+          background: 'var(--glass-bg-strong)',
+          backdropFilter: 'saturate(150%) blur(var(--glass-blur-2))',
+          WebkitBackdropFilter: 'saturate(150%) blur(var(--glass-blur-2))',
+          borderBottom: '1px solid var(--glass-border)',
+          boxShadow: '0 1px 0 var(--glass-highlight) inset',
         }}
       >
         {/* Month line — big display month + year (left), glance cluster (right). */}
@@ -1008,24 +1024,26 @@ function TodayView() {
             bottom nav per Vic change #1). Rare actions (select-all, clear,
             create routine) live under ⋮ so nothing crowds at 360px. */}
         <div className="grid items-center gap-2.5" style={{ gridTemplateColumns: '1fr 1fr auto' }}>
-          <button
+          <m.button
             type="button"
             onClick={() => setAddModalOpen(true)}
             className="btn-accent flex items-center justify-center gap-2"
             style={{ height: 44, padding: 0 }}
             title="Add a custom stack"
+            {...pressScale()}
           >
             <IconPlus /><span className="text-sm">Stack</span>
-          </button>
-          <button
+          </m.button>
+          <m.button
             type="button"
             onClick={() => setAddProtocolOpen(true)}
             className="btn-secondary flex items-center justify-center gap-2"
             style={{ height: 44, padding: 0 }}
             title="Add a science protocol from your library"
+            {...pressScale()}
           >
             <IconBookOpen /><span className="text-sm">Protocol</span>
-          </button>
+          </m.button>
           <div className="relative">
             <button
               type="button"
@@ -1105,45 +1123,82 @@ function TodayView() {
         )}
       </div>
 
-      {/* Next-up hero (buildspec §4.1.4) — oversized asymmetric anchor. */}
+      {/* Next-up hero — liquid-glass (board 01): the ONE frosted card floating
+          over the organic texture zone (clip 6, dark theme only via
+          --hero-art-opacity). The accent border TRACES around it when the
+          next-up item changes (clip 4). Big thin tabular numerals. */}
       {!empty && (
-        <div className="card flex items-center justify-between gap-4 mt-4" style={{ padding: '18px 20px' }}>
-          {nextUp ? (
-            <>
-              <div className="min-w-0">
-                <div className="eyebrow" style={{ color: 'rgb(var(--c-status-now))' }}>Next up</div>
-                <div className="font-display tnum" style={{ fontSize: 30, lineHeight: 1, margin: '8px 0 4px' }}>{nextUp.time || '—:—'}</div>
-                <div className="text-muted text-sm truncate" style={{ maxWidth: '52vw' }}>{titleFor(nextUp)}</div>
-                <button
-                  type="button"
-                  onClick={() => setExpanded(nextUp.id)}
-                  className="btn-accent mt-3 inline-flex items-center gap-1"
-                  style={{ height: 38, padding: '0 18px', fontSize: 13 }}
-                >Open ▸</button>
-              </div>
-              <CompletionRing done={completedCount} total={items.length} hero />
-            </>
-          ) : (
-            <>
-              <div className="min-w-0">
-                <div className="eyebrow" style={{ color: 'rgb(var(--c-status-done))' }}>All done</div>
-                <div className="font-display" style={{ fontSize: 22, lineHeight: 1.1, margin: '8px 0 2px' }}>Nice work today ✓</div>
-                <div className="text-muted text-sm">Everything on this day is ticked off.</div>
-              </div>
-              <CompletionRing done={completedCount} total={items.length} hero />
-            </>
-          )}
+        <div className="relative mt-4">
+          <div className="hero-art" aria-hidden="true">
+            <img
+              src={`${import.meta.env.BASE_URL}assets/backgrounds/fascia_fluid_motion.png`}
+              alt=""
+              loading="lazy"
+              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            />
+          </div>
+          <div
+            className="glass-strong relative flex items-center justify-between gap-4 overflow-hidden"
+            style={{ padding: '20px 22px', borderRadius: 'var(--r-24)' }}
+          >
+            {!reduced && nextUp && (
+              <svg className="border-trace" aria-hidden="true" key={nextUp.id}>
+                <m.rect
+                  x="0" y="0" rx="24"
+                  width="100%" height="100%"
+                  variants={borderTrace}
+                  initial="hidden"
+                  animate="show"
+                />
+              </svg>
+            )}
+            {nextUp ? (
+              <>
+                <div className="min-w-0">
+                  <div className="eyebrow" style={{ color: 'rgb(var(--c-status-now))' }}>Next up</div>
+                  <div className="font-display tnum" style={{ fontSize: 40, fontWeight: 350, letterSpacing: '-0.01em', lineHeight: 1, margin: '8px 0 4px' }}>{nextUp.time || '—:—'}</div>
+                  <div className="text-muted text-sm truncate" style={{ maxWidth: '52vw' }}>{titleFor(nextUp)}</div>
+                  <m.button
+                    type="button"
+                    onClick={() => setExpanded(nextUp.id)}
+                    className="btn-accent mt-3 inline-flex items-center gap-1"
+                    style={{ height: 38, padding: '0 18px', fontSize: 13 }}
+                    whileTap={reduced ? undefined : { scale: 0.96 }}
+                    transition={SPRING.press}
+                  >Open ▸</m.button>
+                </div>
+                <CompletionRing done={completedCount} total={items.length} hero />
+              </>
+            ) : (
+              <>
+                <div className="min-w-0">
+                  <div className="eyebrow" style={{ color: 'rgb(var(--c-status-done))' }}>All done</div>
+                  <div className="font-display" style={{ fontSize: 22, lineHeight: 1.1, margin: '8px 0 2px' }}>Nice work today ✓</div>
+                  <div className="text-muted text-sm">Everything on this day is ticked off.</div>
+                </div>
+                <CompletionRing done={completedCount} total={items.length} hero />
+              </>
+            )}
+          </div>
         </div>
       )}
 
-      {toast && (
-        <div
-          className={'mt-3 text-xs px-3 py-2 rounded-lg border ' + (toast.tone === 'ok' ? 'bg-accent/10 text-accent border-accent/30' : 'bg-cream/5 text-cream border-cream/15')}
-          role="status"
-        >
-          {toast.text}
-        </div>
-      )}
+      {/* Toast — toastIn rise+fade (board 06, clip 4): soft spring, no bounce.
+          Solid surface (it moves → no blur). */}
+      <AnimatePresence>
+        {toast && (
+          <m.div
+            variants={toastIn}
+            initial="hidden"
+            animate="show"
+            exit="exit"
+            className={'mt-3 text-xs px-3 py-2 rounded-lg border ' + (toast.tone === 'ok' ? 'bg-accent/10 text-accent border-accent/30' : 'bg-cream/5 text-cream border-cream/15')}
+            role="status"
+          >
+            {toast.text}
+          </m.div>
+        )}
+      </AnimatePresence>
 
 
       {empty && (
@@ -1181,17 +1236,31 @@ function TodayView() {
         onReorder={handleReorder}
         onMergeDrop={handleSortableMergeDrop}
         onDragOverChange={handleSortableDragOverChange}
-        className="space-y-3 fade-in fade-in-stagger is-visible"
+        className="space-y-3"
       >
         {(it, dragHandleProps, _i, isDragging) => {
+          // Liquid-glass (board 01, clip 4): rows enter staggered — rise +
+          // fade on the locked tokens, keyed on selectedDate so a day switch
+          // re-runs the cascade. Solid cards (they drag → no blur, perf law).
+          // Reduced motion → static (no initial offset, no delay).
+          const rowEnter = reduced ? {} : {
+            initial: { opacity: 0, y: 14 },
+            animate: { opacity: 1, y: 0 },
+            transition: {
+              duration: DUR.base / 1000,
+              ease: EASE.standard,
+              delay: Math.min(_i, 8) * (STAGGER.list / 1000),
+            },
+          };
           // M9 — render the parent MergedStack instead of a plain card when
           // this item is the LEAD member of a merge.
           const leadMergeId = mergeLeadByItemId.lead.get(it.id);
           if (leadMergeId) {
-            const m = merges[leadMergeId];
+            // NB: named mergeRec, NOT m — `m` is the motion component import.
+            const mergeRec = merges[leadMergeId];
             const mergeIsDragOver = mergeDragOverId === it.id;
             return (
-              <div className={mergeIsDragOver ? 'merge-target-pulse' : ''}>
+              <m.div key={selectedDate} {...rowEnter} className={mergeIsDragOver ? 'merge-target-pulse' : ''}>
                 <div className="flex items-stretch gap-2">
                   <button
                     {...dragHandleProps}
@@ -1201,7 +1270,7 @@ function TodayView() {
                   <div className="flex-1 min-w-0">
                     <MergedStack
                       mergeId={leadMergeId}
-                      merge={m}
+                      merge={mergeRec}
                       itemsById={itemsById}
                       isDragOver={mergeIsDragOver}
                       onSetTitle={setMergeTitle}
@@ -1224,12 +1293,12 @@ function TodayView() {
                       onSetActiveTab={setActiveTab}
                       selectionChecked={isSelected(it.id)}
                       onToggleSelection={() => toggleSelected(it.id)}
-                      selectionAriaLabel={`Select stack: ${m.title || titleFor(it)}`}
+                      selectionAriaLabel={`Select stack: ${mergeRec.title || titleFor(it)}`}
                       renderTabBody={(tabItem) => renderItemBody(tabItem, true)}
                     />
                   </div>
                 </div>
-              </div>
+              </m.div>
             );
           }
           const done = isDone(it.id);
@@ -1239,7 +1308,9 @@ function TodayView() {
           const customTitle = titleFor(it);
           const kindClass = `timeline-${it.kind === 'protocol' ? 'protocol' : it.kind === 'audio' ? 'audio' : 'routine'}`;
           return (
-            <div
+            <m.div
+              key={selectedDate}
+              {...rowEnter}
               className={`card today-routine-card overflow-hidden transition-all relative ${done ? 'timeline-done opacity-80' : ''} ${isOpen ? 'is-open' : ''} ${isDragging ? 'border-accent is-dragging' : ''} ${isDragOver ? 'merge-target-pulse ring-2 ring-accent/60 border-accent' : ''} ${isSelected(it.id) ? 'ring-2 ring-accent/40' : ''}`}
             >
               {isDragOver && <DragMergePlusOverlay />}
@@ -1270,12 +1341,18 @@ function TodayView() {
                     aria-label="Edit time"
                   />
                 ) : (
-                  <button
+                  /* The settle beat (board 01): the leading time chip lands a
+                     touch after its row begins — ~8% overshoot, the signature. */
+                  <m.button
+                    key={selectedDate}
+                    initial={reduced ? false : { opacity: 0, scale: 0.6 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={reduced ? { duration: 0 } : { ...SPRING.settle, delay: Math.min(_i, 8) * (STAGGER.list / 1000) + 0.08 }}
                     onClick={(e) => { e.stopPropagation(); setEditingTimeId(it.id); }}
                     className="today-time-chip shrink-0"
                     title="Tap to edit time"
                     aria-label={`Edit time, currently ${it.time}`}
-                  >{it.time}</button>
+                  >{it.time}</m.button>
                 )}
                 <div className="flex-1 min-w-0 flex items-center gap-2">
                   <InlineRename
@@ -1384,7 +1461,7 @@ function TodayView() {
                   </m.div>
                 )}
               </AnimatePresence>
-            </div>
+            </m.div>
           );
         }}
       </SortableList>
@@ -1438,11 +1515,16 @@ function TodayView() {
       {/* 2026-06-03 — recurring-delete scope sheet. Default highlighted choice
           is "This day only" so the destructive cascade is never accidental. */}
       {pendingRecurringDelete && (
-        <div
+        <m.div
+          initial={reduced ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: DUR.fast / 1000 }}
           className="fixed inset-0 z-50 ppw-scrim flex items-end sm:items-center justify-center p-4"
           onClick={() => setPendingRecurringDelete(null)}
         >
-          <div className="card w-full max-w-sm p-5" style={{ backgroundColor: 'var(--col-surface-a)' }} onClick={(e) => e.stopPropagation()}>
+          {/* Sheet arrives on SPRING.sheet — solid surface (it moves → no
+              blur); the static scrim above carries the glass (board 06). */}
+          <m.div variants={sheetUp} initial="hidden" animate="show" className="card w-full max-w-sm p-5" style={{ backgroundColor: 'var(--col-surface-a)' }} onClick={(e) => e.stopPropagation()}>
             <div className="font-display text-lg mb-1">Remove recurring routine</div>
             <p className="text-muted text-xs mb-4">This routine repeats. Remove it from just this day, or from every day it appears?</p>
             <button
@@ -1463,8 +1545,8 @@ function TodayView() {
             >
               Cancel
             </button>
-          </div>
-        </div>
+          </m.div>
+        </m.div>
       )}
 
       <AddProtocolModal

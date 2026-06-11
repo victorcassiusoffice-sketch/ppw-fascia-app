@@ -7,6 +7,7 @@ import { loadMedia, moduleMediaPath } from '../data.js';
 import { requestPermission } from '../notifications.js';
 import { DirectMediaPlayer } from '../MediaPlayer.jsx';
 import { KNOWN_AUDIO_MODULES } from '../constants/knownAudioModules.js';
+import { m, staggerContainer, enterRow, settleEmoji, pressScale } from '../lib/motion';
 
 /* ═══════════════════════════════════════════
    NEW — /modules
@@ -33,27 +34,32 @@ function ModulesList() {
       <h1 className="font-display text-4xl md:text-5xl mb-3 leading-[1.02]">Audio &amp; Modules</h1>
       <p className="text-muted mb-8 max-w-xl leading-relaxed">Meditative, passive, screen-off-friendly. Add to your daily routine.</p>
 
-      <div className="space-y-4 fade-in fade-in-stagger is-visible">
-        {KNOWN_AUDIO_MODULES.map(m => {
-          const media = resolved[m.slug];
-          const isActive = activeModules.includes(m.slug);
+      {/* Liquid-glass (board 03): staggered card entry; the 🎧 glyph SETTLES
+          with the signature ~8% overshoot — the worked-example beat. The
+          Add pill morphs in place with a squishy press. */}
+      <m.div className="space-y-4" variants={staggerContainer()} initial="hidden" animate="show">
+        {KNOWN_AUDIO_MODULES.map(mod => {
+          const media = resolved[mod.slug];
+          const isActive = activeModules.includes(mod.slug);
           return (
-            <div key={m.slug} className={`card protocol-tile p-6 ${isActive ? 'border-accent' : ''}`}>
+            <m.div key={mod.slug} variants={enterRow} className={`card protocol-tile p-6 ${isActive ? 'border-accent' : ''}`}>
               <div className="flex items-start justify-between gap-4 mb-3">
                 <div className="flex-1 min-w-0">
-                  <div className="text-xs text-accent uppercase tracking-widest mb-1">🎧 audio · default {m.defaultTime}</div>
-                  <div className="font-display text-lg">{media?.title || m.label}</div>
+                  <div className="text-xs text-accent uppercase tracking-widest mb-1">
+                    <m.span variants={settleEmoji} className="inline-block" aria-hidden="true">🎧</m.span> audio · default {mod.defaultTime}
+                  </div>
+                  <div className="font-display text-lg">{media?.title || mod.label}</div>
                   {media && <div className="text-muted text-xs">{Math.round(media.duration_sec / 60)} min</div>}
                 </div>
-                <button onClick={() => toggle(m.slug)} className={`px-4 py-2 rounded-full text-sm font-bold shrink-0 ${isActive ? 'bg-cream/10 text-cream border border-accent' : 'btn-accent'}`}>
+                <m.button onClick={() => toggle(mod.slug)} className={`px-4 py-2 rounded-full text-sm font-bold shrink-0 ${isActive ? 'bg-cream/10 text-cream border border-accent' : 'btn-accent'}`} {...pressScale()}>
                   {isActive ? '✓ Active' : 'Add to my routine'}
-                </button>
+                </m.button>
               </div>
               {media && <DirectMediaPlayer media={media} />}
-            </div>
+            </m.div>
           );
         })}
-      </div>
+      </m.div>
     </main>
   );
 }

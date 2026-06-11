@@ -37,11 +37,13 @@ export default {
         'ppw-teal':  tok('--c-alt-teal'),
 
         // Static brand candy values (used by gradient tiles; not theme-flipped)
+        // 2026-06-11: legacy warm-gold `gold: #DCA957` retired (zero usages —
+        // accent is orange per REBUILD-DIRECTION §2; brand gold lives only in
+        // the helix/streak/Pro-badge brand thread, not as a utility colour).
         'cream-bg':   '#ECEBE9',
         glass:        '#FFFFFF',
         'ink-dark':   '#1A1A1A',
         slate:        '#5B6472',
-        gold:         '#DCA957',
         amber:        '#F5B845',
         'amber-deep': '#E8893A',
         emerald:      '#1E7A52',

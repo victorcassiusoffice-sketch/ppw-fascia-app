@@ -11,6 +11,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from './theme.js';
 import { useNotificationPrefs } from './state.js';
 import { requestPermission } from './notifications.js';
+import { m, AnimatePresence, glideIndicator, pressScale, toastIn } from './lib/motion';
 
 /* ── DNA-helix mark — single inline SVG, theme-aware stroke (accent token). ── */
 export function HelixLogo({ size = 30, draw = false, spin = false, title = 'PPW home' }) {
@@ -103,27 +104,48 @@ export function BottomNav() {
     }
   }, [notifPrefs.enabled, setNotifPrefs, flash]);
 
+  // Liquid-glass redesign (2026-06-11, board 05): the active tab carries ONE
+  // gliding accent dot (clip 3 — a single indicator slides, labels only
+  // colour-fade). Solid dot — it moves, so no blur (perf law).
+  const NavTab = ({ to, active, label, children }) => (
+    <m.button
+      type="button"
+      className={'navbtn' + (active ? ' active' : '')}
+      onClick={() => nav(to)}
+      aria-current={active ? 'page' : undefined}
+      {...pressScale(0.94)}
+    >
+      {active && <m.span className="nav-dot" aria-hidden="true" {...glideIndicator('nav-dot')} />}
+      {children}<span>{label}</span>
+    </m.button>
+  );
+
   return (
     <div className="botwrap">
-      {msg && (
-        <div
-          role="status"
-          style={{
-            position: 'absolute', bottom: 78, left: '50%', transform: 'translateX(-50%)',
-            background: 'var(--col-surface)', color: 'var(--col-ink)', boxShadow: 'var(--elv-2)',
-            border: '1px solid var(--hairline)', borderRadius: 'var(--r-pill)',
-            padding: '7px 14px', fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap', pointerEvents: 'none',
-          }}
-        >{msg}</div>
-      )}
+      <AnimatePresence>
+        {msg && (
+          <m.div
+            role="status"
+            variants={toastIn}
+            initial="hidden"
+            animate="show"
+            exit="exit"
+            style={{
+              position: 'absolute', bottom: 78, left: '50%', x: '-50%',
+              background: 'var(--col-surface)', color: 'var(--col-ink)', boxShadow: 'var(--elv-2)',
+              border: '1px solid var(--hairline)', borderRadius: 'var(--r-pill)',
+              padding: '7px 14px', fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap', pointerEvents: 'none',
+            }}
+          >{msg}</m.div>
+        )}
+      </AnimatePresence>
       <nav className="botnav" aria-label="Primary">
-        <button type="button" className={'navbtn' + (isActive('/today') ? ' active' : '')} onClick={() => nav('/today')} aria-current={isActive('/today') ? 'page' : undefined}>
-          <IconHome /><span>Today</span>
-        </button>
-        <button type="button" className={'navbtn' + (isActive('/protocols') || path.startsWith('/protocol/') ? ' active' : '')} onClick={() => nav('/protocols')}>
-          <IconProtocols /><span>Protocols</span>
-        </button>
+        <NavTab to="/today" active={isActive('/today')} label="Today"><IconHome /></NavTab>
+        <NavTab to="/protocols" active={isActive('/protocols') || path.startsWith('/protocol/')} label="Protocols"><IconProtocols /></NavTab>
         <div className="navbtn bellslot">
+          {/* Bell keeps its CSS-only squish: it is centred via translateX(-50%)
+              in .bell, which a Framer whileTap transform would clobber. The
+              ON-state morph (accent fill + halo) is the clip-1 blob move. */}
           <button
             type="button"
             className={'bell' + (notifPrefs.enabled ? ' on' : '')}
@@ -136,12 +158,8 @@ export function BottomNav() {
           </button>
           <span className="belllabel">Alerts</span>
         </div>
-        <button type="button" className={'navbtn' + (isActive('/modules') ? ' active' : '')} onClick={() => nav('/modules')}>
-          <IconModules /><span>Modules</span>
-        </button>
-        <button type="button" className={'navbtn' + (isActive('/settings') ? ' active' : '')} onClick={() => nav('/settings')}>
-          <IconSettings /><span>Settings</span>
-        </button>
+        <NavTab to="/modules" active={isActive('/modules')} label="Modules"><IconModules /></NavTab>
+        <NavTab to="/settings" active={isActive('/settings')} label="Settings"><IconSettings /></NavTab>
       </nav>
     </div>
   );

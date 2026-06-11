@@ -3,6 +3,14 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useActiveProtocols, todayISO } from '../../state.js';
 import { listProtocols } from '../../protocols.js';
+import { m, sheetUp, DUR, reduced } from '../../lib/motion';
+
+/* Liquid-glass (board 06): shared enter grammar for every overlay — the
+   static scrim fades (opacity only; it carries the blur), the sheet ARRIVES
+   on SPRING.sheet (solid surface — it moves, so no backdrop-filter on it). */
+const scrimEnter = () => (reduced()
+  ? {}
+  : { initial: { opacity: 0 }, animate: { opacity: 1 }, transition: { duration: DUR.fast / 1000 } });
 
 /* ─── Iter 2 patch 1 — ClearCalendarModal ───
    Pops from tapping the Clear button in the sticky toolbar.
@@ -106,8 +114,11 @@ function ClearCalendarModal({ open, onClose, onConfirm }) {
 
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-[55] ppw-scrim flex items-end sm:items-center justify-center p-4" onClick={onClose}>
-      <div
+    <m.div {...scrimEnter()} className="fixed inset-0 z-[55] ppw-scrim flex items-end sm:items-center justify-center p-4" onClick={onClose}>
+      <m.div
+        variants={sheetUp}
+        initial="hidden"
+        animate="show"
         className="card w-full max-w-md max-h-[92vh] overflow-y-auto"
         style={{ backgroundColor: 'var(--col-surface-a)', border: '1px solid rgb(var(--c-accent) / 0.4)' }}
         onClick={(e) => e.stopPropagation()}
@@ -190,8 +201,8 @@ function ClearCalendarModal({ open, onClose, onConfirm }) {
             >Clear</button>
           </div>
         </div>
-      </div>
-    </div>
+      </m.div>
+    </m.div>
   );
 }
 
@@ -214,8 +225,11 @@ function NotificationOverlay({ item, onOpen, onSkip, onAutoplay }) {
   const handleAutoplayClick = () => setAskingFuture(true);
   if (askingFuture) {
     return (
-      <div className="fixed inset-0 z-[60] ppw-scrim flex items-end sm:items-center justify-center p-4">
-        <div
+      <m.div {...scrimEnter()} className="fixed inset-0 z-[60] ppw-scrim flex items-end sm:items-center justify-center p-4">
+        <m.div
+          variants={sheetUp}
+          initial="hidden"
+          animate="show"
           className="card w-full max-w-sm p-5"
           style={{ backgroundColor: 'var(--col-surface-a)', border: '1px solid var(--col-accent)' }}
         >
@@ -235,13 +249,16 @@ function NotificationOverlay({ item, onOpen, onSkip, onAutoplay }) {
               className="btn-ghost w-full"
             >Just this one</button>
           </div>
-        </div>
-      </div>
+        </m.div>
+      </m.div>
     );
   }
   return (
-    <div className="fixed inset-0 z-[60] ppw-scrim flex items-end sm:items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Stack reminder">
-      <div
+    <m.div {...scrimEnter()} className="fixed inset-0 z-[60] ppw-scrim flex items-end sm:items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Stack reminder">
+      <m.div
+        variants={sheetUp}
+        initial="hidden"
+        animate="show"
         className="card w-full max-w-sm p-5"
         style={{ backgroundColor: 'var(--col-surface-a)', border: '1px solid var(--col-accent)' }}
       >
@@ -251,17 +268,17 @@ function NotificationOverlay({ item, onOpen, onSkip, onAutoplay }) {
           <div className="text-muted text-xs mb-4">{item.duration_min} min</div>
         ) : <div className="mb-4" />}
         <div className="flex flex-col gap-2">
+          {/* Accent cleanup (Phase 2.5): legacy gold gradient + hard white →
+              theme tokens, so the overlay flips correctly in both themes. */}
           <button
             type="button"
             onClick={onOpen}
-            className="w-full py-3 rounded-full font-bold transition-all"
-            style={{ backgroundImage: 'linear-gradient(180deg, #F5B845 0%, #E8893A 100%)', color: '#1A1A1A' }}
+            className="w-full py-3 rounded-full font-bold transition-all btn-accent"
           >Open</button>
           <button
             type="button"
             onClick={onSkip}
-            className="w-full py-3 rounded-full font-bold transition-all"
-            style={{ backgroundColor: '#FFFFFF', color: '#1A1A1A', border: '1px solid rgba(26,26,26,0.10)' }}
+            className="w-full py-3 rounded-full font-bold transition-all btn-secondary"
           >Skip</button>
           <button
             type="button"
@@ -269,8 +286,8 @@ function NotificationOverlay({ item, onOpen, onSkip, onAutoplay }) {
             className="w-full py-2 rounded-full text-xs font-bold border border-accent/40 text-accent hover:bg-accent/10 transition-all"
           >Autoplay this stack now</button>
         </div>
-      </div>
-    </div>
+      </m.div>
+    </m.div>
   );
 }
 
@@ -290,8 +307,11 @@ function AddProtocolModal({ open, onClose, onActivate }) {
   }, [open]);
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 ppw-scrim flex items-end sm:items-center justify-center p-4" onClick={onClose}>
-      <div
+    <m.div {...scrimEnter()} className="fixed inset-0 z-50 ppw-scrim flex items-end sm:items-center justify-center p-4" onClick={onClose}>
+      <m.div
+        variants={sheetUp}
+        initial="hidden"
+        animate="show"
         className="card w-full max-w-md max-h-[90vh] overflow-y-auto"
         style={{ backgroundColor: 'var(--col-surface-a)' }}
         onClick={(e) => e.stopPropagation()}
@@ -331,8 +351,8 @@ function AddProtocolModal({ open, onClose, onActivate }) {
             );
           })}
         </div>
-      </div>
-    </div>
+      </m.div>
+    </m.div>
   );
 }
 

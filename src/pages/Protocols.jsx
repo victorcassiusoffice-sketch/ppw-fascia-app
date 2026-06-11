@@ -7,6 +7,7 @@ import { listProtocols, fetchProtocol, isMockActive } from '../protocols.js';
 import { iherbUrl, amazonUkUrl, iherbCartAllUrl } from '../affiliate.js';
 import { requestPermission, getPermissionState } from '../notifications.js';
 import { ScienceDivider, Section } from '../components/shared.jsx';
+import { m, staggerContainer, enterRow, glideIndicator, pressScale } from '../lib/motion';
 
 /* ═══════════════════════════════════════════
    NEW — /protocols
@@ -70,26 +71,29 @@ function ProtocolsList() {
         </div>
       )}
 
-      <div className="space-y-4 fade-in fade-in-stagger is-visible">
+      {/* Liquid-glass (board 02, clip 4): cards enter staggered via the
+          locked container/row primitives; the Activate pill MORPHS in place
+          (colour cross-fade + squishy press), no layout jump. */}
+      <m.div key={list ? 'loaded' : 'loading'} className="space-y-4" variants={staggerContainer()} initial="hidden" animate="show">
         {list && list.map(p => {
           const isActive = activeProtocols.includes(p.protocol_id);
           return (
-            <div key={p.protocol_id} className={`card protocol-tile p-6 ${isActive ? 'border-accent' : ''}`}>
+            <m.div key={p.protocol_id} variants={enterRow} className={`card protocol-tile p-6 ${isActive ? 'border-accent' : ''}`}>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="eyebrow mb-2">{p.variant} · {p.kind}</div>
                   <div className="font-display text-2xl mb-2 leading-tight">{p.topic}</div>
                   <div className="text-muted text-xs tracking-wide">{p.studies_used} studies · {p.sections.daily_plan?.length || 0} daily items</div>
                 </div>
-                <button onClick={() => toggle(p.protocol_id)} className={`shrink-0 px-5 py-2.5 rounded-full text-sm font-bold transition-all ${isActive ? 'bg-cream/8 text-cream border border-accent' : 'btn-accent'}`}>
+                <m.button onClick={() => toggle(p.protocol_id)} className={`shrink-0 px-5 py-2.5 rounded-full text-sm font-bold transition-all ${isActive ? 'bg-cream/8 text-cream border border-accent' : 'btn-accent'}`} {...pressScale()}>
                   {isActive ? '✓ Active' : 'Activate'}
-                </button>
+                </m.button>
               </div>
               <Link to={`/protocol/${p.protocol_id}`} className="text-accent text-sm font-medium mt-5 inline-flex items-center gap-1 hover:gap-2 transition-all">View full protocol <span aria-hidden="true">→</span></Link>
-            </div>
+            </m.div>
           );
         })}
-      </div>
+      </m.div>
 
       {/* Wave-2 — closing science divider (ecm-mesh, Register B). Completes the
           5-asset science set; only shown once protocols have loaded. */}
@@ -437,14 +441,34 @@ function FastingControls() {
     <Section title="Live fasting timer">
       <div className="card p-5 mb-4">
         <div className="text-xs uppercase tracking-widest text-muted mb-2">Window</div>
-        <div className="flex flex-wrap gap-2 mb-5">
-          {WINDOWS.map(w => (
-            <button
-              key={w.key}
-              onClick={() => setPrefs(p => ({ ...p, windowKey: w.key }))}
-              className={'px-4 py-2 rounded-full text-xs font-bold transition-all ' + (prefs.windowKey === w.key ? 'btn-accent' : 'btn-ghost')}
-            >{w.label}</button>
-          ))}
+        {/* Window segment (board 02, clip 3): ONE accent pill glides between
+            the options via layoutId; labels colour-fade. */}
+        <div className="flex flex-wrap gap-2 mb-5" role="group" aria-label="Fasting window">
+          {WINDOWS.map(w => {
+            const active = prefs.windowKey === w.key;
+            return (
+              <m.button
+                key={w.key}
+                type="button"
+                onClick={() => setPrefs(p => ({ ...p, windowKey: w.key }))}
+                aria-pressed={active}
+                className="seg-opt px-4 py-2 rounded-full text-xs font-bold"
+                style={{
+                  background: 'var(--col-surface)',
+                  color: active ? 'var(--col-on-accent)' : 'var(--col-ink)',
+                  border: '1px solid var(--hairline)',
+                  boxShadow: 'var(--elv-1)',
+                  transition: 'color var(--dur-mid) var(--ease)',
+                }}
+                {...pressScale()}
+              >
+                {active && (
+                  <m.span className="glide-pill" aria-hidden="true" style={{ borderRadius: 'var(--r-pill)' }} {...glideIndicator('fast-window')} />
+                )}
+                <span className="seg-label">{w.label}</span>
+              </m.button>
+            );
+          })}
         </div>
 
         <div className="text-xs uppercase tracking-widest text-muted mb-2">Start</div>

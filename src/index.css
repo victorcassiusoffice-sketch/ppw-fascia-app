@@ -227,16 +227,19 @@ h1, h2, h3, h4 {
 }
 
 /* ── Organic hero zone (clip 6, dark theme only via --hero-art-opacity) ──
-   Sits absolutely behind the /today hero card, masked to fade out below.
-   Static layer — never animated. */
+   Bleeds past the hero card so the frosted glass visibly floats ON the
+   texture (clip 6's weather-widget-on-foliage move), fading out at the
+   edges. Static layer — never animated. */
 .hero-art {
-  position: absolute; inset: 0; z-index: -1; overflow: hidden;
+  position: absolute; inset: -16px -20px -26px; z-index: -1; overflow: hidden;
   pointer-events: none; border-radius: var(--r-24);
 }
 .hero-art img {
   width: 100%; height: 100%; object-fit: cover; object-position: center;
   opacity: var(--hero-art-opacity);
   transition: opacity var(--dur-mid) var(--ease);
+  -webkit-mask-image: radial-gradient(120% 100% at 50% 40%, #000 55%, transparent 98%);
+          mask-image: radial-gradient(120% 100% at 50% 40%, #000 55%, transparent 98%);
 }
 
 /* ── Border trace overlay (clip 4) — SVG drawn around the hero card. ── */
@@ -258,7 +261,7 @@ h1, h2, h3, h4 {
   box-shadow: var(--elv-2);
 }
 .seg-opt { position: relative; isolation: isolate; }
-.seg-opt > * { position: relative; z-index: 1; }
+.seg-opt > :not(.glide-pill) { position: relative; z-index: 1; }
 .seg-opt .seg-label { transition: color var(--dur-mid) var(--ease); }
 
 /* Nav glide dot — small accent pill under the active bottom-nav tab. */

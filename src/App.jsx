@@ -25,6 +25,7 @@ import { downloadSlotIcs } from './lib/ics.js';
 import { ensurePersistentStorage } from './lib/storagePersist.js';
 import { getPushState, subscribeToPush, INSTALL_HELP } from './lib/push.js';
 import { LazyMotion, domAnimation, m, AnimatePresence, useReducedMotion, motionPresets } from './motion.js';
+import { DUR, SHIFT, EASE } from './lib/motion';
 import { HelixLogo, ThemeToggle, BottomNav } from './chrome.jsx';
 import { useTheme } from './theme.js';
 
@@ -98,7 +99,6 @@ export default function App() {
   const [session, setSession] = useState(initialSession);
   const location = useLocation();
   const reduced = useReducedMotion();
-  const presets = motionPresets(reduced);
 
   const [activeProtocols] = useActiveProtocols();
   const [activeModules] = useActiveModules();
@@ -124,12 +124,15 @@ export default function App() {
 
         {/* Enter-only keyed route transition. (AnimatePresence mode="wait" is
             avoided here: a held exit can block the next route from mounting on
-            SPA navigation — the new screen must always appear immediately.) */}
+            SPA navigation — the new screen must always appear immediately.)
+            Liquid-glass (board 06): retimed to the locked screen tokens —
+            rise SHIFT.screen over DUR.slow on EASE.standard. The ONE thing
+            that moves on navigation. */}
         <m.div
           key={location.pathname}
-          initial={presets.route.initial}
-          animate={presets.route.animate}
-          transition={presets.route.transition}
+          initial={reduced ? false : { opacity: 0, y: SHIFT.screen }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={reduced ? { duration: 0 } : { duration: DUR.slow / 1000, ease: EASE.standard }}
           style={{ paddingBottom: 'calc(72px + env(safe-area-inset-bottom))' }}
         >
           <Routes location={location}>
@@ -163,10 +166,19 @@ export default function App() {
    bottom-nav). Routine builder stays reachable via the Today empty state,
    the Today overflow ⋮ menu, and Settings → Personalised routine. ────────── */
 function Header() {
+  // Liquid-glass (board 05): the header is a static glass film — content
+  // scrolls under it and blurs out through a fading mask. Static surface →
+  // backdrop-filter allowed (perf law).
   return (
     <header
       className="px-5 py-3 flex items-center justify-between sticky top-0 z-40"
-      style={{ background: 'linear-gradient(180deg, var(--col-bg) 72%, transparent)' }}
+      style={{
+        background: 'linear-gradient(180deg, rgb(var(--c-bg-base) / 0.82) 60%, rgb(var(--c-bg-base) / 0))',
+        WebkitBackdropFilter: 'blur(var(--glass-blur-1))',
+        backdropFilter: 'blur(var(--glass-blur-1))',
+        WebkitMaskImage: 'linear-gradient(180deg, #000 70%, transparent)',
+        maskImage: 'linear-gradient(180deg, #000 70%, transparent)',
+      }}
     >
       <Link to="/" aria-label="PPW home"><HelixLogo size={30} draw /></Link>
       <ThemeToggle />
@@ -458,7 +470,7 @@ function BodyMap({ session, setSession }) {
               <defs>
                 <filter id="hotspotGlow" x="-50%" y="-50%" width="200%" height="200%">
                   <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur" />
-                  <feFlood floodColor="#f5b845" floodOpacity="0.65" />
+                  <feFlood floodColor="#E8772E" floodOpacity="0.65" />
                   <feComposite in2="blur" operator="in" result="glow" />
                   <feMerge>
                     <feMergeNode in="glow" />

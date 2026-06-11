@@ -8,6 +8,7 @@ import { useLocalStorage, useActiveProtocols, useActiveModules, useActiveRoutine
 import { LS_KEYS, APP_VERSION, USE_MOCK_DATA, NOTIFICATION_LEAD_TIME_MIN } from '../config.js';
 import { getPushState, subscribeToPush, INSTALL_HELP } from '../lib/push.js';
 import { Section } from '../components/shared.jsx';
+import { m, glideIndicator, pressScale } from '../lib/motion';
 
 /* P0b (2026-06-02) — "Reliable reminders" card. Explains the two delivery
    paths that ACTUALLY fire on a locked phone (calendar .ics + Web Push on an
@@ -126,6 +127,9 @@ function SettingsView() {
         <div className="card p-5">
           <div className="font-display mb-1">Theme</div>
           <div className="text-muted text-xs mb-4">Light is neumorphic soft-UI · Dark is slate + orange · System follows your device.</div>
+          {/* Liquid-glass (board 04, clip 3): the active state is ONE pill
+              that GLIDES between the three options via layoutId. Buttons stay
+              put; labels colour-fade. Pill is solid (it moves → no blur). */}
           <div className="grid grid-cols-3 gap-2" role="group" aria-label="Theme">
             {[
               { key: 'light',  label: 'Light',  icon: '☀' },
@@ -134,22 +138,27 @@ function SettingsView() {
             ].map(opt => {
               const active = themeChoice === opt.key;
               return (
-                <button
+                <m.button
                   key={opt.key}
                   type="button"
                   onClick={() => setThemeChoice(opt.key)}
                   aria-pressed={active}
-                  className="py-3 rounded-2xl text-sm font-bold flex flex-col items-center gap-1 transition-all"
+                  className="seg-opt py-3 rounded-2xl text-sm font-bold flex flex-col items-center gap-1"
                   style={{
-                    background: active ? 'var(--col-accent)' : 'var(--col-inset)',
+                    background: 'var(--col-inset)',
                     color: active ? 'var(--col-on-accent)' : 'var(--col-ink)',
-                    boxShadow: active ? 'var(--elv-1)' : 'var(--elv-inset)',
+                    boxShadow: active ? 'none' : 'var(--elv-inset)',
                     border: '1px solid var(--hairline)',
+                    transition: 'color var(--dur-mid) var(--ease)',
                   }}
+                  {...pressScale()}
                 >
+                  {active && (
+                    <m.span className="glide-pill" aria-hidden="true" style={{ borderRadius: 'var(--r-16)' }} {...glideIndicator('theme-seg')} />
+                  )}
                   <span aria-hidden="true" style={{ fontSize: 18 }}>{opt.icon}</span>
-                  <span>{opt.label}</span>
-                </button>
+                  <span className="seg-label">{opt.label}</span>
+                </m.button>
               );
             })}
           </div>
@@ -182,13 +191,14 @@ function SettingsView() {
               <div className="font-display">Auto-arrange food into eating window</div>
               <div className="text-muted text-xs mt-1">When enabled, food items outside the window move inside automatically. Notifications fire at open · 15 min pre-close · close.</div>
             </div>
-            <button
+            <m.button
               onClick={() => setIfPrefs(p => ({ ...p, enabled: !p.enabled }))}
               className={`px-4 py-2 rounded-full text-sm font-bold shrink-0 ${ifPrefs.enabled ? 'btn-accent' : 'btn-ghost'}`}
               aria-pressed={ifPrefs.enabled}
+              {...pressScale()}
             >
               {ifPrefs.enabled ? '✓ On' : 'Off'}
-            </button>
+            </m.button>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <label className="block">
@@ -217,9 +227,37 @@ function SettingsView() {
         <div className="card p-5">
           <div className="font-display mb-2">Use mock protocol data</div>
           <div className="text-muted text-xs mb-4">Off = pull from the GitHub protocol repo. On = read /mock-protocol.json bundled with the app.</div>
-          <div className="flex gap-2">
-            <button onClick={() => setMockOverride('true')}  className={`flex-1 py-2.5 rounded-full text-sm font-bold ${mockOverride === 'true'  ? 'btn-accent' : 'btn-ghost'}`}>Mock</button>
-            <button onClick={() => setMockOverride('false')} className={`flex-1 py-2.5 rounded-full text-sm font-bold ${mockOverride === 'false' ? 'btn-accent' : 'btn-ghost'}`}>Live</button>
+          {/* Two-option glide segment (board 04) — same move as the theme
+              control, one pill slides between Mock and Live. */}
+          <div className="flex gap-2" role="group" aria-label="Data source">
+            {[
+              { key: 'true', label: 'Mock' },
+              { key: 'false', label: 'Live' },
+            ].map(opt => {
+              const active = mockOverride === opt.key;
+              return (
+                <m.button
+                  key={opt.key}
+                  type="button"
+                  onClick={() => setMockOverride(opt.key)}
+                  aria-pressed={active}
+                  className="seg-opt flex-1 py-2.5 rounded-full text-sm font-bold"
+                  style={{
+                    background: 'var(--col-inset)',
+                    color: active ? 'var(--col-on-accent)' : 'var(--col-ink)',
+                    border: '1px solid var(--hairline)',
+                    boxShadow: active ? 'none' : 'var(--elv-inset)',
+                    transition: 'color var(--dur-mid) var(--ease)',
+                  }}
+                  {...pressScale()}
+                >
+                  {active && (
+                    <m.span className="glide-pill" aria-hidden="true" style={{ borderRadius: 'var(--r-pill)' }} {...glideIndicator('mock-seg')} />
+                  )}
+                  <span className="seg-label">{opt.label}</span>
+                </m.button>
+              );
+            })}
           </div>
         </div>
       </Section>
