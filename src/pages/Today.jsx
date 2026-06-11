@@ -11,7 +11,7 @@ import {
   migrateRecurrenceData, todayISO,
 } from '../state.js';
 import { recurringStacksForDate, makeRule } from '../recurrence.js';
-import { resolveLaunchHref } from '../lib/mediaStore.js';
+import { resolveLaunchHref, stackThumbnailUrl } from '../lib/mediaStore.js';
 import { isSupplementItem, isAccessoryItem, affiliateUrlFor, applyIfWindow, scheduleIfNotifications, clearIfNotifications } from '../lib/tags.js';
 import AddStackModal from '../AddStackModal.jsx';
 import { fetchProtocol, mergeDailyItems } from '../protocols.js';
@@ -1405,6 +1405,28 @@ function TodayView() {
                   >{it.time}</m.button>
                 )}
                 <div className="flex-1 min-w-0 flex items-center gap-2">
+                  {/* REF-06 — media thumbnail tile inside the glass stack card.
+                      thumbnailUrl/youtubeId derive a static image (no runtime
+                      fetch); offline/missing → app glyph chip fallback. */}
+                  {it.isUserStack && it.userStack && (stackThumbnailUrl(it.userStack) || it.userStack.appKind) && (
+                    <span
+                      className="glass-disc shrink-0 overflow-hidden"
+                      style={{ width: 36, height: 36, borderRadius: 10 }}
+                      aria-hidden="true"
+                    >
+                      {stackThumbnailUrl(it.userStack) ? (
+                        <img
+                          src={stackThumbnailUrl(it.userStack)}
+                          alt=""
+                          loading="lazy"
+                          className="w-full h-full object-cover"
+                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                        />
+                      ) : (
+                        <span style={{ fontSize: 14 }}>{it.userStack.appKind === 'spotify' ? '♪' : it.userStack.appKind === 'youtube' ? '▶' : '↗'}</span>
+                      )}
+                    </span>
+                  )}
                   <InlineRename
                     value={customTitle === it.label ? '' : customTitle}
                     placeholder={it.label}

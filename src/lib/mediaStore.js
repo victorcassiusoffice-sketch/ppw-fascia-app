@@ -155,3 +155,46 @@ export async function fetchYouTubeOEmbed(url) {
     return await r.json();
   } catch (_) { return null; }
 }
+
+/* ── Refinement 2 (Apps row, 2026-06-11) — Spotify link metadata ──
+   PUBLIC oEmbed endpoint only: no API key, no SDK, no playback, no spend.
+   Lazy (fires only when the user pastes a Spotify link in Add Stack),
+   cached in localStorage so a repeat paste never refetches, and
+   offline-SILENT (null → the UI falls back to an app glyph chip). */
+const OEMBED_CACHE_KEY = 'ppw.oembedCache';
+
+export function isSpotifyUrl(url) {
+  return /open\.spotify\.com\/(intl-[a-z-]+\/)?(track|episode|playlist|album|show)\//i.test(url || '');
+}
+
+export async function fetchSpotifyOEmbed(url) {
+  if (!isSpotifyUrl(url)) return null;
+  let cache = {};
+  try { cache = JSON.parse(localStorage.getItem(OEMBED_CACHE_KEY) || '{}') || {}; } catch (_) {}
+  if (cache[url]) return cache[url];
+  try {
+    const r = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`, { mode: 'cors' });
+    if (!r.ok) return null;
+    const meta = await r.json();
+    const slim = { title: meta.title || '', thumbnail_url: meta.thumbnail_url || null };
+    try {
+      // Keep the cache bounded (last ~40 links).
+      const keys = Object.keys(cache);
+      if (keys.length > 40) delete cache[keys[0]];
+      cache[url] = slim;
+      localStorage.setItem(OEMBED_CACHE_KEY, JSON.stringify(cache));
+    } catch (_) {}
+    return slim;
+  } catch (_) { return null; }
+}
+
+/* Thumbnail for a stored user stack (REF-06): prefers the additively-stored
+   `thumbnailUrl` (oEmbed result at save time); YouTube ids derive a static
+   CDN thumb with NO network round-trip at save. Null → caller renders the
+   app glyph chip fallback. */
+export function stackThumbnailUrl(stack) {
+  if (!stack) return null;
+  if (stack.thumbnailUrl) return stack.thumbnailUrl;
+  if (stack.youtubeId) return `https://i.ytimg.com/vi/${stack.youtubeId}/mqdefault.jpg`;
+  return null;
+}

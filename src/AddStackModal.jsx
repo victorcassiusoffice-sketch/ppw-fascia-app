@@ -4,7 +4,7 @@
 // to the parent on save.
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { putMedia, probeDuration, probeUrlDuration, parseYouTubeId, fetchYouTubeOEmbed } from './lib/mediaStore.js';
+import { putMedia, probeDuration, probeUrlDuration, parseYouTubeId, fetchYouTubeOEmbed, fetchSpotifyOEmbed, isSpotifyUrl } from './lib/mediaStore.js';
 
 /* P1 (2026-06-02) — keyboard inset hook. On mobile the on-screen keyboard
    overlays the bottom of the layout viewport (iOS especially), hiding the
@@ -80,10 +80,18 @@ const TYPES = [
   { key: 'video', title: 'Video',          icon: Icon.video },
   { key: 'audio', title: 'Audio',          icon: Icon.audio },
   { key: 'text',  title: 'Text Reminder',  icon: Icon.text  },
-  // Iter 2 Phase 8.2 — disabled tile, renders body with the "legal review
-  // pending" notice. Spotify Web Playback SDK + Premium + Developer Terms
-  // review all required before activation. NO Spotify request fires.
-  { key: 'spotify', title: 'Spotify',      icon: SpotifyIcon, disabled: true },
+];
+
+/* ── Refinement 2 (Vic, 2026-06-11) — APPS row. YouTube + Spotify default
+   chips; the user pastes a URL/share-link to attach it to the stack, and the
+   stack card carries its thumbnail (REF-06). Spotify here = LINK + public
+   oEmbed metadata ONLY — playback stays behind the existing legal gate
+   (no SDK, no Premium requirement, no keys, no spend). This row replaces the
+   old disabled Spotify placeholder tile. */
+const APPS = [
+  { key: 'youtube', label: 'YouTube', glyph: '▶', placeholder: 'Paste a YouTube link or share-link…' },
+  { key: 'spotify', label: 'Spotify', glyph: '♪', placeholder: 'Paste a Spotify track / episode / playlist link…' },
+  { key: 'custom',  label: 'Custom',  glyph: '↗', placeholder: 'Paste any app link or share-link…' },
 ];
 
 function newId() {
@@ -144,6 +152,7 @@ function YouTubeSearchPopover({ onPickUrl }) {
 export default function AddStackModal({ open, onClose, onSave, defaultTime = '08:00' }) {
   const keyboardInset = useKeyboardInset();
   const [chosen, setChosen] = useState(null);
+  const [appKind, setAppKind] = useState(null); // 'youtube' | 'spotify' | 'custom' | null
   const [time, setTime] = useState(defaultTime);
   const [url, setUrl] = useState('');
   const [text, setText] = useState('');
@@ -162,6 +171,7 @@ export default function AddStackModal({ open, onClose, onSave, defaultTime = '08
 
   const reset = useCallback(() => {
     setChosen(null);
+    setAppKind(null);
     setTime(defaultTime);
     setUrl(''); setText(''); setDuration(60);
     setStartAt(0); setEndAt(''); setBusy(false); setError(null);
@@ -185,8 +195,22 @@ export default function AddStackModal({ open, onClose, onSave, defaultTime = '08
     if (!v) { setTitlePreview(''); setThumbPreview(null); return; }
     const yt = parseYouTubeId(v);
     if (yt) {
+      setAppKind('youtube');
       setBusy(true);
       const meta = await fetchYouTubeOEmbed(v);
+      if (meta) {
+        setTitlePreview(meta.title || '');
+        setThumbPreview(meta.thumbnail_url || null);
+      }
+      setBusy(false);
+      return;
+    }
+    // Refinement 2 — Spotify share-link → public oEmbed (lazy, cached,
+    // offline-silent; a null result just keeps the app glyph fallback).
+    if (isSpotifyUrl(v)) {
+      setAppKind('spotify');
+      setBusy(true);
+      const meta = await fetchSpotifyOEmbed(v);
       if (meta) {
         setTitlePreview(meta.title || '');
         setThumbPreview(meta.thumbnail_url || null);
@@ -231,6 +255,10 @@ export default function AddStackModal({ open, onClose, onSave, defaultTime = '08
         baseStack.url = url;
         baseStack.youtubeId = yt || null;
         baseStack.title = titlePreview || url;
+        // Refinement 2 — ADDITIVE fields (no existing shape changes): which
+        // app the link belongs to + the resolved thumbnail for the stack card.
+        baseStack.appKind = appKind || (yt ? 'youtube' : isSpotifyUrl(url) ? 'spotify' : 'custom');
+        baseStack.thumbnailUrl = thumbPreview || null;
       } else if (chosen === 'image' || chosen === 'video' || chosen === 'audio') {
         if (!filePicked) throw new Error('Choose a file.');
         const mediaId = newId();
@@ -250,10 +278,7 @@ export default function AddStackModal({ open, onClose, onSave, defaultTime = '08
       setError(err.message || String(err));
       setBusy(false);
     }
-  }, [chosen, time, duration, startAt, endAt, url, titlePreview, filePicked, text, scope, everyN, onSave, handleClose]);
-
-  // Iter 2 Phase 8.2 — block Save when on the disabled Spotify tile.
-  const chosenIsDisabled = TYPES.find(t => t.key === chosen)?.disabled;
+  }, [chosen, appKind, time, duration, startAt, endAt, url, titlePreview, thumbPreview, filePicked, text, scope, everyN, onSave, handleClose]);
 
   if (!open) return null;
 
@@ -275,25 +300,49 @@ export default function AddStackModal({ open, onClose, onSave, defaultTime = '08
 
         {/* P1 (2026-06-02) — scrollable body; footer below stays pinned + reachable above the keyboard. */}
         <div className="flex-1 overflow-y-auto min-h-0">
-        {/* 5-icon row — always visible at top (+ Spotify placeholder tile, disabled) */}
+        {/* 5-icon row — always visible at top. REF-08: circular glass discs. */}
         <div className="flex justify-around px-2 py-4 border-b border-cream/10 gap-1">
           {TYPES.map(t => {
             const active = chosen === t.key;
-            const disabled = !!t.disabled;
             return (
               <button
                 key={t.key}
                 type="button"
-                onClick={() => setChosen(t.key)}
-                disabled={false /* tap allowed so the disabled body's note can show */}
-                className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${active ? 'text-accent bg-accent/15 ring-2 ring-accent' : disabled ? 'text-muted/40 hover:text-muted' : 'text-muted hover:text-cream'}`}
-                aria-label={t.title + (disabled ? ' (coming soon)' : '')}
-                title={t.title + (disabled ? ' (coming soon — legal review pending)' : '')}
+                onClick={() => { setChosen(t.key); if (t.key !== 'link') setAppKind(null); }}
+                className={`glass-disc w-12 h-12 ${active ? 'text-accent ring-2 ring-accent' : 'text-muted hover:text-cream'}`}
+                aria-label={t.title}
+                title={t.title}
               >
                 {t.icon}
               </button>
             );
           })}
+        </div>
+
+        {/* Refinement 2 — APPS row (Vic new feature): YouTube + Spotify
+            default chips + Custom. One tap arms the link flow with the right
+            placeholder; pasting a share-link resolves title + thumbnail
+            (public oEmbed only — link-out, no playback). */}
+        <div className="px-5 py-3 border-b border-cream/10">
+          <div className="text-[10px] text-muted uppercase tracking-widest mb-2">Apps</div>
+          <div className="flex gap-2 flex-wrap">
+            {APPS.map(a => {
+              const active = chosen === 'link' && appKind === a.key;
+              return (
+                <button
+                  key={a.key}
+                  type="button"
+                  onClick={() => { setChosen('link'); setAppKind(a.key); setUrl(''); setTitlePreview(''); setThumbPreview(null); }}
+                  className={`glass-capsule text-xs ${active ? 'text-accent ring-2 ring-accent' : 'text-muted hover:text-cream'}`}
+                  style={{ padding: '8px 14px' }}
+                  aria-pressed={active}
+                  title={`Attach a ${a.label} link to this stack`}
+                >
+                  <span aria-hidden="true">{a.glyph}</span> {a.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Type-specific inputs */}
@@ -310,7 +359,7 @@ export default function AddStackModal({ open, onClose, onSave, defaultTime = '08
                   type="url"
                   value={url}
                   onChange={(e) => onPasteUrl(e.target.value)}
-                  placeholder="https://youtube.com/... or direct video URL"
+                  placeholder={(APPS.find(a => a.key === appKind) || {}).placeholder || 'https://youtube.com/... or direct video URL'}
                   className="w-full bg-cream/5 border border-cream/15 rounded-lg px-3 py-2 text-sm font-display text-cream focus:outline-none focus:border-accent"
                   autoFocus
                 />
@@ -326,18 +375,11 @@ export default function AddStackModal({ open, onClose, onSave, defaultTime = '08
             </>
           )}
 
-          {chosen === 'spotify' && (
-            <div className="card p-4 bg-cream/[0.02] border border-accent/30">
-              <div className="font-display text-base mb-1 text-accent">Spotify — coming soon</div>
-              <p className="text-muted text-xs leading-relaxed">
-                Spotify playback is pending legal review. Activation requires a Spotify Developer App,
-                Spotify Premium for full tracks, oEmbed-preview disclosure, and Developer Terms compliance.
-                No request to Spotify is made until Vic approves the activation.
-              </p>
-              <p className="text-muted text-[10px] mt-3 uppercase tracking-widest">
-                Legal Dept gap (proposed) · see handoff
-              </p>
-            </div>
+          {chosen === 'link' && appKind === 'spotify' && (
+            <p className="text-[10px] text-muted leading-relaxed">
+              Spotify links open in the Spotify app — the stack shows the cover art
+              and title; playback stays in Spotify.
+            </p>
           )}
 
           {(chosen === 'image' || chosen === 'video' || chosen === 'audio') && (
@@ -485,11 +527,10 @@ export default function AddStackModal({ open, onClose, onSave, defaultTime = '08
           <button onClick={handleClose} className="btn-ghost flex-1">Cancel</button>
           <button
             onClick={handleSave}
-            disabled={!chosen || busy || chosenIsDisabled}
+            disabled={!chosen || busy}
             className="btn-accent flex-1 disabled:opacity-40 disabled:cursor-not-allowed"
-            title={chosenIsDisabled ? 'Spotify is gated on legal review' : undefined}
           >
-            {busy ? 'Saving…' : chosenIsDisabled ? 'Locked' : 'Add to today'}
+            {busy ? 'Saving…' : 'Add to today'}
           </button>
         </div>
       </div>
