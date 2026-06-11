@@ -11,7 +11,7 @@ import {
   migrateRecurrenceData, todayISO,
 } from '../state.js';
 import { recurringStacksForDate, makeRule } from '../recurrence.js';
-import { resolveLaunchHref, stackThumbnailUrl } from '../lib/mediaStore.js';
+import { resolveLaunchHref, stackThumbnailUrl, getMediaUrl } from '../lib/mediaStore.js';
 import { isSupplementItem, isAccessoryItem, affiliateUrlFor, applyIfWindow, scheduleIfNotifications, clearIfNotifications } from '../lib/tags.js';
 import AddStackModal from '../AddStackModal.jsx';
 import { fetchProtocol, mergeDailyItems } from '../protocols.js';
@@ -30,6 +30,58 @@ import UserStackBody from '../components/today/UserStackBody.jsx';
 import { ClearCalendarModal, NotificationOverlay, AddProtocolModal, DragMergePlusOverlay } from '../components/today/overlays.jsx';
 import { KNOWN_AUDIO_MODULES } from '../constants/knownAudioModules.js';
 import { queueAck } from '../lib/assistantSync.js';
+
+/* ═══════════════════════════════════════════
+   REF-02/06 (Refinement 2) — StackThumb
+   The thumbnail is the stack's VISUAL REMINDER (Vic label 2): video thumb /
+   album / podcast cover from the stored thumbnailUrl or YouTube id, the
+   user's own stored image for image stacks (IndexedDB blob), else a type/app
+   glyph chip. Static imagery only — zero network fetches at render time.
+   ═══════════════════════════════════════════ */
+function StackThumb({ stack }) {
+  const remote = stackThumbnailUrl(stack);
+  const [blobUrl, setBlobUrl] = useState(null);
+  useEffect(() => {
+    let revoked = false;
+    let u = null;
+    if (!remote && stack.type === 'image' && stack.mediaStoreId) {
+      getMediaUrl(stack.mediaStoreId).then((x) => {
+        if (revoked) { if (x) URL.revokeObjectURL(x); return; }
+        u = x;
+        setBlobUrl(x);
+      }).catch(() => {});
+    }
+    return () => { revoked = true; if (u) URL.revokeObjectURL(u); };
+  }, [remote, stack.type, stack.mediaStoreId]);
+
+  const src = remote || blobUrl;
+  const glyph = stack.appKind === 'spotify' ? '♪'
+    : stack.appKind === 'youtube' ? '▶'
+    : stack.type === 'video' ? '▶'
+    : stack.type === 'audio' ? '♪'
+    : stack.appKind ? '↗'
+    : null;
+  if (!src && !glyph) return null;
+  return (
+    <span
+      className="glass-disc shrink-0 overflow-hidden"
+      style={{ width: 36, height: 36, borderRadius: 10 }}
+      aria-hidden="true"
+    >
+      {src ? (
+        <img
+          src={src}
+          alt=""
+          loading="lazy"
+          className="w-full h-full object-cover"
+          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+        />
+      ) : (
+        <span style={{ fontSize: 14 }}>{glyph}</span>
+      )}
+    </span>
+  );
+}
 
 /* ═══════════════════════════════════════════
    Phase 1.4 (2026-05-23) — DateStrip
@@ -1409,28 +1461,10 @@ function TodayView() {
                   >{it.time}</m.button>
                 )}
                 <div className="flex-1 min-w-0 flex items-center gap-2">
-                  {/* REF-06 — media thumbnail tile inside the glass stack card.
-                      thumbnailUrl/youtubeId derive a static image (no runtime
-                      fetch); offline/missing → app glyph chip fallback. */}
-                  {it.isUserStack && it.userStack && (stackThumbnailUrl(it.userStack) || it.userStack.appKind) && (
-                    <span
-                      className="glass-disc shrink-0 overflow-hidden"
-                      style={{ width: 36, height: 36, borderRadius: 10 }}
-                      aria-hidden="true"
-                    >
-                      {stackThumbnailUrl(it.userStack) ? (
-                        <img
-                          src={stackThumbnailUrl(it.userStack)}
-                          alt=""
-                          loading="lazy"
-                          className="w-full h-full object-cover"
-                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                        />
-                      ) : (
-                        <span style={{ fontSize: 14 }}>{it.userStack.appKind === 'spotify' ? '♪' : it.userStack.appKind === 'youtube' ? '▶' : '↗'}</span>
-                      )}
-                    </span>
-                  )}
+                  {/* REF-02/06 — the thumbnail is the stack's visual reminder:
+                      video thumb, album/podcast cover, or the user's own
+                      stored image; glyph chip when no art exists. */}
+                  {it.isUserStack && it.userStack && <StackThumb stack={it.userStack} />}
                   <InlineRename
                     value={customTitle === it.label ? '' : customTitle}
                     placeholder={it.label}
@@ -1609,7 +1643,7 @@ function TodayView() {
         >
           {/* Sheet arrives on SPRING.sheet — solid surface (it moves → no
               blur); the static scrim above carries the glass (board 06). */}
-          <m.div variants={sheetUp} initial="hidden" animate="show" className="card w-full max-w-sm p-5" style={{ backgroundColor: 'var(--col-surface-a)' }} onClick={(e) => e.stopPropagation()}>
+          <m.div variants={sheetUp} initial="hidden" animate="show" className="card w-full max-w-sm p-5" style={{ backgroundColor: 'var(--glass-bg-strong)' }} onClick={(e) => e.stopPropagation()}>
             <div className="font-display text-lg mb-1">Remove recurring routine</div>
             <p className="text-muted text-xs mb-4">This routine repeats. Remove it from just this day, or from every day it appears?</p>
             <button

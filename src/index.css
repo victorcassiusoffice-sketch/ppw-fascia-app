@@ -75,6 +75,9 @@ html[data-theme="dark"] {
   --glass-shadow-1: 0 1px 0 var(--glass-highlight) inset, 0 8px 24px -12px rgba(0,0,0,.65);
   --glass-shadow-2: 0 1px 0 var(--glass-highlight) inset, 0 18px 44px -18px rgba(0,0,0,.75);
   --hero-art-opacity: 0.5;   /* organic texture behind the /today hero zone */
+  /* REF-07 correction (Vic 2026-06-11): cards are CLEAR glass — tint comes
+     from the user's background through the pane, never a baked dark fill. */
+  --card-glass-bg: rgba(26, 29, 36, 0.38);
 }
 
 /* ───────────────── LIGHT THEME (neumorphic) ───────────────── */
@@ -121,6 +124,7 @@ html[data-theme="light"] {
   --glass-shadow-1: 3px 3px 6px var(--nm-dark), -3px -3px 6px var(--nm-light);
   --glass-shadow-2: 6px 6px 12px var(--nm-dark), -6px -6px 12px var(--nm-light);
   --hero-art-opacity: 0;     /* no organic texture on the neumorphic ground */
+  --card-glass-bg: rgba(255, 255, 255, 0.42);
 }
 
 /* Convenience solid colours (for use where a triplet is awkward). */
@@ -372,11 +376,15 @@ html[data-theme="light"] .glass-knob {
    COMPONENT GRAMMAR — all token-driven
    ══════════════════════════════════════════════════════════════════════ */
 
-/* Surfaces */
+/* Surfaces — REF-07 correction (Vic 2026-06-11): every card is a CLEAR
+   glass pane. Tint comes from the user's background showing through (the
+   scrim tier keeps AA); never a baked dark/solid fill. */
 .card {
   position: relative;
-  background: var(--col-surface);
-  border: 1px solid var(--hairline);
+  background: var(--card-glass-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur-1)) saturate(140%);
+          backdrop-filter: blur(var(--glass-blur-1)) saturate(140%);
+  border: 1px solid var(--glass-border);
   border-radius: var(--r-24);
   box-shadow: var(--elv-2);
   color: var(--col-ink);
@@ -385,6 +393,27 @@ html[data-theme="light"] .glass-knob {
 }
 .card:hover { box-shadow: var(--elv-3); }
 @media (max-width: 640px) { .card { border-radius: var(--r-24); } }
+
+/* Perf carve-out: while a card is ACTIVELY dragging it goes solid (no
+   backdrop-filter resampling under sustained transform animation); it
+   re-frosts on drop. Entry/lift animations are brief and stay frosted. */
+.today-routine-card.is-dragging, .is-dragging .today-routine-card {
+  background: var(--col-surface);
+  -webkit-backdrop-filter: none;
+          backdrop-filter: none;
+}
+
+/* No-blur engines + reduced-transparency users: solid readable cards. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .card { background: var(--col-surface); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .card {
+    background: var(--col-surface);
+    -webkit-backdrop-filter: none;
+            backdrop-filter: none;
+  }
+}
 
 .card-inset {
   background: var(--col-inset);

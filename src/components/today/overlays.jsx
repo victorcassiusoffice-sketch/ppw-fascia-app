@@ -120,7 +120,7 @@ function ClearCalendarModal({ open, onClose, onConfirm }) {
         initial="hidden"
         animate="show"
         className="card w-full max-w-md max-h-[92vh] overflow-y-auto"
-        style={{ backgroundColor: 'var(--col-surface-a)', border: '1px solid rgb(var(--c-accent) / 0.4)' }}
+        style={{ backgroundColor: 'var(--glass-bg-strong)', border: '1px solid rgb(var(--c-accent) / 0.4)' }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-3 border-b border-cream/10">
@@ -231,7 +231,7 @@ function NotificationOverlay({ item, onOpen, onSkip, onAutoplay }) {
           initial="hidden"
           animate="show"
           className="card w-full max-w-sm p-5"
-          style={{ backgroundColor: 'var(--col-surface-a)', border: '1px solid var(--col-accent)' }}
+          style={{ backgroundColor: 'var(--glass-bg-strong)', border: '1px solid var(--col-accent)' }}
         >
           <div className="font-display text-lg mb-2">Autoplay this stack</div>
           <p className="text-muted text-sm mb-5">
@@ -260,7 +260,7 @@ function NotificationOverlay({ item, onOpen, onSkip, onAutoplay }) {
         initial="hidden"
         animate="show"
         className="card w-full max-w-sm p-5"
-        style={{ backgroundColor: 'var(--col-surface-a)', border: '1px solid var(--col-accent)' }}
+        style={{ backgroundColor: 'var(--glass-bg-strong)', border: '1px solid var(--col-accent)' }}
       >
         <div className="text-xs uppercase tracking-widest text-accent mb-1">{item.time} · In-app reminder</div>
         <div className="font-display text-xl mb-1 leading-tight">{item.label}</div>
@@ -313,7 +313,7 @@ function AddProtocolModal({ open, onClose, onActivate }) {
         initial="hidden"
         animate="show"
         className="card w-full max-w-md max-h-[90vh] overflow-y-auto"
-        style={{ backgroundColor: 'var(--col-surface-a)' }}
+        style={{ backgroundColor: 'var(--glass-bg-strong)' }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-cream/10">

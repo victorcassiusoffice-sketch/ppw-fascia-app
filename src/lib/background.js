@@ -17,10 +17,10 @@ export const BG_KEY = 'ppw.background';
 export const CUSTOM_BG_MEDIA_ID = 'ppw-custom-bg';
 
 export const BG_OPTIONS = [
-  { kind: 'auto',   label: 'Auto',   hint: 'Follows the theme — nature in dark, soft grey in light' },
-  { kind: 'nature', label: 'Nature', hint: 'Dark organic texture (PPW fascia)' },
-  { kind: 'grey',   label: 'Grey',   hint: 'Soft neumorphic ground' },
-  { kind: 'custom', label: 'Custom', hint: 'A photo from your device' },
+  { kind: 'auto',   label: 'Auto',          hint: 'Follows the theme — nature in dark, gradient grey in light' },
+  { kind: 'nature', label: 'Nature',        hint: 'Dark organic texture (PPW fascia)' },
+  { kind: 'grey',   label: 'Gradient Grey', hint: 'Soft neumorphic gradient ground (REF-05)' },
+  { kind: 'custom', label: 'Custom',        hint: 'A photo from your device' },
 ];
 
 export function getBackgroundChoice() {

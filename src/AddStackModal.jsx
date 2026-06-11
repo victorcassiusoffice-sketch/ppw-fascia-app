@@ -298,7 +298,7 @@ export default function AddStackModal({ open, onClose, onSave, defaultTime = '08
       <m.div
         {...(noMotion ? {} : { layoutId: 'add-stack-morph', transition: SPRING.sheet })}
         className={'card w-full max-w-md flex flex-col' + (noMotion ? ' slot-sheet-enter' : '')}
-        style={{ backgroundColor: 'var(--col-surface-a)', maxHeight: '90vh', borderRadius: 'var(--r-24)', marginBottom: keyboardInset ? keyboardInset : undefined }}
+        style={{ backgroundColor: 'var(--glass-bg-strong)', maxHeight: '90vh', borderRadius: 'var(--r-24)', marginBottom: keyboardInset ? keyboardInset : undefined }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-cream/10 shrink-0">
