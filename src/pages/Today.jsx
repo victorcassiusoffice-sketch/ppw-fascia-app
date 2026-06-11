@@ -1224,10 +1224,10 @@ function TodayView() {
       )}
 
       {!empty && (
-        <p className="text-muted text-xs mb-3 flex items-center gap-2 flex-wrap">
-          <span className="text-accent">≡</span>
-          <span>Drag handle to reorder. Drop on another routine to merge them into a stack.</span>
-          <span>Tap any title to rename.</span>
+        /* Loop-1 defect fix: single flowing span so the ≡ glyph never wraps
+           onto its own line at 390px. */
+        <p className="text-muted text-xs mb-3">
+          <span className="text-accent">≡</span> Drag handle to reorder. Drop on another routine to merge them into a stack. Tap any title to rename.
         </p>
       )}
 
@@ -1317,7 +1317,7 @@ function TodayView() {
               <div className="flex items-center gap-2 p-4">
                 <button
                   {...dragHandleProps}
-                  className="drag-handle font-display text-muted hover:text-accent w-11 h-11 flex items-center justify-center text-2xl shrink-0 -ml-2"
+                  className="drag-handle font-display text-muted hover:text-accent w-8 sm:w-11 h-11 flex items-center justify-center text-2xl shrink-0 -ml-2"
                   title="Drag to reorder · drop on another routine to merge"
                 >≡</button>
                 <Tickbox
@@ -1361,7 +1361,10 @@ function TodayView() {
                     onSave={(v) => setItemTitle(it.id, v)}
                     titleClassName="timeline-label flex-1 min-w-0 text-sm"
                   />
-                  {it.duration_min ? <span className="text-muted text-xs shrink-0">{it.duration_min} min</span> : null}
+                  {/* Duration hidden below sm — title legibility wins on 390px
+                      (loop-2 critique); duration still reads in the time chip
+                      context + merged-stack header + protocol detail. */}
+                  {it.duration_min ? <span className="text-muted text-xs shrink-0 hidden sm:inline">{it.duration_min} min</span> : null}
                   {/* 2026-06-03 — recurring badge so the user knows a scope
                       choice (this day / all) is coming on delete. */}
                   {it.isRecurring && (
@@ -1424,10 +1427,14 @@ function TodayView() {
                       title="Tap to add this reminder to your phone calendar — your phone fires the lock-screen alarm"
                     ><IconCalendar /></button>
                   )}
-                  {/* Phase 1.3 (2026-05-23) — inline duplicate + delete icons */}
+                  {/* Phase 1.3 (2026-05-23) — inline duplicate + delete icons.
+                      Loop-1 defect fix (2026-06-11): hidden below sm — at
+                      390px the icon cluster squeezed the title to 0 width.
+                      Both actions stay reachable on mobile via the selection
+                      toolbar and the expanded card body. */}
                   <button
                     onClick={(e) => { e.stopPropagation(); handleDuplicate(it); }}
-                    className="text-muted hover:text-accent w-8 h-8 flex items-center justify-center shrink-0 transition-colors"
+                    className="text-muted hover:text-accent w-8 h-8 hidden sm:flex items-center justify-center shrink-0 transition-colors"
                     aria-label="Duplicate stack"
                     title="Duplicate"
                   ><IconCopy /></button>
@@ -1437,7 +1444,7 @@ function TodayView() {
                       if (it.isRecurring) { setPendingRecurringDelete(it); return; }
                       if (window.confirm('Delete this stack?')) handleRemoveItem(it);
                     }}
-                    className="text-muted hover:text-red-400 w-8 h-8 flex items-center justify-center shrink-0 transition-colors"
+                    className="text-muted hover:text-red-400 w-8 h-8 hidden sm:flex items-center justify-center shrink-0 transition-colors"
                     aria-label="Delete stack"
                     title="Delete"
                   ><IconTrash /></button>
