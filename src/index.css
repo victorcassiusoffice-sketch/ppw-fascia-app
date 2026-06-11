@@ -66,6 +66,15 @@ html[data-theme="dark"] {
   --bg-art-opacity: .10;
   --bg-art-blend: screen;
   --scrim: rgba(8, 9, 12, 0.62);
+
+  /* ── Liquid glass (2026-06-11 redesign) — clip 6 glass-over-organic ── */
+  --glass-bg:        rgba(30, 33, 40, 0.55);
+  --glass-bg-strong: rgba(26, 29, 36, 0.72);
+  --glass-border:    rgba(255, 255, 255, 0.12);
+  --glass-highlight: rgba(255, 255, 255, 0.10);
+  --glass-shadow-1: 0 1px 0 var(--glass-highlight) inset, 0 8px 24px -12px rgba(0,0,0,.65);
+  --glass-shadow-2: 0 1px 0 var(--glass-highlight) inset, 0 18px 44px -18px rgba(0,0,0,.75);
+  --hero-art-opacity: 0.5;   /* organic texture behind the /today hero zone */
 }
 
 /* ───────────────── LIGHT THEME (neumorphic) ───────────────── */
@@ -102,6 +111,16 @@ html[data-theme="light"] {
   --bg-art-opacity: .06;
   --bg-art-blend: multiply;
   --scrim: rgba(38, 44, 56, 0.34);
+
+  /* ── Liquid glass — light = neumorphic morph (clips 1, 5): a faint white
+     film whose depth still comes from the nm dual shadows. ── */
+  --glass-bg:        rgba(255, 255, 255, 0.42);
+  --glass-bg-strong: rgba(255, 255, 255, 0.62);
+  --glass-border:    rgba(255, 255, 255, 0.75);
+  --glass-highlight: rgba(255, 255, 255, 0.95);
+  --glass-shadow-1: 3px 3px 6px var(--nm-dark), -3px -3px 6px var(--nm-light);
+  --glass-shadow-2: 6px 6px 12px var(--nm-dark), -6px -6px 12px var(--nm-light);
+  --hero-art-opacity: 0;     /* no organic texture on the neumorphic ground */
 }
 
 /* Convenience solid colours (for use where a triplet is awkward). */
@@ -162,6 +181,91 @@ h1, h2, h3, h4 {
   opacity: var(--bg-art-opacity); mix-blend-mode: var(--bg-art-blend);
   -webkit-mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.3) 50%, transparent 82%);
           mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.3) 50%, transparent 82%);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   LIQUID GLASS GRAMMAR (2026-06-11) — docs/redesign/00-overview.md
+   Blur tiers are geometry (shared); colour/shadow come from theme tokens.
+
+   PERF LAW (binding): .glass* goes ONLY on surfaces that never animate
+   transform/position (sticky bars, the nav dock, the hero card, menus,
+   scrims). Sheets, toasts, glide pills and dragged cards stay SOLID.
+   ══════════════════════════════════════════════════════════════════════ */
+:root {
+  --glass-blur-1: 10px;   /* light film — header fade, menus */
+  --glass-blur-2: 20px;   /* standard dock/bar glass */
+  --glass-blur-3: 28px;   /* heavy — surfaces over imagery (hero) */
+}
+
+.glass {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur-2)) saturate(150%);
+          backdrop-filter: blur(var(--glass-blur-2)) saturate(150%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow-1);
+}
+.glass-strong {
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: blur(var(--glass-blur-3)) saturate(160%);
+          backdrop-filter: blur(var(--glass-blur-3)) saturate(160%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow-2);
+}
+
+/* No-blur environments (old engines) and reduced-transparency users get a
+   solid, fully readable surface instead of a see-through film. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass, .glass-strong { background: var(--col-surface); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass, .glass-strong {
+    background: var(--col-surface);
+    -webkit-backdrop-filter: none;
+            backdrop-filter: none;
+  }
+  .ppw-scrim { -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+
+/* ── Organic hero zone (clip 6, dark theme only via --hero-art-opacity) ──
+   Sits absolutely behind the /today hero card, masked to fade out below.
+   Static layer — never animated. */
+.hero-art {
+  position: absolute; inset: 0; z-index: -1; overflow: hidden;
+  pointer-events: none; border-radius: var(--r-24);
+}
+.hero-art img {
+  width: 100%; height: 100%; object-fit: cover; object-position: center;
+  opacity: var(--hero-art-opacity);
+  transition: opacity var(--dur-mid) var(--ease);
+}
+
+/* ── Border trace overlay (clip 4) — SVG drawn around the hero card. ── */
+.border-trace {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  pointer-events: none; overflow: visible;
+}
+.border-trace rect {
+  fill: none; stroke: var(--col-accent); stroke-width: 1.5;
+  filter: drop-shadow(0 0 6px var(--accent-soft));
+}
+
+/* ── Glide indicator (clip 3) — the ONE sliding pill under segmented
+   controls. Solid (it moves); label colour cross-fades via .seg-opt. ── */
+.glide-pill {
+  position: absolute; inset: 0; z-index: 0;
+  border-radius: inherit;
+  background: var(--col-accent);
+  box-shadow: var(--elv-2);
+}
+.seg-opt { position: relative; isolation: isolate; }
+.seg-opt > * { position: relative; z-index: 1; }
+.seg-opt .seg-label { transition: color var(--dur-mid) var(--ease); }
+
+/* Nav glide dot — small accent pill under the active bottom-nav tab. */
+.nav-dot {
+  position: absolute; top: 6px; left: 50%; margin-left: -10px;
+  width: 20px; height: 3px; border-radius: var(--r-pill);
+  background: var(--col-accent);
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -297,13 +401,25 @@ button, a, .btn-accent, .btn-ghost, .btn-secondary, .btn-teal, .btn-lime { -webk
 
 /* ── Bottom navigation + centre bell ── */
 .botwrap { position: fixed; left: 0; right: 0; bottom: 0; z-index: 45; display: flex; justify-content: center; pointer-events: none; }
+/* The glass dock (clip 3) — static fixed surface, blur allowed. Solid
+   fallback + reduced-transparency handled by the .glass rules above. */
 .botnav {
   pointer-events: auto; width: 100%; max-width: var(--page-max); margin: 0 auto; height: 64px;
-  background: var(--col-surface); box-shadow: var(--elv-3); border-top: 1px solid var(--hairline);
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: blur(var(--glass-blur-2)) saturate(150%);
+          backdrop-filter: blur(var(--glass-blur-2)) saturate(150%);
+  box-shadow: var(--glass-shadow-2); border-top: 1px solid var(--glass-border);
   display: grid; grid-template-columns: repeat(5, 1fr); align-items: center;
   padding-bottom: env(safe-area-inset-bottom);
 }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .botnav { background: var(--col-surface); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .botnav { background: var(--col-surface); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
 .navbtn {
+  position: relative; /* anchors the gliding .nav-dot */
   display: flex; flex-direction: column; align-items: center; gap: 4px;
   color: var(--col-low); cursor: pointer; font-weight: 600; font-size: 10px;
   background: none; border: none; min-height: var(--ppw-tap-min);
