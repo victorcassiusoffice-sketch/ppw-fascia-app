@@ -97,10 +97,27 @@ const initialSession = {
   stack: [],
 };
 
+/* Refinement 2 (REF-03) — liquid navigation: tab-to-tab route changes slide
+   laterally in tab order (the page is a panel moving aside for the next);
+   non-tab routes keep the vertical rise. Reduced motion → plain fade. */
+const TAB_ORDER = ['/today', '/protocols', '/modules', '/settings'];
+function tabIndexOf(pathname) {
+  if (pathname.startsWith('/protocol')) return 1;
+  return TAB_ORDER.indexOf(pathname);
+}
+
 export default function App() {
   const [session, setSession] = useState(initialSession);
   const location = useLocation();
   const reduced = useReducedMotion();
+
+  // Direction of travel between bottom-nav tabs (computed against the
+  // previous pathname; the ref updates after render).
+  const prevPathRef = useRef(location.pathname);
+  const prevIdx = tabIndexOf(prevPathRef.current);
+  const curIdx = tabIndexOf(location.pathname);
+  const slideDir = prevIdx >= 0 && curIdx >= 0 && prevIdx !== curIdx ? Math.sign(curIdx - prevIdx) : 0;
+  useEffect(() => { prevPathRef.current = location.pathname; }, [location.pathname]);
 
   // D2 (2026-06-11) — pull Assistant plan ops on launch + on every return to
   // foreground. Silent no-op when unpaired or offline (assistantSync handles it).
@@ -131,8 +148,12 @@ export default function App() {
             that moves on navigation. */}
         <m.div
           key={location.pathname}
-          initial={reduced ? false : { opacity: 0, y: SHIFT.screen }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={reduced
+            ? false
+            : slideDir !== 0
+              ? { opacity: 0, x: 28 * slideDir }
+              : { opacity: 0, y: SHIFT.screen }}
+          animate={{ opacity: 1, x: 0, y: 0 }}
           transition={reduced ? { duration: 0 } : { duration: DUR.slow / 1000, ease: EASE.standard }}
           style={{ paddingBottom: 'calc(72px + env(safe-area-inset-bottom))' }}
         >

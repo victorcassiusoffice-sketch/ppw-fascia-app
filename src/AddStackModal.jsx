@@ -5,6 +5,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { putMedia, probeDuration, probeUrlDuration, parseYouTubeId, fetchYouTubeOEmbed, fetchSpotifyOEmbed, isSpotifyUrl } from './lib/mediaStore.js';
+import { m, SPRING, DUR, reduced } from './lib/motion';
 
 /* P1 (2026-06-02) — keyboard inset hook. On mobile the on-screen keyboard
    overlays the bottom of the layout viewport (iOS especially), hiding the
@@ -283,12 +284,21 @@ export default function AddStackModal({ open, onClose, onSave, defaultTime = '08
   if (!open) return null;
 
   const chosenType = TYPES.find(t => t.key === chosen);
+  const noMotion = reduced();
 
   return (
-    <div className="fixed inset-0 z-50 ppw-scrim flex items-end sm:items-center justify-center p-4" onClick={handleClose}>
-      <div
-        className="card slot-sheet-enter w-full max-w-md flex flex-col"
-        style={{ backgroundColor: 'var(--col-surface-a)', maxHeight: '90vh', marginBottom: keyboardInset ? keyboardInset : undefined }}
+    <m.div
+      {...(noMotion ? {} : { initial: { opacity: 0 }, animate: { opacity: 1 }, transition: { duration: DUR.fast / 1000 } })}
+      className="fixed inset-0 z-50 ppw-scrim flex items-end sm:items-center justify-center p-4"
+      onClick={handleClose}
+    >
+      {/* REF-04/05 — the sheet IS the "+ Stack" control grown open: shared
+          layoutId morphs button → sheet (transform-only, SPRING.sheet).
+          Reduced motion keeps the CSS slide-in fallback (also media-guarded). */}
+      <m.div
+        {...(noMotion ? {} : { layoutId: 'add-stack-morph', transition: SPRING.sheet })}
+        className={'card w-full max-w-md flex flex-col' + (noMotion ? ' slot-sheet-enter' : '')}
+        style={{ backgroundColor: 'var(--col-surface-a)', maxHeight: '90vh', borderRadius: 'var(--r-24)', marginBottom: keyboardInset ? keyboardInset : undefined }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-cream/10 shrink-0">
@@ -533,7 +543,7 @@ export default function AddStackModal({ open, onClose, onSave, defaultTime = '08
             {busy ? 'Saving…' : 'Add to today'}
           </button>
         </div>
-      </div>
-    </div>
+      </m.div>
+    </m.div>
   );
 }

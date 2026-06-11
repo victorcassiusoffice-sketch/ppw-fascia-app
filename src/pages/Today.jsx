@@ -1061,12 +1061,16 @@ function TodayView() {
             bottom nav per Vic change #1). Rare actions (select-all, clear,
             create routine) live under ⋮ so nothing crowds at 360px. */}
         <div className="grid items-center gap-2.5" style={{ gridTemplateColumns: '1fr 1fr auto' }}>
+          {/* REF-04/05 select→expand: the control GROWS into the Add Stack
+              sheet via a shared layoutId — while the sheet is open the button
+              releases the id so the morph has one owner at a time. */}
           <m.button
             type="button"
             onClick={() => setAddModalOpen(true)}
             className="btn-accent flex items-center justify-center gap-2"
-            style={{ height: 44, padding: 0 }}
+            style={{ height: 44, padding: 0, borderRadius: 'var(--r-pill)' }}
             title="Add a custom stack"
+            {...(reduced || addModalOpen ? {} : { layoutId: 'add-stack-morph' })}
             {...pressScale()}
           >
             <IconPlus /><span className="text-sm">Stack</span>
