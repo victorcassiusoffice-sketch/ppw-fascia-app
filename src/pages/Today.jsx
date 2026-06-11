@@ -29,6 +29,7 @@ import MergedStack from '../components/today/MergedStack.jsx';
 import UserStackBody from '../components/today/UserStackBody.jsx';
 import { ClearCalendarModal, NotificationOverlay, AddProtocolModal, DragMergePlusOverlay } from '../components/today/overlays.jsx';
 import { KNOWN_AUDIO_MODULES } from '../constants/knownAudioModules.js';
+import { queueAck } from '../lib/assistantSync.js';
 
 /* ═══════════════════════════════════════════
    Phase 1.4 (2026-05-23) — DateStrip
@@ -236,6 +237,31 @@ function StreakChip({ count }) {
       </svg>
       <span className="text-xs font-bold tabular-nums" style={{ color: 'rgb(var(--c-accent))' }}>{count}</span>
     </div>
+  );
+}
+
+// D2 (2026-06-11) — an item is "assistant-origin" when its underlying stack
+// carries source:'assistant'. Holds for both one-off user stacks and the
+// stack inside a recurring rule (it.userStack === rule.stack). Returns the
+// server op id (for ack) or null.
+function assistantOpIdOf(it) {
+  const st = it && it.userStack;
+  return st && st.source === 'assistant' && st.assistantOpId ? st.assistantOpId : null;
+}
+
+// Small helix chip marking a coach-created row.
+function AssistantChip() {
+  return (
+    <span
+      className="inline-flex items-center justify-center shrink-0 rounded-full"
+      style={{ width: 18, height: 18, background: 'var(--accent-soft)', border: '1px solid rgb(var(--c-accent) / 0.35)' }}
+      title="Added by your Wellness Assistant"
+      aria-label="Added by your Wellness Assistant"
+    >
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgb(var(--c-accent))" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+        <path d="M5 3c0 6 14 6 14 12M19 3c0 6-14 6-14 12M5 21h14M5 3h14" />
+      </svg>
+    </span>
   );
 }
 
@@ -654,6 +680,10 @@ function TodayView() {
       deleteOccurrence(it.ruleId);
     } else if (it.isUserStack) {
       removeUserStack(it.id);
+      // D2 — tell the coach a one-off assistant item was locally deleted so its
+      // server-side plan op is marked deleted and never re-pulled.
+      const opId = assistantOpIdOf(it);
+      if (opId) queueAck(opId, 'deleted');
     } else if (it.isDuplicate) {
       removeDuplicate(it.id);
     } else {
@@ -673,8 +703,15 @@ function TodayView() {
   const handleConfirmRecurringDelete = useCallback((mode) => {
     const it = pendingRecurringDelete;
     if (!it) return;
-    if (mode === 'all') removeRecurrenceRule(it.ruleId);   // cascade: drop the rule
-    else deleteOccurrence(it.ruleId);                       // this day only
+    if (mode === 'all') {
+      removeRecurrenceRule(it.ruleId);   // cascade: drop the rule
+      // D2 — only a full "all occurrences" removal acks deleted; a "this day
+      // only" skip leaves the rule (and its server op) intact.
+      const opId = assistantOpIdOf(it);
+      if (opId) queueAck(opId, 'deleted');
+    } else {
+      deleteOccurrence(it.ruleId);                          // this day only
+    }
     setDailyOrder(cur => (cur || []).filter(id => id !== it.id));
     setTimeOverrides(cur => {
       if (!cur || !(it.id in cur)) return cur;
@@ -1370,6 +1407,8 @@ function TodayView() {
                   {it.isRecurring && (
                     <span className="text-accent text-xs shrink-0" title="Recurring routine" aria-label="Recurring routine">↻</span>
                   )}
+                  {/* D2 — coach-created rows carry a small helix chip. */}
+                  {assistantOpIdOf(it) && <AssistantChip />}
                   {/* Bug C (2026-06-02) — one-tap "open" launch. Opens the EXACT
                       stored href (youtu.be short-links normalised to the real
                       watch URL) in a new tab. Independent of expand/selection. */}

@@ -28,6 +28,7 @@ import { LazyMotion, domAnimation, m, AnimatePresence, useReducedMotion, motionP
 import { DUR, SHIFT, EASE } from './lib/motion';
 import { HelixLogo, ThemeToggle, BottomNav } from './chrome.jsx';
 import { useTheme } from './theme.js';
+import { initAssistantSync } from './lib/assistantSync.js';
 
 import TodayView from './pages/Today.jsx';
 import { ProtocolsList, ProtocolDetail } from './pages/Protocols.jsx';
@@ -99,6 +100,10 @@ export default function App() {
   const [session, setSession] = useState(initialSession);
   const location = useLocation();
   const reduced = useReducedMotion();
+
+  // D2 (2026-06-11) — pull Assistant plan ops on launch + on every return to
+  // foreground. Silent no-op when unpaired or offline (assistantSync handles it).
+  useEffect(() => initAssistantSync(), []);
 
   const [activeProtocols] = useActiveProtocols();
   const [activeModules] = useActiveModules();

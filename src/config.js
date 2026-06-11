@@ -29,6 +29,23 @@ export const LS_KEYS = {
   RECURRENCE_RULES:    'ppw.recurrenceRules',       // 2026-06-03 — global list of recurring routine rules
   RECURRENCE_OVERRIDES:'ppw.recurrenceOverrides',   // 2026-06-03 — per-date exceptions, key ::<ISO>
   MIGRATION_FLAG:      'ppw.migration.recurrence.v1',// 2026-06-03 — run-once migration marker
+  ENTITLEMENT:         'ppw.entitlement',            // 2026-06-10 — 'pro' unlocks Pro-gated surfaces (Assistant). Absent/anything-else = free.
+  ASSISTANT_SYNC:      'ppw.assistantSync',          // 2026-06-11 (D2) — { token, cursor, lastSyncAt, ackQueue } for the Assistant bridge
 };
+
+// ─── Wellness Assistant launch (STAGED — do NOT enable until go-live) ───────────
+// The Assistant is a SEPARATE paid service (its own Vercel app + Neon DB + Anthropic
+// key). This app only ever LINKS OUT to it — it is never merged in (locked arch).
+//
+// FEATURE_ASSISTANT_LAUNCH is the single master switch. While false, the launch
+// button does not render or mount anywhere, for anyone. Go-live = flip this one
+// line to true (and ship). Even when true, the button only shows for a Pro member
+// (see isProMember()) so a free user can never open the paid assistant from here.
+export const FEATURE_ASSISTANT_LAUNCH = false;
+
+// Where the launch button points — the live, separately-deployed Assistant service.
+// Also the base URL the D2 sync client (src/lib/assistantSync.js) calls for the
+// device-bridge routes (/api/device/exchange, /api/plan/patches, /api/plan/ack).
+export const WELLNESS_ASSISTANT_URL = 'https://ppw-wellness-assistant.vercel.app';
 
 export const APP_VERSION = '0.5.0-dual-theme';

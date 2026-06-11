@@ -9,6 +9,7 @@ import { LS_KEYS, APP_VERSION, USE_MOCK_DATA, NOTIFICATION_LEAD_TIME_MIN } from 
 import { getPushState, subscribeToPush, INSTALL_HELP } from '../lib/push.js';
 import { Section } from '../components/shared.jsx';
 import { m, glideIndicator, pressScale } from '../lib/motion';
+import { getPairingState, pairDevice, unpairDevice } from '../lib/assistantSync.js';
 
 /* P0b (2026-06-02) — "Reliable reminders" card. Explains the two delivery
    paths that ACTUALLY fire on a locked phone (calendar .ics + Web Push on an
@@ -97,6 +98,93 @@ function ReliableRemindersCard() {
   );
 }
 
+/* ─── Connect Assistant (D2, 2026-06-11) ────────────────────────────────────
+   Pairs this app with the SEPARATE Wellness Assistant service. The user signs
+   in once on the assistant, taps "Pair my app" to get a 6-char code, and types
+   it here. The app then stores a long-lived, read-only, revocable device token
+   and pulls the coach's schedule additions on launch/focus. No health data
+   crosses the bridge — only schedule content. Disconnect clears the local token
+   (server-side revoke is done from the assistant app/admin, which is session-
+   gated; clearing the token here stops all sync immediately). */
+function ConnectAssistantCard() {
+  const [state, setState] = useState(() => getPairingState());
+  const [code, setCode] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState(null);
+
+  const connect = async () => {
+    setBusy(true); setMsg(null);
+    const r = await pairDevice(code);
+    setBusy(false);
+    if (r.ok) {
+      setState(getPairingState());
+      setCode('');
+      setMsg({ tone: 'ok', text: r.applied ? `Connected — pulled ${r.applied} item${r.applied === 1 ? '' : 's'} from your coach.` : 'Connected. Your coach’s additions will appear in Today.' });
+    } else {
+      const reason = r.reason === 'bad_code' ? 'That code is invalid or expired — generate a fresh one in the assistant.'
+        : r.reason === 'offline' ? 'No connection — check your network and try again.'
+        : r.reason === 'empty_code' ? 'Enter the 6-character code from the assistant.'
+        : 'Could not connect (' + r.reason + ').';
+      setMsg({ tone: 'warn', text: reason });
+    }
+  };
+
+  const disconnect = () => {
+    unpairDevice();
+    setState(getPairingState());
+    setMsg({ tone: 'ok', text: 'Disconnected on this device. Existing items stay; no new coach additions will sync.' });
+  };
+
+  return (
+    <Section title="Wellness Assistant">
+      <div className="card p-5">
+        {state.paired ? (
+          <>
+            <div className="font-display mb-1">Connected ✓</div>
+            <div className="text-muted text-xs mb-4">
+              Your coach’s schedule additions sync into Today on launch and when you
+              return to the app. They appear with a small helix chip and you can edit or
+              delete them like anything else.
+            </div>
+            <button onClick={disconnect} className="btn-ghost w-full">Disconnect</button>
+          </>
+        ) : (
+          <>
+            <div className="font-display mb-1">Connect your Assistant</div>
+            <div className="text-muted text-xs mb-4">
+              Open the PPW Wellness Assistant, sign in, and tap “Pair my app” to get a
+              6-character code. Enter it below to let your coach add stacks, routines and
+              fasting windows straight into Today.
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                inputMode="text"
+                autoCapitalize="characters"
+                autoCorrect="off"
+                spellCheck={false}
+                maxLength={8}
+                value={code}
+                onChange={(e) => setCode(e.target.value.toUpperCase())}
+                onKeyDown={(e) => { if (e.key === 'Enter' && code.trim() && !busy) connect(); }}
+                placeholder="Pairing code"
+                aria-label="Assistant pairing code"
+                className="flex-1 bg-cream/5 border border-cream/15 rounded-lg px-3 py-2 text-sm font-display tracking-[0.3em] text-cream focus:outline-none focus:border-accent uppercase"
+              />
+              <button onClick={connect} disabled={busy || !code.trim()} className="btn-accent shrink-0 disabled:opacity-40">
+                {busy ? 'Connecting…' : 'Connect'}
+              </button>
+            </div>
+          </>
+        )}
+        {msg && (
+          <div className="text-xs mt-3" style={{ color: msg.tone === 'ok' ? '#7CCB8E' : '#F5C56B' }}>{msg.text}</div>
+        )}
+      </div>
+    </Section>
+  );
+}
+
 /* ═══════════════════════════════════════════
    NEW — /settings
    ═══════════════════════════════════════════ */
@@ -122,6 +210,8 @@ function SettingsView() {
       <Link to="/today" className="text-muted text-sm inline-block hover:text-accent mb-4 transition-colors">← Today</Link>
       <div className="eyebrow mb-3">Configure</div>
       <h1 className="font-display text-4xl md:text-5xl mb-8 leading-[1.02]">Settings</h1>
+
+      <ConnectAssistantCard />
 
       <Section title="Appearance">
         <div className="card p-5">

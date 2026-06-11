@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { LS_KEYS } from './config.js';
 
 function readJSON(key, fallback) {
@@ -30,6 +30,19 @@ export function useLocalStorage(key, initial) {
     setState({ key, val: readJSON(key, initial) });
   }
   useEffect(() => { writeJSON(state.key, state.val); }, [state.key, state.val]);
+  // D2 (2026-06-11) — the Assistant sync client (src/lib/assistantSync.js) writes
+  // coach-created stacks/rules straight into localStorage on launch/focus, OUTSIDE
+  // React. Re-read this key when it signals an apply so those additions surface
+  // live without a navigation. Additive + narrowly scoped: it only fires on this
+  // one custom event (never native cross-tab `storage` events), so existing
+  // behaviour is unchanged when no assistant is paired.
+  const initialRef = useRef(initial);
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const onApplied = () => setState((s) => ({ key: s.key, val: readJSON(s.key, initialRef.current) }));
+    window.addEventListener('ppw:assistant-applied', onApplied);
+    return () => window.removeEventListener('ppw:assistant-applied', onApplied);
+  }, []);
   const setVal = useCallback((update) => {
     setState((s) => ({ key: s.key, val: typeof update === 'function' ? update(s.val) : update }));
   }, []);
