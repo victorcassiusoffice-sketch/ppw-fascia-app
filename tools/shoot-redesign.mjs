@@ -35,6 +35,41 @@ const SEED = {
   ]),
 };
 
+/* Refinement 2 — background-variant extras (REF-01/04/05): /today under the
+   non-default BG per theme + a CUSTOM image bg (canvas-generated blob seeded
+   straight into the app's IndexedDB media store — no asset, no network). */
+const BG_EXTRAS = [
+  { name: 'today-dark-bgGrey',   theme: 'dark',  bg: { kind: 'grey' } },
+  { name: 'today-light-bgNature', theme: 'light', bg: { kind: 'nature' } },
+  { name: 'today-dark-bgCustom', theme: 'dark',  bg: { kind: 'custom', mediaId: 'ppw-custom-bg' }, seedCustom: true },
+];
+
+const seedCustomBgScript = () => new Promise((resolve) => {
+  const c = document.createElement('canvas');
+  c.width = 800; c.height = 1600;
+  const g = c.getContext('2d');
+  const grad = g.createLinearGradient(0, 0, 800, 1600);
+  grad.addColorStop(0, '#2b1d3a'); grad.addColorStop(0.5, '#0f2f3c'); grad.addColorStop(1, '#3a2710');
+  g.fillStyle = grad; g.fillRect(0, 0, 800, 1600);
+  for (let i = 0; i < 40; i++) {
+    g.beginPath();
+    g.arc(Math.sin(i * 7.3) * 380 + 400, (i / 40) * 1600, 60 + (i % 5) * 28, 0, Math.PI * 2);
+    g.fillStyle = `rgba(255,255,255,${0.02 + (i % 3) * 0.015})`;
+    g.fill();
+  }
+  c.toBlob((blob) => {
+    const r = indexedDB.open('ppw-media-store', 1);
+    r.onupgradeneeded = (e) => { const db = e.target.result; if (!db.objectStoreNames.contains('files')) db.createObjectStore('files'); };
+    r.onsuccess = () => {
+      const tx = r.result.transaction('files', 'readwrite');
+      tx.objectStore('files').put(blob, 'ppw-custom-bg');
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => resolve(false);
+    };
+    r.onerror = () => resolve(false);
+  }, 'image/png');
+});
+
 const run = async () => {
   mkdirSync(OUT, { recursive: true });
   const browser = await chromium.launch({ executablePath: CHROME, headless: true });
@@ -74,6 +109,37 @@ const run = async () => {
       }
       await ctx.close();
     }
+  }
+
+  // Background-variant extras (mobile only).
+  for (const extra of BG_EXTRAS) {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
+    await ctx.addInitScript(({ seed, theme, bg }) => {
+      try {
+        localStorage.setItem('ppw.theme', theme);
+        localStorage.setItem('ppw.background', JSON.stringify(bg));
+        for (const [k, v] of Object.entries(seed)) localStorage.setItem(k, v);
+      } catch (_) {}
+    }, { seed: SEED, theme: extra.theme, bg: extra.bg });
+    const page = await ctx.newPage();
+    const errors = [];
+    page.on('console', (msg) => { if (msg.type() === 'error') errors.push(msg.text()); });
+    page.on('pageerror', (err) => errors.push('pageerror: ' + err.message));
+    await page.goto(BASE + '/today', { waitUntil: 'networkidle' });
+    if (extra.seedCustom) {
+      await page.evaluate(seedCustomBgScript);
+      await page.reload({ waitUntil: 'networkidle' });
+    }
+    await page.waitForTimeout(1800);
+    const probe = await page.evaluate(() => ({
+      rootChildren: document.getElementById('root')?.childElementCount ?? -1,
+      overflowX: document.documentElement.scrollWidth > window.innerWidth + 1,
+      dataBg: document.documentElement.getAttribute('data-bg'),
+    }));
+    await page.screenshot({ path: join(OUT, `_${extra.name}-fold.png`) });
+    results.push({ route: '/today', theme: extra.theme, viewport: `mobile-${extra.name}`, ...probe, consoleErrors: [...errors] });
+    console.log(extra.name, JSON.stringify({ root: probe.rootChildren, bg: probe.dataBg, errs: errors.length }));
+    await ctx.close();
   }
 
   // Reduced-motion verification pass (no screenshots needed beyond /today).

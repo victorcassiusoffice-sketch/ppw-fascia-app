@@ -1512,7 +1512,7 @@ function TodayView() {
                       toolbar and the expanded card body. */}
                   <button
                     onClick={(e) => { e.stopPropagation(); handleDuplicate(it); }}
-                    className="glass-disc text-muted hover:text-accent w-8 h-8 hidden sm:inline-flex shrink-0"
+                    className="glass-disc text-muted hover:text-accent w-8 h-8 !hidden sm:!inline-flex shrink-0"
                     aria-label="Duplicate stack"
                     title="Duplicate"
                   ><IconCopy /></button>
@@ -1522,7 +1522,7 @@ function TodayView() {
                       if (it.isRecurring) { setPendingRecurringDelete(it); return; }
                       if (window.confirm('Delete this stack?')) handleRemoveItem(it);
                     }}
-                    className="glass-disc text-muted hover:text-red-400 w-8 h-8 hidden sm:inline-flex shrink-0"
+                    className="glass-disc text-muted hover:text-red-400 w-8 h-8 !hidden sm:!inline-flex shrink-0"
                     aria-label="Delete stack"
                     title="Delete"
                   ><IconTrash /></button>
