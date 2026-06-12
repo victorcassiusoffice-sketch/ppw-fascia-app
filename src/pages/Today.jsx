@@ -158,11 +158,15 @@ const DateStrip = React.forwardRef(function DateStrip({ selectedDate, onSelect }
             className="seg-opt shrink-0 flex flex-col items-center justify-center"
             style={{
               width: 54, padding: '9px 0', borderRadius: 'var(--r-16)',
-              background: 'var(--col-surface)',
+              /* v2: clear glass chip — film + specular rim, never a solid fill
+                 (the glass bar behind already blurs the ground). */
+              backgroundColor: 'var(--chip-glass)',
+              backgroundImage: 'linear-gradient(160deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02) 60%, rgba(255,255,255,0.07))',
+              border: '1px solid var(--glass-rim)',
               color: sel ? 'var(--col-on-accent)' : 'var(--col-ink)',
               boxShadow: isToday && !sel
-                ? 'var(--elv-1), 0 0 0 2px var(--col-accent) inset'
-                : 'var(--elv-1)',
+                ? '0 1px 0 var(--glass-specular) inset, 0 0 0 2px var(--col-accent) inset'
+                : '0 1px 0 var(--glass-specular) inset',
               scrollSnapAlign: 'center',
               transition: 'color var(--dur-mid) var(--ease)',
             }}
@@ -1079,11 +1083,12 @@ function TodayView() {
         className="sticky z-30 -mx-5 px-5 pt-2 pb-2"
         style={{
           top: 56,
-          background: 'var(--glass-bg-strong)',
-          backdropFilter: 'saturate(150%) blur(var(--glass-blur-2))',
-          WebkitBackdropFilter: 'saturate(150%) blur(var(--glass-blur-2))',
-          borderBottom: '1px solid var(--glass-border)',
-          boxShadow: '0 1px 0 var(--glass-highlight) inset',
+          backgroundColor: 'var(--glass-bg)',
+          backgroundImage: 'var(--glass-fill)',
+          backdropFilter: 'saturate(170%) blur(var(--glass-blur-2))',
+          WebkitBackdropFilter: 'saturate(170%) blur(var(--glass-blur-2))',
+          borderBottom: '1px solid var(--glass-rim)',
+          boxShadow: '0 1px 0 var(--glass-specular) inset',
         }}
       >
         {/* Month line — big display month + year (left), glance cluster (right). */}

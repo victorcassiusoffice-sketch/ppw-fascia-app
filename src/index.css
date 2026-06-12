@@ -25,7 +25,8 @@
   --page-max: 480px; --gutter: 20px; --rail-gap: 12px;
   --dur-fast: 140ms; --dur-mid: 200ms; --dur-slow: 240ms;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --ppw-tap-min: 44px;
+  /* Liquid-glass framework Lens 3: hit areas >= 48px. */
+  --ppw-tap-min: 48px;
 
   /* Candy data-viz gradients (both themes) */
   --g-relax:    linear-gradient(180deg, #4FB3F2, #7C5CF2);
@@ -67,17 +68,41 @@ html[data-theme="dark"] {
   --bg-art-blend: screen;
   --scrim: rgba(8, 9, 12, 0.62);
 
-  /* ── Liquid glass (2026-06-11 redesign) — clip 6 glass-over-organic ── */
-  --glass-bg:        rgba(30, 33, 40, 0.55);
-  --glass-bg-strong: rgba(26, 29, 36, 0.72);
-  --glass-border:    rgba(255, 255, 255, 0.12);
-  --glass-highlight: rgba(255, 255, 255, 0.10);
-  --glass-shadow-1: 0 1px 0 var(--glass-highlight) inset, 0 8px 24px -12px rgba(0,0,0,.65);
-  --glass-shadow-2: 0 1px 0 var(--glass-highlight) inset, 0 18px 44px -18px rgba(0,0,0,.75);
+  /* ── Liquid glass v2 (2026-06-12, Vic GATE-2 visual fail fix) ──
+     iOS-26-class recipe: the pane is ~nearly transparent — the glass read
+     comes from (a) blur of a LUMINOUS ground, (b) a diagonal white SHEEN
+     gradient, (c) a bright specular rim (top/leading edges). Legibility is
+     the SCRIM TIER's job, never a darker fill. */
+  --glass-tint:      rgba(22, 25, 31, 0.16);   /* faint body tint only */
+  --glass-tint-strong: rgba(22, 25, 31, 0.30);
+  /* REF-01 pane anatomy (binding, 2026-06-12): edge GLINTS (localised bright
+     light-catch streaks with falloff, top + offset-bottom + side), a CRISP
+     diagonal reflection boundary sweeping the pane, over a near-transparent
+     body. One composite — every glass surface consumes this var. */
+  --glass-fill:
+      radial-gradient(42% 2.5px at 22% 0%,  rgba(255, 255, 255, 0.95), transparent 78%),
+      radial-gradient(32% 2.5px at 79% 100%, rgba(255, 255, 255, 0.60), transparent 78%),
+      radial-gradient(2.5px 26% at 100% 26%, rgba(255, 255, 255, 0.42), transparent 78%),
+      linear-gradient(118deg,
+        rgba(255, 255, 255, 0.135) 0%,
+        rgba(255, 255, 255, 0.060) 46%,
+        rgba(255, 255, 255, 0.006) 46.5%,
+        rgba(255, 255, 255, 0.045) 100%);
+  --glass-rim:       rgba(255, 255, 255, 0.32);
+  --glass-specular:  rgba(255, 255, 255, 0.60);
+  --glass-edge:      rgba(255, 255, 255, 0.16);
+  --chip-glass:      rgba(255, 255, 255, 0.09); /* small pills/chips, no blur */
+  /* Back-compat aliases (bars, sheets) — now translucent */
+  --glass-bg:        rgba(22, 25, 31, 0.30);
+  --glass-bg-strong: rgba(22, 25, 31, 0.46);
+  --glass-border:    var(--glass-rim);
+  --glass-highlight: var(--glass-specular);
+  --glass-shadow-1: 0 1px 0 var(--glass-specular) inset, 1px 0 0 var(--glass-edge) inset,
+                    0 -1px 0 rgba(255,255,255,0.05) inset, 0 8px 24px -12px rgba(0,0,0,.55);
+  --glass-shadow-2: 0 1px 0 var(--glass-specular) inset, 1px 0 0 var(--glass-edge) inset,
+                    0 -1px 0 rgba(255,255,255,0.06) inset, 0 18px 44px -18px rgba(0,0,0,.65);
   --hero-art-opacity: 0.5;   /* organic texture behind the /today hero zone */
-  /* REF-07 correction (Vic 2026-06-11): cards are CLEAR glass — tint comes
-     from the user's background through the pane, never a baked dark fill. */
-  --card-glass-bg: rgba(26, 29, 36, 0.38);
+  --card-glass-bg: var(--glass-tint);
 }
 
 /* ───────────────── LIGHT THEME (neumorphic) ───────────────── */
@@ -115,16 +140,33 @@ html[data-theme="light"] {
   --bg-art-blend: multiply;
   --scrim: rgba(38, 44, 56, 0.34);
 
-  /* ── Liquid glass — light = neumorphic morph (clips 1, 5): a faint white
-     film whose depth still comes from the nm dual shadows. ── */
-  --glass-bg:        rgba(255, 255, 255, 0.42);
-  --glass-bg-strong: rgba(255, 255, 255, 0.62);
-  --glass-border:    rgba(255, 255, 255, 0.75);
-  --glass-highlight: rgba(255, 255, 255, 0.95);
-  --glass-shadow-1: 3px 3px 6px var(--nm-dark), -3px -3px 6px var(--nm-light);
-  --glass-shadow-2: 6px 6px 12px var(--nm-dark), -6px -6px 12px var(--nm-light);
+  /* ── Liquid glass v2, light theme — clear panes over the pale ground;
+     sheen + specular carry the glass read, nm shadows keep the soft depth. ── */
+  --glass-tint:      rgba(255, 255, 255, 0.20);
+  --glass-tint-strong: rgba(255, 255, 255, 0.44);
+  --glass-fill:
+      radial-gradient(42% 2.5px at 22% 0%,  rgba(255, 255, 255, 1), transparent 78%),
+      radial-gradient(32% 2.5px at 79% 100%, rgba(255, 255, 255, 0.9), transparent 78%),
+      radial-gradient(2.5px 26% at 100% 26%, rgba(255, 255, 255, 0.8), transparent 78%),
+      linear-gradient(118deg,
+        rgba(255, 255, 255, 0.66) 0%,
+        rgba(255, 255, 255, 0.30) 46%,
+        rgba(255, 255, 255, 0.10) 46.5%,
+        rgba(255, 255, 255, 0.34) 100%);
+  --glass-rim:       rgba(255, 255, 255, 0.95);
+  --glass-specular:  rgba(255, 255, 255, 1);
+  --glass-edge:      rgba(255, 255, 255, 0.65);
+  --chip-glass:      rgba(255, 255, 255, 0.42);
+  --glass-bg:        rgba(255, 255, 255, 0.30);
+  --glass-bg-strong: rgba(255, 255, 255, 0.55);
+  --glass-border:    var(--glass-rim);
+  --glass-highlight: var(--glass-specular);
+  --glass-shadow-1: 0 1px 0 var(--glass-specular) inset, 1px 0 0 var(--glass-edge) inset,
+                    3px 3px 6px var(--nm-dark), -3px -3px 6px var(--nm-light);
+  --glass-shadow-2: 0 1px 0 var(--glass-specular) inset, 1px 0 0 var(--glass-edge) inset,
+                    6px 6px 12px var(--nm-dark), -6px -6px 12px var(--nm-light);
   --hero-art-opacity: 0;     /* no organic texture on the neumorphic ground */
-  --card-glass-bg: rgba(255, 255, 255, 0.42);
+  --card-glass-bg: var(--glass-tint);
 }
 
 /* Convenience solid colours (for use where a triplet is awkward). */
@@ -202,19 +244,58 @@ h1, h2, h3, h4 {
 }
 
 .glass {
-  background: var(--glass-bg);
-  -webkit-backdrop-filter: blur(var(--glass-blur-2)) saturate(150%);
-          backdrop-filter: blur(var(--glass-blur-2)) saturate(150%);
-  border: 1px solid var(--glass-border);
+  background-color: var(--glass-bg);
+  background-image: var(--glass-fill);
+  -webkit-backdrop-filter: blur(var(--glass-blur-2)) saturate(170%) brightness(1.06);
+          backdrop-filter: blur(var(--glass-blur-2)) saturate(170%) brightness(1.06);
+  border: 1px solid var(--glass-rim);
   box-shadow: var(--glass-shadow-1);
 }
 .glass-strong {
-  background: var(--glass-bg-strong);
-  -webkit-backdrop-filter: blur(var(--glass-blur-3)) saturate(160%);
-          backdrop-filter: blur(var(--glass-blur-3)) saturate(160%);
-  border: 1px solid var(--glass-border);
+  background-color: var(--glass-bg-strong);
+  background-image: var(--glass-fill);
+  -webkit-backdrop-filter: blur(var(--glass-blur-3)) saturate(180%) brightness(1.07);
+          backdrop-filter: blur(var(--glass-blur-3)) saturate(180%) brightness(1.07);
+  border: 1px solid var(--glass-rim);
   box-shadow: var(--glass-shadow-2);
 }
+
+/* ── Lens 2 (micro-interactions): glass GLOWS under the finger — a 240ms
+   brightness bloom on press, on top of the spring press-scale. ── */
+.card:active, .glass-disc:active, .glass-capsule:active,
+.today-time-chip:active, .seg-opt:active, .glass-switch:active {
+  filter: brightness(1.16) saturate(1.05);
+  transition: filter 240ms var(--ease);
+}
+@media (prefers-reduced-motion: reduce) {
+  .card:active, .glass-disc:active, .glass-capsule:active,
+  .today-time-chip:active, .seg-opt:active, .glass-switch:active { filter: none; }
+}
+
+/* ── Lens 4 (user-controllable glass intensity) — html[data-glass] set from
+   Settings (ppw.glassIntensity). LOW = less blur + more body (the perf /
+   visual-comfort escape hatch, incl. weak Android WebView blur paths);
+   HIGH = maximum lensing. Standard = the tokens above. ── */
+html[data-glass="low"] {
+  --glass-blur-1: 4px; --glass-blur-2: 8px; --glass-blur-3: 12px;
+}
+html[data-theme="dark"][data-glass="low"] {
+  --glass-tint: rgba(22, 25, 31, 0.55);
+  --glass-bg: rgba(22, 25, 31, 0.60);
+  --glass-bg-strong: rgba(22, 25, 31, 0.72);
+  --chip-glass: rgba(255, 255, 255, 0.14);
+}
+html[data-theme="light"][data-glass="low"] {
+  --glass-tint: rgba(255, 255, 255, 0.62);
+  --glass-bg: rgba(255, 255, 255, 0.66);
+  --glass-bg-strong: rgba(255, 255, 255, 0.80);
+  --chip-glass: rgba(255, 255, 255, 0.75);
+}
+html[data-glass="high"] {
+  --glass-blur-1: 14px; --glass-blur-2: 26px; --glass-blur-3: 36px;
+}
+html[data-theme="dark"][data-glass="high"]  { --glass-tint: rgba(22, 25, 31, 0.08); }
+html[data-theme="light"][data-glass="high"] { --glass-tint: rgba(255, 255, 255, 0.12); }
 
 /* No-blur environments (old engines) and reduced-transparency users get a
    solid, fully readable surface instead of a see-through film. */
@@ -244,19 +325,35 @@ h1, h2, h3, h4 {
 }
 .app-bg-scrim { position: absolute; inset: 0; background: var(--bg-image-scrim, transparent); }
 
-html[data-theme="dark"]  { --bg-image-scrim: linear-gradient(180deg, rgba(13,15,19,.62), rgba(13,15,19,.78)); }
-html[data-theme="light"] { --bg-image-scrim: linear-gradient(180deg, rgba(231,236,243,.70), rgba(231,236,243,.84)); }
+/* v2 (2026-06-12): scrims lightened hard — the ground MUST stay visible for
+   the glass to have something to refract; legibility comes from the panes'
+   sheen + the remaining scrim floor, not from blacking out the scene. */
+html[data-theme="dark"]  { --bg-image-scrim: linear-gradient(180deg, rgba(13,15,19,.30), rgba(13,15,19,.50)); }
+html[data-theme="light"] { --bg-image-scrim: linear-gradient(180deg, rgba(231,236,243,.52), rgba(231,236,243,.68)); }
 
-/* The REF-05 soft-grey ground — a calm radial wash, no image needed. */
+/* Luminous accent washes over the nature/custom imagery so even its dark
+   regions carry light for the panes to catch. Static decorative layer. */
+html[data-bg="nature"] .app-bg::after, html[data-bg="custom"] .app-bg::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(90% 55% at 18% 8%,  rgba(245, 139, 60, 0.20), transparent 60%),
+    radial-gradient(80% 50% at 85% 30%, rgba(120, 180, 200, 0.14), transparent 60%),
+    radial-gradient(110% 60% at 50% 100%, rgba(232, 119, 46, 0.12), transparent 65%);
+}
+
+/* The REF-05 Gradient Grey ground — luminous slate with a strong top light,
+   bright enough to read THROUGH the clear panes in dark mode. */
 html[data-bg="grey"] .app-bg {
   background:
-    radial-gradient(120% 90% at 50% 0%, rgba(255,255,255,.10), transparent 60%),
-    linear-gradient(180deg, #6E7686 0%, #5B6472 100%);
+    radial-gradient(120% 85% at 30% 0%, rgba(255,255,255,.22), transparent 55%),
+    radial-gradient(90% 55% at 85% 100%, rgba(160, 180, 210, .14), transparent 60%),
+    linear-gradient(180deg, #75808F 0%, #59626F 100%);
 }
 html[data-theme="light"][data-bg="grey"] .app-bg {
   background:
-    radial-gradient(120% 90% at 50% 0%, rgba(255,255,255,.85), transparent 65%),
-    linear-gradient(180deg, #EDF1F7 0%, #DDE4EE 100%);
+    radial-gradient(120% 90% at 30% 0%, rgba(255,255,255,.9), transparent 60%),
+    radial-gradient(90% 55% at 85% 100%, rgba(170, 188, 214, .35), transparent 60%),
+    linear-gradient(180deg, #EDF1F7 0%, #D8E0EC 100%);
 }
 html[data-bg="grey"] .app-bg-scrim { background: transparent; }
 
@@ -312,9 +409,9 @@ html[data-bg="grey"] .bg-art { display: none; }
 .glass-disc {
   display: inline-flex; align-items: center; justify-content: center;
   border-radius: var(--r-pill);
-  background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
-  border: 1px solid var(--glass-border);
-  box-shadow: 0 1px 0 var(--glass-highlight) inset, 0 -1px 0 rgba(255,255,255,0.03) inset,
+  background: linear-gradient(160deg, rgba(255,255,255,0.16), rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.09));
+  border: 1px solid var(--glass-rim);
+  box-shadow: 0 1px 0 var(--glass-specular) inset, 0 -1px 0 rgba(255,255,255,0.04) inset,
               0 4px 10px -6px rgba(0,0,0,0.45);
   transition: border-color var(--dur-mid) var(--ease), color var(--dur-mid) var(--ease);
 }
@@ -381,17 +478,18 @@ html[data-theme="light"] .glass-knob {
    scrim tier keeps AA); never a baked dark/solid fill. */
 .card {
   position: relative;
-  background: var(--card-glass-bg);
-  -webkit-backdrop-filter: blur(var(--glass-blur-1)) saturate(140%);
-          backdrop-filter: blur(var(--glass-blur-1)) saturate(140%);
-  border: 1px solid var(--glass-border);
+  background-color: var(--glass-tint);
+  background-image: var(--glass-fill);
+  -webkit-backdrop-filter: blur(var(--glass-blur-2)) saturate(170%) brightness(1.06);
+          backdrop-filter: blur(var(--glass-blur-2)) saturate(170%) brightness(1.06);
+  border: 1px solid var(--glass-rim);
   border-radius: var(--r-24);
-  box-shadow: var(--elv-2);
+  box-shadow: var(--glass-shadow-1);
   color: var(--col-ink);
   transition: box-shadow var(--dur-mid) var(--ease), border-color var(--dur-mid) var(--ease),
               transform var(--dur-mid) var(--ease), background-color var(--dur-mid) var(--ease);
 }
-.card:hover { box-shadow: var(--elv-3); }
+.card:hover { box-shadow: var(--glass-shadow-2); }
 @media (max-width: 640px) { .card { border-radius: var(--r-24); } }
 
 /* Perf carve-out: while a card is ACTIVELY dragging it goes solid (no
@@ -503,11 +601,8 @@ button, a, .btn-accent, .btn-ghost, .btn-secondary, .btn-teal, .btn-lime { -webk
 .stack-deck > * + * { margin-top: -12px; }
 .stack-deck .today-routine-card {
   border-radius: 26px;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.16) inset, 0 -1px 0 rgba(255, 255, 255, 0.04) inset,
-              var(--elv-2);
-}
-html[data-theme="light"] .stack-deck .today-routine-card {
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.95) inset, var(--elv-2);
+  box-shadow: 0 1px 0 var(--glass-specular) inset, 1px 0 0 var(--glass-edge) inset,
+              0 -1px 0 rgba(255, 255, 255, 0.06) inset, var(--elv-2);
 }
 
 /* Status-card on the rail — kind colour drives the left edge + node. */
@@ -525,12 +620,15 @@ html[data-theme="light"] .stack-deck .today-routine-card {
 }
 .today-routine-card.is-dragging { box-shadow: var(--elv-3); }
 
-/* Time chip — inset well, tabular figures, tap target. */
+/* Time chip — v2: a small clear glass capsule (no blur — it lives inside an
+   already-frosted card; film + rim carry the read). Tabular figures. */
 .today-time-chip {
   display: inline-flex; align-items: center; justify-content: center; gap: 4px;
   padding: 7px 11px; border-radius: var(--r-pill);
-  background: var(--col-inset); box-shadow: var(--elv-inset);
-  border: 1px solid var(--hairline);
+  background-color: var(--chip-glass);
+  background-image: linear-gradient(160deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02) 60%, rgba(255,255,255,0.07));
+  box-shadow: 0 1px 0 var(--glass-specular) inset, 0 2px 6px -3px rgba(0,0,0,.35);
+  border: 1px solid var(--glass-rim);
   color: var(--col-ink); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.02em;
   font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;
   min-height: var(--ppw-tap-min); min-width: var(--ppw-tap-min);
@@ -548,10 +646,11 @@ html[data-theme="light"] .stack-deck .today-routine-card {
    fallback + reduced-transparency handled by the .glass rules above. */
 .botnav {
   pointer-events: auto; width: 100%; max-width: var(--page-max); margin: 0 auto; height: 64px;
-  background: var(--glass-bg-strong);
-  -webkit-backdrop-filter: blur(var(--glass-blur-2)) saturate(150%);
-          backdrop-filter: blur(var(--glass-blur-2)) saturate(150%);
-  box-shadow: var(--glass-shadow-2); border-top: 1px solid var(--glass-border);
+  background-color: var(--glass-bg);
+  background-image: var(--glass-fill);
+  -webkit-backdrop-filter: blur(var(--glass-blur-2)) saturate(170%) brightness(1.06);
+          backdrop-filter: blur(var(--glass-blur-2)) saturate(170%) brightness(1.06);
+  box-shadow: var(--glass-shadow-2); border-top: 1px solid var(--glass-rim);
   display: grid; grid-template-columns: repeat(5, 1fr); align-items: center;
   padding-bottom: env(safe-area-inset-bottom);
 }
@@ -575,8 +674,13 @@ html[data-theme="light"] .stack-deck .today-routine-card {
   position: absolute; left: 50%; top: -26px; transform: translateX(-50%);
   width: 56px; height: 56px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center; cursor: pointer;
-  background: var(--col-surface); box-shadow: var(--elv-3); border: 1px solid var(--hairline);
-  color: var(--col-mid); transition: all var(--dur-mid) var(--ease);
+  background-color: var(--glass-tint);
+  background-image: var(--glass-fill);
+  -webkit-backdrop-filter: blur(var(--glass-blur-1)) saturate(160%) brightness(1.05);
+          backdrop-filter: blur(var(--glass-blur-1)) saturate(160%) brightness(1.05);
+  box-shadow: 0 1px 0 var(--glass-specular) inset, 0 10px 24px -10px rgba(0,0,0,.5);
+  border: 1px solid var(--glass-rim);
+  color: var(--col-ink); transition: all var(--dur-mid) var(--ease);
 }
 .bell svg { width: 26px; height: 26px; }
 .bell.on { background: var(--col-accent); color: var(--col-on-accent); box-shadow: var(--elv-2), 0 0 0 4px var(--accent-soft); }

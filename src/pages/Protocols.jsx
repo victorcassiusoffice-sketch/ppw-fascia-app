@@ -454,10 +454,11 @@ function FastingControls() {
                 aria-pressed={active}
                 className="seg-opt px-4 py-2 rounded-full text-xs font-bold"
                 style={{
-                  background: 'var(--col-surface)',
+                  backgroundColor: 'var(--chip-glass)',
+                  backgroundImage: 'linear-gradient(160deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02) 60%, rgba(255,255,255,0.07))',
                   color: active ? 'var(--col-on-accent)' : 'var(--col-ink)',
-                  border: '1px solid var(--hairline)',
-                  boxShadow: 'var(--elv-1)',
+                  border: '1px solid var(--glass-rim)',
+                  boxShadow: '0 1px 0 var(--glass-specular) inset',
                   transition: 'color var(--dur-mid) var(--ease)',
                 }}
                 {...pressScale()}

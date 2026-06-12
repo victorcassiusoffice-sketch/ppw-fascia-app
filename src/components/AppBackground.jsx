@@ -10,6 +10,7 @@
 import React, { useEffect } from 'react';
 import { useTheme } from '../theme.js';
 import { useBackground } from '../lib/background.js';
+import { getGlassIntensity, applyGlassIntensity } from '../lib/glassIntensity.js';
 
 export default function AppBackground() {
   const { resolved } = useTheme();
@@ -19,6 +20,10 @@ export default function AppBackground() {
     document.documentElement.setAttribute('data-bg', kind);
     return () => document.documentElement.removeAttribute('data-bg');
   }, [kind]);
+
+  // Lens 4 — apply the stored glass-intensity level at boot (Settings owns
+  // changes thereafter via the same html[data-glass] attribute).
+  useEffect(() => { applyGlassIntensity(getGlassIntensity()); }, []);
 
   return (
     <div className="app-bg" aria-hidden="true">

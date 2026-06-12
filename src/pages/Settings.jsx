@@ -11,6 +11,7 @@ import { Section } from '../components/shared.jsx';
 import { m, glideIndicator, pressScale, SPRING, reduced } from '../lib/motion';
 import { getPairingState, pairDevice, unpairDevice } from '../lib/assistantSync.js';
 import { useBackground, BG_OPTIONS } from '../lib/background.js';
+import { useGlassIntensity, GLASS_LEVELS } from '../lib/glassIntensity.js';
 
 /* P0b (2026-06-02) — "Reliable reminders" card. Explains the two delivery
    paths that ACTUALLY fire on a locked phone (calendar .ics + Web Push on an
@@ -194,6 +195,8 @@ function SettingsView() {
   // Refinement 2 (REF-01/04/05) — user-selectable background behind the glass.
   const { choice: bgChoice, setChoice: setBgChoice, pickCustom } = useBackground(resolvedTheme);
   const [bgMsg, setBgMsg] = useState(null);
+  // Lens 4 (liquid-glass framework) — user-controllable glass intensity.
+  const { level: glassLevel, setLevel: setGlassLevel } = useGlassIntensity();
   const [perm, setPerm] = useState(getPermissionState());
   const [mockOverride, setMockOverride] = useLocalStorage(LS_KEYS.USE_MOCK_OVERRIDE, USE_MOCK_DATA ? 'true' : 'false');
   const [activeProtocols, setActiveProtocols] = useActiveProtocols();
@@ -239,10 +242,11 @@ function SettingsView() {
                   aria-pressed={active}
                   className="seg-opt py-3 rounded-2xl text-sm font-bold flex flex-col items-center gap-1"
                   style={{
-                    background: 'var(--col-inset)',
+                    backgroundColor: 'var(--chip-glass)',
+                    backgroundImage: 'linear-gradient(160deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02) 60%, rgba(255,255,255,0.07))',
                     color: active ? 'var(--col-on-accent)' : 'var(--col-ink)',
-                    boxShadow: active ? 'none' : 'var(--elv-inset)',
-                    border: '1px solid var(--hairline)',
+                    boxShadow: '0 1px 0 var(--glass-specular) inset',
+                    border: '1px solid var(--glass-rim)',
                     transition: 'color var(--dur-mid) var(--ease)',
                   }}
                   {...pressScale()}
@@ -275,10 +279,11 @@ function SettingsView() {
                   aria-pressed={active}
                   className="seg-opt py-3 rounded-2xl text-xs font-bold flex flex-col items-center gap-1.5"
                   style={{
-                    background: 'var(--col-inset)',
+                    backgroundColor: 'var(--chip-glass)',
+                    backgroundImage: 'linear-gradient(160deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02) 60%, rgba(255,255,255,0.07))',
                     color: active ? 'var(--col-on-accent)' : 'var(--col-ink)',
-                    boxShadow: active ? 'none' : 'var(--elv-inset)',
-                    border: '1px solid var(--hairline)',
+                    boxShadow: '0 1px 0 var(--glass-specular) inset',
+                    border: '1px solid var(--glass-rim)',
                     transition: 'color var(--dur-mid) var(--ease)',
                     position: 'relative',
                     overflow: opt.kind === 'custom' ? 'visible' : undefined,
@@ -318,6 +323,42 @@ function SettingsView() {
           {bgMsg && (
             <div className="text-xs mt-3" style={{ color: bgMsg.tone === 'ok' ? 'rgb(var(--c-status-done))' : 'rgb(var(--c-status-alert))' }}>{bgMsg.text}</div>
           )}
+        </div>
+
+        {/* Lens 4 (liquid-glass framework, BINDING) — glass intensity. Subtle
+            = less transparency/blur (visual comfort + weak-blur devices);
+            Max = full lensing. */}
+        <div className="card p-5 mt-4">
+          <div className="font-display mb-1">Glass intensity</div>
+          <div className="text-muted text-xs mb-4">How see-through the glass feels. Subtle is easiest to read (and lightest on older phones); Max is full liquid glass.</div>
+          <div className="grid grid-cols-3 gap-2" role="group" aria-label="Glass intensity">
+            {GLASS_LEVELS.map(opt => {
+              const active = glassLevel === opt.key;
+              return (
+                <m.button
+                  key={opt.key}
+                  type="button"
+                  onClick={() => setGlassLevel(opt.key)}
+                  aria-pressed={active}
+                  className="seg-opt py-3 rounded-2xl text-sm font-bold"
+                  style={{
+                    backgroundColor: 'var(--chip-glass)',
+                    backgroundImage: 'linear-gradient(160deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02) 60%, rgba(255,255,255,0.07))',
+                    color: active ? 'var(--col-on-accent)' : 'var(--col-ink)',
+                    boxShadow: '0 1px 0 var(--glass-specular) inset',
+                    border: '1px solid var(--glass-rim)',
+                    transition: 'color var(--dur-mid) var(--ease)',
+                  }}
+                  {...pressScale()}
+                >
+                  {active && (
+                    <m.span className="glide-pill" aria-hidden="true" style={{ borderRadius: 'var(--r-16)' }} {...glideIndicator('glass-seg')} />
+                  )}
+                  <span className="seg-label">{opt.label}</span>
+                </m.button>
+              );
+            })}
+          </div>
         </div>
       </Section>
 
@@ -410,10 +451,11 @@ function SettingsView() {
                   aria-pressed={active}
                   className="seg-opt flex-1 py-2.5 rounded-full text-sm font-bold"
                   style={{
-                    background: 'var(--col-inset)',
+                    backgroundColor: 'var(--chip-glass)',
+                    backgroundImage: 'linear-gradient(160deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02) 60%, rgba(255,255,255,0.07))',
                     color: active ? 'var(--col-on-accent)' : 'var(--col-ink)',
-                    border: '1px solid var(--hairline)',
-                    boxShadow: active ? 'none' : 'var(--elv-inset)',
+                    border: '1px solid var(--glass-rim)',
+                    boxShadow: '0 1px 0 var(--glass-specular) inset',
                     transition: 'color var(--dur-mid) var(--ease)',
                   }}
                   {...pressScale()}

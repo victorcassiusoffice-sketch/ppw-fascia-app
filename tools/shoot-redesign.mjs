@@ -42,6 +42,11 @@ const BG_EXTRAS = [
   { name: 'today-dark-bgGrey',   theme: 'dark',  bg: { kind: 'grey' } },
   { name: 'today-light-bgNature', theme: 'light', bg: { kind: 'nature' } },
   { name: 'today-dark-bgCustom', theme: 'dark',  bg: { kind: 'custom', mediaId: 'ppw-custom-bg' }, seedCustom: true },
+  // Lens 5 (Android parity, BINDING skill): Android phone viewport pass.
+  { name: 'today-dark-android',  theme: 'dark',  bg: { kind: 'auto' }, viewport: { width: 412, height: 915 } },
+  { name: 'settings-dark-android', theme: 'dark', bg: { kind: 'auto' }, viewport: { width: 412, height: 915 }, route: '/settings' },
+  // Lens 4: glass-intensity LOW (the comfort/perf level) renders legibly.
+  { name: 'today-dark-glassLow', theme: 'dark',  bg: { kind: 'auto' }, glass: 'low' },
 ];
 
 const seedCustomBgScript = () => new Promise((resolve) => {
@@ -111,21 +116,22 @@ const run = async () => {
     }
   }
 
-  // Background-variant extras (mobile only).
+  // Background / platform / intensity extras.
   for (const extra of BG_EXTRAS) {
-    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
-    await ctx.addInitScript(({ seed, theme, bg }) => {
+    const ctx = await browser.newContext({ viewport: extra.viewport || { width: 390, height: 844 }, deviceScaleFactor: 1 });
+    await ctx.addInitScript(({ seed, theme, bg, glass }) => {
       try {
         localStorage.setItem('ppw.theme', theme);
         localStorage.setItem('ppw.background', JSON.stringify(bg));
+        if (glass) localStorage.setItem('ppw.glassIntensity', glass);
         for (const [k, v] of Object.entries(seed)) localStorage.setItem(k, v);
       } catch (_) {}
-    }, { seed: SEED, theme: extra.theme, bg: extra.bg });
+    }, { seed: SEED, theme: extra.theme, bg: extra.bg, glass: extra.glass || null });
     const page = await ctx.newPage();
     const errors = [];
     page.on('console', (msg) => { if (msg.type() === 'error') errors.push(msg.text()); });
     page.on('pageerror', (err) => errors.push('pageerror: ' + err.message));
-    await page.goto(BASE + '/today', { waitUntil: 'networkidle' });
+    await page.goto(BASE + (extra.route || '/today'), { waitUntil: 'networkidle' });
     if (extra.seedCustom) {
       await page.evaluate(seedCustomBgScript);
       await page.reload({ waitUntil: 'networkidle' });
