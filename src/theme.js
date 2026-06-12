@@ -43,9 +43,17 @@ export function applyTheme(choice) {
   return resolved;
 }
 
+/* Same-tab change bus (2026-06-12): multiple useTheme() instances (header
+   toggle, Settings, AppBackground) must all see a change immediately — the
+   `storage` event only fires across tabs. Found via the REF-09 toggle proof
+   capture: flipping theme in Settings left the background layer stale. */
+const themeListeners = new Set();
+
 export function setThemeChoice(choice) {
   try { localStorage.setItem(THEME_KEY, choice); } catch (_) { /* ignore */ }
-  return applyTheme(choice);
+  const resolved = applyTheme(choice);
+  themeListeners.forEach((fn) => { try { fn(choice); } catch (_) {} });
+  return resolved;
 }
 
 // React hook: returns { choice, resolved, setChoice, toggle }.
@@ -81,6 +89,16 @@ export function useTheme() {
 
   // Keep <html> in sync on mount / choice change.
   useEffect(() => { setResolved(applyTheme(choice)); }, [choice]);
+
+  // Follow theme changes made by OTHER useTheme instances in this tab.
+  useEffect(() => {
+    const onChange = (c) => {
+      setChoiceState(c);
+      setResolved(resolveTheme(c));
+    };
+    themeListeners.add(onChange);
+    return () => { themeListeners.delete(onChange); };
+  }, []);
 
   return { choice, resolved, setChoice, toggle };
 }

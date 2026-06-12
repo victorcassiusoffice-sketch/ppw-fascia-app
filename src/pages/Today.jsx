@@ -38,13 +38,14 @@ import { queueAck } from '../lib/assistantSync.js';
    user's own stored image for image stacks (IndexedDB blob), else a type/app
    glyph chip. Static imagery only — zero network fetches at render time.
    ═══════════════════════════════════════════ */
-function StackThumb({ stack }) {
-  const remote = stackThumbnailUrl(stack);
+function StackThumb({ item }) {
+  const stack = item.userStack || null;
+  const remote = stack ? stackThumbnailUrl(stack) : null;
   const [blobUrl, setBlobUrl] = useState(null);
   useEffect(() => {
     let revoked = false;
     let u = null;
-    if (!remote && stack.type === 'image' && stack.mediaStoreId) {
+    if (!remote && stack && stack.type === 'image' && stack.mediaStoreId) {
       getMediaUrl(stack.mediaStoreId).then((x) => {
         if (revoked) { if (x) URL.revokeObjectURL(x); return; }
         u = x;
@@ -52,20 +53,25 @@ function StackThumb({ stack }) {
       }).catch(() => {});
     }
     return () => { revoked = true; if (u) URL.revokeObjectURL(u); };
-  }, [remote, stack.type, stack.mediaStoreId]);
+  }, [remote, stack]);
 
   const src = remote || blobUrl;
-  const glyph = stack.appKind === 'spotify' ? '♪'
-    : stack.appKind === 'youtube' ? '▶'
-    : stack.type === 'video' ? '▶'
-    : stack.type === 'audio' ? '♪'
-    : stack.appKind ? '↗'
-    : null;
-  if (!src && !glyph) return null;
+  // Forensic-audit REF-06 fix: the tile is ALWAYS present (leading rounded
+  // square) — media art when attached, an etched type glyph otherwise.
+  const glyph = stack
+    ? (stack.appKind === 'spotify' || stack.type === 'audio' ? '♪'
+      : stack.appKind === 'youtube' || stack.type === 'video' ? '▶'
+      : stack.type === 'image' ? '◫'
+      : stack.type === 'text' ? '✎'
+      : '↗')
+    : item.kind === 'audio' ? '♪'
+    : item.kind === 'protocol' ? '▣'
+    : item.kind === 'fasting' ? '◷'
+    : '⟡';
   return (
     <span
       className="glass-disc shrink-0 overflow-hidden"
-      style={{ width: 36, height: 36, borderRadius: 10 }}
+      style={{ width: 44, height: 44, borderRadius: 12 }}
       aria-hidden="true"
     >
       {src ? (
@@ -77,7 +83,7 @@ function StackThumb({ stack }) {
           onError={(e) => { e.currentTarget.style.display = 'none'; }}
         />
       ) : (
-        <span style={{ fontSize: 14 }}>{glyph}</span>
+        <span style={{ fontSize: 17, opacity: 0.85 }}>{glyph}</span>
       )}
     </span>
   );
@@ -1185,7 +1191,9 @@ function TodayView() {
               onClick={handleBulkMerge}
               disabled={selectedIds.size < 2}
               className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-              style={{ backgroundColor: selectedIds.size >= 2 ? 'var(--col-accent)' : 'transparent', color: selectedIds.size >= 2 ? 'var(--col-on-accent)' : 'var(--col-ink)', border: '1px solid var(--col-accent)' }}
+              style={selectedIds.size >= 2
+                ? { backgroundColor: 'var(--accent-glass-bg)', backgroundImage: 'var(--glass-fill)', color: '#fff', textShadow: '0 1px 2px rgba(0,0,0,0.35)', border: '1px solid var(--accent-glass-rim)', boxShadow: '0 1px 0 var(--glass-specular) inset' }
+                : { backgroundColor: 'transparent', color: 'var(--col-ink)', border: '1px solid var(--accent-glass-rim)' }}
               title={selectedIds.size >= 2 ? 'Merge selected into one tabbed stack' : 'Select 2 or more to merge'}
             >
               <span>Merge ({selectedIds.size})</span>
@@ -1348,7 +1356,7 @@ function TodayView() {
           const rowDelay = Math.min(_i, 8) * (STAGGER.list / 1000);
           const deckProps = (lifted) => (reduced ? {} : {
             initial: { opacity: 0, y: 14 },
-            animate: { opacity: 1, y: 0, scale: lifted ? 1.02 : 1 },
+            animate: { opacity: 1, y: 0, scale: lifted ? 1.035 : 1 },
             transition: {
               opacity: { duration: DUR.base / 1000, ease: EASE.standard, delay: rowDelay },
               y: { duration: DUR.base / 1000, ease: EASE.standard, delay: rowDelay },
@@ -1466,10 +1474,10 @@ function TodayView() {
                   >{it.time}</m.button>
                 )}
                 <div className="flex-1 min-w-0 flex items-center gap-2">
-                  {/* REF-02/06 — the thumbnail is the stack's visual reminder:
-                      video thumb, album/podcast cover, or the user's own
-                      stored image; glyph chip when no art exists. */}
-                  {it.isUserStack && it.userStack && <StackThumb stack={it.userStack} />}
+                  {/* REF-02/06 — the thumbnail tile is the stack's visual
+                      reminder and is ALWAYS present: media art when attached,
+                      etched type glyph otherwise (audit P0 fix). */}
+                  <StackThumb item={it} />
                   <InlineRename
                     value={customTitle === it.label ? '' : customTitle}
                     placeholder={it.label}

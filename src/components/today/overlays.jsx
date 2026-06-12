@@ -165,14 +165,16 @@ function ClearCalendarModal({ open, onClose, onConfirm }) {
                   className="aspect-square rounded-md flex items-center justify-center text-sm font-display transition-all"
                   style={{
                     backgroundColor: sel
-                      ? 'var(--col-accent)'
+                      ? 'var(--accent-glass-bg)'
                       : inR
                         ? 'var(--accent-soft)'
                         : isT
-                          ? 'var(--col-inset)'
+                          ? 'var(--chip-glass)'
                           : 'transparent',
-                    color: sel ? 'var(--col-on-accent)' : 'var(--col-ink)',
-                    border: '1px solid ' + (sel ? 'var(--col-accent)' : isT ? 'rgb(var(--c-accent) / 0.6)' : 'transparent'),
+                    backgroundImage: sel ? 'var(--glass-fill)' : 'none',
+                    color: sel ? '#fff' : 'var(--col-ink)',
+                    textShadow: sel ? '0 1px 2px rgba(0,0,0,0.35)' : 'none',
+                    border: '1px solid ' + (sel ? 'var(--accent-glass-rim)' : isT ? 'rgb(var(--c-accent) / 0.6)' : 'transparent'),
                   }}
                   title={cell.iso}
                 >
@@ -372,9 +374,11 @@ function DragMergePlusOverlay() {
         style={{
           width: 56,
           height: 56,
-          backgroundColor: 'var(--col-accent)',
-          boxShadow: '0 8px 28px -6px var(--accent-soft)',
-          color: 'var(--col-on-accent)',
+          /* Audit P0 — accent-glass, not paint. */
+          backgroundColor: 'var(--accent-glass-bg)',
+          backgroundImage: 'var(--glass-fill)',
+          boxShadow: 'inset 0 0 0 1px var(--accent-glass-rim), 0 1px 0 var(--glass-specular) inset, var(--accent-glass-glow)',
+          color: '#fff',
         }}
       >
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">

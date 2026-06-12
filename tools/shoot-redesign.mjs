@@ -32,6 +32,8 @@ const SEED = {
   [`ppw.userStacks::${todayISO}`]: JSON.stringify([
     { id: 'seed-1', type: 'text', title: 'Morning mobility flow', text: 'Cat-camel x10, hip CARs x5/side', time: '07:30', durationSec: 600 },
     { id: 'seed-2', type: 'link', title: 'Evening breathwork', url: 'https://example.com/breath', time: '21:00', durationSec: 300 },
+    // REF-06 proof: a YouTube stack whose tile shows REAL video art.
+    { id: 'seed-3', type: 'link', title: 'Hip mobility follow-along', url: 'https://youtu.be/dQw4w9WgXcQ', youtubeId: 'dQw4w9WgXcQ', appKind: 'youtube', time: '12:00', durationSec: 900 },
   ]),
 };
 

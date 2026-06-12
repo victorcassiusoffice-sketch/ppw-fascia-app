@@ -224,41 +224,50 @@ function SettingsView() {
         <div className="card p-5">
           <div className="font-display mb-1">Theme</div>
           <div className="text-muted text-xs mb-4">Light is neumorphic soft-UI · Dark is slate + orange · System follows your device.</div>
-          {/* Liquid-glass (board 04, clip 3): the active state is ONE pill
-              that GLIDES between the three options via layoutId. Buttons stay
-              put; labels colour-fade. Pill is solid (it moves → no blur). */}
-          <div className="grid grid-cols-3 gap-2" role="group" aria-label="Theme">
-            {[
-              { key: 'light',  label: 'Light',  icon: '☀' },
-              { key: 'dark',   label: 'Dark',   icon: '☾' },
-              { key: 'system', label: 'System', icon: '⌖' },
-            ].map(opt => {
-              const active = themeChoice === opt.key;
-              return (
-                <m.button
-                  key={opt.key}
-                  type="button"
-                  onClick={() => setThemeChoice(opt.key)}
-                  aria-pressed={active}
-                  className="seg-opt py-3 rounded-2xl text-sm font-bold flex flex-col items-center gap-1"
-                  style={{
-                    backgroundColor: 'var(--chip-glass)',
-                    backgroundImage: 'linear-gradient(160deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02) 60%, rgba(255,255,255,0.07))',
-                    color: active ? 'var(--col-on-accent)' : 'var(--col-ink)',
-                    boxShadow: '0 1px 0 var(--glass-specular) inset',
-                    border: '1px solid var(--glass-rim)',
-                    transition: 'color var(--dur-mid) var(--ease)',
-                  }}
-                  {...pressScale()}
-                >
-                  {active && (
-                    <m.span className="glide-pill" aria-hidden="true" style={{ borderRadius: 'var(--r-16)' }} {...glideIndicator('theme-seg')} />
-                  )}
-                  <span aria-hidden="true" style={{ fontSize: 18 }}>{opt.icon}</span>
-                  <span className="seg-label">{opt.label}</span>
-                </m.button>
-              );
-            })}
+          {/* Audit P2 (REF-09): Dark↔Light is a pill-track toggle with a
+              refractive glass knob, moon/sun etched IN the knob. "System"
+              stays available as a separate Auto glass chip so the binary
+              toggle remains a toggle. */}
+          <div className="flex items-center gap-3 flex-wrap" role="group" aria-label="Theme">
+            <button
+              type="button"
+              onClick={() => setThemeChoice(resolvedTheme === 'dark' ? 'light' : 'dark')}
+              className={'glass-switch lg' + (resolvedTheme === 'dark' ? ' on' : '')}
+              role="switch"
+              aria-checked={resolvedTheme === 'dark'}
+              aria-label={resolvedTheme === 'dark' ? 'Dark theme on — tap for light' : 'Light theme on — tap for dark'}
+            >
+              <m.span
+                className="glass-knob"
+                initial={false}
+                animate={{ x: resolvedTheme === 'dark' ? 46 : 3 }}
+                transition={reduced() ? { duration: 0 } : SPRING.glide}
+                aria-hidden="true"
+              >
+                {resolvedTheme === 'dark' ? '☾' : '☀'}
+              </m.span>
+            </button>
+            <span className="text-sm font-bold">{resolvedTheme === 'dark' ? 'Dark' : 'Light'}</span>
+            <m.button
+              type="button"
+              onClick={() => setThemeChoice('system')}
+              aria-pressed={themeChoice === 'system'}
+              className="glass-capsule text-xs"
+              style={{
+                padding: '8px 14px',
+                color: themeChoice === 'system' ? '#fff' : 'var(--col-ink)',
+                ...(themeChoice === 'system' ? {
+                  backgroundColor: 'var(--accent-glass-bg)',
+                  backgroundImage: 'var(--glass-fill)',
+                  border: '1px solid var(--accent-glass-rim)',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.35)',
+                } : {}),
+              }}
+              title="Follow the device theme"
+              {...pressScale()}
+            >
+              <span aria-hidden="true">⌖</span> Auto
+            </m.button>
           </div>
         </div>
 

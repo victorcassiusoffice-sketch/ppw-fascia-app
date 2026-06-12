@@ -73,28 +73,30 @@ html[data-theme="dark"] {
      comes from (a) blur of a LUMINOUS ground, (b) a diagonal white SHEEN
      gradient, (c) a bright specular rim (top/leading edges). Legibility is
      the SCRIM TIER's job, never a darker fill. */
-  --glass-tint:      rgba(22, 25, 31, 0.16);   /* faint body tint only */
-  --glass-tint-strong: rgba(22, 25, 31, 0.30);
+  --glass-tint:      rgba(22, 25, 31, 0.11);   /* audit P1: body ~30% clearer */
+  --glass-tint-strong: rgba(22, 25, 31, 0.24);
   /* REF-01 pane anatomy (binding, 2026-06-12): edge GLINTS (localised bright
      light-catch streaks with falloff, top + offset-bottom + side), a CRISP
-     diagonal reflection boundary sweeping the pane, over a near-transparent
-     body. One composite — every glass surface consumes this var. */
+     diagonal reflection boundary (audit P1: with a visible bright reflection
+     LINE at the hard stop), over a near-transparent body. */
   --glass-fill:
-      radial-gradient(42% 2.5px at 22% 0%,  rgba(255, 255, 255, 0.95), transparent 78%),
-      radial-gradient(32% 2.5px at 79% 100%, rgba(255, 255, 255, 0.60), transparent 78%),
-      radial-gradient(2.5px 26% at 100% 26%, rgba(255, 255, 255, 0.42), transparent 78%),
+      radial-gradient(46% 3px at 22% 0%,  rgba(255, 255, 255, 1), transparent 80%),
+      radial-gradient(36% 3px at 79% 100%, rgba(255, 255, 255, 0.75), transparent 80%),
+      radial-gradient(3px 30% at 100% 26%, rgba(255, 255, 255, 0.55), transparent 80%),
       linear-gradient(118deg,
-        rgba(255, 255, 255, 0.135) 0%,
-        rgba(255, 255, 255, 0.060) 46%,
-        rgba(255, 255, 255, 0.006) 46.5%,
-        rgba(255, 255, 255, 0.045) 100%);
-  --glass-rim:       rgba(255, 255, 255, 0.32);
+        rgba(255, 255, 255, 0.125) 0%,
+        rgba(255, 255, 255, 0.055) 45.6%,
+        rgba(255, 255, 255, 0.20) 46%,
+        rgba(255, 255, 255, 0.20) 46.9%,
+        rgba(255, 255, 255, 0.012) 47.4%,
+        rgba(255, 255, 255, 0.04) 100%);
+  --glass-rim:       rgba(255, 255, 255, 0.40);
   --glass-specular:  rgba(255, 255, 255, 0.60);
   --glass-edge:      rgba(255, 255, 255, 0.16);
   --chip-glass:      rgba(255, 255, 255, 0.09); /* small pills/chips, no blur */
   /* Back-compat aliases (bars, sheets) — now translucent */
-  --glass-bg:        rgba(22, 25, 31, 0.30);
-  --glass-bg-strong: rgba(22, 25, 31, 0.46);
+  --glass-bg:        rgba(22, 25, 31, 0.22);
+  --glass-bg-strong: rgba(22, 25, 31, 0.36);
   --glass-border:    var(--glass-rim);
   --glass-highlight: var(--glass-specular);
   --glass-shadow-1: 0 1px 0 var(--glass-specular) inset, 1px 0 0 var(--glass-edge) inset,
@@ -103,6 +105,11 @@ html[data-theme="dark"] {
                     0 -1px 0 rgba(255,255,255,0.06) inset, 0 18px 44px -18px rgba(0,0,0,.65);
   --hero-art-opacity: 0.5;   /* organic texture behind the /today hero zone */
   --card-glass-bg: var(--glass-tint);
+  /* FORENSIC-AUDIT P0 (2026-06-12): accent arrives THROUGH glass, never as
+     opaque paint. One token for every CTA/active state. */
+  --accent-glass-bg:  rgba(232, 119, 46, 0.44);
+  --accent-glass-rim: rgba(255, 205, 165, 0.70);
+  --accent-glass-glow: 0 8px 22px -10px rgba(232, 119, 46, 0.55);
 }
 
 /* ───────────────── LIGHT THEME (neumorphic) ───────────────── */
@@ -145,14 +152,16 @@ html[data-theme="light"] {
   --glass-tint:      rgba(255, 255, 255, 0.20);
   --glass-tint-strong: rgba(255, 255, 255, 0.44);
   --glass-fill:
-      radial-gradient(42% 2.5px at 22% 0%,  rgba(255, 255, 255, 1), transparent 78%),
-      radial-gradient(32% 2.5px at 79% 100%, rgba(255, 255, 255, 0.9), transparent 78%),
-      radial-gradient(2.5px 26% at 100% 26%, rgba(255, 255, 255, 0.8), transparent 78%),
+      radial-gradient(46% 3px at 22% 0%,  rgba(255, 255, 255, 1), transparent 80%),
+      radial-gradient(36% 3px at 79% 100%, rgba(255, 255, 255, 0.95), transparent 80%),
+      radial-gradient(3px 30% at 100% 26%, rgba(255, 255, 255, 0.85), transparent 80%),
       linear-gradient(118deg,
-        rgba(255, 255, 255, 0.66) 0%,
-        rgba(255, 255, 255, 0.30) 46%,
-        rgba(255, 255, 255, 0.10) 46.5%,
-        rgba(255, 255, 255, 0.34) 100%);
+        rgba(255, 255, 255, 0.60) 0%,
+        rgba(255, 255, 255, 0.26) 45.6%,
+        rgba(255, 255, 255, 0.70) 46%,
+        rgba(255, 255, 255, 0.70) 46.9%,
+        rgba(255, 255, 255, 0.12) 47.4%,
+        rgba(255, 255, 255, 0.30) 100%);
   --glass-rim:       rgba(255, 255, 255, 0.95);
   --glass-specular:  rgba(255, 255, 255, 1);
   --glass-edge:      rgba(255, 255, 255, 0.65);
@@ -167,6 +176,9 @@ html[data-theme="light"] {
                     6px 6px 12px var(--nm-dark), -6px -6px 12px var(--nm-light);
   --hero-art-opacity: 0;     /* no organic texture on the neumorphic ground */
   --card-glass-bg: var(--glass-tint);
+  --accent-glass-bg:  rgba(238, 110, 32, 0.66);
+  --accent-glass-rim: rgba(255, 255, 255, 0.95);
+  --accent-glass-glow: 0 8px 22px -10px rgba(242, 121, 43, 0.50);
 }
 
 /* Convenience solid colours (for use where a triplet is awkward). */
@@ -344,10 +356,12 @@ html[data-bg="nature"] .app-bg::after, html[data-bg="custom"] .app-bg::after {
 /* The REF-05 Gradient Grey ground — luminous slate with a strong top light,
    bright enough to read THROUGH the clear panes in dark mode. */
 html[data-bg="grey"] .app-bg {
+  /* Audit P1 (REF-05): radial-LUMINOUS field — bright oval bloom at the
+     upper third (~15% delta to edges) so panes have light to catch. */
   background:
-    radial-gradient(120% 85% at 30% 0%, rgba(255,255,255,.22), transparent 55%),
-    radial-gradient(90% 55% at 85% 100%, rgba(160, 180, 210, .14), transparent 60%),
-    linear-gradient(180deg, #75808F 0%, #59626F 100%);
+    radial-gradient(85% 60% at 50% 22%, rgba(255,255,255,.30), rgba(255,255,255,.06) 55%, transparent 75%),
+    radial-gradient(90% 55% at 85% 100%, rgba(160, 180, 210, .16), transparent 60%),
+    linear-gradient(180deg, #78838f 0%, #565f6c 100%);
 }
 html[data-theme="light"][data-bg="grey"] .app-bg {
   background:
@@ -384,9 +398,11 @@ html[data-bg="grey"] .bg-art { display: none; }
   position: absolute; inset: 0; width: 100%; height: 100%;
   pointer-events: none; overflow: visible;
 }
+/* Audit REF-02 fix: the traced card edge is a LUMINOUS NEUTRAL rim (light
+   catching the glass), not a hard orange stroke. */
 .border-trace rect {
-  fill: none; stroke: var(--col-accent); stroke-width: 1.5;
-  filter: drop-shadow(0 0 6px var(--accent-soft));
+  fill: none; stroke: rgba(255, 255, 255, 0.55); stroke-width: 1.25;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.35));
 }
 
 /* ── Glide indicator (clip 3) — the ONE sliding pill under segmented
@@ -394,8 +410,11 @@ html[data-bg="grey"] .bg-art { display: none; }
 .glide-pill {
   position: absolute; inset: 0; z-index: 0;
   border-radius: inherit;
-  background: var(--col-accent);
-  box-shadow: var(--elv-2);
+  /* Audit P0: active state = accent-tinted glass, not paint. No blur (it
+     glides); film + rim + sheen carry the material. */
+  background-color: var(--accent-glass-bg);
+  background-image: var(--glass-fill);
+  box-shadow: inset 0 0 0 1px var(--accent-glass-rim), 0 1px 0 var(--glass-specular) inset, var(--accent-glass-glow);
 }
 .seg-opt { position: relative; isolation: isolate; }
 .seg-opt > :not(.glide-pill) { position: relative; z-index: 1; }
@@ -410,8 +429,11 @@ html[data-bg="grey"] .bg-art { display: none; }
   display: inline-flex; align-items: center; justify-content: center;
   border-radius: var(--r-pill);
   background: linear-gradient(160deg, rgba(255,255,255,0.16), rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.09));
-  border: 1px solid var(--glass-rim);
-  box-shadow: 0 1px 0 var(--glass-specular) inset, 0 -1px 0 rgba(255,255,255,0.04) inset,
+  /* Audit P1 (REF-08): crisp metallic ring — bright border + outer hairline
+     + inner specular, so the disc rim catches light like the source btn. */
+  border: 1px solid rgba(255, 255, 255, 0.50);
+  box-shadow: 0 1px 0 var(--glass-specular) inset, 0 -1px 0 rgba(255,255,255,0.06) inset,
+              0 0 0 1px rgba(255, 255, 255, 0.10),
               0 4px 10px -6px rgba(0,0,0,0.45);
   transition: border-color var(--dur-mid) var(--ease), color var(--dur-mid) var(--ease);
 }
@@ -446,6 +468,9 @@ html[data-theme="light"] .glass-capsule {
   -webkit-tap-highlight-color: transparent;
 }
 .glass-switch.on { background: var(--accent-soft); border-color: rgb(var(--c-accent) / 0.45); }
+/* Large variant — the labelled Settings theme toggle (REF-09). */
+.glass-switch.lg { width: 84px; height: 40px; }
+.glass-switch.lg .glass-knob { width: 34px; height: 34px; top: 2px; font-size: 16px; }
 .glass-knob {
   position: absolute; top: 2px; left: 0;
   width: 26px; height: 26px; border-radius: var(--r-pill);
@@ -522,21 +547,28 @@ html[data-theme="light"] .glass-knob {
 
 .card-cream { background: var(--col-surface); color: var(--col-ink); border-radius: var(--r-24); }
 
-/* Buttons */
+/* Buttons — FORENSIC-AUDIT P0: every reference button is TRANSPARENT glass.
+   The accent CTA is an accent-TINTED glass capsule (REF-01 pane anatomy over
+   a warm tint), never opaque paint. White label + text-shadow keeps AA. */
 .btn-accent {
-  background: var(--col-accent);
-  color: var(--col-on-accent);
+  background-color: var(--accent-glass-bg);
+  background-image: var(--glass-fill);
+  -webkit-backdrop-filter: blur(var(--glass-blur-1)) saturate(160%) brightness(1.05);
+          backdrop-filter: blur(var(--glass-blur-1)) saturate(160%) brightness(1.05);
+  border: 1px solid var(--accent-glass-rim);
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
   font-weight: 700;
   padding: 13px 24px;
   border-radius: var(--r-pill);
   min-height: var(--ppw-tap-min);
-  box-shadow: var(--elv-1);
+  box-shadow: 0 1px 0 var(--glass-specular) inset, var(--accent-glass-glow);
   transition: transform var(--dur-fast) var(--ease), filter var(--dur-fast) var(--ease),
               box-shadow var(--dur-fast) var(--ease);
 }
-.btn-accent:hover { transform: translateY(-1px); filter: brightness(1.05); }
-.btn-accent:active { transform: translateY(0); box-shadow: var(--elv-inset); }
-.btn-accent:disabled { opacity: .4; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-accent:hover { transform: translateY(-1px); filter: brightness(1.08); }
+.btn-accent:active { transform: translateY(0); filter: brightness(1.18); }
+.btn-accent:disabled { opacity: .4; cursor: not-allowed; transform: none; }
 
 .btn-secondary, .btn-ghost {
   background: var(--col-surface);
@@ -553,11 +585,22 @@ html[data-theme="light"] .glass-knob {
 .btn-secondary:hover, .btn-ghost:hover { border-color: var(--col-accent); color: var(--col-accent); transform: translateY(-1px); }
 .btn-secondary:active, .btn-ghost:active { box-shadow: var(--elv-inset); transform: translateY(0); }
 
-/* Legacy aliases kept so old class names still resolve (now token-driven). */
-.btn-lime { background: var(--col-accent); color: var(--col-on-accent); font-weight: 800; padding: 13px 24px; border-radius: var(--r-pill); min-height: var(--ppw-tap-min); box-shadow: var(--elv-1); transition: transform var(--dur-fast) var(--ease), filter var(--dur-fast) var(--ease); }
-.btn-lime:hover { transform: translateY(-1px); filter: brightness(1.05); }
-.btn-teal { background: rgb(var(--c-alt-teal)); color: #fff; font-weight: 700; padding: 12px 22px; border-radius: var(--r-pill); transition: transform var(--dur-fast) var(--ease); }
+/* Legacy aliases kept so old class names still resolve (accent-glass now). */
+.btn-lime { background-color: var(--accent-glass-bg); background-image: var(--glass-fill); -webkit-backdrop-filter: blur(var(--glass-blur-1)) saturate(160%) brightness(1.05); backdrop-filter: blur(var(--glass-blur-1)) saturate(160%) brightness(1.05); border: 1px solid var(--accent-glass-rim); color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.35); font-weight: 800; padding: 13px 24px; border-radius: var(--r-pill); min-height: var(--ppw-tap-min); box-shadow: 0 1px 0 var(--glass-specular) inset, var(--accent-glass-glow); transition: transform var(--dur-fast) var(--ease), filter var(--dur-fast) var(--ease); }
+.btn-lime:hover { transform: translateY(-1px); filter: brightness(1.08); }
+.btn-teal { background-color: rgba(43, 182, 196, 0.40); background-image: var(--glass-fill); border: 1px solid rgba(180, 235, 240, 0.6); color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.3); font-weight: 700; padding: 12px 22px; border-radius: var(--r-pill); box-shadow: 0 1px 0 var(--glass-specular) inset; transition: transform var(--dur-fast) var(--ease); }
 .btn-teal:hover { transform: translateY(-1px); }
+
+/* Tailwind utility hijack (deliberate, audit P0): any leftover `bg-accent`
+   usage renders as accent-glass — NO opaque accent paint can exist. Inset
+   ring instead of border so element metrics don't shift. */
+.bg-accent {
+  background-color: var(--accent-glass-bg) !important;
+  background-image: var(--glass-fill) !important;
+  box-shadow: inset 0 0 0 1px var(--accent-glass-rim), 0 1px 0 var(--glass-specular) inset;
+  color: #fff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
 
 button, a, .btn-accent, .btn-ghost, .btn-secondary, .btn-teal, .btn-lime { -webkit-tap-highlight-color: transparent; }
 
@@ -568,23 +611,23 @@ button, a, .btn-accent, .btn-ghost, .btn-secondary, .btn-teal, .btn-lime { -webk
   color: var(--col-accent); font-weight: 600;
 }
 
-/* ── Accent gradient tiles (candy, theme-independent) ── */
+/* ── Accent tiles — audit P0: candy gradients retired; tinted GLASS now. ── */
 .tile-amber {
-  background:
-    radial-gradient(130% 90% at 50% -10%, rgba(255,255,255,0.32), transparent 56%),
-    linear-gradient(178deg, #FBD79A 0%, #F7BE55 34%, #F1A23E 60%, #E6852F 84%, #DA7322 100%) !important;
-  color: #3A2206 !important; border: none !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), var(--elv-2) !important;
+  background-color: rgba(241, 162, 62, 0.40) !important;
+  background-image: var(--glass-fill) !important;
+  color: #fff !important; text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+  border: 1px solid var(--accent-glass-rim) !important;
+  box-shadow: 0 1px 0 var(--glass-specular) inset, var(--accent-glass-glow) !important;
 }
-.tile-amber:hover { filter: brightness(1.04) saturate(1.04); }
+.tile-amber:hover { filter: brightness(1.06) saturate(1.04); }
 .tile-green {
-  background:
-    radial-gradient(130% 90% at 50% -10%, rgba(255,255,255,0.2), transparent 56%),
-    linear-gradient(178deg, #34B07A 0%, #229968 38%, #1A7B52 70%, #135E3E 100%) !important;
-  color: #EAFBF1 !important; border: none !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), var(--elv-2) !important;
+  background-color: rgba(42, 160, 110, 0.40) !important;
+  background-image: var(--glass-fill) !important;
+  color: #fff !important; text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+  border: 1px solid rgba(190, 240, 215, 0.65) !important;
+  box-shadow: 0 1px 0 var(--glass-specular) inset, 0 8px 22px -10px rgba(42,160,110,0.5) !important;
 }
-.tile-green:hover { filter: brightness(1.05) saturate(1.04); }
+.tile-green:hover { filter: brightness(1.06) saturate(1.04); }
 
 /* ── Timeline / status-card kind accents ── */
 .timeline-dot { width: 14px; height: 14px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; line-height: 1; }
@@ -598,21 +641,19 @@ button, a, .btn-accent, .btn-ghost, .btn-secondary, .btn-teal, .btn-lime { -webk
    Rows overlap like a deck of glass capsules; the open/selected card LIFTS
    to the front (FM scale, transform-only) while the rest sit behind. The
    bright top rim is the REF-01/07 specular edge. */
-.stack-deck > * + * { margin-top: -12px; }
+/* Audit P0 fix: REAL deck overlap (was an imperceptible 12px) + capsule
+   silhouette. The lifted card's z-raise + scale make select-to-front read. */
+.stack-deck > * + * { margin-top: -18px; }
 .stack-deck .today-routine-card {
-  border-radius: 26px;
+  border-radius: 30px;
   box-shadow: 0 1px 0 var(--glass-specular) inset, 1px 0 0 var(--glass-edge) inset,
-              0 -1px 0 rgba(255, 255, 255, 0.06) inset, var(--elv-2);
+              0 -1px 0 rgba(255, 255, 255, 0.06) inset, 0 -10px 18px -14px rgba(0,0,0,0.55),
+              var(--elv-2);
 }
 
-/* Status-card on the rail — kind colour drives the left edge + node. */
+/* Status card — audit P0 (REF-07): the orange left accent-bar is RETIRED;
+   the capsule is all-glass, status lives in the tickbox kind-dot. */
 .today-routine-card { position: relative; }
-.today-routine-card::before {
-  content: ''; position: absolute; left: 0; top: 16px; bottom: 16px; width: 4px;
-  border-radius: 0 var(--r-pill) var(--r-pill) 0;
-  background: var(--kind, var(--col-accent)); opacity: 0.9;
-}
-.today-routine-card.timeline-done::before { background: rgb(var(--c-status-done)); opacity: 0.7; }
 .today-routine-card.is-open {
   background: var(--col-surface-a);
   box-shadow: var(--elv-3);
@@ -683,7 +724,13 @@ button, a, .btn-accent, .btn-ghost, .btn-secondary, .btn-teal, .btn-lime { -webk
   color: var(--col-ink); transition: all var(--dur-mid) var(--ease);
 }
 .bell svg { width: 26px; height: 26px; }
-.bell.on { background: var(--col-accent); color: var(--col-on-accent); box-shadow: var(--elv-2), 0 0 0 4px var(--accent-soft); }
+.bell.on {
+  background-color: var(--accent-glass-bg);
+  background-image: var(--glass-fill);
+  border-color: var(--accent-glass-rim);
+  color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  box-shadow: 0 1px 0 var(--glass-specular) inset, var(--accent-glass-glow), 0 0 0 4px var(--accent-soft);
+}
 .bell:active { transform: translateX(-50%) scale(0.93); }
 .belllabel { margin-top: 30px; color: var(--col-low); font-weight: 600; font-size: 10px; }
 
@@ -712,11 +759,11 @@ button, a, .btn-accent, .btn-ghost, .btn-secondary, .btn-teal, .btn-lime { -webk
 .hotspot-label { fill: var(--col-ink); font-family: 'Inter', system-ui, sans-serif; font-weight: 800; font-size: 18px; letter-spacing: 0.02em; pointer-events: none; text-anchor: middle; dominant-baseline: middle; paint-order: stroke; stroke: var(--col-bg); stroke-width: 3px; }
 
 /* ── Affiliate buttons (protocol detail) ── */
-.btn-iherb { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: #84cc16; color: #0a1628; font-weight: 700; font-size: 0.8rem; padding: 8px 16px; border-radius: var(--r-pill); white-space: nowrap; text-decoration: none; transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease; }
-.btn-iherb:hover { background: #a3e635; transform: translateY(-1px); }
+.btn-iherb { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background-color: rgba(132, 204, 22, 0.38); background-image: var(--glass-fill); border: 1px solid rgba(215, 245, 160, 0.65); color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.35); box-shadow: 0 1px 0 var(--glass-specular) inset; font-weight: 700; font-size: 0.8rem; padding: 8px 16px; border-radius: var(--r-pill); white-space: nowrap; text-decoration: none; transition: transform .15s ease, box-shadow .15s ease, filter .15s ease; }
+.btn-iherb:hover { filter: brightness(1.1); transform: translateY(-1px); }
 .btn-amazon { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: transparent; color: var(--col-ink); border: 1px solid var(--col-accent); font-weight: 600; font-size: 0.8rem; padding: 7px 15px; border-radius: var(--r-pill); white-space: nowrap; text-decoration: none; transition: border-color .2s ease, color .2s ease; }
 .btn-amazon:hover { color: var(--col-accent); }
-.btn-iherb-all { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: var(--col-accent); color: var(--col-on-accent); font-weight: 700; font-size: 0.95rem; padding: 14px 20px; border-radius: var(--r-pill); text-decoration: none; transition: transform .15s ease, filter .15s ease; }
+.btn-iherb-all { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background-color: var(--accent-glass-bg); background-image: var(--glass-fill); border: 1px solid var(--accent-glass-rim); color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.35); box-shadow: 0 1px 0 var(--glass-specular) inset, var(--accent-glass-glow); font-weight: 700; font-size: 0.95rem; padding: 14px 20px; border-radius: var(--r-pill); text-decoration: none; transition: transform .15s ease, filter .15s ease; }
 .btn-iherb-all:hover { transform: translateY(-1px); filter: brightness(1.04); }
 .supplement-actions { display: flex; flex-direction: column; gap: 6px; align-items: stretch; flex-shrink: 0; }
 @media (min-width: 640px) { .supplement-actions { align-items: flex-end; min-width: 140px; } }
