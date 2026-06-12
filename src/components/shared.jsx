@@ -3,32 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { useScrollFadeIn } from '../useScrollFadeIn.js';
 
-// Wave-2 — cinematic science divider. Register B (bioluminescent cyan on deep
-// black) is correct here: this is embedded content imagery, NOT surface chrome.
-// Uses `fade-in is-visible` (both classes) so it paints immediately even where
-// the scroll-reveal hook isn't wired — avoids an invisible band.
-function ScienceDivider({ src, label, aspect = '16 / 3' }) {
-  return (
-    <div className="relative my-10 rounded-xl overflow-hidden fade-in is-visible" style={{ aspectRatio: aspect }}>
-      <img
-        src={`${import.meta.env.BASE_URL}images/science/${src}`}
-        alt=""
-        aria-hidden="true"
-        loading="lazy"
-        className="w-full h-full object-cover"
-      />
-      <div
-        className="absolute inset-0"
-        style={{ background: 'linear-gradient(90deg, rgba(10,22,40,0.88) 0%, rgba(10,22,40,0.18) 48%, rgba(10,22,40,0.88) 100%)' }}
-      />
-      {label && (
-        <div className="absolute inset-0 flex items-center px-5">
-          <span className="eyebrow">{label}</span>
-        </div>
-      )}
-    </div>
-  );
-}
+// 2026-06-12 revamp (Vic purge order): the Wave-2 ScienceDivider stock-image
+// component is RETIRED with its assets — no importers remain (App.jsx +
+// Protocols.jsx usages removed in the same commit). Content surfaces are
+// glass panes per the REF contract.
 
 /* ═══════════════════════════════════════════
    M9 — InlineRename
@@ -83,4 +61,4 @@ function Section({ title, children }) {
   );
 }
 
-export { ScienceDivider, InlineRename, Section };
+export { InlineRename, Section };

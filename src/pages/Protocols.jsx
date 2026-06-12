@@ -6,7 +6,7 @@ import { useActiveProtocols, useFastingPrefs, useDailyDuplicates } from '../stat
 import { listProtocols, fetchProtocol, isMockActive } from '../protocols.js';
 import { iherbUrl, amazonUkUrl, iherbCartAllUrl } from '../affiliate.js';
 import { requestPermission, getPermissionState } from '../notifications.js';
-import { ScienceDivider, Section } from '../components/shared.jsx';
+import { Section } from '../components/shared.jsx';
 import { m, staggerContainer, enterRow, glideIndicator, pressScale } from '../lib/motion';
 
 /* ═══════════════════════════════════════════
@@ -31,24 +31,8 @@ function ProtocolsList() {
       <h1 className="font-display text-4xl md:text-5xl mb-3 leading-[1.02]">Protocols</h1>
       <p className="text-muted mb-6 max-w-xl leading-relaxed">Evidence-based, agent-generated. Tap to view, activate to merge into your day.</p>
 
-      {/* Wave-2 — cinematic science banner. Register B (bioluminescent cyan on
-          deep black) is correct here: this is embedded content imagery, not
-          surface chrome. */}
-      <div className="relative mb-8 rounded-2xl overflow-hidden fade-in is-visible" style={{ aspectRatio: '16 / 6' }}>
-        <img
-          src={`${import.meta.env.BASE_URL}images/science/muscle-divider.webp`}
-          alt=""
-          aria-hidden="true"
-          loading="lazy"
-          className="w-full h-full object-cover"
-          style={{ objectPosition: 'center' }}
-        />
-        <div
-          className="absolute inset-0"
-          style={{ background: 'linear-gradient(180deg, rgba(10,22,40,0.05) 0%, rgba(10,22,40,0.55) 100%)' }}
-        />
-      </div>
-
+      {/* 2026-06-12 revamp: legacy science banner purged — the library opens
+          straight onto glass protocol panes over the user's background. */}
       {list == null && (
         <>
           <span className="sr-only" role="status">Loading protocols…</span>
@@ -95,11 +79,7 @@ function ProtocolsList() {
         })}
       </m.div>
 
-      {/* Wave-2 — closing science divider (ecm-mesh, Register B). Completes the
-          5-asset science set; only shown once protocols have loaded. */}
-      {list && list.length > 0 && (
-        <ScienceDivider src="ecm-mesh.webp" label="Extracellular matrix" aspect="16 / 3" />
-      )}
+      {/* 2026-06-12 revamp: closing science divider purged (legacy imagery). */}
     </main>
   );
 }

@@ -22,11 +22,18 @@ const SEED = {
 
 mkdirSync(OUT, { recursive: true });
 const browser = await chromium.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true });
-const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
+// reducedMotion explicit: headless defaults can report `reduce`, which makes
+// the splash (correctly) skip itself — proofs need the animated path.
+const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, reducedMotion: 'no-preference' });
 await ctx.addInitScript(({ seed }) => {
   try { localStorage.setItem('ppw.theme', 'dark'); for (const [k, v] of Object.entries(seed)) localStorage.setItem(k, v); } catch (_) {}
 }, { seed: SEED });
 const page = await ctx.newPage();
+
+// 0 — Glass-logo shimmer splash (2026-06-12 revamp): catch it mid-display.
+await page.goto(BASE + '/welcome', { waitUntil: 'domcontentloaded' });
+await page.waitForTimeout(500);
+await page.screenshot({ path: join(OUT, 'PROOF-splash-glass-logo.png') });
 
 // 1 — Add-Stack expand morph (open state).
 await page.goto(BASE + '/today', { waitUntil: 'networkidle' });

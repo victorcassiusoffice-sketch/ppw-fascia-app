@@ -64,8 +64,6 @@ html[data-theme="dark"] {
   --elv-4: 0 1px 0 var(--top-highlight) inset, 0 28px 48px -20px rgba(0,0,0,.8);
   --elv-inset: inset 0 2px 6px rgba(0,0,0,.5);
 
-  --bg-art-opacity: .10;
-  --bg-art-blend: screen;
   --scrim: rgba(8, 9, 12, 0.62);
 
   /* ── Liquid glass v2 (2026-06-12, Vic GATE-2 visual fail fix) ──
@@ -103,7 +101,6 @@ html[data-theme="dark"] {
                     0 -1px 0 rgba(255,255,255,0.05) inset, 0 8px 24px -12px rgba(0,0,0,.55);
   --glass-shadow-2: 0 1px 0 var(--glass-specular) inset, 1px 0 0 var(--glass-edge) inset,
                     0 -1px 0 rgba(255,255,255,0.06) inset, 0 18px 44px -18px rgba(0,0,0,.65);
-  --hero-art-opacity: 0.5;   /* organic texture behind the /today hero zone */
   --card-glass-bg: var(--glass-tint);
   /* FORENSIC-AUDIT P0 (2026-06-12): accent arrives THROUGH glass, never as
      opaque paint. One token for every CTA/active state. */
@@ -143,8 +140,6 @@ html[data-theme="light"] {
   --elv-4: 12px 12px 24px var(--nm-dark), -12px -12px 24px var(--nm-light);
   --elv-inset: inset 3px 3px 6px var(--nm-dark), inset -3px -3px 6px var(--nm-light);
 
-  --bg-art-opacity: .06;
-  --bg-art-blend: multiply;
   --scrim: rgba(38, 44, 56, 0.34);
 
   /* ── Liquid glass v2, light theme — clear panes over the pale ground;
@@ -174,7 +169,6 @@ html[data-theme="light"] {
                     3px 3px 6px var(--nm-dark), -3px -3px 6px var(--nm-light);
   --glass-shadow-2: 0 1px 0 var(--glass-specular) inset, 1px 0 0 var(--glass-edge) inset,
                     6px 6px 12px var(--nm-dark), -6px -6px 12px var(--nm-light);
-  --hero-art-opacity: 0;     /* no organic texture on the neumorphic ground */
   --card-glass-bg: var(--glass-tint);
   --accent-glass-bg:  rgba(238, 110, 32, 0.66);
   --accent-glass-rim: rgba(255, 255, 255, 0.95);
@@ -216,30 +210,8 @@ h1, h2, h3, h4 {
   font-feature-settings: "tnum" 1;
 }
 
-/* ── Faded body-zone / fascia background (buildspec §2) ──
-   Fixed, app-wide, behind content. CSS stand-in fascia web; if the real PNG
-   asset exists it layers via .bg-art img. Theme-flipped opacity + blend. */
-.bg-art {
-  position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background: radial-gradient(120% 70% at 50% -10%, var(--accent-soft), transparent 60%);
-}
-.bg-art::after {
-  content: ""; position: absolute; inset: 0;
-  background:
-    repeating-linear-gradient(60deg,  rgba(var(--c-accent), .12) 0 1px, transparent 1px 27px),
-    repeating-linear-gradient(-60deg, rgba(var(--c-accent), .12) 0 1px, transparent 1px 27px);
-  opacity: var(--bg-art-opacity);
-  mix-blend-mode: var(--bg-art-blend);
-  -webkit-mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.3) 50%, transparent 82%);
-          mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.3) 50%, transparent 82%);
-}
-.bg-art img {
-  position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: cover; object-position: top center;
-  opacity: var(--bg-art-opacity); mix-blend-mode: var(--bg-art-blend);
-  -webkit-mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.3) 50%, transparent 82%);
-          mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.3) 50%, transparent 82%);
-}
+/* 2026-06-12 revamp (Vic purge order): the legacy .bg-art fascia-web layer
+   is RETIRED — the user-selected AppBackground is the only ground. */
 
 /* ══════════════════════════════════════════════════════════════════════
    LIQUID GLASS GRAMMAR (2026-06-11) — docs/redesign/00-overview.md
@@ -371,27 +343,8 @@ html[data-theme="light"][data-bg="grey"] .app-bg {
 }
 html[data-bg="grey"] .app-bg-scrim { background: transparent; }
 
-/* Full-bleed image grounds replace the hero-art zone + the legacy bg-art web
-   (no texture-on-texture; one organic surface at a time). */
-html[data-bg="nature"] .hero-art, html[data-bg="custom"] .hero-art { display: none; }
-html[data-bg="nature"] .bg-art,  html[data-bg="custom"] .bg-art  { display: none; }
-html[data-bg="grey"] .bg-art { display: none; }
-
-/* ── Organic hero zone (clip 6, dark theme only via --hero-art-opacity) ──
-   Bleeds past the hero card so the frosted glass visibly floats ON the
-   texture (clip 6's weather-widget-on-foliage move), fading out at the
-   edges. Static layer — never animated. */
-.hero-art {
-  position: absolute; inset: -16px -20px -26px; z-index: -1; overflow: hidden;
-  pointer-events: none; border-radius: var(--r-24);
-}
-.hero-art img {
-  width: 100%; height: 100%; object-fit: cover; object-position: center;
-  opacity: var(--hero-art-opacity);
-  transition: opacity var(--dur-mid) var(--ease);
-  -webkit-mask-image: radial-gradient(120% 100% at 50% 40%, #000 55%, transparent 98%);
-          mask-image: radial-gradient(120% 100% at 50% 40%, #000 55%, transparent 98%);
-}
+/* 2026-06-12 revamp: the hero-art overlay zone is RETIRED with the bg-art
+   layer — the user-selected background is the one organic surface. */
 
 /* ── Border trace overlay (clip 4) — SVG drawn around the hero card. ── */
 .border-trace {
@@ -824,9 +777,6 @@ button, a, .btn-accent, .btn-ghost, .btn-secondary, .btn-teal, .btn-lime { -webk
 .slot-sheet-enter { animation: slot-sheet-in .32s var(--ease) both; }
 @keyframes slot-sheet-in { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 
-.science-hero-img { animation: ppw-hero-drift 22s ease-in-out infinite alternate; transform-origin: 50% 45%; will-change: transform; }
-@keyframes ppw-hero-drift { from { transform: scale(1); } to { transform: scale(1.06); } }
-
 /* Helix stroke-draw on mount; slow rotate only where .helix-spin applied. */
 .helix-draw path, .helix-draw line { stroke-dasharray: 60; stroke-dashoffset: 60; animation: helix-draw 1100ms var(--ease) forwards; }
 @keyframes helix-draw { to { stroke-dashoffset: 0; } }
@@ -837,7 +787,7 @@ button, a, .btn-accent, .btn-ghost, .btn-secondary, .btn-teal, .btn-lime { -webk
 button:focus-visible, a:focus-visible { outline: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-fadeIn, .fade-in, .fade-in-stagger > *, .empty-orb, .science-hero-img,
+  .animate-fadeIn, .fade-in, .fade-in-stagger > *, .empty-orb,
   .hotspot-feedback, .merge-target-pulse, .helix-draw path, .helix-draw line, .helix-spin, .slot-sheet-enter {
     animation: none !important;
     transition: none !important;

@@ -127,9 +127,11 @@ describe('no feature lost — App.jsx wiring guard', () => {
     });
   }
 
-  it('redesign chrome is mounted: bottom nav + helix logo + theme toggle', () => {
+  it('redesign chrome is mounted: bottom nav + glass logo + theme toggle', () => {
     expect(src.includes('<BottomNav')).toBe(true);
-    expect(src.includes('<HelixLogo')).toBe(true);
+    // 2026-06-12 revamp (Vic ratification: REF contract supersedes legacy
+    // rules) — the approved clear-glass logo replaces the inline helix mark.
+    expect(src.includes('<GlassLogo')).toBe(true);
     expect(src.includes('<ThemeToggle')).toBe(true);
     // Bell relocated to the bottom nav and still gates on notification prefs.
     expect(chrome.includes('useNotificationPrefs')).toBe(true);

@@ -28,6 +28,7 @@ import { InlineRename } from '../components/shared.jsx';
 import MergedStack from '../components/today/MergedStack.jsx';
 import UserStackBody from '../components/today/UserStackBody.jsx';
 import { ClearCalendarModal, NotificationOverlay, AddProtocolModal, DragMergePlusOverlay } from '../components/today/overlays.jsx';
+import { GlassLogo } from '../chrome.jsx';
 import { KNOWN_AUDIO_MODULES } from '../constants/knownAudioModules.js';
 import { queueAck } from '../lib/assistantSync.js';
 
@@ -1231,20 +1232,12 @@ function TodayView() {
         )}
       </div>
 
-      {/* Next-up hero — liquid-glass (board 01): the ONE frosted card floating
-          over the organic texture zone (clip 6, dark theme only via
-          --hero-art-opacity). The accent border TRACES around it when the
-          next-up item changes (clip 4). Big thin tabular numerals. */}
+      {/* Next-up hero — the ONE strong frosted pane over the user's
+          background (2026-06-12 revamp: the legacy hero-art overlay is
+          purged — the user-selected ground IS the scene; one organic surface
+          only). The luminous rim TRACES around it when next-up changes. */}
       {!empty && (
         <div className="relative mt-4">
-          <div className="hero-art" aria-hidden="true">
-            <img
-              src={`${import.meta.env.BASE_URL}assets/backgrounds/fascia_fluid_motion.png`}
-              alt=""
-              loading="lazy"
-              onError={(e) => { e.currentTarget.style.display = 'none'; }}
-            />
-          </div>
           <div
             className="glass-strong relative flex items-center justify-between gap-4 overflow-hidden"
             style={{ padding: '20px 22px', borderRadius: 'var(--r-24)' }}
@@ -1311,16 +1304,11 @@ function TodayView() {
 
       {empty && (
         <div className="card p-10 text-center fade-in is-visible">
-          <img
-            src={`${import.meta.env.BASE_URL}images/science/dna-helix.webp`}
-            alt=""
-            aria-hidden="true"
-            loading="lazy"
-            width="116"
-            height="116"
-            className="mx-auto mb-4 rounded-2xl"
-            style={{ objectFit: 'cover', boxShadow: '0 20px 50px -20px rgba(0,0,0,0.75)' }}
-          />
+          {/* 2026-06-12 revamp: legacy DNA stock image purged — the approved
+              clear-glass logo is the empty-state mark. */}
+          <div className="mx-auto mb-4 flex justify-center" aria-hidden="true">
+            <GlassLogo size={110} title="" />
+          </div>
           <div className="font-display slot-empty-title text-2xl mb-2">Nothing scheduled yet.</div>
           <p className="text-muted text-sm mb-6 max-w-sm mx-auto leading-relaxed">Activate a protocol, save a body-zone routine, or pick an audio module — they will all show up here.</p>
           <div className="flex flex-wrap gap-3 justify-center">

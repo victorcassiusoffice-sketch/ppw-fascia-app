@@ -26,7 +26,7 @@ import { ensurePersistentStorage } from './lib/storagePersist.js';
 import { getPushState, subscribeToPush, INSTALL_HELP } from './lib/push.js';
 import { LazyMotion, domAnimation, m, AnimatePresence, useReducedMotion, motionPresets } from './motion.js';
 import { DUR, SHIFT, EASE } from './lib/motion';
-import { HelixLogo, ThemeToggle, BottomNav } from './chrome.jsx';
+import { GlassLogo, ThemeToggle, BottomNav } from './chrome.jsx';
 import { useTheme } from './theme.js';
 import { initAssistantSync } from './lib/assistantSync.js';
 
@@ -34,7 +34,6 @@ import TodayView from './pages/Today.jsx';
 import { ProtocolsList, ProtocolDetail } from './pages/Protocols.jsx';
 import ModulesList from './pages/Modules.jsx';
 import SettingsView from './pages/Settings.jsx';
-import { ScienceDivider } from './components/shared.jsx';
 import AppBackground from './components/AppBackground.jsx';
 
 /* ────────────────────────────────────────────
@@ -202,46 +201,39 @@ function Header() {
         maskImage: 'linear-gradient(180deg, #000 70%, transparent)',
       }}
     >
-      <Link to="/" aria-label="PPW home"><HelixLogo size={30} draw /></Link>
+      <Link to="/" aria-label="PPW home"><GlassLogo size={34} /></Link>
       <ThemeToggle />
     </header>
   );
 }
 
-/* ────────── Video Intro ────────── */
+/* ────────── Glass splash (2026-06-12 revamp) ──────────
+   Replaces the legacy video intro (dead placeholder asset, purged per Vic's
+   revamp order): the approved clear-glass logo SHIMMER variant over the
+   user's background, ~1.6s then fades into the app. Reduced motion skips
+   straight to content. Tap anywhere to skip. */
 function VideoIntro({ children }) {
-  const [phase, setPhase] = useState('loading');
-  const videoRef = useRef(null);
+  const prefersReduced = useReducedMotion();
+  const [phase, setPhase] = useState(() => (prefersReduced ? 'done' : 'showing'));
   const timerRef = useRef(null);
   const skipToContent = useCallback(() => { clearTimeout(timerRef.current); setPhase('done'); }, []);
-  const handleCanPlay = useCallback(() => {
-    if (phase === 'loading') {
-      setPhase('playing');
-      timerRef.current = setTimeout(() => setPhase('fading'), 4000);
-    }
+  useEffect(() => {
+    if (phase !== 'showing') return undefined;
+    timerRef.current = setTimeout(() => setPhase('fading'), 1600);
+    return () => clearTimeout(timerRef.current);
   }, [phase]);
-  const handleError = useCallback(() => skipToContent(), [skipToContent]);
-  useEffect(() => () => clearTimeout(timerRef.current), []);
   const handleFadeEnd = useCallback(() => { if (phase === 'fading') setPhase('done'); }, [phase]);
   if (phase === 'done') return children;
   return (
     <div className="relative min-h-screen">
       <div
-        className={`fixed inset-0 z-50 bg-bg flex items-center justify-center transition-opacity duration-700 ${phase === 'fading' ? 'opacity-0' : 'opacity-100'}`}
+        className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-500 ${phase === 'fading' ? 'opacity-0' : 'opacity-100'}`}
+        style={{ background: 'rgb(var(--c-bg-base) / 0.55)', backdropFilter: 'blur(var(--glass-blur-2))', WebkitBackdropFilter: 'blur(var(--glass-blur-2))' }}
         onTransitionEnd={handleFadeEnd}
+        onClick={skipToContent}
+        role="presentation"
       >
-        {phase === 'loading' && <div className="text-muted text-sm animate-pulse">Loading...</div>}
-        <video
-          ref={videoRef}
-          src={`${import.meta.env.BASE_URL || '/'}assets/intro_loop.mp4`}
-          autoPlay muted loop playsInline
-          className={`w-full h-full object-cover ${phase === 'loading' ? 'opacity-0' : 'opacity-100'}`}
-          onCanPlay={handleCanPlay}
-          onError={handleError}
-        />
-        {phase === 'playing' && (
-          <button onClick={skipToContent} className="absolute bottom-8 right-8 text-xs text-muted/70 hover:text-cream uppercase tracking-widest transition-colors">Skip</button>
-        )}
+        <GlassLogo size={150} shimmer title="Peak Performance Wellness" />
       </div>
       <div className="opacity-0">{children}</div>
     </div>
@@ -275,23 +267,18 @@ function Entry({ session, setSession }) {
         <p className="text-muted max-w-xl text-lg leading-relaxed">Science-backed fascia protocols personalised to your body, your pain, your lifestyle.</p>
       </div>
 
-      {/* Wave-2 — cinematic fascia hero (Register B: embedded science art). */}
-      <div className="relative mb-12 rounded-3xl overflow-hidden fade-in is-visible" style={{ aspectRatio: '16 / 7' }}>
-        <img
-          src={`${import.meta.env.BASE_URL}images/science/fascia-hero.webp`}
-          alt=""
-          aria-hidden="true"
-          className="science-hero-img w-full h-full object-cover"
-          style={{ objectPosition: 'center' }}
-        />
-        <div
-          className="absolute inset-0"
-          style={{ background: 'linear-gradient(180deg, rgba(10,22,40,0.08) 0%, rgba(10,22,40,0.30) 55%, rgba(10,22,40,0.72) 100%)' }}
-        />
-        <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7">
+      {/* 2026-06-12 revamp: legacy stock fascia imagery purged — the hero is
+          a clear glass pane over the user's background, carrying the
+          approved glass logo (REF-01/02 language). */}
+      <div
+        className="glass-strong relative mb-12 overflow-hidden fade-in is-visible flex items-center justify-between gap-6 p-6 md:p-8"
+        style={{ borderRadius: 'var(--r-24)', minHeight: 150 }}
+      >
+        <div>
           <div className="eyebrow mb-1">The fascia network</div>
-          <div className="font-display text-lg md:text-2xl text-cream leading-tight">Your body's living connective architecture.</div>
+          <div className="font-display text-lg md:text-2xl leading-tight">Your body's living connective architecture.</div>
         </div>
+        <GlassLogo size={84} title="" />
       </div>
 
       <div className="grid md:grid-cols-2 gap-5 fade-in fade-in-stagger is-visible">
@@ -308,9 +295,7 @@ function Entry({ session, setSession }) {
           <div className="text-accent text-sm mt-6 inline-flex items-center gap-1 group-hover:gap-2 transition-all">Get started <span aria-hidden="true">→</span></div>
         </button>
       </div>
-      <ScienceDivider src="microtubule-divider.webp" label="Cellular mechanotransduction" aspect="16 / 2.6" />
-
-      <div className="mt-2">
+      <div className="mt-8">
         <Link to="/protocols" className="text-accent text-sm underline underline-offset-4">Or browse evidence-based protocols →</Link>
       </div>
     </main>

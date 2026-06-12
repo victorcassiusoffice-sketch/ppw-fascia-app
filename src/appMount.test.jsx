@@ -32,10 +32,11 @@ describe('App mounts (module graph resolves end-to-end)', () => {
       </MemoryRouter>
     );
 
-    // Mount proof: the persistent bottom nav + helix mark are present, i.e. the
-    // App shell actually rendered (not a blank #root).
+    // Mount proof: the persistent bottom nav + the approved glass logo are
+    // present, i.e. the App shell actually rendered (not a blank #root).
+    // (2026-06-12 revamp: glass logo replaced the legacy helix mark.)
     expect(container.querySelector('.botnav')).toBeTruthy();
-    expect(container.querySelector('.helix-mark')).toBeTruthy();
+    expect(container.querySelector('img[src*="ppw-glass-logo"]')).toBeTruthy();
     expect(container.querySelector('.botnav .bell')).toBeTruthy();
   });
 

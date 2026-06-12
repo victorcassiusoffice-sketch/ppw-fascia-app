@@ -13,7 +13,22 @@ import { useNotificationPrefs } from './state.js';
 import { requestPermission } from './notifications.js';
 import { m, AnimatePresence, glideIndicator, pressScale, toastIn, SPRING, reduced } from './lib/motion';
 
-/* ── DNA-helix mark — single inline SVG, theme-aware stroke (accent token). ── */
+/* ── PPW clear-glass logo (Vic-approved, 2026-06-12 revamp) — the master
+   transparent SVG from 09-Fascia-App/brand/liquid-glass-logo/, shimmer
+   variant for the splash. Replaces the legacy inline helix as the app mark. ── */
+export function GlassLogo({ size = 34, shimmer = false, title = 'PPW' }) {
+  return (
+    <img
+      src={`${import.meta.env.BASE_URL}brand/${shimmer ? 'ppw-glass-logo-shimmer.svg' : 'ppw-glass-logo.svg'}`}
+      alt={title}
+      style={{ height: size, width: 'auto', display: 'inline-block' }}
+      draggable="false"
+    />
+  );
+}
+
+/* ── Legacy DNA-helix mark — kept for the assistant chip + back-compat
+   (no longer the header mark). ── */
 export function HelixLogo({ size = 30, draw = false, spin = false, title = 'PPW home' }) {
   return (
     <span className={'helix-mark' + (draw ? ' helix-draw' : '')} title={title} aria-label="PPW">
