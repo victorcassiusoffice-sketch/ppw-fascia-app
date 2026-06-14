@@ -92,6 +92,19 @@ function IconExternalLink() {
   );
 }
 
+/* Fix 2026-06-14 (Vic) — "unmerge stack" icon: two rounded tiles pulling
+   apart, signalling the merged stack splits back into separate routines. */
+function IconUnmerge() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="2.5" y="6" width="9" height="9" rx="2" />
+      <rect x="12.5" y="9" width="9" height="9" rx="2" />
+      <path d="M16 3.5l2 2-2 2" />
+      <path d="M8 20.5l-2-2 2-2" />
+    </svg>
+  );
+}
+
 /* ─── Iter 2 Phase 5.1 — Tickbox + kind-dot pill ───
    Replaces the kind dot in the row between drag handle and time chip.
    Kind dot survives as a small coloured pill BEHIND the checkbox so
@@ -223,5 +236,5 @@ function MasterTickbox({ selectedCount, visibleCount, onToggle }) {
 export {
   IconTrash, IconCopy, IconPlus, IconLink2, IconImage, IconVideo, IconMusic,
   IconMessageSquare, IconShoppingCart, IconExternalLink, IconBell,
-  IconBookOpen, IconCalendar, Tickbox, MasterTickbox,
+  IconBookOpen, IconCalendar, IconUnmerge, Tickbox, MasterTickbox,
 };

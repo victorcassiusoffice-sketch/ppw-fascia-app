@@ -1,7 +1,7 @@
 // MergedStack (extracted verbatim from App.jsx, 2026-06-11 liquid-glass
 // redesign — zero logic change).
 import React, { useState, useMemo } from 'react';
-import { Tickbox, IconCalendar } from '../icons.jsx';
+import { Tickbox, IconCalendar, IconUnmerge } from '../icons.jsx';
 import { InlineRename } from '../shared.jsx';
 import { DragMergePlusOverlay } from './overlays.jsx';
 
@@ -115,6 +115,20 @@ function MergedStack({
         {/* Patch 2 (2026-05-29) — inline duplicate/delete icons retired for
             cleaner rows. Both actions now live in the sticky bulk toolbar:
             select the stack (tickbox) → Duplicate (single-select) / Delete. */}
+        {/* Fix 2026-06-14 (Vic) — un-merge affordance was buried in the expanded
+            footer as text; surface it as a glass icon-disc in the compact header
+            so a merged stack can always be split back into separate routines. */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (window.confirm('Unmerge this stack? Routines return as separate cards.')) onDissolve(mergeId);
+          }}
+          className="glass-disc shrink-0"
+          style={{ width: 36, height: 36, color: 'var(--col-ink)' }}
+          aria-label="Unmerge stack — split back into separate routines"
+          title="Unmerge stack"
+        ><IconUnmerge /></button>
         {/* P0a (2026-06-02) — add merged stack to phone calendar. */}
         {stackTime && onAddToCalendar && (
           <button

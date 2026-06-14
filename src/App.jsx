@@ -201,7 +201,11 @@ function Header() {
         maskImage: 'linear-gradient(180deg, #000 70%, transparent)',
       }}
     >
-      <Link to="/" aria-label="PPW home"><GlassLogo size={34} /></Link>
+      {/* Fix 2026-06-14 (Vic): the logo must reach the homepage/landing. "/"
+          redirects straight back to /today once the user has any active state
+          (hasActiveState), so it dead-ended. Point home at /welcome, which
+          always renders the Session-Builder landing — a reliable way back. */}
+      <Link to="/welcome" aria-label="PPW home"><GlassLogo size={34} /></Link>
       <ThemeToggle />
     </header>
   );

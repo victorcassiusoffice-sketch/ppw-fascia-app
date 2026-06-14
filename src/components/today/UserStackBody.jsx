@@ -2,6 +2,7 @@
 // redesign — zero logic change).
 import React, { useState, useEffect, useCallback } from 'react';
 import { getMediaUrl } from '../../lib/mediaStore.js';
+import DurationField from '../DurationField.jsx';
 
 /* ═══════════════════════════════════════════
    Phase 2 (2026-05-23) — UserStackBody
@@ -100,10 +101,16 @@ function UserStackBody({ stack, onEnded, onPatch }) {
       </div>
       {editFields && (
         <div className="card p-3 bg-cream/[0.02] space-y-2">
-          <label className="grid grid-cols-2 gap-2 items-center text-xs">
-            <span className="text-muted uppercase tracking-widest">Duration (sec)</span>
-            <input type="number" min="0" value={stack.durationSec || 0} onChange={(e) => onPatch({ durationSec: Number(e.target.value) || 0 })} className="bg-cream/5 border border-cream/15 rounded px-2 py-1 text-cream focus:outline-none focus:border-accent" />
-          </label>
+          <div className="grid grid-cols-2 gap-2 items-center text-xs">
+            <span className="text-muted uppercase tracking-widest">Duration</span>
+            {/* Vic fix 2026-06-14 — mm:ss timer (was seconds-only); still stored as durationSec. */}
+            <DurationField
+              valueSec={stack.durationSec || 0}
+              onChangeSec={(sec) => onPatch({ durationSec: sec })}
+              idPrefix="editstack-dur"
+              inputClassName="bg-cream/5 border border-cream/15 rounded px-2 py-1 text-cream focus:outline-none focus:border-accent"
+            />
+          </div>
           {(stack.type === 'link' || stack.type === 'video' || stack.type === 'audio') && (
             <>
               <label className="grid grid-cols-2 gap-2 items-center text-xs">

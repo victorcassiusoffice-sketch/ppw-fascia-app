@@ -6,6 +6,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { putMedia, probeDuration, probeUrlDuration, parseYouTubeId, fetchYouTubeOEmbed, fetchSpotifyOEmbed, isSpotifyUrl } from './lib/mediaStore.js';
 import { m, SPRING, DUR, reduced } from './lib/motion';
+import DurationField from './components/DurationField.jsx';
 
 /* P1 (2026-06-02) — keyboard inset hook. On mobile the on-screen keyboard
    overlays the bottom of the layout viewport (iOS especially), hiding the
@@ -489,14 +490,10 @@ export default function AddStackModal({ open, onClose, onSave, defaultTime = '08
               </div>
               {chosen !== 'text' && (
                 <label className="grid grid-cols-2 gap-3 items-center">
-                  <span className="text-xs text-muted uppercase tracking-widest">Duration (sec)</span>
-                  <input
-                    type="number"
-                    min="1"
-                    value={duration}
-                    onChange={(e) => setDuration(e.target.value)}
-                    className="bg-cream/5 border border-cream/15 rounded-lg px-3 py-2 text-sm font-display text-cream focus:outline-none focus:border-accent"
-                  />
+                  <span className="text-xs text-muted uppercase tracking-widest">Duration</span>
+                  {/* Vic fix 2026-06-14 — mm:ss timer (was seconds-only). Still
+                      stored as durationSec under the hood. */}
+                  <DurationField valueSec={duration} onChangeSec={setDuration} idPrefix="addstack-dur" />
                 </label>
               )}
               {(chosen === 'link' || chosen === 'video' || chosen === 'audio') && (
