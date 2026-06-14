@@ -840,6 +840,17 @@ button:focus-visible, a:focus-visible { outline: none; }
     stroke-dashoffset: 0 !important;
   }
   body { transition: none; }
+  /* Motion unification (2026-06-15) — universal reset so the now-unified
+     Tailwind utility transitions (selection rings/borders/colour fades) also
+     collapse under reduced motion, matching the JS motion primitives (which
+     collapse via reduced()). 0.01ms (not 0) keeps transitionend listeners
+     firing — the standard a11y pattern. */
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @media (max-width: 640px) {

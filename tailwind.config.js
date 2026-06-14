@@ -53,6 +53,21 @@ export default {
         display: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
         body:    ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
       },
+      // Motion unification (2026-06-15): override the DEFAULT that every
+      // `transition`/`transition-all`/`transition-colors`/`transition-transform`
+      // utility resolves to, so CSS-driven selection states (card rings, active
+      // borders, colour fades) ease on the SAME curve + family-duration as the
+      // bespoke CSS (`var(--ease)`) and the Framer springs (`EASE.standard`).
+      // Was Tailwind's default cubic-bezier(0.4,0,0.2,1) @ 150ms — the source of
+      // the "selections don't match the page motion" inconsistency. The curve
+      // here is identical to motion/index.ts EASE.standard + index.css --ease;
+      // 200ms mirrors --dur-mid (the app's standard state-change tier).
+      transitionTimingFunction: {
+        DEFAULT: 'cubic-bezier(0.22, 1, 0.36, 1)',
+      },
+      transitionDuration: {
+        DEFAULT: '200ms',
+      },
     },
   },
   plugins: [],
