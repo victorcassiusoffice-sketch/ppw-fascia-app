@@ -10,7 +10,7 @@ import { getPushState, subscribeToPush, INSTALL_HELP } from '../lib/push.js';
 import { Section } from '../components/shared.jsx';
 import { m, glideIndicator, pressScale, SPRING, reduced } from '../lib/motion';
 import { getPairingState, pairDevice, unpairDevice } from '../lib/assistantSync.js';
-import { useBackground, BG_OPTIONS } from '../lib/background.js';
+import { useBackground, BG_OPTIONS, SKINS, skinAsset } from '../lib/background.js';
 import { useGlassIntensity, GLASS_LEVELS } from '../lib/glassIntensity.js';
 
 /* P0b (2026-06-02) — "Reliable reminders" card. Explains the two delivery
@@ -332,6 +332,36 @@ function SettingsView() {
           {bgMsg && (
             <div className="text-xs mt-3" style={{ color: bgMsg.tone === 'ok' ? 'rgb(var(--c-status-done))' : 'rgb(var(--c-status-alert))' }}>{bgMsg.text}</div>
           )}
+        </div>
+
+        {/* Background skins (2026-06-14, Vic feature pass) — a visual gallery of
+            interchangeable full-bleed grounds. Tap a tile to switch the surface
+            behind the glass; the choice persists. The glass scrim tier keeps
+            labels legible on every skin (bright skins take a heavier scrim). */}
+        <div className="card p-5 mt-4">
+          <div className="font-display mb-1">Background skins</div>
+          <div className="text-muted text-xs mb-4">Pick a ground for the glass. Minimal, interchangeable — tap to apply, it sticks across sessions.</div>
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5" role="group" aria-label="Background skins">
+            {SKINS.map((s) => {
+              const active = bgChoice.kind === 'skin' && bgChoice.skinId === s.id;
+              return (
+                <m.button
+                  key={s.id}
+                  type="button"
+                  onClick={() => { setBgChoice({ kind: 'skin', skinId: s.id }); setBgMsg(null); }}
+                  aria-pressed={active}
+                  aria-label={`${s.label} background skin${active ? ' (selected)' : ''}`}
+                  title={s.label}
+                  className={'skin-tile' + (active ? ' is-active' : '')}
+                  style={{ backgroundImage: `url(${skinAsset(s.id, true)})` }}
+                  {...pressScale()}
+                >
+                  {active && <span className="skin-check" aria-hidden="true">✓</span>}
+                  <span className="skin-name">{s.label}</span>
+                </m.button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Lens 4 (liquid-glass framework, BINDING) — glass intensity. Subtle

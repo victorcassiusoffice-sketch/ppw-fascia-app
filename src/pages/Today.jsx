@@ -1199,25 +1199,30 @@ function TodayView() {
             >
               <span>Merge ({selectedIds.size})</span>
             </button>
+            {/* Vic 2026-06-14 — minimise text → glass icon buttons (matches the
+                reels). Duplicate/Delete are icon-only glass discs; a11y label +
+                tooltip preserved so the action stays discoverable. */}
             {selectedIds.size === 1 && (
               <button
                 type="button"
                 onClick={handleBulkDuplicate}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold transition-all"
-                style={{ backgroundColor: 'transparent', color: 'var(--col-ink)', border: '1px solid var(--col-accent)' }}
+                className="glass-disc"
+                style={{ width: 40, height: 40, color: 'var(--col-ink)' }}
+                aria-label="Duplicate the selected stack"
                 title="Duplicate the selected stack (adds a copy 4h later)"
               >
-                <IconCopy /><span>Duplicate</span>
+                <IconCopy />
               </button>
             )}
             <button
               type="button"
               onClick={handleBulkDelete}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold transition-all"
-              style={{ backgroundColor: 'transparent', color: 'rgb(var(--c-status-alert))', border: '1px solid rgb(var(--c-status-alert) / 0.6)' }}
+              className="glass-disc"
+              style={{ width: 40, height: 40, color: 'rgb(var(--c-status-alert))' }}
+              aria-label="Delete selected stacks from this day"
               title="Delete selected stacks from this day"
             >
-              <IconTrash /><span>Delete</span>
+              <IconTrash />
             </button>
             <div className="flex-1" />
             <span className="text-[11px] text-muted font-bold">{selectedIds.size} selected</span>

@@ -23,11 +23,36 @@ export const BG_OPTIONS = [
   { kind: 'custom', label: 'Custom',        hint: 'A photo from your device' },
 ];
 
+/* Interchangeable background skins (2026-06-14, Vic feature pass). Each is a
+ * full-bleed ground stored as a repo asset under public/assets/skins/<id>.jpg
+ * (+ a small picker thumb under thumb/). `tone` drives the scrim tier so the
+ * liquid glass keeps AA legibility on top: 'dark' grounds take the light
+ * default scrim; 'bright' grounds take a heavier scrim. Curated from Vic's
+ * reference set — watermarked + low-res candidates were excluded. */
+export const SKINS = [
+  { id: 'forest-mist',  label: 'Forest Mist',  tone: 'dark'   },
+  { id: 'orbit',        label: 'Orbit',        tone: 'dark'   },
+  { id: 'saturn',       label: 'Saturn',       tone: 'dark'   },
+  { id: 'crimson-peak', label: 'Crimson Peak', tone: 'dark'   },
+  { id: 'scarlet-wood', label: 'Scarlet Wood', tone: 'dark'   },
+  { id: 'ember-tide',   label: 'Ember Tide',   tone: 'dark'   },
+  { id: 'azure',        label: 'Azure',        tone: 'bright' },
+  { id: 'chrome',       label: 'Chrome',       tone: 'bright' },
+  { id: 'metropolis',   label: 'Metropolis',   tone: 'bright' },
+];
+export const SKIN_BY_ID = Object.fromEntries(SKINS.map((s) => [s.id, s]));
+
+/** Asset URL for a skin (base-path aware). `thumb` returns the small picker tile. */
+export function skinAsset(id, thumb = false) {
+  return `${import.meta.env.BASE_URL}assets/skins/${thumb ? 'thumb/' : ''}${id}.jpg`;
+}
+
 export function getBackgroundChoice() {
   try {
     const raw = localStorage.getItem(BG_KEY);
     if (!raw) return { kind: 'auto' };
     const v = JSON.parse(raw);
+    if (v && v.kind === 'skin' && SKIN_BY_ID[v.skinId]) return { kind: 'skin', skinId: v.skinId };
     if (v && ['auto', 'nature', 'grey', 'custom'].includes(v.kind)) return v;
   } catch (_) { /* fall through */ }
   return { kind: 'auto' };
@@ -42,6 +67,12 @@ export function setBackgroundChoice(choice) {
 export function resolveBackgroundKind(choice, resolvedTheme) {
   if (!choice || choice.kind === 'auto') return resolvedTheme === 'light' ? 'grey' : 'nature';
   return choice.kind;
+}
+
+/** The scrim tone for a choice — 'bright' grounds need a heavier scrim. */
+export function backgroundTone(choice) {
+  if (choice && choice.kind === 'skin') return (SKIN_BY_ID[choice.skinId] || {}).tone || 'dark';
+  return null;
 }
 
 /* Tiny same-tab change bus so AppBackground re-renders when Settings saves
@@ -74,6 +105,9 @@ export function useBackground(resolvedTheme) {
   }, []);
 
   const kind = resolveBackgroundKind(choice, resolvedTheme);
+  const skinId = choice.kind === 'skin' ? choice.skinId : null;
+  const skinUrl = skinId ? skinAsset(skinId) : null;
+  const tone = backgroundTone(choice);
 
   useEffect(() => {
     let revoked = false;
@@ -104,5 +138,5 @@ export function useBackground(resolvedTheme) {
     setChoiceState(getBackgroundChoice());
   }, []);
 
-  return { choice, kind, customUrl, setChoice, pickCustom };
+  return { choice, kind, customUrl, skinId, skinUrl, tone, setChoice, pickCustom };
 }

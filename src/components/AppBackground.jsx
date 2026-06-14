@@ -14,12 +14,18 @@ import { getGlassIntensity, applyGlassIntensity } from '../lib/glassIntensity.js
 
 export default function AppBackground() {
   const { resolved } = useTheme();
-  const { kind, customUrl } = useBackground(resolved);
+  const { kind, customUrl, skinUrl, tone } = useBackground(resolved);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-bg', kind);
-    return () => document.documentElement.removeAttribute('data-bg');
-  }, [kind]);
+    // tone drives the scrim tier for image skins (bright → heavier scrim).
+    if (tone) document.documentElement.setAttribute('data-bg-tone', tone);
+    else document.documentElement.removeAttribute('data-bg-tone');
+    return () => {
+      document.documentElement.removeAttribute('data-bg');
+      document.documentElement.removeAttribute('data-bg-tone');
+    };
+  }, [kind, tone]);
 
   // Lens 4 — apply the stored glass-intensity level at boot (Settings owns
   // changes thereafter via the same html[data-glass] attribute).
@@ -33,6 +39,9 @@ export default function AppBackground() {
           alt=""
           onError={(e) => { e.currentTarget.style.display = 'none'; }}
         />
+      )}
+      {kind === 'skin' && skinUrl && (
+        <img src={skinUrl} alt="" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
       )}
       {kind === 'custom' && customUrl && <img src={customUrl} alt="" />}
       {/* 'grey' renders no image — the .app-bg ground itself is the surface. */}
