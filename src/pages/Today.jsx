@@ -1576,8 +1576,11 @@ function TodayView() {
                     aria-label="Delete stack"
                     title="Delete"
                   ><IconTrash /></button>
-                  <button onClick={() => setExpanded(isOpen ? null : it.id)} className="text-muted text-xs px-1 py-1 shrink-0" aria-label="Toggle details">
-                    {isOpen ? '▴' : '▾'}
+                  <button onClick={() => setExpanded(isOpen ? null : it.id)} className="text-muted text-xs px-1 py-1 shrink-0" aria-label="Toggle details" aria-expanded={isOpen}>
+                    {/* liquid toggle: one chevron that ROTATES between states
+                        (melts open↔closed) rather than swapping glyphs. The
+                        global reduced-motion reset makes it instant when set. */}
+                    <span className="inline-block" style={{ transition: 'transform 200ms cubic-bezier(0.22,1,0.36,1)', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>▾</span>
                   </button>
                 </div>
               </div>

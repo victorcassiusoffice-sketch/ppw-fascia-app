@@ -104,6 +104,13 @@ html[data-theme="dark"] {
                     0 -1px 0 rgba(255,255,255,0.05) inset, 0 8px 24px -12px rgba(0,0,0,.55);
   --glass-shadow-2: 0 1px 0 var(--glass-specular) inset, 1px 0 0 var(--glass-edge) inset,
                     0 -1px 0 rgba(255,255,255,0.06) inset, 0 18px 44px -18px rgba(0,0,0,.65);
+  /* Thick-glass v3 (2026-06-15) — rim light + inner glow give panes real
+     dimensionality (visionOS feel). Edge-weighted (inset spread pulls the glow
+     to the rim) so the centre stays clear → text legibility + scrim tier
+     untouched. White light only; never a dark fill. */
+  --glass-rimlight:   inset 0 0 0 1px rgba(255,255,255,0.10);
+  --glass-inner-glow: inset 0 1.5px 1px -0.5px rgba(255,255,255,0.30), inset 0 0 34px -14px rgba(255,255,255,0.16), inset 0 -14px 22px -18px rgba(255,255,255,0.10);
+  --glass-sheen: linear-gradient(125deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.03) 34%, rgba(255,255,255,0) 60%);
   --card-glass-bg: var(--glass-tint);
   /* FORENSIC-AUDIT P0 (2026-06-12): accent arrives THROUGH glass, never as
      opaque paint. One token for every CTA/active state. */
@@ -174,6 +181,11 @@ html[data-theme="light"] {
                     3px 3px 6px var(--nm-dark), -3px -3px 6px var(--nm-light);
   --glass-shadow-2: 0 1px 0 var(--glass-specular) inset, 1px 0 0 var(--glass-edge) inset,
                     6px 6px 12px var(--nm-dark), -6px -6px 12px var(--nm-light);
+  /* Thick-glass v3 (light) — brighter rim + crisper inner glow over the pale
+     ground; edge-weighted so the centre stays readable. */
+  --glass-rimlight:   inset 0 0 0 1px rgba(255,255,255,0.55);
+  --glass-inner-glow: inset 0 2px 1px -0.5px rgba(255,255,255,0.95), inset 0 0 34px -14px rgba(255,255,255,0.55), inset 0 -16px 24px -18px rgba(255,255,255,0.40);
+  --glass-sheen: linear-gradient(125deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.12) 34%, rgba(255,255,255,0) 60%);
   --card-glass-bg: var(--glass-tint);
   --accent-glass-bg:  rgba(238, 110, 32, 0.66);
   --accent-glass-rim: rgba(255, 255, 255, 0.95);
@@ -233,20 +245,28 @@ h1, h2, h3, h4 {
 }
 
 .glass {
+  position: relative;
   background-color: var(--glass-bg);
   background-image: var(--glass-fill);
   -webkit-backdrop-filter: blur(var(--glass-blur-2)) saturate(170%) brightness(1.06);
           backdrop-filter: blur(var(--glass-blur-2)) saturate(170%) brightness(1.06);
   border: 1px solid var(--glass-rim);
-  box-shadow: var(--glass-shadow-1);
+  box-shadow: var(--glass-shadow-1), var(--glass-rimlight), var(--glass-inner-glow);
 }
 .glass-strong {
+  position: relative;
   background-color: var(--glass-bg-strong);
   background-image: var(--glass-fill);
   -webkit-backdrop-filter: blur(var(--glass-blur-3)) saturate(180%) brightness(1.07);
           backdrop-filter: blur(var(--glass-blur-3)) saturate(180%) brightness(1.07);
   border: 1px solid var(--glass-rim);
-  box-shadow: var(--glass-shadow-2);
+  box-shadow: var(--glass-shadow-2), var(--glass-rimlight), var(--glass-inner-glow);
+}
+/* Thick-glass specular sweep on the big panes (hero / sheets / dock). Behind
+   content, pointer-inert, no filter. */
+.glass-strong::before, .glass::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit;
+  pointer-events: none; background: var(--glass-sheen);
 }
 
 /* ── Lens 2 (micro-interactions): glass GLOWS under the finger — a 240ms
@@ -473,18 +493,37 @@ html[data-bg="grey"] .app-bg-scrim { background: transparent; }
    fine bright rim (top specular + hairline border), which is exactly the
    REF-08 recipe. */
 .glass-disc {
+  position: relative; overflow: hidden; isolation: isolate;
   display: inline-flex; align-items: center; justify-content: center;
   border-radius: var(--r-pill);
   background: linear-gradient(160deg, rgba(255,255,255,0.16), rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.09));
   /* Audit P1 (REF-08): crisp metallic ring — bright border + outer hairline
-     + inner specular, so the disc rim catches light like the source btn. */
+     + inner specular, so the disc rim catches light like the source btn.
+     Thick-glass v3 (2026-06-15): + inner glow so the disc reads as a bead of
+     liquid glass, not a flat chip. */
   border: 1px solid rgba(255, 255, 255, 0.50);
   box-shadow: 0 1px 0 var(--glass-specular) inset, 0 -1px 0 rgba(255,255,255,0.06) inset,
               0 0 0 1px rgba(255, 255, 255, 0.10),
+              var(--glass-inner-glow),
               0 4px 10px -6px rgba(0,0,0,0.45);
-  transition: border-color var(--dur-mid) var(--ease), color var(--dur-mid) var(--ease);
+  transition: border-color var(--dur-mid) var(--ease), color var(--dur-mid) var(--ease),
+              transform var(--dur-mid) var(--ease), border-radius var(--dur-mid) var(--ease),
+              box-shadow var(--dur-mid) var(--ease);
 }
+/* Liquid lens — a specular dome bloom (top-left light) makes the disc read as a
+   curved bead of thick glass. The glyph liquid-TAPS on press (scale + tilt) and
+   melts back on release via the app curve — the "liquid morphism icon" beat. */
+.glass-disc::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 0;
+  background: radial-gradient(64% 54% at 32% 24%, rgba(255,255,255,0.45), rgba(255,255,255,0) 72%);
+}
+.glass-disc svg { position: relative; z-index: 1; transition: transform var(--dur-mid) var(--ease); transform-box: fill-box; transform-origin: center; }
+.glass-disc:active svg { transform: scale(0.78) rotate(-6deg); }
 .glass-disc:hover { border-color: var(--col-accent); }
+.glass-disc:hover svg { transform: scale(1.06); }
+@media (prefers-reduced-motion: reduce) {
+  .glass-disc svg, .glass-disc:active svg, .glass-disc:hover svg { transform: none; transition: none; }
+}
 html[data-theme="light"] .glass-disc {
   background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.45));
   box-shadow: 0 1px 0 rgba(255,255,255,0.95) inset, 2px 2px 5px var(--nm-dark), -2px -2px 5px var(--nm-light);
@@ -556,12 +595,20 @@ html[data-theme="light"] .glass-knob {
           backdrop-filter: blur(var(--glass-blur-2)) saturate(170%) brightness(1.06);
   border: 1px solid var(--glass-rim);
   border-radius: var(--r-24);
-  box-shadow: var(--glass-shadow-1);
+  box-shadow: var(--glass-shadow-1), var(--glass-rimlight), var(--glass-inner-glow);
   color: var(--col-ink);
   transition: box-shadow var(--dur-mid) var(--ease), border-color var(--dur-mid) var(--ease),
               transform var(--dur-mid) var(--ease), background-color var(--dur-mid) var(--ease);
 }
-.card:hover { box-shadow: var(--glass-shadow-2); }
+.card:hover { box-shadow: var(--glass-shadow-2), var(--glass-rimlight), var(--glass-inner-glow); }
+/* Thick-glass specular sweep — a soft diagonal light that reads as the curved
+   top face of a glass slab. Paints BEHIND normal-flow content (no z-index) so
+   text/legibility is untouched; pure white light, pointer-inert, GPU-cheap
+   (no filter). */
+.card::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit;
+  pointer-events: none; background: var(--glass-sheen);
+}
 @media (max-width: 640px) { .card { border-radius: var(--r-24); } }
 
 /* Perf carve-out: while a card is ACTIVELY dragging it goes solid (no

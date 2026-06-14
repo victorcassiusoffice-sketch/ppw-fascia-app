@@ -146,7 +146,7 @@ function MergedStack({
           aria-expanded={!collapsed}
           aria-label={collapsed ? 'Expand stack' : 'Collapse stack'}
           title={collapsed ? 'Tap to expand' : 'Tap to collapse'}
-        >{collapsed ? '▾' : '▴'}</button>
+        ><span className="inline-block" style={{ transition: 'transform 200ms cubic-bezier(0.22,1,0.36,1)', transform: collapsed ? 'rotate(0deg)' : 'rotate(180deg)' }}>▾</span></button>
       </div>
 
       {/* EXPANDED — tabbed view (Iter 2 Phase 5.3) OR parallel-play (M14 default) */}
