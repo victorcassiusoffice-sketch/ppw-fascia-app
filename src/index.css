@@ -57,6 +57,9 @@ html[data-theme="dark"] {
   --hairline:      rgba(255, 255, 255, 0.07);
   --top-highlight: rgba(255, 255, 255, 0.06);
   --accent-soft:   rgba(232, 119, 46, 0.16);
+  /* Progress-ring groove — a faint glass channel, NOT a baked-dark fill
+     (Vic liquid-glass law). The gold arc carries the signal. */
+  --ring-track:    rgba(255, 255, 255, 0.13);
 
   --elv-1: 0 1px 0 var(--top-highlight) inset, 0 2px 6px -4px rgba(0,0,0,.6);
   --elv-2: 0 1px 0 var(--top-highlight) inset, 0 8px 20px -12px rgba(0,0,0,.7);
@@ -131,6 +134,8 @@ html[data-theme="light"] {
   --hairline:      rgba(15, 30, 60, 0.05);
   --top-highlight: rgba(255, 255, 255, 0.9);
   --accent-soft:   rgba(242, 121, 43, 0.14);
+  /* Light-theme groove — a soft neumorphic channel, not an ink fill. */
+  --ring-track:    rgba(15, 30, 60, 0.10);
 
   --nm-light: rgba(255, 255, 255, 0.92);
   --nm-dark:  rgba(163, 177, 198, 0.55);

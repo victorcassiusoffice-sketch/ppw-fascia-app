@@ -63,7 +63,6 @@ function MergedStack({
         + (isDragOver ? 'border-accent ring-2 ring-accent/60 ' : '')
         + (selectionChecked ? 'ring-2 ring-accent/40 ' : '')
       }
-      style={{ boxShadow: '0 0 0 1px rgba(245,184,69,0.22) inset' }}
     >
       {isDragOver && <DragMergePlusOverlay />}
       {/* COMPACT HEADER — always visible */}

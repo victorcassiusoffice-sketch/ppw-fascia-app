@@ -213,7 +213,7 @@ function CompletionRing({ done, total, hero = false }) {
     return (
       <div className="relative shrink-0" style={{ width: 92, height: 92 }} aria-label={`${pctNum}% of today done`}>
         <svg width="92" height="92" viewBox="0 0 96 96" aria-hidden="true">
-          <circle cx="48" cy="48" r={r} fill="none" stroke="var(--col-inset)" strokeWidth="9" />
+          <circle cx="48" cy="48" r={r} fill="none" stroke="var(--ring-track)" strokeWidth="9" />
           <circle
             cx="48" cy="48" r={r} fill="none"
             stroke="url(#ppwHeroRing)" strokeWidth="9" strokeLinecap="round"
@@ -239,7 +239,7 @@ function CompletionRing({ done, total, hero = false }) {
   return (
     <div className="flex items-center gap-1.5 shrink-0" title={`${done} of ${total} done`} aria-label={`${done} of ${total} done`}>
       <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true" style={{ transform: 'rotate(-90deg)' }}>
-        <circle cx="14" cy="14" r={r} fill="none" stroke="var(--col-inset)" strokeWidth="3" />
+        <circle cx="14" cy="14" r={r} fill="none" stroke="var(--ring-track)" strokeWidth="3" />
         <circle
           cx="14" cy="14" r={r} fill="none"
           stroke="rgb(var(--c-accent))" strokeWidth="3" strokeLinecap="round"
