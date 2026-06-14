@@ -122,6 +122,17 @@ export default function App() {
   return (
     <LazyMotion features={domAnimation}>
       <div className="min-h-screen text-ink">
+        {/* REF-03 liquid refraction filter (2026-06-15). Defined ONCE; consumed
+            by `.liquid-refract::after` on signature glass. Static fractal-noise
+            displacement — no per-frame animation (holds 60fps) and an element
+            filter, not backdrop (works on iOS Safari). */}
+        <svg aria-hidden="true" focusable="false" style={{ position: 'absolute', width: 0, height: 0 }}>
+          <filter id="ppw-liquid-glass" x="-15%" y="-15%" width="130%" height="130%" colorInterpolationFilters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.011 0.016" numOctaves="2" seed="11" result="n" />
+            <feGaussianBlur in="n" stdDeviation="1.1" result="nb" />
+            <feDisplacementMap in="SourceGraphic" in2="nb" scale="13" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+        </svg>
         {/* Refinement 2 (REF-01/04/05): user-selectable ground behind the
             glass — replaces the old fixed bg-art web. */}
         <AppBackground />
@@ -261,7 +272,7 @@ function Entry({ session, setSession }) {
           a clear glass pane over the user's background, carrying the
           approved glass logo (REF-01/02 language). */}
       <div
-        className="glass-strong relative mb-12 overflow-hidden fade-in is-visible flex items-center justify-between gap-6 p-6 md:p-8"
+        className="glass-strong liquid-refract relative mb-12 overflow-hidden fade-in is-visible flex items-center justify-between gap-6 p-6 md:p-8"
         style={{ borderRadius: 'var(--r-24)', minHeight: 150 }}
       >
         <div>

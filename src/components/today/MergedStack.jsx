@@ -61,7 +61,7 @@ function MergedStack({
       className={
         'card today-routine-card overflow-hidden transition-all relative '
         + (isDragOver ? 'border-accent ring-2 ring-accent/60 ' : '')
-        + (selectionChecked ? 'ring-2 ring-accent/40 ' : '')
+        + (selectionChecked ? 'ring-2 ring-accent/40 is-selected ' : '')
       }
     >
       {isDragOver && <DragMergePlusOverlay />}
@@ -185,16 +185,8 @@ function MergedStack({
               </div>
             )}
           </div>
-          <div className="flex items-center justify-between gap-2 px-4 py-2 border-t border-cream/5 text-[11px] text-muted">
-            <span>Tabbed stack · tap a tab to switch · drag another routine onto this card to add a tab.</span>
-            <button
-              type="button"
-              onClick={() => {
-                if (window.confirm('Unstack? Routines return as separate cards.')) onDissolve(mergeId);
-              }}
-              className="text-muted hover:text-accent px-2 py-1 rounded shrink-0"
-              title="Unstack"
-            >Unstack</button>
+          <div className="px-4 py-2 border-t border-cream/5 text-[11px] text-muted">
+            <span>Tap a tab to switch · drag a routine here to add one.</span>
           </div>
         </>
       )}
@@ -215,16 +207,8 @@ function MergedStack({
               ))}
             </div>
           </div>
-          <div className="flex items-center justify-between gap-2 px-4 py-2 border-t border-cream/5 text-[11px] text-muted">
-            <span>Children play in parallel · drag another routine onto this card to add a child.</span>
-            <button
-              type="button"
-              onClick={() => {
-                if (window.confirm('Unstack? Routines return as separate cards.')) onDissolve(mergeId);
-              }}
-              className="text-muted hover:text-accent px-2 py-1 rounded shrink-0"
-              title="Unstack"
-            >Unstack</button>
+          <div className="px-4 py-2 border-t border-cream/5 text-[11px] text-muted">
+            <span>Plays in parallel · drag a routine here to add one.</span>
           </div>
         </>
       )}

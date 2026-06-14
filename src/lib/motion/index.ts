@@ -66,6 +66,10 @@ export const SPRING: Record<string, Transition> = {
   press: { type: "spring", stiffness: 400, damping: 28, mass: 0.8 },
   /** Sheet / modal glide-up — no bounce, just arrive. */
   sheet: { type: "spring", stiffness: 300, damping: 30, mass: 1 },
+  /** Liquid morph — shape/radius/scale changes that should MELT between
+   *  states (open/close/select). Softer + heavier than glide: a slow, fluid
+   *  settle with a whisper of overshoot. The "more liquid morph" beat. */
+  liquid: { type: "spring", stiffness: 112, damping: 17, mass: 1.1 },
 };
 
 /** Translate distances (px). */
@@ -167,6 +171,23 @@ export function pressScale(downScale: number = 0.96) {
     whileTap: { scale: downScale },
     whileHover: { scale: 1.02 },
     transition: SPRING.press,
+  } as const;
+}
+
+/**
+ * liquidMorph — wrap an element that should MELT between two states (selected /
+ * open). Spread the returned props; pass `on` to drive the morph. The element
+ * fluidly settles its corner-radius + scale on SPRING.liquid — the "more liquid
+ * morph" character. Reduced motion → no transform (CSS still cross-fades).
+ *
+ *   <m.div {...liquidMorph(isSelected)}>…</m.div>
+ */
+export function liquidMorph(on: boolean, opts: { radius?: number; lift?: number } = {}) {
+  const { radius = 30, lift = 1.012 } = opts;
+  if (reduced()) return {};
+  return {
+    animate: { borderRadius: on ? radius : 24, scale: on ? lift : 1 },
+    transition: SPRING.liquid,
   } as const;
 }
 

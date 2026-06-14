@@ -8,6 +8,7 @@ import { iherbUrl, amazonUkUrl, iherbCartAllUrl } from '../affiliate.js';
 import { requestPermission, getPermissionState } from '../notifications.js';
 import { Section } from '../components/shared.jsx';
 import { m, staggerContainer, enterRow, glideIndicator, pressScale } from '../lib/motion';
+import { IconArrowLeft } from '../components/icons.jsx';
 
 /* ═══════════════════════════════════════════
    NEW — /protocols
@@ -26,7 +27,7 @@ function ProtocolsList() {
 
   return (
     <main className="px-5 py-8 max-w-3xl mx-auto pb-16">
-      <Link to="/today" className="text-muted text-sm inline-block hover:text-accent mb-4 transition-colors">← Today</Link>
+      <Link to="/today" className="glass-disc mb-5" style={{ width: 40, height: 40, color: 'var(--col-ink)' }} aria-label="Back to Today" title="Back to Today"><IconArrowLeft /></Link>
       <div className="eyebrow mb-3">Library</div>
       <h1 className="font-display text-4xl md:text-5xl mb-3 leading-[1.02]">Protocols</h1>
       <p className="text-muted mb-6 max-w-xl leading-relaxed">Evidence-based, agent-generated. Tap to view, activate to merge into your day.</p>
@@ -100,7 +101,7 @@ function ProtocolDetail() {
 
   return (
     <main className="px-5 py-8 max-w-3xl mx-auto pb-16">
-      <Link to="/protocols" className="text-muted text-sm inline-block hover:text-accent mb-4 transition-colors">← Protocols</Link>
+      <Link to="/protocols" className="glass-disc mb-5" style={{ width: 40, height: 40, color: 'var(--col-ink)' }} aria-label="Back to Protocols" title="Back to Protocols"><IconArrowLeft /></Link>
       <div className="eyebrow mb-3">{p.variant} · {p.kind} · v{p.schema_version}</div>
       <h1 className="font-display text-4xl md:text-5xl mb-3 leading-[1.02]">{p.topic}</h1>
       <p className="text-muted mb-6 max-w-xl leading-relaxed">{p.studies_used} studies · generated {new Date(p.generated_at).toLocaleDateString()}</p>

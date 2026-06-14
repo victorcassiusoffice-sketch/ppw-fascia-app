@@ -165,7 +165,7 @@ export function BottomNav() {
           >{msg}</m.div>
         )}
       </AnimatePresence>
-      <nav className="botnav" aria-label="Primary">
+      <nav className="botnav liquid-refract" aria-label="Primary">
         <NavTab to="/today" active={isActive('/today')} label="Today"><IconHome /></NavTab>
         <NavTab to="/protocols" active={isActive('/protocols') || path.startsWith('/protocol/')} label="Protocols"><IconProtocols /></NavTab>
         <div className="navbtn bellslot">

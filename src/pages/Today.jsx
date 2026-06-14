@@ -23,7 +23,7 @@ import { downloadSlotIcs } from '../lib/ics.js';
 import { ensurePersistentStorage } from '../lib/storagePersist.js';
 import { m, AnimatePresence, useReducedMotion, motionPresets } from '../motion.js';
 import { DUR, STAGGER, EASE, SPRING, glideIndicator, toastIn, borderTrace, sheetUp, pressScale } from '../lib/motion';
-import { IconTrash, IconCopy, IconPlus, IconShoppingCart, IconExternalLink, IconBookOpen, IconCalendar, Tickbox } from '../components/icons.jsx';
+import { IconTrash, IconCopy, IconPlus, IconShoppingCart, IconExternalLink, IconBookOpen, IconCalendar, IconUnmerge, Tickbox } from '../components/icons.jsx';
 import { InlineRename } from '../components/shared.jsx';
 import MergedStack from '../components/today/MergedStack.jsx';
 import UserStackBody from '../components/today/UserStackBody.jsx';
@@ -655,38 +655,48 @@ function TodayView() {
         >
           {done ? '✓ Done — tap to undo' : 'Mark done'}
         </m.button>
-        <button
-          onClick={() => handleDuplicate(it)}
-          className="w-full text-center py-2 rounded-full text-xs font-bold border border-accent/40 text-accent hover:bg-accent/5 transition-colors"
-          title="Add a copy 4 hours later — drag to reorder, tap time to edit"
-        >
-          + Duplicate (later today)
-        </button>
-        {inMerge && (
+        {/* Less-text pass (2026-06-15) — the three secondary text buttons
+            (Duplicate / Remove-from-stack / Remove-from-daily) collapse into a
+            compact glass-disc icon row. aria-label + title preserve meaning. */}
+        <div className="flex items-center justify-center gap-3 pt-1">
           <button
+            type="button"
+            onClick={() => handleDuplicate(it)}
+            className="glass-disc"
+            style={{ width: 40, height: 40, color: 'var(--col-ink)' }}
+            aria-label="Duplicate 4 hours later — drag to reorder, tap time to edit"
+            title="Duplicate (later today)"
+          ><IconCopy /></button>
+          {inMerge && (
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm('Remove this tab from the merged stack? It returns to the main list.')) {
+                  unmergeItem(it.id);
+                }
+              }}
+              className="glass-disc"
+              style={{ width: 40, height: 40, color: 'var(--col-ink)' }}
+              aria-label="Remove from stack — returns to the main list"
+              title="Remove from stack"
+            ><IconUnmerge /></button>
+          )}
+          <button
+            type="button"
             onClick={() => {
-              if (window.confirm('Remove this tab from the merged stack? It returns to the main list.')) {
-                unmergeItem(it.id);
+              // Recurring items open the scope sheet (This day only / All
+              // occurrences). One-off items keep the simple confirm.
+              if (it.isRecurring) { setPendingRecurringDelete(it); return; }
+              if (window.confirm('Remove just this item from today? Other items in your stack stay.')) {
+                handleRemoveItem(it);
               }
             }}
-            className="w-full text-center py-2 rounded-full text-xs font-bold border border-accent/30 text-accent/80 hover:text-accent transition-colors"
-          >
-            Remove from stack
-          </button>
-        )}
-        <button
-          onClick={() => {
-            // Recurring items open the scope sheet (This day only / All
-            // occurrences). One-off items keep the simple confirm.
-            if (it.isRecurring) { setPendingRecurringDelete(it); return; }
-            if (window.confirm('Remove just this item from today? Other items in your stack stay.')) {
-              handleRemoveItem(it);
-            }
-          }}
-          className="w-full text-center py-2 rounded-full text-xs font-bold border border-cream/10 text-muted hover:text-accent hover:border-accent transition-colors"
-        >
-          Remove from daily plan
-        </button>
+            className="glass-disc"
+            style={{ width: 40, height: 40, color: 'var(--col-ink)' }}
+            aria-label="Remove from daily plan"
+            title="Remove from daily plan"
+          ><IconTrash /></button>
+        </div>
       </div>
     );
   };
@@ -1423,7 +1433,7 @@ function TodayView() {
               key={selectedDate}
               {...deckProps(lifted)}
               style={{ zIndex: lifted ? 30 : undefined }}
-              className={`card today-routine-card overflow-hidden transition-all relative ${done ? 'timeline-done opacity-80' : ''} ${isOpen ? 'is-open' : ''} ${isDragging ? 'border-accent is-dragging' : ''} ${isDragOver ? 'merge-target-pulse ring-2 ring-accent/60 border-accent' : ''} ${isSelected(it.id) ? 'ring-2 ring-accent/40' : ''}`}
+              className={`card today-routine-card overflow-hidden transition-all relative ${done ? 'timeline-done opacity-80' : ''} ${isOpen ? 'is-open' : ''} ${isDragging ? 'border-accent is-dragging' : ''} ${isDragOver ? 'merge-target-pulse ring-2 ring-accent/60 border-accent' : ''} ${isSelected(it.id) ? 'ring-2 ring-accent/40 is-selected' : ''}`}
             >
               {isDragOver && <DragMergePlusOverlay />}
               <div className="flex items-center gap-2 p-4">

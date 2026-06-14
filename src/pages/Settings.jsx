@@ -9,6 +9,7 @@ import { LS_KEYS, APP_VERSION, USE_MOCK_DATA, NOTIFICATION_LEAD_TIME_MIN } from 
 import { getPushState, subscribeToPush, INSTALL_HELP } from '../lib/push.js';
 import { Section } from '../components/shared.jsx';
 import { m, glideIndicator, pressScale, SPRING, reduced } from '../lib/motion';
+import { IconArrowLeft } from '../components/icons.jsx';
 import { getPairingState, pairDevice, unpairDevice } from '../lib/assistantSync.js';
 import { useBackground, BG_OPTIONS, SKINS, skinAsset } from '../lib/background.js';
 import { useGlassIntensity, GLASS_LEVELS } from '../lib/glassIntensity.js';
@@ -214,7 +215,7 @@ function SettingsView() {
 
   return (
     <main className="px-5 py-8 max-w-3xl mx-auto pb-16">
-      <Link to="/today" className="text-muted text-sm inline-block hover:text-accent mb-4 transition-colors">← Today</Link>
+      <Link to="/today" className="glass-disc mb-5" style={{ width: 40, height: 40, color: 'var(--col-ink)' }} aria-label="Back to Today" title="Back to Today"><IconArrowLeft /></Link>
       <div className="eyebrow mb-3">Configure</div>
       <h1 className="font-display text-4xl md:text-5xl mb-8 leading-[1.02]">Settings</h1>
 

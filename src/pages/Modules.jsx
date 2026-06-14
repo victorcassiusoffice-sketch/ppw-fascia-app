@@ -8,6 +8,7 @@ import { requestPermission } from '../notifications.js';
 import { DirectMediaPlayer } from '../MediaPlayer.jsx';
 import { KNOWN_AUDIO_MODULES } from '../constants/knownAudioModules.js';
 import { m, staggerContainer, enterRow, settleEmoji, pressScale } from '../lib/motion';
+import { IconArrowLeft } from '../components/icons.jsx';
 
 /* ═══════════════════════════════════════════
    NEW — /modules
@@ -29,7 +30,7 @@ function ModulesList() {
 
   return (
     <main className="px-5 py-8 max-w-3xl mx-auto pb-16">
-      <Link to="/today" className="text-muted text-sm inline-block hover:text-accent mb-4 transition-colors">← Today</Link>
+      <Link to="/today" className="glass-disc mb-5" style={{ width: 40, height: 40, color: 'var(--col-ink)' }} aria-label="Back to Today" title="Back to Today"><IconArrowLeft /></Link>
       <div className="eyebrow mb-3">Listen</div>
       <h1 className="font-display text-4xl md:text-5xl mb-3 leading-[1.02]">Audio &amp; Modules</h1>
       <p className="text-muted mb-8 max-w-xl leading-relaxed">Meditative, passive, screen-off-friendly. Add to your daily routine.</p>
@@ -51,8 +52,8 @@ function ModulesList() {
                   <div className="font-display text-lg">{media?.title || mod.label}</div>
                   {media && <div className="text-muted text-xs">{Math.round(media.duration_sec / 60)} min</div>}
                 </div>
-                <m.button onClick={() => toggle(mod.slug)} className={`px-4 py-2 rounded-full text-sm font-bold shrink-0 ${isActive ? 'bg-cream/10 text-cream border border-accent' : 'btn-accent'}`} {...pressScale()}>
-                  {isActive ? '✓ Active' : 'Add to my routine'}
+                <m.button onClick={() => toggle(mod.slug)} className={`px-4 py-2 rounded-full text-sm font-bold shrink-0 ${isActive ? 'bg-cream/10 text-cream border border-accent' : 'btn-accent'}`} aria-label={isActive ? 'Active — tap to remove from your routine' : 'Add to my routine'} {...pressScale()}>
+                  {isActive ? '✓ Active' : 'Add'}
                 </m.button>
               </div>
               {media && <DirectMediaPlayer media={media} />}

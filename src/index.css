@@ -261,6 +261,56 @@ h1, h2, h3, h4 {
   .today-time-chip:active, .seg-opt:active, .glass-switch:active { filter: none; }
 }
 
+/* ══════════════════════════════════════════════════════════════════════
+   LIQUID MORPH (2026-06-15) — "more liquid morph": glass MELTS between
+   states instead of hard-cutting. The corner-radius + lift flow on the app
+   curve (carried by the inline `transition-all` utilities, now unified to
+   cubic-bezier(.22,1,.36,1) @ .2s). Press squish gives a fluid rebound.
+   ══════════════════════════════════════════════════════════════════════ */
+/* Selected card melts to a softer, larger radius — the blob settle. Deck cards
+   sit at a 30px base (REF-07 `.stack-deck .today-routine-card`), so the morph
+   targets must out-specify that AND grow PAST 30 to read as a melt. */
+.card.is-selected { border-radius: 30px; }                              /* plain cards: 24 → 30 */
+.stack-deck .today-routine-card.is-selected { border-radius: 38px; }    /* deck cards: 30 → 38 melt */
+/* Opened card unfurls its corners as the body expands. */
+.stack-deck .today-routine-card.is-open { border-radius: 36px; }        /* deck cards: 30 → 36 */
+.card.is-open:not(.today-routine-card) { border-radius: 28px; }
+/* Press rebound: discs/capsules/tiles squish radius + scale, then spring back
+   (the :active state is brief; the release morph reads as a liquid bounce). */
+.glass-disc:active, .glass-capsule:active { transform: scale(0.92); border-radius: 42%; }
+.protocol-tile:active { transform: scale(0.992); }
+@media (prefers-reduced-motion: reduce) {
+  .card.is-selected { border-radius: var(--r-24); }
+  .stack-deck .today-routine-card.is-selected,
+  .stack-deck .today-routine-card.is-open { border-radius: 30px; }
+  .glass-disc:active, .glass-capsule:active, .protocol-tile:active { transform: none; border-radius: var(--r-pill); }
+}
+
+/* ── REF-03 LIQUID REFRACTION (deferred → shipped 2026-06-15) ──
+   A static SVG feTurbulence + feDisplacementMap ripples the specular sheen so
+   light appears to bend through liquid glass. Deliberately NOT animated and
+   applied as an ELEMENT filter on a sheen ::after — NOT `backdrop-filter:url()`
+   — because (a) static = renders once = holds 60fps, and (b) iOS Safari
+   supports element SVG filters but NOT url() in backdrop-filter (Vic tests on
+   iPhone). Sheen sits BEHIND content (z-index 0 + children lifted) so legibility
+   is untouched. Applied only to signature surfaces. Off under reduced
+   transparency / no-filter engines / low glass intensity. */
+.liquid-refract { position: relative; isolation: isolate; }
+.liquid-refract > * { position: relative; z-index: 1; }
+.liquid-refract::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit;
+  pointer-events: none; z-index: 0;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0) 42%),
+    radial-gradient(130% 90% at 12% -10%, rgba(255,255,255,0.14), rgba(255,255,255,0) 55%);
+  mix-blend-mode: screen;
+  filter: url(#ppw-liquid-glass);
+  opacity: 0.85;
+}
+@supports not (filter: url("#ppw-liquid-glass")) { .liquid-refract::after { filter: none; opacity: 0.5; } }
+@media (prefers-reduced-transparency: reduce) { .liquid-refract::after { display: none; } }
+html[data-glass="low"] .liquid-refract::after { display: none; }
+
 /* ── Lens 4 (user-controllable glass intensity) — html[data-glass] set from
    Settings (ppw.glassIntensity). LOW = less blur + more body (the perf /
    visual-comfort escape hatch, incl. weak Android WebView blur paths);

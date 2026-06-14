@@ -92,6 +92,17 @@ function IconExternalLink() {
   );
 }
 
+/* Less-text pass (2026-06-15) — back-arrow for glass-disc back buttons that
+   replace the "← Today" / "← Protocols" text links. */
+function IconArrowLeft() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <line x1="19" y1="12" x2="5" y2="12" />
+      <polyline points="12 19 5 12 12 5" />
+    </svg>
+  );
+}
+
 /* Fix 2026-06-14 (Vic) — "unmerge stack" icon: two rounded tiles pulling
    apart, signalling the merged stack splits back into separate routines. */
 function IconUnmerge() {
@@ -131,10 +142,12 @@ function Tickbox({ checked, onChange, ariaLabel, kindClass }) {
         style={{
           width: 18,
           height: 18,
-          borderRadius: 4,
           border: '1.5px solid ' + (checked ? 'var(--col-accent)' : 'var(--col-mid)'),
           backgroundColor: checked ? 'var(--col-accent)' : 'var(--col-inset)',
-          transition: 'background-color 120ms ease, border-color 120ms ease',
+          transition: 'background-color 200ms cubic-bezier(0.22,1,0.36,1), border-color 200ms cubic-bezier(0.22,1,0.36,1), border-radius 200ms cubic-bezier(0.22,1,0.36,1)',
+          // liquid morph: the box relaxes from a square tick to a softer
+          // blob when checked — a tiny melt that matches the app character.
+          borderRadius: checked ? 7 : 4,
         }}
       >
         {checked && (
@@ -212,10 +225,12 @@ function MasterTickbox({ selectedCount, visibleCount, onToggle }) {
         style={{
           width: 18,
           height: 18,
-          borderRadius: 4,
           border: '1.5px solid ' + (filled ? 'var(--col-accent)' : 'var(--col-mid)'),
           backgroundColor: filled ? 'var(--col-accent)' : 'var(--col-inset)',
-          transition: 'background-color 120ms ease, border-color 120ms ease',
+          transition: 'background-color 200ms cubic-bezier(0.22,1,0.36,1), border-color 200ms cubic-bezier(0.22,1,0.36,1), border-radius 200ms cubic-bezier(0.22,1,0.36,1)',
+          // liquid morph: the box relaxes from a square tick to a softer
+          // blob when filled — a tiny melt that matches the app character.
+          borderRadius: filled ? 7 : 4,
         }}
       >
         {state === 'full' && (
@@ -236,5 +251,5 @@ function MasterTickbox({ selectedCount, visibleCount, onToggle }) {
 export {
   IconTrash, IconCopy, IconPlus, IconLink2, IconImage, IconVideo, IconMusic,
   IconMessageSquare, IconShoppingCart, IconExternalLink, IconBell,
-  IconBookOpen, IconCalendar, IconUnmerge, Tickbox, MasterTickbox,
+  IconBookOpen, IconCalendar, IconUnmerge, IconArrowLeft, Tickbox, MasterTickbox,
 };
