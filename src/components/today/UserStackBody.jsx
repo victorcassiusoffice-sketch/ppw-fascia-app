@@ -2,7 +2,8 @@
 // redesign — zero logic change).
 import React, { useState, useEffect, useCallback } from 'react';
 import { getMediaUrl } from '../../lib/mediaStore.js';
-import DurationField from '../DurationField.jsx';
+import DurationField, { formatMMSS } from '../DurationField.jsx';
+import { IconSliders } from '../icons.jsx';
 
 /* ═══════════════════════════════════════════
    Phase 2 (2026-05-23) — UserStackBody
@@ -90,14 +91,18 @@ function UserStackBody({ stack, onEnded, onPatch }) {
     <div className="space-y-3">
       {player}
       <div className="flex items-center justify-between gap-2">
+        {/* Icon-first (2026-06-15) — the "edit stack fields" text link became a
+            glass-disc sliders toggle; aria-label + tooltip carry the meaning. */}
         <button
           type="button"
           onClick={() => setEditFields(v => !v)}
-          className="text-xs text-muted hover:text-accent underline underline-offset-4"
-        >
-          {editFields ? 'Hide fields' : 'Edit stack fields'}
-        </button>
-        {stack.durationSec ? <span className="text-[10px] text-muted">{stack.durationSec}s</span> : null}
+          className="glass-disc"
+          style={{ width: 34, height: 34, color: 'var(--col-ink)' }}
+          aria-label={editFields ? 'Hide stack fields' : 'Edit stack fields (duration, start/end)'}
+          aria-pressed={editFields}
+          title={editFields ? 'Hide fields' : 'Edit stack fields'}
+        ><IconSliders /></button>
+        {stack.durationSec ? <span className="text-[10px] text-muted tnum">{formatMMSS(stack.durationSec)}</span> : null}
       </div>
       {editFields && (
         <div className="card p-3 bg-cream/[0.02] space-y-2">
