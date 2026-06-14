@@ -581,9 +581,16 @@ html[data-theme="light"] .glass-capsule {
   display: flex; align-items: center; justify-content: center; font-size: 13px;
   color: var(--col-ink);
   background: linear-gradient(165deg, rgba(255,255,255,0.30), rgba(255,255,255,0.06) 45%, rgba(255,255,255,0.14));
-  border: 1px solid rgba(255,255,255,0.35);
-  box-shadow: 0 1px 0 rgba(255,255,255,0.45) inset, 0 -1px 1px rgba(0,0,0,0.18) inset,
+  border: 1px solid rgba(255,255,255,0.48);
+  /* REF-09 refractive knob — thick-glass v3: + inner specular ring + edge glow
+     + a dome bloom (::before) so the knob reads as a refractive glass bead. */
+  box-shadow: 0 1px 0 rgba(255,255,255,0.55) inset, 0 -1px 1px rgba(0,0,0,0.18) inset,
+              inset 0 0 0 1px rgba(255,255,255,0.12), var(--glass-inner-glow),
               0 3px 8px -2px rgba(0,0,0,0.45);
+}
+.glass-knob::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(62% 52% at 30% 22%, rgba(255,255,255,0.50), rgba(255,255,255,0) 70%);
 }
 html[data-theme="light"] .glass-knob {
   background: linear-gradient(165deg, rgba(255,255,255,0.95), rgba(255,255,255,0.55) 45%, rgba(255,255,255,0.8));
@@ -780,7 +787,10 @@ button, a, .btn-accent, .btn-ghost, .btn-secondary, .btn-teal, .btn-lime { -webk
   padding: 7px 11px; border-radius: var(--r-pill);
   background-color: var(--chip-glass);
   background-image: linear-gradient(160deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02) 60%, rgba(255,255,255,0.07));
-  box-shadow: 0 1px 0 var(--glass-specular) inset, 0 2px 6px -3px rgba(0,0,0,.35);
+  /* thick-glass v3 consistency (2026-06-15): + inner specular ring + edge glow
+     so the time chip matches the disc/card glass grammar. */
+  box-shadow: 0 1px 0 var(--glass-specular) inset, inset 0 0 0 1px rgba(255,255,255,0.08),
+              var(--glass-inner-glow), 0 2px 6px -3px rgba(0,0,0,.35);
   border: 1px solid var(--glass-rim);
   color: var(--col-ink); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.02em;
   font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;
