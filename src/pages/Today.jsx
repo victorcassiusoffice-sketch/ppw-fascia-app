@@ -1357,13 +1357,20 @@ function TodayView() {
           // REF-07 lift-to-front: the open/selected card scales to the deck
           // front on SPRING.glide (transform only); enter keeps the stagger.
           const rowDelay = Math.min(_i, 8) * (STAGGER.list / 1000);
+          // 2026-06-15 (Vic #4 — selection had no PERCEPTIBLE liquid motion):
+          // the lifted (open/selected) card now MELTS on SPRING.liquid — the
+          // designated "melt" token (softer + heavier overshoot than glide) —
+          // with a bigger scale (1.035→1.05) AND a corner-radius melt (30→38)
+          // animated in lock-step, so selecting an item visibly blooms/melts.
+          // Reduced motion → {} (CSS holds the static radius; no transform).
           const deckProps = (lifted) => (reduced ? {} : {
             initial: { opacity: 0, y: 14 },
-            animate: { opacity: 1, y: 0, scale: lifted ? 1.035 : 1 },
+            animate: { opacity: 1, y: 0, scale: lifted ? 1.05 : 1, borderRadius: lifted ? 38 : 30 },
             transition: {
               opacity: { duration: DUR.base / 1000, ease: EASE.standard, delay: rowDelay },
               y: { duration: DUR.base / 1000, ease: EASE.standard, delay: rowDelay },
-              scale: SPRING.glide,
+              scale: SPRING.liquid,
+              borderRadius: SPRING.liquid,
             },
           });
           // M9 — render the parent MergedStack instead of a plain card when
