@@ -31,7 +31,8 @@ const FRAG = `
 precision mediump float;
 uniform float u_time;
 uniform vec2  u_res;
-uniform float u_theme; // 1.0 = light, 0.0 = dark
+uniform float u_theme;  // 1.0 = light, 0.0 = dark
+uniform float u_energy; // 0..1 — interaction energy (scroll velocity + tap impulse, decays)
 
 float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }
 float noise(vec2 p){
@@ -49,11 +50,14 @@ float fbm(vec2 p){
 void main(){
   vec2 uv = gl_FragCoord.xy / u_res.xy;
   uv.x *= u_res.x / u_res.y;
-  float t = u_time * 0.09;                       // calm flow — visible but not distracting
+  // Calm at rest; scroll/tap energy makes the liquid flow + warp a touch more
+  // (the "responds to interaction" beat) — capped so it never gets busy.
+  float t = u_time * (0.09 + u_energy * 0.20);   // surge then settle
+  float warp = 2.0 + u_energy * 0.55;            // a little extra turbulence on interaction
   vec2 q = vec2(fbm(uv * 2.2 + t),
                 fbm(uv * 2.2 + vec2(5.2, 1.3) - t));
-  vec2 r = vec2(fbm(uv * 2.2 + 2.0 * q + vec2(1.7, 9.2) + 0.15 * t),
-                fbm(uv * 2.2 + 2.0 * q + vec2(8.3, 2.8) - 0.12 * t));
+  vec2 r = vec2(fbm(uv * 2.2 + warp * q + vec2(1.7, 9.2) + 0.15 * t),
+                fbm(uv * 2.2 + warp * q + vec2(8.3, 2.8) - 0.12 * t));
   float f = fbm(uv * 2.2 + 2.5 * r);
 
   vec3 col;
@@ -66,7 +70,7 @@ void main(){
     col = mix(a, b, clamp(f * f * 2.2, 0.0, 1.0));
     col = mix(col, acc, clamp(r.x * 0.42, 0.0, 0.34));
   }
-  col += 0.05 * smoothstep(0.62, 0.96, f);       // caustic sheen highlights
+  col += (0.05 + u_energy * 0.05) * smoothstep(0.62, 0.96, f); // caustic sheen — brightens subtly on interaction
   gl_FragColor = vec4(col, 1.0);
 }
 `;
@@ -112,6 +116,21 @@ export default function LiquidGlassBG({ theme }) {
     const uTime = gl.getUniformLocation(prog, 'u_time');
     const uRes = gl.getUniformLocation(prog, 'u_res');
     const uTheme = gl.getUniformLocation(prog, 'u_theme');
+    const uEnergy = gl.getUniformLocation(prog, 'u_energy');
+
+    // Interaction energy (2026-06-15 "movement engagement") — scroll velocity +
+    // tap impulse feed `energy`, which decays back to calm each frame. The liquid
+    // surges subtly then settles → it feels alive + responds to the user. Caps at
+    // 1.0 so it never gets busy; listeners are passive; only in the animated path.
+    let energy = 0;
+    let lastScrollY = (typeof window !== 'undefined') ? window.scrollY : 0;
+    function onScroll() {
+      const y = window.scrollY;
+      const dv = Math.min(Math.abs(y - lastScrollY) / 60, 0.5); // velocity → impulse
+      energy = Math.min(energy + dv, 1);
+      lastScrollY = y;
+    }
+    function onPointerDown() { energy = Math.min(energy + 0.45, 1); } // tap impulse
 
     // Render the soft liquid ground at REDUCED internal resolution (≈0.6× CSS
     // px, DPR ignored) and let CSS upscale it. It's a blurred ground behind a
@@ -139,8 +158,10 @@ export default function LiquidGlassBG({ theme }) {
       if (!running) return;
       if (start == null) start = now;
       resize();
+      energy *= 0.93; // ease back to calm (~0.9s settle)
       gl.uniform1f(uTheme, themeRef.current === 'light' ? 1.0 : 0.0);
       gl.uniform1f(uTime, (now - start) / 1000);
+      gl.uniform1f(uEnergy, energy);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       raf = requestAnimationFrame(frame);
     }
@@ -149,6 +170,7 @@ export default function LiquidGlassBG({ theme }) {
       resize();
       gl.uniform1f(uTheme, themeRef.current === 'light' ? 1.0 : 0.0);
       gl.uniform1f(uTime, 0);
+      gl.uniform1f(uEnergy, 0); // reduced-motion: calm, no interaction surge
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     }
 
@@ -158,10 +180,12 @@ export default function LiquidGlassBG({ theme }) {
     }
 
     if (reduce) {
-      renderOnce(); // static liquid frame — honours prefers-reduced-motion
+      renderOnce(); // static liquid frame — honours prefers-reduced-motion (no listeners)
     } else {
       raf = requestAnimationFrame(frame);
       document.addEventListener('visibilitychange', onVisibility);
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('pointerdown', onPointerDown, { passive: true });
     }
     window.addEventListener('resize', resize);
 
@@ -169,6 +193,8 @@ export default function LiquidGlassBG({ theme }) {
       running = false;
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', resize);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('pointerdown', onPointerDown);
       document.removeEventListener('visibilitychange', onVisibility);
       // NB: deliberately NOT calling WEBGL_lose_context here. React StrictMode
       // (and toggling the liquid bg off→on) remounts this component on the SAME

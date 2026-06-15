@@ -165,12 +165,15 @@ export const settleEmoji: Variants = reduced()
  *
  *   <m.button {...pressScale()}>…</m.button>
  */
-export function pressScale(downScale: number = 0.96) {
+export function pressScale(downScale: number = 0.94) {
   if (reduced()) return {};
   return {
-    whileTap: { scale: downScale },
-    whileHover: { scale: 1.02 },
-    transition: SPRING.press,
+    // 2026-06-15 "movement engagement": a touch deeper squish (0.96→0.94) + the
+    // springy `settle` on RELEASE gives a satisfying liquid rebound on every
+    // press app-wide; press-down stays on the fast no-overshoot `press` spring.
+    whileTap: { scale: downScale, transition: SPRING.press },
+    whileHover: { scale: 1.03 },
+    transition: SPRING.settle,
   } as const;
 }
 
