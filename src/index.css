@@ -3,6 +3,25 @@
 @tailwind utilities;
 
 /* ══════════════════════════════════════════════════════════════════════
+   FONT (2026-06-15) — Geist (self-hosted), matched to the SOURCE BTN v.02
+   reference wordmark. Geist = the free, OFL, SF-Pro-analog grotesque (Vercel):
+   light, neutral, slightly-humanist — the closest of the 3 vetted options to
+   the REF's clean light sans (A Fraunces is a serif; B Plus Jakarta is more
+   geometric/quirky). One variable woff2 covers all weights. Google CDN dropped.
+   SWAP POINT: change `--font-app` below (one token) — final font is Vic's call.
+   ══════════════════════════════════════════════════════════════════════ */
+@font-face {
+  font-family: 'Geist';
+  src: url('./assets/fonts/Geist-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+/* Tabular figures for timers/numerals (build-recipe: tnum on all times/numbers)
+   — keeps digits from jittering as they tick. Geist supports `tnum`. */
+.tnum { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+
+/* ══════════════════════════════════════════════════════════════════════
    PPW App — DUAL-THEME DESIGN SYSTEM (2026-06-03)
    Governed by docs/app-redesign-buildspec.md + docs/mockup-today.html.
 
@@ -25,6 +44,9 @@
   --page-max: 480px; --gutter: 20px; --rail-gap: 12px;
   --dur-fast: 140ms; --dur-mid: 200ms; --dur-slow: 240ms;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* THE font token (2026-06-15) — swap this one line to change the app font
+     (Vic's brand call). Geist = self-hosted SF-Pro-analog matched to REF-08. */
+  --font-app: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
   /* Liquid-glass framework Lens 3: hit areas >= 48px. */
   --ppw-tap-min: 48px;
 
@@ -211,13 +233,13 @@ body {
   background: var(--col-bg);
   color: var(--col-ink);
   overscroll-behavior: none;
-  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: var(--font-app);
   transition: background-color var(--dur-mid) var(--ease), color var(--dur-mid) var(--ease);
 }
 #root { position: relative; z-index: 1; min-height: 100%; }
 
 h1, h2, h3, h4 {
-  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: var(--font-app);
   letter-spacing: -0.02em;
   font-weight: 600;
 }
@@ -557,7 +579,7 @@ html[data-bg="grey"] .app-bg-scrim { background: transparent; }
 /* REF-08: etched THIN-LINE glyphs inside the disc (the reference icons are
    hairline, not chunky). 0-specificity :where() still beats the SVG stroke-width
    presentation attribute, so 2 → 1.7 without touching every icon component. */
-.glass-disc svg :where(path, line, polyline, circle, rect, polygon) { stroke-width: 1.7; }
+/* (icon stroke weight now set globally — see the REF-08 thin-stroke rule.) */
 .glass-disc:active svg { transform: scale(0.78) rotate(-6deg); }
 .glass-disc:hover { border-color: var(--col-accent); }
 .glass-disc:hover svg { transform: scale(1.06); }
@@ -587,7 +609,12 @@ html[data-theme="light"] .glass-disc {
   background: var(--glass-sheen);
 }
 .glass-capsule > * { position: relative; z-index: 1; }
-.glass-capsule svg :where(path, line, polyline, circle, rect, polygon) { stroke-width: 1.7; }
+/* REF-08 (SOURCE BTN v.02) — THIN, LIGHT, UNIFORM icon stroke app-wide. The
+   reference arrow is hairline, not chunky. Fully :where()-wrapped → 0 specificity:
+   it beats every line-icon's stroke-width="2" PRESENTATION attribute, yet LOSES
+   to any class rule (e.g. .hotspot-feedback 2.5) so the medical body-map strokes
+   keep their weight. Tickbox checks use a non-currentColor stroke → unaffected. */
+:where(svg[stroke="currentColor"]) :where(path, line, polyline, circle, rect, polygon, ellipse) { stroke-width: 1.6; }
 html[data-theme="light"] .glass-capsule {
   background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.5));
   box-shadow: 0 1px 0 rgba(255,255,255,0.95) inset, 3px 3px 6px var(--nm-dark), -3px -3px 6px var(--nm-light);
@@ -764,7 +791,7 @@ button, a, .btn-accent, .btn-ghost, .btn-secondary, .btn-teal, .btn-lime { -webk
 
 /* Eyebrow caption */
 .eyebrow {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-app);
   font-size: 0.72rem; letter-spacing: 0.24em; text-transform: uppercase;
   color: var(--col-accent); font-weight: 600;
 }
@@ -917,7 +944,7 @@ button, a, .btn-accent, .btn-ghost, .btn-secondary, .btn-teal, .btn-lime { -webk
 @keyframes pulse-selected { 0%,100% { fill: rgba(var(--c-accent),0.18); } 50% { fill: rgba(var(--c-accent),0.32); } }
 .hotspot .hotspot-label { opacity: 0; transition: opacity 0.2s ease; }
 .hotspot:hover .hotspot-label, .hotspot:focus-within .hotspot-label { opacity: 1; }
-.hotspot-label { fill: var(--col-ink); font-family: 'Inter', system-ui, sans-serif; font-weight: 800; font-size: 18px; letter-spacing: 0.02em; pointer-events: none; text-anchor: middle; dominant-baseline: middle; paint-order: stroke; stroke: var(--col-bg); stroke-width: 3px; }
+.hotspot-label { fill: var(--col-ink); font-family: var(--font-app); font-weight: 800; font-size: 18px; letter-spacing: 0.02em; pointer-events: none; text-anchor: middle; dominant-baseline: middle; paint-order: stroke; stroke: var(--col-bg); stroke-width: 3px; }
 
 /* ── Affiliate buttons (protocol detail) ── */
 .btn-iherb { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background-color: rgba(132, 204, 22, 0.38); background-image: var(--glass-fill); border: 1px solid rgba(215, 245, 160, 0.65); color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.35); box-shadow: 0 1px 0 var(--glass-specular) inset; font-weight: 700; font-size: 0.8rem; padding: 8px 16px; border-radius: var(--r-pill); white-space: nowrap; text-decoration: none; transition: transform .15s ease, box-shadow .15s ease, filter .15s ease; }
@@ -943,7 +970,7 @@ button, a, .btn-accent, .btn-ghost, .btn-secondary, .btn-teal, .btn-lime { -webk
 @keyframes empty-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.04); } }
 
 .section-divider { height: 1px; background: linear-gradient(90deg, transparent, var(--hairline), transparent); margin: 2.5rem 0; }
-.slot-empty-title { font-family: 'Inter', system-ui, sans-serif; letter-spacing: -0.02em; font-weight: 600; }
+.slot-empty-title { font-family: var(--font-app); letter-spacing: -0.02em; font-weight: 600; }
 
 .audio-only-wrap { position: relative; width: 100%; height: 80px; border-radius: 16px; overflow: hidden; background: var(--col-inset); border: 1px solid var(--hairline); }
 .audio-only-wrap iframe { position: absolute; inset: 0; width: 100%; height: 320px; pointer-events: auto; }

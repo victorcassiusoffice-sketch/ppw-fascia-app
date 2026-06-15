@@ -49,9 +49,12 @@ export default {
         emerald:      '#1E7A52',
         coral:        '#D9655B',
       },
+      // Both resolve to the single --font-app token (defined in src/index.css
+      // :root) — change that one line to swap the app font (Vic's brand call).
+      // 2026-06-15: Inter (Google CDN) → Geist (self-hosted), matched to REF-08.
       fontFamily: {
-        display: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
-        body:    ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+        display: ['var(--font-app)'],
+        body:    ['var(--font-app)'],
       },
       // Motion unification (2026-06-15): override the DEFAULT that every
       // `transition`/`transition-all`/`transition-colors`/`transition-transform`
