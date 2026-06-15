@@ -23,7 +23,7 @@ import { downloadSlotIcs } from '../lib/ics.js';
 import { ensurePersistentStorage } from '../lib/storagePersist.js';
 import { m, AnimatePresence, useReducedMotion, motionPresets } from '../motion.js';
 import { DUR, STAGGER, EASE, SPRING, glideIndicator, toastIn, borderTrace, sheetUp, pressScale } from '../lib/motion';
-import { IconTrash, IconCopy, IconPlus, IconShoppingCart, IconExternalLink, IconBookOpen, IconCalendar, IconUnmerge, Tickbox } from '../components/icons.jsx';
+import { IconTrash, IconCopy, IconPlus, IconShoppingCart, IconExternalLink, IconBookOpen, IconCalendar, IconUnmerge, IconMore, IconCheckSquare, IconSparkle, Tickbox } from '../components/icons.jsx';
 import { InlineRename } from '../components/shared.jsx';
 import MergedStack from '../components/today/MergedStack.jsx';
 import UserStackBody from '../components/today/UserStackBody.jsx';
@@ -1171,7 +1171,7 @@ function TodayView() {
               aria-expanded={overflowOpen}
               aria-label="More actions"
               title="More — select all, clear, create routine"
-            >⋯</button>
+            ><IconMore /></button>
             {overflowOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setOverflowOpen(false)} aria-hidden="true" />
@@ -1181,13 +1181,13 @@ function TodayView() {
                   style={{ minWidth: 208 }}
                 >
                   <button role="menuitem" type="button" onClick={() => { handleMasterToggle(selectedIds.size === 0 ? 'empty' : 'full'); setOverflowOpen(false); }} className="w-full text-left px-3 py-2.5 rounded-xl text-sm hover:bg-cream/5 flex items-center gap-2">
-                    <span aria-hidden="true">☑</span>{selectedIds.size === 0 ? 'Select all on this day' : 'Clear selection'}
+                    <IconCheckSquare />{selectedIds.size === 0 ? 'Select all on this day' : 'Clear selection'}
                   </button>
                   <button role="menuitem" type="button" onClick={() => { setClearOpen(true); setOverflowOpen(false); }} className="w-full text-left px-3 py-2.5 rounded-xl text-sm hover:bg-cream/5 flex items-center gap-2">
                     <IconCalendar /> Clear a day or range…
                   </button>
                   <button role="menuitem" type="button" onClick={() => { setOverflowOpen(false); nav('/welcome'); }} className="w-full text-left px-3 py-2.5 rounded-xl text-sm hover:bg-cream/5 flex items-center gap-2">
-                    <span aria-hidden="true">◆</span> Create personalised routine
+                    <IconSparkle /> Create personalised routine
                   </button>
                 </div>
               </>
@@ -1662,7 +1662,7 @@ function TodayView() {
         >
           {/* Sheet arrives on SPRING.sheet — solid surface (it moves → no
               blur); the static scrim above carries the glass (board 06). */}
-          <m.div variants={sheetUp} initial="hidden" animate="show" className="card w-full max-w-sm p-5" style={{ backgroundColor: 'var(--glass-bg-strong)' }} onClick={(e) => e.stopPropagation()}>
+          <m.div variants={sheetUp} initial="hidden" animate="show" className="glass-dialog w-full max-w-sm p-5" onClick={(e) => e.stopPropagation()}>
             <div className="font-display text-lg mb-1">Remove recurring routine</div>
             <p className="text-muted text-xs mb-4">This routine repeats. Remove it from just this day, or from every day it appears?</p>
             <button

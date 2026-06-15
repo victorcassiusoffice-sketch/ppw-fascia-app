@@ -9,7 +9,10 @@ import { LS_KEYS, APP_VERSION, USE_MOCK_DATA, NOTIFICATION_LEAD_TIME_MIN } from 
 import { getPushState, subscribeToPush, INSTALL_HELP } from '../lib/push.js';
 import { Section } from '../components/shared.jsx';
 import { m, glideIndicator, pressScale, SPRING, reduced } from '../lib/motion';
-import { IconArrowLeft } from '../components/icons.jsx';
+import { IconArrowLeft, IconAuto, IconDroplet, IconLeaf, IconSquareRounded, IconImage } from '../components/icons.jsx';
+
+// Background-picker glyphs → clean line icons (no old emoji).
+const BG_ICON = { auto: IconAuto, liquid: IconDroplet, nature: IconLeaf, grey: IconSquareRounded, custom: IconImage };
 import { getPairingState, pairDevice, unpairDevice } from '../lib/assistantSync.js';
 import { useBackground, BG_OPTIONS, SKINS, skinAsset } from '../lib/background.js';
 import { useGlassIntensity, GLASS_LEVELS } from '../lib/glassIntensity.js';
@@ -324,7 +327,7 @@ function SettingsView() {
                       style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', zIndex: 2 }}
                     />
                   )}
-                  <span aria-hidden="true" style={{ fontSize: 16 }}>{opt.kind === 'auto' ? '◑' : opt.kind === 'nature' ? '❧' : opt.kind === 'grey' ? '◻' : '🖼'}</span>
+                  <span aria-hidden="true" style={{ display: 'inline-flex' }}>{(() => { const I = BG_ICON[opt.kind] || IconSquareRounded; return <I />; })()}</span>
                   <span className="seg-label">{opt.label}</span>
                 </m.button>
               );

@@ -298,8 +298,8 @@ export default function AddStackModal({ open, onClose, onSave, defaultTime = '08
           Reduced motion keeps the CSS slide-in fallback (also media-guarded). */}
       <m.div
         {...(noMotion ? {} : { layoutId: 'add-stack-morph', transition: SPRING.sheet })}
-        className={'card w-full max-w-md flex flex-col' + (noMotion ? ' slot-sheet-enter' : '')}
-        style={{ backgroundColor: 'var(--glass-bg-strong)', maxHeight: '90vh', borderRadius: 'var(--r-24)', marginBottom: keyboardInset ? keyboardInset : undefined }}
+        className={'glass-dialog w-full max-w-md flex flex-col' + (noMotion ? ' slot-sheet-enter' : '')}
+        style={{ maxHeight: '90vh', borderRadius: 'var(--r-24)', marginBottom: keyboardInset ? keyboardInset : undefined }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-cream/10 shrink-0">

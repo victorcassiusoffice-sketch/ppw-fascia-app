@@ -18,6 +18,7 @@ export const CUSTOM_BG_MEDIA_ID = 'ppw-custom-bg';
 
 export const BG_OPTIONS = [
   { kind: 'auto',   label: 'Auto',          hint: 'Follows the theme — nature in dark, gradient grey in light' },
+  { kind: 'liquid', label: 'Liquid',        hint: 'Flowing liquid-glass ground — animated (GPU), freezes under reduced-motion' },
   { kind: 'nature', label: 'Nature',        hint: 'Dark organic texture (PPW fascia)' },
   { kind: 'grey',   label: 'Gradient Grey', hint: 'Soft neumorphic gradient ground (REF-05)' },
   { kind: 'custom', label: 'Custom',        hint: 'A photo from your device' },
@@ -53,7 +54,7 @@ export function getBackgroundChoice() {
     if (!raw) return { kind: 'auto' };
     const v = JSON.parse(raw);
     if (v && v.kind === 'skin' && SKIN_BY_ID[v.skinId]) return { kind: 'skin', skinId: v.skinId };
-    if (v && ['auto', 'nature', 'grey', 'custom'].includes(v.kind)) return v;
+    if (v && ['auto', 'liquid', 'nature', 'grey', 'custom'].includes(v.kind)) return v;
   } catch (_) { /* fall through */ }
   return { kind: 'auto' };
 }

@@ -11,6 +11,7 @@ import React, { useEffect } from 'react';
 import { useTheme } from '../theme.js';
 import { useBackground } from '../lib/background.js';
 import { getGlassIntensity, applyGlassIntensity } from '../lib/glassIntensity.js';
+import LiquidGlassBG from './LiquidGlassBG.jsx';
 
 export default function AppBackground() {
   const { resolved } = useTheme();
@@ -44,6 +45,9 @@ export default function AppBackground() {
         <img src={skinUrl} alt="" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
       )}
       {kind === 'custom' && customUrl && <img src={customUrl} alt="" />}
+      {/* 'liquid' — animated WebGL flowing-glass ground (REF flowing-liquid motion).
+          Self-contained shader; the glass UI above refracts it via backdrop-blur. */}
+      {kind === 'liquid' && <LiquidGlassBG theme={resolved} />}
       {/* 'grey' renders no image — the .app-bg ground itself is the surface. */}
       <div className="app-bg-scrim" />
     </div>
