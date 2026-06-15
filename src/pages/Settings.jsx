@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { useTheme } from '../theme.js';
 import { getPermissionState, requestPermission } from '../notifications.js';
 import { useLocalStorage, useActiveProtocols, useActiveModules, useActiveRoutines, useIfPrefs } from '../state.js';
-import { LS_KEYS, APP_VERSION, USE_MOCK_DATA, NOTIFICATION_LEAD_TIME_MIN } from '../config.js';
+import { LS_KEYS, APP_VERSION, USE_MOCK_DATA, NOTIFICATION_LEAD_TIME_MIN, FEATURE_ASSISTANT_LAUNCH, coachUrl } from '../config.js';
 import { getPushState, subscribeToPush, INSTALL_HELP } from '../lib/push.js';
 import { Section } from '../components/shared.jsx';
 import { m, glideIndicator, pressScale, SPRING, reduced } from '../lib/motion';
@@ -144,6 +144,26 @@ function ConnectAssistantCard() {
 
   return (
     <Section title="Wellness Assistant">
+      {/* Launch row (2026-06-16) — opens the live coach chat in a new tab.
+          Separate paid service; the app only links out (locked arch). */}
+      {FEATURE_ASSISTANT_LAUNCH && (
+        <div className="card p-5 mb-4">
+          <div className="font-display mb-1">Your Wellness Coach</div>
+          <div className="text-muted text-xs mb-4">
+            Chat with the PPW Wellness Assistant — evidence-grounded guidance on
+            recovery, fascia and your routine. Opens in a new tab; sign in, use a
+            guest pass, or subscribe there.
+          </div>
+          <a
+            href={coachUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-lime w-full inline-flex items-center justify-center"
+          >
+            Open your Wellness Coach ↗
+          </a>
+        </div>
+      )}
       <div className="card p-5">
         {state.paired ? (
           <>

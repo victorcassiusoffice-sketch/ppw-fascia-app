@@ -15,7 +15,7 @@ import { resolveLaunchHref, stackThumbnailUrl, getMediaUrl } from '../lib/mediaS
 import { isSupplementItem, isAccessoryItem, affiliateUrlFor, applyIfWindow, scheduleIfNotifications, clearIfNotifications } from '../lib/tags.js';
 import AddStackModal from '../AddStackModal.jsx';
 import { fetchProtocol, mergeDailyItems } from '../protocols.js';
-import { LS_KEYS } from '../config.js';
+import { LS_KEYS, FEATURE_ASSISTANT_LAUNCH } from '../config.js';
 import { DirectMediaPlayer } from '../MediaPlayer.jsx';
 import SortableList from '../SortableList.jsx';
 import { requestPermission, scheduleStackNotifications, clearAllScheduled } from '../notifications.js';
@@ -23,7 +23,7 @@ import { downloadSlotIcs } from '../lib/ics.js';
 import { ensurePersistentStorage } from '../lib/storagePersist.js';
 import { m, AnimatePresence, useReducedMotion, motionPresets } from '../motion.js';
 import { DUR, STAGGER, EASE, SPRING, glideIndicator, toastIn, borderTrace, sheetUp, pressScale } from '../lib/motion';
-import { IconTrash, IconCopy, IconPlus, IconShoppingCart, IconExternalLink, IconBookOpen, IconCalendar, IconUnmerge, IconMore, IconCheckSquare, IconSparkle, Tickbox } from '../components/icons.jsx';
+import { IconTrash, IconCopy, IconPlus, IconShoppingCart, IconExternalLink, IconBookOpen, IconCalendar, IconUnmerge, IconMore, IconCheckSquare, IconSparkle, IconMessageSquare, Tickbox } from '../components/icons.jsx';
 import { InlineRename } from '../components/shared.jsx';
 import MergedStack from '../components/today/MergedStack.jsx';
 import UserStackBody from '../components/today/UserStackBody.jsx';
@@ -1246,6 +1246,38 @@ function TodayView() {
           </div>
         )}
       </div>
+
+      {/* Coach entry (2026-06-16) — doorway to the live Wellness Assistant.
+          Tapping opens the dedicated /coach surface; the actual chat is a
+          separate paid service the app links out to (locked arch). Gated by
+          the single FEATURE_ASSISTANT_LAUNCH master switch. */}
+      {FEATURE_ASSISTANT_LAUNCH && (
+        <m.button
+          type="button"
+          onClick={() => nav('/coach')}
+          className="card liquid-refract w-full flex items-center gap-3 mt-4 text-left"
+          style={{ padding: '14px 16px' }}
+          aria-label="Open your Wellness Coach"
+          {...pressScale(0.98)}
+        >
+          <span
+            className="shrink-0 grid place-items-center text-accent"
+            style={{ width: 36, height: 36 }}
+            aria-hidden="true"
+          >
+            <IconMessageSquare />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="font-display block leading-tight">Ask your coach</span>
+            <span className="text-muted text-xs block truncate">
+              Evidence-grounded guidance on your routine
+            </span>
+          </span>
+          <span className="shrink-0 text-muted" aria-hidden="true">
+            <IconExternalLink />
+          </span>
+        </m.button>
+      )}
 
       {/* Next-up hero — the ONE strong frosted pane over the user's
           background (2026-06-12 revamp: the legacy hero-art overlay is
