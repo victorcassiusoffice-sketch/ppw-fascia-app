@@ -33,7 +33,11 @@ function ClearCalendarModal({ open, onClose, onConfirm }) {
   const [day, setDay] = useState(null);
   const [start, setStart] = useState(null);
   const [end, setEnd] = useState(null);
-  const [{ y, m }, setMonth] = useState(initialMonth);
+  // NB: alias the month index to `mo` — destructuring it as `m` shadowed the
+  // imported motion component `m`, so `<m.div>` resolved to a number → React
+  // "element type is invalid: undefined" crash the instant this modal opened
+  // (pre-existing; AddStackModal had no such shadow, which is why it worked).
+  const [{ y, m: mo }, setMonth] = useState(initialMonth);
 
   // Reset when opening.
   useEffect(() => {
@@ -47,32 +51,32 @@ function ClearCalendarModal({ open, onClose, onConfirm }) {
   }, [open, initialMonth]);
 
   const monthLabel = useMemo(() => {
-    const d = new Date(y, m, 1);
+    const d = new Date(y, mo, 1);
     return d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
-  }, [y, m]);
+  }, [y, mo]);
 
   const grid = useMemo(() => {
-    const first = new Date(y, m, 1);
-    const last  = new Date(y, m + 1, 0);
+    const first = new Date(y, mo, 1);
+    const last  = new Date(y, mo + 1, 0);
     // Mon=0..Sun=6 offset.
     const dayOfWeek = (first.getDay() + 6) % 7;
     const cells = [];
     for (let i = 0; i < dayOfWeek; i++) cells.push(null);
     for (let d = 1; d <= last.getDate(); d++) {
-      const date = new Date(y, m, d);
+      const date = new Date(y, mo, d);
       const iso = date.toISOString().slice(0, 10);
       cells.push({ d, iso });
     }
     while (cells.length % 7 !== 0) cells.push(null);
     return cells;
-  }, [y, m]);
+  }, [y, mo]);
 
   const prevMonth = () => {
-    const d = new Date(y, m - 1, 1);
+    const d = new Date(y, mo - 1, 1);
     setMonth({ y: d.getFullYear(), m: d.getMonth() });
   };
   const nextMonth = () => {
-    const d = new Date(y, m + 1, 1);
+    const d = new Date(y, mo + 1, 1);
     setMonth({ y: d.getFullYear(), m: d.getMonth() });
   };
 

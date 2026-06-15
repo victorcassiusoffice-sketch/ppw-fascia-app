@@ -1,15 +1,20 @@
 /* PPW service worker — minimal app-shell + protocol JSON cache.
-   No backend, no auth. Bumps cache name on each release.
+   No backend, no auth. Cache name is derived from the build version so it
+   changes on EVERY deploy.
 
    Subpath-aware: derives BASE from the SW's own location so the same
    file works at root ('/') and under a GitHub Pages repo subpath
    (e.g. '/ppw-fascia-app/').
 */
-// Bump on EVERY release so the browser sees sw.js as changed, installs the new
-// SW, skipWaiting()+clients.claim() activate it immediately, and the activate
-// handler purges the old cache — returning visitors get the new build, never a
-// stale cached index.html. (2026-06-11: liquid-glass redesign.)
-const CACHE_NAME = 'ppw-cache-v0.8.0-liquid-glass-2026-06-11';
+// BUILD_VERSION is replaced at build time by the ppw-sw-version Vite plugin
+// (vite.config.js) with the short git commit SHA — e.g. 'a1b2c3d'. Because the
+// token is the literal '__BUILD_VERSION__' in source, the dev server and any
+// un-built copy still run; the placeholder simply becomes part of the dev cache
+// name. Every production deploy gets a NEW SHA -> NEW CACHE_NAME -> the activate
+// handler purges every old cache, so returning visitors are never pinned to a
+// stale cached shell. (2026-06-15: SW auto-update fix.)
+const BUILD_VERSION = '__BUILD_VERSION__';
+const CACHE_NAME = 'ppw-cache-' + BUILD_VERSION;
 
 // BASE includes the leading and trailing slash. Examples:
 //   served at /sw.js                -> BASE = '/'
@@ -29,8 +34,13 @@ const SHELL = [
   BASE + 'mock-protocol.json',
 ];
 
+// NOTE: we intentionally do NOT call skipWaiting() here. A freshly-installed SW
+// stays in `waiting` so the client can surface a tasteful "new version" prompt
+// (src/lib/swUpdate.js) and apply it on the user's terms — on tap, when the app
+// is backgrounded, or on the next cold launch. The client triggers activation by
+// posting SKIP_WAITING (handled below). This avoids yanking a reload out from
+// under an active user while still guaranteeing they never stay on a stale build.
 self.addEventListener('install', (e) => {
-  self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) =>
       cache.addAll(SHELL).catch((err) => {
@@ -43,11 +53,25 @@ self.addEventListener('install', (e) => {
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    )
+    caches.keys()
+      .then((keys) =>
+        Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+      )
+      // Take control of all open clients immediately on activation so the new
+      // SW governs them without waiting for a navigation — paired with the
+      // client's controllerchange reload, this is the moment the page refreshes.
+      .then(() => self.clients.claim())
   );
-  self.clients.claim();
+});
+
+// The client posts this once it decides to apply a pending update (user tapped
+// "Refresh", the app was backgrounded, etc.). Calling skipWaiting() promotes this
+// waiting SW to active -> fires `controllerchange` on every client -> they reload.
+self.addEventListener('message', (e) => {
+  const data = e.data;
+  if (data === 'SKIP_WAITING' || (data && data.type === 'SKIP_WAITING')) {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('fetch', (e) => {
@@ -64,12 +88,22 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Network-first for HTML navigation; cache fallback if offline
+  // Network-first for HTML navigation: always re-check the network so the app
+  // shell is the latest build, refresh the cached copy for offline, and fall
+  // back to cache only when the network is unreachable.
   if (req.mode === 'navigate') {
     e.respondWith(
-      fetch(req).catch(() =>
-        caches.match(BASE + 'today').then((m) => m || caches.match(BASE))
-      )
+      fetch(req)
+        .then((res) => {
+          if (res && res.ok) {
+            const clone = res.clone();
+            caches.open(CACHE_NAME).then((c) => c.put(BASE, clone)).catch(() => {});
+          }
+          return res;
+        })
+        .catch(() =>
+          caches.match(BASE + 'today').then((m) => m || caches.match(BASE))
+        )
     );
     return;
   }

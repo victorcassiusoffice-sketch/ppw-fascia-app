@@ -89,7 +89,7 @@ html[data-theme="dark"] {
   --elv-4: 0 1px 0 var(--top-highlight) inset, 0 28px 48px -20px rgba(0,0,0,.8);
   --elv-inset: inset 0 2px 6px rgba(0,0,0,.5);
 
-  --scrim: rgba(8, 9, 12, 0.62);
+  --scrim: rgba(8, 9, 12, 0.52);
 
   /* ── Liquid glass v2 (2026-06-12, Vic GATE-2 visual fail fix) ──
      iOS-26-class recipe: the pane is ~nearly transparent — the glass read
@@ -139,6 +139,26 @@ html[data-theme="dark"] {
   --accent-glass-bg:  rgba(232, 119, 46, 0.44);
   --accent-glass-rim: rgba(255, 205, 165, 0.70);
   --accent-glass-glow: 0 8px 22px -10px rgba(232, 119, 46, 0.55);
+
+  /* ── FROSTED-DIALOG grammar (2026-06-15, Vic "real frosted glass" pass) ──
+     The card/button --glass-fill carries a deliberate HARD-STOP diagonal sheen
+     LINE (good on small chips, reads as a hard streak on a big dialog pane).
+     Dialogs get a SOFT, diffuse light instead — a broad top-left bloom + a
+     faint top-edge sheen, no diagonal boundary (matches Vic's frosted-widget
+     reference: smooth surface, faint bright rim only). */
+  --glass-fill-soft:
+      radial-gradient(135% 90% at 26% -16%, rgba(255,255,255,0.16), rgba(255,255,255,0) 56%),
+      radial-gradient(60% 40% at 88% 108%, rgba(255,255,255,0.06), rgba(255,255,255,0) 60%);
+  --glass-sheen-soft: linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 26%);
+  /* Frosted body tint = the legibility SCRIM TIER (law #4), NOT a baked fill:
+     translucent, the heavy blur diffuses the wallpaper through it, and it
+     ADAPTS up on bright grounds (see the [data-bg-tone] rules) so white text
+     keeps AA. Tuned by measurement (handoff REDESIGN-FROST table). */
+  --dialog-frost: rgba(17, 19, 25, 0.34);
+  /* Dialog secondary/"muted" ink — bumped vs the global --c-ink-mid so even the
+     small hint text clears WCAG AA 4.5:1 on the frosted field (measured worst-
+     case), without making the frost less see-through. */
+  --dialog-ink-2: 200 208 219; /* #C8D0DB */
 }
 
 /* ───────────────── LIGHT THEME (neumorphic) ───────────────── */
@@ -212,6 +232,16 @@ html[data-theme="light"] {
   --accent-glass-bg:  rgba(238, 110, 32, 0.66);
   --accent-glass-rim: rgba(255, 255, 255, 0.95);
   --accent-glass-glow: 0 8px 22px -10px rgba(242, 121, 43, 0.50);
+
+  /* Frosted-dialog grammar (light) — soft whites; the frost body is a pale
+     translucent scrim tier (dark ink reads on it over any ground; adapts up
+     on dark skins where the blurred field would otherwise be too dark). */
+  --glass-fill-soft:
+      radial-gradient(135% 90% at 26% -16%, rgba(255,255,255,0.55), rgba(255,255,255,0) 56%),
+      radial-gradient(60% 40% at 88% 108%, rgba(255,255,255,0.22), rgba(255,255,255,0) 60%);
+  --glass-sheen-soft: linear-gradient(180deg, rgba(255,255,255,0.40) 0%, rgba(255,255,255,0) 26%);
+  --dialog-frost: rgba(244, 247, 251, 0.42);
+  --dialog-ink-2: 58 67 80; /* #3A4350 — darker slate so hint text clears AA on the pale frost */
 }
 
 /* Convenience solid colours (for use where a triplet is awkward). */
@@ -264,6 +294,8 @@ h1, h2, h3, h4 {
   --glass-blur-1: 10px;   /* light film — header fade, menus */
   --glass-blur-2: 20px;   /* standard dock/bar glass */
   --glass-blur-3: 28px;   /* heavy — surfaces over imagery (hero) */
+  --glass-blur-4: 46px;   /* DIALOG frost — true Gaussian diffusion (REF look):
+                             content behind melts into soft colour fields. */
 }
 
 .glass {
@@ -291,36 +323,58 @@ h1, h2, h3, h4 {
   pointer-events: none; background: var(--glass-sheen);
 }
 
-/* ── CLEAR-GLASS DIALOG (2026-06-15, Vic) — every dialog / modal / sheet /
-   popover is genuine SEE-THROUGH glass, NOT an opaque panel. Was a static
-   ~.36/.55-alpha fill (`--glass-bg-strong`) with no guaranteed blur → it read
-   solid. Now: heavy backdrop-blur of the (scrim-dimmed) page behind + the CLEAR
-   `--glass-tint` body, so content/backdrop is visible THROUGH the dialog per
-   REF-04 / the "everything liquid glass" law. The modal scrim carries AA
-   legibility (law #4); tint stays clear. Falls back SOLID where blur is
-   unsupported / reduced-transparency. ── */
+/* ── FROSTED-GLASS DIALOG (2026-06-15 rev2, Vic "real frosted glass" pass) ──
+   Every dialog / modal / sheet / popover is genuine FROSTED glass like the
+   reference widget: the ground behind melts into soft diffuse colour fields,
+   the surface is smooth with only a faint bright rim (NO hard diagonal streak),
+   and the text reads crisp.
+
+   ROOT-CAUSE FIXES vs the prior build:
+   • #1 diagonal streak — the body image is now `--glass-fill-soft` (a broad
+     diffuse top bloom) and the ::before is the soft top-edge `--glass-sheen-soft`,
+     NOT the card grammar's hard-stop reflection LINE.
+   • #2 "blur-tint of the theme colour" — blur jumps to `--glass-blur-4` (46px)
+     with saturate(200%): real Gaussian diffusion + colour pop, so the ground
+     becomes soft fields, not a slightly-blurred copy. The scrim no longer
+     blurs/flattens the page first (see .ppw-scrim), so varied colour survives
+     to be diffused.
+   • #3 legibility — `--dialog-frost` is the adaptive SCRIM TIER (law #4):
+     translucent so the ground shows through, but it strengthens on bright
+     grounds so text always clears AA (measured per skin × theme).
+
+   PERF NOTE (law #3 precedence, documented): a dialog is a SINGLE, momentary
+   element, and the reference effect REQUIRES a persistent backdrop-filter — so
+   the dialog deliberately keeps blur (unlike list/dragged surfaces, which stay
+   solid). Falls back SOLID under reduced-transparency / no-backdrop engines /
+   data-glass=low (Android-perf escape hatch). ── */
 .glass-dialog {
   position: relative; isolation: isolate;
   color: var(--col-ink); border-radius: var(--r-24);
-  background-color: var(--glass-tint);
-  background-image: var(--glass-fill);
-  -webkit-backdrop-filter: blur(var(--glass-blur-3)) saturate(180%) brightness(1.07);
-          backdrop-filter: blur(var(--glass-blur-3)) saturate(180%) brightness(1.07);
+  background-color: var(--dialog-frost);
+  background-image: var(--glass-fill-soft);
+  -webkit-backdrop-filter: blur(var(--glass-blur-4)) saturate(200%) brightness(1.04);
+          backdrop-filter: blur(var(--glass-blur-4)) saturate(200%) brightness(1.04);
   border: 1px solid var(--glass-rim);
   box-shadow: var(--glass-shadow-2), var(--glass-rimlight), var(--glass-inner-glow);
 }
 .glass-dialog::before {
   content: ""; position: absolute; inset: 0; border-radius: inherit;
-  pointer-events: none; background: var(--glass-sheen); z-index: 0;
+  pointer-events: none; background: var(--glass-sheen-soft); z-index: 0;
 }
 .glass-dialog > * { position: relative; z-index: 1; }
+/* Legibility (Vic #3): strengthen dialog secondary/hint text so it clears AA
+   4.5:1 on the frosted field (primary ink already does). text-shadow adds a
+   touch of edge crispness on busy grounds (perceptual, not counted in WCAG). */
+.glass-dialog .text-muted { color: rgb(var(--dialog-ink-2)) !important; }
+.glass-dialog { text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18); }
+html[data-theme="light"] .glass-dialog { text-shadow: 0 1px 1px rgba(255, 255, 255, 0.35); }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .glass-dialog { background-color: var(--col-surface); }
+  .glass-dialog { background-color: var(--col-surface); background-image: none; }
 }
 @media (prefers-reduced-transparency: reduce) {
-  .glass-dialog { background-color: var(--col-surface); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .glass-dialog { background-color: var(--col-surface); background-image: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
 }
-html[data-glass="low"] .glass-dialog { -webkit-backdrop-filter: blur(var(--glass-blur-1)); backdrop-filter: blur(var(--glass-blur-1)); background-color: var(--glass-tint-strong); }
+html[data-glass="low"] .glass-dialog { -webkit-backdrop-filter: blur(var(--glass-blur-4)) saturate(150%); backdrop-filter: blur(var(--glass-blur-4)) saturate(150%); background-color: var(--glass-tint-strong); }
 
 /* ── Lens 2 (micro-interactions): glass GLOWS under the finger — a 240ms
    brightness bloom on press, on top of the spring press-scale. ── */
@@ -389,7 +443,7 @@ html[data-glass="low"] .liquid-refract::after { display: none; }
    visual-comfort escape hatch, incl. weak Android WebView blur paths);
    HIGH = maximum lensing. Standard = the tokens above. ── */
 html[data-glass="low"] {
-  --glass-blur-1: 4px; --glass-blur-2: 8px; --glass-blur-3: 12px;
+  --glass-blur-1: 4px; --glass-blur-2: 8px; --glass-blur-3: 12px; --glass-blur-4: 16px;
 }
 html[data-theme="dark"][data-glass="low"] {
   --glass-tint: rgba(22, 25, 31, 0.55);
@@ -404,10 +458,21 @@ html[data-theme="light"][data-glass="low"] {
   --chip-glass: rgba(255, 255, 255, 0.75);
 }
 html[data-glass="high"] {
-  --glass-blur-1: 14px; --glass-blur-2: 26px; --glass-blur-3: 36px;
+  --glass-blur-1: 14px; --glass-blur-2: 26px; --glass-blur-3: 36px; --glass-blur-4: 56px;
 }
 html[data-theme="dark"][data-glass="high"]  { --glass-tint: rgba(22, 25, 31, 0.08); }
 html[data-theme="light"][data-glass="high"] { --glass-tint: rgba(255, 255, 255, 0.12); }
+
+/* ── Adaptive frosted-dialog SCRIM TIER (Vic #3 — legibility law #4) ──
+   The dialog body tint strengthens where the blurred ground would otherwise
+   defeat the text colour: BRIGHT skins push a heavier dark frost (white text);
+   DARK grounds in light theme push a heavier pale frost (dark ink). Values
+   set by measurement (every skin × theme proven AA — see frost handoff). */
+html[data-theme="dark"][data-bg-tone="bright"]  { --dialog-frost: rgba(13, 15, 20, 0.52); }
+html[data-theme="light"][data-bg-tone="bright"] { --dialog-frost: rgba(246, 249, 252, 0.30); }
+html[data-theme="light"][data-bg-tone="dark"]   { --dialog-frost: rgba(244, 247, 251, 0.56); }
+/* Light theme over the dark 'nature' image (no tone attr) — keep ink legible. */
+html[data-theme="light"][data-bg="nature"]      { --dialog-frost: rgba(244, 247, 251, 0.54); }
 
 /* No-blur environments (old engines) and reduced-transparency users get a
    solid, fully readable surface instead of a see-through film. */
@@ -962,8 +1027,14 @@ button, a, .btn-accent, .btn-ghost, .btn-secondary, .btn-teal, .btn-lime { -webk
 .drag-handle:active { cursor: grabbing; }
 .is-dragging .drag-handle { color: var(--col-accent); }
 
-/* ── Modal scrim (dark-translucent in both themes for readable contrast) ── */
-.ppw-scrim { position: fixed; inset: 0; background: var(--scrim); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+/* ── Modal scrim — DIM ONLY, no blur (2026-06-15 frost pass) ──
+   The scrim used to blur(6px) the whole page, which flattened the ground to a
+   near-monochrome field BEFORE the dialog sampled it — so the frost read as a
+   "slightly-blurred copy of the theme colour" (Vic #2). The frost is now the
+   DIALOG's job (its 46px backdrop-filter). The scrim only dims for focus +
+   the legibility floor, leaving the ground sharp & colourful around the panel
+   (exactly the reference: sharp wallpaper, frosted only inside the widget). */
+.ppw-scrim { position: fixed; inset: 0; background: var(--scrim); }
 
 /* ── Empty-state orb ── */
 .empty-orb { width: 96px; height: 96px; margin: 0 auto 18px; border-radius: 999px; background: radial-gradient(circle at 35% 30%, var(--accent-soft), transparent 55%), var(--col-surface); box-shadow: var(--elv-2); animation: empty-pulse 4.6s ease-in-out infinite; }
