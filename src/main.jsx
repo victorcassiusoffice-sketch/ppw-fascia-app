@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App.jsx';
 import './index.css';
 import './theme.css';
+import { registerServiceWorker } from './lib/swUpdate.js';
 
 // Vite injects BASE_URL — '/' in dev, '/ppw-fascia-app/' (or whatever the
 // repo slug is) in a GitHub Pages production build. Strip the trailing
@@ -17,3 +18,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </BrowserRouter>
   </React.StrictMode>
 );
+
+// Service worker: register + drive the auto-update flow (replaces the old inline
+// index.html registration). Listens for new builds and surfaces UpdateToast.
+registerServiceWorker();

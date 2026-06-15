@@ -29,6 +29,7 @@ import { screenTransition } from './lib/motion';
 import { GlassLogo, ThemeToggle, BottomNav } from './chrome.jsx';
 import { useTheme } from './theme.js';
 import { initAssistantSync } from './lib/assistantSync.js';
+import UpdateToast from './components/UpdateToast.jsx';
 
 import TodayView from './pages/Today.jsx';
 import { ProtocolsList, ProtocolDetail } from './pages/Protocols.jsx';
@@ -174,6 +175,7 @@ export default function App() {
         </m.div>
 
         <BottomNav />
+        <UpdateToast />
       </div>
     </LazyMotion>
   );

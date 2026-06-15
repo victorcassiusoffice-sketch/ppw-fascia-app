@@ -34,16 +34,9 @@
   </head>
   <body class="bg-bg text-ink font-body antialiased">
     <div id="root"></div>
+    <!-- Service-worker registration + auto-update flow moved into the app
+         bundle (src/main.jsx -> src/lib/swUpdate.js) so it can detect new
+         builds, prompt to refresh, and recover stuck caches. -->
     <script type="module" src="/src/main.jsx"></script>
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function () {
-          // %BASE_URL% is replaced at build time by Vite (e.g. '/ppw-fascia-app/')
-          navigator.serviceWorker.register('%BASE_URL%sw.js').catch(function (err) {
-            console.warn('SW registration failed:', err);
-          });
-        });
-      }
-    </script>
   </body>
 </html>
