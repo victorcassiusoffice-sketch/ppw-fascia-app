@@ -37,15 +37,29 @@ export const LS_KEYS = {
 // The Assistant is a SEPARATE paid service (its own Vercel app + Neon DB + Anthropic
 // key). This app only ever LINKS OUT to it — it is never merged in (locked arch).
 //
-// FEATURE_ASSISTANT_LAUNCH is the single master switch. While false, the launch
-// button does not render or mount anywhere, for anyone. Go-live = flip this one
-// line to true (and ship). Even when true, the button only shows for a Pro member
-// (see isProMember()) so a free user can never open the paid assistant from here.
-export const FEATURE_ASSISTANT_LAUNCH = false;
+// FEATURE_ASSISTANT_LAUNCH is the single master switch. While false, the Coach
+// surface (entry tile on Today, /coach page, Settings launch row) does not render
+// or mount anywhere, for anyone. Go-live = this one line is true (and ship).
+//
+// 2026-06-16: flipped ON to surface the live coach. Entitlement is NOT gated here
+// on purpose — the Assistant owns the paywall + guest pass, so opening it always
+// lands the user on its own sign-in / guest / subscribe flow and a free user can
+// never spend tokens (see entitlement.js). To make the entry Pro-only instead,
+// gate the entry render on isProMember() — left open per Vic's "coach accessible
+// from within the app" goal.
+export const FEATURE_ASSISTANT_LAUNCH = true;
 
 // Where the launch button points — the live, separately-deployed Assistant service.
 // Also the base URL the D2 sync client (src/lib/assistantSync.js) calls for the
 // device-bridge routes (/api/device/exchange, /api/plan/patches, /api/plan/ack).
 export const WELLNESS_ASSISTANT_URL = 'https://ppw-wellness-assistant.vercel.app';
+
+// Deep link to the coach chat UI on the Assistant service. The app only ever
+// LINKS OUT here (locked arch — never embedded; the Assistant also sets
+// X-Frame-Options: DENY so it cannot be iframed). Opening this in a new tab needs
+// NO CORS — only the D2 plan-sync fetch() routes need the app origin allow-listed.
+export function coachUrl() {
+  return `${(WELLNESS_ASSISTANT_URL || '').replace(/\/+$/, '')}/assistant`;
+}
 
 export const APP_VERSION = '0.5.0-dual-theme';

@@ -11,7 +11,7 @@ import { render, cleanup } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import App from './App.jsx';
 
-const ROUTES = ['/today', '/protocols', '/modules', '/settings', '/welcome'];
+const ROUTES = ['/today', '/protocols', '/modules', '/coach', '/settings', '/welcome'];
 
 describe('every route mounts after the pages extraction', () => {
   beforeEach(() => {
