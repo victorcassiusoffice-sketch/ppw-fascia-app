@@ -8,7 +8,8 @@ import { iherbUrl, amazonUkUrl, iherbCartAllUrl } from '../affiliate.js';
 import { requestPermission, getPermissionState } from '../notifications.js';
 import { Section } from '../components/shared.jsx';
 import { m, staggerContainer, enterRow, glideIndicator, pressScale } from '../lib/motion';
-import { IconArrowLeft } from '../components/icons.jsx';
+import { IconArrowLeft, IconShoppingCart } from '../components/icons.jsx';
+import { t } from '../i18n/strings.js';
 
 /* ═══════════════════════════════════════════
    NEW — /protocols
@@ -127,12 +128,13 @@ function ProtocolDetail() {
       <Section title="Supplements">
         {iherbCartAllUrl(p.sections.supplements, p.topic) && (
           <a
-            className="btn-iherb-all mb-4"
+            className="btn-iherb-all mb-4 inline-flex items-center justify-center gap-2"
             href={iherbCartAllUrl(p.sections.supplements, p.topic)}
             target="_blank"
             rel="noopener nofollow sponsored"
           >
-            🛒 Add all {p.sections.supplements.filter(s => s.iherb_sku).length} to iHerb cart
+            <IconShoppingCart />
+            <span>{t('protocol.addAllToCart', { n: p.sections.supplements.filter(s => s.iherb_sku).length })}</span>
           </a>
         )}
         <div className="space-y-2">
@@ -149,13 +151,14 @@ function ProtocolDetail() {
                 </div>
                 <div className="supplement-actions">
                   <a
-                    className="btn-iherb"
+                    className="btn-iherb inline-flex items-center justify-center gap-2"
                     href={iherbUrl(s, p.topic)}
                     target="_blank"
                     rel="noopener nofollow sponsored"
                     aria-label={`Buy ${s.name} on iHerb`}
                   >
-                    🛒 Buy on iHerb
+                    <IconShoppingCart />
+                    <span>{t('protocol.buyOnIherb')}</span>
                   </a>
                   <a
                     className="btn-amazon"

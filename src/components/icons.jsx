@@ -232,6 +232,30 @@ function Tickbox({ checked, onChange, ariaLabel, kindClass }) {
   );
 }
 
+/* Multilingual pass (2026-06-16) — Apps selector becomes icon-only so its
+   YouTube / Spotify / Custom labels no longer need translating. Monochrome
+   line icons (currentColor, thin uniform stroke) per the SOURCE BTN v.02
+   grammar — NOT brand-coloured logos (those would break the glass monochrome
+   rule). Accessible name lives on the control via aria-label + title. */
+function IconYouTube({ size = 24 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="2" y="5" width="20" height="14" rx="4" />
+      <path d="M10 8.75l5.5 3.25L10 15.25z" />
+    </svg>
+  );
+}
+function IconSpotify({ size = 24 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M7 9.5c3-1 7-1 10 1" />
+      <path d="M7 12.5c2.5-0.7 6-0.7 8.5 0.8" />
+      <path d="M7 15.5c2-0.5 5-0.5 7 0.6" />
+    </svg>
+  );
+}
+
 /* ─── Iter 2 Phase 6.5 — Bell icon for notifications toggle ─── */
 function IconBell({ filled }) {
   return (
@@ -326,4 +350,5 @@ export {
   IconBookOpen, IconCalendar, IconUnmerge, IconArrowLeft, IconSliders,
   IconMore, IconCheckSquare, IconSparkle,
   IconAuto, IconDroplet, IconLeaf, IconSquareRounded, Tickbox, MasterTickbox,
+  IconYouTube, IconSpotify,
 };

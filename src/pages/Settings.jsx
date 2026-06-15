@@ -10,6 +10,7 @@ import { getPushState, subscribeToPush, INSTALL_HELP } from '../lib/push.js';
 import { Section } from '../components/shared.jsx';
 import { m, glideIndicator, pressScale, SPRING, reduced } from '../lib/motion';
 import { IconArrowLeft, IconAuto, IconDroplet, IconLeaf, IconSquareRounded, IconImage } from '../components/icons.jsx';
+import { t } from '../i18n/strings.js';
 
 // Background-picker glyphs → clean line icons (no old emoji).
 const BG_ICON = { auto: IconAuto, liquid: IconDroplet, nature: IconLeaf, grey: IconSquareRounded, custom: IconImage };
@@ -267,10 +268,13 @@ function SettingsView() {
                   textShadow: '0 1px 2px rgba(0,0,0,0.35)',
                 } : {}),
               }}
-              title="Follow the device theme"
+              title={t('theme.autoHint')}
               {...pressScale()}
             >
-              <span aria-hidden="true">⌖</span> Auto
+              <span className="inline-flex items-center gap-1.5">
+                <span aria-hidden="true" style={{ display: 'inline-flex' }}><IconAuto /></span>
+                {t('theme.auto')}
+              </span>
             </m.button>
           </div>
         </div>

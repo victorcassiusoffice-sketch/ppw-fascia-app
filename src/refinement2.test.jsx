@@ -82,16 +82,28 @@ describe('Add Stack — Apps row (Vic new feature)', () => {
     </LazyMotion>
   );
 
-  it('shows YouTube + Spotify + Custom chips', () => {
+  // Multilingual pass (2026-06-16) — the Apps selector is now ICON-ONLY (no
+  // visible YouTube/Spotify/Custom words to translate). The label survives as
+  // the control's accessible name (aria-label) from the i18n strings layer, so
+  // we query by role/name — the locale-portable way.
+  it('shows YouTube + Spotify + Custom controls by accessible name (icon-only)', () => {
     renderModal();
-    expect(screen.getByText('YouTube')).toBeTruthy();
-    expect(screen.getByText('Spotify')).toBeTruthy();
-    expect(screen.getByText('Custom')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'YouTube' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Spotify' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Custom' })).toBeTruthy();
   });
 
-  it('tapping the Spotify chip arms the link flow with the Spotify placeholder', () => {
+  it('the Apps controls carry no language-dependent visible text label', () => {
     renderModal();
-    fireEvent.click(screen.getByText('Spotify'));
+    // The brand WORD must not be rendered as visible text anymore — only as the
+    // accessible name — otherwise it would need translating per locale.
+    expect(screen.queryByText('Spotify')).toBeNull();
+    expect(screen.queryByText('YouTube')).toBeNull();
+  });
+
+  it('tapping the Spotify control arms the link flow with the Spotify placeholder', () => {
+    renderModal();
+    fireEvent.click(screen.getByRole('button', { name: 'Spotify' }));
     expect(screen.getByPlaceholderText(/Spotify track/i)).toBeTruthy();
   });
 });

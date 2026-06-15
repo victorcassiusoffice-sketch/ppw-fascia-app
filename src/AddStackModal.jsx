@@ -7,6 +7,8 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { putMedia, probeDuration, probeUrlDuration, parseYouTubeId, fetchYouTubeOEmbed, fetchSpotifyOEmbed, isSpotifyUrl } from './lib/mediaStore.js';
 import { m, SPRING, DUR, reduced } from './lib/motion';
 import DurationField from './components/DurationField.jsx';
+import { IconYouTube, IconSpotify, IconExternalLink } from './components/icons.jsx';
+import { t } from './i18n/strings.js';
 
 /* P1 (2026-06-02) — keyboard inset hook. On mobile the on-screen keyboard
    overlays the bottom of the layout viewport (iOS especially), hiding the
@@ -66,16 +68,6 @@ const Icon = {
   ),
 };
 
-/* Iter 2 Phase 8.2 — Spotify placeholder (legal-gated; disabled). */
-const SpotifyIcon = (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <circle cx="12" cy="12" r="10" />
-    <path d="M7 9.5c3-1 7-1 10 1" />
-    <path d="M7 12.5c2.5-0.7 6-0.7 8.5 0.8" />
-    <path d="M7 15.5c2-0.5 5-0.5 7 0.6" />
-  </svg>
-);
-
 const TYPES = [
   { key: 'link',  title: 'Link',           icon: Icon.link  },
   { key: 'image', title: 'Image',          icon: Icon.image },
@@ -90,10 +82,16 @@ const TYPES = [
    oEmbed metadata ONLY — playback stays behind the existing legal gate
    (no SDK, no Premium requirement, no keys, no spend). This row replaces the
    old disabled Spotify placeholder tile. */
+// Multilingual pass (2026-06-16) — icon-only selector. The visible YouTube /
+// Spotify / Custom WORDS are gone (they'd need translating in every locale);
+// the meaning now rides on the icon, with the label kept as the accessible
+// name (aria-label + tooltip) pulled from the i18n strings layer so it
+// localises with the rest of the app. Icon matches the icon-disc grammar of
+// the TYPES row directly above.
 const APPS = [
-  { key: 'youtube', label: 'YouTube', glyph: '▶', placeholder: 'Paste a YouTube link or share-link…' },
-  { key: 'spotify', label: 'Spotify', glyph: '♪', placeholder: 'Paste a Spotify track / episode / playlist link…' },
-  { key: 'custom',  label: 'Custom',  glyph: '↗', placeholder: 'Paste any app link or share-link…' },
+  { key: 'youtube', labelKey: 'apps.youtube', Icon: IconYouTube,      placeholder: 'Paste a YouTube link or share-link…' },
+  { key: 'spotify', labelKey: 'apps.spotify', Icon: IconSpotify,      placeholder: 'Paste a Spotify track / episode / playlist link…' },
+  { key: 'custom',  labelKey: 'apps.custom',  Icon: IconExternalLink, placeholder: 'Paste any app link or share-link…' },
 ];
 
 function newId() {
@@ -335,21 +333,23 @@ export default function AddStackModal({ open, onClose, onSave, defaultTime = '08
             placeholder; pasting a share-link resolves title + thumbnail
             (public oEmbed only — link-out, no playback). */}
         <div className="px-5 py-3 border-b border-cream/10">
-          <div className="text-[10px] text-muted uppercase tracking-widest mb-2">Apps</div>
-          <div className="flex gap-2 flex-wrap">
+          <div className="text-[10px] text-muted uppercase tracking-widest mb-2">{t('apps.heading')}</div>
+          <div className="flex gap-2">
             {APPS.map(a => {
               const active = chosen === 'link' && appKind === a.key;
+              const name = t(a.labelKey);
+              const AppIcon = a.Icon;
               return (
                 <button
                   key={a.key}
                   type="button"
                   onClick={() => { setChosen('link'); setAppKind(a.key); setUrl(''); setTitlePreview(''); setThumbPreview(null); }}
-                  className={`glass-capsule text-xs ${active ? 'text-accent ring-2 ring-accent' : 'text-muted hover:text-cream'}`}
-                  style={{ padding: '8px 14px' }}
+                  className={`glass-disc w-12 h-12 ${active ? 'text-accent ring-2 ring-accent' : 'text-muted hover:text-cream'}`}
                   aria-pressed={active}
-                  title={`Attach a ${a.label} link to this stack`}
+                  aria-label={name}
+                  title={t('apps.attachLink', { app: name })}
                 >
-                  <span aria-hidden="true">{a.glyph}</span> {a.label}
+                  <AppIcon size={26} />
                 </button>
               );
             })}
