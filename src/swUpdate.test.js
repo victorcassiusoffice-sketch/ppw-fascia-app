@@ -7,6 +7,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   isUpdateReady,
+  shouldHardReload,
   registerServiceWorker,
   onUpdateState,
   applyUpdate,
@@ -49,6 +50,28 @@ describe('isUpdateReady', () => {
     expect(isUpdateReady('installed', null)).toBe(false); // first install, no prior SW
     expect(isUpdateReady('installing', {})).toBe(false);
     expect(isUpdateReady('activated', {})).toBe(false);
+  });
+});
+
+describe('shouldHardReload (version sentinel)', () => {
+  it('reloads once when the deployed build differs from the running build', () => {
+    expect(shouldHardReload('newSHA', 'oldSHA', null)).toBe(true);
+  });
+  it('does NOT reload when builds match', () => {
+    expect(shouldHardReload('sameSHA', 'sameSHA', null)).toBe(false);
+  });
+  it('does NOT reload in dev', () => {
+    expect(shouldHardReload('anySHA', 'dev', null)).toBe(false);
+  });
+  it('does NOT reload when the server build is unknown', () => {
+    expect(shouldHardReload(null, 'oldSHA', null)).toBe(false);
+    expect(shouldHardReload(undefined, 'oldSHA', null)).toBe(false);
+  });
+  it('loop-guards: does NOT reload twice for the same target build', () => {
+    expect(shouldHardReload('newSHA', 'oldSHA', 'newSHA')).toBe(false);
+  });
+  it('reloads again if the target build moved on past the one we guarded', () => {
+    expect(shouldHardReload('newerSHA', 'oldSHA', 'newSHA')).toBe(true);
   });
 });
 

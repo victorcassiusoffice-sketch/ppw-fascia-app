@@ -63,6 +63,58 @@ export function isUpdateReady(state, hasController) {
   return state === 'installed' && !!hasController;
 }
 
+// ── Version sentinel (2026-06-17) ────────────────────────────────────────────
+// The belt-and-suspenders for "device shows a stale build even though the live
+// URL is current". A tiny version.json (written at build with the commit SHA)
+// is fetched no-store on every check; if the SERVER's build differs from the
+// build THIS tab is running, a stuck SW/cache is pinning us — so we nudge the SW
+// to update and, if that doesn't budge, do ONE guarded hard reload to pull the
+// fresh shell. The reload bypasses the HTTP cache via the SW's no-store nav
+// handler, so the new hashed JS loads and the running build matches again.
+const VERSION_URL = (typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.BASE_URL : '/') + 'version.json';
+const RELOAD_GUARD_KEY = 'ppw.swReloadedFor';
+
+/** Pure helper (unit-tested): should we do a one-time recovery hard reload?
+ *  - never in dev / when the server build is unknown
+ *  - only when the server build genuinely differs from what we're running
+ *  - only ONCE per distinct server build (sessionStorage loop guard) */
+export function shouldHardReload(serverBuild, runningBuild, reloadedFor) {
+  if (!serverBuild || runningBuild === 'dev') return false;
+  if (serverBuild === runningBuild) return false;
+  if (serverBuild === reloadedFor) return false; // already reloaded for this build — don't loop
+  return true;
+}
+
+async function checkVersion(reg) {
+  if (BUILD === 'dev') return;                 // dev server has no deployed build to recover to
+  if (typeof fetch !== 'function') return;     // unsupported env (jsdom unit tests)
+  let serverBuild = null;
+  try {
+    const res = await fetch(`${VERSION_URL}?t=${Date.now()}`, { cache: 'no-store' });
+    if (!res || !res.ok) return;
+    const data = await res.json();
+    serverBuild = data && data.build;
+  } catch {
+    return;                                    // offline / not deployed — keep working, never reload
+  }
+  if (!serverBuild || serverBuild === BUILD) return;   // in sync
+
+  // Server is serving a different build than this tab is running. Prefer the
+  // graceful SW path first: pull the new SW and apply it if it's waiting — its
+  // controllerchange handler does the reload cleanly (no double reload).
+  try { if (reg) await reg.update(); } catch { /* ignore */ }
+  if (reg && reg.waiting) { _setWaiting(reg.waiting); applyUpdate(); return; }
+
+  // No SW update path budged (stuck / blocked / absent). One-time guarded hard
+  // reload as the last resort.
+  let reloadedFor = null;
+  try { reloadedFor = sessionStorage.getItem(RELOAD_GUARD_KEY); } catch { /* ignore */ }
+  if (shouldHardReload(serverBuild, BUILD, reloadedFor)) {
+    try { sessionStorage.setItem(RELOAD_GUARD_KEY, serverBuild); } catch { /* ignore */ }
+    if (typeof window !== 'undefined' && window.location) window.location.reload();
+  }
+}
+
 /** For tests: reset module state between cases. */
 export function _resetForTest() {
   _waitingWorker = null;
@@ -115,7 +167,10 @@ export function registerServiceWorker({ immediate = false } = {}) {
     });
 
     // Force a check now and whenever the app comes back to the foreground.
-    const check = () => { reg.update().catch(() => {}); };
+    // Two signals: reg.update() pulls a fresh sw.js (the normal SW path), and
+    // checkVersion() compares the deployed build sentinel to the running build
+    // and recovers a stuck cache that reg.update() alone can't shift.
+    const check = () => { reg.update().catch(() => {}); checkVersion(reg); };
     check();
 
     if (typeof document !== 'undefined') {

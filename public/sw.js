@@ -88,12 +88,26 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
+  // Version sentinel (2026-06-17): ALWAYS fetch version.json fresh from the
+  // network and NEVER cache it. It is the signal the client uses to detect a
+  // new deploy even when a stuck cache/SW is pinning the rest of the app — so
+  // caching it would defeat its entire purpose. Falls back to cache only when
+  // offline (so an offline launch doesn't error on the probe).
+  if (url.origin === self.location.origin && url.pathname.endsWith('/version.json')) {
+    e.respondWith(fetch(req, { cache: 'no-store' }).catch(() => caches.match(req)));
+    return;
+  }
+
   // Network-first for HTML navigation: always re-check the network so the app
   // shell is the latest build, refresh the cached copy for offline, and fall
-  // back to cache only when the network is unreachable.
+  // back to cache only when the network is unreachable. cache:'no-store' on the
+  // navigation fetch bypasses the BROWSER HTTP cache too — without it a stale
+  // index.html (and therefore stale hashed JS) could be served from the HTTP
+  // cache even though we're "network-first" (a root cause of the stuck-build
+  // reports). 2026-06-17.
   if (req.mode === 'navigate') {
     e.respondWith(
-      fetch(req)
+      fetch(req, { cache: 'no-store' })
         .then((res) => {
           if (res && res.ok) {
             const clone = res.clone();

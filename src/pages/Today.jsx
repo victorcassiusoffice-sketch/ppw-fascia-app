@@ -1141,27 +1141,32 @@ function TodayView() {
         {/* Rebalanced action row — two equal pills + ⋮ overflow (bell moved to
             bottom nav per Vic change #1). Rare actions (select-all, clear,
             create routine) live under ⋮ so nothing crowds at 360px. */}
-        <div className="grid items-center gap-2.5" style={{ gridTemplateColumns: '1fr 1fr auto' }}>
-          {/* REF-04/05 select→expand: the control GROWS into the Add Stack
-              sheet via a shared layoutId — while the sheet is open the button
-              releases the id so the morph has one owner at a time. */}
+        <div className="grid items-center gap-2.5" style={{ gridTemplateColumns: 'auto 1fr auto' }}>
+          {/* Vic 2026-06-17 — "the Plus icon would be enough for the stack, no
+              need for words." Primary add = accent-GLASS icon disc (+ only).
+              aria-label keeps it discoverable + i18n-safe. Still GROWS into the
+              Add Stack sheet via the shared layoutId (REF-04/05). */}
           <m.button
             type="button"
             onClick={() => setAddModalOpen(true)}
-            className="btn-accent flex items-center justify-center gap-2"
-            style={{ height: 44, padding: 0, borderRadius: 'var(--r-pill)' }}
+            className="btn-accent flex items-center justify-center"
+            style={{ height: 44, width: 44, padding: 0, borderRadius: 'var(--r-pill)' }}
+            aria-label="Add stack"
             title="Add a custom stack"
             {...(reduced || addModalOpen ? {} : { layoutId: 'add-stack-morph' })}
             {...pressScale()}
           >
-            <IconPlus /><span className="text-sm">Stack</span>
+            <IconPlus />
           </m.button>
-          {/* REF-08: labelled secondary action = glass capsule. */}
+          {/* REF-08: labelled secondary action = glass capsule. Kept its tiny
+              "Protocol" label (Vic's judgement clause): a book glyph alone reads
+              ambiguously as read/library, so one word anchors the row. */}
           <m.button
             type="button"
             onClick={() => setAddProtocolOpen(true)}
             className="glass-capsule flex items-center justify-center gap-2 text-sm font-bold"
             style={{ height: 44, padding: 0 }}
+            aria-label="Add protocol"
             title="Add a science protocol from your library"
             {...pressScale()}
           >

@@ -48,6 +48,14 @@ function ppwSwVersionPlugin() {
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
         const path = (req.url || '').split('?')[0];
+        // Version sentinel — served fresh so the dev/preview update flow is
+        // testable end-to-end (the client probes this no-store).
+        if (path.endsWith('/version.json') || path === '/version.json') {
+          res.setHeader('Content-Type', 'application/json');
+          res.setHeader('Cache-Control', 'no-store');
+          res.end(JSON.stringify({ build: BUILD_VERSION }));
+          return;
+        }
         if (!path.endsWith('/sw.js') && path !== '/sw.js') return next();
         const swPath = resolve(process.cwd(), 'public/sw.js');
         if (!existsSync(swPath)) return next();
@@ -57,12 +65,18 @@ function ppwSwVersionPlugin() {
         res.end(out);
       });
     },
-    // build: replace the token in the copied dist/sw.js
+    // build: replace the token in the copied dist/sw.js + emit the version
+    // sentinel the client compares against to detect a new deploy.
     closeBundle() {
       const swOut = resolve(process.cwd(), 'dist/sw.js');
-      if (!existsSync(swOut)) return;
-      const src = readFileSync(swOut, 'utf8');
-      writeFileSync(swOut, src.replace(TOKEN, BUILD_VERSION));
+      if (existsSync(swOut)) {
+        const src = readFileSync(swOut, 'utf8');
+        writeFileSync(swOut, src.replace(TOKEN, BUILD_VERSION));
+      }
+      writeFileSync(
+        resolve(process.cwd(), 'dist/version.json'),
+        JSON.stringify({ build: BUILD_VERSION }) + '\n'
+      );
     },
   };
 }
