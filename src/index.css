@@ -926,24 +926,30 @@ button, a, .btn-accent, .btn-ghost, .btn-secondary, .btn-teal, .btn-lime { -webk
    the user must know a scope choice is coming on delete) — everything else goes. */
 .stack-recur { color: var(--col-accent); opacity: 0.85; font-size: 0.8rem; flex: none; }
 
-/* Action cluster zone — the morph-in options. Lives inside the expanded body. */
-.stack-actions-zone { position: relative; }
+/* Action cluster zone — the tap-open liquid metaball morph (REF Recording A).
+   Layout is ABSOLUTE + JS-driven (LiquidMorphCluster.jsx): every disc + goo
+   blob starts overlapped at the row centre (one mass) and TRANSLATES to its
+   rest slot. The one-mass-splits drive is what grows a real thick liquid neck —
+   a flex row of statically-gapped blobs cannot (the prior "soft bloom" failure;
+   see advanced-liquid-morph.md). Transforms are set per-frame on refs. */
+.stack-actions-zone { position: relative; width: 100%; }
 .stack-actions {
-  position: relative; z-index: 1;
-  display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+  position: absolute; inset: 0; z-index: 1;
 }
-/* The goo metaball layer (REF Recording A necks): solid accent blobs mirror the
-   disc layout BEHIND the crisp discs; the SVG goo filter makes adjacent blobs
-   neck like liquid while they bloom, then the layer fades — discs settle crisp
-   so the REF-08 bright rim is never blurred. Decorative + pointer-inert. */
+/* The goo metaball layer (REF Recording A necks): white liquid-light blobs
+   mirror the disc travel BEHIND the crisp discs; the SVG goo filter (#stack-goo)
+   blurs + alpha-thresholds them so adjacent blobs NECK like liquid while they
+   split, then the whole layer fades — the REF-08 disc rims settle crisp + never
+   blurred. Decorative + pointer-inert. */
 .stack-goo-layer {
   position: absolute; inset: 0; z-index: 0; pointer-events: none;
-  display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
   filter: url(#stack-goo);
 }
 .stack-goo-blob {
-  width: var(--ppw-tap-min); height: var(--ppw-tap-min); flex: none;
+  position: absolute; left: 0; top: 0;
+  width: var(--ppw-tap-min); height: var(--ppw-tap-min);
   border-radius: var(--r-pill);
+  will-change: transform;
   /* WHITE liquid light (glass-law #2: never opaque accent paint). The neck that
      necks the discs together is the sheen catching between them, not a colour. */
   background: rgba(255, 255, 255, 0.92);
@@ -951,10 +957,12 @@ button, a, .btn-accent, .btn-ghost, .btn-secondary, .btn-teal, .btn-lime { -webk
 html[data-theme="light"] .stack-goo-blob { background: rgba(150, 160, 180, 0.7); }
 @media (prefers-reduced-motion: reduce) { .stack-goo-layer { display: none; } }
 @media (prefers-reduced-transparency: reduce) { .stack-goo-layer { display: none; } }
-/* Action disc — the glass-disc grammar (REF-08), sized to the ≥48px tap law. */
+/* Action disc — the glass-disc grammar (REF-08), sized to the ≥48px tap law.
+   Absolutely positioned; LiquidMorphCluster sets transform (translateX+scale). */
 .stack-act {
-  width: var(--ppw-tap-min); height: var(--ppw-tap-min); flex: none;
-  color: var(--col-ink);
+  position: absolute; left: 0; top: 0;
+  width: var(--ppw-tap-min); height: var(--ppw-tap-min);
+  color: var(--col-ink); will-change: transform, opacity;
 }
 .stack-act.is-danger:hover { border-color: rgb(248 113 113 / 0.9); color: rgb(248 113 113); }
 .stack-act.is-on {

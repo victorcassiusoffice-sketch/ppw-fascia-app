@@ -26,6 +26,7 @@ import { DUR, STAGGER, EASE, SPRING, glideIndicator, toastIn, borderTrace, sheet
 import { IconTrash, IconCopy, IconPlus, IconShoppingCart, IconExternalLink, IconBookOpen, IconCalendar, IconUnmerge, IconMore, IconCheckSquare, IconSparkle, IconMessageSquare, Tickbox } from '../components/icons.jsx';
 import { InlineRename } from '../components/shared.jsx';
 import MergedStack from '../components/today/MergedStack.jsx';
+import LiquidMorphCluster from '../components/today/LiquidMorphCluster.jsx';
 import UserStackBody from '../components/today/UserStackBody.jsx';
 import { ClearCalendarModal, NotificationOverlay, AddProtocolModal, DragMergePlusOverlay } from '../components/today/overlays.jsx';
 import { GlassLogo } from '../chrome.jsx';
@@ -1386,9 +1387,17 @@ function TodayView() {
           crisp discs. Defined once; pointer-inert, zero-size. */}
       <svg width="0" height="0" aria-hidden="true" focusable="false" style={{ position: 'absolute' }}>
         <defs>
-          <filter id="stack-goo" colorInterpolationFilters="sRGB">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="blur" />
-            <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -8" result="goo" />
+          {/* Recording-grade goo (advanced-liquid-morph skill, 2026-06-16):
+              blur → steep alpha threshold = the THICK liquid neck (the prior
+              7 / 19,-8 was too weak to neck travelling blobs); + a soft halo
+              (re-blur the goo, dim, merge UNDER) for the reference's luminous
+              gooey glow. Wide region so the halo never clips. */}
+          <filter id="stack-goo" x="-50%" y="-50%" width="200%" height="200%" colorInterpolationFilters="sRGB">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+            <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10" result="goo" />
+            <feGaussianBlur in="goo" stdDeviation="6" result="halo" />
+            <feComponentTransfer in="halo" result="haloDim"><feFuncA type="linear" slope="0.55" /></feComponentTransfer>
+            <feMerge><feMergeNode in="haloDim" /><feMergeNode in="goo" /></feMerge>
           </filter>
         </defs>
       </svg>
@@ -1651,55 +1660,17 @@ function TodayView() {
                     style={{ overflow: 'hidden' }}
                   >
                     {/* ── TAP-OPEN ACTION CLUSTER (REF Recording A) ──
-                        The control melts open into its option icons: glass discs
-                        liquid-bloom out (staggered settle), with a goo metaball
-                        layer necking them like liquid during the reveal, then
-                        settling crisp. Holds every action that left the token. */}
+                        The control MELTS open into its option icons: from one
+                        overlapped mass the discs travel apart through thick
+                        liquid necks (SVG-goo one-mass-splits), then settle crisp.
+                        Recording-grade + 60fps — see LiquidMorphCluster.jsx +
+                        the advanced-liquid-morph skill. Holds every action that
+                        left the collapsed token. */}
                     <div className="px-4 pt-1 pb-3 space-y-3">
                       {assistantOpIdOf(it) && (
                         <div className="flex"><AssistantChip /></div>
                       )}
-                      <div className="stack-actions-zone">
-                        {!reduced && (
-                          <m.div
-                            className="stack-goo-layer"
-                            aria-hidden="true"
-                            initial="hidden"
-                            animate="show"
-                            variants={{
-                              hidden: { opacity: 0 },
-                              show: { opacity: [0, 0.72, 0], transition: { duration: DUR.slow / 1000, ease: EASE.standard, staggerChildren: STAGGER.list / 1000 } },
-                            }}
-                          >
-                            {stackActions.map((a) => (
-                              <m.span
-                                key={a.key}
-                                className="stack-goo-blob"
-                                variants={{ hidden: { scale: 0.2 }, show: { scale: 1, transition: SPRING.settle } }}
-                              />
-                            ))}
-                          </m.div>
-                        )}
-                        <m.div
-                          className="stack-actions"
-                          initial={reduced ? false : 'hidden'}
-                          animate={reduced ? false : 'show'}
-                          variants={reduced ? undefined : { hidden: {}, show: { transition: { staggerChildren: STAGGER.list / 1000, delayChildren: 0.03 } } }}
-                        >
-                          {stackActions.map((a) => (
-                            <m.button
-                              key={a.key}
-                              type="button"
-                              onClick={(e) => { e.stopPropagation(); a.onClick(); }}
-                              className={`glass-disc stack-act${a.danger ? ' is-danger' : ''}${a.on ? ' is-on' : ''}`}
-                              aria-label={a.label}
-                              aria-pressed={a.on || undefined}
-                              title={a.label}
-                              variants={reduced ? undefined : { hidden: { opacity: 0, scale: 0.3 }, show: { opacity: 1, scale: 1, transition: SPRING.settle } }}
-                            >{a.icon}</m.button>
-                          ))}
-                        </m.div>
-                      </div>
+                      <LiquidMorphCluster actions={stackActions} reduced={reduced} />
                     </div>
                     {renderItemBody(it, false)}
                   </m.div>

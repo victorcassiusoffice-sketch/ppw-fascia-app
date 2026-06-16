@@ -37,6 +37,12 @@ export const DUR = {
   base: 280, // standard enter (rows, cards, fades)
   slow: 360, // route / screen transitions, "luxurious" reveals
   xslow: 480, // hero / first-paint flourish (use sparingly)
+  // The liquid metaball morph (stack-card action cluster melting open from ONE
+  // mass into separate discs — REF Recording A). Deliberately slow so the thick
+  // liquid necks read: the reference neck window is ~500–650ms inside a ~1.4s
+  // expand; we hold that character at a touch tighter 1100ms. Far above xslow
+  // by design — see the advanced-liquid-morph skill for the why + fps budget.
+  morph: 1100,
 } as const;
 
 /** Stagger gaps (ms) between siblings — set on CONTAINERS. */

@@ -4,7 +4,8 @@ import React, { useState, useMemo } from 'react';
 import { Tickbox, IconCalendar, IconUnmerge, IconCheckSquare } from '../icons.jsx';
 import { InlineRename } from '../shared.jsx';
 import { DragMergePlusOverlay } from './overlays.jsx';
-import { m, AnimatePresence, SPRING, STAGGER, DUR, EASE, useReducedMotion } from '../../lib/motion';
+import LiquidMorphCluster from './LiquidMorphCluster.jsx';
+import { m, AnimatePresence, DUR, EASE, useReducedMotion } from '../../lib/motion';
 
 /* ═══════════════════════════════════════════
    M14 — MergedStack (compact-by-default, expandable)
@@ -169,47 +170,10 @@ function MergedStack({
             style={{ overflow: 'hidden' }}
           >
             <div className="px-4 pt-1 pb-3">
-              <div className="stack-actions-zone">
-                {!reduced && (
-                  <m.div
-                    className="stack-goo-layer"
-                    aria-hidden="true"
-                    initial="hidden"
-                    animate="show"
-                    variants={{
-                      hidden: { opacity: 0 },
-                      show: { opacity: [0, 0.72, 0], transition: { duration: DUR.slow / 1000, ease: EASE.standard, staggerChildren: STAGGER.list / 1000 } },
-                    }}
-                  >
-                    {mergedActions.map((a) => (
-                      <m.span
-                        key={a.key}
-                        className="stack-goo-blob"
-                        variants={{ hidden: { scale: 0.2 }, show: { scale: 1, transition: SPRING.settle } }}
-                      />
-                    ))}
-                  </m.div>
-                )}
-                <m.div
-                  className="stack-actions"
-                  initial={reduced ? false : 'hidden'}
-                  animate={reduced ? false : 'show'}
-                  variants={reduced ? undefined : { hidden: {}, show: { transition: { staggerChildren: STAGGER.list / 1000, delayChildren: 0.03 } } }}
-                >
-                  {mergedActions.map((a) => (
-                    <m.button
-                      key={a.key}
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); a.onClick(); }}
-                      className={`glass-disc stack-act${a.on ? ' is-on' : ''}`}
-                      aria-label={a.label}
-                      aria-pressed={a.on || undefined}
-                      title={a.label}
-                      variants={reduced ? undefined : { hidden: { opacity: 0, scale: 0.3 }, show: { opacity: 1, scale: 1, transition: SPRING.settle } }}
-                    >{a.icon}</m.button>
-                  ))}
-                </m.div>
-              </div>
+              {/* Same recording-grade one-mass-splits morph as the single
+                  stack card (LiquidMorphCluster) — one component, both clusters
+                  stay identical. See advanced-liquid-morph.md. */}
+              <LiquidMorphCluster actions={mergedActions} reduced={reduced} />
             </div>
           </m.div>
         )}
