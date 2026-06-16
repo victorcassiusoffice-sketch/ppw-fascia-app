@@ -36,6 +36,7 @@ import { ProtocolsList, ProtocolDetail } from './pages/Protocols.jsx';
 import ModulesList from './pages/Modules.jsx';
 import SettingsView from './pages/Settings.jsx';
 import CoachView from './pages/Coach.jsx';
+import SoftLab from './pages/SoftLab.jsx'; // STAGED (feat/soft-v1) — review only, not deployed
 import AppBackground from './components/AppBackground.jsx';
 
 /* ────────────────────────────────────────────
@@ -171,6 +172,8 @@ export default function App() {
             <Route path="/modules"        element={<ModulesList />} />
             <Route path="/coach"          element={<CoachView />} />
             <Route path="/settings"       element={<SettingsView />} />
+            {/* STAGED — feat/soft-v1 review only, not deployed */}
+            <Route path="/soft-lab"       element={<SoftLab />} />
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

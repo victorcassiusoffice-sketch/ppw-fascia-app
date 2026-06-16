@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App.jsx';
 import './index.css';
 import './theme.css';
+import './soft.css'; // STAGED (feat/soft-v1) — colourway tokens are inert until data-soft-skin is set
 import { registerServiceWorker } from './lib/swUpdate.js';
 
 // Vite injects BASE_URL — '/' in dev, '/ppw-fascia-app/' (or whatever the

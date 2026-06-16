@@ -1,0 +1,107 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   SOFT v1 (2026-06-17) — disciplined neumorphism for the light theme.
+   STAGED, NOT DEPLOYED. Per SOFT-UI-ANALYSIS-AND-SPEC-2026-06-16.md + the
+   soft-neumorphism-ui skill. Colourways retint the existing light-theme
+   neumorphic tokens (nm-light, nm-dark, base, accent, ink) via an orthogonal
+   data-soft-skin attribute, mirroring how background skins already layer.
+
+   HARD LAWS honoured: surface == ground (separation = dual-light shadow);
+   always the dual-light shadow; NEVER blur; state = convex→concave flip
+   (never shadow-only — rim + scale too); one accent, sparing.
+   Default colourway → cream (brand-cleanest), pending Vic G-1.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* ── 1 · The 5 colourways (effective only under data-theme="light") ─────── */
+
+html[data-theme="light"][data-soft-skin="slate"] {
+  --c-bg-base: 228 233 241; --c-surface: 228 233 241; --c-surface-active: 234 238 245; --c-surface-inset: 224 229 238;
+  --c-ink-hi: 40 48 66; --c-ink-mid: 88 98 118; --c-ink-low: 150 162 182;
+  --c-accent: 78 96 117; --c-accent-bright: 98 118 140; --c-on-accent: 255 255 255;
+  --nm-light: rgba(255,255,255,0.95); --nm-dark: rgba(160,174,196,0.55);
+  --nm-rim: rgba(70,86,108,0.34); --accent-soft: rgba(78,96,117,0.14);
+}
+html[data-theme="light"][data-soft-skin="frost"] {
+  --c-bg-base: 243 245 248; --c-surface: 243 245 248; --c-surface-active: 248 250 252; --c-surface-inset: 238 241 245;
+  --c-ink-hi: 43 51 64; --c-ink-mid: 92 102 118; --c-ink-low: 150 160 176;
+  --c-accent: 46 147 173; --c-accent-bright: 70 170 196; --c-on-accent: 255 255 255;
+  --nm-light: rgba(255,255,255,1); --nm-dark: rgba(174,184,200,0.50);
+  --nm-rim: rgba(120,134,156,0.32); --accent-soft: rgba(46,147,173,0.14);
+}
+html[data-theme="light"][data-soft-skin="cream"] {
+  --c-bg-base: 240 235 225; --c-surface: 240 235 225; --c-surface-active: 246 242 234; --c-surface-inset: 235 229 218;
+  --c-ink-hi: 56 50 42; --c-ink-mid: 104 95 82; --c-ink-low: 160 150 134;
+  --c-accent: 192 131 43; --c-accent-bright: 214 152 60; --c-on-accent: 255 255 255;
+  --nm-light: rgba(255,255,255,1); --nm-dark: rgba(190,178,158,0.55);
+  --nm-rim: rgba(176,164,144,0.42); --accent-soft: rgba(192,131,43,0.15);
+}
+html[data-theme="light"][data-soft-skin="honey"] {
+  --c-bg-base: 236 239 243; --c-surface: 236 239 243; --c-surface-active: 242 245 248; --c-surface-inset: 231 234 239;
+  --c-ink-hi: 42 46 55; --c-ink-mid: 90 98 112; --c-ink-low: 148 158 174;
+  --c-accent: 242 176 30; --c-accent-bright: 255 196 64; --c-on-accent: 42 46 55; /* honey: ink label (white fails AA) */
+  --nm-light: rgba(255,255,255,1); --nm-dark: rgba(166,178,196,0.52);
+  --nm-rim: rgba(120,134,156,0.34); --accent-soft: rgba(242,176,30,0.18);
+}
+html[data-theme="light"][data-soft-skin="sage"] {
+  --c-bg-base: 237 241 237; --c-surface: 237 241 237; --c-surface-active: 243 246 243; --c-surface-inset: 232 236 232;
+  --c-ink-hi: 41 51 44; --c-ink-mid: 90 104 94; --c-ink-low: 150 164 152;
+  --c-accent: 79 145 115; --c-accent-bright: 100 168 136; --c-on-accent: 255 255 255;
+  --nm-light: rgba(255,255,255,1); --nm-dark: rgba(168,186,170,0.52);
+  --nm-rim: rgba(150,170,154,0.38); --accent-soft: rgba(79,145,115,0.15);
+}
+
+/* ── 2 · The .soft-btn — raised → inset (convex→concave) press ──────────── */
+.soft-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: var(--ppw-tap-min); padding: 12px 22px; border-radius: var(--r-16);
+  background: var(--col-surface); color: var(--col-ink);
+  border: 1px solid var(--nm-rim, transparent);
+  box-shadow: var(--elv-2);
+  font-weight: 700; font-size: 0.95rem; cursor: pointer; user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: box-shadow var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease), filter var(--dur-fast) var(--ease);
+}
+.soft-btn:hover { filter: brightness(1.02); }
+.soft-btn:active { box-shadow: var(--elv-inset); transform: scale(0.97); filter: brightness(0.98); }
+.soft-btn:focus-visible { outline: 2px solid var(--col-accent); outline-offset: 2px; }
+
+/* Accent CTA — a RAISED accent surface (law: accent is sparing, on the live
+   element only). Label = per-palette --c-on-accent (AA-checked). */
+.soft-btn.is-accent {
+  background: var(--col-accent); color: var(--col-on-accent);
+  border-color: rgb(var(--c-accent));
+  box-shadow: var(--elv-2);
+}
+.soft-btn.is-accent:active { box-shadow: var(--elv-inset); filter: brightness(0.96); }
+
+/* Disabled ≠ just faded: flush (no shadow) + no rim + reduced opacity. */
+.soft-btn:disabled { box-shadow: none; border-color: transparent; opacity: 0.5; cursor: not-allowed; transform: none; filter: none; }
+
+/* A neumorphic CARD (decorative — rim optional). */
+.soft-card {
+  background: var(--col-surface); border-radius: var(--r-24);
+  box-shadow: var(--elv-3); padding: var(--sp-4); color: var(--col-ink);
+}
+
+/* Pressable INSET WELL (e.g. a selected toggle slot). State is the concave flip. */
+.soft-well { background: var(--col-surface); border-radius: var(--r-pill); box-shadow: var(--elv-inset); }
+
+/* ── 3 · Tactile Level → press depth (visual channel) ───────────────────── */
+html[data-tactile="off"]  .soft-btn:active { transform: none; box-shadow: var(--elv-2); filter: brightness(1.06); }
+html[data-tactile="soft"] .soft-btn:active { transform: scale(0.98); }
+html[data-tactile="firm"] .soft-btn:active { transform: scale(0.96); box-shadow: var(--elv-inset), inset 0 0 0 1px var(--nm-rim); }
+
+/* ── 4 · "Crisp edges" a11y toggle — promotes rims to visible accent borders
+   (WCAG 1.4.11 mitigation). Auto-on under OS high-contrast. ─────────────── */
+html[data-crisp="on"] .soft-btn,
+html[data-crisp="on"] .soft-well { border: 1.5px solid rgb(var(--c-accent) / 0.55); }
+html[data-crisp="on"] .soft-btn:active { border-color: rgb(var(--c-accent)); }
+@media (prefers-contrast: more) {
+  html[data-theme="light"] .soft-btn,
+  html[data-theme="light"] .soft-well { border: 1.5px solid rgb(var(--c-accent) / 0.55); }
+}
+
+/* ── 5 · Reduced-motion floor — instant inset, no animated travel. ──────── */
+@media (prefers-reduced-motion: reduce) {
+  .soft-btn { transition: none; }
+  .soft-btn:active { transform: none; }
+}

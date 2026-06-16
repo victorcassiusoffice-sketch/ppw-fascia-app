@@ -68,13 +68,18 @@ function ppwSwVersionPlugin() {
     // build: replace the token in the copied dist/sw.js + emit the version
     // sentinel the client compares against to detect a new deploy.
     closeBundle() {
-      const swOut = resolve(process.cwd(), 'dist/sw.js');
+      // Guard on dist existing — closeBundle can fire while rollup is unwinding
+      // a failed build (no output written); writing then ENOENTs and MASKS the
+      // real compile error. Skip silently when there's nothing to stamp.
+      const distDir = resolve(process.cwd(), 'dist');
+      if (!existsSync(distDir)) return;
+      const swOut = resolve(distDir, 'sw.js');
       if (existsSync(swOut)) {
         const src = readFileSync(swOut, 'utf8');
         writeFileSync(swOut, src.replace(TOKEN, BUILD_VERSION));
       }
       writeFileSync(
-        resolve(process.cwd(), 'dist/version.json'),
+        resolve(distDir, 'version.json'),
         JSON.stringify({ build: BUILD_VERSION }) + '\n'
       );
     },
