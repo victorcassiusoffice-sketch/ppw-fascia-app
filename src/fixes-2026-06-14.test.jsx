@@ -36,13 +36,17 @@ describe('Fix 2 — merged stack exposes an unmerge control', () => {
     ['b', { id: 'b', label: 'Routine B', time: '08:00' }],
   ]);
 
+  // 2026-06-16 (Vic ref pass): unmerge moved from the always-on compact header
+  // into the tap-open action cluster, so it renders when the stack is OPEN
+  // (collapsed: false). Same action, now behind the minimal-token progressive
+  // disclosure.
   it('renders an unmerge icon-button that dissolves the merge (after confirm)', () => {
     const onDissolve = vi.fn();
     const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
     render(
       <MergedStack
         mergeId="m1"
-        merge={{ itemIds: ['a', 'b'], collapsed: true }}
+        merge={{ itemIds: ['a', 'b'], collapsed: false }}
         itemsById={itemsById}
         onSetTitle={() => {}}
         onUnmergeItem={() => {}}
@@ -64,7 +68,7 @@ describe('Fix 2 — merged stack exposes an unmerge control', () => {
     const onDissolve = vi.fn();
     const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
     render(
-      <MergedStack mergeId="m2" merge={{ itemIds: ['a', 'b'], collapsed: true }} itemsById={itemsById}
+      <MergedStack mergeId="m2" merge={{ itemIds: ['a', 'b'], collapsed: false }} itemsById={itemsById}
         onSetTitle={() => {}} onDissolve={onDissolve} onSetTime={() => {}} onToggleCollapsed={() => {}} renderTabBody={() => null} />
     );
     fireEvent.click(screen.getByRole('button', { name: /unmerge stack/i }));

@@ -378,11 +378,6 @@ function TodayView() {
   const [protocols, setProtocols] = useState([]);
   const [moduleEntries, setModuleEntries] = useState([]);
   const [expanded, setExpanded] = useState(null);
-  // 2026-06-16 (Vic ref pass) — the brief "gooing" beat: when a card opens, its
-  // action cluster liquid-MORPHS out (REF Recording A — a control melts open
-  // into its option icons). One card opens at a time, so a single flag drives
-  // the goo filter window; auto-clears so discs settle crisp (REF-08 rims).
-  const [gooing, setGooing] = useState(false);
   // id of item whose time picker is currently open
   const [editingTimeId, setEditingTimeId] = useState(null);
   // Iter 2 Phase 5 — multi-select state. Tickbox in every row toggles ids
@@ -408,19 +403,12 @@ function TodayView() {
   const nav = useNavigate();
   const reduced = useReducedMotion();
   const presets = motionPresets(reduced);
-  // Tap-to-open a stack card. Opening fires the goo morph window (skipped under
-  // reduced motion). The whole collapsed card surface calls this (Vic: "when
-  // you tap it, it opens up").
+  // Tap-to-open a stack card. The whole collapsed card surface calls this
+  // (Vic: "when you tap it, it opens up"). The action cluster's goo morph runs
+  // off its own AnimatePresence mount, so no extra state is needed here.
   const toggleExpand = useCallback((id) => {
-    setExpanded((prev) => {
-      const next = prev === id ? null : id;
-      if (next && !reduced) {
-        setGooing(true);
-        window.setTimeout(() => setGooing(false), 520);
-      }
-      return next;
-    });
-  }, [reduced]);
+    setExpanded((prev) => (prev === id ? null : id));
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -1451,12 +1439,16 @@ function TodayView() {
                 style={{ position: 'relative', zIndex: mergeLifted ? 30 : undefined }}
                 className={mergeIsDragOver ? 'merge-target-pulse' : ''}
               >
-                <div className="flex items-stretch gap-2">
+                <div className="flex items-stretch gap-1">
+                  {/* Minimal grip, matched to the single-card grammar (2026-06-16). */}
                   <button
                     {...dragHandleProps}
-                    className="drag-handle font-display text-muted hover:text-accent w-11 self-stretch flex items-center justify-center text-2xl shrink-0"
+                    onClick={(e) => e.stopPropagation()}
+                    className="stack-grip self-stretch"
+                    style={{ height: 'auto' }}
+                    aria-label="Drag to reorder · drop on another routine to merge"
                     title="Drag to reorder · drop on another routine to merge"
-                  >≡</button>
+                  ><span aria-hidden="true">⋮⋮</span></button>
                   <div className="flex-1 min-w-0">
                     <MergedStack
                       mergeId={leadMergeId}
@@ -1483,6 +1475,7 @@ function TodayView() {
                       onSetActiveTab={setActiveTab}
                       selectionChecked={isSelected(it.id)}
                       onToggleSelection={() => toggleSelected(it.id)}
+                      selecting={selectedIds.size > 0}
                       selectionAriaLabel={`Select stack: ${mergeRec.title || titleFor(it)}`}
                       renderTabBody={(tabItem) => renderItemBody(tabItem, true)}
                     />

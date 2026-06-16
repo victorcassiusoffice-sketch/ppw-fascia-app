@@ -964,6 +964,21 @@ html[data-theme="light"] .stack-goo-blob { background: rgba(150, 160, 180, 0.7);
   color: #fff;
 }
 
+/* Merged-stack count tile — the recognisable token for a merged (deck) stack:
+   a glass tile carrying the routine count. A faint inner top sheet-edge hints
+   "a stack of cards", so a merged token reads differently from a single card's
+   thumbnail at a glance. Square radius (12) matches StackThumb. */
+.merged-count-tile {
+  position: relative; width: 44px; height: 44px; border-radius: 12px;
+  color: var(--col-ink);
+}
+.merged-count-tile::after {
+  content: ""; position: absolute; left: 7px; right: 7px; top: 5px; height: 6px;
+  border: 1px solid var(--glass-rim); border-bottom: none; border-radius: 6px 6px 0 0;
+  opacity: 0.5; z-index: 0; pointer-events: none;
+}
+.merged-count-n { position: relative; z-index: 1; font-size: 16px; font-weight: 700; line-height: 1; margin-top: 4px; }
+
 /* Status card — audit P0 (REF-07): the orange left accent-bar is RETIRED;
    the capsule is all-glass, status lives in the tickbox kind-dot. */
 .today-routine-card { position: relative; }

@@ -1,9 +1,10 @@
 // MergedStack (extracted verbatim from App.jsx, 2026-06-11 liquid-glass
 // redesign — zero logic change).
 import React, { useState, useMemo } from 'react';
-import { Tickbox, IconCalendar, IconUnmerge } from '../icons.jsx';
+import { Tickbox, IconCalendar, IconUnmerge, IconCheckSquare } from '../icons.jsx';
 import { InlineRename } from '../shared.jsx';
 import { DragMergePlusOverlay } from './overlays.jsx';
+import { m, AnimatePresence, SPRING, STAGGER, DUR, EASE, useReducedMotion } from '../../lib/motion';
 
 /* ═══════════════════════════════════════════
    M14 — MergedStack (compact-by-default, expandable)
@@ -29,8 +30,10 @@ function MergedStack({
   onDelete, onDuplicate, onAddToCalendar,
   // Iter 2 Phase 5 — selection + tab-mode props (all optional for back-compat).
   selectionChecked, onToggleSelection, selectionAriaLabel,
+  selecting,
   onSetActiveTab,
 }) {
+  const reduced = useReducedMotion();
   const ids = (merge.itemIds || []).filter(id => itemsById.has(id));
   const children = ids.map(id => itemsById.get(id));
 
@@ -56,34 +59,84 @@ function MergedStack({
   const activeTabId = merge.activeTabId || (ids[0] || null);
   const activeChild = children.find(c => c.id === activeTabId) || children[0];
 
+  // 2026-06-16 (Vic ref pass) — tap-open action cluster, matched to the single
+  // stack card: the actions that used to clutter the compact header now bloom
+  // out as REF-08 glass discs when the stack opens.
+  const mergedActions = [
+    onToggleSelection && {
+      key: 'select', label: selectionChecked ? 'Deselect stack' : 'Select stack',
+      icon: <IconCheckSquare />, on: !!selectionChecked, onClick: onToggleSelection,
+    },
+    (stackTime && onAddToCalendar) && {
+      key: 'cal', label: 'Add stack to phone calendar', icon: <IconCalendar />,
+      onClick: () => onAddToCalendar(mergeId, merge.title || 'Stack', stackTime, totalDurationMin || 15),
+    },
+    {
+      key: 'unmerge', label: 'Unmerge stack — split back into separate routines', icon: <IconUnmerge />,
+      onClick: () => { if (window.confirm('Unmerge this stack? Routines return as separate cards.')) onDissolve(mergeId); },
+    },
+  ].filter(Boolean);
+
   return (
     <div
       className={
         'card today-routine-card overflow-hidden transition-all relative '
         + (isDragOver ? 'border-accent ring-2 ring-accent/60 ' : '')
+        + (!collapsed ? 'is-open ' : '')
         + (selectionChecked ? 'ring-2 ring-accent/40 is-selected ' : '')
       }
     >
       {isDragOver && <DragMergePlusOverlay />}
-      {/* COMPACT HEADER — always visible */}
-      <div className="flex items-center gap-2 p-4">
-        {onToggleSelection ? (
-          <Tickbox
-            checked={!!selectionChecked}
-            onChange={onToggleSelection}
-            ariaLabel={selectionAriaLabel || `Select stack: ${merge.title || 'merged stack'}`}
-            kindClass="timeline-routine"
-          />
-        ) : (
-          <span className="text-accent shrink-0 text-xl leading-none" aria-hidden>▤</span>
+      {/* ── COLLAPSED TOKEN (2026-06-16, Vic ref pass) — minimal, matched to the
+          single stack card: count tile · title · time · chevron. The whole head
+          taps open; every action moved into the morph cluster below. ── */}
+      <div
+        className="stack-head flex items-center gap-2.5 p-3.5"
+        role="button"
+        tabIndex={0}
+        aria-expanded={!collapsed}
+        aria-label={`${merge.title || 'Merged stack'}, ${children.length} routines${stackTime ? `, ${stackTime}` : ''} — tap to ${collapsed ? 'open' : 'collapse'}`}
+        onClick={() => onToggleCollapsed(mergeId, !collapsed)}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggleCollapsed(mergeId, !collapsed); } }}
+      >
+        {/* selection tick — only in selection mode (keeps the token clean). */}
+        {onToggleSelection && selecting && (
+          <span onClick={(e) => e.stopPropagation()} className="shrink-0 inline-flex">
+            <Tickbox
+              checked={!!selectionChecked}
+              onChange={onToggleSelection}
+              ariaLabel={selectionAriaLabel || `Select stack: ${merge.title || 'merged stack'}`}
+              kindClass="timeline-routine"
+            />
+          </span>
         )}
-        {editingTime ? (
+
+        {/* Recognisable visual — a glass deck tile carrying the routine count
+            (this is how you tell a merged stack from a single card at a glance). */}
+        <span className="merged-count-tile glass-disc shrink-0" aria-hidden="true">
+          <span className="merged-count-n tnum">{children.length}</span>
+        </span>
+
+        {/* Title only — the verbose "N parallel · X min total" subtext is gone. */}
+        <span className="flex-1 min-w-0">
+          <InlineRename
+            value={merge.title}
+            placeholder="Name this stack…"
+            onSave={(v) => onSetTitle(mergeId, v)}
+            titleClassName="font-display text-base block w-full truncate"
+          />
+        </span>
+
+        {/* Time — small, trailing; tap edits. */}
+        {stackTime && (editingTime ? (
           <input
             type="time"
             autoFocus
             defaultValue={stackTime}
+            onClick={(e) => e.stopPropagation()}
             onBlur={(e) => { onSetTime(mergeId, e.target.value); setEditingTime(false); }}
             onKeyDown={(e) => {
+              e.stopPropagation();
               if (e.key === 'Enter')   { onSetTime(mergeId, e.currentTarget.value); setEditingTime(false); }
               if (e.key === 'Escape')  { setEditingTime(false); }
             }}
@@ -96,58 +149,71 @@ function MergedStack({
             className="today-time-chip shrink-0"
             title="Tap to edit stack time"
             aria-label={`Edit stack time, currently ${stackTime}`}
-          >{stackTime || '—:—'}</button>
-        )}
-        <div className="flex-1 min-w-0">
-          <InlineRename
-            value={merge.title}
-            placeholder="Name this stack…"
-            onSave={(v) => onSetTitle(mergeId, v)}
-            titleClassName="font-display text-base block"
-          />
-          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-            <span className="text-[10px] uppercase tracking-widest text-accent/85 font-bold">{children.length} parallel</span>
-            {totalDurationMin > 0 && (
-              <span className="text-[10px] uppercase tracking-widest text-muted">{totalDurationMin} min total</span>
-            )}
-          </div>
-        </div>
-        {/* Patch 2 (2026-05-29) — inline duplicate/delete icons retired for
-            cleaner rows. Both actions now live in the sticky bulk toolbar:
-            select the stack (tickbox) → Duplicate (single-select) / Delete. */}
-        {/* Fix 2026-06-14 (Vic) — un-merge affordance was buried in the expanded
-            footer as text; surface it as a glass icon-disc in the compact header
-            so a merged stack can always be split back into separate routines. */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            if (window.confirm('Unmerge this stack? Routines return as separate cards.')) onDissolve(mergeId);
-          }}
-          className="glass-disc shrink-0"
-          style={{ width: 36, height: 36, color: 'var(--col-ink)' }}
-          aria-label="Unmerge stack — split back into separate routines"
-          title="Unmerge stack"
-        ><IconUnmerge /></button>
-        {/* P0a (2026-06-02) — add merged stack to phone calendar. */}
-        {stackTime && onAddToCalendar && (
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); onAddToCalendar(mergeId, merge.title || 'Stack', stackTime, totalDurationMin || 15); }}
-            className="text-muted hover:text-accent w-9 h-9 flex items-center justify-center shrink-0 transition-colors"
-            aria-label="Add stack to phone calendar"
-            title="Add to phone calendar (reliable lock-screen reminder)"
-          ><IconCalendar /></button>
-        )}
-        <button
-          type="button"
-          onClick={() => onToggleCollapsed(mergeId, !collapsed)}
-          className="text-muted text-base hover:text-accent w-9 h-9 flex items-center justify-center shrink-0"
-          aria-expanded={!collapsed}
-          aria-label={collapsed ? 'Expand stack' : 'Collapse stack'}
-          title={collapsed ? 'Tap to expand' : 'Tap to collapse'}
-        ><span className="inline-block" style={{ transition: 'transform 200ms cubic-bezier(0.22,1,0.36,1)', transform: collapsed ? 'rotate(0deg)' : 'rotate(180deg)' }}>▾</span></button>
+          >{stackTime}</button>
+        ))}
+
+        {/* Chevron — the open affordance (rotates/melts on open). */}
+        <span className="stack-chevron" aria-hidden="true">▾</span>
       </div>
+
+      {/* ── TAP-OPEN ACTION CLUSTER (REF Recording A) — select · calendar ·
+          unmerge bloom out as glass discs with the goo metaball neck. ── */}
+      <AnimatePresence initial={false}>
+        {!collapsed && (
+          <m.div
+            key="merged-actions"
+            initial={reduced ? false : { height: 0, opacity: 0 }}
+            animate={reduced ? { height: 'auto', opacity: 1 } : { height: 'auto', opacity: 1 }}
+            exit={reduced ? { height: 0, opacity: 0 } : { height: 0, opacity: 0 }}
+            transition={reduced ? { duration: 0 } : { duration: DUR.base / 1000, ease: EASE.standard }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div className="px-4 pt-1 pb-3">
+              <div className="stack-actions-zone">
+                {!reduced && (
+                  <m.div
+                    className="stack-goo-layer"
+                    aria-hidden="true"
+                    initial="hidden"
+                    animate="show"
+                    variants={{
+                      hidden: { opacity: 0 },
+                      show: { opacity: [0, 0.72, 0], transition: { duration: DUR.slow / 1000, ease: EASE.standard, staggerChildren: STAGGER.list / 1000 } },
+                    }}
+                  >
+                    {mergedActions.map((a) => (
+                      <m.span
+                        key={a.key}
+                        className="stack-goo-blob"
+                        variants={{ hidden: { scale: 0.2 }, show: { scale: 1, transition: SPRING.settle } }}
+                      />
+                    ))}
+                  </m.div>
+                )}
+                <m.div
+                  className="stack-actions"
+                  initial={reduced ? false : 'hidden'}
+                  animate={reduced ? false : 'show'}
+                  variants={reduced ? undefined : { hidden: {}, show: { transition: { staggerChildren: STAGGER.list / 1000, delayChildren: 0.03 } } }}
+                >
+                  {mergedActions.map((a) => (
+                    <m.button
+                      key={a.key}
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); a.onClick(); }}
+                      className={`glass-disc stack-act${a.on ? ' is-on' : ''}`}
+                      aria-label={a.label}
+                      aria-pressed={a.on || undefined}
+                      title={a.label}
+                      variants={reduced ? undefined : { hidden: { opacity: 0, scale: 0.3 }, show: { opacity: 1, scale: 1, transition: SPRING.settle } }}
+                    >{a.icon}</m.button>
+                  ))}
+                </m.div>
+              </div>
+            </div>
+          </m.div>
+        )}
+      </AnimatePresence>
 
       {/* EXPANDED — tabbed view (Iter 2 Phase 5.3) OR parallel-play (M14 default) */}
       {!collapsed && mode === 'tabs' && (
