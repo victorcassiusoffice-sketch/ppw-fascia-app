@@ -378,6 +378,11 @@ function TodayView() {
   const [protocols, setProtocols] = useState([]);
   const [moduleEntries, setModuleEntries] = useState([]);
   const [expanded, setExpanded] = useState(null);
+  // 2026-06-16 (Vic ref pass) — the brief "gooing" beat: when a card opens, its
+  // action cluster liquid-MORPHS out (REF Recording A — a control melts open
+  // into its option icons). One card opens at a time, so a single flag drives
+  // the goo filter window; auto-clears so discs settle crisp (REF-08 rims).
+  const [gooing, setGooing] = useState(false);
   // id of item whose time picker is currently open
   const [editingTimeId, setEditingTimeId] = useState(null);
   // Iter 2 Phase 5 — multi-select state. Tickbox in every row toggles ids
@@ -403,6 +408,19 @@ function TodayView() {
   const nav = useNavigate();
   const reduced = useReducedMotion();
   const presets = motionPresets(reduced);
+  // Tap-to-open a stack card. Opening fires the goo morph window (skipped under
+  // reduced motion). The whole collapsed card surface calls this (Vic: "when
+  // you tap it, it opens up").
+  const toggleExpand = useCallback((id) => {
+    setExpanded((prev) => {
+      const next = prev === id ? null : id;
+      if (next && !reduced) {
+        setGooing(true);
+        window.setTimeout(() => setGooing(false), 520);
+      }
+      return next;
+    });
+  }, [reduced]);
 
   useEffect(() => {
     let cancelled = false;
@@ -655,19 +673,21 @@ function TodayView() {
         >
           {done ? '✓ Done — tap to undo' : 'Mark done'}
         </m.button>
-        {/* Less-text pass (2026-06-15) — the three secondary text buttons
-            (Duplicate / Remove-from-stack / Remove-from-daily) collapse into a
-            compact glass-disc icon row. aria-label + title preserve meaning. */}
-        <div className="flex items-center justify-center gap-3 pt-1">
-          <button
-            type="button"
-            onClick={() => handleDuplicate(it)}
-            className="glass-disc"
-            style={{ width: 40, height: 40, color: 'var(--col-ink)' }}
-            aria-label="Duplicate 4 hours later — drag to reorder, tap time to edit"
-            title="Duplicate (later today)"
-          ><IconCopy /></button>
-          {inMerge && (
+        {/* Less-text pass (2026-06-15) — secondary glass-disc icon row.
+            2026-06-16 (Vic ref pass): for a normal expanded card the new
+            tap-open MORPH cluster (rendered above the body) already carries
+            Duplicate + Delete, so this row is MERGE-ONLY now — it adds the
+            unmerge ("remove from stack") action a merged tab still needs. */}
+        {inMerge && (
+          <div className="flex items-center justify-center gap-3 pt-1">
+            <button
+              type="button"
+              onClick={() => handleDuplicate(it)}
+              className="glass-disc"
+              style={{ width: 40, height: 40, color: 'var(--col-ink)' }}
+              aria-label="Duplicate 4 hours later — drag to reorder, tap time to edit"
+              title="Duplicate (later today)"
+            ><IconCopy /></button>
             <button
               type="button"
               onClick={() => {
@@ -680,23 +700,21 @@ function TodayView() {
               aria-label="Remove from stack — returns to the main list"
               title="Remove from stack"
             ><IconUnmerge /></button>
-          )}
-          <button
-            type="button"
-            onClick={() => {
-              // Recurring items open the scope sheet (This day only / All
-              // occurrences). One-off items keep the simple confirm.
-              if (it.isRecurring) { setPendingRecurringDelete(it); return; }
-              if (window.confirm('Remove just this item from today? Other items in your stack stay.')) {
-                handleRemoveItem(it);
-              }
-            }}
-            className="glass-disc"
-            style={{ width: 40, height: 40, color: 'var(--col-ink)' }}
-            aria-label="Remove from daily plan"
-            title="Remove from daily plan"
-          ><IconTrash /></button>
-        </div>
+            <button
+              type="button"
+              onClick={() => {
+                if (it.isRecurring) { setPendingRecurringDelete(it); return; }
+                if (window.confirm('Remove just this item from today? Other items in your stack stay.')) {
+                  handleRemoveItem(it);
+                }
+              }}
+              className="glass-disc"
+              style={{ width: 40, height: 40, color: 'var(--col-ink)' }}
+              aria-label="Remove from daily plan"
+              title="Remove from daily plan"
+            ><IconTrash /></button>
+          </div>
+        )}
       </div>
     );
   };
@@ -1374,6 +1392,19 @@ function TodayView() {
         </p>
       )}
 
+      {/* Goo / metaball filter for the tap-open action cluster (REF Recording A
+          liquid necks). Blur → high-contrast alpha threshold = blobs that merge
+          like liquid. Applied only to the decorative .stack-goo-layer, never the
+          crisp discs. Defined once; pointer-inert, zero-size. */}
+      <svg width="0" height="0" aria-hidden="true" focusable="false" style={{ position: 'absolute' }}>
+        <defs>
+          <filter id="stack-goo" colorInterpolationFilters="sRGB">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="blur" />
+            <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -8" result="goo" />
+          </filter>
+        </defs>
+      </svg>
+
       <SortableList
         items={visibleItems}
         onReorder={handleReorder}
@@ -1467,6 +1498,59 @@ function TodayView() {
           const customTitle = titleFor(it);
           const kindClass = `timeline-${it.kind === 'protocol' ? 'protocol' : it.kind === 'audio' ? 'audio' : 'routine'}`;
           const lifted = isOpen || isSelected(it.id);
+          // Selection-mode: a per-card tick only appears once a selection is
+          // active (iOS pattern) — keeps the default collapsed token clean while
+          // bulk-select stays one tap away once started.
+          const selecting = selectedIds.size > 0;
+          // 2026-06-16 — the TAP-OPEN action cluster. Every action that used to
+          // clutter the collapsed row now lives here, revealed on open as glass
+          // discs that liquid-bloom out (REF Recording A). Order = most-used first.
+          const launchHref = it.isUserStack ? resolveLaunchHref(it.userStack) : null;
+          const stackActions = [
+            {
+              key: 'select', label: isSelected(it.id) ? 'Deselect stack' : 'Select stack',
+              icon: <IconCheckSquare />, on: isSelected(it.id),
+              onClick: () => toggleSelected(it.id),
+            },
+            launchHref && {
+              key: 'open', label: 'Open link in a new tab', icon: <IconExternalLink />,
+              onClick: () => window.open(launchHref, '_blank', 'noopener'),
+            },
+            (isSupplementItem(it) || isAccessoryItem(it)) && {
+              key: 'buy', label: 'Buy via affiliate link', icon: <IconShoppingCart />,
+              onClick: () => {
+                const url = affiliateUrlFor(it);
+                if (!url || url.startsWith('TODO_')) { window.alert('Affiliate link not yet configured — Vic to fill in src/config/affiliates.json.'); return; }
+                window.open(url, '_blank', 'noopener,nofollow');
+              },
+            },
+            it.time && {
+              key: 'cal', label: 'Add this reminder to your phone calendar', icon: <IconCalendar />,
+              onClick: () => {
+                const ok = downloadSlotIcs({
+                  itemId: it.id,
+                  title: customTitle || it.label || 'Reminder',
+                  dateISO: selectedDate,
+                  time: it.time,
+                  durationMin: it.duration_min || 15,
+                  description: `${it.category || ''}${it.duration_min ? ` · ${it.duration_min} min` : ''}`.trim(),
+                });
+                setToast({ tone: ok ? 'ok' : 'err', text: ok ? 'Opening your phone calendar — confirm to add the lock-screen alarm.' : 'Could not create calendar file.' });
+                setTimeout(() => setToast(null), 4000);
+              },
+            },
+            {
+              key: 'dup', label: 'Duplicate stack', icon: <IconCopy />,
+              onClick: () => handleDuplicate(it),
+            },
+            {
+              key: 'del', label: 'Delete stack', icon: <IconTrash />, danger: true,
+              onClick: () => {
+                if (it.isRecurring) { setPendingRecurringDelete(it); return; }
+                if (window.confirm('Delete this stack?')) handleRemoveItem(it);
+              },
+            },
+          ].filter(Boolean);
           return (
             <m.div
               key={selectedDate}
@@ -1475,25 +1559,68 @@ function TodayView() {
               className={`card today-routine-card overflow-hidden transition-all relative ${done ? 'timeline-done opacity-80' : ''} ${isOpen ? 'is-open' : ''} ${isDragging ? 'border-accent is-dragging' : ''} ${isDragOver ? 'merge-target-pulse ring-2 ring-accent/60 border-accent' : ''} ${isSelected(it.id) ? 'ring-2 ring-accent/40 is-selected' : ''}`}
             >
               {isDragOver && <DragMergePlusOverlay />}
-              <div className="flex items-center gap-2 p-4">
+              {/* ── COLLAPSED TOKEN (2026-06-16, Vic reference pass) ──
+                  Radically minimal: drag-grip · thumbnail · title · time ·
+                  chevron. Everything else moved into the tap-open morph
+                  cluster below. The whole head taps open the card. */}
+              <div
+                className="stack-head flex items-center gap-2.5 p-3.5"
+                role="button"
+                tabIndex={0}
+                aria-expanded={isOpen}
+                aria-label={`${customTitle || it.label}${it.time ? `, ${it.time}` : ''} — tap to ${isOpen ? 'collapse' : 'open'}`}
+                onClick={() => toggleExpand(it.id)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleExpand(it.id); } }}
+              >
                 <button
                   {...dragHandleProps}
-                  className="drag-handle font-display text-muted hover:text-accent w-8 sm:w-11 h-11 flex items-center justify-center text-2xl shrink-0 -ml-2"
+                  onClick={(e) => e.stopPropagation()}
+                  className="stack-grip"
+                  aria-label="Drag to reorder · drop on another routine to merge"
                   title="Drag to reorder · drop on another routine to merge"
-                >≡</button>
-                <Tickbox
-                  checked={isSelected(it.id)}
-                  onChange={() => toggleSelected(it.id)}
-                  ariaLabel={`Select stack: ${customTitle || it.label}`}
-                  kindClass={kindClass}
-                />
-                {isEditingTime ? (
+                ><span aria-hidden="true">⋮⋮</span></button>
+
+                {/* selection tick — only in selection mode (keeps the default
+                    token clean while bulk-select stays one tap away once started). */}
+                {selecting && (
+                  <span onClick={(e) => e.stopPropagation()} className="shrink-0 inline-flex">
+                    <Tickbox
+                      checked={isSelected(it.id)}
+                      onChange={() => toggleSelected(it.id)}
+                      ariaLabel={`Select stack: ${customTitle || it.label}`}
+                      kindClass={kindClass}
+                    />
+                  </span>
+                )}
+
+                {/* REF-02/06 — the thumbnail tile is the recognisable visual. */}
+                <StackThumb item={it} />
+
+                {/* Title — one line; tapping it renames (its own stopPropagation). */}
+                <span className="flex-1 min-w-0">
+                  <InlineRename
+                    value={customTitle === it.label ? '' : customTitle}
+                    placeholder={it.label}
+                    onSave={(v) => setItemTitle(it.id, v)}
+                    titleClassName="timeline-label block w-full text-sm"
+                  />
+                </span>
+
+                {/* Recurring — one informative glyph stays in the token. */}
+                {it.isRecurring && (
+                  <span className="stack-recur" title="Recurring routine" aria-label="Recurring routine">↻</span>
+                )}
+
+                {/* Time — small, trailing; tap edits. */}
+                {it.time && (isEditingTime ? (
                   <input
                     type="time"
                     autoFocus
                     defaultValue={it.time}
+                    onClick={(e) => e.stopPropagation()}
                     onBlur={(e) => { handleTimeChange(it, e.target.value); setEditingTimeId(null); }}
                     onKeyDown={(e) => {
+                      e.stopPropagation();
                       if (e.key === 'Enter') { handleTimeChange(it, e.currentTarget.value); setEditingTimeId(null); }
                       if (e.key === 'Escape') { setEditingTimeId(null); }
                     }}
@@ -1502,8 +1629,8 @@ function TodayView() {
                     aria-label="Edit time"
                   />
                 ) : (
-                  /* The settle beat (board 01): the leading time chip lands a
-                     touch after its row begins — ~8% overshoot, the signature. */
+                  /* The settle beat: the time chip lands a touch after its row
+                     begins — ~8% overshoot, the signature. */
                   <m.button
                     key={selectedDate}
                     initial={reduced ? false : { opacity: 0, scale: 0.6 }}
@@ -1514,114 +1641,10 @@ function TodayView() {
                     title="Tap to edit time"
                     aria-label={`Edit time, currently ${it.time}`}
                   >{it.time}</m.button>
-                )}
-                <div className="flex-1 min-w-0 flex items-center gap-2">
-                  {/* REF-02/06 — the thumbnail tile is the stack's visual
-                      reminder and is ALWAYS present: media art when attached,
-                      etched type glyph otherwise (audit P0 fix). */}
-                  <StackThumb item={it} />
-                  <InlineRename
-                    value={customTitle === it.label ? '' : customTitle}
-                    placeholder={it.label}
-                    onSave={(v) => setItemTitle(it.id, v)}
-                    titleClassName="timeline-label flex-1 min-w-0 text-sm"
-                  />
-                  {/* Duration hidden below sm — title legibility wins on 390px
-                      (loop-2 critique); duration still reads in the time chip
-                      context + merged-stack header + protocol detail. */}
-                  {it.duration_min ? <span className="text-muted text-xs shrink-0 hidden sm:inline">{it.duration_min} min</span> : null}
-                  {/* 2026-06-03 — recurring badge so the user knows a scope
-                      choice (this day / all) is coming on delete. */}
-                  {it.isRecurring && (
-                    <span className="text-accent text-xs shrink-0" title="Recurring routine" aria-label="Recurring routine">↻</span>
-                  )}
-                  {/* D2 — coach-created rows carry a small helix chip. */}
-                  {assistantOpIdOf(it) && <AssistantChip />}
-                  {/* Bug C (2026-06-02) — one-tap "open" launch. Opens the EXACT
-                      stored href (youtu.be short-links normalised to the real
-                      watch URL) in a new tab. Independent of expand/selection. */}
-                  {it.isUserStack && resolveLaunchHref(it.userStack) && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const href = resolveLaunchHref(it.userStack);
-                        if (href) window.open(href, '_blank', 'noopener');
-                      }}
-                      className="glass-disc text-muted hover:text-accent w-8 h-8 shrink-0"
-                      aria-label="Open link in a new tab"
-                      title="Open"
-                    ><IconExternalLink /></button>
-                  )}
-                  {/* Phase 3.2 (2026-05-23) — affiliate cart icon for supplement/accessory items */}
-                  {(isSupplementItem(it) || isAccessoryItem(it)) && (
-                    <a
-                      href={affiliateUrlFor(it) || '#'}
-                      target="_blank"
-                      rel="noopener nofollow sponsored"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const url = affiliateUrlFor(it);
-                        if (!url || url.startsWith('TODO_')) {
-                          e.preventDefault();
-                          window.alert('Affiliate link not yet configured — Vic to fill in src/config/affiliates.json.');
-                        }
-                      }}
-                      className="glass-disc text-muted hover:text-accent w-8 h-8 shrink-0"
-                      aria-label="Buy this product"
-                      title="Buy via affiliate link"
-                    ><IconShoppingCart /></a>
-                  )}
-                  {/* P0a (2026-06-02) — add this slot to the phone's own calendar.
-                      The phone Calendar/Clock then fires a reliable lock-screen
-                      alarm at slot time with the app fully closed. */}
-                  {it.time && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const ok = downloadSlotIcs({
-                          itemId: it.id,
-                          title: customTitle || it.label || 'Reminder',
-                          dateISO: selectedDate,
-                          time: it.time,
-                          durationMin: it.duration_min || 15,
-                          description: `${it.category || ''}${it.duration_min ? ` · ${it.duration_min} min` : ''}`.trim(),
-                        });
-                        setToast({ tone: ok ? 'ok' : 'err', text: ok ? 'Opening your phone calendar — confirm to add the lock-screen alarm.' : 'Could not create calendar file.' });
-                        setTimeout(() => setToast(null), 4000);
-                      }}
-                      className="glass-disc text-muted hover:text-accent w-8 h-8 shrink-0"
-                      aria-label="Tap to add this reminder to your phone calendar"
-                      title="Tap to add this reminder to your phone calendar — your phone fires the lock-screen alarm"
-                    ><IconCalendar /></button>
-                  )}
-                  {/* Phase 1.3 (2026-05-23) — inline duplicate + delete icons.
-                      Loop-1 defect fix (2026-06-11): hidden below sm — at
-                      390px the icon cluster squeezed the title to 0 width.
-                      Both actions stay reachable on mobile via the selection
-                      toolbar and the expanded card body. */}
-                  <button
-                    onClick={(e) => { e.stopPropagation(); handleDuplicate(it); }}
-                    className="glass-disc text-muted hover:text-accent w-8 h-8 !hidden sm:!inline-flex shrink-0"
-                    aria-label="Duplicate stack"
-                    title="Duplicate"
-                  ><IconCopy /></button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (it.isRecurring) { setPendingRecurringDelete(it); return; }
-                      if (window.confirm('Delete this stack?')) handleRemoveItem(it);
-                    }}
-                    className="glass-disc text-muted hover:text-red-400 w-8 h-8 !hidden sm:!inline-flex shrink-0"
-                    aria-label="Delete stack"
-                    title="Delete"
-                  ><IconTrash /></button>
-                  <button onClick={() => setExpanded(isOpen ? null : it.id)} className="text-muted text-xs px-1 py-1 shrink-0" aria-label="Toggle details" aria-expanded={isOpen}>
-                    {/* liquid toggle: one chevron that ROTATES between states
-                        (melts open↔closed) rather than swapping glyphs. The
-                        global reduced-motion reset makes it instant when set. */}
-                    <span className="inline-block" style={{ transition: 'transform 200ms cubic-bezier(0.22,1,0.36,1)', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>▾</span>
-                  </button>
-                </div>
+                ))}
+
+                {/* Chevron — the single open affordance (rotates/melts on open). */}
+                <span className="stack-chevron" aria-hidden="true">▾</span>
               </div>
 
               <AnimatePresence initial={false}>
@@ -1634,6 +1657,57 @@ function TodayView() {
                     transition={presets.expand.transition}
                     style={{ overflow: 'hidden' }}
                   >
+                    {/* ── TAP-OPEN ACTION CLUSTER (REF Recording A) ──
+                        The control melts open into its option icons: glass discs
+                        liquid-bloom out (staggered settle), with a goo metaball
+                        layer necking them like liquid during the reveal, then
+                        settling crisp. Holds every action that left the token. */}
+                    <div className="px-4 pt-1 pb-3 space-y-3">
+                      {assistantOpIdOf(it) && (
+                        <div className="flex"><AssistantChip /></div>
+                      )}
+                      <div className="stack-actions-zone">
+                        {!reduced && (
+                          <m.div
+                            className="stack-goo-layer"
+                            aria-hidden="true"
+                            initial="hidden"
+                            animate="show"
+                            variants={{
+                              hidden: { opacity: 0 },
+                              show: { opacity: [0, 0.72, 0], transition: { duration: DUR.slow / 1000, ease: EASE.standard, staggerChildren: STAGGER.list / 1000 } },
+                            }}
+                          >
+                            {stackActions.map((a) => (
+                              <m.span
+                                key={a.key}
+                                className="stack-goo-blob"
+                                variants={{ hidden: { scale: 0.2 }, show: { scale: 1, transition: SPRING.settle } }}
+                              />
+                            ))}
+                          </m.div>
+                        )}
+                        <m.div
+                          className="stack-actions"
+                          initial={reduced ? false : 'hidden'}
+                          animate={reduced ? false : 'show'}
+                          variants={reduced ? undefined : { hidden: {}, show: { transition: { staggerChildren: STAGGER.list / 1000, delayChildren: 0.03 } } }}
+                        >
+                          {stackActions.map((a) => (
+                            <m.button
+                              key={a.key}
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); a.onClick(); }}
+                              className={`glass-disc stack-act${a.danger ? ' is-danger' : ''}${a.on ? ' is-on' : ''}`}
+                              aria-label={a.label}
+                              aria-pressed={a.on || undefined}
+                              title={a.label}
+                              variants={reduced ? undefined : { hidden: { opacity: 0, scale: 0.3 }, show: { opacity: 1, scale: 1, transition: SPRING.settle } }}
+                            >{a.icon}</m.button>
+                          ))}
+                        </m.div>
+                      </div>
+                    </div>
                     {renderItemBody(it, false)}
                   </m.div>
                 )}
