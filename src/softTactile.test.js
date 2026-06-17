@@ -25,9 +25,9 @@ describe('vibrateMsForLevel', () => {
   });
 });
 
-describe('defaults (respect-first)', () => {
-  it('sound is OFF by default; visual Soft; haptics on', () => {
-    expect(DEFAULT_TACTILE.sound).toBe(false);
+describe('defaults (Vic 2026-06-17: sound ON, off toggle in Settings)', () => {
+  it('sound is ON by default; visual Soft; haptics on', () => {
+    expect(DEFAULT_TACTILE.sound).toBe(true);
     expect(DEFAULT_TACTILE.level).toBe('soft');
     expect(DEFAULT_TACTILE.haptics).toBe(true);
   });

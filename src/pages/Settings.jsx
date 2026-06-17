@@ -17,6 +17,10 @@ const BG_ICON = { auto: IconAuto, liquid: IconDroplet, nature: IconLeaf, grey: I
 import { getPairingState, pairDevice, unpairDevice } from '../lib/assistantSync.js';
 import { useBackground, BG_OPTIONS, SKINS, skinAsset } from '../lib/background.js';
 import { useGlassIntensity, GLASS_LEVELS } from '../lib/glassIntensity.js';
+import { useSoftTactile, playClick } from '../lib/softTactile.js';
+
+// Press feel for the slot/click feedback (Soft controls). Off = silent + no depth.
+const TACTILE_LEVELS = [{ key: 'off', label: 'Off' }, { key: 'soft', label: 'Soft' }, { key: 'firm', label: 'Firm' }];
 
 /* P0b (2026-06-02) — "Reliable reminders" card. Explains the two delivery
    paths that ACTUALLY fire on a locked phone (calendar .ics + Web Push on an
@@ -229,6 +233,14 @@ function SettingsView() {
   const [activeRoutines, setActiveRoutines] = useActiveRoutines();
   // Phase 3.1 (2026-05-23) — IF (Intermittent Fasting) eating-window prefs.
   const [ifPrefs, setIfPrefs] = useIfPrefs();
+  // 2026-06-17 — tactile/sound prefs (slot-click + press depth on Soft controls).
+  const { cfg: tactile, setCfg: setTactile } = useSoftTactile();
+  const toggleClickSound = () => {
+    const next = !tactile.sound;
+    setTactile((c) => ({ ...c, sound: next }));
+    // Confirmation click when enabling (the tap is the gesture that unlocks audio).
+    if (next) playClick('down', tactile.level === 'off' ? 'soft' : tactile.level, true);
+  };
 
   const askPerm = async () => { const r = await requestPermission(); setPerm(r); };
   const clearAll = () => {
@@ -426,6 +438,65 @@ function SettingsView() {
               );
             })}
           </div>
+        </div>
+      </Section>
+
+      {/* 2026-06-17 — slot/click sound + press depth for Soft controls. Sound is
+          ON by default (Vic); this is the off toggle. */}
+      <Section title="Button feedback">
+        <div className="card p-5">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <div>
+              <div className="font-display">Click sound</div>
+              <div className="text-muted text-xs mt-1">A soft slot/click when you press buttons. On by default — turn off here. Your device's silent switch still applies where supported.</div>
+            </div>
+            <button
+              type="button"
+              onClick={toggleClickSound}
+              className={'glass-switch shrink-0' + (tactile.sound ? ' on' : '')}
+              role="switch"
+              aria-checked={tactile.sound}
+              aria-label={tactile.sound ? 'Click sound on — tap to turn off' : 'Click sound off — tap to turn on'}
+            >
+              <m.span
+                className="glass-knob"
+                initial={false}
+                animate={{ x: tactile.sound ? 34 : 3 }}
+                transition={reduced() ? { duration: 0 } : SPRING.glide}
+                aria-hidden="true"
+              />
+            </button>
+          </div>
+          <div className="text-muted text-xs mb-2">Press feel</div>
+          <div className="grid grid-cols-3 gap-2" role="group" aria-label="Press level">
+            {TACTILE_LEVELS.map(opt => {
+              const active = tactile.level === opt.key;
+              return (
+                <m.button
+                  key={opt.key}
+                  type="button"
+                  onClick={() => setTactile(c => ({ ...c, level: opt.key }))}
+                  aria-pressed={active}
+                  className="seg-opt py-3 rounded-2xl text-sm font-bold"
+                  style={{
+                    backgroundColor: 'var(--chip-glass)',
+                    backgroundImage: 'linear-gradient(160deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02) 60%, rgba(255,255,255,0.07))',
+                    color: active ? 'var(--col-on-accent)' : 'var(--col-ink)',
+                    boxShadow: '0 1px 0 var(--glass-specular) inset',
+                    border: '1px solid var(--glass-rim)',
+                    transition: 'color var(--dur-mid) var(--ease)',
+                  }}
+                  {...pressScale()}
+                >
+                  {active && (
+                    <m.span className="glide-pill" aria-hidden="true" style={{ borderRadius: 'var(--r-16)' }} {...glideIndicator('tactile-seg')} />
+                  )}
+                  <span className="seg-label">{opt.label}</span>
+                </m.button>
+              );
+            })}
+          </div>
+          <div className="text-muted text-[11px] mt-3 leading-relaxed">Used on Soft controls (preview at <code>/soft-lab</code>). Reduced-motion shortens the press; audio is separate.</div>
         </div>
       </Section>
 

@@ -4,15 +4,18 @@
 //   • audio   — a two-stage WebAudio synth "slot/click" (down-thock + up-tick)
 //   • haptic  — navigator.vibrate (Android/Chromebook only; iOS ignores it)
 //
-// Respect-first defaults: sound OFF (no web API can read the iOS silent
-// switch), haptics on-if-supported, visual Soft. AudioContext is created
-// lazily on the first user gesture (autoplay policy) and clicks throttle so
-// rapid taps don't machine-gun. Per the soft-neumorphism-ui skill §3.
+// Defaults (Vic 2026-06-17): sound ON at Level Soft — "sounds auto on, then in
+// settings turn off". A clear off toggle lives in Settings → Button feedback.
+// Sound is still gesture-gated (AudioContext only starts on the first press —
+// never autoplays on load) and clicks throttle so rapid taps don't machine-gun.
+// Honest caveat: no web API reads the iOS hardware silent switch, so the
+// Settings toggle is the reliable mute on iOS. Haptics on-if-supported. Per the
+// soft-neumorphism-ui skill §3, amended by Vic's sound-on default.
 
 import { useCallback, useEffect, useState } from 'react';
 
 export const TACTILE_KEY = 'ppw.tactile';
-export const DEFAULT_TACTILE = { level: 'soft', sound: false, haptics: true };
+export const DEFAULT_TACTILE = { level: 'soft', sound: true, haptics: true };
 
 /** Pure, unit-tested: audio gain for a press/release stage at a given Level.
  *  Returns 0 when muted (Level off OR sound disabled) so the caller can skip. */
