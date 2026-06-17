@@ -130,9 +130,11 @@ export function BottomNav() {
     }
   }, [notifPrefs.enabled, setNotifPrefs, flash]);
 
-  // Liquid-glass redesign (2026-06-11, board 05): the active tab carries ONE
-  // gliding accent dot (clip 3 — a single indicator slides, labels only
-  // colour-fade). Solid dot — it moves, so no blur (perf law).
+  // Liquid-glass nav beads (2026-06-17): every tab icon sits in a glass bead
+  // matching the card action discs (REF-08). The active tab's accent-glass fill
+  // GLIDES between beads (shared layoutId 'nav-bead' — clip 3 glide), and the
+  // glyph liquid-taps on press. No backdrop-filter on the bead (the dock already
+  // frosts + the button transforms — perf law #3).
   const NavTab = ({ to, active, label, children }) => (
     <m.button
       type="button"
@@ -141,8 +143,11 @@ export function BottomNav() {
       aria-current={active ? 'page' : undefined}
       {...pressScale(0.94)}
     >
-      {active && <m.span className="nav-dot" aria-hidden="true" {...glideIndicator('nav-dot')} />}
-      {children}<span>{label}</span>
+      <span className={'nav-bead' + (active ? ' is-active' : '')}>
+        {active && <m.span className="nav-bead-fill" aria-hidden="true" {...glideIndicator('nav-bead')} />}
+        {children}
+      </span>
+      <span className="navlabel">{label}</span>
     </m.button>
   );
 

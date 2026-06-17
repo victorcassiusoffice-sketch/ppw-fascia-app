@@ -507,15 +507,22 @@ html[data-theme="light"] { --bg-image-scrim: linear-gradient(180deg, rgba(231,23
 html[data-bg="skin"][data-bg-tone="bright"][data-theme="dark"]  { --bg-image-scrim: linear-gradient(180deg, rgba(13,15,19,.46), rgba(13,15,19,.66)); }
 html[data-bg="skin"][data-bg-tone="bright"][data-theme="light"] { --bg-image-scrim: linear-gradient(180deg, rgba(231,236,243,.60), rgba(231,236,243,.76)); }
 
-/* Luminous accent washes over the nature/custom imagery so even its dark
-   regions carry light for the panes to catch. Static decorative layer. */
+/* Luminous wash over the nature/custom/dark-skin imagery so even dark regions
+   carry light for the panes to catch. 2026-06-17 (REF-difference pass): was a
+   strong ORANGE+teal wash (orange .20/.12) that rendered as a warm DIAGONAL
+   STREAK across every dark screen — nothing in Vic's references has that; their
+   grounds are clean, evenly-lit daylight. Re-tuned to soft NEUTRAL WHITE light
+   (glass-law: white light only) with only a whisper of warmth at the floor, so
+   glass catches clean light like the reference. Scrim tier (AA) is separate +
+   unchanged. The orange of the `nature` IMAGE itself is a separate, default-
+   ground question for Vic (see REF-DIFFERENCE-ANALYSIS-2026-06-17). */
 html[data-bg="nature"] .app-bg::after, html[data-bg="custom"] .app-bg::after,
 html[data-bg="skin"][data-bg-tone="dark"] .app-bg::after {
   content: ""; position: absolute; inset: 0; pointer-events: none;
   background:
-    radial-gradient(90% 55% at 18% 8%,  rgba(245, 139, 60, 0.20), transparent 60%),
-    radial-gradient(80% 50% at 85% 30%, rgba(120, 180, 200, 0.14), transparent 60%),
-    radial-gradient(110% 60% at 50% 100%, rgba(232, 119, 46, 0.12), transparent 65%);
+    radial-gradient(96% 60% at 50% 4%,  rgba(255, 255, 255, 0.15), transparent 62%),
+    radial-gradient(80% 50% at 84% 28%, rgba(196, 210, 224, 0.09), transparent 60%),
+    radial-gradient(120% 64% at 50% 104%, rgba(245, 205, 170, 0.07), transparent 66%);
 }
 
 /* The REF-05 Gradient Grey ground — luminous slate with a strong top light,
@@ -714,16 +721,52 @@ html[data-theme="light"] .glass-knob {
   box-shadow: 0 1px 0 rgba(255,255,255,1) inset, 2px 2px 5px var(--nm-dark);
 }
 
-/* Nav glide dot — small accent pill under the active bottom-nav tab.
-   2026-06-15: was opaque var(--col-accent) (an orange-paint highlight, law #2
-   violation) → now accent-TINTED GLASS (tint + bright rim + glow), so the
-   active-tab signal arrives through glass like every other accent surface. */
-.nav-dot {
-  position: absolute; top: 6px; left: 50%; margin-left: -10px;
-  width: 20px; height: 3px; border-radius: var(--r-pill);
+/* ── Liquid-glass NAV BEADS (2026-06-17) — the bottom-nav icons now carry the
+   SAME glass-bead grammar as the card action discs (REF-08): a clear glass
+   bead (rim + specular dome, no backdrop-filter — the dock frosts + the button
+   transforms, perf law #3), the active tab's accent-glass fill GLIDES between
+   beads (shared layoutId 'nav-bead'), and the glyph liquid-taps on press. ── */
+.nav-bead {
+  position: relative; isolation: isolate;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; border-radius: var(--r-pill);
+  /* clear glass body — rim + dome carry the read (mirrors .glass-disc) */
+  background: linear-gradient(160deg, rgba(255,255,255,0.10), rgba(255,255,255,0.015) 52%, rgba(255,255,255,0.05));
+  border: 1px solid rgba(255,255,255,0.20);
+  box-shadow: 0 1px 0 var(--glass-specular) inset, inset 0 0 0 1px rgba(255,255,255,0.07),
+              var(--glass-inner-glow);
+  transition: border-color var(--dur-mid) var(--ease), background var(--dur-mid) var(--ease),
+              border-radius var(--dur-mid) var(--ease);
+}
+.nav-bead::before { /* specular dome — the curved-bead read */
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 0;
+  background: radial-gradient(62% 52% at 30% 22%, rgba(255,255,255,0.42), rgba(255,255,255,0) 70%);
+}
+.nav-bead svg {
+  position: relative; z-index: 1; width: 20px; height: 20px;
+  transition: transform var(--dur-mid) var(--ease); transform-box: fill-box; transform-origin: center;
+}
+/* the gliding accent-glass fill (REF-09 glide + accent-glass law #2 — never paint) */
+.nav-bead-fill {
+  position: absolute; inset: 0; border-radius: inherit; z-index: 0;
   background-color: var(--accent-glass-bg);
   background-image: var(--glass-fill);
-  box-shadow: inset 0 0 0 1px var(--accent-glass-rim), var(--accent-glass-glow);
+  box-shadow: inset 0 0 0 1px var(--accent-glass-rim), 0 1px 0 var(--glass-specular) inset, var(--accent-glass-glow);
+}
+.navbtn.active .nav-bead { border-color: transparent; border-radius: 30px; } /* melt on activate */
+.navbtn.active .nav-bead svg { color: #fff; }
+/* liquid-tap press: glyph squishes + tilts, bead radius melts (matches .glass-disc:active) */
+.navbtn:active .nav-bead svg { transform: scale(0.8) rotate(-6deg); }
+.navbtn:active .nav-bead { border-radius: 44%; }
+html[data-theme="light"] .nav-bead {
+  background: linear-gradient(160deg, rgba(255,255,255,0.82), rgba(255,255,255,0.42) 58%, rgba(255,255,255,0.62));
+  border-color: rgba(255,255,255,0.92);
+  box-shadow: 0 1px 0 rgba(255,255,255,1) inset, inset 0 0 0 1px rgba(255,255,255,0.5),
+              2px 2px 5px var(--nm-dark), -2px -2px 5px var(--nm-light);
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-bead svg, .navbtn:active .nav-bead svg { transform: none; transition: none; }
+  .navbtn.active .nav-bead, .navbtn:active .nav-bead { border-radius: var(--r-pill); }
 }
 
 /* ══════════════════════════════════════════════════════════════════════
