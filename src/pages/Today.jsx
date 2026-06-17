@@ -401,6 +401,10 @@ function TodayView() {
   // Redesign (2026-06-03) — overflow ⋮ menu for rare actions (select-all,
   // clear, create routine) so the action row stays to two balanced pills.
   const [overflowOpen, setOverflowOpen] = useState(false);
+  // PROTOTYPE 2026-06-17 (liquid de-clutter, branch only) — secondary chrome
+  // (coach doorway + the reorder/merge hint) is hidden behind ONE liquid reveal
+  // so the at-rest screen shows only Next-up + the stacks (ref-class calm).
+  const [calmMoreOpen, setCalmMoreOpen] = useState(false);
   const nav = useNavigate();
   const reduced = useReducedMotion();
   const presets = motionPresets(reduced);
@@ -1115,25 +1119,25 @@ function TodayView() {
           boxShadow: '0 1px 0 var(--glass-specular) inset',
         }}
       >
-        {/* Month line — big display month + year (left), glance cluster (right). */}
-        <div className="flex items-end justify-between mb-1.5">
-          <div className="min-w-0">
-            <div className="font-display leading-none" style={{ fontSize: 26, letterSpacing: '-0.02em' }}>
-              {monthLabel}<span className="text-muted ml-1.5" style={{ fontSize: 15, fontWeight: 500 }}>{yearLabel}</span>
-            </div>
+        {/* PROTOTYPE 2026-06-17 — CENTRED month header (symmetry). The duplicate
+            top-bar completion ring is dropped (the Next-up hero already carries
+            it); Today chip + streak sit as a small centred cluster → balanced,
+            calmer top that reads like the reference. */}
+        <div className="flex flex-col items-center text-center mb-1.5">
+          <div className="font-display leading-none" style={{ fontSize: 26, letterSpacing: '-0.02em' }}>
+            {monthLabel}<span className="text-muted ml-1.5" style={{ fontSize: 15, fontWeight: 500 }}>{yearLabel}</span>
+          </div>
+          <div className="mt-1 flex items-center gap-2">
             <button
               type="button"
               onClick={() => dateStripRef.current?.jumpToToday()}
-              className="mt-1 inline-flex items-center gap-1 today-time-chip"
+              className="inline-flex items-center gap-1 today-time-chip"
               style={{ height: 26, minHeight: 26, padding: '0 12px', fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase',
                 borderColor: selectedDate === todayISO() ? 'var(--col-accent)' : 'var(--hairline)' }}
               aria-label="Jump to today"
               title="Jump to today"
             >Today</button>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
             <StreakChip count={streak} />
-            {items.length > 0 && <CompletionRing done={completedCount} total={items.length} />}
           </div>
         </div>
         <DateStrip ref={dateStripRef} selectedDate={selectedDate} onSelect={setSelectedDate} />
@@ -1259,37 +1263,9 @@ function TodayView() {
         )}
       </div>
 
-      {/* Coach entry (2026-06-16) — doorway to the live Wellness Assistant.
-          Tapping opens the dedicated /coach surface; the actual chat is a
-          separate paid service the app links out to (locked arch). Gated by
-          the single FEATURE_ASSISTANT_LAUNCH master switch. */}
-      {FEATURE_ASSISTANT_LAUNCH && (
-        <m.button
-          type="button"
-          onClick={() => nav('/coach')}
-          className="card liquid-refract w-full flex items-center gap-3 mt-4 text-left"
-          style={{ padding: '14px 16px' }}
-          aria-label="Open your Wellness Coach"
-          {...pressScale(0.98)}
-        >
-          <span
-            className="shrink-0 grid place-items-center text-accent"
-            style={{ width: 36, height: 36 }}
-            aria-hidden="true"
-          >
-            <IconMessageSquare />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="font-display block leading-tight">Ask your coach</span>
-            <span className="text-muted text-xs block truncate">
-              Evidence-grounded guidance on your routine
-            </span>
-          </span>
-          <span className="shrink-0 text-muted" aria-hidden="true">
-            <IconExternalLink />
-          </span>
-        </m.button>
-      )}
+      {/* PROTOTYPE 2026-06-17 — the coach doorway moved DOWN into the single
+          liquid "More" reveal below the hero (progressive disclosure), so it no
+          longer competes with Next-up at rest. */}
 
       {/* Next-up hero — the ONE strong frosted pane over the user's
           background (2026-06-12 revamp: the legacy hero-art overlay is
@@ -1343,6 +1319,73 @@ function TodayView() {
         </div>
       )}
 
+      {/* PROTOTYPE 2026-06-17 — ONE liquid "More" reveal. Secondary chrome
+          (coach doorway + the reorder/merge hint) is hidden until tapped, so the
+          at-rest screen is just Next-up + the stacks (ref-class calm). The bead
+          chevron melts 180° and the cluster liquid-expands (SPRING.liquid),
+          matching the stack-card open-morph; collapses to opacity under reduced
+          motion. */}
+      {!empty && (
+        <div className="flex flex-col items-center mt-3">
+          <m.button
+            type="button"
+            onClick={() => setCalmMoreOpen(v => !v)}
+            className="glass-disc"
+            style={{ width: 40, height: 40, color: 'var(--col-ink)' }}
+            aria-expanded={calmMoreOpen}
+            aria-label={calmMoreOpen ? 'Hide coach and tips' : 'Show coach and tips'}
+            title={calmMoreOpen ? 'Less' : 'More — coach + tips'}
+            {...pressScale()}
+          >
+            <m.span
+              aria-hidden="true"
+              style={{ display: 'inline-flex' }}
+              animate={reduced ? {} : { rotate: calmMoreOpen ? 180 : 0 }}
+              transition={SPRING.liquid}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
+            </m.span>
+          </m.button>
+          <AnimatePresence initial={false}>
+            {calmMoreOpen && (
+              <m.div
+                key="calm-more"
+                className="w-full overflow-hidden"
+                initial={reduced ? { opacity: 0 } : { opacity: 0, height: 0, scale: 0.98 }}
+                animate={reduced ? { opacity: 1 } : { opacity: 1, height: 'auto', scale: 1 }}
+                exit={reduced ? { opacity: 0 } : { opacity: 0, height: 0, scale: 0.98 }}
+                transition={reduced ? { duration: 0.12 } : SPRING.liquid}
+              >
+                <div className="pt-3 flex flex-col gap-3">
+                  {FEATURE_ASSISTANT_LAUNCH && (
+                    <m.button
+                      type="button"
+                      onClick={() => nav('/coach')}
+                      className="card liquid-refract w-full flex items-center gap-3 text-left"
+                      style={{ padding: '14px 16px' }}
+                      aria-label="Open your Wellness Coach"
+                      {...pressScale(0.98)}
+                    >
+                      <span className="shrink-0 grid place-items-center text-accent" style={{ width: 36, height: 36 }} aria-hidden="true">
+                        <IconMessageSquare />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="font-display block leading-tight">Ask your coach</span>
+                        <span className="text-muted text-xs block truncate">Evidence-grounded guidance on your routine</span>
+                      </span>
+                      <span className="shrink-0 text-muted" aria-hidden="true"><IconExternalLink /></span>
+                    </m.button>
+                  )}
+                  <p className="text-muted text-xs text-center px-2">
+                    <span className="text-accent">≡</span> Drag a handle to reorder. Drop one stack on another to merge. Tap a title to rename.
+                  </p>
+                </div>
+              </m.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+
       {/* Toast — toastIn rise+fade (board 06, clip 4): soft spring, no bounce.
           Solid surface (it moves → no blur). */}
       <AnimatePresence>
@@ -1378,13 +1421,9 @@ function TodayView() {
         </div>
       )}
 
-      {!empty && (
-        /* Loop-1 defect fix: single flowing span so the ≡ glyph never wraps
-           onto its own line at 390px. */
-        <p className="text-muted text-xs mb-3">
-          <span className="text-accent">≡</span> Drag handle to reorder. Drop on another routine to merge them into a stack. Tap any title to rename.
-        </p>
-      )}
+      {/* PROTOTYPE 2026-06-17 — the always-on reorder/merge helper paragraph is
+          relocated into the liquid "More" reveal above (progressive disclosure);
+          it no longer sits permanently in the flow. */}
 
       {/* Goo / metaball filter for the tap-open action cluster (REF Recording A
           liquid necks). Blur → high-contrast alpha threshold = blobs that merge
