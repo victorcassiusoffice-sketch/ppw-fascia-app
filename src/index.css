@@ -482,6 +482,72 @@ html[data-theme="light"][data-bg="nature"]      { --dialog-frost: rgba(244, 247,
   .ppw-scrim { -webkit-backdrop-filter: none; backdrop-filter: none; }
 }
 
+/* ══════════════════════════════════════════════════════════════════════
+   LIGHT THEME = SOFT NEUMORPHISM (2026-06-18, Vic) — REF-05 ground + REF-08
+   relief. Vic's model: the dark/light toggle's LIGHT side IS the "Soft" look.
+   So in light theme every primary surface drops the glass treatment and becomes
+   matte neumorphism: surface == the grey ground (#E7ECF3), depth = the dual-light
+   CONVEX shadow (--elv), NO backdrop-blur, thin bright top rim, and press flips
+   to CONCAVE (--elv-inset). DARK theme is untouched (stays liquid glass). This
+   is scoped entirely under html[data-theme="light"]. ══════════════════════ */
+html[data-theme="light"] .glass,
+html[data-theme="light"] .glass-strong,
+html[data-theme="light"] .card,
+html[data-theme="light"] .botnav {
+  background-color: var(--col-surface);
+  background-image: none;                       /* matte ground, not glossy glass */
+  -webkit-backdrop-filter: none;
+          backdrop-filter: none;
+  border: 1px solid rgba(255, 255, 255, 0.75);  /* fine bright top rim (REF-08) */
+  box-shadow: var(--elv-2);                      /* raised convex, dual-light */
+}
+html[data-theme="light"] .glass-strong { box-shadow: var(--elv-3); }
+html[data-theme="light"] .botnav { box-shadow: var(--elv-3); }
+/* Kill the glass specular sweep — neumorphism is matte. */
+html[data-theme="light"] .glass::before,
+html[data-theme="light"] .glass-strong::before,
+html[data-theme="light"] .card::before { display: none; }
+/* Icon discs + capsules + segments + the switch track = small convex chips. */
+html[data-theme="light"] .glass-disc,
+html[data-theme="light"] .glass-capsule,
+html[data-theme="light"] .seg-opt,
+html[data-theme="light"] .today-time-chip {
+  background-color: var(--col-surface);
+  background-image: none;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: var(--elv-1);
+}
+/* Press = the concave flip (the neumorphic tactile signature) + a settle scale.
+   Overrides the dark-theme brightness bloom for these surfaces in light only. */
+html[data-theme="light"] .card:active,
+html[data-theme="light"] .glass-disc:active,
+html[data-theme="light"] .glass-capsule:active,
+html[data-theme="light"] .seg-opt:active,
+html[data-theme="light"] .today-time-chip:active {
+  box-shadow: var(--elv-inset);
+  filter: none;
+  transform: scale(0.98);
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme="light"] .card:active,
+  html[data-theme="light"] .glass-disc:active,
+  html[data-theme="light"] .glass-capsule:active { transform: none; }
+}
+/* Accent (CTA + active tab/segment) = a RAISED accent surface, not glass film
+   (law: accent sparing, on the live element). Keeps PPW orange, on-brand. */
+html[data-theme="light"] .btn-lime,
+html[data-theme="light"] .accent-glass {
+  background-color: var(--col-accent);
+  background-image: none;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  border: 1px solid rgb(var(--c-accent));
+  box-shadow: var(--elv-2);
+  color: #fff;
+}
+html[data-theme="light"] .btn-lime:active,
+html[data-theme="light"] .accent-glass:active { box-shadow: var(--elv-inset); filter: brightness(0.97); }
+
 /* ── App-wide user-selectable background (Refinement 2, REF-01/04/05) ──
    Fixed ground layer behind ALL glass. The scrim tier keeps glass legible
    over any image (defaults AND arbitrary user photos). Static — never
