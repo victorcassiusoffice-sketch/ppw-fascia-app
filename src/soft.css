@@ -49,6 +49,23 @@ html[data-theme="light"][data-soft-skin="sage"] {
   --nm-rim: rgba(150,170,154,0.38); --accent-soft: rgba(79,145,115,0.15);
 }
 
+/* ── 1b · The soft GROUND (REF-05/08) ───────────────────────────────────────
+   When a Soft colourway is active the ground IS the surface — there is no glass
+   image behind it. Suppress any image/liquid skin + scrim, and fill the fixed
+   bg layer with a smooth soft ground that carries REF-08's gentle top-light →
+   floor-shade gradient, so the raised neumorphic chrome reads as convex relief
+   on a dimensional ground (not flat colour). NEVER blurred (Soft hard-law). */
+html[data-soft-skin] .app-bg img,
+html[data-soft-skin] .app-bg .liquid-bg-canvas { display: none !important; }
+html[data-soft-skin] .app-bg::after { display: none !important; }
+html[data-soft-skin] .app-bg-scrim { background: transparent; }
+html[data-soft-skin] .app-bg {
+  background:
+    radial-gradient(115% 80% at 26% -4%, rgba(255, 255, 255, 0.55), transparent 56%),
+    radial-gradient(95% 60% at 86% 106%, rgba(70, 84, 110, 0.10), transparent 62%),
+    var(--col-bg);
+}
+
 /* ── 2 · The .soft-btn — raised → inset (convex→concave) press ──────────── */
 .soft-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;

@@ -281,11 +281,14 @@ h1, h2, h3, h4 {
    scrims). Sheets, toasts, glide pills and dragged cards stay SOLID.
    ══════════════════════════════════════════════════════════════════════ */
 :root {
-  --glass-blur-1: 10px;   /* light film — header fade, menus */
-  --glass-blur-2: 20px;   /* standard dock/bar glass */
-  --glass-blur-3: 28px;   /* heavy — surfaces over imagery (hero) */
-  --glass-blur-4: 46px;   /* DIALOG frost — true Gaussian diffusion (REF look):
-                             content behind melts into soft colour fields. */
+  /* CLEAR-GLASS calibration (2026-06-18, Vic "too frosty"): REF-01 is
+     TRANSPARENT dark glass — the ground stays crisp through it, the read comes
+     from the bright rim + soft sheen + faint tint, NOT Gaussian frost. Blur is
+     pulled right down from the prior frosted build so the surface clarifies. */
+  --glass-blur-1: 5px;    /* light film — header fade, menus */
+  --glass-blur-2: 9px;    /* standard dock/bar glass */
+  --glass-blur-3: 14px;   /* heavy — surfaces over imagery (hero) */
+  --glass-blur-4: 20px;   /* DIALOG — gentle diffusion, ground still legible */
 }
 
 .glass {
@@ -342,8 +345,8 @@ h1, h2, h3, h4 {
   color: var(--col-ink); border-radius: var(--r-24);
   background-color: var(--dialog-frost);
   background-image: var(--glass-fill-soft);
-  -webkit-backdrop-filter: blur(var(--glass-blur-4)) saturate(200%) brightness(1.04);
-          backdrop-filter: blur(var(--glass-blur-4)) saturate(200%) brightness(1.04);
+  -webkit-backdrop-filter: blur(var(--glass-blur-4)) saturate(150%) brightness(1.03);
+          backdrop-filter: blur(var(--glass-blur-4)) saturate(150%) brightness(1.03);
   border: 1px solid var(--glass-rim);
   box-shadow: var(--glass-shadow-2), var(--glass-rimlight), var(--glass-inner-glow);
 }
@@ -448,7 +451,7 @@ html[data-theme="light"][data-glass="low"] {
   --chip-glass: rgba(255, 255, 255, 0.75);
 }
 html[data-glass="high"] {
-  --glass-blur-1: 14px; --glass-blur-2: 26px; --glass-blur-3: 36px; --glass-blur-4: 56px;
+  --glass-blur-1: 9px; --glass-blur-2: 15px; --glass-blur-3: 22px; --glass-blur-4: 32px;
 }
 html[data-theme="dark"][data-glass="high"]  { --glass-tint: rgba(22, 25, 31, 0.08); }
 html[data-theme="light"][data-glass="high"] { --glass-tint: rgba(255, 255, 255, 0.12); }

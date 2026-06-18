@@ -51,7 +51,7 @@ export default function SoftLab() {
   }, [skin, crisp]);
 
   return (
-    <main className="px-5 pt-4 pb-28 max-w-2xl mx-auto" style={{ minHeight: '100vh', background: 'var(--col-bg)', color: 'var(--col-ink)' }}>
+    <main className="px-5 pt-4 pb-28 max-w-2xl mx-auto" style={{ minHeight: '100vh', background: 'transparent', color: 'var(--col-ink)' }}>
       <h1 className="font-display" style={{ fontSize: 26, marginBottom: 2 }}>Soft Lab</h1>
       <p className="text-muted" style={{ fontSize: 13, marginBottom: 20 }}>
         Neumorphism v1 — staged for review. Tap a palette, set the Level, press the buttons.
@@ -64,6 +64,7 @@ export default function SoftLab() {
           <button
             key={s.id}
             type="button"
+            onPointerDown={onPress}
             onClick={() => setSkin(s.id)}
             className="soft-btn"
             aria-pressed={skin === s.id}
@@ -82,6 +83,7 @@ export default function SoftLab() {
           <button
             key={lv}
             type="button"
+            onPointerDown={onPress}
             onClick={() => setCfg((c) => ({ ...c, level: lv }))}
             className="soft-btn"
             aria-pressed={cfg.level === lv}
@@ -94,10 +96,10 @@ export default function SoftLab() {
 
       {/* Toggles */}
       <div className="flex gap-2.5" style={{ marginBottom: 26, flexWrap: 'wrap' }}>
-        <button type="button" className="soft-btn" aria-pressed={cfg.sound} onClick={() => setCfg((c) => ({ ...c, sound: !c.sound }))} style={{ boxShadow: cfg.sound ? 'var(--elv-inset)' : 'var(--elv-2)' }}>
+        <button type="button" className="soft-btn" aria-pressed={cfg.sound} onPointerDown={onPress} onClick={() => setCfg((c) => ({ ...c, sound: !c.sound }))} style={{ boxShadow: cfg.sound ? 'var(--elv-inset)' : 'var(--elv-2)' }}>
           Sound: {cfg.sound ? 'On' : 'Off'}
         </button>
-        <button type="button" className="soft-btn" aria-pressed={crisp} onClick={() => setCrisp((v) => !v)} style={{ boxShadow: crisp ? 'var(--elv-inset)' : 'var(--elv-2)' }}>
+        <button type="button" className="soft-btn" aria-pressed={crisp} onPointerDown={onPress} onClick={() => setCrisp((v) => !v)} style={{ boxShadow: crisp ? 'var(--elv-inset)' : 'var(--elv-2)' }}>
           Crisp edges: {crisp ? 'On' : 'Off'}
         </button>
       </div>

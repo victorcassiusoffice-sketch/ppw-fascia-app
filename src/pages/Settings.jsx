@@ -17,7 +17,7 @@ const BG_ICON = { auto: IconAuto, liquid: IconDroplet, nature: IconLeaf, grey: I
 import { getPairingState, pairDevice, unpairDevice } from '../lib/assistantSync.js';
 import { useBackground, BG_OPTIONS, SKINS, skinAsset } from '../lib/background.js';
 import { useGlassIntensity, GLASS_LEVELS } from '../lib/glassIntensity.js';
-import { useSoftTactile, playClick } from '../lib/softTactile.js';
+import { useSoftTactile, playClick, unlockAudio } from '../lib/softTactile.js';
 
 // Press feel for the slot/click feedback (Soft controls). Off = silent + no depth.
 const TACTILE_LEVELS = [{ key: 'off', label: 'Off' }, { key: 'soft', label: 'Soft' }, { key: 'firm', label: 'Firm' }];
@@ -239,7 +239,7 @@ function SettingsView() {
     const next = !tactile.sound;
     setTactile((c) => ({ ...c, sound: next }));
     // Confirmation click when enabling (the tap is the gesture that unlocks audio).
-    if (next) playClick('down', tactile.level === 'off' ? 'soft' : tactile.level, true);
+    if (next) { unlockAudio(); playClick('down', tactile.level === 'off' ? 'soft' : tactile.level, true); }
   };
 
   const askPerm = async () => { const r = await requestPermission(); setPerm(r); };
