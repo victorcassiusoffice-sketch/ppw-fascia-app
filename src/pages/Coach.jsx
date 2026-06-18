@@ -17,7 +17,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { coachUrl, FEATURE_ASSISTANT_LAUNCH } from '../config.js';
 import { isPaired } from '../lib/assistantSync.js';
-import { HelixLogo } from '../chrome.jsx';
+import { GlassLogo } from '../chrome.jsx';
 import { m, staggerContainer, enterRow, pressScale } from '../lib/motion';
 import {
   IconArrowLeft, IconMessageSquare, IconExternalLink, IconSparkle, IconLink2,
@@ -73,7 +73,7 @@ export default function CoachView() {
                 style={{ width: 48, height: 48, color: 'var(--col-accent)' }}
                 aria-hidden="true"
               >
-                <HelixLogo size={40} />
+                <GlassLogo size={40} />
               </span>
               <div className="min-w-0">
                 <div className="text-xs text-accent uppercase tracking-widest mb-1">
