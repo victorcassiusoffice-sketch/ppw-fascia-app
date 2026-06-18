@@ -281,14 +281,15 @@ h1, h2, h3, h4 {
    scrims). Sheets, toasts, glide pills and dragged cards stay SOLID.
    ══════════════════════════════════════════════════════════════════════ */
 :root {
-  /* CLEAR-GLASS calibration (2026-06-18, Vic "too frosty"): REF-01 is
-     TRANSPARENT dark glass — the ground stays crisp through it, the read comes
-     from the bright rim + soft sheen + faint tint, NOT Gaussian frost. Blur is
-     pulled right down from the prior frosted build so the surface clarifies. */
-  --glass-blur-1: 5px;    /* light film — header fade, menus */
-  --glass-blur-2: 9px;    /* standard dock/bar glass */
-  --glass-blur-3: 14px;   /* heavy — surfaces over imagery (hero) */
-  --glass-blur-4: 20px;   /* DIALOG — gentle diffusion, ground still legible */
+  /* CLEAR-GLASS calibration (2026-06-18 rev2, Vic "too frosty" → then "liquid
+     gone/flat"): the MIDDLE GROUND. The original over-frost was 10/20/28/46; the
+     first de-frost (5/9/14/20) read FLAT. These sit between: blur is enough to
+     diffuse + give real glass depth, while the ground still reads THROUGH the
+     pane. The liquid quality is carried by the bright rim + sheen + refraction. */
+  --glass-blur-1: 7px;    /* light film — header fade, menus */
+  --glass-blur-2: 14px;   /* standard dock/bar glass */
+  --glass-blur-3: 20px;   /* heavy — surfaces over imagery (hero) */
+  --glass-blur-4: 28px;   /* DIALOG — soft diffusion, ground still legible */
 }
 
 .glass {
@@ -345,8 +346,8 @@ h1, h2, h3, h4 {
   color: var(--col-ink); border-radius: var(--r-24);
   background-color: var(--dialog-frost);
   background-image: var(--glass-fill-soft);
-  -webkit-backdrop-filter: blur(var(--glass-blur-4)) saturate(150%) brightness(1.03);
-          backdrop-filter: blur(var(--glass-blur-4)) saturate(150%) brightness(1.03);
+  -webkit-backdrop-filter: blur(var(--glass-blur-4)) saturate(175%) brightness(1.04);
+          backdrop-filter: blur(var(--glass-blur-4)) saturate(175%) brightness(1.04);
   border: 1px solid var(--glass-rim);
   box-shadow: var(--glass-shadow-2), var(--glass-rimlight), var(--glass-inner-glow);
 }
@@ -451,7 +452,7 @@ html[data-theme="light"][data-glass="low"] {
   --chip-glass: rgba(255, 255, 255, 0.75);
 }
 html[data-glass="high"] {
-  --glass-blur-1: 9px; --glass-blur-2: 15px; --glass-blur-3: 22px; --glass-blur-4: 32px;
+  --glass-blur-1: 11px; --glass-blur-2: 20px; --glass-blur-3: 28px; --glass-blur-4: 40px;
 }
 html[data-theme="dark"][data-glass="high"]  { --glass-tint: rgba(22, 25, 31, 0.08); }
 html[data-theme="light"][data-glass="high"] { --glass-tint: rgba(255, 255, 255, 0.12); }

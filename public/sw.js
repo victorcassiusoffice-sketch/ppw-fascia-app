@@ -34,12 +34,14 @@ const SHELL = [
   BASE + 'mock-protocol.json',
 ];
 
-// NOTE: we intentionally do NOT call skipWaiting() here. A freshly-installed SW
-// stays in `waiting` so the client can surface a tasteful "new version" prompt
-// (src/lib/swUpdate.js) and apply it on the user's terms — on tap, when the app
-// is backgrounded, or on the next cold launch. The client triggers activation by
-// posting SKIP_WAITING (handled below). This avoids yanking a reload out from
-// under an active user while still guaranteeing they never stay on a stale build.
+// 2026-06-18 (regression fix): we now call skipWaiting() on install. The prior
+// "stay in waiting until the client asks" design left Vic's INSTALLED PWA pinned
+// to an old shell across launches (iOS especially only re-checks SW on launch and
+// promotes lazily) — so a fresh deploy read as "features vanished / went back a
+// step". This app is localStorage-only with no in-flight server state to protect,
+// so immediate promotion is safe: install → skipWaiting → activate purges old
+// caches + clients.claim() → the client's controllerchange handler does ONE clean
+// reload. Net effect: every deploy takes over on the very next launch, no lag.
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) =>
@@ -47,7 +49,7 @@ self.addEventListener('install', (e) => {
         // Some shell entries may not exist yet — log + continue
         console.warn('SW shell precache partial:', err);
       })
-    )
+    ).then(() => self.skipWaiting())
   );
 });
 
