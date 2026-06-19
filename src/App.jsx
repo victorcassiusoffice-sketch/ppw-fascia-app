@@ -25,7 +25,7 @@ import { downloadSlotIcs } from './lib/ics.js';
 import { ensurePersistentStorage } from './lib/storagePersist.js';
 import { getPushState, subscribeToPush, INSTALL_HELP } from './lib/push.js';
 import { LazyMotion, domAnimation, m, AnimatePresence, useReducedMotion } from './motion.js';
-import { screenTransition } from './lib/motion';
+import { screenTransition, reduced } from './lib/motion';
 import { GlassLogo, ThemeToggle, BottomNav } from './chrome.jsx';
 import { useTheme } from './theme.js';
 import { initAssistantSync } from './lib/assistantSync.js';
@@ -125,13 +125,29 @@ export default function App() {
   return (
     <LazyMotion features={domAnimation}>
       <div className="min-h-screen text-ink">
-        {/* REF-03 liquid refraction filter (2026-06-15). Defined ONCE; consumed
-            by `.liquid-refract::after` on signature glass. Static fractal-noise
-            displacement — no per-frame animation (holds 60fps) and an element
-            filter, not backdrop (works on iOS Safari). */}
+        {/* REF-03 liquid refraction filter (2026-06-15; ANIMATED 2026-06-19, Vic
+            "make the liquid motion visible"). Consumed by `.liquid-refract::after`
+            on signature glass. The fractal-noise field now slowly CHURNS (SMIL
+            <animate> on baseFrequency) so the refracted light FLOWS like liquid —
+            a slow 14s loop, tiny amplitude, on small filtered regions (cards/nav)
+            so it stays cheap. Element filter (not backdrop) → works on iOS Safari.
+            Churn is omitted under prefers-reduced-motion (the CSS flow drift is
+            disabled there too). */}
         <svg aria-hidden="true" focusable="false" style={{ position: 'absolute', width: 0, height: 0 }}>
           <filter id="ppw-liquid-glass" x="-15%" y="-15%" width="130%" height="130%" colorInterpolationFilters="sRGB">
-            <feTurbulence type="fractalNoise" baseFrequency="0.011 0.016" numOctaves="2" seed="11" result="n" />
+            <feTurbulence type="fractalNoise" baseFrequency="0.011 0.016" numOctaves="2" seed="11" result="n">
+              {!reduced() && (
+                <animate
+                  attributeName="baseFrequency"
+                  dur="14s"
+                  values="0.011 0.016; 0.014 0.020; 0.010 0.014; 0.011 0.016"
+                  keyTimes="0; 0.4; 0.72; 1"
+                  calcMode="spline"
+                  keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
+                  repeatCount="indefinite"
+                />
+              )}
+            </feTurbulence>
             <feGaussianBlur in="n" stdDeviation="1.1" result="nb" />
             <feDisplacementMap in="SourceGraphic" in2="nb" scale="13" xChannelSelector="R" yChannelSelector="G" />
           </filter>

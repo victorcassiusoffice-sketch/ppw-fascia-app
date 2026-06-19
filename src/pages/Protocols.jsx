@@ -64,7 +64,7 @@ function ProtocolsList() {
         {list && list.map(p => {
           const isActive = activeProtocols.includes(p.protocol_id);
           return (
-            <m.div key={p.protocol_id} variants={enterRow} className={`card protocol-tile p-6 ${isActive ? 'border-accent' : ''}`}>
+            <m.div key={p.protocol_id} variants={enterRow} className={`card protocol-tile liquid-refract p-6 ${isActive ? 'border-accent' : ''}`}>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="eyebrow mb-2">{p.variant} · {p.kind}</div>

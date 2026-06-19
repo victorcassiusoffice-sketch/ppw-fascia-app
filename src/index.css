@@ -96,8 +96,8 @@ html[data-theme="dark"] {
      comes from (a) blur of a LUMINOUS ground, (b) a diagonal white SHEEN
      gradient, (c) a bright specular rim (top/leading edges). Legibility is
      the SCRIM TIER's job, never a darker fill. */
-  --glass-tint:      rgba(22, 25, 31, 0.11);   /* audit P1: body ~30% clearer */
-  --glass-tint-strong: rgba(22, 25, 31, 0.24);
+  --glass-tint:      rgba(22, 25, 31, 0.05);   /* 2026-06-19 Vic: clearer still — ground reads through */
+  --glass-tint-strong: rgba(22, 25, 31, 0.16);
   /* 2026-06-16 (Vic follow-up): the old REF-01 value carried a HARD-STOP
      diagonal reflection LINE (0.055→0.20→0.012 across 45.6–47.4%). On large
      surfaces (cards, panels, the Settings Connect card, the dock, sheets) that
@@ -106,16 +106,19 @@ html[data-theme="dark"] {
      soft, diffuse, NO-hard-stop bloom the dialogs use (a broad top-left light +
      a faint bottom glint), so every --glass-fill surface reads as smooth frost.
      Small chips/discs/capsules keep their own subtle sheen (own gradients). */
+  /* GLOSSY-CLEAR fill (2026-06-19, Vic REF-08 "finish"): a brighter top-gloss
+     bloom + a soft lower reflection POOL (the reference disc's light gathers low),
+     so the surface reads as polished CLEAR glass, not matte frost. */
   --glass-fill:
-      radial-gradient(135% 90% at 26% -16%, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0) 56%),
-      radial-gradient(60% 40% at 88% 108%, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0) 60%);
-  --glass-rim:       rgba(255, 255, 255, 0.40);
-  --glass-specular:  rgba(255, 255, 255, 0.60);
+      radial-gradient(120% 78% at 30% -12%, rgba(255, 255, 255, 0.30), rgba(255, 255, 255, 0) 52%),
+      radial-gradient(92% 56% at 50% 116%, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0) 58%);
+  --glass-rim:       rgba(255, 255, 255, 0.55);   /* brighter visible rim (was 0.40) */
+  --glass-specular:  rgba(255, 255, 255, 0.78);   /* brighter top bevel line (was 0.60) */
   --glass-edge:      rgba(255, 255, 255, 0.16);
-  --chip-glass:      rgba(255, 255, 255, 0.09); /* small pills/chips, no blur */
-  /* Back-compat aliases (bars, sheets) — now translucent */
-  --glass-bg:        rgba(22, 25, 31, 0.22);
-  --glass-bg-strong: rgba(22, 25, 31, 0.36);
+  --chip-glass:      rgba(255, 255, 255, 0.07); /* small pills/chips, no blur */
+  /* Back-compat aliases (bars, sheets) — MORE transparent (Vic: clearer glass) */
+  --glass-bg:        rgba(22, 25, 31, 0.10);
+  --glass-bg-strong: rgba(22, 25, 31, 0.18);
   --glass-border:    var(--glass-rim);
   --glass-highlight: var(--glass-specular);
   --glass-shadow-1: 0 1px 0 var(--glass-specular) inset, 1px 0 0 var(--glass-edge) inset,
@@ -126,8 +129,13 @@ html[data-theme="dark"] {
      dimensionality (visionOS feel). Edge-weighted (inset spread pulls the glow
      to the rim) so the centre stays clear → text legibility + scrim tier
      untouched. White light only; never a dark fill. */
-  --glass-rimlight:   inset 0 0 0 1px rgba(255,255,255,0.10);
-  --glass-inner-glow: inset 0 1.5px 1px -0.5px rgba(255,255,255,0.30), inset 0 0 34px -14px rgba(255,255,255,0.16), inset 0 -14px 22px -18px rgba(255,255,255,0.10);
+  /* BEVELLED EDGE (2026-06-19, Vic REF-08 "edge"): a bright top-left bevel light
+     + full rim + a lower groove shadow = real chamfered depth, not a flat 1px line. */
+  --glass-rimlight:   inset 0 1px 0.5px rgba(255,255,255,0.72),
+                      inset 1px 0 0.5px rgba(255,255,255,0.30),
+                      inset 0 0 0 1px rgba(255,255,255,0.18),
+                      inset 0 -1.5px 1.5px rgba(0,0,0,0.20);
+  --glass-inner-glow: inset 0 2px 1px -0.5px rgba(255,255,255,0.42), inset 0 0 34px -12px rgba(255,255,255,0.22), inset 0 -16px 26px -18px rgba(255,255,255,0.14);
   --glass-sheen: linear-gradient(125deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.03) 34%, rgba(255,255,255,0) 60%);
   --card-glass-bg: var(--glass-tint);
   /* FORENSIC-AUDIT P0 (2026-06-12): accent arrives THROUGH glass, never as
@@ -286,10 +294,10 @@ h1, h2, h3, h4 {
      first de-frost (5/9/14/20) read FLAT. These sit between: blur is enough to
      diffuse + give real glass depth, while the ground still reads THROUGH the
      pane. The liquid quality is carried by the bright rim + sheen + refraction. */
-  --glass-blur-1: 7px;    /* light film — header fade, menus */
-  --glass-blur-2: 14px;   /* standard dock/bar glass */
-  --glass-blur-3: 20px;   /* heavy — surfaces over imagery (hero) */
-  --glass-blur-4: 28px;   /* DIALOG — soft diffusion, ground still legible */
+  --glass-blur-1: 4px;    /* light film — header fade, menus */
+  --glass-blur-2: 8px;    /* standard dock/bar glass */
+  --glass-blur-3: 13px;   /* heavy — surfaces over imagery (hero) */
+  --glass-blur-4: 18px;   /* DIALOG — soft diffusion, ground still legible */
 }
 
 .glass {
@@ -422,14 +430,27 @@ html[data-glass="low"] .glass-dialog { -webkit-backdrop-filter: blur(var(--glass
   content: ""; position: absolute; inset: 0; border-radius: inherit;
   pointer-events: none; z-index: 0;
   background:
-    linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0) 42%),
-    radial-gradient(130% 90% at 12% -10%, rgba(255,255,255,0.14), rgba(255,255,255,0) 55%);
+    linear-gradient(135deg, rgba(255,255,255,0.14), rgba(255,255,255,0) 42%),
+    radial-gradient(130% 90% at 12% -10%, rgba(255,255,255,0.16), rgba(255,255,255,0) 55%);
+  background-size: 132% 132%;
+  background-position: 0% 0%;
   mix-blend-mode: screen;
   filter: url(#ppw-liquid-glass);
   opacity: 0.85;
+  /* LIQUID MOTION (2026-06-19, Vic): the refracted highlight slowly FLOWS across
+     the surface (background-position drift + opacity breathe), and the SVG filter
+     it passes through is itself churning (App.jsx <animate>) → visible liquid
+     light. background-size>100% gives travel room so no edge is exposed. The
+     position drift is GPU-cheap (no layout/paint of the card). */
+  animation: ppw-liquid-flow 11s ease-in-out infinite;
+}
+@keyframes ppw-liquid-flow {
+  0%, 100% { background-position: 0% 0%;   opacity: 0.78; }
+  50%      { background-position: 20% 14%; opacity: 1; }
 }
 @supports not (filter: url("#ppw-liquid-glass")) { .liquid-refract::after { filter: none; opacity: 0.5; } }
 @media (prefers-reduced-transparency: reduce) { .liquid-refract::after { display: none; } }
+@media (prefers-reduced-motion: reduce) { .liquid-refract::after { animation: none; background-position: 0% 0%; } }
 html[data-glass="low"] .liquid-refract::after { display: none; }
 
 /* ── Lens 4 (user-controllable glass intensity) — html[data-glass] set from
@@ -452,7 +473,7 @@ html[data-theme="light"][data-glass="low"] {
   --chip-glass: rgba(255, 255, 255, 0.75);
 }
 html[data-glass="high"] {
-  --glass-blur-1: 11px; --glass-blur-2: 20px; --glass-blur-3: 28px; --glass-blur-4: 40px;
+  --glass-blur-1: 7px; --glass-blur-2: 13px; --glass-blur-3: 19px; --glass-blur-4: 28px;
 }
 html[data-theme="dark"][data-glass="high"]  { --glass-tint: rgba(22, 25, 31, 0.08); }
 html[data-theme="light"][data-glass="high"] { --glass-tint: rgba(255, 255, 255, 0.12); }
@@ -727,7 +748,8 @@ html[data-theme="light"] .glass-disc {
 .glass-capsule {
   position: relative; overflow: hidden; isolation: isolate;
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  border-radius: var(--r-pill); padding: 10px 18px; font-weight: 600;
+  border-radius: var(--r-pill); padding: 10px 18px; font-weight: 500; letter-spacing: 0.01em;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.20), 0 -0.5px 0 rgba(255,255,255,0.30); /* soft REF-08 emboss */
   background: linear-gradient(160deg, rgba(255,255,255,0.10), rgba(255,255,255,0.02) 52%, rgba(255,255,255,0.05));
   border: 1px solid rgba(255, 255, 255, 0.58);
   box-shadow: 0 1px 0 var(--glass-highlight) inset, inset 0 0 0 1px rgba(255,255,255,0.10),
@@ -939,7 +961,7 @@ html[data-theme="light"] .nav-bead {
 .btn-secondary:active, .btn-ghost:active { box-shadow: var(--elv-inset); transform: translateY(0); }
 
 /* Legacy aliases kept so old class names still resolve (accent-glass now). */
-.btn-lime { background-color: var(--accent-glass-bg); background-image: var(--glass-fill); -webkit-backdrop-filter: blur(var(--glass-blur-1)) saturate(160%) brightness(1.05); backdrop-filter: blur(var(--glass-blur-1)) saturate(160%) brightness(1.05); border: 1px solid var(--accent-glass-rim); color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.35); font-weight: 800; padding: 13px 24px; border-radius: var(--r-pill); min-height: var(--ppw-tap-min); box-shadow: 0 1px 0 var(--glass-specular) inset, var(--accent-glass-glow); transition: transform var(--dur-fast) var(--ease), filter var(--dur-fast) var(--ease); }
+.btn-lime { background-color: var(--accent-glass-bg); background-image: var(--glass-fill); -webkit-backdrop-filter: blur(var(--glass-blur-1)) saturate(160%) brightness(1.05); backdrop-filter: blur(var(--glass-blur-1)) saturate(160%) brightness(1.05); border: 1px solid var(--accent-glass-rim); color: #fff; text-shadow: 0 1px 1px rgba(0,0,0,0.28), 0 -0.5px 0 rgba(255,255,255,0.25); font-weight: 600; letter-spacing: 0.01em; padding: 13px 24px; border-radius: var(--r-pill); min-height: var(--ppw-tap-min); box-shadow: 0 1px 0 var(--glass-specular) inset, var(--accent-glass-glow); transition: transform var(--dur-fast) var(--ease), filter var(--dur-fast) var(--ease); }
 .btn-lime:hover { transform: translateY(-1px); filter: brightness(1.08); }
 .btn-teal { background-color: rgba(43, 182, 196, 0.40); background-image: var(--glass-fill); border: 1px solid rgba(180, 235, 240, 0.6); color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.3); font-weight: 700; padding: 12px 22px; border-radius: var(--r-pill); box-shadow: 0 1px 0 var(--glass-specular) inset; transition: transform var(--dur-fast) var(--ease); }
 .btn-teal:hover { transform: translateY(-1px); }
@@ -960,8 +982,9 @@ button, a, .btn-accent, .btn-ghost, .btn-secondary, .btn-teal, .btn-lime { -webk
 /* Eyebrow caption */
 .eyebrow {
   font-family: var(--font-app);
-  font-size: 0.72rem; letter-spacing: 0.24em; text-transform: uppercase;
-  color: var(--col-accent); font-weight: 600;
+  /* 2026-06-19 (Vic REF-08 "font"): lighter + wider-tracked meta label. */
+  font-size: 0.72rem; letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--col-accent); font-weight: 500;
 }
 
 /* ── Accent tiles — audit P0: candy gradients retired; tinted GLASS now. ── */
