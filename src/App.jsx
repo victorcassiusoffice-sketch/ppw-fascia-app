@@ -29,6 +29,7 @@ import { screenTransition, reduced } from './lib/motion';
 import { GlassLogo, ThemeToggle, BottomNav } from './chrome.jsx';
 import { useTheme } from './theme.js';
 import { initAssistantSync } from './lib/assistantSync.js';
+import { installGlobalPressSound } from './lib/softTactile.js';
 import UpdateToast from './components/UpdateToast.jsx';
 
 import TodayView from './pages/Today.jsx';
@@ -113,6 +114,11 @@ export default function App() {
   // D2 (2026-06-11) — pull Assistant plan ops on launch + on every return to
   // foreground. Silent no-op when unpaired or offline (assistantSync handles it).
   useEffect(() => initAssistantSync(), []);
+
+  // 2026-06-19 — install the GLOBAL press-sound so every interactive tap clicks
+  // when sound is enabled (root-cause fix for "sound doesn't work": it was only
+  // ever wired to /soft-lab + the Settings toggle, never the app itself).
+  useEffect(() => installGlobalPressSound(), []);
 
   const [activeProtocols] = useActiveProtocols();
   const [activeModules] = useActiveModules();

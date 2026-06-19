@@ -93,6 +93,10 @@ function IconSettings() {
 function IconBellGlyph({ filled }) {
   return <svg viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.7 21a2 2 0 0 1-3.4 0" /></svg>;
 }
+/* Central STACK hub glyph — stacked layers (the protocol/stack hub). */
+function IconStack() {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5 9-5z" /><path d="M3 13l9 5 9-5" /><path d="M3 17l9 5 9-5" opacity="0.7" /></svg>;
+}
 
 /* ── Bottom navigation + enlarged centre bell ── */
 export function BottomNav() {
@@ -151,6 +155,11 @@ export function BottomNav() {
     </m.button>
   );
 
+  // Central STACK hub (2026-06-19, Vic): Protocols now lives behind a raised
+  // nested-glass pod in the MIDDLE of the dock — a button INSIDE a button
+  // (merged-liquid grammar). The bell drops to a normal bead slot.
+  const stackActive = isActive('/protocols') || path.startsWith('/protocol/');
+
   return (
     <div className="botwrap">
       <AnimatePresence>
@@ -162,7 +171,7 @@ export function BottomNav() {
             animate="show"
             exit="exit"
             style={{
-              position: 'absolute', bottom: 78, left: '50%', x: '-50%',
+              position: 'absolute', bottom: 86, left: '50%', x: '-50%',
               background: 'var(--col-surface)', color: 'var(--col-ink)', boxShadow: 'var(--elv-2)',
               border: '1px solid var(--hairline)', borderRadius: 'var(--r-pill)',
               padding: '7px 14px', fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap', pointerEvents: 'none',
@@ -172,24 +181,41 @@ export function BottomNav() {
       </AnimatePresence>
       <nav className="botnav liquid-refract" aria-label="Primary">
         <NavTab to="/today" active={isActive('/today')} label="Today"><IconHome /></NavTab>
-        <NavTab to="/protocols" active={isActive('/protocols') || path.startsWith('/protocol/')} label="Protocols"><IconProtocols /></NavTab>
-        <div className="navbtn bellslot">
-          {/* Bell keeps its CSS-only squish: it is centred via translateX(-50%)
-              in .bell, which a Framer whileTap transform would clobber. The
-              ON-state morph (accent fill + halo) is the clip-1 blob move. */}
-          <button
-            type="button"
-            className={'bell' + (notifPrefs.enabled ? ' on' : '')}
-            onClick={toggleBell}
-            aria-pressed={notifPrefs.enabled}
-            aria-label={notifPrefs.enabled ? 'Notifications on — tap to turn off' : 'Notifications off — tap to turn on'}
-            title={notifPrefs.enabled ? 'Notifications on' : 'Notifications off'}
-          >
-            <IconBellGlyph filled={notifPrefs.enabled} />
-          </button>
-          <span className="belllabel">Alerts</span>
-        </div>
         <NavTab to="/modules" active={isActive('/modules')} label="Modules"><IconModules /></NavTab>
+
+        {/* Central STACK pod — nested liquid glass (outer pod + inner core disc),
+            raised above the dock, routes to the Protocols stack. */}
+        <div className="navbtn stackslot">
+          <m.button
+            type="button"
+            className={'nav-stack' + (stackActive ? ' active' : '')}
+            onClick={() => nav('/protocols')}
+            aria-current={stackActive ? 'page' : undefined}
+            aria-label="Stack — your protocols"
+            title="Stack"
+            {...pressScale(0.9)}
+          >
+            <span className="nav-stack-core" aria-hidden="true"><IconStack /></span>
+          </m.button>
+          <span className="stacklabel">Stack</span>
+        </div>
+
+        {/* Alerts — the notifications toggle, now a normal bead. ON = accent fill. */}
+        <button
+          type="button"
+          className={'navbtn alertbtn' + (notifPrefs.enabled ? ' active' : '')}
+          onClick={toggleBell}
+          aria-pressed={notifPrefs.enabled}
+          aria-label={notifPrefs.enabled ? 'Notifications on — tap to turn off' : 'Notifications off — tap to turn on'}
+          title={notifPrefs.enabled ? 'Notifications on' : 'Notifications off'}
+        >
+          <span className={'nav-bead' + (notifPrefs.enabled ? ' is-active' : '')}>
+            {notifPrefs.enabled && <m.span className="nav-bead-fill" aria-hidden="true" {...glideIndicator('nav-bell')} />}
+            <IconBellGlyph filled={notifPrefs.enabled} />
+          </span>
+          <span className="navlabel">Alerts</span>
+        </button>
+
         <NavTab to="/settings" active={isActive('/settings')} label="Settings"><IconSettings /></NavTab>
       </nav>
     </div>

@@ -37,7 +37,10 @@ describe('App mounts (module graph resolves end-to-end)', () => {
     // (2026-06-12 revamp: glass logo replaced the legacy helix mark.)
     expect(container.querySelector('.botnav')).toBeTruthy();
     expect(container.querySelector('img[src*="ppw-glass-logo"]')).toBeTruthy();
-    expect(container.querySelector('.botnav .bell')).toBeTruthy();
+    // 2026-06-19 restructure: central nested STACK pod (Protocols hub) + the
+    // notifications toggle is now a normal bead (.alertbtn), replacing .bell.
+    expect(container.querySelector('.botnav .nav-stack')).toBeTruthy();
+    expect(container.querySelector('.botnav .alertbtn')).toBeTruthy();
   });
 
   it('renders the welcome/entry route too (covers the VideoIntro branch)', () => {

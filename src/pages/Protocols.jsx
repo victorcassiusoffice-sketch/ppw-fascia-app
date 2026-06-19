@@ -27,11 +27,13 @@ function ProtocolsList() {
   };
 
   return (
-    <main className="px-5 py-8 max-w-3xl mx-auto pb-16">
-      <Link to="/today" className="glass-disc mb-5" style={{ width: 40, height: 40, color: 'var(--col-ink)' }} aria-label="Back to Today" title="Back to Today"><IconArrowLeft /></Link>
+    <main className="px-5 py-9 max-w-3xl mx-auto pb-20">
+      <Link to="/today" className="glass-disc mb-6" style={{ width: 40, height: 40, color: 'var(--col-ink)' }} aria-label="Back to Today" title="Back to Today"><IconArrowLeft /></Link>
       <div className="eyebrow mb-3">Library</div>
-      <h1 className="font-display text-4xl md:text-5xl mb-3 leading-[1.02]">Protocols</h1>
-      <p className="text-muted mb-6 max-w-xl leading-relaxed">Evidence-based, agent-generated. Tap to view, activate to merge into your day.</p>
+      <h1 className="font-display text-4xl md:text-5xl mb-8 leading-[1.02]">Protocols</h1>
+      {/* Declutter (2026-06-19, Vic "hide more, give space"): the descriptive
+          blurb is demoted to a quiet single hint so the glass panes breathe. */}
+      <p className="text-muted mb-7 max-w-xl leading-relaxed text-sm opacity-70">Tap a protocol to view · activate to merge into your day.</p>
 
       {/* 2026-06-12 revamp: legacy science banner purged — the library opens
           straight onto glass protocol panes over the user's background. */}

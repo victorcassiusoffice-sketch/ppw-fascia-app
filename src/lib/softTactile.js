@@ -40,7 +40,14 @@ export function loadTactile() {
   return { ...DEFAULT_TACTILE };
 }
 
+// Module-level LIVE config mirror so the global press-sound listener (which is
+// not a React component) always knows the current Level/sound/haptics without a
+// re-subscribe. Updated on every save + by useSoftTactile's effect.
+let _liveCfg = null;
+export function liveTactile() { if (!_liveCfg) _liveCfg = loadTactile(); return _liveCfg; }
+
 export function saveTactile(cfg) {
+  _liveCfg = cfg;
   try { localStorage.setItem(TACTILE_KEY, JSON.stringify(cfg)); } catch (_) { /* ignore */ }
 }
 
@@ -81,11 +88,47 @@ export function unlockAudio() {
  *  drops in pitch, with a transient noise attack. Tonal core = clearly audible
  *  on phone speakers (the prior noise-only burst was a whisper). down ≈ 60ms
  *  (lower), up ≈ 45ms (brighter). */
+// ── HTMLAudio WAV fallback (2026-06-19) — for engines where WebAudio is blocked
+// or fails (rare, but the user hit "no sound" repeatedly so we belt-and-brace).
+// A short pitch-dropping click is PCM-synthesised in pure JS (no AudioContext
+// needed) into a WAV Blob URL once, then played through a tiny <audio> pool. ──
+let _wavUrl = null;
+let _audioPool = null;
+let _poolIdx = 0;
+function clickWavUrl() {
+  if (_wavUrl || typeof window === 'undefined' || typeof Blob === 'undefined') return _wavUrl;
+  const sr = 44100, dur = 0.05, n = Math.floor(sr * dur);
+  const buf = new ArrayBuffer(44 + n * 2);
+  const dv = new DataView(buf);
+  const ws = (o, s) => { for (let i = 0; i < s.length; i++) dv.setUint8(o + i, s.charCodeAt(i)); };
+  ws(0, 'RIFF'); dv.setUint32(4, 36 + n * 2, true); ws(8, 'WAVE'); ws(12, 'fmt ');
+  dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 1, true);
+  dv.setUint32(24, sr, true); dv.setUint32(28, sr * 2, true); dv.setUint16(32, 2, true); dv.setUint16(34, 16, true);
+  ws(36, 'data'); dv.setUint32(40, n * 2, true);
+  for (let i = 0; i < n; i++) {
+    const tt = i / sr, env = Math.pow(1 - i / n, 3);
+    const tone = Math.sin(2 * Math.PI * 1500 * tt * (1 - 0.4 * tt / dur));
+    const noise = (Math.random() * 2 - 1) * 0.5;
+    let s = (tone * 0.7 + noise * 0.3) * env;
+    s = Math.max(-1, Math.min(1, s));
+    dv.setInt16(44 + i * 2, s * 32767, true);
+  }
+  try { _wavUrl = URL.createObjectURL(new Blob([buf], { type: 'audio/wav' })); } catch (_) { _wavUrl = null; }
+  return _wavUrl;
+}
+function playClickFallback(gain) {
+  const url = clickWavUrl();
+  if (!url || typeof Audio === 'undefined') return;
+  if (!_audioPool) { _audioPool = [0, 1, 2].map(() => { const a = new Audio(url); a.preload = 'auto'; return a; }); }
+  const a = _audioPool[_poolIdx = (_poolIdx + 1) % _audioPool.length];
+  try { a.volume = Math.min(1, gain * 1.4); a.currentTime = 0; const p = a.play(); if (p && p.catch) p.catch(() => {}); } catch (_) { /* ignore */ }
+}
+
 export function playClick(stage, level, soundEnabled) {
   const gain = gainForLevel(level, stage, soundEnabled);
   if (gain <= 0) return;
   const ac = ctx();
-  if (!ac) return;
+  if (!ac) { playClickFallback(gain); return; }     // WebAudio unavailable → HTMLAudio WAV
   const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
   if (now - _lastPlay < 28) return;                 // throttle: one click / 28ms
   _lastPlay = now;
@@ -156,4 +199,34 @@ export function useSoftTactile() {
   }, [cfg]);
 
   return { cfg, setCfg, onPress, onRelease };
+}
+
+// ── GLOBAL press-sound (2026-06-19, ROOT-CAUSE FIX) ─────────────────────────
+// The click sound was previously wired ONLY to /soft-lab + the Settings toggle,
+// so tapping the actual app (nav, bell, cards, CTAs) was SILENT — that is why
+// "sound doesn't work" recurred. This installs ONE capture-phase pointerdown
+// listener so EVERY interactive press app-wide plays the click when sound is
+// enabled. pointerdown IS the user gesture, so it also unlocks the audio context
+// on the first tap. Throttled in playClick (so a component that ALSO plays on
+// press doesn't double-fire). Mounted once from App.
+const PRESS_SELECTOR =
+  'a[href], button, [role="button"], summary, label, ' +
+  'input[type="checkbox"], input[type="radio"], ' +
+  '.seg-opt, .glass-switch, .glass-disc, .glass-capsule, .navbtn, .bell, .nav-bead, [data-click-sound]';
+let _globalInstalled = false;
+export function installGlobalPressSound() {
+  if (typeof document === 'undefined' || _globalInstalled) return () => {};
+  _globalInstalled = true;
+  const onDown = (e) => {
+    const cfg = liveTactile();
+    if (!cfg.sound || cfg.level === 'off') return;
+    const t = e.target;
+    const el = t && t.closest ? t.closest(PRESS_SELECTOR) : null;
+    if (!el || el.disabled || el.getAttribute('aria-disabled') === 'true') return;
+    unlockAudio();
+    playClick('down', cfg.level, cfg.sound);
+    vibrate(cfg.level, cfg.haptics);
+  };
+  document.addEventListener('pointerdown', onDown, { capture: true, passive: true });
+  return () => { document.removeEventListener('pointerdown', onDown, { capture: true }); _globalInstalled = false; };
 }

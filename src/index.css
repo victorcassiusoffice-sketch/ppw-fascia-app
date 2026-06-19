@@ -294,10 +294,10 @@ h1, h2, h3, h4 {
      first de-frost (5/9/14/20) read FLAT. These sit between: blur is enough to
      diffuse + give real glass depth, while the ground still reads THROUGH the
      pane. The liquid quality is carried by the bright rim + sheen + refraction. */
-  --glass-blur-1: 4px;    /* light film — header fade, menus */
-  --glass-blur-2: 8px;    /* standard dock/bar glass */
-  --glass-blur-3: 13px;   /* heavy — surfaces over imagery (hero) */
-  --glass-blur-4: 18px;   /* DIALOG — soft diffusion, ground still legible */
+  --glass-blur-1: 3px;    /* light film — header fade, menus */
+  --glass-blur-2: 6px;    /* standard dock/bar glass (2026-06-19: clearer still) */
+  --glass-blur-3: 10px;   /* heavy — surfaces over imagery (hero) */
+  --glass-blur-4: 16px;   /* DIALOG — soft diffusion, ground still legible */
 }
 
 .glass {
@@ -1208,6 +1208,44 @@ html[data-theme="light"] .stack-goo-blob { background: rgba(150, 160, 180, 0.7);
 }
 .bell:active { transform: translateX(-50%) scale(0.93); }
 .belllabel { margin-top: 30px; color: var(--col-low); font-weight: 600; font-size: 10px; }
+
+/* ── Central STACK hub (2026-06-19, Vic) — NESTED liquid glass: a raised outer
+   pod with an inner core disc = a button INSIDE a button (merged-liquid grammar).
+   Routes to the Protocols stack. Sits raised above the dock like the old bell. ── */
+.stackslot { position: relative; }
+.nav-stack {
+  position: absolute; left: 50%; top: -24px; transform: translateX(-50%);
+  width: 62px; height: 62px; border-radius: 50%;
+  display: grid; place-items: center; cursor: pointer; isolation: isolate;
+  background-color: var(--glass-tint);
+  background-image: var(--glass-fill);
+  -webkit-backdrop-filter: blur(var(--glass-blur-1)) saturate(160%) brightness(1.05);
+          backdrop-filter: blur(var(--glass-blur-1)) saturate(160%) brightness(1.05);
+  border: 1px solid var(--glass-rim);
+  box-shadow: var(--glass-rimlight), var(--glass-inner-glow), 0 12px 26px -10px rgba(0,0,0,0.55);
+  color: var(--col-ink);
+  transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-mid) var(--ease), border-color var(--dur-mid) var(--ease);
+}
+/* INNER core — the nested disc; carries its own bevel so it reads as a separate
+   merged glass body floating inside the outer pod. */
+.nav-stack-core {
+  width: 42px; height: 42px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: linear-gradient(160deg, rgba(255,255,255,0.15), rgba(255,255,255,0.02) 55%, rgba(255,255,255,0.08));
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  box-shadow: inset 0 1px 0.5px rgba(255,255,255,0.65), inset 0 -2px 4px rgba(0,0,0,0.18);
+}
+.nav-stack-core svg { width: 23px; height: 23px; color: var(--col-ink); }
+.nav-stack.active {
+  background-color: var(--accent-glass-bg);
+  border-color: var(--accent-glass-rim);
+  box-shadow: var(--glass-rimlight), var(--accent-glass-glow), 0 0 0 4px var(--accent-soft);
+}
+.nav-stack.active .nav-stack-core { border-color: rgba(255,255,255,0.6); }
+.nav-stack.active .nav-stack-core svg { color: #fff; }
+.stacklabel { margin-top: 44px; color: var(--col-low); font-weight: 600; font-size: 10px; }
+.alertbtn { background: none; border: none; cursor: pointer; }
+@media (prefers-reduced-motion: reduce) { .nav-stack { transition: none; } }
 
 /* DNA-helix logo mark (inline SVG, theme-aware stroke). */
 .helix-mark { display: inline-flex; align-items: center; color: var(--col-accent); }
