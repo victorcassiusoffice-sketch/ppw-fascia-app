@@ -97,7 +97,10 @@ let _audioPool = null;
 let _poolIdx = 0;
 function clickWavUrl() {
   if (_wavUrl || typeof window === 'undefined' || typeof Blob === 'undefined') return _wavUrl;
-  const sr = 44100, dur = 0.05, n = Math.floor(sr * dur);
+  // Liquid-drop (2026-06-20): a rounded sine that bends UP in pitch with a soft
+  // attack + gentle decay — a water "plip", no noise edge (matches the WebAudio
+  // path). dur longer than the old tick so it reads as a drop, not a click.
+  const sr = 44100, dur = 0.14, n = Math.floor(sr * dur);
   const buf = new ArrayBuffer(44 + n * 2);
   const dv = new DataView(buf);
   const ws = (o, s) => { for (let i = 0; i < s.length; i++) dv.setUint8(o + i, s.charCodeAt(i)); };
@@ -105,11 +108,14 @@ function clickWavUrl() {
   dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 1, true);
   dv.setUint32(24, sr, true); dv.setUint32(28, sr * 2, true); dv.setUint16(32, 2, true); dv.setUint16(34, 16, true);
   ws(36, 'data'); dv.setUint32(40, n * 2, true);
+  let phase = 0;
   for (let i = 0; i < n; i++) {
-    const tt = i / sr, env = Math.pow(1 - i / n, 3);
-    const tone = Math.sin(2 * Math.PI * 1500 * tt * (1 - 0.4 * tt / dur));
-    const noise = (Math.random() * 2 - 1) * 0.5;
-    let s = (tone * 0.7 + noise * 0.3) * env;
+    const frac = i / n;
+    // soft attack over first 12%, gentle exponential decay after.
+    const env = frac < 0.12 ? frac / 0.12 : Math.pow(1 - (frac - 0.12) / 0.88, 2.4);
+    const f = 440 * (1 + 1.2 * Math.min(1, frac / 0.85));   // 440 → ~970 Hz rise
+    phase += (2 * Math.PI * f) / sr;
+    let s = Math.sin(phase) * env;
     s = Math.max(-1, Math.min(1, s));
     dv.setInt16(44 + i * 2, s * 32767, true);
   }
@@ -124,49 +130,46 @@ function playClickFallback(gain) {
   try { a.volume = Math.min(1, gain * 1.4); a.currentTime = 0; const p = a.play(); if (p && p.catch) p.catch(() => {}); } catch (_) { /* ignore */ }
 }
 
+// LIQUID-DROP press sound (2026-06-20, Vic FRESH-EYES: "make the click a softer
+// liquid-drop, not the current tick"). A water droplet = a rounded SINE pluck
+// that bends UP in pitch (the "plip"), through a resonant low-pass so there is
+// NO bright noise edge, with a soft attack and a gentle bell-like decay. The
+// harsh bandpass-noise transient that made the old sound a "tick" is gone.
+// down ≈ a fuller, lower drop; up ≈ a lighter, higher droplet (rarely played).
 export function playClick(stage, level, soundEnabled) {
   const gain = gainForLevel(level, stage, soundEnabled);
   if (gain <= 0) return;
   const ac = ctx();
   if (!ac) { playClickFallback(gain); return; }     // WebAudio unavailable → HTMLAudio WAV
   const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
-  if (now - _lastPlay < 28) return;                 // throttle: one click / 28ms
+  if (now - _lastPlay < 28) return;                 // throttle: one drop / 28ms
   _lastPlay = now;
 
   const t = ac.currentTime;
-  const dur = stage === 'up' ? 0.045 : 0.06;
+  const dur = stage === 'up' ? 0.10 : 0.14;         // longer than a click → rounded drop
 
-  // Tonal core — a triangle tick dropping in pitch (the "thock"/"tick").
+  // Pitch-rising sine = the droplet "plip" (low → up). Sine only, no noise edge.
   const osc = ac.createOscillator();
-  osc.type = 'triangle';
-  const f0 = stage === 'up' ? 2200 : 1500;
+  osc.type = 'sine';
+  const f0 = stage === 'up' ? 620 : 440;
   osc.frequency.setValueAtTime(f0, t);
-  osc.frequency.exponentialRampToValueAtTime(f0 * 0.55, t + dur);
+  osc.frequency.exponentialRampToValueAtTime(f0 * 2.2, t + dur * 0.85);
+
+  // Resonant low-pass softens any edge and gives the watery "bloop" body.
+  const lp = ac.createBiquadFilter();
+  lp.type = 'lowpass';
+  lp.frequency.setValueAtTime(900, t);
+  lp.frequency.exponentialRampToValueAtTime(1800, t + dur * 0.6);
+  lp.Q.value = 6;
+
   const g = ac.createGain();
   g.gain.setValueAtTime(0.0001, t);
-  g.gain.exponentialRampToValueAtTime(gain, t + 0.004);   // fast attack
-  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);   // fast decay
-  osc.connect(g).connect(ac.destination);
-  osc.start(t);
-  osc.stop(t + dur + 0.02);
+  g.gain.exponentialRampToValueAtTime(gain, t + 0.012);   // soft attack (not a snap)
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);   // gentle decay
 
-  // Transient noise attack layered on top for the crisp "click" edge.
-  const nFrames = Math.max(1, Math.floor(ac.sampleRate * 0.012));
-  const buf = ac.createBuffer(1, nFrames, ac.sampleRate);
-  const data = buf.getChannelData(0);
-  for (let i = 0; i < nFrames; i++) {
-    data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / nFrames, 3);
-  }
-  const noise = ac.createBufferSource();
-  noise.buffer = buf;
-  const bp = ac.createBiquadFilter();
-  bp.type = 'bandpass';
-  bp.frequency.value = stage === 'up' ? 2800 : 1900;
-  bp.Q.value = 0.8;
-  const ng = ac.createGain();
-  ng.gain.value = gain * 0.6;
-  noise.connect(bp).connect(ng).connect(ac.destination);
-  noise.start(t);
+  osc.connect(lp).connect(g).connect(ac.destination);
+  osc.start(t);
+  osc.stop(t + dur + 0.03);
 }
 
 export function vibrate(level, hapticsEnabled) {

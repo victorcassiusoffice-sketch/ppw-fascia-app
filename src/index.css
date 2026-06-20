@@ -109,9 +109,14 @@ html[data-theme="dark"] {
   /* GLOSSY-CLEAR fill (2026-06-19, Vic REF-08 "finish"): a brighter top-gloss
      bloom + a soft lower reflection POOL (the reference disc's light gathers low),
      so the surface reads as polished CLEAR glass, not matte frost. */
+  /* 2026-06-20 (Vic FRESH-EYES, SOURCE BTN v.02): glossier convex CLEAR glass —
+     a tighter, brighter top gloss cap (the domed lens highlight in the ref) over
+     the broad bloom, + the low reflection pool. Reads as polished glass, not
+     matte frost; the ground still shows through (low body tint). */
   --glass-fill:
-      radial-gradient(120% 78% at 30% -12%, rgba(255, 255, 255, 0.30), rgba(255, 255, 255, 0) 52%),
-      radial-gradient(92% 56% at 50% 116%, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0) 58%);
+      linear-gradient(180deg, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0.05) 12%, rgba(255,255,255,0) 30%),
+      radial-gradient(120% 78% at 30% -12%, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0) 52%),
+      radial-gradient(92% 56% at 50% 116%, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0) 58%);
   --glass-rim:       rgba(255, 255, 255, 0.55);   /* brighter visible rim (was 0.40) */
   --glass-specular:  rgba(255, 255, 255, 0.78);   /* brighter top bevel line (was 0.60) */
   --glass-edge:      rgba(255, 255, 255, 0.16);
@@ -131,9 +136,15 @@ html[data-theme="dark"] {
      untouched. White light only; never a dark fill. */
   /* BEVELLED EDGE (2026-06-19, Vic REF-08 "edge"): a bright top-left bevel light
      + full rim + a lower groove shadow = real chamfered depth, not a flat 1px line. */
-  --glass-rimlight:   inset 0 1px 0.5px rgba(255,255,255,0.72),
-                      inset 1px 0 0.5px rgba(255,255,255,0.30),
-                      inset 0 0 0 1px rgba(255,255,255,0.18),
+  /* BEVELLED + CHROMATIC EDGE (2026-06-20, Vic SOURCE BTN v.02 + component-set
+     rainbow edge): the bevel now carries a faint PRISM dispersion — a cool
+     cyan-white catch on the top-left bevel and a warm amber catch on the
+     bottom-right groove, the unmistakable signature of the reference glass.
+     Kept low-alpha so legibility/scrim are untouched (law #4). */
+  --glass-rimlight:   inset 0 1px 0.5px rgba(255,255,255,0.78),
+                      inset 1.5px 1.5px 1px -0.5px rgba(150,205,255,0.42),
+                      inset 0 0 0 1px rgba(255,255,255,0.20),
+                      inset -1.5px -1.5px 1px -0.5px rgba(255,200,150,0.34),
                       inset 0 -1.5px 1.5px rgba(0,0,0,0.20);
   --glass-inner-glow: inset 0 2px 1px -0.5px rgba(255,255,255,0.42), inset 0 0 34px -12px rgba(255,255,255,0.22), inset 0 -16px 26px -18px rgba(255,255,255,0.14);
   --glass-sheen: linear-gradient(125deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.03) 34%, rgba(255,255,255,0) 60%);
@@ -442,11 +453,16 @@ html[data-glass="low"] .glass-dialog { -webkit-backdrop-filter: blur(var(--glass
      it passes through is itself churning (App.jsx <animate>) → visible liquid
      light. background-size>100% gives travel room so no edge is exposed. The
      position drift is GPU-cheap (no layout/paint of the card). */
-  animation: ppw-liquid-flow 11s ease-in-out infinite;
+  animation: ppw-liquid-flow 8s ease-in-out infinite;
 }
+/* 2026-06-20 (Vic FRESH-EYES "NO liquid motion"): the drift is now wider + a
+   touch faster + a brighter breathe so the refracted light visibly FLOWS across
+   the pane (the prior 20%/0.78–1 range read as static on a phone). Still pure
+   background-position/opacity → GPU-cheap, no layout/paint of the card. */
 @keyframes ppw-liquid-flow {
-  0%, 100% { background-position: 0% 0%;   opacity: 0.78; }
-  50%      { background-position: 20% 14%; opacity: 1; }
+  0%, 100% { background-position: 0% 0%;    opacity: 0.62; }
+  35%      { background-position: 34% 22%;  opacity: 1; }
+  70%      { background-position: 14% 30%;  opacity: 0.82; }
 }
 @supports not (filter: url("#ppw-liquid-glass")) { .liquid-refract::after { filter: none; opacity: 0.5; } }
 @media (prefers-reduced-transparency: reduce) { .liquid-refract::after { display: none; } }

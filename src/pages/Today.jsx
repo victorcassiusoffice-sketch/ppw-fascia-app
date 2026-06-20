@@ -1138,10 +1138,12 @@ function TodayView() {
         </div>
         <DateStrip ref={dateStripRef} selectedDate={selectedDate} onSelect={setSelectedDate} />
 
-        {/* Rebalanced action row — two equal pills + ⋮ overflow (bell moved to
-            bottom nav per Vic change #1). Rare actions (select-all, clear,
-            create routine) live under ⋮ so nothing crowds at 360px. */}
-        <div className="grid items-center gap-2.5" style={{ gridTemplateColumns: 'auto 1fr auto' }}>
+        {/* Decluttered action row (2026-06-20, Vic FRESH-EYES): the Protocol
+            entry is GONE from Today — protocols now live behind the central
+            Stack hub in the bottom dock. Today keeps only the single + (add a
+            stack) and the ⋮ overflow; "Add a protocol…" moved into ⋮ so the
+            function is never lost. Row is now [ + Add stack ............ ⋮ ]. */}
+        <div className="flex items-center justify-between gap-2.5">
           {/* Vic 2026-06-17 — "the Plus icon would be enough for the stack, no
               need for words." Primary add = accent-GLASS icon disc (+ only).
               aria-label keeps it discoverable + i18n-safe. Still GROWS into the
@@ -1149,28 +1151,14 @@ function TodayView() {
           <m.button
             type="button"
             onClick={() => setAddModalOpen(true)}
-            className="btn-accent flex items-center justify-center"
-            style={{ height: 44, width: 44, padding: 0, borderRadius: 'var(--r-pill)' }}
+            className="btn-accent flex items-center justify-center gap-2"
+            style={{ height: 44, padding: '0 18px', borderRadius: 'var(--r-pill)' }}
             aria-label="Add stack"
             title="Add a custom stack"
             {...(reduced || addModalOpen ? {} : { layoutId: 'add-stack-morph' })}
             {...pressScale()}
           >
-            <IconPlus />
-          </m.button>
-          {/* REF-08: labelled secondary action = glass capsule. Kept its tiny
-              "Protocol" label (Vic's judgement clause): a book glyph alone reads
-              ambiguously as read/library, so one word anchors the row. */}
-          <m.button
-            type="button"
-            onClick={() => setAddProtocolOpen(true)}
-            className="glass-capsule flex items-center justify-center gap-2 text-sm font-bold"
-            style={{ height: 44, padding: 0 }}
-            aria-label="Add protocol"
-            title="Add a science protocol from your library"
-            {...pressScale()}
-          >
-            <IconBookOpen /><span className="text-sm">Protocol</span>
+            <IconPlus /><span className="text-sm font-bold">Add stack</span>
           </m.button>
           <div className="relative">
             {/* REF-08: icon-only action = circular glass disc. */}
@@ -1192,6 +1180,9 @@ function TodayView() {
                   className="absolute right-0 mt-2 z-50 card p-1.5"
                   style={{ minWidth: 208 }}
                 >
+                  <button role="menuitem" type="button" onClick={() => { setAddProtocolOpen(true); setOverflowOpen(false); }} className="w-full text-left px-3 py-2.5 rounded-xl text-sm hover:bg-cream/5 flex items-center gap-2">
+                    <IconBookOpen /> Add a protocol…
+                  </button>
                   <button role="menuitem" type="button" onClick={() => { handleMasterToggle(selectedIds.size === 0 ? 'empty' : 'full'); setOverflowOpen(false); }} className="w-full text-left px-3 py-2.5 rounded-xl text-sm hover:bg-cream/5 flex items-center gap-2">
                     <IconCheckSquare />{selectedIds.size === 0 ? 'Select all on this day' : 'Clear selection'}
                   </button>
@@ -1298,7 +1289,7 @@ function TodayView() {
       {!empty && (
         <div className="relative mt-4">
           <div
-            className="glass-strong relative flex items-center justify-between gap-4 overflow-hidden"
+            className="glass-strong liquid-refract relative flex items-center justify-between gap-4 overflow-hidden"
             style={{ padding: '20px 22px', borderRadius: 'var(--r-24)' }}
           >
             {!reduced && nextUp && (
@@ -1370,8 +1361,10 @@ function TodayView() {
           </div>
           <div className="font-display slot-empty-title text-2xl mb-2">Nothing scheduled yet.</div>
           <p className="text-muted text-sm mb-6 max-w-sm mx-auto leading-relaxed">Activate a protocol, save a body-zone routine, or pick an audio module — they will all show up here.</p>
+          {/* Declutter (2026-06-20): "Browse protocols" removed — protocols now
+              live behind the central Stack hub in the dock, so the empty state
+              leads with the one primary action + audio modules. */}
           <div className="flex flex-wrap gap-3 justify-center">
-            <Link to="/protocols" className="btn-accent tile-amber">Browse protocols</Link>
             <Link to="/welcome" className="btn-accent tile-green">Create our Personalised Release Routine</Link>
             <Link to="/modules" className="btn-ghost">Audio modules</Link>
           </div>

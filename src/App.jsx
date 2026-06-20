@@ -155,7 +155,9 @@ export default function App() {
               )}
             </feTurbulence>
             <feGaussianBlur in="n" stdDeviation="1.1" result="nb" />
-            <feDisplacementMap in="SourceGraphic" in2="nb" scale="13" xChannelSelector="R" yChannelSelector="G" />
+            {/* 2026-06-20 (Vic "make liquid motion visible"): scale 13 → 19 so the
+                churning noise field bends the refracted light noticeably more. */}
+            <feDisplacementMap in="SourceGraphic" in2="nb" scale="19" xChannelSelector="R" yChannelSelector="G" />
           </filter>
         </svg>
         {/* Refinement 2 (REF-01/04/05): user-selectable ground behind the

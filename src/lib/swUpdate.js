@@ -148,6 +148,9 @@ export function registerServiceWorker({ immediate = false } = {}) {
       console.warn('SW registration failed:', err);
       return null;
     }
+    // register() can resolve undefined in environments that block SW (some
+    // headless/incognito contexts) — guard so we never read .waiting on it.
+    if (!reg) return null;
 
     // A build may have installed and parked in `waiting` while the app was
     // closed — surface it right away.
