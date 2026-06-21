@@ -66,9 +66,14 @@ void main(){
     col = mix(a, b, clamp(f * f * 2.2, 0.0, 1.0));
     col = mix(col, acc, clamp(r.x * 0.5, 0.0, 0.38));
   } else {
-    vec3 a = vec3(0.06, 0.07, 0.10), b = vec3(0.12, 0.15, 0.21), acc = vec3(0.30, 0.16, 0.07);
+    // 2026-06-22: LIFTED deep-but-LUMINOUS ground (was 0.06–0.21, too dark — the
+    // glass had no light to refract so cards read murky). REF-08 glass sits over a
+    // MID ground; this lifts the dark theme toward a lit deep-room tone (~0.13–0.30)
+    // with a warm amber caustic, so the clear glass catches light + reads glossy.
+    // Still clearly a DARK theme; card tint + text-shadow keep white-on-glass AA.
+    vec3 a = vec3(0.13, 0.145, 0.175), b = vec3(0.235, 0.265, 0.325), acc = vec3(0.42, 0.25, 0.12);
     col = mix(a, b, clamp(f * f * 2.2, 0.0, 1.0));
-    col = mix(col, acc, clamp(r.x * 0.42, 0.0, 0.34));
+    col = mix(col, acc, clamp(r.x * 0.40, 0.0, 0.34));
   }
   col += (0.05 + u_energy * 0.05) * smoothstep(0.62, 0.96, f); // caustic sheen — brightens subtly on interaction
   gl_FragColor = vec4(col, 1.0);
