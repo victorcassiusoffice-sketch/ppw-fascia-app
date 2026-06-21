@@ -17,7 +17,7 @@ export const BG_KEY = 'ppw.background';
 export const CUSTOM_BG_MEDIA_ID = 'ppw-custom-bg';
 
 export const BG_OPTIONS = [
-  { kind: 'auto',   label: 'Auto',          hint: 'Follows the theme — nature in dark, gradient grey in light' },
+  { kind: 'auto',   label: 'Auto (Liquid)', hint: 'Flowing liquid-glass ground, theme-tinted — animated; freezes under reduced-motion' },
   { kind: 'liquid', label: 'Liquid',        hint: 'Flowing liquid-glass ground — animated (GPU), freezes under reduced-motion' },
   { kind: 'nature', label: 'Nature',        hint: 'Dark organic texture (PPW fascia)' },
   { kind: 'grey',   label: 'Gradient Grey', hint: 'Soft neumorphic gradient ground (REF-05)' },
@@ -64,9 +64,15 @@ export function setBackgroundChoice(choice) {
   emitChange();
 }
 
-/** 'auto' resolves by the RESOLVED theme; explicit kinds pass through. */
+/** 'auto' resolves to the ANIMATED liquid ground (2026-06-22, Vic "visible
+ *  liquid motion" — the default must MOVE). This is the "Gradient Grey as in the
+ *  navigation liquid-morphism movements" Vic referenced: the WebGL shader is
+ *  theme-tinted (pale grey in light, deep ground in dark) and gives the glass UI
+ *  luminous flowing content to refract instead of a flat static image. Static
+ *  options (nature / grey / skins / custom) remain explicit picks in Settings;
+ *  reduced-motion freezes the liquid to one static frame. */
 export function resolveBackgroundKind(choice, resolvedTheme) {
-  if (!choice || choice.kind === 'auto') return resolvedTheme === 'light' ? 'grey' : 'nature';
+  if (!choice || choice.kind === 'auto') return 'liquid';
   return choice.kind;
 }
 

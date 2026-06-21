@@ -26,11 +26,14 @@ describe('backgrounds feature (REF-01/04/05)', () => {
     expect(getBackgroundChoice().kind).toBe('grey');
   });
 
-  it('auto resolves by theme: dark→nature, light→grey; explicit passes through', () => {
-    expect(resolveBackgroundKind({ kind: 'auto' }, 'dark')).toBe('nature');
-    expect(resolveBackgroundKind({ kind: 'auto' }, 'light')).toBe('grey');
+  it('auto resolves to the animated liquid ground (2026-06-22 default); explicit passes through', () => {
+    // Default now MOVES — auto → liquid (Vic "visible liquid motion"). Static
+    // nature/grey/skins remain explicit picks.
+    expect(resolveBackgroundKind({ kind: 'auto' }, 'dark')).toBe('liquid');
+    expect(resolveBackgroundKind({ kind: 'auto' }, 'light')).toBe('liquid');
     expect(resolveBackgroundKind({ kind: 'custom' }, 'dark')).toBe('custom');
-    expect(resolveBackgroundKind(null, 'dark')).toBe('nature');
+    expect(resolveBackgroundKind({ kind: 'nature' }, 'dark')).toBe('nature');
+    expect(resolveBackgroundKind(null, 'dark')).toBe('liquid');
   });
 });
 

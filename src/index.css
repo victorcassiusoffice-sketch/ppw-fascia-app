@@ -117,8 +117,8 @@ html[data-theme="dark"] {
       linear-gradient(180deg, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0.05) 12%, rgba(255,255,255,0) 30%),
       radial-gradient(120% 78% at 30% -12%, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0) 52%),
       radial-gradient(92% 56% at 50% 116%, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0) 58%);
-  --glass-rim:       rgba(255, 255, 255, 0.55);   /* brighter visible rim (was 0.40) */
-  --glass-specular:  rgba(255, 255, 255, 0.78);   /* brighter top bevel line (was 0.60) */
+  --glass-rim:       rgba(255, 255, 255, 0.62);   /* 2026-06-22: crisper bright bevel edge (REF-08 fine rim) */
+  --glass-specular:  rgba(255, 255, 255, 0.80);   /* brighter top bevel line */
   --glass-edge:      rgba(255, 255, 255, 0.16);
   --chip-glass:      rgba(255, 255, 255, 0.07); /* small pills/chips, no blur */
   /* Back-compat aliases (bars, sheets) — MORE transparent (Vic: clearer glass) */
@@ -147,7 +147,11 @@ html[data-theme="dark"] {
                       inset -1.5px -1.5px 1px -0.5px rgba(255,200,150,0.34),
                       inset 0 -1.5px 1.5px rgba(0,0,0,0.20);
   --glass-inner-glow: inset 0 2px 1px -0.5px rgba(255,255,255,0.42), inset 0 0 34px -12px rgba(255,255,255,0.22), inset 0 -16px 26px -18px rgba(255,255,255,0.14);
-  --glass-sheen: linear-gradient(125deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.03) 34%, rgba(255,255,255,0) 60%);
+  /* 2026-06-22 (design-dept rebuild): brighter, crisper diagonal gloss BAND —
+     the polished light-bar of REF-01/REF-08, not a faint haze. Leading bright
+     edge top-left, quick falloff by ~38% so it reads as a glossy streak (not a
+     foggy wash) over the moving liquid ground. */
+  --glass-sheen: linear-gradient(122deg, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.12) 16%, rgba(255,255,255,0.02) 38%, rgba(255,255,255,0) 62%);
   --card-glass-bg: var(--glass-tint);
   /* FORENSIC-AUDIT P0 (2026-06-12): accent arrives THROUGH glass, never as
      opaque paint. One token for every CTA/active state. */
