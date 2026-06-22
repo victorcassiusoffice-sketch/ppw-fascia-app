@@ -1,12 +1,14 @@
 // /protocols + /protocol/:id (extracted verbatim from App.jsx, 2026-06-11
 // liquid-glass redesign — zero logic change).
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { useActiveProtocols, useFastingPrefs, useDailyDuplicates } from '../state.js';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useActiveProtocols, useFastingPrefs, useDailyDuplicates, useActiveRoutines } from '../state.js';
 import { listProtocols, fetchProtocol, isMockActive } from '../protocols.js';
 import { iherbUrl, amazonUkUrl, iherbCartAllUrl } from '../affiliate.js';
 import { requestPermission, getPermissionState } from '../notifications.js';
 import { Section } from '../components/shared.jsx';
+import { ModulesBody } from './Modules.jsx';
+import { ZONES } from '../data.js';
 import { m, staggerContainer, enterRow, glideIndicator, pressScale } from '../lib/motion';
 import { IconArrowLeft, IconShoppingCart } from '../components/icons.jsx';
 import { t } from '../i18n/strings.js';
@@ -15,9 +17,21 @@ import { t } from '../i18n/strings.js';
    NEW — /protocols
    ═══════════════════════════════════════════ */
 function ProtocolsList() {
+  // 2026-06-23 whole-app redesign: "/protocols" is now the STACK library screen
+  // with three tabs — Routines · Audio · Protocols (Modules folded in as Audio).
+  const nav = useNavigate();
+  const [tab, setTab] = useState('routines');
   const [list, setList] = useState(null);
   const [activeProtocols, setActiveProtocols] = useActiveProtocols();
+  const [routines] = useActiveRoutines();
   useEffect(() => { listProtocols().then(setList); }, []);
+
+  const TABS = [
+    { id: 'routines', label: 'Routines' },
+    { id: 'audio', label: 'Audio' },
+    { id: 'protocols', label: 'Protocols' },
+  ];
+  const savedZones = Array.isArray(routines?.savedZones) ? routines.savedZones : [];
 
   const toggle = (id) => {
     setActiveProtocols((cur) => cur.includes(id) ? cur.filter(x => x !== id) : [...cur, id]);
@@ -27,16 +41,63 @@ function ProtocolsList() {
   };
 
   return (
-    <main className="px-5 py-9 max-w-3xl mx-auto pb-20">
-      <Link to="/today" className="glass-disc mb-6" style={{ width: 40, height: 40, color: 'var(--col-ink)' }} aria-label="Back to Today" title="Back to Today"><IconArrowLeft /></Link>
-      <div className="eyebrow mb-3">Library</div>
-      <h1 className="font-display text-4xl md:text-5xl mb-8 leading-[1.02]">Protocols</h1>
-      {/* Declutter (2026-06-19, Vic "hide more, give space"): the descriptive
-          blurb is demoted to a quiet single hint so the glass panes breathe. */}
-      <p className="text-muted mb-7 max-w-xl leading-relaxed text-sm opacity-70">Tap a protocol to view · activate to merge into your day.</p>
+    <main className="px-5 pt-6 max-w-3xl mx-auto pb-28">
+      <div className="eyebrow mb-2">Stack</div>
+      <h1 className="font-display leading-[1.02] mb-1" style={{ fontSize: 34, letterSpacing: '-0.03em' }}>Your library.</h1>
+      <p className="text-muted text-sm mb-4">Routines, audio &amp; evidence-based protocols.</p>
 
-      {/* 2026-06-12 revamp: legacy science banner purged — the library opens
-          straight onto glass protocol panes over the user's background. */}
+      {/* Segmented tabs (component-set ref): glass track + accent-glass active. */}
+      <div className="glass flex gap-1 p-1 mb-5" role="tablist" aria-label="Library tabs" style={{ borderRadius: 'var(--r-pill)' }}>
+        {TABS.map(tb => {
+          const on = tab === tb.id;
+          return (
+            <button
+              key={tb.id}
+              role="tab"
+              aria-selected={on}
+              onClick={() => setTab(tb.id)}
+              className="flex-1 text-center font-bold transition-all"
+              style={{
+                fontSize: 13, padding: '9px 0', borderRadius: 'var(--r-pill)',
+                color: on ? '#fff' : 'var(--col-mid)',
+                ...(on ? { backgroundColor: 'var(--accent-glass-bg)', backgroundImage: 'var(--glass-fill)', border: '1px solid var(--accent-glass-rim)', boxShadow: 'var(--accent-glass-glow), 0 1px 0 var(--glass-specular) inset', textShadow: '0 1px 2px rgba(0,0,0,0.3)' } : {}),
+              }}
+            >{tb.label}</button>
+          );
+        })}
+      </div>
+
+      {/* ── ROUTINES tab — the user's personalised routine summary + builder. ── */}
+      {tab === 'routines' && (
+        <m.div variants={staggerContainer()} initial="hidden" animate="show">
+          {savedZones.length > 0 ? (
+            <m.div variants={enterRow} className="card liquid-refract p-5 mb-4">
+              <div className="eyebrow mb-2" style={{ color: 'var(--col-accent)' }}>Your routine</div>
+              <div className="font-display text-xl mb-1">{savedZones.length} fascia zone{savedZones.length === 1 ? '' : 's'}</div>
+              <div className="text-muted text-xs mb-3">{routines.level || 'beginner'} · daily at {routines.scheduledTime || '08:00'}{routines.lifestyle ? ' · ' + routines.lifestyle : ''}</div>
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                {savedZones.slice(0, 8).map(z => (
+                  <span key={z} className="glass-capsule" style={{ padding: '4px 11px', fontSize: 11.5 }}>{ZONES.find(x => x.code === z)?.label || z}</span>
+                ))}
+              </div>
+              <m.button onClick={() => nav('/welcome')} className="btn-accent inline-flex items-center gap-1" style={{ height: 38, padding: '0 18px', fontSize: 13 }} {...pressScale()}>Edit routine ▸</m.button>
+            </m.div>
+          ) : (
+            <m.div variants={enterRow} className="card text-center p-8 mb-4">
+              <div className="empty-orb" aria-hidden="true" />
+              <div className="font-display text-lg mb-2">No routine yet.</div>
+              <p className="text-muted text-sm mb-4">Build a personalised fascia routine from your body map, level &amp; lifestyle.</p>
+              <m.button onClick={() => nav('/welcome')} className="btn-accent inline-flex items-center gap-1" style={{ height: 40, padding: '0 20px', fontSize: 13 }} {...pressScale()}>Build a routine ▸</m.button>
+            </m.div>
+          )}
+        </m.div>
+      )}
+
+      {/* ── AUDIO tab — Modules folded in (Vic). ── */}
+      {tab === 'audio' && <ModulesBody />}
+
+      {/* ── PROTOCOLS tab — evidence-based protocol library. ── */}
+      {tab === 'protocols' && (<>
       {list == null && (
         <>
           <span className="sr-only" role="status">Loading protocols…</span>
@@ -83,7 +144,7 @@ function ProtocolsList() {
         })}
       </m.div>
 
-      {/* 2026-06-12 revamp: closing science divider purged (legacy imagery). */}
+      </>)}
     </main>
   );
 }
