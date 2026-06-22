@@ -165,16 +165,14 @@ const DateStrip = React.forwardRef(function DateStrip({ selectedDate, onSelect }
             onClick={() => onSelect(d.iso)}
             className="seg-opt shrink-0 flex flex-col items-center justify-center"
             style={{
-              width: 54, padding: '9px 0', borderRadius: 'var(--r-16)',
-              /* v2: clear glass chip — film + specular rim, never a solid fill
-                 (the glass bar behind already blurs the ground). */
-              backgroundColor: 'var(--chip-glass)',
-              backgroundImage: 'linear-gradient(160deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02) 60%, rgba(255,255,255,0.07))',
-              border: '1px solid var(--glass-rim)',
+              width: 52, padding: '8px 0', borderRadius: 'var(--r-16)',
+              /* RADICAL REDO (2026-06-22): clean/minimal — NO chip box. Unselected
+                 days are bare numerals on the ground; the SELECTED day gets the
+                 crisp accent-glass glide pill (below); TODAY (unselected) carries
+                 only a thin accent ring. Nothing frosted. */
+              backgroundColor: 'transparent',
+              border: isToday && !sel ? '1px solid rgb(var(--c-accent) / 0.55)' : '1px solid transparent',
               color: sel ? 'var(--col-on-accent)' : 'var(--col-ink)',
-              boxShadow: isToday && !sel
-                ? '0 1px 0 var(--glass-specular) inset, 0 0 0 2px var(--col-accent) inset'
-                : '0 1px 0 var(--glass-specular) inset',
               scrollSnapAlign: 'center',
               transition: 'color var(--dur-mid) var(--ease)',
             }}
@@ -1103,16 +1101,15 @@ function TodayView() {
       {/* Sticky top bar — month line · date strip · rebalanced action row.
           Token-driven surface so it flips light↔dark. Sits below the global
           Header (z-40); uses z-30. Full-bleed via negative-x margin. */}
+      {/* RADICAL REDO (2026-06-22): the frosted-glass BOX behind the date tiles
+          is GONE (Vic: "pure clutter, taking space for no reason"). The sticky
+          region is now just a soft fade of the clean ground — no blur, no border,
+          no glass pane. The dates sit clean/minimal on the moving liquid ground. */}
       <div
         className="sticky z-30 -mx-5 px-5 pt-2 pb-2"
         style={{
           top: 56,
-          backgroundColor: 'var(--glass-bg)',
-          backgroundImage: 'var(--glass-fill)',
-          backdropFilter: 'saturate(170%) blur(var(--glass-blur-2))',
-          WebkitBackdropFilter: 'saturate(170%) blur(var(--glass-blur-2))',
-          borderBottom: '1px solid var(--glass-rim)',
-          boxShadow: '0 1px 0 var(--glass-specular) inset',
+          background: 'linear-gradient(180deg, var(--col-bg) 0%, rgb(var(--c-bg-base) / 0.86) 64%, rgb(var(--c-bg-base) / 0))',
         }}
       >
         {/* Month line — big display month + year (left), glance cluster (right). */}
@@ -1143,16 +1140,15 @@ function TodayView() {
             Stack hub in the bottom dock. Today keeps only the single + (add a
             stack) and the ⋮ overflow; "Add a protocol…" moved into ⋮ so the
             function is never lost. Row is now [ + Add stack ............ ⋮ ]. */}
-        <div className="flex items-center justify-between gap-2.5">
-          {/* Vic 2026-06-17 — "the Plus icon would be enough for the stack, no
-              need for words." Primary add = accent-GLASS icon disc (+ only).
-              aria-label keeps it discoverable + i18n-safe. Still GROWS into the
-              Add Stack sheet via the shared layoutId (REF-04/05). */}
+        {/* RADICAL REDO (2026-06-22): Add stack is now CENTRED (Vic: "the add
+            stack button is on the LEFT — it should be in the MIDDLE"). The ⋮
+            overflow is pinned right so the row stays balanced/symmetrical. */}
+        <div className="relative flex items-center justify-center" style={{ minHeight: 44 }}>
           <m.button
             type="button"
             onClick={() => setAddModalOpen(true)}
             className="btn-accent flex items-center justify-center gap-2"
-            style={{ height: 44, padding: '0 18px', borderRadius: 'var(--r-pill)' }}
+            style={{ height: 44, padding: '0 22px', borderRadius: 'var(--r-pill)' }}
             aria-label="Add stack"
             title="Add a custom stack"
             {...(reduced || addModalOpen ? {} : { layoutId: 'add-stack-morph' })}
@@ -1160,7 +1156,7 @@ function TodayView() {
           >
             <IconPlus /><span className="text-sm font-bold">Add stack</span>
           </m.button>
-          <div className="relative">
+          <div className="absolute right-0">
             {/* REF-08: icon-only action = circular glass disc. */}
             <button
               type="button"

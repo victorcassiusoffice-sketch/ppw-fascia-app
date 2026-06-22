@@ -77,25 +77,30 @@ export function ThemeToggle() {
   );
 }
 
-/* ── Icons ── */
+/* ── Icons — RADICAL REDO icon set (2026-06-22, Vic "icons must actually
+   change"). Every glyph is redrawn fresh + distinct from the prior round: the
+   house → a today/calendar-dot, the music-note → an audio equalizer, the gear →
+   SLIDERS (Vic: the Settings icon must change), the bell + stack redrawn. Thin
+   uniform stroke (the global REF-08 1.6 rule applies). ── */
 function IconHome() {
-  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8" /><path d="M5 10v10h14V10" /></svg>;
-}
-function IconProtocols() {
-  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 4h13a2 2 0 0 1 2 2v14H6a2 2 0 0 1-2-2z" /><line x1="8" y1="8" x2="15" y2="8" /></svg>;
+  // "Today" — calendar with the day dot (not a house).
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3.2" /><path d="M8 3.2v3.2M16 3.2v3.2M3.5 10h17" /><circle cx="12" cy="15" r="1.7" fill="currentColor" stroke="none" /></svg>;
 }
 function IconModules() {
-  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></svg>;
+  // "Modules" — audio equalizer bars (not a music note).
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 10v4M8.5 6.5v11M13 4.5v15M17.5 8v8M21 11v2" /></svg>;
 }
 function IconSettings() {
-  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.5-2.4 1a7 7 0 0 0-1.7-1L16 2h-4l-.8 2.5a7 7 0 0 0-1.7 1l-2.4-1-2 3.5L7 10a7 7 0 0 0 0 2l-2 1.5 2 3.5 2.4-1a7 7 0 0 0 1.7 1L12 22h4l.8-2.5" /></svg>;
+  // "Settings" — three horizontal sliders with knobs (NOT the gear).
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3.5 7h9M17 7h3.5M3.5 12h2.5M10.5 12h10M3.5 17h9M17 17h3.5" /><circle cx="14.5" cy="7" r="2.2" /><circle cx="8" cy="12" r="2.2" /><circle cx="14.5" cy="17" r="2.2" /></svg>;
 }
 function IconBellGlyph({ filled }) {
-  return <svg viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.7 21a2 2 0 0 1-3.4 0" /></svg>;
+  // "Alerts" — softer, rounder bell, redrawn.
+  return <svg viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 10a6 6 0 0 1 12 0c0 4.2 1.4 5.6 2.2 6.4a.6.6 0 0 1-.42 1.02H4.22A.6.6 0 0 1 3.8 16.4C4.6 15.6 6 14.2 6 10Z" /><path d="M9.8 20a2.4 2.4 0 0 0 4.4 0" /></svg>;
 }
-/* Central STACK hub glyph — stacked layers (the protocol/stack hub). */
+/* Central STACK hub glyph — a clean stacked deck (rounded layers). */
 function IconStack() {
-  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5 9-5z" /><path d="M3 13l9 5 9-5" /><path d="M3 17l9 5 9-5" opacity="0.7" /></svg>;
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="4.5" y="3.8" width="15" height="5.2" rx="2.2" /><rect x="4.5" y="10.6" width="15" height="5.2" rx="2.2" opacity="0.85" /><path d="M6.6 18.6h10.8" opacity="0.5" /></svg>;
 }
 
 /* ── Bottom navigation + enlarged centre bell ── */

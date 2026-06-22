@@ -27,6 +27,16 @@ void main() { gl_Position = vec4(a_pos, 0.0, 1.0); }
 `;
 
 // mediump: ample for a soft background; faster + broadest mobile support.
+//
+// RADICAL REDO (2026-06-22) — CLEAN MINIMAL GROUND.
+// The prior 5-octave domain-warped FBM read as a CLOUDY, murky churn — the glass
+// over it could never look crisp (Vic: "frosty/murky, nothing like the refs").
+// The reference motion videos (app-refs/*.mp4) are the opposite: a SMOOTH grey
+// field with ONE or two large, soft LUMINOUS pools slowly drifting, and crisp
+// glass catching that moving light. This shader is rebuilt to that: a smooth
+// base gradient + a few big gaussian light-pools that orbit slowly. Far less
+// visual noise → the glass on top reads CLEAR + glossy, exactly like the refs,
+// and the drifting pools give genuinely VISIBLE liquid motion.
 const FRAG = `
 precision mediump float;
 uniform float u_time;
@@ -34,48 +44,52 @@ uniform vec2  u_res;
 uniform float u_theme;  // 1.0 = light, 0.0 = dark
 uniform float u_energy; // 0..1 — interaction energy (scroll velocity + tap impulse, decays)
 
-float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }
-float noise(vec2 p){
-  vec2 i = floor(p), f = fract(p);
-  f = f * f * (3.0 - 2.0 * f);
-  float a = hash(i), b = hash(i + vec2(1.0, 0.0));
-  float c = hash(i + vec2(0.0, 1.0)), d = hash(i + vec2(1.0, 1.0));
-  return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+// Big soft light-pool: aspect-corrected gaussian falloff. Returns 0..1.
+float pool(vec2 uv, vec2 c, float r, float asp){
+  vec2 d = uv - c; d.x *= asp;
+  float x = length(d) / r;
+  return exp(-x * x * 2.2);              // smooth gaussian — no hard edge
 }
-float fbm(vec2 p){
-  float v = 0.0, a = 0.5;
-  for (int i = 0; i < 5; i++) { v += a * noise(p); p *= 2.0; a *= 0.5; }
-  return v;
-}
+
 void main(){
   vec2 uv = gl_FragCoord.xy / u_res.xy;
-  uv.x *= u_res.x / u_res.y;
-  // Calm at rest; scroll/tap energy makes the liquid flow + warp a touch more
-  // (the "responds to interaction" beat) — capped so it never gets busy.
-  float t = u_time * (0.09 + u_energy * 0.20);   // surge then settle
-  float warp = 2.0 + u_energy * 0.55;            // a little extra turbulence on interaction
-  vec2 q = vec2(fbm(uv * 2.2 + t),
-                fbm(uv * 2.2 + vec2(5.2, 1.3) - t));
-  vec2 r = vec2(fbm(uv * 2.2 + warp * q + vec2(1.7, 9.2) + 0.15 * t),
-                fbm(uv * 2.2 + warp * q + vec2(8.3, 2.8) - 0.12 * t));
-  float f = fbm(uv * 2.2 + 2.5 * r);
+  float asp = u_res.x / u_res.y;
+  // Calm but VISIBLE drift (Vic flags absent motion every round): wide-travel
+  // orbits so the light-pools clearly migrate across the screen over a few
+  // seconds. Scroll/tap energy nudges it a touch (responds to the user).
+  float t = u_time * (0.080 + u_energy * 0.12);
+
+  // Three large pools tracing WIDE independent orbits → soft, clearly-moving light.
+  vec2 c1 = vec2(0.24 + 0.22 * sin(t * 0.95),       0.26 + 0.17 * cos(t * 0.73));
+  vec2 c2 = vec2(0.80 + 0.21 * cos(t * 0.66),       0.74 + 0.19 * sin(t * 0.86));
+  vec2 c3 = vec2(0.50 + 0.26 * sin(t * 0.47 + 1.6), 0.52 + 0.21 * cos(t * 0.57 + 2.1));
+  float p1 = pool(uv, c1, 0.62, asp);
+  float p2 = pool(uv, c2, 0.58, asp);
+  float p3 = pool(uv, c3, 0.74, asp);
 
   vec3 col;
   if (u_theme > 0.5) {
-    vec3 a = vec3(0.86, 0.88, 0.92), b = vec3(0.72, 0.77, 0.85), acc = vec3(0.97, 0.90, 0.83);
-    col = mix(a, b, clamp(f * f * 2.2, 0.0, 1.0));
-    col = mix(col, acc, clamp(r.x * 0.5, 0.0, 0.38));
+    // LIGHT — near-white, clean. Cool light pool + a faint warm one drift across
+    // a soft top-lit gradient. Stays bright so dark ink + glass read crisp.
+    vec3 base = mix(vec3(0.95, 0.965, 0.985), vec3(0.875, 0.905, 0.945), uv.y);
+    col  = base;
+    col += p1 * vec3(0.045, 0.055, 0.075);   // cool luminous pool
+    col += p2 * vec3(0.060, 0.050, 0.038);   // faint warm pool
+    col -= p3 * vec3(0.030, 0.032, 0.040);   // soft shadow lobe → gentle depth
   } else {
-    // 2026-06-22: LIFTED deep-but-LUMINOUS ground (was 0.06–0.21, too dark — the
-    // glass had no light to refract so cards read murky). REF-08 glass sits over a
-    // MID ground; this lifts the dark theme toward a lit deep-room tone (~0.13–0.30)
-    // with a warm amber caustic, so the clear glass catches light + reads glossy.
-    // Still clearly a DARK theme; card tint + text-shadow keep white-on-glass AA.
-    vec3 a = vec3(0.13, 0.145, 0.175), b = vec3(0.235, 0.265, 0.325), acc = vec3(0.42, 0.25, 0.12);
-    col = mix(a, b, clamp(f * f * 2.2, 0.0, 1.0));
-    col = mix(col, acc, clamp(r.x * 0.40, 0.0, 0.34));
+    // DARK — clean deep slate, NOT a cloudy churn. A cool luminous pool + a warm
+    // amber pool drift over a smooth top-lit gradient → the glass catches moving
+    // light and reads glossy/clear. Clearly a dark theme; card tint keeps AA.
+    vec3 base = mix(vec3(0.115, 0.125, 0.150), vec3(0.072, 0.080, 0.100), uv.y);
+    col  = base;
+    col += p1 * vec3(0.130, 0.150, 0.190);   // cool luminous pool
+    col += p2 * vec3(0.140, 0.090, 0.045);   // warm amber pool (PPW)
+    col += p3 * vec3(0.060, 0.070, 0.090);   // mid lift
+    col += (u_energy * 0.05) * p1;           // brightens subtly on interaction
   }
-  col += (0.05 + u_energy * 0.05) * smoothstep(0.62, 0.96, f); // caustic sheen — brightens subtly on interaction
+  // Soft focal vignette — keeps the eye centred, adds a touch of depth.
+  float vig = smoothstep(1.30, 0.25, length(uv - 0.5));
+  col *= mix(0.93, 1.0, vig);
   gl_FragColor = vec4(col, 1.0);
 }
 `;
