@@ -1140,23 +1140,12 @@ function TodayView() {
             Stack hub in the bottom dock. Today keeps only the single + (add a
             stack) and the ⋮ overflow; "Add a protocol…" moved into ⋮ so the
             function is never lost. Row is now [ + Add stack ............ ⋮ ]. */}
-        {/* RADICAL REDO (2026-06-22): Add stack is now CENTRED (Vic: "the add
-            stack button is on the LEFT — it should be in the MIDDLE"). The ⋮
-            overflow is pinned right so the row stays balanced/symmetrical. */}
-        <div className="relative flex items-center justify-center" style={{ minHeight: 44 }}>
-          <m.button
-            type="button"
-            onClick={() => setAddModalOpen(true)}
-            className="btn-accent flex items-center justify-center gap-2"
-            style={{ height: 52, padding: '0 28px', borderRadius: 'var(--r-pill)', fontSize: 15 }}
-            aria-label="Add stack"
-            title="Add a custom stack"
-            {...(reduced || addModalOpen ? {} : { layoutId: 'add-stack-morph' })}
-            {...pressScale()}
-          >
-            <IconPlus /><span className="font-bold">Add stack</span>
-          </m.button>
-          <div className="absolute right-0">
+        {/* PLAN §3A: the on-canvas Add-stack pill is REMOVED — the raised centre
+            nav ＋ is the single canonical "Add" (best thumb-reach, no duplicate
+            primary). The row keeps only the ⋮ overflow for rare actions, pinned
+            right (Hick — rare actions behind one affordance). */}
+        <div className="flex items-center justify-end" style={{ minHeight: 4 }}>
+          <div className="relative">
             {/* Icon-only action = circular clear-glass icon button (REF component set). */}
             <button
               type="button"
@@ -1246,42 +1235,10 @@ function TodayView() {
         )}
       </div>
 
-      {/* Coach entry (2026-06-16) — doorway to the live Wellness Assistant.
-          Tapping opens the dedicated /coach surface; the actual chat is a
-          separate paid service the app links out to (locked arch). Gated by
-          the single FEATURE_ASSISTANT_LAUNCH master switch. */}
-      {FEATURE_ASSISTANT_LAUNCH && (
-        <m.button
-          type="button"
-          onClick={() => nav('/coach')}
-          className="card liquid-refract w-full flex items-center gap-3 mt-4 text-left"
-          style={{ padding: '14px 16px' }}
-          aria-label="Open your Wellness Coach"
-          {...pressScale(0.98)}
-        >
-          <span
-            className="shrink-0 grid place-items-center text-accent"
-            style={{ width: 36, height: 36 }}
-            aria-hidden="true"
-          >
-            <IconMessageSquare />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="font-display block leading-tight">Ask your coach</span>
-            <span className="text-muted text-xs block truncate">
-              Evidence-grounded guidance on your routine
-            </span>
-          </span>
-          <span className="shrink-0 text-muted" aria-hidden="true">
-            <IconExternalLink />
-          </span>
-        </m.button>
-      )}
-
-      {/* Next-up hero — the ONE strong frosted pane over the user's
-          background (2026-06-12 revamp: the legacy hero-art overlay is
-          purged — the user-selected ground IS the scene; one organic surface
-          only). The luminous rim TRACES around it when next-up changes. */}
+      {/* PLAN §3A — HIERARCHY: the Next-up hero is the PRIMARY focus and now
+          leads (moved ABOVE the coach). It answers "what's next" the instant
+          Today opens — biggest, highest, highest-contrast element. The luminous
+          rim TRACES around it when next-up changes. */}
       {!empty && (
         <div className="relative mt-4">
           <div
@@ -1328,6 +1285,26 @@ function TodayView() {
             )}
           </div>
         </div>
+      )}
+
+      {/* PLAN §3A — Ask your coach DEMOTED to a slim single-line clear-glass row
+          BELOW the hero (Secondary assist, not the daily job). Progressive
+          disclosure keeps it from stealing focus. */}
+      {FEATURE_ASSISTANT_LAUNCH && (
+        <m.button
+          type="button"
+          onClick={() => nav('/coach')}
+          className="card w-full flex items-center gap-3 mt-3 text-left"
+          style={{ padding: '10px 14px', borderRadius: 'var(--r-16)' }}
+          aria-label="Open your Wellness Coach"
+          {...pressScale(0.98)}
+        >
+          <span className="shrink-0 grid place-items-center text-accent" style={{ width: 28, height: 28 }} aria-hidden="true">
+            <IconMessageSquare />
+          </span>
+          <span className="min-w-0 flex-1 font-display text-sm leading-tight">Ask your coach</span>
+          <span className="shrink-0 text-muted" aria-hidden="true"><IconExternalLink /></span>
+        </m.button>
       )}
 
       {/* Toast — toastIn rise+fade (board 06, clip 4): soft spring, no bounce.
