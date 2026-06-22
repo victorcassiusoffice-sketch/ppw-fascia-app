@@ -17,8 +17,9 @@ export const BG_KEY = 'ppw.background';
 export const CUSTOM_BG_MEDIA_ID = 'ppw-custom-bg';
 
 export const BG_OPTIONS = [
-  { kind: 'auto',   label: 'Auto (Liquid)', hint: 'Flowing liquid-glass ground, theme-tinted — animated; freezes under reduced-motion' },
-  { kind: 'liquid', label: 'Liquid',        hint: 'Flowing liquid-glass ground — animated (GPU), freezes under reduced-motion' },
+  { kind: 'auto',   label: 'Auto (Clean)',  hint: 'Clean graphite/white ground with slow drifting light — the approved default; freezes under reduced-motion' },
+  { kind: 'clean',  label: 'Clean Liquid',  hint: 'Clean minimal graphite/white ground + slow drifting luminous blobs (the redesign default — crisp glass)' },
+  { kind: 'liquid', label: 'Liquid (GPU)',  hint: 'Flowing WebGL liquid-glass ground — animated (GPU), freezes under reduced-motion' },
   { kind: 'nature', label: 'Nature',        hint: 'Dark organic texture (PPW fascia)' },
   { kind: 'grey',   label: 'Gradient Grey', hint: 'Soft neumorphic gradient ground (REF-05)' },
   { kind: 'custom', label: 'Custom',        hint: 'A photo from your device' },
@@ -54,7 +55,7 @@ export function getBackgroundChoice() {
     if (!raw) return { kind: 'auto' };
     const v = JSON.parse(raw);
     if (v && v.kind === 'skin' && SKIN_BY_ID[v.skinId]) return { kind: 'skin', skinId: v.skinId };
-    if (v && ['auto', 'liquid', 'nature', 'grey', 'custom'].includes(v.kind)) return v;
+    if (v && ['auto', 'clean', 'liquid', 'nature', 'grey', 'custom'].includes(v.kind)) return v;
   } catch (_) { /* fall through */ }
   return { kind: 'auto' };
 }
@@ -64,15 +65,15 @@ export function setBackgroundChoice(choice) {
   emitChange();
 }
 
-/** 'auto' resolves to the ANIMATED liquid ground (2026-06-22, Vic "visible
- *  liquid motion" — the default must MOVE). This is the "Gradient Grey as in the
- *  navigation liquid-morphism movements" Vic referenced: the WebGL shader is
- *  theme-tinted (pale grey in light, deep ground in dark) and gives the glass UI
- *  luminous flowing content to refract instead of a flat static image. Static
- *  options (nature / grey / skins / custom) remain explicit picks in Settings;
- *  reduced-motion freezes the liquid to one static frame. */
+/** 'auto' resolves to the CLEAN ground (2026-06-23, whole-app redesign — the
+ *  approved mock). The redesign root-fix: drop the photo/heavy-shader ground for
+ *  a clean minimal graphite/white field with slow drifting luminous blobs, so
+ *  glass reads crisp + clear like the SOURCE-BTN / component-set references
+ *  (frosting over a busy/dark ground could never match). It's pure CSS →
+ *  deterministic + cheap on every device; reduced-motion freezes the drift.
+ *  The WebGL `liquid` shader remains an explicit Settings option. */
 export function resolveBackgroundKind(choice, resolvedTheme) {
-  if (!choice || choice.kind === 'auto') return 'liquid';
+  if (!choice || choice.kind === 'auto') return 'clean';
   return choice.kind;
 }
 

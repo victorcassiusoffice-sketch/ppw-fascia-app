@@ -45,6 +45,16 @@ export default function AppBackground() {
         <img src={skinUrl} alt="" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
       )}
       {kind === 'custom' && customUrl && <img src={customUrl} alt="" />}
+      {/* 'clean' (the approved default) — clean graphite/white field with 3 slow
+          drifting luminous blobs (pure CSS; reduced-motion freezes it). Glass
+          reads crisp + clear over it — the redesign root-fix. */}
+      {kind === 'clean' && (
+        <div className="cg-field" aria-hidden="true">
+          <div className="cg-blob cg-b1" />
+          <div className="cg-blob cg-b2" />
+          <div className="cg-blob cg-b3" />
+        </div>
+      )}
       {/* 'liquid' — animated WebGL flowing-glass ground (REF flowing-liquid motion).
           Self-contained shader; the glass UI above refracts it via backdrop-blur. */}
       {kind === 'liquid' && <LiquidGlassBG theme={resolved} />}

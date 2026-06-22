@@ -616,6 +616,30 @@ html[data-theme="light"] .accent-glass:active { box-shadow: var(--elv-inset); fi
 .liquid-bg-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .app-bg-scrim { position: absolute; inset: 0; background: var(--bg-image-scrim, transparent); }
 
+/* ── CLEAN LIQUID GROUND (2026-06-23, whole-app redesign default — the approved
+   mock). A clean graphite (dark) / near-white (light) radial field with three
+   slow drifting luminous blobs. Pure CSS → deterministic + cheap; glass reads
+   crisp + clear over it (the redesign root-fix vs frosting over a photo/shader).
+   reduced-motion freezes the drift. ── */
+.cg-field {
+  position: absolute; inset: 0; overflow: hidden;
+  background: radial-gradient(140% 120% at 50% -10%, rgb(var(--c-surface)), var(--col-bg) 60%);
+}
+.cg-blob { position: absolute; border-radius: 50%; filter: blur(46px); opacity: 0.5; mix-blend-mode: screen; will-change: transform; }
+html[data-theme="light"] .cg-blob { opacity: 0.6; mix-blend-mode: multiply; filter: blur(54px); }
+.cg-b1 { width: 300px; height: 300px; background: radial-gradient(circle, rgb(var(--c-accent)), transparent 70%); top: -60px; left: -50px; animation: cg-drift1 18s var(--ease) infinite; }
+.cg-b2 { width: 260px; height: 260px; background: radial-gradient(circle, rgb(var(--c-alt-teal)), transparent 70%); top: 30%; right: -70px; animation: cg-drift2 22s var(--ease) infinite; }
+.cg-b3 { width: 240px; height: 240px; background: radial-gradient(circle, #7c5cf2, transparent 70%); bottom: -40px; left: 18%; animation: cg-drift3 26s var(--ease) infinite; }
+html[data-theme="light"] .cg-b1 { background: radial-gradient(circle, #ffd9b8, transparent 70%); }
+html[data-theme="light"] .cg-b2 { background: radial-gradient(circle, #bfe9ee, transparent 70%); }
+html[data-theme="light"] .cg-b3 { background: radial-gradient(circle, #d8d0ff, transparent 70%); }
+@keyframes cg-drift1 { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(40px,60px) scale(1.15); } 66% { transform: translate(-30px,30px) scale(0.95); } }
+@keyframes cg-drift2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-50px,40px) scale(1.18); } }
+@keyframes cg-drift3 { 0%,100% { transform: translate(0,0) scale(1); } 40% { transform: translate(50px,-40px) scale(1.1); } 75% { transform: translate(20px,20px) scale(0.92); } }
+@media (prefers-reduced-motion: reduce) { .cg-blob { animation: none !important; } }
+/* clean ground carries its own light — no darkening scrim over it. */
+html[data-bg="clean"] .app-bg-scrim { background: transparent; }
+
 /* v2 (2026-06-12): scrims lightened hard — the ground MUST stay visible for
    the glass to have something to refract; legibility comes from the panes'
    sheen + the remaining scrim floor, not from blacking out the scene. */

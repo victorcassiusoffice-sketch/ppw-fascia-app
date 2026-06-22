@@ -26,14 +26,16 @@ describe('backgrounds feature (REF-01/04/05)', () => {
     expect(getBackgroundChoice().kind).toBe('grey');
   });
 
-  it('auto resolves to the animated liquid ground (2026-06-22 default); explicit passes through', () => {
-    // Default now MOVES — auto → liquid (Vic "visible liquid motion"). Static
-    // nature/grey/skins remain explicit picks.
-    expect(resolveBackgroundKind({ kind: 'auto' }, 'dark')).toBe('liquid');
-    expect(resolveBackgroundKind({ kind: 'auto' }, 'light')).toBe('liquid');
+  it('auto resolves to the clean ground (2026-06-23 whole-app redesign default); explicit passes through', () => {
+    // Default is the approved mock: auto → clean (clean graphite/white field +
+    // drifting blobs → crisp glass). WebGL `liquid` + static nature/grey/skins
+    // remain explicit picks.
+    expect(resolveBackgroundKind({ kind: 'auto' }, 'dark')).toBe('clean');
+    expect(resolveBackgroundKind({ kind: 'auto' }, 'light')).toBe('clean');
+    expect(resolveBackgroundKind({ kind: 'liquid' }, 'dark')).toBe('liquid');
     expect(resolveBackgroundKind({ kind: 'custom' }, 'dark')).toBe('custom');
     expect(resolveBackgroundKind({ kind: 'nature' }, 'dark')).toBe('nature');
-    expect(resolveBackgroundKind(null, 'dark')).toBe('liquid');
+    expect(resolveBackgroundKind(null, 'dark')).toBe('clean');
   });
 });
 
