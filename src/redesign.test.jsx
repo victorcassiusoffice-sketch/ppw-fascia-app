@@ -133,9 +133,12 @@ describe('no feature lost — App.jsx wiring guard', () => {
     // rules) — the approved clear-glass logo replaces the inline helix mark.
     expect(src.includes('<GlassLogo')).toBe(true);
     expect(src.includes('<ThemeToggle')).toBe(true);
-    // Bell relocated to the bottom nav and still gates on notification prefs.
-    expect(chrome.includes('useNotificationPrefs')).toBe(true);
-    expect(chrome.includes('requestPermission')).toBe(true);
+    // 2026-06-23 whole-app redesign: the Alerts toggle relocated OUT of the nav
+    // (a toggle is not a navigation destination) to the Today top bar. The
+    // notification prefs + permission gate still live in the app — now in
+    // Today.jsx, which is part of `src` here.
+    expect(src.includes('useNotificationPrefs')).toBe(true);
+    expect(src.includes('requestPermission')).toBe(true);
   });
 
   it('hamburger drawer retired (no NavDrawer / app-glass wrapper left)', () => {

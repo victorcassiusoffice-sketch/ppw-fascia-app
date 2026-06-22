@@ -23,7 +23,7 @@ import { downloadSlotIcs } from '../lib/ics.js';
 import { ensurePersistentStorage } from '../lib/storagePersist.js';
 import { m, AnimatePresence, useReducedMotion, motionPresets } from '../motion.js';
 import { DUR, STAGGER, EASE, SPRING, glideIndicator, toastIn, borderTrace, sheetUp, pressScale } from '../lib/motion';
-import { IconTrash, IconCopy, IconPlus, IconShoppingCart, IconExternalLink, IconBookOpen, IconCalendar, IconUnmerge, IconMore, IconCheckSquare, IconSparkle, IconMessageSquare, Tickbox } from '../components/icons.jsx';
+import { IconTrash, IconCopy, IconPlus, IconShoppingCart, IconExternalLink, IconBookOpen, IconCalendar, IconUnmerge, IconMore, IconCheckSquare, IconSparkle, IconMessageSquare, IconBell, Tickbox } from '../components/icons.jsx';
 import { InlineRename } from '../components/shared.jsx';
 import MergedStack from '../components/today/MergedStack.jsx';
 import LiquidMorphCluster from '../components/today/LiquidMorphCluster.jsx';
@@ -329,7 +329,12 @@ function AssistantChip() {
 
 function TodayView() {
   // Phase 1.4 (2026-05-23) — selected date drives every per-date state hook.
-  const [selectedDate, setSelectedDate] = useState(() => todayISO());
+  // Seed from ?date=YYYY-MM-DD when arriving from the Calendar screen (it opens
+  // a chosen day here); otherwise today. Read once on mount.
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const d = new URLSearchParams(window.location.search).get('date');
+    return (d && /^\d{4}-\d{2}-\d{2}$/.test(d)) ? d : todayISO();
+  });
 
   const [activeProtocols, setActiveProtocols] = useActiveProtocols();
   const [activeModules, setActiveModules] = useActiveModules();
@@ -1129,6 +1134,17 @@ function TodayView() {
             >Today</button>
           </div>
           <div className="flex items-center gap-2 shrink-0">
+            {/* Alerts toggle — relocated here from the bottom nav (a toggle is
+                not a navigation destination). Same permission/scheduling gate. */}
+            <button
+              type="button"
+              onClick={handleToggleNotifications}
+              className="glass-disc"
+              style={{ width: 40, height: 40, color: notifPrefs.enabled ? 'var(--col-accent)' : 'var(--col-ink)' }}
+              aria-pressed={notifPrefs.enabled}
+              aria-label={notifPrefs.enabled ? 'Notifications on — tap to turn off' : 'Notifications off — tap to turn on'}
+              title={notifPrefs.enabled ? 'Notifications on' : 'Notifications off'}
+            ><IconBell filled={notifPrefs.enabled} /></button>
             <StreakChip count={streak} />
             {items.length > 0 && <CompletionRing done={completedCount} total={items.length} />}
           </div>

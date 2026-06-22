@@ -37,10 +37,12 @@ describe('App mounts (module graph resolves end-to-end)', () => {
     // (2026-06-12 revamp: glass logo replaced the legacy helix mark.)
     expect(container.querySelector('.botnav')).toBeTruthy();
     expect(container.querySelector('img[src*="ppw-glass-logo"]')).toBeTruthy();
-    // 2026-06-19 restructure: central nested STACK pod (Protocols hub) + the
-    // notifications toggle is now a normal bead (.alertbtn), replacing .bell.
-    expect(container.querySelector('.botnav .nav-stack')).toBeTruthy();
-    expect(container.querySelector('.botnav .alertbtn')).toBeTruthy();
+    // 2026-06-23 whole-app redesign: nav is [Today·Stack·＋Add·Calendar·Settings]
+    // with a raised centre Add pod (.nav-add). Alerts left the nav — the bell is
+    // now the notifications toggle in the Today top bar.
+    expect(container.querySelector('.botnav .nav-add')).toBeTruthy();
+    expect(container.querySelector('[aria-label*="Notifications"]')).toBeTruthy();
+    expect(container.querySelector('.botnav').textContent).toContain('Calendar');
   });
 
   it('renders the welcome/entry route too (covers the VideoIntro branch)', () => {

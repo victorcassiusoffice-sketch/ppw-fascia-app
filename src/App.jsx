@@ -35,6 +35,7 @@ import UpdateToast from './components/UpdateToast.jsx';
 import TodayView from './pages/Today.jsx';
 import { ProtocolsList, ProtocolDetail } from './pages/Protocols.jsx';
 import ModulesList from './pages/Modules.jsx';
+import CalendarView from './pages/Calendar.jsx';
 import SettingsView from './pages/Settings.jsx';
 import CoachView from './pages/Coach.jsx';
 import SoftLab from './pages/SoftLab.jsx'; // STAGED (feat/soft-v1) — review only, not deployed
@@ -194,6 +195,7 @@ export default function App() {
             <Route path="/protocols"      element={<ProtocolsList />} />
             <Route path="/protocol/:id"   element={<ProtocolDetail />} />
             <Route path="/modules"        element={<ModulesList />} />
+            <Route path="/calendar"       element={<CalendarView />} />
             <Route path="/coach"          element={<CoachView />} />
             <Route path="/settings"       element={<SettingsView />} />
             {/* STAGED — feat/soft-v1 review only, not deployed */}
