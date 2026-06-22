@@ -60,7 +60,10 @@
 /* ───────────────── DARK THEME (default) ───────────────── */
 html[data-theme="dark"] {
   color-scheme: dark;
-  --c-bg-base:        21 23 28;     /* #15171C */
+  /* RADICAL REDO (2026-06-22): "dark" is re-pitched as refined GRAPHITE mid-grey
+     — the reference ground (REF-source-btn / ui-kit panel) is mid-grey, NOT
+     near-black. This base matches the shader's graphite floor so fades/body align. */
+  --c-bg-base:        42 47 56;     /* #2A2F38 graphite */
   --c-surface:        30 33 40;     /* #1E2128 */
   --c-surface-active: 38 42 51;     /* #262A33 */
   --c-surface-inset:  18 20 25;     /* #121419 */
@@ -96,7 +99,10 @@ html[data-theme="dark"] {
      comes from (a) blur of a LUMINOUS ground, (b) a diagonal white SHEEN
      gradient, (c) a bright specular rim (top/leading edges). Legibility is
      the SCRIM TIER's job, never a darker fill. */
-  --glass-tint:      rgba(22, 25, 31, 0.05);   /* 2026-06-19 Vic: clearer still — ground reads through */
+  /* RADICAL REDO (2026-06-22): on the GRAPHITE ground the pane keeps a modest
+     translucent body so white labels hold AA over the lit pools (legibility =
+     local scrim tier, law #4) — still clearly see-through, just not zero. */
+  --glass-tint:      rgba(18, 21, 28, 0.18);
   --glass-tint-strong: rgba(22, 25, 31, 0.16);
   /* 2026-06-16 (Vic follow-up): the old REF-01 value carried a HARD-STOP
      diagonal reflection LINE (0.055→0.20→0.012 across 45.6–47.4%). On large
@@ -309,10 +315,14 @@ h1, h2, h3, h4 {
      first de-frost (5/9/14/20) read FLAT. These sit between: blur is enough to
      diffuse + give real glass depth, while the ground still reads THROUGH the
      pane. The liquid quality is carried by the bright rim + sheen + refraction. */
-  --glass-blur-1: 3px;    /* light film — header fade, menus */
-  --glass-blur-2: 6px;    /* standard dock/bar glass (2026-06-19: clearer still) */
-  --glass-blur-3: 10px;   /* heavy — surfaces over imagery (hero) */
-  --glass-blur-4: 16px;   /* DIALOG — soft diffusion, ground still legible */
+  /* RADICAL REDO (2026-06-22) — LESS FROST (Vic). Blur dropped so the clean
+     graphite/white ground reads THROUGH the panes like the SOURCE-BTN +
+     component-set refs (clear glossy glass, not frosted). The glass read now
+     comes from the gloss cap + bright bevel rim + layered shadow, not blur. */
+  --glass-blur-1: 2px;    /* light film — header fade, menus */
+  --glass-blur-2: 4px;    /* standard dock/bar/card glass — clear */
+  --glass-blur-3: 7px;    /* heavy — hero / over busier ground */
+  --glass-blur-4: 14px;   /* DIALOG — soft diffusion, ground still legible */
 }
 
 .glass {
@@ -609,7 +619,10 @@ html[data-theme="light"] .accent-glass:active { box-shadow: var(--elv-inset); fi
 /* v2 (2026-06-12): scrims lightened hard — the ground MUST stay visible for
    the glass to have something to refract; legibility comes from the panes'
    sheen + the remaining scrim floor, not from blacking out the scene. */
-html[data-theme="dark"]  { --bg-image-scrim: linear-gradient(180deg, rgba(13,15,19,.30), rgba(13,15,19,.50)); }
+/* RADICAL REDO (2026-06-22): lighter dark scrim so the GRAPHITE mid-grey ground
+   reads through like the refs (the old .30/.50 darkened it back toward black).
+   Card body tint + text-shadow carry label AA; the ground stays premium graphite. */
+html[data-theme="dark"]  { --bg-image-scrim: linear-gradient(180deg, rgba(18,20,26,.16), rgba(18,20,26,.34)); }
 html[data-theme="light"] { --bg-image-scrim: linear-gradient(180deg, rgba(231,236,243,.52), rgba(231,236,243,.68)); }
 
 /* Image skins (2026-06-14): BRIGHT-toned grounds (blue cave, chrome, foggy
@@ -1263,6 +1276,18 @@ html[data-theme="light"] .stack-goo-blob { background: rgba(150, 160, 180, 0.7);
 }
 .nav-stack.active .nav-stack-core { border-color: rgba(255,255,255,0.6); }
 .nav-stack.active .nav-stack-core svg { color: #fff; }
+/* Centre ADD pod = the primary action → amber accent-glass (selective colour,
+   law #2: tinted glass + rim + glow, never opaque paint). */
+.nav-add {
+  background-color: var(--accent-glass-bg);
+  border-color: var(--accent-glass-rim);
+  box-shadow: var(--glass-rimlight), var(--accent-glass-glow), 0 12px 26px -10px rgba(0,0,0,0.5);
+}
+.nav-add .nav-stack-core {
+  background: linear-gradient(160deg, rgba(255,255,255,0.30), rgba(255,255,255,0.06) 55%, rgba(255,255,255,0.14));
+  border-color: rgba(255,255,255,0.55);
+}
+.nav-add .nav-stack-core svg { color: #fff; }
 .stacklabel { margin-top: 44px; color: var(--col-low); font-weight: 600; font-size: 10px; }
 .alertbtn { background: none; border: none; cursor: pointer; }
 @media (prefers-reduced-motion: reduce) { .nav-stack { transition: none; } }

@@ -1148,21 +1148,21 @@ function TodayView() {
             type="button"
             onClick={() => setAddModalOpen(true)}
             className="btn-accent flex items-center justify-center gap-2"
-            style={{ height: 44, padding: '0 22px', borderRadius: 'var(--r-pill)' }}
+            style={{ height: 52, padding: '0 28px', borderRadius: 'var(--r-pill)', fontSize: 15 }}
             aria-label="Add stack"
             title="Add a custom stack"
             {...(reduced || addModalOpen ? {} : { layoutId: 'add-stack-morph' })}
             {...pressScale()}
           >
-            <IconPlus /><span className="text-sm font-bold">Add stack</span>
+            <IconPlus /><span className="font-bold">Add stack</span>
           </m.button>
           <div className="absolute right-0">
-            {/* REF-08: icon-only action = circular glass disc. */}
+            {/* Icon-only action = circular clear-glass icon button (REF component set). */}
             <button
               type="button"
               onClick={() => setOverflowOpen(v => !v)}
               className="glass-disc"
-              style={{ height: 44, width: 44, padding: 0, fontSize: 20, color: 'var(--col-ink)' }}
+              style={{ height: 48, width: 48, padding: 0, fontSize: 20, color: 'var(--col-ink)' }}
               aria-haspopup="menu"
               aria-expanded={overflowOpen}
               aria-label="More actions"

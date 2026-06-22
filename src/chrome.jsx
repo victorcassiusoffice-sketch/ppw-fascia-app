@@ -98,9 +98,13 @@ function IconBellGlyph({ filled }) {
   // "Alerts" — softer, rounder bell, redrawn.
   return <svg viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 10a6 6 0 0 1 12 0c0 4.2 1.4 5.6 2.2 6.4a.6.6 0 0 1-.42 1.02H4.22A.6.6 0 0 1 3.8 16.4C4.6 15.6 6 14.2 6 10Z" /><path d="M9.8 20a2.4 2.4 0 0 0 4.4 0" /></svg>;
 }
-/* Central STACK hub glyph — a clean stacked deck (rounded layers). */
+/* STACK glyph — a clean stacked deck (rounded layers). */
 function IconStack() {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="4.5" y="3.8" width="15" height="5.2" rx="2.2" /><rect x="4.5" y="10.6" width="15" height="5.2" rx="2.2" opacity="0.85" /><path d="M6.6 18.6h10.8" opacity="0.5" /></svg>;
+}
+/* Central ADD glyph — a thin plus (the raised centre action). */
+function IconAdd() {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><path d="M12 5.5v13M5.5 12h13" /></svg>;
 }
 
 /* ── Bottom navigation + enlarged centre bell ── */
@@ -185,24 +189,28 @@ export function BottomNav() {
         )}
       </AnimatePresence>
       <nav className="botnav liquid-refract" aria-label="Primary">
+        {/* RADICAL REDO nav (2026-06-22): symmetrical [ Today · Stack · ＋Add ·
+            Alerts · Settings ]. Stack is promoted to a prominent left-of-centre
+            tab (Vic: "Stack should live where Today used to be"); the raised
+            CENTRE pod is now ＋ Add stack (Vic: "add stack in the MIDDLE"); the
+            centre never slides — only the per-tab accent indicator glides. New
+            outline icons throughout; Settings = sliders. */}
         <NavTab to="/today" active={isActive('/today')} label="Today"><IconHome /></NavTab>
-        <NavTab to="/modules" active={isActive('/modules')} label="Modules"><IconModules /></NavTab>
+        <NavTab to="/protocols" active={stackActive} label="Stack"><IconStack /></NavTab>
 
-        {/* Central STACK pod — nested liquid glass (outer pod + inner core disc),
-            raised above the dock, routes to the Protocols stack. */}
+        {/* Central ADD pod — raised glass, opens the Add-stack flow on Today. */}
         <div className="navbtn stackslot">
           <m.button
             type="button"
-            className={'nav-stack' + (stackActive ? ' active' : '')}
-            onClick={() => nav('/protocols')}
-            aria-current={stackActive ? 'page' : undefined}
-            aria-label="Stack — your protocols"
-            title="Stack"
+            className="nav-stack nav-add"
+            onClick={() => nav('/today?add=1')}
+            aria-label="Add stack"
+            title="Add stack"
             {...pressScale(0.9)}
           >
-            <span className="nav-stack-core" aria-hidden="true"><IconStack /></span>
+            <span className="nav-stack-core" aria-hidden="true"><IconAdd /></span>
           </m.button>
-          <span className="stacklabel">Stack</span>
+          <span className="stacklabel">Add</span>
         </div>
 
         {/* Alerts — the notifications toggle, now a normal bead. ON = accent fill. */}

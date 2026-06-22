@@ -77,15 +77,17 @@ void main(){
     col += p2 * vec3(0.060, 0.050, 0.038);   // faint warm pool
     col -= p3 * vec3(0.030, 0.032, 0.040);   // soft shadow lobe → gentle depth
   } else {
-    // DARK — clean deep slate, NOT a cloudy churn. A cool luminous pool + a warm
-    // amber pool drift over a smooth top-lit gradient → the glass catches moving
-    // light and reads glossy/clear. Clearly a dark theme; card tint keeps AA.
-    vec3 base = mix(vec3(0.115, 0.125, 0.150), vec3(0.072, 0.080, 0.100), uv.y);
+    // GRAPHITE (dark) — the REFERENCE ground: a smooth MID-GREY gradient (NOT
+    // near-black), exactly like REF-source-btn-v02 / REF-glass-ui-kit-panel.
+    // Top is lit (~#525a66), floor is deep graphite (~#262b33); a cool pool + a
+    // warm amber pool drift across so the clear glass catches moving light and
+    // reads glossy/bevelled. Re-pitches "dark" as refined graphite, per the refs.
+    vec3 base = mix(vec3(0.320, 0.350, 0.400), vec3(0.150, 0.168, 0.205), uv.y);
     col  = base;
-    col += p1 * vec3(0.130, 0.150, 0.190);   // cool luminous pool
-    col += p2 * vec3(0.140, 0.090, 0.045);   // warm amber pool (PPW)
-    col += p3 * vec3(0.060, 0.070, 0.090);   // mid lift
-    col += (u_energy * 0.05) * p1;           // brightens subtly on interaction
+    col += p1 * vec3(0.140, 0.160, 0.200);   // cool luminous pool (the panel's edge-light feel)
+    col += p2 * vec3(0.150, 0.095, 0.045);   // warm amber pool (PPW accent in the light)
+    col += p3 * vec3(0.070, 0.080, 0.100);   // mid lift
+    col += (u_energy * 0.06) * p1;           // brightens subtly on interaction
   }
   // Soft focal vignette — keeps the eye centred, adds a touch of depth.
   float vig = smoothstep(1.30, 0.25, length(uv - 0.5));
