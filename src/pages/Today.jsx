@@ -1,7 +1,7 @@
 // /today (extracted verbatim from App.jsx, 2026-06-11 liquid-glass redesign
 // — zero logic change).
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { ZONES, moduleMediaPath, loadMedia, resolveRoutineZones } from '../data.js';
 import {
   useActiveProtocols, useActiveModules, useActiveRoutines, useCompletedToday,
@@ -23,7 +23,7 @@ import { downloadSlotIcs } from '../lib/ics.js';
 import { ensurePersistentStorage } from '../lib/storagePersist.js';
 import { m, AnimatePresence, useReducedMotion, motionPresets } from '../motion.js';
 import { DUR, STAGGER, EASE, SPRING, glideIndicator, toastIn, borderTrace, sheetUp, pressScale } from '../lib/motion';
-import { IconTrash, IconCopy, IconPlus, IconShoppingCart, IconExternalLink, IconBookOpen, IconCalendar, IconUnmerge, IconMore, IconCheckSquare, IconSparkle, IconMessageSquare, IconBell, Tickbox } from '../components/icons.jsx';
+import { IconTrash, IconCopy, IconPlus, IconShoppingCart, IconExternalLink, IconBookOpen, IconCalendar, IconUnmerge, IconMore, IconCheckSquare, IconSparkle, IconMessageSquare, IconBell, IconMusic, Tickbox } from '../components/icons.jsx';
 import { InlineRename } from '../components/shared.jsx';
 import MergedStack from '../components/today/MergedStack.jsx';
 import LiquidMorphCluster from '../components/today/LiquidMorphCluster.jsx';
@@ -363,6 +363,19 @@ function TodayView() {
   const [addModalOpen, setAddModalOpen] = useState(false);
   // Iter 2 Phase 6.4 — Add Protocol modal + transient toast.
   const [addProtocolOpen, setAddProtocolOpen] = useState(false);
+  // Add 2×2 sheet (whole-app redesign): the raised centre nav ＋ opens this.
+  // It signals via ?add=1 (cross-component channel from BottomNav); consume +
+  // clear the param so a refresh doesn't re-open it.
+  const [addSheetOpen, setAddSheetOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    if (searchParams.get('add') === '1') {
+      setAddSheetOpen(true);
+      const next = new URLSearchParams(searchParams);
+      next.delete('add');
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
   const [toast, setToast] = useState(null);
   // Iter 2 Phase 6.2 — imperative ref into DateStrip for the Today jump.
   const dateStripRef = useRef(null);
@@ -1685,7 +1698,60 @@ function TodayView() {
         </div>
       )}
 
-      {/* +Add Stack + +Add Protocol moved to top action bar (Iter 2 Phase 6.3). */}
+      {/* ADD 2×2 SHEET (whole-app redesign §3) — the single canonical create
+          surface, opened by the raised centre nav ＋. Four glass tiles route
+          into the existing builders (nothing functional lost); the accent pill
+          is the general custom-stack modal. Sheet rises from below over a
+          scrim; solid-while-moving (glass-dialog falls back solid). */}
+      <AnimatePresence>
+        {addSheetOpen && (
+          <>
+            <m.div
+              className="fixed inset-0 z-[60] ppw-scrim"
+              style={{ background: 'var(--scrim)' }}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+              onClick={() => setAddSheetOpen(false)}
+              aria-hidden="true"
+            />
+            <m.div
+              role="dialog" aria-label="Add to your day" aria-modal="true"
+              className="fixed left-0 right-0 bottom-0 z-[61] glass-dialog"
+              style={{ borderRadius: '28px 28px 0 0', padding: '10px 18px calc(24px + env(safe-area-inset-bottom))' }}
+              variants={sheetUp} initial="hidden" animate="show" exit="hidden"
+            >
+              <div style={{ width: 42, height: 5, borderRadius: 3, background: 'var(--ring-track)', margin: '6px auto 14px' }} aria-hidden="true" />
+              <h2 className="font-display" style={{ fontSize: 24, letterSpacing: '-0.02em' }}>Add to your day</h2>
+              <div className="text-muted text-sm">One place to create anything.</div>
+              <div className="grid grid-cols-2 gap-3 mt-3">
+                <m.button type="button" onClick={() => { setAddSheetOpen(false); setAddModalOpen(true); }} className="card text-left flex flex-col items-start" style={{ padding: '16px 14px', borderRadius: 'var(--r-16)' }} {...pressScale(0.97)}>
+                  <span className="grid place-items-center text-accent" style={{ width: 40, height: 40, marginBottom: 10 }} aria-hidden="true"><IconSparkle /></span>
+                  <b style={{ fontWeight: 600, fontSize: 14.5 }}>Routine</b>
+                  <span className="text-muted" style={{ fontSize: 12 }}>Fascia / body zones</span>
+                </m.button>
+                <m.button type="button" onClick={() => { setAddSheetOpen(false); nav('/modules'); }} className="card text-left flex flex-col items-start" style={{ padding: '16px 14px', borderRadius: 'var(--r-16)' }} {...pressScale(0.97)}>
+                  <span className="grid place-items-center text-accent" style={{ width: 40, height: 40, marginBottom: 10 }} aria-hidden="true"><IconMusic /></span>
+                  <b style={{ fontWeight: 600, fontSize: 14.5 }}>Audio</b>
+                  <span className="text-muted" style={{ fontSize: 12 }}>Breath · sound</span>
+                </m.button>
+                <m.button type="button" onClick={() => { setAddSheetOpen(false); setAddProtocolOpen(true); }} className="card text-left flex flex-col items-start" style={{ padding: '16px 14px', borderRadius: 'var(--r-16)' }} {...pressScale(0.97)}>
+                  <span className="grid place-items-center text-accent" style={{ width: 40, height: 40, marginBottom: 10 }} aria-hidden="true"><IconBookOpen /></span>
+                  <b style={{ fontWeight: 600, fontSize: 14.5 }}>Protocol</b>
+                  <span className="text-muted" style={{ fontSize: 12 }}>Evidence-based</span>
+                </m.button>
+                <m.button type="button" onClick={() => { setAddSheetOpen(false); setAddModalOpen(true); }} className="card text-left flex flex-col items-start" style={{ padding: '16px 14px', borderRadius: 'var(--r-16)' }} {...pressScale(0.97)}>
+                  <span className="grid place-items-center text-accent" style={{ width: 40, height: 40, marginBottom: 10 }} aria-hidden="true"><IconShoppingCart /></span>
+                  <b style={{ fontWeight: 600, fontSize: 14.5 }}>Supplement</b>
+                  <span className="text-muted" style={{ fontSize: 12 }}>Timed reminder</span>
+                </m.button>
+              </div>
+              <m.button type="button" onClick={() => { setAddSheetOpen(false); setAddModalOpen(true); }} className="btn-accent w-full inline-flex items-center justify-center gap-1.5" style={{ height: 48, marginTop: 14 }} {...pressScale(0.97)}>
+                <IconPlus /> Create custom stack
+              </m.button>
+            </m.div>
+          </>
+        )}
+      </AnimatePresence>
 
       <AddStackModal
         open={addModalOpen}
