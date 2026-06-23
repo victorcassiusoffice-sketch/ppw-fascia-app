@@ -293,7 +293,7 @@ function Entry({ session, setSession }) {
   const pick = (mode) => { setSession({ ...initialSession, mode }); nav(mode === 'lifestyle' ? '/lifestyle' : '/level'); };
   return (
     <main className="px-6 py-14 md:py-24 max-w-5xl mx-auto">
-      <div className="mb-10 fade-in is-visible">
+      <div className="mb-12 fade-in is-visible">
         <div className="eyebrow mb-5">Session Builder</div>
         <h1 className="font-display text-5xl md:text-7xl leading-[0.95] mb-5">
           Unlock<br/>your body<span className="text-accent">.</span>
@@ -301,19 +301,9 @@ function Entry({ session, setSession }) {
         <p className="text-muted max-w-xl text-lg leading-relaxed">Science-backed fascia protocols personalised to your body, your pain, your lifestyle.</p>
       </div>
 
-      {/* 2026-06-12 revamp: legacy stock fascia imagery purged — the hero is
-          a clear glass pane over the user's background, carrying the
-          approved glass logo (REF-01/02 language). */}
-      <div
-        className="glass-strong liquid-refract relative mb-12 overflow-hidden fade-in is-visible flex items-center justify-between gap-6 p-6 md:p-8"
-        style={{ borderRadius: 'var(--r-24)', minHeight: 150 }}
-      >
-        <div>
-          <div className="eyebrow mb-1">The fascia network</div>
-          <div className="font-display text-lg md:text-2xl leading-tight">Your body's living connective architecture.</div>
-        </div>
-        <GlassLogo size={84} title="" />
-      </div>
+      {/* 2026-06-23 (MLT trial): "The fascia network" glass card removed at
+          Vic's request; hero now flows straight into the selection cards.
+          Spacing rebalanced (hero mb-12) for symmetric empty space. */}
 
       <div className="grid md:grid-cols-2 gap-5 fade-in fade-in-stagger is-visible">
         <button onClick={() => pick('zone')} className="card protocol-tile p-10 text-left group transition-all duration-300">
