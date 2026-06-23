@@ -875,21 +875,30 @@ html[data-theme="light"] .glass-knob {
    bead (rim + specular dome, no backdrop-filter — the dock frosts + the button
    transforms, perf law #3), the active tab's accent-glass fill GLIDES between
    beads (shared layoutId 'nav-bead'), and the glyph liquid-taps on press. ── */
-/* MINIMAL liquid-glass nav (2026-06-23, Vic #1): inactive tabs are BARE
-   hairline glyphs — no bead body — so the dock reads minimal. Only the ACTIVE
-   tab wears a clear-glass bead (the accent fill glides in via .nav-bead-fill).
-   The centre ＋ Add stays the one raised accent. */
+/* 3D-GLASS floating nav icons (2026-06-23, Vic v2): every tab icon is a thick
+   convex glass bead (REF-01 look), floating without a bar. The active tab's
+   accent fill glides in via .nav-bead-fill; the centre ＋ stays the raised
+   accent. */
 .nav-bead {
   position: relative; isolation: isolate;
   display: inline-flex; align-items: center; justify-content: center;
-  width: 40px; height: 40px; border-radius: var(--r-pill);
-  background: transparent; border: 1px solid transparent; box-shadow: none;
+  width: 44px; height: 44px; border-radius: var(--r-pill);
+  background: linear-gradient(160deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02) 52%, rgba(255,255,255,0.07));
+  border: 1.25px solid var(--glass-rim);
+  box-shadow:
+    inset 0 1.5px 0.5px -0.5px rgba(255,255,255,0.92),
+    inset 0 -2px 2px -1px rgba(255,255,255,0.22),
+    inset 0 0 0 1px rgba(255,255,255,0.16),
+    var(--glass-inner-glow),
+    0 2px 4px -1px rgba(0,0,0,0.30), 0 8px 18px -8px rgba(0,0,0,0.55);
   transition: border-color var(--dur-mid) var(--ease), background var(--dur-mid) var(--ease),
-              border-radius var(--dur-mid) var(--ease);
+              border-radius var(--dur-mid) var(--ease), transform var(--dur-mid) var(--ease);
 }
-.nav-bead.is-active::before { /* specular dome only on the active bead */
+.nav-bead::before { /* broad convex dome + tight crown hotspot */
   content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 0;
-  background: radial-gradient(62% 52% at 30% 22%, rgba(255,255,255,0.42), rgba(255,255,255,0) 70%);
+  background:
+    radial-gradient(40% 30% at 32% 18%, rgba(255,255,255,0.80), rgba(255,255,255,0) 60%),
+    linear-gradient(180deg, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.08) 36%, rgba(255,255,255,0) 62%);
 }
 .nav-bead svg {
   position: relative; z-index: 1; width: 20px; height: 20px;
@@ -907,11 +916,11 @@ html[data-theme="light"] .glass-knob {
 /* liquid-tap press: glyph squishes + tilts, bead radius melts (matches .glass-disc:active) */
 .navbtn:active .nav-bead svg { transform: scale(0.8) rotate(-6deg); }
 .navbtn:active .nav-bead { border-radius: 44%; }
-html[data-theme="light"] .nav-bead.is-active {
+html[data-theme="light"] .nav-bead {
   background: linear-gradient(160deg, rgba(255,255,255,0.82), rgba(255,255,255,0.42) 58%, rgba(255,255,255,0.62));
   border-color: rgba(255,255,255,0.92);
   box-shadow: 0 1px 0 rgba(255,255,255,1) inset, inset 0 0 0 1px rgba(255,255,255,0.5),
-              2px 2px 5px var(--nm-dark), -2px -2px 5px var(--nm-light);
+              3px 4px 8px var(--nm-dark), -3px -3px 8px var(--nm-light);
 }
 @media (prefers-reduced-motion: reduce) {
   .nav-bead svg, .navbtn:active .nav-bead svg { transform: none; transition: none; }
@@ -1217,22 +1226,25 @@ html[data-theme="light"] .stack-goo-blob { background: rgba(150, 160, 180, 0.7);
 .botwrap { position: fixed; left: 0; right: 0; bottom: 0; z-index: 45; display: flex; justify-content: center; pointer-events: none; }
 /* The glass dock (clip 3) — static fixed surface, blur allowed. Solid
    fallback + reduced-transparency handled by the .glass rules above. */
+/* BAR REMOVED (2026-06-23, Vic): "the sticky bar is unnecessary — the icons
+   are sufficient." The dock surface is gone; the 3D-glass icons float free.
+   A faint bottom scrim keeps the icons legible over scrolling content without
+   reading as a bar. */
 .botnav {
-  pointer-events: auto; width: 100%; max-width: var(--page-max); margin: 0 auto; height: 64px;
-  background-color: var(--glass-bg);
-  background-image: var(--glass-fill);
-  -webkit-backdrop-filter: blur(var(--glass-blur-2)) saturate(170%) brightness(1.06);
-          backdrop-filter: blur(var(--glass-blur-2)) saturate(170%) brightness(1.06);
-  box-shadow: var(--glass-shadow-2); border-top: 1px solid var(--glass-rim);
+  pointer-events: auto; width: 100%; max-width: var(--page-max); margin: 0 auto; height: 78px;
+  background: none; backdrop-filter: none; -webkit-backdrop-filter: none;
+  box-shadow: none; border-top: none;
   display: grid; grid-template-columns: repeat(5, 1fr); align-items: center;
   padding-bottom: env(safe-area-inset-bottom);
 }
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .botnav { background: var(--col-surface); }
+/* override the light-theme neumorphic bar (set earlier) — no bar in either theme */
+html[data-theme="light"] .botnav { background: none; background-color: transparent; box-shadow: none; border: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+.botwrap::before {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 120px; z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 0%, rgb(var(--scrim-rgb, 0 0 0) / 0.12) 55%, rgb(var(--scrim-rgb, 0 0 0) / 0.26) 100%);
 }
-@media (prefers-reduced-transparency: reduce) {
-  .botnav { background: var(--col-surface); -webkit-backdrop-filter: none; backdrop-filter: none; }
-}
+html[data-theme="light"] .botwrap::before { --scrim-rgb: 230 236 243; }
 .navbtn {
   position: relative; /* anchors the gliding .nav-dot */
   display: flex; flex-direction: column; align-items: center; gap: 4px;
@@ -1463,23 +1475,95 @@ html[data-theme="light"] .liquid-split-blob { background: rgba(150, 160, 180, 0.
 @media (prefers-reduced-motion: reduce) { .liquid-split-goo { display: none; } }
 @media (prefers-reduced-transparency: reduce) { .liquid-split-goo { display: none; } }
 
-/* Entry primary choices — full-width, left-aligned glass pills. */
-.mlt-choices { display: flex; flex-direction: column; gap: 14px; align-items: stretch; }
-.mlt-choice { width: 100%; justify-content: flex-start; text-align: left; gap: 16px; padding: 17px 20px; }
-.mlt-choice .mlt-ic { flex: none; width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--r-pill); border: 1px solid var(--glass-rim); box-shadow: 0 1px 0 var(--glass-specular) inset; }
-.mlt-choice .mlt-ic svg { width: 21px; height: 21px; }
-.mlt-choice .mlt-tx { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-.mlt-choice .mlt-title { font-family: var(--font-display, 'EB Garamond', serif); font-size: 1.12rem; line-height: 1.12; }
-.mlt-choice .mlt-sub { font-size: 0.78rem; line-height: 1.2; opacity: 0.72; }
-.mlt-choice .mlt-go { margin-left: auto; align-self: center; flex: none; color: var(--col-accent); }
-.mlt-ic-level { color: var(--col-accent); font-size: 1.05rem; line-height: 1; }
-.mlt-choice-tertiary { padding: 12px 18px; }
-.mlt-choice-tertiary .mlt-title { font-size: 0.95rem; }
+/* ── MLT orbs (2026-06-23, Vic v2): icon-only 3D-glass circles. No persistent
+   labels — "just the circle icon is good enough". Label reveals on hover/focus
+   + on tap (the floating caption below). Smaller than the old pills. ── */
+.mlt-select { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.mlt-row  { display: flex; flex-wrap: wrap; justify-content: center; gap: 22px; max-width: 420px; margin: 0 auto; }
+.mlt-grid { display: grid; grid-template-columns: repeat(4, auto); justify-content: center; gap: 18px 22px; max-width: 420px; margin: 0 auto; }
+@media (min-width: 480px) { .mlt-grid { grid-template-columns: repeat(5, auto); } }
 
-/* Lifestyle tokens — compact glass tiles in a grid: emoji glyph + tight label. */
-.mlt-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-@media (min-width: 640px) { .mlt-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (min-width: 768px) { .mlt-grid { grid-template-columns: repeat(5, 1fr); } }
-.mlt-token { flex-direction: column; gap: 7px; padding: 14px 8px; min-height: 80px; text-align: center; justify-content: center; }
-.mlt-token .mlt-emoji { font-size: 1.7rem; line-height: 1; }
-.mlt-token .mlt-token-label { font-size: 0.78rem; line-height: 1.1; }
+/* the orb itself = a thick 3D glass disc (inherits .glass-disc convex read) */
+.mlt-orb { width: 66px; height: 66px; flex: none; padding: 0; cursor: pointer; transition: transform var(--dur-mid) var(--ease), opacity var(--dur-mid) var(--ease); }
+.mlt-grid .mlt-orb { width: 60px; height: 60px; }
+.mlt-orb-ic { display: inline-flex; align-items: center; justify-content: center; }
+.mlt-orb-ic svg { width: 26px; height: 26px; }
+.mlt-emoji { font-size: 1.65rem; line-height: 1; }
+.mlt-grid .mlt-emoji { font-size: 1.5rem; }
+.mlt-orb-level { color: var(--col-accent); font-size: 1.5rem; line-height: 1; }
+
+/* hover/tap states */
+.mlt-orb:hover { transform: translateY(-2px) scale(1.04); }
+.mlt-orb.is-chosen { transform: scale(1.12); border-color: var(--accent-glass-rim); }
+.mlt-orb.is-dimmed { opacity: 0.4; transform: scale(0.94); }
+
+/* floating caption — the label that appears on hover/select ("text when selected") */
+.mlt-caption { min-height: 1.4em; font-family: var(--font-display, 'EB Garamond', serif); font-size: 1.05rem; letter-spacing: 0.01em; color: var(--col-ink); text-align: center; opacity: 0; transform: translateY(4px); transition: opacity var(--dur-mid) var(--ease), transform var(--dur-mid) var(--ease); }
+.mlt-select.show-cap .mlt-caption { opacity: 1; transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) { .mlt-caption, .mlt-orb { transition: none; } }
+
+/* Entry — hero text removed; the orbs sit centred over the ground. */
+.mlt-entry { display: flex; align-items: center; justify-content: center; min-height: calc(100dvh - 140px); padding: 32px 20px 120px; }
+
+/* ══════════════════════════════════════════════════════════════════
+   THICK CONVEX 3D GLASS (2026-06-23, Vic + design-specialist spec)
+   Make .glass-disc / .glass-capsule read as a fat bead sitting PROUD of
+   the surface, like REF-01 — not a flat translucent sticker. Additive
+   overrides; NO backdrop-filter (law #3 — these transform during morph).
+   The #1 missing cue was a real ambient DROP SHADOW (elevation).
+   ══════════════════════════════════════════════════════════════════ */
+.glass-disc, .glass-capsule {
+  border-width: 1.25px;
+  box-shadow:
+    inset 0 1.5px 0.5px -0.5px rgba(255,255,255,0.92),     /* crisp top-edge crown */
+    inset 0 -2px 2px -1px rgba(255,255,255,0.22),          /* bottom light-wrap */
+    inset 0 0 0 1px rgba(255,255,255,0.18),                /* fatter refractive bevel */
+    inset 1px 1px 1.5px -0.5px rgba(170,215,255,0.40),     /* cool edge catch */
+    inset -1px -1px 1.5px -0.5px rgba(255,205,160,0.32),   /* warm edge catch */
+    var(--glass-inner-glow),
+    0 2px 4px -1px rgba(0,0,0,0.30),                       /* contact shadow */
+    0 10px 22px -8px rgba(0,0,0,0.52),                     /* mid penumbra */
+    0 20px 40px -18px rgba(0,0,0,0.38);                    /* wide soft floor */
+}
+/* broad convex DOME + tight specular hotspot + belly catch = curved glass read */
+.glass-disc::before, .glass-capsule::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(40% 30% at 32% 16%, rgba(255,255,255,0.85), rgba(255,255,255,0) 60%),
+    linear-gradient(180deg, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0.10) 34%, rgba(255,255,255,0) 60%),
+    radial-gradient(90% 60% at 50% 118%, rgba(255,255,255,0.16), rgba(255,255,255,0) 62%);
+}
+/* hair-thin ultra-bright lit crown arc */
+.glass-disc::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 0;
+  background: radial-gradient(70% 14% at 50% 3%, rgba(255,255,255,0.9), rgba(255,255,255,0) 70%);
+}
+.glass-disc > *, .glass-capsule > * { position: relative; z-index: 1; }
+
+html[data-theme="light"] .glass-disc, html[data-theme="light"] .glass-capsule {
+  box-shadow:
+    inset 0 1.5px 0.5px -0.5px rgba(255,255,255,1),
+    inset 0 0 0 1px rgba(255,255,255,0.7),
+    4px 5px 9px var(--nm-dark), -4px -4px 9px var(--nm-light),
+    0 12px 22px -12px rgba(120,135,160,0.40);
+}
+html[data-theme="light"] .glass-disc::before, html[data-theme="light"] .glass-capsule::before,
+html[data-theme="light"] .glass-disc::after {
+  background: linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 55%);
+}
+/* press — the bead sinks toward the surface (pairs with existing :active scale) */
+.glass-disc:active, .glass-capsule:active {
+  box-shadow:
+    inset 0 1.5px 0.5px -0.5px rgba(255,255,255,0.92),
+    inset 0 0 0 1px rgba(255,255,255,0.18),
+    var(--glass-inner-glow),
+    0 1px 2px -1px rgba(0,0,0,0.30), 0 4px 10px -6px rgba(0,0,0,0.45);
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass-disc::before, .glass-capsule::before, .glass-disc::after { display: none; }
+  .glass-disc, .glass-capsule { box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18), 0 6px 14px -8px rgba(0,0,0,0.4); }
+}
+
+/* nav labels float over content now (bar removed) → add legibility shadow */
+.navlabel, .stacklabel, .belllabel { text-shadow: 0 1px 3px rgba(0,0,0,0.55); }
+html[data-theme="light"] .navlabel, html[data-theme="light"] .stacklabel, html[data-theme="light"] .belllabel { text-shadow: 0 1px 2px rgba(255,255,255,0.8); }

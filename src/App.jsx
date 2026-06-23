@@ -289,43 +289,58 @@ function ProgressBar({ current, total }) {
    Screen 1 — Entry
    ═══════════════════════════════════════════ */
 
+/* MLT select (2026-06-23, Vic): icon-only 3D-glass ORBS. No persistent labels
+   ("just the circle icon is good enough"); the label reveals on hover/focus
+   (desktop) and on TAP — the chosen orb's label rises in a floating caption,
+   then it proceeds (a beat later, so the text is seen). Reduced-motion → pick
+   immediately. The orbs melt-and-split in via LiquidSplit. */
+function MltSelect({ items, layout = 'row', playKey }) {
+  const [chosen, setChosen] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const choose = (it) => {
+    if (chosen) return;
+    if (reduced()) { it.onPick(); return; }
+    setChosen(it);
+    window.setTimeout(() => it.onPick(), 640);
+  };
+  const cap = chosen ? chosen.label : (preview ? preview.label : ' ');
+  return (
+    <div className={'mlt-select' + (chosen || preview ? ' show-cap' : '')}>
+      <LiquidSplit className={layout === 'grid' ? 'mlt-grid' : 'mlt-row'} playKey={playKey}>
+        {items.map(it => (
+          <button
+            key={it.key}
+            type="button"
+            onClick={() => choose(it)}
+            onPointerEnter={() => { if (!chosen) setPreview(it); }}
+            onPointerLeave={() => setPreview(p => (p === it ? null : p))}
+            onFocus={() => { if (!chosen) setPreview(it); }}
+            onBlur={() => setPreview(p => (p === it ? null : p))}
+            className={'glass-disc mlt-orb' + (chosen === it ? ' is-chosen' : '') + (chosen && chosen !== it ? ' is-dimmed' : '')}
+            aria-label={it.label}
+          >
+            <span className="mlt-orb-ic" aria-hidden="true">{it.icon}</span>
+          </button>
+        ))}
+      </LiquidSplit>
+      <div className="mlt-caption" aria-live="polite">{cap}</div>
+    </div>
+  );
+}
+
 function Entry({ session, setSession }) {
   const nav = useNavigate();
   const pick = (mode) => { setSession({ ...initialSession, mode }); nav(mode === 'lifestyle' ? '/lifestyle' : '/level'); };
+  // Hero text removed (Vic 2026-06-23): the icons are sufficient. Three icon-
+  // only glass orbs over the ground; tap reveals the label, then proceeds.
+  const items = [
+    { key: 'zone',      label: 'Body Zone',              icon: <IconBodyZone />,  onPick: () => pick('zone') },
+    { key: 'lifestyle', label: 'Lifestyle',              icon: <IconLifestyle />, onPick: () => pick('lifestyle') },
+    { key: 'protocols', label: 'Evidence-based protocols', icon: <IconProtocols />, onPick: () => nav('/protocols') },
+  ];
   return (
-    <main className="px-6 py-14 md:py-24 max-w-5xl mx-auto">
-      <div className="mb-12 fade-in is-visible">
-        <div className="eyebrow mb-5">Session Builder</div>
-        <h1 className="font-display text-5xl md:text-7xl leading-[0.95] mb-5">
-          Unlock<br/>your body<span className="text-accent">.</span>
-        </h1>
-        <p className="text-muted max-w-xl text-lg leading-relaxed">Science-backed fascia protocols personalised to your body, your pain, your lifestyle.</p>
-      </div>
-
-      {/* 2026-06-23 (MLT trial): "The fascia network" glass card removed at
-          Vic's request; hero now flows straight into the selection cards.
-          Spacing rebalanced (hero mb-12) for symmetric empty space. */}
-
-      {/* MLT (2026-06-23): the big frosted selection boxes are now compact
-          clear-glass pills that melt-and-split in from one mass (LiquidSplit).
-          Body Zone + Lifestyle are primary; Protocols is the slim tertiary. */}
-      <LiquidSplit className="mlt-choices" playKey="entry">
-        <button onClick={() => pick('zone')} className="glass-capsule mlt-choice" aria-label="Select by Body Zone">
-          <span className="mlt-ic" aria-hidden="true"><IconBodyZone /></span>
-          <span className="mlt-tx"><span className="mlt-title">Body Zone</span><span className="mlt-sub">Tap where it hurts</span></span>
-          <span className="mlt-go" aria-hidden="true">→</span>
-        </button>
-        <button onClick={() => pick('lifestyle')} className="glass-capsule mlt-choice" aria-label="Select by Lifestyle">
-          <span className="mlt-ic" aria-hidden="true"><IconLifestyle /></span>
-          <span className="mlt-tx"><span className="mlt-title">Lifestyle</span><span className="mlt-sub">We preset your zones</span></span>
-          <span className="mlt-go" aria-hidden="true">→</span>
-        </button>
-        <Link to="/protocols" className="glass-capsule mlt-choice mlt-choice-tertiary" aria-label="Browse evidence-based protocols">
-          <span className="mlt-ic" aria-hidden="true"><IconProtocols /></span>
-          <span className="mlt-tx"><span className="mlt-title">Evidence-based protocols</span></span>
-          <span className="mlt-go" aria-hidden="true">→</span>
-        </Link>
-      </LiquidSplit>
+    <main className="mlt-entry">
+      <MltSelect items={items} layout="row" playKey="entry" />
     </main>
   );
 }
@@ -358,15 +373,17 @@ function LifestyleSelect({ session, setSession }) {
       <Link to="/welcome" className="text-muted text-sm mb-4 inline-block hover:text-accent">← Back</Link>
       <h2 className="font-display text-3xl md:text-4xl mb-2">Your lifestyle</h2>
       <p className="text-muted mb-8">What does your average day look like?</p>
-      {/* MLT: lifestyle tokens are compact glass tiles that melt-and-split in. */}
-      <LiquidSplit className="mlt-grid" playKey="lifestyle">
-        {LIFESTYLES.map(l => (
-          <button key={l.code} onClick={() => pick(l.code)} className="glass-capsule mlt-token" aria-label={l.label}>
-            <span className="mlt-emoji" aria-hidden="true">{l.icon}</span>
-            <span className="mlt-token-label">{l.label}</span>
-          </button>
-        ))}
-      </LiquidSplit>
+      {/* MLT: icon-only glass orbs (emoji glyph); label reveals on hover/tap. */}
+      <MltSelect
+        layout="grid"
+        playKey="lifestyle"
+        items={LIFESTYLES.map(l => ({
+          key: l.code,
+          label: l.label,
+          icon: <span className="mlt-emoji">{l.icon}</span>,
+          onPick: () => pick(l.code),
+        }))}
+      />
     </main>
   );
 }
@@ -387,15 +404,17 @@ function LevelSelect({ session, setSession }) {
       <Link to={session.mode === 'lifestyle' ? '/lifestyle' : '/welcome'} className="text-muted text-sm mb-4 inline-block hover:text-accent">← Back</Link>
       <h2 className="font-display text-3xl md:text-4xl mb-2">Flexibility level</h2>
       <p className="text-muted mb-8">This sets which video variations load for each zone.</p>
-      {/* MLT: levels are compact glass pills that melt-and-split in. */}
-      <LiquidSplit className="mlt-choices" playKey="level">
-        {levels.map(l => (
-          <button key={l.code} onClick={() => pick(l.code)} className="glass-capsule mlt-choice" aria-label={l.title}>
-            <span className="mlt-ic mlt-ic-level" aria-hidden="true">{l.icon}</span>
-            <span className="mlt-tx"><span className="mlt-title">{l.title}</span><span className="mlt-sub">{l.sub}</span></span>
-          </button>
-        ))}
-      </LiquidSplit>
+      {/* MLT: icon-only glass orbs (fill-level glyph); label reveals on hover/tap. */}
+      <MltSelect
+        layout="row"
+        playKey="level"
+        items={levels.map(l => ({
+          key: l.code,
+          label: l.title,
+          icon: <span className="mlt-orb-level" aria-hidden="true">{l.icon}</span>,
+          onPick: () => pick(l.code),
+        }))}
+      />
     </main>
   );
 }
