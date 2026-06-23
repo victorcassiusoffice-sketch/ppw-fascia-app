@@ -875,19 +875,19 @@ html[data-theme="light"] .glass-knob {
    bead (rim + specular dome, no backdrop-filter — the dock frosts + the button
    transforms, perf law #3), the active tab's accent-glass fill GLIDES between
    beads (shared layoutId 'nav-bead'), and the glyph liquid-taps on press. ── */
+/* MINIMAL liquid-glass nav (2026-06-23, Vic #1): inactive tabs are BARE
+   hairline glyphs — no bead body — so the dock reads minimal. Only the ACTIVE
+   tab wears a clear-glass bead (the accent fill glides in via .nav-bead-fill).
+   The centre ＋ Add stays the one raised accent. */
 .nav-bead {
   position: relative; isolation: isolate;
   display: inline-flex; align-items: center; justify-content: center;
   width: 40px; height: 40px; border-radius: var(--r-pill);
-  /* clear glass body — rim + dome carry the read (mirrors .glass-disc) */
-  background: linear-gradient(160deg, rgba(255,255,255,0.10), rgba(255,255,255,0.015) 52%, rgba(255,255,255,0.05));
-  border: 1px solid rgba(255,255,255,0.20);
-  box-shadow: 0 1px 0 var(--glass-specular) inset, inset 0 0 0 1px rgba(255,255,255,0.07),
-              var(--glass-inner-glow);
+  background: transparent; border: 1px solid transparent; box-shadow: none;
   transition: border-color var(--dur-mid) var(--ease), background var(--dur-mid) var(--ease),
               border-radius var(--dur-mid) var(--ease);
 }
-.nav-bead::before { /* specular dome — the curved-bead read */
+.nav-bead.is-active::before { /* specular dome only on the active bead */
   content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 0;
   background: radial-gradient(62% 52% at 30% 22%, rgba(255,255,255,0.42), rgba(255,255,255,0) 70%);
 }
@@ -907,7 +907,7 @@ html[data-theme="light"] .glass-knob {
 /* liquid-tap press: glyph squishes + tilts, bead radius melts (matches .glass-disc:active) */
 .navbtn:active .nav-bead svg { transform: scale(0.8) rotate(-6deg); }
 .navbtn:active .nav-bead { border-radius: 44%; }
-html[data-theme="light"] .nav-bead {
+html[data-theme="light"] .nav-bead.is-active {
   background: linear-gradient(160deg, rgba(255,255,255,0.82), rgba(255,255,255,0.42) 58%, rgba(255,255,255,0.62));
   border-color: rgba(255,255,255,0.92);
   box-shadow: 0 1px 0 rgba(255,255,255,1) inset, inset 0 0 0 1px rgba(255,255,255,0.5),
@@ -1447,3 +1447,39 @@ button:focus-visible, a:focus-visible { outline: none; }
 @media (max-width: 640px) {
   .btn-accent, .btn-ghost, .btn-secondary, .btn-lime { padding: 12px 20px; }
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   MLT — Minimalistic Liquid Transition (2026-06-23, Vic)
+   Compact clear-glass selection pills that MELT-AND-SPLIT in from one
+   mass (engine: src/components/LiquidSplit.jsx). Replaces the big frosted
+   selection boxes on Entry / Lifestyle / Level. Skin = .glass-capsule
+   (clear glass, no backdrop-filter → safe to transform during the morph).
+   ══════════════════════════════════════════════════════════════════ */
+.liquid-split { position: relative; }
+.liquid-split-goo { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+/* WHITE liquid light (glass law #2 — the neck is sheen, never accent paint). */
+.liquid-split-blob { position: absolute; left: 0; top: 0; border-radius: var(--r-pill); background: rgba(255, 255, 255, 0.92); will-change: transform; }
+html[data-theme="light"] .liquid-split-blob { background: rgba(150, 160, 180, 0.72); }
+@media (prefers-reduced-motion: reduce) { .liquid-split-goo { display: none; } }
+@media (prefers-reduced-transparency: reduce) { .liquid-split-goo { display: none; } }
+
+/* Entry primary choices — full-width, left-aligned glass pills. */
+.mlt-choices { display: flex; flex-direction: column; gap: 14px; align-items: stretch; }
+.mlt-choice { width: 100%; justify-content: flex-start; text-align: left; gap: 16px; padding: 17px 20px; }
+.mlt-choice .mlt-ic { flex: none; width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--r-pill); border: 1px solid var(--glass-rim); box-shadow: 0 1px 0 var(--glass-specular) inset; }
+.mlt-choice .mlt-ic svg { width: 21px; height: 21px; }
+.mlt-choice .mlt-tx { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.mlt-choice .mlt-title { font-family: var(--font-display, 'EB Garamond', serif); font-size: 1.12rem; line-height: 1.12; }
+.mlt-choice .mlt-sub { font-size: 0.78rem; line-height: 1.2; opacity: 0.72; }
+.mlt-choice .mlt-go { margin-left: auto; align-self: center; flex: none; color: var(--col-accent); }
+.mlt-ic-level { color: var(--col-accent); font-size: 1.05rem; line-height: 1; }
+.mlt-choice-tertiary { padding: 12px 18px; }
+.mlt-choice-tertiary .mlt-title { font-size: 0.95rem; }
+
+/* Lifestyle tokens — compact glass tiles in a grid: emoji glyph + tight label. */
+.mlt-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+@media (min-width: 640px) { .mlt-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 768px) { .mlt-grid { grid-template-columns: repeat(5, 1fr); } }
+.mlt-token { flex-direction: column; gap: 7px; padding: 14px 8px; min-height: 80px; text-align: center; justify-content: center; }
+.mlt-token .mlt-emoji { font-size: 1.7rem; line-height: 1; }
+.mlt-token .mlt-token-label { font-size: 0.78rem; line-height: 1.1; }

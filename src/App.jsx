@@ -31,6 +31,7 @@ import { useTheme } from './theme.js';
 import { initAssistantSync } from './lib/assistantSync.js';
 import { installGlobalPressSound } from './lib/softTactile.js';
 import UpdateToast from './components/UpdateToast.jsx';
+import LiquidSplit from './components/LiquidSplit.jsx';
 
 import TodayView from './pages/Today.jsx';
 import { ProtocolsList, ProtocolDetail } from './pages/Protocols.jsx';
@@ -305,25 +306,40 @@ function Entry({ session, setSession }) {
           Vic's request; hero now flows straight into the selection cards.
           Spacing rebalanced (hero mb-12) for symmetric empty space. */}
 
-      <div className="grid md:grid-cols-2 gap-5 fade-in fade-in-stagger is-visible">
-        <button onClick={() => pick('zone')} className="card protocol-tile p-10 text-left group transition-all duration-300">
-          <div className="eyebrow mb-4">01</div>
-          <div className="font-display text-2xl md:text-3xl mb-3 leading-tight">Select by Body Zone</div>
-          <div className="text-muted text-sm leading-relaxed">Tap the body where it hurts. Build your own stack.</div>
-          <div className="text-accent text-sm mt-6 inline-flex items-center gap-1 group-hover:gap-2 transition-all">Get started <span aria-hidden="true">→</span></div>
+      {/* MLT (2026-06-23): the big frosted selection boxes are now compact
+          clear-glass pills that melt-and-split in from one mass (LiquidSplit).
+          Body Zone + Lifestyle are primary; Protocols is the slim tertiary. */}
+      <LiquidSplit className="mlt-choices" playKey="entry">
+        <button onClick={() => pick('zone')} className="glass-capsule mlt-choice" aria-label="Select by Body Zone">
+          <span className="mlt-ic" aria-hidden="true"><IconBodyZone /></span>
+          <span className="mlt-tx"><span className="mlt-title">Body Zone</span><span className="mlt-sub">Tap where it hurts</span></span>
+          <span className="mlt-go" aria-hidden="true">→</span>
         </button>
-        <button onClick={() => pick('lifestyle')} className="card protocol-tile p-10 text-left group transition-all duration-300">
-          <div className="eyebrow mb-4">02</div>
-          <div className="font-display text-2xl md:text-3xl mb-3 leading-tight">Select by Lifestyle</div>
-          <div className="text-muted text-sm leading-relaxed">Pick your daily work. We preset the zones for you.</div>
-          <div className="text-accent text-sm mt-6 inline-flex items-center gap-1 group-hover:gap-2 transition-all">Get started <span aria-hidden="true">→</span></div>
+        <button onClick={() => pick('lifestyle')} className="glass-capsule mlt-choice" aria-label="Select by Lifestyle">
+          <span className="mlt-ic" aria-hidden="true"><IconLifestyle /></span>
+          <span className="mlt-tx"><span className="mlt-title">Lifestyle</span><span className="mlt-sub">We preset your zones</span></span>
+          <span className="mlt-go" aria-hidden="true">→</span>
         </button>
-      </div>
-      <div className="mt-8">
-        <Link to="/protocols" className="text-accent text-sm underline underline-offset-4">Or browse evidence-based protocols →</Link>
-      </div>
+        <Link to="/protocols" className="glass-capsule mlt-choice mlt-choice-tertiary" aria-label="Browse evidence-based protocols">
+          <span className="mlt-ic" aria-hidden="true"><IconProtocols /></span>
+          <span className="mlt-tx"><span className="mlt-title">Evidence-based protocols</span></span>
+          <span className="mlt-go" aria-hidden="true">→</span>
+        </Link>
+      </LiquidSplit>
     </main>
   );
+}
+
+/* MLT thin-line glyphs (REF-08 hairline; the global :where stroke rule thins
+   them to 1.6). Icon-first selection pills replace the big-text boxes. */
+function IconBodyZone() {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="4.6" r="2.2" /><path d="M12 7v8M12 9.5 6.5 12M12 9.5 17.5 12M12 15l-3 6M12 15l3 6" /></svg>;
+}
+function IconLifestyle() {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3.5" y="8" width="17" height="11.5" rx="2.4" /><path d="M9 8V6.2A2.2 2.2 0 0 1 11.2 4h1.6A2.2 2.2 0 0 1 15 6.2V8M3.5 13h17" /></svg>;
+}
+function IconProtocols() {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 4.5h9a2.5 2.5 0 0 1 2.5 2.5v12.5H7.5A2.5 2.5 0 0 1 5 19V4.5Z" /><path d="M8.5 9h5M8.5 12.5h5" /></svg>;
 }
 
 /* ═══════════════════════════════════════════
@@ -342,14 +358,15 @@ function LifestyleSelect({ session, setSession }) {
       <Link to="/welcome" className="text-muted text-sm mb-4 inline-block hover:text-accent">← Back</Link>
       <h2 className="font-display text-3xl md:text-4xl mb-2">Your lifestyle</h2>
       <p className="text-muted mb-8">What does your average day look like?</p>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+      {/* MLT: lifestyle tokens are compact glass tiles that melt-and-split in. */}
+      <LiquidSplit className="mlt-grid" playKey="lifestyle">
         {LIFESTYLES.map(l => (
-          <button key={l.code} onClick={() => pick(l.code)} className="card p-6 text-center transition-all duration-200 hover:scale-[1.03]">
-            <div className="text-4xl mb-3">{l.icon}</div>
-            <div className="font-display text-sm md:text-base">{l.label}</div>
+          <button key={l.code} onClick={() => pick(l.code)} className="glass-capsule mlt-token" aria-label={l.label}>
+            <span className="mlt-emoji" aria-hidden="true">{l.icon}</span>
+            <span className="mlt-token-label">{l.label}</span>
           </button>
         ))}
-      </div>
+      </LiquidSplit>
     </main>
   );
 }
@@ -370,15 +387,15 @@ function LevelSelect({ session, setSession }) {
       <Link to={session.mode === 'lifestyle' ? '/lifestyle' : '/welcome'} className="text-muted text-sm mb-4 inline-block hover:text-accent">← Back</Link>
       <h2 className="font-display text-3xl md:text-4xl mb-2">Flexibility level</h2>
       <p className="text-muted mb-8">This sets which video variations load for each zone.</p>
-      <div className="grid md:grid-cols-3 gap-5">
+      {/* MLT: levels are compact glass pills that melt-and-split in. */}
+      <LiquidSplit className="mlt-choices" playKey="level">
         {levels.map(l => (
-          <button key={l.code} onClick={() => pick(l.code)} className="card p-8 text-left transition-all duration-200 hover:scale-[1.02]">
-            <div className="text-2xl mb-3 text-accent">{l.icon}</div>
-            <div className="font-display text-2xl mb-2">{l.title}</div>
-            <div className="text-muted text-sm">{l.sub}</div>
+          <button key={l.code} onClick={() => pick(l.code)} className="glass-capsule mlt-choice" aria-label={l.title}>
+            <span className="mlt-ic mlt-ic-level" aria-hidden="true">{l.icon}</span>
+            <span className="mlt-tx"><span className="mlt-title">{l.title}</span><span className="mlt-sub">{l.sub}</span></span>
           </button>
         ))}
-      </div>
+      </LiquidSplit>
     </main>
   );
 }
