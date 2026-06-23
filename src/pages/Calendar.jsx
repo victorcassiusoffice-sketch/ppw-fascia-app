@@ -29,8 +29,8 @@ export default function CalendarView() {
   const [view, setView] = useState(() => { const t = new Date(today + 'T12:00:00'); return { y: t.getFullYear(), m: t.getMonth() }; });
   const [selected, setSelected] = useState(today);
 
-  const [recurrenceRules] = useRecurrenceRules();
-  const overrides = useRecurrenceOverrides(selected);
+  const { rules: recurrenceRules } = useRecurrenceRules();
+  const { overrides } = useRecurrenceOverrides(selected);
   const { stacks: userStacks } = useUserStacks(selected);
 
   // Build the month matrix (Monday-start), with a planned-dot flag per day.
