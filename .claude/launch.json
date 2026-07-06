@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "redesign-mock",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["--yes", "serve", "-l", "4599", "C:\Users\Victor\Documents\PPW-Second-Brain\06-Roadmap\media-dept\design-training"],
+      "port": 4599
+    },
+    {
+      "name": "ppw-fascia-app-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 3000
+    }
+  ]
+}

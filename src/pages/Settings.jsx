@@ -6,6 +6,7 @@ import { useTheme } from '../theme.js';
 import { getPermissionState, requestPermission } from '../notifications.js';
 import { useLocalStorage, useActiveProtocols, useActiveModules, useActiveRoutines, useIfPrefs } from '../state.js';
 import { LS_KEYS, APP_VERSION, USE_MOCK_DATA, NOTIFICATION_LEAD_TIME_MIN, FEATURE_ASSISTANT_LAUNCH, coachUrl } from '../config.js';
+import { isProMember, setProMember } from '../lib/entitlement.js';
 import { getPushState, subscribeToPush, INSTALL_HELP } from '../lib/push.js';
 import { Section } from '../components/shared.jsx';
 import { m, glideIndicator, pressScale, SPRING, reduced } from '../lib/motion';
@@ -228,6 +229,15 @@ function SettingsView() {
   const { level: glassLevel, setLevel: setGlassLevel } = useGlassIntensity();
   const [perm, setPerm] = useState(getPermissionState());
   const [mockOverride, setMockOverride] = useLocalStorage(LS_KEYS.USE_MOCK_OVERRIDE, USE_MOCK_DATA ? 'true' : 'false');
+  // Premium — manual test switch (2026-07-06). No payment gateway wired yet;
+  // see src/lib/entitlement.js setProMember() for the seam a real Gumroad
+  // unlock should call later.
+  const [isPro, setIsPro] = useState(() => isProMember());
+  const togglePremium = () => {
+    const next = !isPro;
+    setProMember(next);
+    setIsPro(next);
+  };
   const [activeProtocols, setActiveProtocols] = useActiveProtocols();
   const [activeModules, setActiveModules] = useActiveModules();
   const [activeRoutines, setActiveRoutines] = useActiveRoutines();
@@ -565,6 +575,42 @@ function SettingsView() {
                 className="w-full bg-cream/5 border border-cream/15 rounded-lg px-3 py-2 text-sm font-display text-cream focus:outline-none focus:border-accent"
               />
             </label>
+          </div>
+        </div>
+      </Section>
+
+      <Section title="Membership">
+        <div className="card p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <div className="font-display">Premium{isPro ? ' · active' : ''}</div>
+              <div className="text-muted text-xs mt-1">Manual test switch — no payment gateway wired yet. Flip on to preview Premium; flip off to test the free tier.</div>
+            </div>
+            {/* Same glass-switch/glass-knob pattern as the IF toggle above. */}
+            <button
+              type="button"
+              onClick={togglePremium}
+              className={'glass-switch shrink-0' + (isPro ? ' on' : '')}
+              role="switch"
+              aria-checked={isPro}
+              aria-label={isPro ? 'Premium on — tap to turn off' : 'Premium off — tap to turn on'}
+            >
+              <m.span
+                className="glass-knob"
+                initial={false}
+                animate={{ x: isPro ? 34 : 3 }}
+                transition={reduced() ? { duration: 0 } : SPRING.glide}
+                aria-hidden="true"
+              >
+                {isPro ? '✓' : ''}
+              </m.span>
+            </button>
+          </div>
+          <div className="text-muted text-[11px] mt-3 leading-relaxed">
+            This is a local flag (<code>ppw.entitlement</code>) for testing — no card, no charge. When your
+            Gumroad product is live, wire a real unlock (a redeemed license-key page, or a checkout-redirect
+            route) to call the same <code>setProMember()</code> function in <code>src/lib/entitlement.js</code> —
+            nothing else needs to change.
           </div>
         </div>
       </Section>
