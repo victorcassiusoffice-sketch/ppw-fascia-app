@@ -1,5 +1,20 @@
 # Claude Design Transfer + Premium/Gumroad Build — Handoff
 
+## 🚀 LIVE (2026-07-06, Vic's explicit go: "Go live — replace the old app completely")
+
+Deployed: `main` fast-forwarded `3fc4151` → `738f29f`, GH Actions run 28794206756
+completed/success, live bundle `assets/index-wgAe8cBr.js` verified by cache-busted
+curl + REAL-CHROME render check (`tools/shoot-live-newdesign-2026-07-06.mjs` →
+`.shots/live-newdesign-2026-07-06/`): fresh visitor gets the onboarding wizard,
+onboarded gets the Stack screen, zero console errors on both.
+
+**One-command rollback** (restores the old app on Pages):
+```
+git -C C:\Users\Victor\Documents\PPW-Code\ppw-fascia-app push origin 3fc415107e17a7e5758cd0cfc8782189bc271fca:main --force
+```
+(Softer in-code revert: set `NEW_DESIGN_ONLY = false` in `src/App.jsx` and push.)
+Old-app user data (`ppw.` keys) is untouched on devices; the New Design uses `ppw5.` keys.
+
 **Read this file FIRST if resuming after a credit cutout or new session.**
 
 Repo: `C:\Users\Victor\Documents\PPW-Code\ppw-fascia-app`
