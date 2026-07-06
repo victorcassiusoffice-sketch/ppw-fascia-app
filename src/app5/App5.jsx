@@ -275,7 +275,7 @@ export default function App5() {
 
   return (
     <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#83878B' }}>
-      <div style={{ position: 'relative', width: 'min(430px, 100vw)', height: 'min(932px, 100dvh)', overflow: 'hidden', borderRadius: 'clamp(0px, calc((100vw - 429px) * 99), 40px)', boxShadow: '0 40px 120px -30px rgba(20,26,36,.55)', fontFamily: "'Nunito', system-ui, sans-serif", fontWeight: 500, color: 'var(--ink, #23262C)', ...vars }}>
+      <div data-easyread={S.a11y.on ? '1' : '0'} style={{ position: 'relative', width: 'min(430px, 100vw)', height: 'min(932px, 100dvh)', overflow: 'hidden', borderRadius: 'clamp(0px, calc((100vw - 429px) * 99), 40px)', boxShadow: '0 40px 120px -30px rgba(20,26,36,.55)', fontFamily: "'Nunito', system-ui, sans-serif", fontWeight: 500, color: 'var(--ink, #23262C)', zoom: S.a11y.zoom || 1, ...vars }}>
         {/* ground */}
         <div style={{ position: 'absolute', inset: 0, background: 'var(--ground)', transition: 'background .4s ease' }} />
         {/* luminous blobs the glass refracts */}

@@ -64,6 +64,8 @@ function initialState() {
     completedOpen: false,
     // runtime popups: slot reminder banner + full-screen note (affirmation)
     slotPop: null, notePop: null, eatingNow: false, autoplay: false,
+    // general prefs
+    sounds: true,
     // repeat picker (repeatId = item being edited, null = closed)
     repeatId: null,
     // terms & health disclaimer overlay
@@ -98,6 +100,8 @@ function initialState() {
     if (g('onboarded') === '1') def.onboarded = true;
     if (g('terms') === '1') def.termsOk = true;
     if (g('reminders')) def.reminders = g('reminders') === '1';
+    if (g('sounds') === '0') def.sounds = false;
+    if (g('autoplay') === '1') def.autoplay = true;
     const ay = gj('a11y'); if (ay && typeof ay === 'object') def.a11y = { on: !!ay.on, zoom: (+ay.zoom >= .85 && +ay.zoom <= 1.4) ? +ay.zoom : 1 };
     const cs = gj('courses'); if (Array.isArray(cs)) def.courseLinks = cs;
     const ig = gj('integrations'); if (ig && typeof ig === 'object') def.integrations = ig;
@@ -405,6 +409,17 @@ export function setTheme(patch) {
   setState(patch);
 }
 export function setPremium(on) { save('premium', on ? '1' : '0'); setState({ premium: !!on }); }
+// general prefs (prototype key encodings)
+export function setSounds(on) { save('sounds', on ? '1' : '0'); setState({ sounds: !!on }); }
+export function setReminders(on) { save('reminders', on ? '1' : '0'); setState({ reminders: !!on }); }
+export function setAutoplay(on) { save('autoplay', on ? '1' : '0'); setState({ autoplay: !!on }); }
+// vision / a11y — easy-read (bold + full-strength dim) and zoom (.85–1.4)
+export function setA11y(patch) {
+  const a = { on: !!(patch.on !== undefined ? patch.on : state.a11y.on), zoom: patch.zoom !== undefined ? patch.zoom : state.a11y.zoom };
+  a.zoom = Math.round(Math.min(1.4, Math.max(.85, a.zoom)) * 100) / 100;
+  save('a11y', JSON.stringify(a));
+  setState({ a11y: a });
+}
 
 // ── React hook ──
 export function useStore5() {

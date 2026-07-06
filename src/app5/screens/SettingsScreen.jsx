@@ -7,7 +7,18 @@
 
 import React from 'react';
 import { SOFT, GLASS } from '../theme5.js';
-import { useStore5, setTheme, setPremium, openTerms } from '../store5.js';
+import { useStore5, setTheme, setPremium, openTerms, setSounds, setReminders, setAutoplay, setA11y } from '../store5.js';
+
+// glass pill toggle (the prototype's 60×34 switch)
+function Switch({ on, onTap, label }) {
+  return (
+    <button onClick={onTap} aria-label={label} role="switch" aria-checked={on} style={{ position: 'relative', width: 60, height: 34, flex: 'none', borderRadius: 999, border: `1px solid ${on ? 'var(--acc-rim)' : 'var(--hairline)'}`, background: on ? 'var(--acc-surf)' : 'var(--track)', boxShadow: 'var(--inset)', transition: 'background .3s' }}>
+      <span style={{ position: 'absolute', top: 3, left: 3, width: 26, height: 26, borderRadius: 999, background: 'var(--thumb)', border: '1px solid var(--rim)', boxShadow: '0 3px 8px rgba(40,50,70,.25)', transform: `translateX(${on ? 26 : 0}px)`, transition: 'transform .38s cubic-bezier(.3,1.3,.4,1)' }} />
+    </button>
+  );
+}
+const ROW = { position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 18px', minHeight: 60, gap: 12 };
+const DIV = <div style={{ height: 1, background: 'var(--hairline)', margin: '0 18px' }} />;
 
 const SOFT_ORDER = ['graphite', 'silver', 'ivory', 'black', 'gloft', 'indigo', 'gel'];
 const GLASS_ORDER = Object.keys(GLASS);
@@ -67,6 +78,52 @@ export default function SettingsScreen() {
             </div>
           </>
         )}
+      </div>
+
+      {/* Vision — easy read + text size (a11y, wired to setA11y) */}
+      <Eyebrow>Vision</Eyebrow>
+      <div style={{ marginTop: 12, borderRadius: 24, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)', overflow: 'hidden' }}>
+        <div style={ROW}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 15, fontWeight: 500 }}>Easy read</div>
+            <div style={{ marginTop: 2, fontSize: 12.5, color: 'var(--dim)' }}>Bolder, brighter text everywhere</div>
+          </div>
+          <Switch on={S.a11y.on} onTap={() => setA11y({ on: !S.a11y.on })} label="Toggle easy read" />
+        </div>
+        {DIV}
+        <div style={ROW}>
+          <div style={{ fontSize: 15, fontWeight: 500, flex: 'none' }}>Text size</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <button onClick={() => setA11y({ zoom: (S.a11y.zoom || 1) - 0.05 })} aria-label="Smaller text" style={{ width: 46, height: 46, borderRadius: 999, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--ink)', fontSize: 14, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>A−</button>
+            <div style={{ fontSize: 15, fontWeight: 700, minWidth: 52, textAlign: 'center', textShadow: 'var(--emboss)' }}>{Math.round((S.a11y.zoom || 1) * 100)}%</div>
+            <button onClick={() => setA11y({ zoom: (S.a11y.zoom || 1) + 0.05 })} aria-label="Bigger text" style={{ width: 46, height: 46, borderRadius: 999, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--ink)', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>A+</button>
+          </div>
+        </div>
+      </div>
+
+      {/* General — sounds / reminders / autoplay (wired to the slot engine) */}
+      <Eyebrow>General</Eyebrow>
+      <div style={{ marginTop: 12, borderRadius: 24, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)', overflow: 'hidden' }}>
+        <div style={ROW}>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 500 }}>Sounds</div>
+            <div style={{ marginTop: 2, fontSize: 12.5, color: 'var(--dim)' }}>Soft ASMR taps on every action</div>
+          </div>
+          <Switch on={S.sounds} onTap={() => setSounds(!S.sounds)} label="Toggle sounds" />
+        </div>
+        {DIV}
+        <div style={ROW}>
+          <div style={{ fontSize: 15, fontWeight: 500 }}>Reminders</div>
+          <Switch on={S.reminders} onTap={() => setReminders(!S.reminders)} label="Toggle reminders" />
+        </div>
+        {DIV}
+        <div style={ROW}>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 500 }}>Autoplay media</div>
+            <div style={{ marginTop: 2, fontSize: 12.5, color: 'var(--dim)' }}>Videos start on their own at slot time</div>
+          </div>
+          <Switch on={S.autoplay} onTap={() => setAutoplay(!S.autoplay)} label="Toggle autoplay" />
+        </div>
       </div>
 
       {/* Membership — Premium toggle (New Design's own flag; wired to store5.setPremium) */}
