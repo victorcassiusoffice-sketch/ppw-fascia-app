@@ -35,7 +35,7 @@ export default function CalendarScreen() {
   const selLabel = selDate.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }).toUpperCase();
 
   return (
-    <div style={{ position: 'absolute', inset: 0, overflowY: 'auto', padding: '28px 20px 140px', animation: 'ppwRise .5s cubic-bezier(.26,1,.4,1)' }}>
+    <div style={{ position: 'absolute', inset: 0, overflowY: 'auto', padding: '28px 20px 140px', animation: 'ppwScreenIn .62s cubic-bezier(.26,1,.4,1)' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <h1 style={{ margin: 0, fontSize: 30, fontWeight: 600, letterSpacing: '-.02em', textShadow: 'var(--emboss)' }}>{monthLabel}</h1>
         <div style={{ display: 'flex', gap: 10 }}>

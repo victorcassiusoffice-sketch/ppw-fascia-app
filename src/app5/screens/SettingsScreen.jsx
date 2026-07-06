@@ -21,7 +21,7 @@ export default function SettingsScreen() {
   const isGel = S.soft === 'gel';
 
   return (
-    <div style={{ position: 'absolute', inset: 0, overflowY: 'auto', padding: '28px 20px 140px', animation: 'ppwRise .5s cubic-bezier(.26,1,.4,1)' }}>
+    <div style={{ position: 'absolute', inset: 0, overflowY: 'auto', padding: '28px 20px 140px', animation: 'ppwScreenIn .62s cubic-bezier(.26,1,.4,1)' }}>
       <h1 style={{ margin: 0, fontSize: 30, fontWeight: 600, letterSpacing: '-.02em', textShadow: 'var(--emboss)' }}>Settings</h1>
 
       <Eyebrow>Appearance</Eyebrow>

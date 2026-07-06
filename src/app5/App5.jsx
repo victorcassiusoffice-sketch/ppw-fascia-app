@@ -11,6 +11,7 @@
 // ─────────────────────────────────────────────────────────────────────────
 
 import React from 'react';
+import './app5.css'; // the prototype's keyframes — required for all ppw* animations
 import { themeVars, parseVars, THUMBS } from './theme5.js';
 import SettingsScreen from './screens/SettingsScreen.jsx';
 import LibraryScreen from './screens/LibraryScreen.jsx';
@@ -116,7 +117,7 @@ function StackScreen() {
   };
 
   return (
-    <div style={{ position: 'absolute', inset: 0, overflowY: 'auto', padding: '28px 20px 140px', animation: 'ppwRise .5s cubic-bezier(.26,1,.4,1)' }}>
+    <div style={{ position: 'absolute', inset: 0, overflowY: 'auto', padding: '28px 20px 140px', animation: 'ppwScreenIn .62s cubic-bezier(.26,1,.4,1)' }}>
       {/* header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -129,6 +130,18 @@ function StackScreen() {
           <h1 style={{ margin: 0, fontSize: 30, fontWeight: 600, letterSpacing: '-.02em', textShadow: 'var(--emboss)' }}>Stack</h1>
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
+          {/* Assistant orb — accent disc, Premium-gated (prototype: openAssistantOrb).
+              When premium, opens the real Wellness Assistant service. */}
+          <button
+            onClick={() => {
+              if (!S.premium) { setState({ premiumUpsell: 'The Assistant is part of Premium — it plans, researches and rebuilds your day, right from this corner.' }); return; }
+              window.open('https://ppw-wellness-assistant.vercel.app/assistant', '_blank', 'noopener');
+            }}
+            aria-label="Assistant"
+            style={{ width: 46, height: 46, borderRadius: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--acc-surf)', border: '1px solid var(--acc-rim)', boxShadow: 'var(--acc-glow)', color: 'var(--acc-ink)', opacity: S.premium ? 1 : .45, transition: 'opacity .3s' }}
+          >
+            <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="9" width="14" height="9.5" rx="3.2" /><path d="M12 6v3" /><circle cx="12" cy="4.4" r="1.5" /><circle cx="9.2" cy="13.6" r="1.15" fill="currentColor" stroke="none" /><circle cx="14.8" cy="13.6" r="1.15" fill="currentColor" stroke="none" /><path d="M9.3 16.4h5.4" /><path d="M2.6 12.6v2.8M21.4 12.6v2.8" /></svg>
+          </button>
           <Disc label="Completed today" badge={completedCount || null} onClick={openCompleted}>{ICheck}</Disc>
           <Disc label="Notifications">{IBell}</Disc>
         </div>
@@ -137,9 +150,14 @@ function StackScreen() {
       {/* NEXT UP hero */}
       {next ? (
         <div style={{ position: 'relative', marginTop: 24, borderRadius: 28, padding: '22px 22px 20px', background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', animation: 'ppwRise .45s cubic-bezier(.3,1.2,.4,1) both' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+          {/* slow accent border-trace (prototype ppwTrace) */}
+          <svg aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} preserveAspectRatio="none" viewBox="0 0 100 100">
+            <rect x="0.6" y="1.2" width="98.8" height="97.6" rx="7.5" fill="none" vectorEffect="non-scaling-stroke" stroke="var(--accent)" strokeWidth="1.5" pathLength="100" strokeDasharray="100" style={{ animation: 'ppwTrace 2.6s ease-out .4s both' }} />
+          </svg>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: 'var(--accent)', textShadow: 'var(--emboss)' }}>Next up</div>
             <label style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--dim)', flex: 'none' }}><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" /></svg>
               <span style={{ fontSize: 24, fontWeight: 600, lineHeight: 1, textShadow: 'var(--emboss)' }}>{next.time}</span>
               <input type="time" value={next.time} onChange={(e) => setItemTime(next.id, e.target.value)} aria-label="Edit next slot time" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', margin: 0, padding: 0, opacity: 0, border: 'none', cursor: 'pointer' }} />
             </label>
