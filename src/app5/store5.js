@@ -56,6 +56,8 @@ function initialState() {
     addOpen: false, customUrl: '', addedCustom: null,
     // calendar → stack (per-date view; null = today)
     viewDate: null,
+    // in-app media viewer (null = closed)
+    playerItem: null,
     // selection / interaction
     selectedIds: [],
     // completed
@@ -210,6 +212,9 @@ export function addToStack(libItem, time = '09:00') {
   return true;
 }
 export function setTab(tab) { setState({ stackTab: tab }); }
+// in-app media viewer
+export function openPlayer(item) { if (item) setState({ playerItem: item }); }
+export function closePlayer() { setState({ playerItem: null }); }
 // open a specific date's stack (null / today → clear viewDate)
 export function openStackForDate(key) {
   const isToday = !key || key === todayKey();

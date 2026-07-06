@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { THUMBS } from '../theme5.js';
-import { useStore5, setTab, addToStack, setUpsell } from '../store5.js';
+import { useStore5, setTab, addToStack, setUpsell, openPlayer } from '../store5.js';
 
 const PREM_PRICE = '$4.99';
 const TABS = [
@@ -22,9 +22,9 @@ const IPlay = <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor
 function MediaRow({ it }) {
   const bg = it.thumbUrl ? `url(${it.thumbUrl})` : (THUMBS[it.thumb] || THUMBS.au);
   const [added, setAdded] = React.useState(false);
-  const add = () => { if (addToStack(it)) setAdded(true); };
+  const add = (e) => { e.stopPropagation(); if (addToStack(it)) setAdded(true); };
   return (
-    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', minHeight: 76, borderRadius: 24, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)' }}>
+    <div onClick={() => { if (it.embed || it.url) openPlayer(it); }} style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', minHeight: 76, borderRadius: 24, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)', cursor: (it.embed || it.url) ? 'pointer' : 'default' }}>
       <div style={{ width: 56, height: 56, flex: 'none', borderRadius: 16, background: bg, backgroundSize: 'cover', backgroundPosition: 'center', border: '1px solid var(--rim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,.92)' }}>{!it.thumbUrl && IPlay}</div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 16, fontWeight: 600, letterSpacing: '-.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textShadow: 'var(--emboss)' }}>{it.title}</div>

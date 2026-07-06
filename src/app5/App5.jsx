@@ -17,10 +17,11 @@ import LibraryScreen from './screens/LibraryScreen.jsx';
 import AddSheet from './screens/AddSheet.jsx';
 import UpsellModal from './screens/UpsellModal.jsx';
 import CalendarScreen from './screens/CalendarScreen.jsx';
+import MediaViewer from './screens/MediaViewer.jsx';
 import {
   useStore5, getState, setState, save,
   stackFor, todayKey, markDone, setItemTime, deleteItem, overLimit,
-  openAdd, backToToday,
+  openAdd, backToToday, openPlayer,
 } from './store5.js';
 
 // ── small inline-SVG icon helpers (match the prototype's line icons) ──
@@ -164,15 +165,15 @@ function StackScreen() {
       </div>
       <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 12 }}>
         {rest.map((it) => (
-          <div key={it.id} style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', minHeight: 68, borderRadius: 26, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)' }}>
+          <div key={it.id} onClick={() => { if (it.embed || it.url) openPlayer(it); }} style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', minHeight: 68, borderRadius: 26, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)', cursor: (it.embed || it.url) ? 'pointer' : 'default' }}>
             {cardIcon(it)}
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 15.5, fontWeight: 600, letterSpacing: '-.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textShadow: 'var(--emboss)' }}>{it.title}</div>
               <div style={{ marginTop: 3, fontSize: 12.5, color: 'var(--dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{it.meta}</div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, flex: 'none' }}>
-              <input type="time" value={it.time} onChange={(e) => setItemTime(it.id, e.target.value)} aria-label="Edit slot time" style={{ fontSize: 15, fontWeight: 600, color: 'var(--dim)', background: 'transparent', border: 'none', outline: 'none', textAlign: 'right', padding: 0, width: 84, cursor: 'pointer' }} />
-              <button onClick={() => markDone(it.id, key)} aria-label="Mark done" style={{ width: 26, height: 26, borderRadius: 999, border: '1.5px solid var(--acc-rim)', background: 'transparent', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}>{ICheck}</button>
+              <input type="time" value={it.time} onClick={(e) => e.stopPropagation()} onChange={(e) => setItemTime(it.id, e.target.value)} aria-label="Edit slot time" style={{ fontSize: 15, fontWeight: 600, color: 'var(--dim)', background: 'transparent', border: 'none', outline: 'none', textAlign: 'right', padding: 0, width: 84, cursor: 'pointer' }} />
+              <button onClick={(e) => { e.stopPropagation(); markDone(it.id, key); }} aria-label="Mark done" style={{ width: 26, height: 26, borderRadius: 999, border: '1.5px solid var(--acc-rim)', background: 'transparent', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}>{ICheck}</button>
             </div>
           </div>
         ))}
@@ -229,6 +230,7 @@ export default function App5() {
         <NavDock screen={S.screen} onNav={nav} onAdd={openAdd} />
         {/* overlays */}
         <AddSheet />
+        <MediaViewer />
         <UpsellModal />
       </div>
     </div>
