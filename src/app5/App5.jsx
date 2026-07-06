@@ -23,10 +23,12 @@ import CompletedSheet from './screens/CompletedSheet.jsx';
 import RepeatSheet from './screens/RepeatSheet.jsx';
 import TermsScreen from './screens/TermsScreen.jsx';
 import OnboardingScreen from './screens/OnboardingScreen.jsx';
+import { NotePopup, SlotReminder } from './screens/Popups.jsx';
 import {
   useStore5, getState, setState, save,
   stackFor, todayKey, markDone, setItemTime, deleteItem, overLimit,
   openAdd, backToToday, openPlayer, openCompleted, openRepeat, repeatLabel,
+  startSlotEngine,
 } from './store5.js';
 
 // ── small inline-SVG icon helpers (match the prototype's line icons) ──
@@ -260,6 +262,10 @@ export default function App5() {
   const vars = parseVars(themeVars(S));
   const nav = (screen) => setState({ screen });
 
+  // runtime slot engine — fires notes/reminders/autoplay when a slot's time
+  // arrives (20s tick, ported from the prototype). Cleans up on unmount.
+  React.useEffect(() => startSlotEngine(), []);
+
   let body;
   if (S.screen === 'stack') body = <StackScreen />;
   else if (S.screen === 'library') body = <LibraryScreen />;
@@ -289,6 +295,8 @@ export default function App5() {
         <MediaViewer />
         <CompletedSheet />
         <RepeatSheet />
+        <SlotReminder />
+        <NotePopup />
         <OnboardingScreen />
         <TermsScreen />
         <UpsellModal />

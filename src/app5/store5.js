@@ -62,6 +62,8 @@ function initialState() {
     playerItem: null,
     // completed-today sheet
     completedOpen: false,
+    // runtime popups: slot reminder banner + full-screen note (affirmation)
+    slotPop: null, notePop: null, eatingNow: false, autoplay: false,
     // repeat picker (repeatId = item being edited, null = closed)
     repeatId: null,
     // terms & health disclaimer overlay
@@ -256,6 +258,58 @@ export function setTab(tab) { setState({ stackTab: tab }); }
 // in-app media viewer
 export function openPlayer(item) { if (item) setState({ playerItem: item }); }
 export function closePlayer() { setState({ playerItem: null }); }
+
+// ── runtime slot engine (ported from the prototype's _slotTimer, 20s tick) ──
+// Fires when a slot's time arrives: notes → full-screen affirmation popup
+// (auto-dismiss per its duration); media with autoplay → opens the player;
+// otherwise (reminders on) → the slot reminder banner. Also announces the
+// fasting window opening/closing.
+let _noteTimer = null;
+export function showNotePop(note) {
+  if (_noteTimer) clearTimeout(_noteTimer);
+  setState({ notePop: note });
+  if (note.dur !== 'stay') {
+    const ms = (note.dur === '15' ? 15 : 5) * 1000;
+    _noteTimer = setTimeout(() => setState({ notePop: null }), ms);
+  }
+}
+export function closeNotePop() { if (_noteTimer) clearTimeout(_noteTimer); setState({ notePop: null }); }
+export function dismissSlotPop() { setState({ slotPop: null }); }
+
+let _slotTimer = null, _lastFire = null, _lastFast = null;
+export function startSlotEngine() {
+  if (_slotTimer) return () => {};
+  _slotTimer = setInterval(() => {
+    const S = state;
+    const now = new Date();
+    const hm = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+    const key = todayKey();
+    if (S.fastOn && S.reminders) {
+      if (hm === S.eatOpen && _lastFast !== key + '|open') { _lastFast = key + '|open'; setState({ slotPop: { id: null, title: 'Eating window open', time: hm, hasUrl: false } }); return; }
+      if (hm === S.eatClose && _lastFast !== key + '|close') { _lastFast = key + '|close'; setState({ slotPop: { id: null, title: 'Eating window closed · fasting begins', time: hm, hasUrl: false } }); return; }
+    }
+    const eating = S.fastOn ? (hm >= S.eatOpen && hm < S.eatClose) : false;
+    if (eating !== S.eatingNow) setState({ eatingNow: eating });
+    const item = stackFor(key).find((x) => x.time === hm);
+    if (!item) return;
+    const fireKey = key + '|' + item.id + '|' + hm;
+    if (_lastFire === fireKey) return;
+    _lastFire = fireKey;
+    if (item.kind === 'note') { showNotePop({ text: item.title, anim: item.noteAnim, speed: item.noteSpeed, dur: item.noteDur }); return; }
+    if (item.url && (S.autoplay || item.auto)) { setState({ playerItem: item, slotPop: null }); return; }
+    if (S.reminders) { setState({ slotPop: { id: item.id, title: item.title, time: item.time, hasUrl: !!(item.url || item.embed) } }); }
+  }, 20000);
+  return () => { clearInterval(_slotTimer); _slotTimer = null; };
+}
+
+// note popup animation css (verbatim mapping from the prototype)
+export function noteAnimCss(anim, sp) {
+  const d = { slow: { flash: '1.4s', pulse: '2.6s', marquee: '14s' }, med: { flash: '.8s', pulse: '1.6s', marquee: '9s' }, fast: { flash: '.4s', pulse: '.9s', marquee: '5s' } }[sp || 'med'];
+  if (anim === 'flash') return 'ppwNoteFlash ' + d.flash + ' steps(1,end) infinite';
+  if (anim === 'pulse') return 'ppwNotePulse ' + d.pulse + ' ease-in-out infinite';
+  if (anim === 'marquee') return 'ppwNoteMarquee ' + d.marquee + ' linear infinite';
+  return 'none';
+}
 // completed-today sheet
 export function openCompleted() { setState({ completedOpen: true }); }
 export function closeCompleted() { setState({ completedOpen: false }); }
