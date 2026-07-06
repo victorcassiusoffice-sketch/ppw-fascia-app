@@ -214,6 +214,34 @@ function addMinutes(t, mins) {
   return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
 }
 
+// ── fasting badge — corner F/E indicator + info popup (prototype: fastBadge) ──
+function FastingBadge() {
+  const S = useStore5();
+  const [open, setOpen] = React.useState(false);
+  if (!S.fastOn) return null;
+  const now = new Date();
+  const mins = now.getHours() * 60 + now.getMinutes();
+  const eating = mins >= toMin(S.eatOpen) && mins < toMin(S.eatClose);
+  return (
+    <>
+      <button onClick={() => setOpen(!open)} aria-label="Fasting status" style={{ position: 'absolute', top: 'calc(12px + env(safe-area-inset-top, 0px))', right: 14, zIndex: 31, width: 34, height: 34, borderRadius: 999, border: '1px solid var(--rim)', background: 'var(--surface-strong)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', boxShadow: 'var(--elev)', color: 'var(--accent)', fontWeight: 800, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {eating ? 'E' : 'F'}
+      </button>
+      {open && (
+        <div style={{ position: 'absolute', top: 'calc(54px + env(safe-area-inset-top, 0px))', right: 14, left: 14, zIndex: 31, borderRadius: 20, padding: 16, background: 'var(--surface-strong)', backdropFilter: 'var(--blur-heavy)', WebkitBackdropFilter: 'var(--blur-heavy)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', animation: 'ppwSheetIn .4s cubic-bezier(.3,1.36,.4,1) both' }}>
+          <div style={{ fontSize: 15, fontWeight: 700, textShadow: 'var(--emboss)' }}>{eating ? 'Eating window open' : 'Fasting'}</div>
+          <div style={{ marginTop: 6, fontSize: 13, lineHeight: 1.5, color: 'var(--dim)' }}>
+            {eating
+              ? `Your window closes at ${S.eatClose}. The badge flips back to F after that.`
+              : `Your eating window opens at ${S.eatOpen} and closes at ${S.eatClose}. The badge flips to E while it's open.`}
+          </div>
+          <button onClick={() => setOpen(false)} style={{ marginTop: 12, background: 'none', border: 'none', padding: 0, color: 'var(--accent)', fontSize: 12.5, fontWeight: 700 }}>Got it</button>
+        </div>
+      )}
+    </>
+  );
+}
+
 // ── placeholder for not-yet-ported screens (keeps nav working) ──
 function Placeholder({ name }) {
   return (
@@ -254,6 +282,8 @@ export default function App5() {
         {body}
         {/* nav dock */}
         <NavDock screen={S.screen} onNav={nav} onAdd={openAdd} />
+        {/* fasting corner badge */}
+        <FastingBadge />
         {/* overlays */}
         <AddSheet />
         <MediaViewer />
