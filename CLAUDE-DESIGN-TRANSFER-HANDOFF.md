@@ -43,12 +43,14 @@ Resolved open questions accordingly:
 - [x] Global — Nunito font app-wide (`182c917`)
 - [x] Premium mechanism — Settings toggle + entitlement seam (`7f0b919`)
 - [x] **Native-port foundation** — `src/app5/theme5.js` (full skin engine, ported verbatim) + `src/app5/store5.js` (state + `ppw5.` persistence + stack ops) + `src/app5/App5.jsx` (shell + nav dock) mounted at **`/v2`** (full-bleed route, bypasses old chrome; live app untouched)
-- [x] Stack (daily/home view) — renders faithfully in default soft-neumorphism graphite; NEXT UP hero + deck + mark-done/edit-time/delete work + persist to `ppw5.stacks`. Verified live at /v2.
-- [ ] Library (tabbed Routines/Media/Protocols/Supps — new name for old "Stack")
-- [ ] Add sheet (2×2 glass tiles)
-- [ ] Calendar (month grid)
-- [ ] Settings (full new-design layout — card exists, needs new-design structure)
-- [ ] Modals: Upgrade/upsell · Completed · Media viewer · Note popup · Repeat options · Fasting info · Slot reminder · Stack assistant (orb chat) · Terms · Easy set up · Onboarding
+- [x] Stack (daily/home view) — NEXT UP hero + deck + mark-done/edit-time/delete/snooze + per-date via viewDate. `df53c94`
+- [x] Library — 4-tab gliding control, Routines Premium gate, Media list + add-to-stack; Protocols/Supps empty states. `c0e935b`
+- [x] Add sheet — 2×2 tiles (→Library), Assistant CTA (gated), custom paste-a-link add, YouTube/Spotify. `2924108`
+- [x] Calendar — month grid + dots + per-date day panel + Open in Stack. `e04e458`
+- [x] Settings — skin picker (all soft colourways + glass scenes) + Premium toggle. `7554c64`
+- [x] Upgrade/upsell modal — faithful paywall, Enable = Gumroad seam. `2924108`
+- [ ] **Remaining modals/flows** (secondary): inline note composer + doc upload (in Add) · Completed list · Media viewer (in-app player) · Note popup (affirmation display) · Repeat options picker · Fasting badge/info · Slot reminder · Stack assistant orb chat (needs a real endpoint — was Claude-Design's window.claude) · Terms/health disclaimer · Easy set-up (a11y) · Onboarding wizard
+- [ ] **Deferred polish**: copy scene-background image assets (`assets/glass/*.png`, `bg-grey.png`) into the build so glass/gel scenes show photos (default soft skins need none) · Settings a11y/notifications/IF/tactile sections · reminders wired to the existing `.ics`/push · route cutover (make `/` the New Design) — Vic's explicit go required
 
 **Native port architecture (DECIDED):** The New Design is a complete app with its own data model
 (`ppw5.` keys). Porting it as a parallel `src/app5/` tree mounted at `/v2`; old app stays on `/`
@@ -59,8 +61,10 @@ Theme is done (`theme5.js`) — every screen inherits it. To VIEW progress: dev 
 
 **Last completed step:** Native-port foundation + Stack screen SHIPPED to `/v2` (theme5 + store5 + App5). Nunito (`182c917`) + Premium toggle (`7f0b919`) shipped earlier. `src/lib/entitlement.js` gained `setProMember(isPro)` — the single seam for a future real Gumroad unlock (comment explains it). `src/pages/Settings.jsx` gained a "Membership" card with a glass-switch toggle wired to it (same visual pattern as the existing IF toggle). NO payment gateway wired — Vic explicitly asked to keep it a manual switch for now, just built so a real unlock is a one-function-call drop-in later. Verified live in dev server: toggles both ways, label/persistence correct across reload, zero console errors, clean production build.
 **Also done:** `docs\claude-design-import\DESIGN-SPEC.md` — screen inventory (17 screens/modals) + full premium/paywall mechanics from the Claude Design prototype, built via targeted Grep/Read after **three background digest-agents failed silently** (2 tool calls, ~120k tokens each, no output each time — do NOT repeat that approach on this file, it's too big for one-shot digestion; read it in small targeted chunks instead).
-**Next step:** Full visual transfer of the 17 screens/modals (`PPW Fascia App.dc.html` → real React), screen by screen, each as its own small commit. Open questions to resolve with Vic first (logged in DESIGN-SPEC.md): (1) naming swap — new design's "Stack" = old app's "Today", new design's "Library" = old app's "Stack"; (2) whether to reconcile the design's Assistant-orb premium-gate with the current app's separate external-paid-Assistant model; (3) font — design uses Nunito, current app/vault docs specify Geist/EB Garamond/Inter.
-**Blocked on:** nothing — ready to start screen-by-screen transfer whenever Vic gives the word / answers the open questions above.
+**MILESTONE (2026-07-06):** ALL 5 PRIMARY NAV SCREENS live at `/v2` (Stack/Library/Add/Calendar/Settings) + the Premium upsell modal. Fully navigable New Design on its own `ppw5.` data; theme engine drives every skin; premium gate + toggle work. Open questions from earlier are RESOLVED by Vic's "New Design overrules every time" (new naming, Nunito, one premium flag).
+**Next step:** Secondary modals/flows (unchecked tracker items) — note composer, media viewer, onboarding wizard, assistant chat, terms, repeat picker, etc. Then deferred polish (scene image assets, remaining Settings sections, reminders wiring). Route cutover (`/` → New Design) is LAST + needs Vic's explicit go.
+**Blocked on:** nothing — continue down the tracker. Vic decision needed only for the final production cutover.
+**To test right now:** `npm run dev` → open `http://localhost:3000/v2`. The live app at `/` is untouched.
 
 ## Where the source design lives (not in the repo — scratchpad is session-temporary)
 
