@@ -6,7 +6,7 @@
 // note composer + document upload (need more logic) — tiles still present.
 
 import React from 'react';
-import { useStore5, closeAdd, setCustomUrl, addCustomUrl, goLibrary, setUpsell, openNoteComposer, setNoteField, addNote } from '../store5.js';
+import { useStore5, closeAdd, setCustomUrl, addCustomUrl, goLibrary, setUpsell, openNoteComposer, setNoteField, addNote, parseRoutineMd, addItemsToToday, createRoutine, getState } from '../store5.js';
 
 const tsvg = (p) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">{p}</svg>;
 const TILES = [
@@ -26,6 +26,22 @@ const segBtn = (active) => ({ position: 'relative', flex: 1, background: active 
 
 export default function AddSheet() {
   const S = useStore5();
+  // Vic 1a — routine import: parsed .md is held as a DRAFT for review before
+  // anything is added.
+  const [draft, setDraft] = React.useState(null); // { name, items } | { error }
+  const [draftMsg, setDraftMsg] = React.useState(null);
+  const onRoutineFile = (e) => {
+    const f = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const res = parseRoutineMd(reader.result);
+      setDraftMsg(null);
+      setDraft(res.ok ? { name: res.name, items: res.items } : { error: 'That file doesn’t look like a PPW routine (.md).' });
+    };
+    reader.readAsText(f);
+  };
   if (!S.addOpen) return null;
   const hasSpeed = S.noteAnim !== 'still';
 
@@ -95,6 +111,45 @@ export default function AddSheet() {
             <button onClick={addNote} style={{ marginTop: 14, width: '100%', height: 46, borderRadius: 14, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 600, fontSize: 14, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)' }}>Add affirmation</button>
           </div>
         )}
+
+        {/* Vic 1a — import a shared routine (.md): stacks arrive as a draft */}
+        <label style={{ marginTop: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, minHeight: 52, borderRadius: 18, border: '2px dashed var(--hairline)', color: 'var(--dim)', fontSize: 13.5, fontWeight: 600, cursor: 'pointer' }}>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v7a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 19v-7" /><path d="M12 3v12M8 11l4 4 4-4" /></svg>
+          Import routine (.md)
+          <input type="file" accept=".md,.markdown,.txt,text/markdown,text/plain" onChange={onRoutineFile} style={{ display: 'none' }} />
+        </label>
+        {draft && (
+          <div style={{ marginTop: 12, borderRadius: 20, padding: 16, border: '1px solid var(--rim)', background: 'var(--surface)', animation: 'ppwRise .3s ease both' }}>
+            {draft.error ? (
+              <div style={{ fontSize: 13, color: 'var(--dim)' }}>{draft.error}</div>
+            ) : (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--accent)' }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 6h16M4 12h16M4 18h10" /></svg>
+                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase' }}>Routine draft</span>
+                </div>
+                <div style={{ marginTop: 8, fontSize: 16, fontWeight: 700, textShadow: 'var(--emboss)' }}>{draft.name}</div>
+                <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 5 }}>
+                  {draft.items.map((it, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5, color: 'var(--dim)' }}>
+                      <span style={{ width: 5, height: 5, borderRadius: 999, background: 'var(--accent)', flex: 'none' }} />
+                      <span style={{ flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--ink)' }}>{it.title}</span>
+                      {it.time && <span>{it.time}</span>}
+                    </div>
+                  ))}
+                </div>
+                <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                  <button onClick={() => { const r = addItemsToToday(draft.items); if (r.ok) { setDraftMsg(`${r.count} stack${r.count === 1 ? '' : 's'} added to today`); setDraft(null); } }} style={{ flex: 1, height: 44, borderRadius: 14, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 600, fontSize: 13.5, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)' }}>Add all to today</button>
+                  {S.premium && (
+                    <button onClick={() => { createRoutine(draft.name, draft.items); setDraftMsg(`Saved “${draft.name}” to your Routines`); setDraft(null); }} style={{ height: 44, padding: '0 14px', borderRadius: 14, border: '1px solid var(--rim)', background: 'transparent', color: 'var(--accent)', fontWeight: 600, fontSize: 13 }}>Save as routine</button>
+                  )}
+                  <button onClick={() => setDraft(null)} style={{ height: 44, padding: '0 12px', borderRadius: 14, border: 'none', background: 'none', color: 'var(--dim)', fontWeight: 600, fontSize: 13 }}>✕</button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+        {draftMsg && <div style={{ marginTop: 10, fontSize: 12.5, fontWeight: 600, color: 'var(--accent)', textAlign: 'center', animation: 'ppwRise .3s ease both' }}>{draftMsg}</div>}
 
         <div style={{ marginTop: 20, fontSize: 11, fontWeight: 600, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--dim)', textShadow: 'var(--emboss)' }}>Custom apps</div>
         <div style={{ marginTop: 10, display: 'flex', gap: 10 }}>

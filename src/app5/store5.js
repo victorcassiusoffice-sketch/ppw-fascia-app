@@ -268,6 +268,73 @@ export function createRoutine(name, items) {
   return r;
 }
 export function deleteRoutine(id) { saveRoutines(state.routines.filter((r) => r.id !== id)); }
+
+// ── routine sharing via Markdown (Vic 2026-07-06) ──
+// Human-readable MD with a fenced `ppw-routine` JSON block as the lossless
+// machine payload. Import looks for the block first; the prose is for people.
+export function routineToMd(r) {
+  const lines = [
+    `# ${r.name}`,
+    '',
+    `PPW Routine · ${r.items.length} stack${r.items.length === 1 ? '' : 's'} · shared from the PPW Fascia App`,
+    '',
+    'To use it: open the app → ＋ Add → **Import routine** → pick this file.',
+    '',
+    '## Stacks',
+    '',
+    ...r.items.map((it, i) => {
+      const head = `${i + 1}. **${it.title}**${it.meta ? ` — ${it.meta}` : ''}${it.time ? ` · ${it.time}` : ''}`;
+      return it.url ? head + `\n   ${it.url}` : head;
+    }),
+    '',
+    '```ppw-routine',
+    JSON.stringify({ ppw: 'routine', v: 1, name: r.name, items: r.items }, null, 2),
+    '```',
+    '',
+  ];
+  return lines.join('\n');
+}
+export function parseRoutineMd(text) {
+  try {
+    const m = /```ppw-routine\s*([\s\S]*?)```/.exec(String(text));
+    if (!m) return { ok: false, reason: 'no-block' };
+    const data = JSON.parse(m[1]);
+    if (data.ppw !== 'routine' || !Array.isArray(data.items) || !data.items.length) return { ok: false, reason: 'bad-shape' };
+    // sanitise: only known fields survive the import
+    const items = data.items.map((it) => ({
+      title: String(it.title || 'Stack').slice(0, 120),
+      meta: it.meta ? String(it.meta).slice(0, 120) : undefined,
+      thumb: typeof it.thumb === 'string' ? it.thumb.slice(0, 8) : undefined,
+      url: typeof it.url === 'string' ? it.url.slice(0, 500) : undefined,
+      embed: typeof it.embed === 'string' ? it.embed.slice(0, 500) : undefined,
+      thumbUrl: typeof it.thumbUrl === 'string' ? it.thumbUrl.slice(0, 500) : undefined,
+      kind: it.kind === 'note' ? 'note' : undefined,
+      time: /^\d{1,2}:\d{2}$/.test(it.time || '') ? it.time : undefined,
+    }));
+    return { ok: true, name: String(data.name || 'Shared routine').slice(0, 60), items };
+  } catch {
+    return { ok: false, reason: 'parse' };
+  }
+}
+// bulk-add imported stacks to TODAY (repeat once, staggered from 09:00 when
+// untimed). Free tier: respects the 10-stack cap → upsell.
+export function addItemsToToday(items) {
+  if (!state.premium && state.deckItems.length + items.length > 10) {
+    setState({ premiumUpsell: 'You have reached the free limit of 10 stacks. Go Premium for unlimited stacks.' });
+    return { upsell: true };
+  }
+  const key = todayKey();
+  const base = 9 * 60;
+  const added = items.map((item, i) => ({
+    ...item,
+    id: 'im' + Date.now().toString(36) + i,
+    time: item.time || (String(Math.floor((base + i * 30) / 60)).padStart(2, '0') + ':' + String((base + i * 30) % 60).padStart(2, '0')),
+    anchor: key, repeat: 'once',
+  }));
+  setState({ deckItems: [...state.deckItems, ...added] });
+  saveStacks();
+  return { ok: true, count: added.length };
+}
 // add every stack in the routine to the given date at once (repeat: once,
 // anchored to that day). Items keep their saved times, staggered from 09:00
 // in 30-min steps when they don't have one.

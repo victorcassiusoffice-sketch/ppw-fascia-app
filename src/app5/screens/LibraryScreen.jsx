@@ -7,7 +7,23 @@
 
 import React from 'react';
 import { THUMBS } from '../theme5.js';
-import { useStore5, setTab, addToStack, setUpsell, openPlayer, createRoutine, deleteRoutine } from '../store5.js';
+import { useStore5, setTab, addToStack, setUpsell, openPlayer, createRoutine, deleteRoutine, routineToMd } from '../store5.js';
+
+// share a routine as a .md file — native share sheet when the device supports
+// sharing files (phones), else a plain download.
+async function shareRoutine(r) {
+  const md = routineToMd(r);
+  const slug = r.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'routine';
+  const file = new File([md], `${slug}.ppw-routine.md`, { type: 'text/markdown' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: r.name, text: `PPW routine: ${r.name}` }); return; } catch { /* cancelled → fall through */ }
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([md], { type: 'text/markdown' }));
+  a.download = `${slug}.ppw-routine.md`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
 
 // Routine builder (Vic #5, premium): name a routine, tick stacks into it, save.
 // Saved routines are applied to any day from the Calendar. Unlimited.
@@ -38,6 +54,10 @@ function RoutineBuilder() {
                 <div style={{ fontSize: 15.5, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textShadow: 'var(--emboss)' }}>{r.name}</div>
                 <div style={{ marginTop: 2, fontSize: 12.5, color: 'var(--dim)' }}>{r.items.length} stack{r.items.length === 1 ? '' : 's'} · add it to a day from the Calendar</div>
               </div>
+              {/* Vic 2026-07-06 — share as a .md file others can import via ＋ Add */}
+              <button onClick={() => shareRoutine(r)} aria-label="Share routine" style={{ width: 34, height: 34, flex: 'none', borderRadius: 10, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v7a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 19v-7" /><path d="M12 15V3M8 7l4-4 4 4" /></svg>
+              </button>
               <button onClick={() => deleteRoutine(r.id)} aria-label="Delete routine" style={{ width: 34, height: 34, flex: 'none', borderRadius: 10, border: '1px solid var(--hairline)', background: 'transparent', color: 'var(--dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16M10 4h4M6.5 7l1 13h9l1-13" /></svg>
               </button>
