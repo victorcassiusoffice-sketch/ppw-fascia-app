@@ -1,0 +1,174 @@
+// ─────────────────────────────────────────────────────────────────────────
+// store5.js — New Design app state + persistence.
+//
+// Ports the prototype DCLogic's state model + its localStorage persistence
+// (the `ppw5.` key namespace — deliberately separate from the current app's
+// `ppw.` keys, so the New Design runs on its own data and the old app is never
+// touched). Faithful ports of starterDeck / itemOnDate / stackFor / date math.
+//
+// Exposed as a tiny external store (useSyncExternalStore) so any app5 screen
+// subscribes with useStore5(). Grows one slice at a time as screens are ported.
+// ─────────────────────────────────────────────────────────────────────────
+
+import { useSyncExternalStore } from 'react';
+
+const LS = (k) => 'ppw5.' + k;
+
+// ── curated starter deck (verbatim from the prototype) ──
+function starterDeck() {
+  const yt = (xid, time, id, title, meta) => ({
+    id: xid, time, title, meta, thumb: 'yt', repeat: 'daily',
+    url: 'https://www.youtube.com/watch?v=' + id,
+    embed: 'https://www.youtube.com/embed/' + id + '?autoplay=1&playsinline=1&rel=0',
+    thumbUrl: 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg',
+  });
+  return [
+    yt('d1', '07:30', 'v7AYKMP6rOE', 'Yoga For Complete Beginners', 'YouTube · Basic Yoga · 20 min'),
+    yt('d2', '12:30', 'O-6f5wQXSu8', 'Guided Meditation for Calm', 'YouTube · Meditation · 10 min'),
+    yt('d3', '17:00', 'UBMk30rjy0o', 'Full Body Workout, No Equipment', 'YouTube · Fitness · 20 min'),
+    { id: 'd4', title: 'I did enough today. I am consistent.', meta: 'Affirmation · Still', time: '21:00', kind: 'note', noteAnim: 'still', noteSpeed: 'med', noteDur: '5', repeat: 'daily' },
+  ];
+}
+
+// ── initial state (subset in use so far; grows as screens are ported) ──
+function initialState() {
+  const def = {
+    screen: 'stack',
+    // theme
+    skin: 'soft', bg: 'grey', soft: 'graphite', gelBg: 'zen', intensity: null, customBgUrl: null,
+    a11y: { on: false, zoom: 1 },
+    // membership
+    premium: false, premiumUpsell: null, orbTipSeen: false,
+    // stack data
+    deckItems: starterDeck(),
+    doneByDate: {},
+    suppSel: {},
+    importedProtos: [],
+    // library tab
+    stackTab: 'routines',
+    // selection / interaction
+    selectedIds: [],
+    // completed
+    completed: [], completedDate: null,
+  };
+  try {
+    const g = (k) => localStorage.getItem(LS(k));
+    const gj = (k) => { try { return JSON.parse(g(k) || 'null'); } catch { return null; } };
+    if (g('bg') && g('bg') !== 'custom') def.bg = g('bg');
+    if (g('soft')) def.soft = g('soft');
+    if (g('skin')) def.skin = g('skin');
+    if (g('gelBg') && g('gelBg') !== 'custom') def.gelBg = g('gelBg');
+    if (g('intensity')) def.intensity = g('intensity');
+    if (g('premium') === '1') def.premium = true;
+    if (g('orbTip') === '1') def.orbTipSeen = true;
+    const ay = gj('a11y'); if (ay && typeof ay === 'object') def.a11y = { on: !!ay.on, zoom: (+ay.zoom >= .85 && +ay.zoom <= 1.4) ? +ay.zoom : 1 };
+    // stacks live in one consolidated blob; legacy per-key blobs load as fallback
+    const st = gj('stacks') || {};
+    const di = Array.isArray(st.d) ? st.d : gj('deckItems'); if (Array.isArray(di) && di.length) def.deckItems = di;
+    const db = (st.db && typeof st.db === 'object') ? st.db : gj('doneByDate'); if (db && typeof db === 'object') def.doneByDate = db;
+    const ss = (st.ss && typeof st.ss === 'object') ? st.ss : gj('suppSel'); if (ss && typeof ss === 'object') def.suppSel = ss;
+    const ip = Array.isArray(st.ip) ? st.ip : gj('importedProtos'); if (Array.isArray(ip)) def.importedProtos = ip;
+  } catch { /* private mode / storage off → defaults */ }
+  return def;
+}
+
+// ── external store plumbing ──
+let state = initialState();
+const listeners = new Set();
+function emit() { for (const l of listeners) l(); }
+function subscribe(l) { listeners.add(l); return () => listeners.delete(l); }
+function getSnapshot() { return state; }
+
+// merge + notify (React-setState-like). Accepts object or updater fn.
+export function setState(patch) {
+  const next = typeof patch === 'function' ? patch(state) : patch;
+  state = { ...state, ...next };
+  emit();
+}
+export function getState() { return state; }
+
+export function save(k, v) { try { localStorage.setItem(LS(k), String(v)); } catch {} }
+
+// consolidated, debounced stacks write; completed-history pruned to 60 days
+let _saveT = null;
+function writeStacks() {
+  try {
+    const today = todayKey();
+    const db = {};
+    Object.keys(state.doneByDate).forEach((k) => {
+      const d = dayDiff(today, k);
+      if (d <= 60 && d > -400) db[k] = state.doneByDate[k];
+    });
+    localStorage.setItem(LS('stacks'), JSON.stringify({
+      d: state.deckItems.filter((x) => !x.local), db, ss: state.suppSel, ip: state.importedProtos,
+    }));
+    ['deckItems', 'doneByDate', 'suppSel', 'importedProtos'].forEach((k) => localStorage.removeItem(LS(k)));
+  } catch {}
+}
+export function saveStacks() {
+  if (_saveT) clearTimeout(_saveT);
+  _saveT = setTimeout(() => { _saveT = null; writeStacks(); }, 200);
+}
+
+// ── date math + recurrence (verbatim from the prototype) ──
+export function todayKey() { const d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+export function keyToDate(k) { const p = String(k).split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+export function dayDiff(aKey, bKey) { return Math.round((keyToDate(aKey) - keyToDate(bKey)) / 86400000); }
+export function itemOnDate(it, key) {
+  if (!it.anchor) return true; // legacy items — every day
+  const d = dayDiff(key, it.anchor);
+  const r = it.repeat === undefined ? 'daily' : it.repeat;
+  if (r === 'once') return d === 0;
+  if (d < 0) return false;
+  if (r === 'daily') return true;
+  if (r === 'weekly') return d % 7 === 0;
+  const n = parseInt(r, 10);
+  return n > 1 ? d % n === 0 : true;
+}
+// items scheduled on `key`, excluding those already marked done that day.
+export function stackFor(key) {
+  const done = (state.doneByDate[key] || []).map((x) => x.id);
+  return state.deckItems.filter((it) => itemOnDate(it, key) && done.indexOf(it.id) === -1);
+}
+
+// ── stack operations ──
+export function overLimit() { return !state.premium && state.deckItems.length >= 10; }
+
+export function markDone(id, key = todayKey()) {
+  const it = state.deckItems.find((x) => x.id === id);
+  if (!it) return;
+  const prev = state.doneByDate[key] || [];
+  if (prev.some((x) => x.id === id)) return;
+  setState({ doneByDate: { ...state.doneByDate, [key]: [...prev, { id, at: Date.now() }] } });
+  saveStacks();
+}
+export function undoDone(id, key = todayKey()) {
+  const prev = state.doneByDate[key] || [];
+  setState({ doneByDate: { ...state.doneByDate, [key]: prev.filter((x) => x.id !== id) } });
+  saveStacks();
+}
+export function setItemTime(id, time) {
+  setState({ deckItems: state.deckItems.map((it) => it.id === id ? { ...it, time } : it) });
+  saveStacks();
+}
+export function deleteItem(id) {
+  setState({ deckItems: state.deckItems.filter((it) => it.id !== id), selectedIds: state.selectedIds.filter((x) => x !== id) });
+  saveStacks();
+}
+export function reorderDeck(orderedIds) {
+  const byId = Object.fromEntries(state.deckItems.map((it) => [it.id, it]));
+  setState({ deckItems: orderedIds.map((id) => byId[id]).filter(Boolean) });
+  saveStacks();
+}
+
+// theme setters
+export function setTheme(patch) {
+  Object.entries(patch).forEach(([k, v]) => save(k, v));
+  setState(patch);
+}
+export function setPremium(on) { save('premium', on ? '1' : '0'); setState({ premium: !!on }); }
+
+// ── React hook ──
+export function useStore5() {
+  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+}

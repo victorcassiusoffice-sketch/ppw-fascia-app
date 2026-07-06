@@ -42,14 +42,22 @@ Resolved open questions accordingly:
 **Screen-transfer progress tracker (17 screens/modals total):**
 - [x] Global — Nunito font app-wide (`182c917`)
 - [x] Premium mechanism — Settings toggle + entitlement seam (`7f0b919`)
-- [ ] Stack (daily/home view — new name for old "Today") ← RECOMMENDED NEXT (most-seen screen)
+- [x] **Native-port foundation** — `src/app5/theme5.js` (full skin engine, ported verbatim) + `src/app5/store5.js` (state + `ppw5.` persistence + stack ops) + `src/app5/App5.jsx` (shell + nav dock) mounted at **`/v2`** (full-bleed route, bypasses old chrome; live app untouched)
+- [x] Stack (daily/home view) — renders faithfully in default soft-neumorphism graphite; NEXT UP hero + deck + mark-done/edit-time/delete work + persist to `ppw5.stacks`. Verified live at /v2.
 - [ ] Library (tabbed Routines/Media/Protocols/Supps — new name for old "Stack")
 - [ ] Add sheet (2×2 glass tiles)
 - [ ] Calendar (month grid)
 - [ ] Settings (full new-design layout — card exists, needs new-design structure)
 - [ ] Modals: Upgrade/upsell · Completed · Media viewer · Note popup · Repeat options · Fasting info · Slot reminder · Stack assistant (orb chat) · Terms · Easy set up · Onboarding
 
-**Last completed step:** Nunito font swap SHIPPED (`182c917`, pushed). Premium manual-test toggle SHIPPED (`7f0b919`, pushed). `src/lib/entitlement.js` gained `setProMember(isPro)` — the single seam for a future real Gumroad unlock (comment explains it). `src/pages/Settings.jsx` gained a "Membership" card with a glass-switch toggle wired to it (same visual pattern as the existing IF toggle). NO payment gateway wired — Vic explicitly asked to keep it a manual switch for now, just built so a real unlock is a one-function-call drop-in later. Verified live in dev server: toggles both ways, label/persistence correct across reload, zero console errors, clean production build.
+**Native port architecture (DECIDED):** The New Design is a complete app with its own data model
+(`ppw5.` keys). Porting it as a parallel `src/app5/` tree mounted at `/v2`; old app stays on `/`
+untouched (its `ppw.` data is separate). Swap main routes to app5 only at parity + Vic's go.
+Pattern per screen: translate the `.dc.html` template slice → JSX in `App5.jsx` (or its own file),
+wire bindings/handlers to `store5.js` (grow the store per screen), keep the app building each commit.
+Theme is done (`theme5.js`) — every screen inherits it. To VIEW progress: dev server → `/v2`.
+
+**Last completed step:** Native-port foundation + Stack screen SHIPPED to `/v2` (theme5 + store5 + App5). Nunito (`182c917`) + Premium toggle (`7f0b919`) shipped earlier. `src/lib/entitlement.js` gained `setProMember(isPro)` — the single seam for a future real Gumroad unlock (comment explains it). `src/pages/Settings.jsx` gained a "Membership" card with a glass-switch toggle wired to it (same visual pattern as the existing IF toggle). NO payment gateway wired — Vic explicitly asked to keep it a manual switch for now, just built so a real unlock is a one-function-call drop-in later. Verified live in dev server: toggles both ways, label/persistence correct across reload, zero console errors, clean production build.
 **Also done:** `docs\claude-design-import\DESIGN-SPEC.md` — screen inventory (17 screens/modals) + full premium/paywall mechanics from the Claude Design prototype, built via targeted Grep/Read after **three background digest-agents failed silently** (2 tool calls, ~120k tokens each, no output each time — do NOT repeat that approach on this file, it's too big for one-shot digestion; read it in small targeted chunks instead).
 **Next step:** Full visual transfer of the 17 screens/modals (`PPW Fascia App.dc.html` → real React), screen by screen, each as its own small commit. Open questions to resolve with Vic first (logged in DESIGN-SPEC.md): (1) naming swap — new design's "Stack" = old app's "Today", new design's "Library" = old app's "Stack"; (2) whether to reconcile the design's Assistant-orb premium-gate with the current app's separate external-paid-Assistant model; (3) font — design uses Nunito, current app/vault docs specify Geist/EB Garamond/Inter.
 **Blocked on:** nothing — ready to start screen-by-screen transfer whenever Vic gives the word / answers the open questions above.

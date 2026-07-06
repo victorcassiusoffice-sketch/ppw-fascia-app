@@ -41,6 +41,7 @@ import SettingsView from './pages/Settings.jsx';
 import CoachView from './pages/Coach.jsx';
 import SoftLab from './pages/SoftLab.jsx'; // STAGED (feat/soft-v1) — review only, not deployed
 import AppBackground from './components/AppBackground.jsx';
+import App5 from './app5/App5.jsx'; // New Design (Claude Design) native port — mounted at /v2
 
 /* ────────────────────────────────────────────
    BodyMap — see src/bodyZones.js for the architecture comment.
@@ -129,6 +130,18 @@ export default function App() {
     activeProtocols.length > 0 ||
     activeModules.length > 0 ||
     (activeRoutines.savedZones?.length || 0) > 0;
+
+  // /v2 — New Design (Claude Design) native port, in progress. Full-bleed: it
+  // owns its own shell/background/nav, so it bypasses the existing chrome
+  // (Header/AppBackground/BottomNav). Isolated route → the live app is untouched
+  // until the port reaches parity and Vic approves the cutover.
+  if (location.pathname === '/v2') {
+    return (
+      <LazyMotion features={domAnimation}>
+        <App5 />
+      </LazyMotion>
+    );
+  }
 
   return (
     <LazyMotion features={domAnimation}>
