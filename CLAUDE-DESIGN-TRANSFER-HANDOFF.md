@@ -49,7 +49,10 @@ Resolved open questions accordingly:
 - [x] Calendar — month grid + dots + per-date day panel + Open in Stack. `e04e458`
 - [x] Settings — skin picker (all soft colourways + glass scenes) + Premium toggle. `7554c64`
 - [x] Upgrade/upsell modal — faithful paywall, Enable = Gumroad seam. `2924108`
-- [ ] **Remaining modals/flows** (secondary): inline note composer + doc upload (in Add) · Completed list · Media viewer (in-app player) · Note popup (affirmation display) · Repeat options picker · Fasting badge/info · Slot reminder · Stack assistant orb chat (needs a real endpoint — was Claude-Design's window.claude) · Terms/health disclaimer · Easy set-up (a11y) · Onboarding wizard
+- [x] Media viewer — tap a video item → inline YouTube embed player. `74aa26a`
+- [x] Affirmation (note) composer — in Add sheet, creates note items. `a58525f`
+- [x] Completed-today sheet + Undo — from Stack header check-disc. `bd8379f`
+- [ ] **Remaining modals/flows** (secondary): doc upload (in Add/Library) · Note popup (affirmation full-screen display at its time) · Repeat options picker (change item recurrence) · Fasting badge/info · Slot reminder · Stack assistant orb chat (needs a real endpoint — was Claude-Design's window.claude) · Terms/health disclaimer · Easy set-up (a11y) · Onboarding wizard
 - [ ] **Deferred polish**: copy scene-background image assets (`assets/glass/*.png`, `bg-grey.png`) into the build so glass/gel scenes show photos (default soft skins need none) · Settings a11y/notifications/IF/tactile sections · reminders wired to the existing `.ics`/push · route cutover (make `/` the New Design) — Vic's explicit go required
 
 **Native port architecture (DECIDED):** The New Design is a complete app with its own data model

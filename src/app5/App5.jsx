@@ -19,10 +19,11 @@ import UpsellModal from './screens/UpsellModal.jsx';
 import CalendarScreen from './screens/CalendarScreen.jsx';
 import MediaViewer from './screens/MediaViewer.jsx';
 import CompletedSheet from './screens/CompletedSheet.jsx';
+import RepeatSheet from './screens/RepeatSheet.jsx';
 import {
   useStore5, getState, setState, save,
   stackFor, todayKey, markDone, setItemTime, deleteItem, overLimit,
-  openAdd, backToToday, openPlayer, openCompleted,
+  openAdd, backToToday, openPlayer, openCompleted, openRepeat, repeatLabel,
 } from './store5.js';
 
 // ── small inline-SVG icon helpers (match the prototype's line icons) ──
@@ -144,6 +145,10 @@ function StackScreen() {
           </div>
           <div style={{ marginTop: 12, fontSize: 23, fontWeight: 600, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>{next.title}</div>
           <div style={{ marginTop: 5, fontSize: 14, color: 'var(--dim)' }}>{next.meta}</div>
+          <button onClick={() => openRepeat(next.id)} aria-label="Repeat schedule" style={{ marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 5, background: 'none', border: 'none', padding: 0, color: 'var(--dim)', fontSize: 11, fontWeight: 600, letterSpacing: '.05em' }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 2l4 4-4 4" /><path d="M3 11v-1a4 4 0 0 1 4-4h14" /><path d="M7 22l-4-4 4-4" /><path d="M21 13v1a4 4 0 0 1-4 4H3" /></svg>
+            {repeatLabel(next.repeat)}
+          </button>
           <div style={{ marginTop: 18, display: 'flex', alignItems: 'center', gap: 10 }}>
             {next.url && (
               <a href={next.url} target="_blank" rel="noopener noreferrer" aria-label="Play now" style={{ height: 48, width: 52, flex: 'none', borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{IPlay}</a>
@@ -233,6 +238,7 @@ export default function App5() {
         <AddSheet />
         <MediaViewer />
         <CompletedSheet />
+        <RepeatSheet />
         <UpsellModal />
       </div>
     </div>

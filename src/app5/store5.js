@@ -62,6 +62,8 @@ function initialState() {
     playerItem: null,
     // completed-today sheet
     completedOpen: false,
+    // repeat picker (repeatId = item being edited, null = closed)
+    repeatId: null,
     // selection / interaction
     selectedIds: [],
     // completed
@@ -222,6 +224,23 @@ export function closePlayer() { setState({ playerItem: null }); }
 // completed-today sheet
 export function openCompleted() { setState({ completedOpen: true }); }
 export function closeCompleted() { setState({ completedOpen: false }); }
+// repeat picker — set an item's recurrence (stamps an anchor so weekly/every-N works)
+export function openRepeat(id) { setState({ repeatId: id }); }
+export function closeRepeat() { setState({ repeatId: null }); }
+export function setRepeat(id, value) {
+  setState({ deckItems: state.deckItems.map((it) => it.id === id
+    ? { ...it, repeat: value, anchor: it.anchor || todayKey() }
+    : it) });
+  saveStacks();
+}
+export function repeatLabel(repeat) {
+  const r = repeat === undefined ? 'daily' : repeat;
+  if (r === 'daily') return 'Every day';
+  if (r === 'weekly') return 'Weekly';
+  if (r === 'once') return 'Just once';
+  const n = parseInt(r, 10);
+  return n > 1 ? `Every ${n} days` : 'Every day';
+}
 // today's completed entries joined with their item (title/time), newest first
 export function completedToday(key = todayKey()) {
   const done = state.doneByDate[key] || [];
