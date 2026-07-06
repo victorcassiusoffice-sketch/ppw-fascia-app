@@ -90,12 +90,19 @@ export default function OnboardingScreen() {
 
         {step === 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', paddingTop: 8, animation: 'ppwScreenIn .62s cubic-bezier(.26,1,.4,1)' }}>
-            {/* soft plaque — renders the wordmark; logo raster is a deferred asset */}
-            <div style={{ position: 'relative', width: 'min(86%, 330px)', margin: '14px auto 0', borderRadius: 42, padding: '44px 20px', background: 'var(--intro-slab, var(--surface))', boxShadow: 'var(--intro-shadow, var(--elev-hi))', animation: 'ppwLogoFloat 7s ease-in-out 1.2s infinite' }}>
-              <div style={{ fontSize: 34, fontWeight: 800, letterSpacing: '.06em', textShadow: 'var(--emboss)' }}>PPW</div>
-              <div style={{ marginTop: 4, fontSize: 12, fontWeight: 700, letterSpacing: '.34em', textTransform: 'uppercase', color: 'var(--dim)' }}>Wellness</div>
-              <div aria-hidden="true" style={{ position: 'absolute', inset: 0, borderRadius: 'inherit', pointerEvents: 'none', boxShadow: 'var(--intro-bevel, none)' }} />
-            </div>
+            {/* per-theme logo render (assets copied 2026-07-06). Soft themes sit on
+                the raised plaque slab; the glass/gel theme floats free with a drop
+                shadow — exactly the prototype's two branches. */}
+            {S.soft === 'gel' ? (
+              <div style={{ position: 'relative', width: '100%', animation: 'ppwLogoIn 1.05s cubic-bezier(.22,1,.32,1) both' }}>
+                <img src={`${import.meta.env.BASE_URL}assets/ppw-logo-glass.png`} alt="PPW Wellness" style={{ width: '100%', height: 'auto', display: 'block', filter: 'drop-shadow(0 22px 34px rgba(10,14,18,.3)) drop-shadow(0 4px 10px rgba(10,14,18,.15))', animation: 'ppwLogoFloat 7s ease-in-out 1.2s infinite' }} />
+              </div>
+            ) : (
+              <div style={{ position: 'relative', width: 'min(86%, 330px)', margin: '14px auto 0', borderRadius: 42, background: 'var(--intro-slab, var(--surface))', boxShadow: 'var(--intro-shadow, var(--elev-hi))', animation: 'ppwLogoFloat 7s ease-in-out 1.2s infinite' }}>
+                <img src={`${import.meta.env.BASE_URL}assets/ppw-logo-${['graphite', 'silver', 'ivory', 'black', 'gloft', 'indigo'].includes(S.soft) ? S.soft : 'graphite'}.png`} alt="PPW Wellness" style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 'inherit' }} />
+                <div aria-hidden="true" style={{ position: 'absolute', inset: 0, borderRadius: 'inherit', pointerEvents: 'none', boxShadow: 'var(--intro-bevel, none)' }} />
+              </div>
+            )}
             <p style={{ position: 'relative', margin: '36px auto 0', fontSize: 16, lineHeight: 1.6, color: 'var(--dim)', maxWidth: 280, textShadow: 'var(--emboss)' }}>Manage your life as simple daily stacks. Video, audio and affirmations that appear right on your screen.</p>
             <div style={{ margin: '24px auto 0', width: '100%', maxWidth: 328, padding: '15px 16px', borderRadius: 18, ...CARD, textAlign: 'left' }}>
               <p style={{ margin: 0, fontSize: 12.5, lineHeight: 1.55, color: 'var(--dim)' }}>PPWellness organizes and schedules the content <em>you</em> choose. It is not medical advice and doesn't host or sell any content.</p>
