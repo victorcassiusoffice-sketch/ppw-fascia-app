@@ -7,7 +7,9 @@
 
 import React from 'react';
 import { THUMBS } from '../theme5.js';
-import { useStore5, setTab, addToStack, setUpsell, openPlayer, createRoutine, deleteRoutine, routineToMd, itemFromUrl } from '../store5.js';
+import { useStore5, setTab, addToStack, setUpsell, openPlayer, createRoutine, deleteRoutine, updateRoutine, routineToMd, itemFromUrl } from '../store5.js';
+import { TILE_ICONS, DOC_ACCEPT } from './AddSheet.jsx';
+import { saveFile } from '../files5.js';
 
 // share a routine as a .md file — native share sheet when the device supports
 // sharing files (phones), else a plain download.
@@ -29,15 +31,18 @@ async function shareRoutine(r) {
 // ADD STACKS THE SAME WAY THE MAIN ＋ ADD WORKS — paste a share link, write an
 // affirmation, or pull from your library — accumulating inside the named
 // routine. Saved routines are applied to any day from the Calendar. Unlimited.
-function RoutineBuilder() {
+function RoutineBuilder({ query = '' }) {
   const S = useStore5();
   const [open, setOpen] = React.useState(false);
+  const [editingId, setEditingId] = React.useState(null); // Vic 1c — open + edit a saved routine
   const [name, setName] = React.useState('');
   const [items, setItems] = React.useState([]); // snapshots added so far
+  const [panel, setPanel] = React.useState(null); // 'media' | 'protocol' | 'text' | null
   const [link, setLink] = React.useState('');
   const [noteText, setNoteText] = React.useState('');
   const count = items.length;
-  const reset = () => { setOpen(false); setName(''); setItems([]); setLink(''); setNoteText(''); };
+  const reset = () => { setOpen(false); setEditingId(null); setName(''); setItems([]); setPanel(null); setLink(''); setNoteText(''); };
+  const openEdit = (r) => { setEditingId(r.id); setName(r.name); setItems(r.items.map((x) => ({ ...x }))); setPanel(null); setOpen(true); };
   const addLink = () => {
     const snap = itemFromUrl(link);
     if (!snap) return;
@@ -46,13 +51,21 @@ function RoutineBuilder() {
   const addNoteItem = () => {
     const t = noteText.trim();
     if (!t) return;
-    setItems((xs) => [...xs, { title: t, meta: 'Affirmation · Still', kind: 'note', noteAnim: 'still', noteSpeed: 'med', noteDur: '5' }]);
+    setItems((xs) => [...xs, { title: t, meta: 'Text · Still', kind: 'note', noteAnim: 'still', noteSpeed: 'med', noteDur: '5' }]);
     setNoteText('');
   };
   const addFromLibrary = (c) => { const { id, ...rest } = c; setItems((xs) => [...xs, { ...rest }]); };
+  const addDoc = async (e) => {
+    const f = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!f) return;
+    const fileId = await saveFile(f);
+    setItems((xs) => [...xs, { title: f.name, meta: 'Document', thumb: 'doc', kind: 'doc', fileId }]);
+  };
   const saveIt = () => {
     if (!name.trim() || !count) return;
-    createRoutine(name, items);
+    if (editingId) updateRoutine(editingId, { name: name.trim(), items });
+    else createRoutine(name, items);
     reset();
   };
   const IN = { height: 44, padding: '0 12px', borderRadius: 12, border: '1px solid var(--hairline)', background: 'var(--track)', boxShadow: 'var(--inset)', color: 'var(--ink)', outline: 'none', fontSize: 14 };
@@ -63,20 +76,21 @@ function RoutineBuilder() {
       {/* saved routines */}
       {S.routines.length > 0 && (
         <div style={{ marginTop: 18, display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {S.routines.map((r) => (
-            <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderRadius: 24, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)' }}>
+          {S.routines.filter((r) => !query || r.name.toLowerCase().includes(query)).map((r) => (
+            // Vic 1c — tap the routine to open + edit it
+            <div key={r.id} onClick={() => openEdit(r)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderRadius: 24, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)', cursor: 'pointer' }}>
               <span style={{ width: 44, height: 44, flex: 'none', borderRadius: 14, background: 'var(--acc-surf)', border: '1px solid var(--acc-rim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--acc-ink)' }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M4 6h16M4 12h16M4 18h10" /></svg>
               </span>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 15.5, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textShadow: 'var(--emboss)' }}>{r.name}</div>
-                <div style={{ marginTop: 2, fontSize: 12.5, color: 'var(--dim)' }}>{r.items.length} stack{r.items.length === 1 ? '' : 's'} · add it to a day from the Calendar</div>
+                <div style={{ marginTop: 2, fontSize: 12.5, color: 'var(--dim)' }}>{r.items.length} stack{r.items.length === 1 ? '' : 's'} · tap to open &amp; edit</div>
               </div>
               {/* Vic 2026-07-06 — share as a .md file others can import via ＋ Add */}
-              <button onClick={() => shareRoutine(r)} aria-label="Share routine" style={{ width: 34, height: 34, flex: 'none', borderRadius: 10, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <button onClick={(e) => { e.stopPropagation(); shareRoutine(r); }} aria-label="Share routine" style={{ width: 34, height: 34, flex: 'none', borderRadius: 10, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v7a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 19v-7" /><path d="M12 15V3M8 7l4-4 4 4" /></svg>
               </button>
-              <button onClick={() => deleteRoutine(r.id)} aria-label="Delete routine" style={{ width: 34, height: 34, flex: 'none', borderRadius: 10, border: '1px solid var(--hairline)', background: 'transparent', color: 'var(--dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <button onClick={(e) => { e.stopPropagation(); deleteRoutine(r.id); }} aria-label="Delete routine" style={{ width: 34, height: 34, flex: 'none', borderRadius: 10, border: '1px solid var(--hairline)', background: 'transparent', color: 'var(--dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16M10 4h4M6.5 7l1 13h9l1-13" /></svg>
               </button>
             </div>
@@ -108,38 +122,63 @@ function RoutineBuilder() {
             </>
           )}
 
-          {/* add a link — same as the main ＋ Add paste flow */}
-          <div style={LABEL}>Add a link</div>
+          {/* Vic 1 — same tile format as the main ＋ Add, minus Routines */}
+          <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            {[['media', 'Media'], ['protocol', 'Protocol'], ['text', 'Text']].map(([k, label]) => (
+              <button key={k} onClick={() => setPanel(panel === k ? null : k)} style={{ height: 80, borderRadius: 20, border: `1px solid ${panel === k ? 'var(--acc-rim)' : 'var(--rim)'}`, background: panel === k ? 'var(--acc-surf)' : 'var(--surface)', boxShadow: 'var(--elev)', color: panel === k ? 'var(--acc-ink)' : 'var(--ink)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                {TILE_ICONS[k]}
+                <span style={{ fontSize: 12.5, fontWeight: 600 }}>{label}</span>
+              </button>
+            ))}
+            <label style={{ height: 80, borderRadius: 20, border: '1px solid var(--rim)', background: 'var(--surface)', boxShadow: 'var(--elev)', color: 'var(--ink)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, cursor: 'pointer' }}>
+              {TILE_ICONS.doc}
+              <span style={{ fontSize: 12.5, fontWeight: 600 }}>Document</span>
+              <input type="file" accept={DOC_ACCEPT} onChange={addDoc} style={{ display: 'none' }} />
+            </label>
+          </div>
+
+          {/* contextual panel per tile */}
+          {panel === 'media' && (
+            <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 6, animation: 'ppwRise .25s ease both' }}>
+              {S.mediaItems.map((c) => (
+                <button key={c.id} onClick={() => addFromLibrary(c)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 12, border: '1px solid var(--hairline)', background: 'var(--track)', color: 'var(--ink)', textAlign: 'left' }}>
+                  <span style={{ width: 18, height: 18, flex: 'none', borderRadius: 999, border: '1.5px solid var(--accent)', color: 'var(--accent)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, lineHeight: 1 }}>+</span>
+                  <span style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.title}</span>
+                </button>
+              ))}
+              <div style={{ fontSize: 11, color: 'var(--dim)', textAlign: 'center' }}>…or paste any link below.</div>
+            </div>
+          )}
+          {panel === 'protocol' && (
+            <div style={{ marginTop: 10, padding: '12px 14px', borderRadius: 14, border: '1px solid var(--hairline)', background: 'var(--track)', fontSize: 12.5, lineHeight: 1.5, color: 'var(--dim)', animation: 'ppwRise .25s ease both' }}>
+              The PPW protocol library is being wired up — protocols will be addable here soon.
+            </div>
+          )}
+          {panel === 'text' && (
+            <div style={{ marginTop: 10, display: 'flex', gap: 8, animation: 'ppwRise .25s ease both' }}>
+              <input value={noteText} onChange={(e) => setNoteText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') addNoteItem(); }} placeholder="Write text to appear on screen…" aria-label="Text for this routine" style={{ flex: 1, minWidth: 0, ...IN }} />
+              <button onClick={addNoteItem} disabled={!noteText.trim()} style={{ ...ADD, opacity: noteText.trim() ? 1 : .45 }}>Add</button>
+            </div>
+          )}
+
+          {/* Custom apps — same as the main ＋ Add */}
+          <div style={LABEL}>Custom apps</div>
+          <div style={{ marginTop: 8, display: 'flex', gap: 10 }}>
+            <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer" style={{ height: 36, padding: '0 13px', borderRadius: 999, border: '1px solid var(--rim)', background: 'var(--disc)', display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 12, fontWeight: 600, color: 'var(--ink)', textDecoration: 'none' }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M9 6.2v11.6l9.4-5.8L9 6.2z" /></svg>YouTube
+            </a>
+            <a href="https://open.spotify.com" target="_blank" rel="noopener noreferrer" style={{ height: 36, padding: '0 13px', borderRadius: 999, border: '1px solid var(--rim)', background: 'var(--disc)', display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 12, fontWeight: 600, color: 'var(--ink)', textDecoration: 'none' }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V6l8-2v12" /><circle cx="7" cy="18" r="2.2" /><circle cx="15" cy="16" r="2.2" /></svg>Spotify
+            </a>
+          </div>
           <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
-            <input value={link} onChange={(e) => setLink(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') addLink(); }} placeholder="Paste a YouTube / Spotify / share link…" aria-label="Paste a share link for this routine" style={{ flex: 1, minWidth: 0, ...IN }} />
+            <input value={link} onChange={(e) => setLink(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') addLink(); }} placeholder="Paste a share link…" aria-label="Paste a share link for this routine" style={{ flex: 1, minWidth: 0, ...IN }} />
             <button onClick={addLink} disabled={!link.trim()} style={{ ...ADD, opacity: link.trim() ? 1 : .45 }}>Add</button>
           </div>
 
-          {/* add an affirmation */}
-          <div style={LABEL}>Add an affirmation</div>
-          <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
-            <input value={noteText} onChange={(e) => setNoteText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') addNoteItem(); }} placeholder="Write an affirmation…" aria-label="Affirmation for this routine" style={{ flex: 1, minWidth: 0, ...IN }} />
-            <button onClick={addNoteItem} disabled={!noteText.trim()} style={{ ...ADD, opacity: noteText.trim() ? 1 : .45 }}>Add</button>
-          </div>
-
-          {/* pull from your library */}
-          {S.mediaItems.length > 0 && (
-            <>
-              <div style={LABEL}>From your library</div>
-              <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {S.mediaItems.map((c) => (
-                  <button key={c.id} onClick={() => addFromLibrary(c)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 12, border: '1px solid var(--hairline)', background: 'var(--track)', color: 'var(--ink)', textAlign: 'left' }}>
-                    <span style={{ width: 18, height: 18, flex: 'none', borderRadius: 999, border: '1.5px solid var(--accent)', color: 'var(--accent)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, lineHeight: 1 }}>+</span>
-                    <span style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.title}</span>
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-
           <div style={{ marginTop: 14, display: 'flex', gap: 10 }}>
             <button onClick={reset} style={{ height: 46, padding: '0 16px', borderRadius: 14, border: '1px solid var(--rim)', background: 'transparent', color: 'var(--dim)', fontWeight: 600, fontSize: 13.5 }}>Cancel</button>
-            <button onClick={saveIt} disabled={!name.trim() || !count} style={{ flex: 1, height: 46, borderRadius: 14, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 600, fontSize: 14, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)', opacity: (!name.trim() || !count) ? .45 : 1 }}>Save routine{count ? ` (${count})` : ''}</button>
+            <button onClick={saveIt} disabled={!name.trim() || !count} style={{ flex: 1, height: 46, borderRadius: 14, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 600, fontSize: 14, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)', opacity: (!name.trim() || !count) ? .45 : 1 }}>{editingId ? 'Save changes' : 'Save routine'}{count ? ` (${count})` : ''}</button>
           </div>
         </div>
       )}
@@ -179,6 +218,10 @@ export default function LibraryScreen() {
   const S = useStore5();
   const idx = TABS.findIndex((t) => t.key === S.stackTab);
   const tabLeft = `calc(${idx < 0 ? 0 : idx} * 25% + 3px)`;
+  // Vic #5 — search within whichever category is selected
+  const [search, setSearch] = React.useState('');
+  const query = search.trim().toLowerCase();
+  const mediaFiltered = S.mediaItems.filter((it) => !query || it.title.toLowerCase().includes(query) || (it.meta || '').toLowerCase().includes(query));
 
   return (
     <div style={{ position: 'absolute', inset: 0, overflowY: 'auto', padding: '28px 20px 140px', animation: 'ppwScreenIn .38s cubic-bezier(.26,1,.4,1)' }}>
@@ -193,6 +236,17 @@ export default function LibraryScreen() {
         {TABS.map((t) => (
           <button key={t.key} onClick={() => setTab(t.key)} style={{ position: 'relative', flex: 1, background: 'none', border: 'none', fontSize: 12, fontWeight: 600, color: S.stackTab === t.key ? 'var(--acc-ink)' : 'var(--dim)', textShadow: 'var(--label-shadow)', transition: 'color .25s' }}>{t.label}</button>
         ))}
+      </div>
+
+      {/* Vic #5 — search the selected category */}
+      <div style={{ position: 'relative', marginTop: 12 }}>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--dim)', pointerEvents: 'none' }}><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
+        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`Search ${TABS[idx < 0 ? 0 : idx].label.toLowerCase()}…`} aria-label="Search library" style={{ width: '100%', height: 44, padding: '0 36px 0 38px', borderRadius: 14, border: '1px solid var(--hairline)', background: 'var(--track)', boxShadow: 'var(--inset)', color: 'var(--ink)', outline: 'none', fontSize: 14 }} />
+        {search && (
+          <button onClick={() => setSearch('')} aria-label="Clear search" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', width: 28, height: 28, borderRadius: 999, border: 'none', background: 'var(--disc)', color: 'var(--dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+          </button>
+        )}
       </div>
 
       {/* Routines — premium gated */}
@@ -221,12 +275,13 @@ export default function LibraryScreen() {
           </div>
         )
       )}
-      {S.stackTab === 'routines' && S.premium && <RoutineBuilder />}
+      {S.stackTab === 'routines' && S.premium && <RoutineBuilder query={query} />}
 
       {/* Media — list + add to stack */}
       {S.stackTab === 'media' && (
         <div style={{ marginTop: 18, display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {S.mediaItems.map((it) => <MediaRow key={it.id} it={it} />)}
+          {mediaFiltered.map((it) => <MediaRow key={it.id} it={it} />)}
+          {query && mediaFiltered.length === 0 && <div style={{ padding: '18px 0', textAlign: 'center', fontSize: 13, color: 'var(--dim)' }}>Nothing matches “{search.trim()}”.</div>}
         </div>
       )}
 

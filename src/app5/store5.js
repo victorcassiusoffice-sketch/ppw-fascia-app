@@ -26,7 +26,7 @@ function starterDeck() {
     yt('d1', '07:30', 'v7AYKMP6rOE', 'Yoga For Complete Beginners', 'YouTube · Basic Yoga · 20 min'),
     yt('d2', '12:30', 'O-6f5wQXSu8', 'Guided Meditation for Calm', 'YouTube · Meditation · 10 min'),
     yt('d3', '17:00', 'UBMk30rjy0o', 'Full Body Workout, No Equipment', 'YouTube · Fitness · 20 min'),
-    { id: 'd4', title: 'I did enough today. I am consistent.', meta: 'Affirmation · Still', time: '21:00', kind: 'note', noteAnim: 'still', noteSpeed: 'med', noteDur: '5', repeat: 'daily' },
+    { id: 'd4', title: 'I did enough today. I am consistent.', meta: 'Text · Still', time: '21:00', kind: 'note', noteAnim: 'still', noteSpeed: 'med', noteDur: '5', repeat: 'daily' },
   ];
 }
 
@@ -268,6 +268,32 @@ export function createRoutine(name, items) {
   return r;
 }
 export function deleteRoutine(id) { saveRoutines(state.routines.filter((r) => r.id !== id)); }
+// edit a saved routine in place (Vic 1c)
+export function updateRoutine(id, patch) {
+  saveRoutines(state.routines.map((r) => r.id === id ? { ...r, ...patch } : r));
+}
+
+// ── stack selection + bulk delete (Vic 4/4b) ──
+export function toggleSelect(id) {
+  const sel = state.selectedIds.includes(id) ? state.selectedIds.filter((x) => x !== id) : [...state.selectedIds, id];
+  setState({ selectedIds: sel });
+}
+export function selectAll(ids) { setState({ selectedIds: [...new Set([...state.selectedIds, ...ids])] }); }
+export function clearSelection() { setState({ selectedIds: [] }); }
+export function deleteSelected() {
+  const sel = new Set(state.selectedIds);
+  if (!sel.size) return;
+  setState({ deckItems: state.deckItems.filter((it) => !sel.has(it.id)), selectedIds: [] });
+  saveStacks();
+}
+// add a Document stack to today (file already saved to IndexedDB → fileId)
+export function addDocToToday(name, fileId) {
+  if (overLimit()) { setState({ premiumUpsell: 'You have reached the free limit of 10 stacks. Go Premium for unlimited stacks.' }); return { upsell: true }; }
+  const item = { id: 'doc' + Date.now().toString(36), title: name, meta: 'Document', thumb: 'doc', kind: 'doc', fileId, time: '09:00', repeat: 'daily' };
+  setState({ deckItems: [...state.deckItems, item], addedCustom: item });
+  saveStacks();
+  return { ok: true, item };
+}
 
 // ── routine sharing via Markdown (Vic 2026-07-06) ──
 // Human-readable MD with a fenced `ppw-routine` JSON block as the lossless
@@ -523,7 +549,7 @@ export function addNote() {
   const anim = state.noteAnim || 'still';
   const animLabel = anim.charAt(0).toUpperCase() + anim.slice(1);
   const item = {
-    id: 'n' + Date.now().toString(36), title: text, meta: 'Affirmation · ' + animLabel,
+    id: 'n' + Date.now().toString(36), title: text, meta: 'Text · ' + animLabel,
     time: state.noteTime || '09:00', kind: 'note', noteAnim: anim, noteSpeed: state.noteSpeed || 'med',
     noteDur: state.noteDur || '5', repeat: 'daily',
   };

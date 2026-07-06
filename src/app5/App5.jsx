@@ -29,6 +29,7 @@ import {
   stackFor, todayKey, markDone, setItemTime, deleteItem, overLimit,
   openAdd, backToToday, openPlayer, openCompleted, openRepeat, repeatLabel,
   startSlotEngine, orderedStackFor, reorderTimed, reorderDeck, toggleAuto,
+  toggleSelect, selectAll, clearSelection, deleteSelected,
 } from './store5.js';
 import { installPressSound } from './sfx5.js';
 
@@ -160,6 +161,7 @@ function StackScreen() {
   const dateLabel = labelDate.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }).toUpperCase();
 
   const cardIcon = (it) => {
+    if (it.kind === 'doc') return <div style={{ width: 46, height: 46, flex: 'none', borderRadius: 14, background: THUMBS.doc, border: '1px solid var(--rim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,.9)' }}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h8l4 4v14H6z" /><path d="M14 3v4h4M9.5 12h5M9.5 15.5h5" /></svg></div>;
     if (it.kind === 'note') return <div style={{ width: 46, height: 46, flex: 'none', borderRadius: 14, background: 'var(--disc)', border: '1px solid var(--rim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)' }}>{INote}</div>;
     if (it.thumb) {
       const bg = it.thumbUrl ? `url(${it.thumbUrl})` : (THUMBS[it.thumb] || THUMBS.yt);
@@ -246,9 +248,19 @@ function StackScreen() {
         </div>
       )}
 
-      {/* deck (rest of today) */}
-      <div style={{ marginTop: 30, display: 'flex', alignItems: 'center', justifyContent: 'space-between', minHeight: 40 }}>
+      {/* deck (rest of today) — selection actions live inline with this header (Vic 4b) */}
+      <div style={{ marginTop: 30, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, minHeight: 40 }}>
         <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--dim)', textShadow: 'var(--emboss)' }}>{rest.length ? 'Later today' : ''}</div>
+        {S.selectedIds.length > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, animation: 'ppwRise .25s ease both' }}>
+            <button onClick={() => selectAll(rest.map((x) => x.id))} style={{ height: 36, padding: '0 12px', borderRadius: 999, border: '1px solid var(--rim)', background: 'transparent', color: 'var(--ink)', fontSize: 12, fontWeight: 600 }}>Select all</button>
+            <button onClick={clearSelection} aria-label="Clear selection" style={{ height: 36, padding: '0 10px', borderRadius: 999, border: 'none', background: 'none', color: 'var(--dim)', fontSize: 12, fontWeight: 600 }}>Clear</button>
+            <button onClick={deleteSelected} aria-label="Delete selected stacks" style={{ height: 36, padding: '0 13px', borderRadius: 999, display: 'flex', alignItems: 'center', gap: 6, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', boxShadow: 'var(--acc-glow)', color: 'var(--acc-ink)', fontSize: 12, fontWeight: 700 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16M10 4h4M6.5 7l1 13h9l1-13" /></svg>
+              {S.selectedIds.length}
+            </button>
+          </div>
+        )}
       </div>
       <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 12 }}>
         {rest.map((it, i) => {
@@ -259,9 +271,13 @@ function StackScreen() {
               key={it.id}
               data-dragidx={i}
               onPointerDown={rowPointerDown(i)}
-              onClick={() => { if (suppressClick.current) return; if (it.embed || it.url) openPlayer(it); }}
+              onClick={() => { if (suppressClick.current) return; if (S.selectedIds.length) { toggleSelect(it.id); return; } if (it.embed || it.url || it.kind === 'doc') openPlayer(it); }}
               style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', minHeight: 68, borderRadius: 26, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: `1px solid ${isOver ? 'var(--acc-rim)' : 'var(--rim)'}`, boxShadow: isDragged ? 'var(--elev-hi)' : 'var(--elev)', cursor: (it.embed || it.url) ? 'pointer' : 'grab', touchAction: 'pan-y', userSelect: 'none', WebkitUserSelect: 'none', transform: isDragged ? `translateY(${drag.dy}px) scale(1.03)` : 'none', zIndex: isDragged ? 5 : 1, transition: isDragged ? 'none' : 'transform .2s, border-color .2s' }}
             >
+              {/* Vic 4 — small selection tick, top-left of every stack card */}
+              <button onClick={(e) => { e.stopPropagation(); toggleSelect(it.id); }} aria-label={S.selectedIds.includes(it.id) ? 'Deselect' : 'Select for deletion'} style={{ width: 22, height: 22, flex: 'none', alignSelf: 'flex-start', marginTop: 2, borderRadius: 999, border: `1.5px solid ${S.selectedIds.includes(it.id) ? 'var(--acc-rim)' : 'var(--rim)'}`, background: S.selectedIds.includes(it.id) ? 'var(--acc-surf)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--acc-ink)', padding: 0, transition: 'all .2s' }}>
+                {S.selectedIds.includes(it.id) && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>}
+              </button>
               {cardIcon(it)}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 15.5, fontWeight: 600, letterSpacing: '-.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textShadow: 'var(--emboss)' }}>{it.title}</div>

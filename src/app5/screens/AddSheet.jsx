@@ -6,14 +6,24 @@
 // note composer + document upload (need more logic) — tiles still present.
 
 import React from 'react';
-import { useStore5, closeAdd, setCustomUrl, addCustomUrl, goLibrary, setUpsell, openNoteComposer, setNoteField, addNote, parseRoutineMd, addItemsToToday, createRoutine, getState } from '../store5.js';
+import { useStore5, closeAdd, setCustomUrl, addCustomUrl, goLibrary, setUpsell, openNoteComposer, setNoteField, addNote, parseRoutineMd, addItemsToToday, createRoutine, getState, addDocToToday } from '../store5.js';
+import { saveFile } from '../files5.js';
 
 const tsvg = (p) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">{p}</svg>;
+export const TILE_ICONS = {
+  routine: tsvg(<path d="M12 3s6 6.3 6 10.3a6 6 0 0 1-12 0C6 9.3 12 3 12 3z" />),
+  media: tsvg(<><path d="M9 18V6l8-2v12" /><circle cx="7" cy="18" r="2.2" /><circle cx="15" cy="16" r="2.2" /></>),
+  protocol: tsvg(<><path d="M5 7.5 12 4l7 3.5-7 3.5-7-3.5z" /><path d="M5 12l7 3.5 7-3.5" /><path d="M5 16.5 12 20l7-3.5" /></>),
+  text: tsvg(<><path d="M5 4h14v11l-4 5H5z" /><path d="M15 20v-5h4M8.5 9h7M8.5 12.5h4" /></>),
+  doc: tsvg(<><path d="M6 3h8l4 4v14H6z" /><path d="M14 3v4h4M9.5 12h5M9.5 15.5h5" /></>),
+};
+export const DOC_ACCEPT = '.pdf,.doc,.docx,.txt,.md,.rtf,.csv,.ppt,.pptx,.xls,.xlsx,image/*';
 const TILES = [
-  { key: 'routines', name: 'Routine', tab: 'routines', icon: tsvg(<path d="M12 3s6 6.3 6 10.3a6 6 0 0 1-12 0C6 9.3 12 3 12 3z" />) },
-  { key: 'media', name: 'Media', tab: 'media', icon: tsvg(<><path d="M9 18V6l8-2v12" /><circle cx="7" cy="18" r="2.2" /><circle cx="15" cy="16" r="2.2" /></>) },
-  { key: 'protocols', name: 'Protocol', tab: 'protocols', icon: tsvg(<><path d="M5 7.5 12 4l7 3.5-7 3.5-7-3.5z" /><path d="M5 12l7 3.5 7-3.5" /><path d="M5 16.5 12 20l7-3.5" /></>) },
-  { key: 'note', name: 'Affirmation', note: true, icon: tsvg(<><path d="M5 4h14v11l-4 5H5z" /><path d="M15 20v-5h4M8.5 9h7M8.5 12.5h4" /></>) },
+  { key: 'routines', name: 'Routine', tab: 'routines', icon: TILE_ICONS.routine },
+  { key: 'media', name: 'Media', tab: 'media', icon: TILE_ICONS.media },
+  { key: 'protocols', name: 'Protocol', tab: 'protocols', icon: TILE_ICONS.protocol },
+  // Vic 2026-07-07 — "Affirmation" is called "Text" everywhere in Add Stacks.
+  { key: 'note', name: 'Text', note: true, icon: TILE_ICONS.text },
 ];
 const NOTE_STYLES = [
   { key: 'still', label: 'Still' },
@@ -64,6 +74,12 @@ export default function AddSheet() {
               <span style={{ fontSize: 13, fontWeight: 600 }}>{t.name}</span>
             </button>
           ))}
+          {/* Document — stays on this device, reopens after a restart */}
+          <label style={{ height: 92, borderRadius: 22, border: '1px solid var(--rim)', background: 'var(--surface)', boxShadow: 'var(--elev)', color: 'var(--ink)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: 'pointer' }}>
+            {TILE_ICONS.doc}
+            <span style={{ fontSize: 13, fontWeight: 600 }}>Document</span>
+            <input type="file" accept={DOC_ACCEPT} onChange={async (e) => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (!f) return; const fileId = await saveFile(f); addDocToToday(f.name, fileId); }} style={{ display: 'none' }} />
+          </label>
           <button onClick={onAssistant} style={{ gridColumn: '1 / -1', height: 60, borderRadius: 20, border: '1px solid var(--rim)', background: 'var(--surface)', boxShadow: 'var(--elev)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.9 5.6L19.5 10.5l-5.6 1.9L12 18l-1.9-5.6L4.5 10.5l5.6-1.9z" /><path d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z" /></svg>
             <span style={{ fontSize: 14, fontWeight: 600 }}>Assistant — build it for me</span>
@@ -75,9 +91,9 @@ export default function AddSheet() {
           <div style={{ marginTop: 14, borderRadius: 22, padding: 16, border: '1px solid var(--rim)', background: 'var(--surface)', animation: 'ppwRise .35s cubic-bezier(.22,1,.36,1) both' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--accent)' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M5 4h14v11l-4 5H5z" /><path d="M15 20v-5h4M8.5 9h7M8.5 12.5h4" /></svg>
-              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase' }}>Affirmation</span>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase' }}>Text</span>
             </div>
-            <input value={S.noteText} onChange={(e) => setNoteField({ noteText: e.target.value })} placeholder="Write an affirmation to appear on screen…" aria-label="Affirmation text" style={{ marginTop: 10, width: '100%', height: 46, padding: '0 14px', borderRadius: 14, border: '1px solid var(--hairline)', background: 'var(--track)', boxShadow: 'var(--inset)', color: 'var(--ink)', outline: 'none', fontSize: 14 }} />
+            <input value={S.noteText} onChange={(e) => setNoteField({ noteText: e.target.value })} placeholder="Write text to appear on screen…" aria-label="Text content" style={{ marginTop: 10, width: '100%', height: 46, padding: '0 14px', borderRadius: 14, border: '1px solid var(--hairline)', background: 'var(--track)', boxShadow: 'var(--inset)', color: 'var(--ink)', outline: 'none', fontSize: 14 }} />
             <div style={{ marginTop: 14, fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--dim)' }}>Style</div>
             <div style={{ marginTop: 8, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 7 }}>
               {NOTE_STYLES.map((ns) => (
@@ -108,7 +124,7 @@ export default function AddSheet() {
                 </div>
               </div>
             </div>
-            <button onClick={addNote} style={{ marginTop: 14, width: '100%', height: 46, borderRadius: 14, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 600, fontSize: 14, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)' }}>Add affirmation</button>
+            <button onClick={addNote} style={{ marginTop: 14, width: '100%', height: 46, borderRadius: 14, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 600, fontSize: 14, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)' }}>Add text</button>
           </div>
         )}
 

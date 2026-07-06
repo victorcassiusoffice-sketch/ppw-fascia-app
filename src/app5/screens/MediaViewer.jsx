@@ -9,13 +9,23 @@
 import React from 'react';
 import { THUMBS } from '../theme5.js';
 import { useStore5, closePlayer } from '../store5.js';
+import { fileUrl } from '../files5.js';
 
 export default function MediaViewer() {
   const S = useStore5();
   const it = S.playerItem;
+  // Document items: resolve the on-device file to an object URL when opened.
+  const [docUrl, setDocUrl] = React.useState(null);
+  React.useEffect(() => {
+    let on = true;
+    setDocUrl(null);
+    if (it && it.kind === 'doc' && it.fileId) fileUrl(it.fileId).then((u) => { if (on) setDocUrl(u); });
+    return () => { on = false; };
+  }, [it && it.id]);
   if (!it) return null;
 
   const poster = it.thumbUrl ? `url(${it.thumbUrl})` : (THUMBS[it.thumb] || THUMBS.au);
+  const openHref = it.kind === 'doc' ? docUrl : it.url;
 
   return (
     <div style={{ position: 'absolute', inset: 0, zIndex: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
@@ -31,9 +41,10 @@ export default function MediaViewer() {
         <div style={{ position: 'relative', marginTop: 14, fontSize: 17, fontWeight: 600, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>{it.title}</div>
         <div style={{ position: 'relative', marginTop: 3, fontSize: 13, color: 'var(--dim)' }}>{it.meta}</div>
         <div style={{ position: 'relative', marginTop: 16, display: 'flex', gap: 10 }}>
-          {it.url && (
-            <a href={it.url} target="_blank" rel="noopener noreferrer" style={{ height: 48, padding: '0 16px', borderRadius: 15, border: '1px solid var(--rim)', color: 'var(--ink)', display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13.5, fontWeight: 600, textDecoration: 'none' }}>Open ↗</a>
+          {openHref && (
+            <a href={openHref} target="_blank" rel="noopener noreferrer" style={{ height: 48, padding: '0 16px', borderRadius: 15, border: '1px solid var(--acc-rim)', background: it.kind === 'doc' ? 'var(--acc-surf)' : 'transparent', color: it.kind === 'doc' ? 'var(--acc-ink)' : 'var(--ink)', display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13.5, fontWeight: 600, textDecoration: 'none' }}>{it.kind === 'doc' ? 'Open document ↗' : 'Open ↗'}</a>
           )}
+          {it.kind === 'doc' && !docUrl && <div style={{ alignSelf: 'center', fontSize: 12.5, color: 'var(--dim)' }}>Loading document…</div>}
           <button onClick={closePlayer} style={{ flex: 1, height: 48, padding: '0 16px', borderRadius: 15, border: '1px solid var(--rim)', background: 'transparent', color: 'var(--dim)', fontWeight: 600, fontSize: 13.5 }}>Cancel</button>
         </div>
       </div>

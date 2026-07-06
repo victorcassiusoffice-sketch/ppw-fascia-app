@@ -110,6 +110,10 @@ const initialSession = {
    onboarding/wizard routes, which is exactly the "page transitions aren't the
    same" mismatch Vic flagged. One primitive = one motion language. */
 
+// CUTOVER (Vic, 2026-07-06): the New Design (App5) IS the app on every route.
+// Old app retired but intact — flip to false for a one-line revert.
+const NEW_DESIGN_ONLY = true;
+
 export default function App() {
   const [session, setSession] = useState(initialSession);
   const location = useLocation();
@@ -118,10 +122,12 @@ export default function App() {
   // foreground. Silent no-op when unpaired or offline (assistantSync handles it).
   useEffect(() => initAssistantSync(), []);
 
-  // 2026-06-19 — install the GLOBAL press-sound so every interactive tap clicks
-  // when sound is enabled (root-cause fix for "sound doesn't work": it was only
-  // ever wired to /soft-lab + the Settings toggle, never the app itself).
-  useEffect(() => installGlobalPressSound(), []);
+  // 2026-06-19 — the OLD app's global press-sound. 2026-07-07 (Vic "sound off
+  // switch not working"): this kept installing under the New Design too, and it
+  // reads the OLD ppw.* sound pref (default on) — so App5's Sounds toggle could
+  // never silence it. Skip it entirely under the New Design (App5 has its own
+  // Sounds-gated engine in app5/sfx5.js).
+  useEffect(() => { if (!NEW_DESIGN_ONLY) return installGlobalPressSound(); }, []);
 
   const [activeProtocols] = useActiveProtocols();
   const [activeModules] = useActiveModules();
@@ -131,11 +137,6 @@ export default function App() {
     activeModules.length > 0 ||
     (activeRoutines.savedZones?.length || 0) > 0;
 
-  // CUTOVER (Vic, 2026-07-06): "change everything to be exactly the same as the
-  // new [design]" — the New Design (App5) IS the app now, on every route. The
-  // old app below is retired but kept intact; flip NEW_DESIGN_ONLY to false for
-  // a one-line revert. App5 owns its own shell/background/nav (full-bleed).
-  const NEW_DESIGN_ONLY = true;
   if (NEW_DESIGN_ONLY || location.pathname === '/v2') {
     return (
       <LazyMotion features={domAnimation}>
