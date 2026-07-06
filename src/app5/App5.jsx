@@ -30,6 +30,7 @@ import {
   openAdd, backToToday, openPlayer, openCompleted, openRepeat, repeatLabel,
   startSlotEngine,
 } from './store5.js';
+import { installPressSound } from './sfx5.js';
 
 // ── small inline-SVG icon helpers (match the prototype's line icons) ──
 const svg = (p, extra = {}) => (
@@ -265,6 +266,8 @@ export default function App5() {
   // runtime slot engine — fires notes/reminders/autoplay when a slot's time
   // arrives (20s tick, ported from the prototype). Cleans up on unmount.
   React.useEffect(() => startSlotEngine(), []);
+  // global press sound — soft ASMR tap on any interactive press (Sounds-gated).
+  React.useEffect(() => installPressSound(), []);
 
   let body;
   if (S.screen === 'stack') body = <StackScreen />;
