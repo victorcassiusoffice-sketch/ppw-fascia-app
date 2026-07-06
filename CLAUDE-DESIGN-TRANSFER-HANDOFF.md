@@ -39,7 +39,17 @@ Resolved open questions accordingly:
 ## STATUS (update this after every meaningful chunk, then commit + push)
 
 **Last updated:** 2026-07-06, mid-session.
-**Last completed step:** Premium manual-test toggle SHIPPED on this branch (commit `7f0b919`, pushed). `src/lib/entitlement.js` gained `setProMember(isPro)` — the single seam for a future real Gumroad unlock (comment explains it). `src/pages/Settings.jsx` gained a "Membership" card with a glass-switch toggle wired to it (same visual pattern as the existing IF toggle). NO payment gateway wired — Vic explicitly asked to keep it a manual switch for now, just built so a real unlock is a one-function-call drop-in later. Verified live in dev server: toggles both ways, label/persistence correct across reload, zero console errors, clean production build.
+**Screen-transfer progress tracker (17 screens/modals total):**
+- [x] Global — Nunito font app-wide (`182c917`)
+- [x] Premium mechanism — Settings toggle + entitlement seam (`7f0b919`)
+- [ ] Stack (daily/home view — new name for old "Today") ← RECOMMENDED NEXT (most-seen screen)
+- [ ] Library (tabbed Routines/Media/Protocols/Supps — new name for old "Stack")
+- [ ] Add sheet (2×2 glass tiles)
+- [ ] Calendar (month grid)
+- [ ] Settings (full new-design layout — card exists, needs new-design structure)
+- [ ] Modals: Upgrade/upsell · Completed · Media viewer · Note popup · Repeat options · Fasting info · Slot reminder · Stack assistant (orb chat) · Terms · Easy set up · Onboarding
+
+**Last completed step:** Nunito font swap SHIPPED (`182c917`, pushed). Premium manual-test toggle SHIPPED (`7f0b919`, pushed). `src/lib/entitlement.js` gained `setProMember(isPro)` — the single seam for a future real Gumroad unlock (comment explains it). `src/pages/Settings.jsx` gained a "Membership" card with a glass-switch toggle wired to it (same visual pattern as the existing IF toggle). NO payment gateway wired — Vic explicitly asked to keep it a manual switch for now, just built so a real unlock is a one-function-call drop-in later. Verified live in dev server: toggles both ways, label/persistence correct across reload, zero console errors, clean production build.
 **Also done:** `docs\claude-design-import\DESIGN-SPEC.md` — screen inventory (17 screens/modals) + full premium/paywall mechanics from the Claude Design prototype, built via targeted Grep/Read after **three background digest-agents failed silently** (2 tool calls, ~120k tokens each, no output each time — do NOT repeat that approach on this file, it's too big for one-shot digestion; read it in small targeted chunks instead).
 **Next step:** Full visual transfer of the 17 screens/modals (`PPW Fascia App.dc.html` → real React), screen by screen, each as its own small commit. Open questions to resolve with Vic first (logged in DESIGN-SPEC.md): (1) naming swap — new design's "Stack" = old app's "Today", new design's "Library" = old app's "Stack"; (2) whether to reconcile the design's Assistant-orb premium-gate with the current app's separate external-paid-Assistant model; (3) font — design uses Nunito, current app/vault docs specify Geist/EB Garamond/Inter.
 **Blocked on:** nothing — ready to start screen-by-screen transfer whenever Vic gives the word / answers the open questions above.
