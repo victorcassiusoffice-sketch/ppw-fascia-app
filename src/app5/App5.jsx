@@ -13,9 +13,12 @@
 import React from 'react';
 import { themeVars, parseVars, THUMBS } from './theme5.js';
 import SettingsScreen from './screens/SettingsScreen.jsx';
+import AddSheet from './screens/AddSheet.jsx';
+import UpsellModal from './screens/UpsellModal.jsx';
 import {
   useStore5, getState, setState, save,
   stackFor, todayKey, markDone, setItemTime, deleteItem, overLimit,
+  openAdd,
 } from './store5.js';
 
 // ── small inline-SVG icon helpers (match the prototype's line icons) ──
@@ -212,7 +215,10 @@ export default function App5() {
         {/* active screen */}
         {body}
         {/* nav dock */}
-        <NavDock screen={S.screen} onNav={nav} onAdd={() => { /* Add sheet — ported next */ }} />
+        <NavDock screen={S.screen} onNav={nav} onAdd={openAdd} />
+        {/* overlays */}
+        <AddSheet />
+        <UpsellModal />
       </div>
     </div>
   );

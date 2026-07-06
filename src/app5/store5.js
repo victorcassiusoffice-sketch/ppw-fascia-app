@@ -46,6 +46,8 @@ function initialState() {
     importedProtos: [],
     // library tab
     stackTab: 'routines',
+    // add sheet
+    addOpen: false, customUrl: '', addedCustom: null,
     // selection / interaction
     selectedIds: [],
     // completed
@@ -160,6 +162,42 @@ export function reorderDeck(orderedIds) {
   setState({ deckItems: orderedIds.map((id) => byId[id]).filter(Boolean) });
   saveStacks();
 }
+
+// ── add flows ──
+export function parseYouTubeId(url) {
+  const m = String(url).match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+// build a stack item from a pasted share link. Returns { ok } or { upsell }.
+export function addCustomUrl(url) {
+  const raw = String(url || '').trim();
+  if (!raw) return { ok: false };
+  if (overLimit()) {
+    setState({ premiumUpsell: 'You have reached the free limit of 10 stacks. Go Premium for unlimited stacks.' });
+    return { upsell: true };
+  }
+  const id = 'u' + Date.now().toString(36);
+  const time = '09:00';
+  let item;
+  const yt = parseYouTubeId(raw);
+  if (yt) {
+    item = { id, time, title: 'YouTube video', meta: 'YouTube', thumb: 'yt', repeat: 'daily', url: raw, embed: 'https://www.youtube.com/embed/' + yt + '?autoplay=1&playsinline=1&rel=0', thumbUrl: 'https://i.ytimg.com/vi/' + yt + '/hqdefault.jpg' };
+  } else if (/spotify\.com|open\.spotify/.test(raw)) {
+    item = { id, time, title: 'Spotify', meta: 'Spotify', thumb: 'sp', repeat: 'daily', url: raw };
+  } else {
+    let host = raw; try { host = new URL(raw).hostname.replace(/^www\./, ''); } catch {}
+    item = { id, time, title: host, meta: 'Link', thumb: 'au', repeat: 'daily', url: raw };
+  }
+  setState({ deckItems: [...state.deckItems, item], addedCustom: item, customUrl: '' });
+  saveStacks();
+  return { ok: true, item };
+}
+export function openAdd() { setState({ addOpen: true }); }
+export function closeAdd() { setState({ addOpen: false, addedCustom: null }); }
+export function setCustomUrl(v) { setState({ customUrl: v }); }
+export function goLibrary(tab) { setState({ addOpen: false, addedCustom: null, screen: 'library', ...(tab ? { stackTab: tab } : {}) }); }
+export function setUpsell(reason) { setState({ premiumUpsell: reason }); }
+export function clearUpsell() { setState({ premiumUpsell: null }); }
 
 // theme setters
 export function setTheme(patch) {
