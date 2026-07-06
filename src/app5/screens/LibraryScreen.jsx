@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { THUMBS } from '../theme5.js';
-import { useStore5, setTab, addToStack, setUpsell, openPlayer, createRoutine, deleteRoutine, routineToMd } from '../store5.js';
+import { useStore5, setTab, addToStack, setUpsell, openPlayer, createRoutine, deleteRoutine, routineToMd, itemFromUrl } from '../store5.js';
 
 // share a routine as a .md file — native share sheet when the device supports
 // sharing files (phones), else a plain download.
@@ -25,21 +25,39 @@ async function shareRoutine(r) {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 }
 
-// Routine builder (Vic #5, premium): name a routine, tick stacks into it, save.
-// Saved routines are applied to any day from the Calendar. Unlimited.
+// Routine builder (Vic #5 + rework 2026-07-06, premium): name a routine, then
+// ADD STACKS THE SAME WAY THE MAIN ＋ ADD WORKS — paste a share link, write an
+// affirmation, or pull from your library — accumulating inside the named
+// routine. Saved routines are applied to any day from the Calendar. Unlimited.
 function RoutineBuilder() {
   const S = useStore5();
   const [open, setOpen] = React.useState(false);
   const [name, setName] = React.useState('');
-  const [sel, setSel] = React.useState({});
-  const choices = S.mediaItems;
-  const count = Object.values(sel).filter(Boolean).length;
+  const [items, setItems] = React.useState([]); // snapshots added so far
+  const [link, setLink] = React.useState('');
+  const [noteText, setNoteText] = React.useState('');
+  const count = items.length;
+  const reset = () => { setOpen(false); setName(''); setItems([]); setLink(''); setNoteText(''); };
+  const addLink = () => {
+    const snap = itemFromUrl(link);
+    if (!snap) return;
+    setItems((xs) => [...xs, snap]); setLink('');
+  };
+  const addNoteItem = () => {
+    const t = noteText.trim();
+    if (!t) return;
+    setItems((xs) => [...xs, { title: t, meta: 'Affirmation · Still', kind: 'note', noteAnim: 'still', noteSpeed: 'med', noteDur: '5' }]);
+    setNoteText('');
+  };
+  const addFromLibrary = (c) => { const { id, ...rest } = c; setItems((xs) => [...xs, { ...rest }]); };
   const saveIt = () => {
     if (!name.trim() || !count) return;
-    const items = choices.filter((c) => sel[c.id]).map(({ id, ...rest }) => ({ ...rest }));
     createRoutine(name, items);
-    setOpen(false); setName(''); setSel({});
+    reset();
   };
+  const IN = { height: 44, padding: '0 12px', borderRadius: 12, border: '1px solid var(--hairline)', background: 'var(--track)', boxShadow: 'var(--inset)', color: 'var(--ink)', outline: 'none', fontSize: 14 };
+  const ADD = { height: 44, padding: '0 16px', flex: 'none', borderRadius: 12, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontSize: 14, fontWeight: 600, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)' };
+  const LABEL = { marginTop: 14, fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--dim)' };
   return (
     <>
       {/* saved routines */}
@@ -71,19 +89,56 @@ function RoutineBuilder() {
       ) : (
         <div style={{ marginTop: 16, borderRadius: 24, padding: 16, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)', animation: 'ppwRise .3s ease both' }}>
           <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Routine name — e.g. Morning Reset" aria-label="Routine name" style={{ width: '100%', height: 46, padding: '0 14px', borderRadius: 14, border: '1px solid var(--hairline)', background: 'var(--track)', boxShadow: 'var(--inset)', color: 'var(--ink)', outline: 'none', fontSize: 14 }} />
-          <div style={{ marginTop: 12, fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--dim)' }}>Add stacks</div>
-          <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {choices.map((c) => (
-              <button key={c.id} onClick={() => setSel((s) => ({ ...s, [c.id]: !s[c.id] }))} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 14, border: `1px solid ${sel[c.id] ? 'var(--acc-rim)' : 'var(--hairline)'}`, background: sel[c.id] ? 'var(--acc-surf)' : 'var(--track)', color: sel[c.id] ? 'var(--acc-ink)' : 'var(--ink)', textAlign: 'left', transition: 'all .2s' }}>
-                <span style={{ width: 18, height: 18, flex: 'none', borderRadius: 6, border: '1.5px solid currentColor', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {sel[c.id] && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>}
-                </span>
-                <span style={{ flex: 1, minWidth: 0, fontSize: 13.5, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.title}</span>
-              </button>
-            ))}
+
+          {/* stacks added so far */}
+          {count > 0 && (
+            <>
+              <div style={LABEL}>In this routine ({count})</div>
+              <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {items.map((it, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 12, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)' }}>
+                    <span style={{ fontSize: 11, fontWeight: 800, opacity: .8 }}>{i + 1}</span>
+                    <span style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{it.title}</span>
+                    <button onClick={() => setItems((xs) => xs.filter((_, j) => j !== i))} aria-label="Remove from routine" style={{ width: 24, height: 24, flex: 'none', borderRadius: 999, border: 'none', background: 'rgba(0,0,0,.18)', color: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* add a link — same as the main ＋ Add paste flow */}
+          <div style={LABEL}>Add a link</div>
+          <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
+            <input value={link} onChange={(e) => setLink(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') addLink(); }} placeholder="Paste a YouTube / Spotify / share link…" aria-label="Paste a share link for this routine" style={{ flex: 1, minWidth: 0, ...IN }} />
+            <button onClick={addLink} disabled={!link.trim()} style={{ ...ADD, opacity: link.trim() ? 1 : .45 }}>Add</button>
           </div>
-          <div style={{ marginTop: 12, display: 'flex', gap: 10 }}>
-            <button onClick={() => { setOpen(false); setName(''); setSel({}); }} style={{ height: 46, padding: '0 16px', borderRadius: 14, border: '1px solid var(--rim)', background: 'transparent', color: 'var(--dim)', fontWeight: 600, fontSize: 13.5 }}>Cancel</button>
+
+          {/* add an affirmation */}
+          <div style={LABEL}>Add an affirmation</div>
+          <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
+            <input value={noteText} onChange={(e) => setNoteText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') addNoteItem(); }} placeholder="Write an affirmation…" aria-label="Affirmation for this routine" style={{ flex: 1, minWidth: 0, ...IN }} />
+            <button onClick={addNoteItem} disabled={!noteText.trim()} style={{ ...ADD, opacity: noteText.trim() ? 1 : .45 }}>Add</button>
+          </div>
+
+          {/* pull from your library */}
+          {S.mediaItems.length > 0 && (
+            <>
+              <div style={LABEL}>From your library</div>
+              <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {S.mediaItems.map((c) => (
+                  <button key={c.id} onClick={() => addFromLibrary(c)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 12, border: '1px solid var(--hairline)', background: 'var(--track)', color: 'var(--ink)', textAlign: 'left' }}>
+                    <span style={{ width: 18, height: 18, flex: 'none', borderRadius: 999, border: '1.5px solid var(--accent)', color: 'var(--accent)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, lineHeight: 1 }}>+</span>
+                    <span style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.title}</span>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+
+          <div style={{ marginTop: 14, display: 'flex', gap: 10 }}>
+            <button onClick={reset} style={{ height: 46, padding: '0 16px', borderRadius: 14, border: '1px solid var(--rim)', background: 'transparent', color: 'var(--dim)', fontWeight: 600, fontSize: 13.5 }}>Cancel</button>
             <button onClick={saveIt} disabled={!name.trim() || !count} style={{ flex: 1, height: 46, borderRadius: 14, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 600, fontSize: 14, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)', opacity: (!name.trim() || !count) ? .45 : 1 }}>Save routine{count ? ` (${count})` : ''}</button>
           </div>
         </div>

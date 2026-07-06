@@ -358,26 +358,26 @@ export function parseYouTubeId(url) {
   const m = String(url).match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
   return m ? m[1] : null;
 }
-// build a stack item from a pasted share link. Returns { ok } or { upsell }.
-export function addCustomUrl(url) {
+// build a stack-item SNAPSHOT (no id/time) from a pasted share link — shared
+// by the main ＋ Add and the Routine builder.
+export function itemFromUrl(url) {
   const raw = String(url || '').trim();
-  if (!raw) return { ok: false };
+  if (!raw) return null;
+  const yt = parseYouTubeId(raw);
+  if (yt) return { title: 'YouTube video', meta: 'YouTube', thumb: 'yt', url: raw, embed: 'https://www.youtube.com/embed/' + yt + '?autoplay=1&playsinline=1&rel=0', thumbUrl: 'https://i.ytimg.com/vi/' + yt + '/hqdefault.jpg' };
+  if (/spotify\.com|open\.spotify/.test(raw)) return { title: 'Spotify', meta: 'Spotify', thumb: 'sp', url: raw };
+  let host = raw; try { host = new URL(raw).hostname.replace(/^www\./, ''); } catch {}
+  return { title: host, meta: 'Link', thumb: 'au', url: raw };
+}
+// add a pasted share link to today's stack. Returns { ok } or { upsell }.
+export function addCustomUrl(url) {
+  const snap = itemFromUrl(url);
+  if (!snap) return { ok: false };
   if (overLimit()) {
     setState({ premiumUpsell: 'You have reached the free limit of 10 stacks. Go Premium for unlimited stacks.' });
     return { upsell: true };
   }
-  const id = 'u' + Date.now().toString(36);
-  const time = '09:00';
-  let item;
-  const yt = parseYouTubeId(raw);
-  if (yt) {
-    item = { id, time, title: 'YouTube video', meta: 'YouTube', thumb: 'yt', repeat: 'daily', url: raw, embed: 'https://www.youtube.com/embed/' + yt + '?autoplay=1&playsinline=1&rel=0', thumbUrl: 'https://i.ytimg.com/vi/' + yt + '/hqdefault.jpg' };
-  } else if (/spotify\.com|open\.spotify/.test(raw)) {
-    item = { id, time, title: 'Spotify', meta: 'Spotify', thumb: 'sp', repeat: 'daily', url: raw };
-  } else {
-    let host = raw; try { host = new URL(raw).hostname.replace(/^www\./, ''); } catch {}
-    item = { id, time, title: host, meta: 'Link', thumb: 'au', repeat: 'daily', url: raw };
-  }
+  const item = { ...snap, id: 'u' + Date.now().toString(36), time: '09:00', repeat: 'daily' };
   setState({ deckItems: [...state.deckItems, item], addedCustom: item, customUrl: '' });
   saveStacks();
   return { ok: true, item };
