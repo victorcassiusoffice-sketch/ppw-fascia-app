@@ -66,6 +66,18 @@ function initialState() {
     repeatId: null,
     // terms & health disclaimer overlay
     termsOpen: false,
+    // onboarding (first run: onboarded=false → wizard over the app)
+    onboarded: false, obStep: 0, termsOk: false,
+    obLifestyle: ['Office & desk-bound'], obAnchors: [], obInterests: ['Meditation'],
+    obLevels: { Yoga: 5, Fitness: 5, Meditation: 5, Breathwork: 5, 'Cold exposure': 5 },
+    obCustom: '', obBody: ['Stress'],
+    obModules: { Routines: true, Media: true, Protocols: true, Supplements: false },
+    discreet: true, dayT: { wake: '07:00', bed: '22:30', ws: '09:00', we: '17:00' },
+    fastOn: false, eatOpen: '12:00', eatClose: '20:00',
+    reminders: true,
+    integrations: { spotify: false, youtube: true },
+    courseLinks: [], courseLabel: '', courseUrl: '',
+    obCreators: [], creatorInput: '',
     // selection / interaction
     selectedIds: [],
     // completed
@@ -81,7 +93,28 @@ function initialState() {
     if (g('intensity')) def.intensity = g('intensity');
     if (g('premium') === '1') def.premium = true;
     if (g('orbTip') === '1') def.orbTipSeen = true;
+    if (g('onboarded') === '1') def.onboarded = true;
+    if (g('terms') === '1') def.termsOk = true;
+    if (g('reminders')) def.reminders = g('reminders') === '1';
     const ay = gj('a11y'); if (ay && typeof ay === 'object') def.a11y = { on: !!ay.on, zoom: (+ay.zoom >= .85 && +ay.zoom <= 1.4) ? +ay.zoom : 1 };
+    const cs = gj('courses'); if (Array.isArray(cs)) def.courseLinks = cs;
+    const ig = gj('integrations'); if (ig && typeof ig === 'object') def.integrations = ig;
+    const pf = gj('prefs');
+    if (pf && typeof pf === 'object') {
+      if (Array.isArray(pf.l)) def.obLifestyle = pf.l;
+      if (Array.isArray(pf.b)) def.obBody = pf.b;
+      if (Array.isArray(pf.i)) def.obInterests = pf.i;
+      if (typeof pf.c === 'string') def.obCustom = pf.c;
+      if (pf.lv && typeof pf.lv === 'object') def.obLevels = { ...def.obLevels, ...pf.lv };
+      if (Array.isArray(pf.a)) def.obAnchors = pf.a;
+      if (Array.isArray(pf.cr)) def.obCreators = pf.cr;
+    }
+    const pf2 = gj('prefs2');
+    if (pf2 && typeof pf2 === 'object') {
+      if (typeof pf2.d === 'boolean') def.discreet = pf2.d;
+      if (pf2.t && pf2.t.wake) def.dayT = pf2.t;
+      if (pf2.f) { def.fastOn = !!pf2.f.on; if (pf2.f.o) def.eatOpen = pf2.f.o; if (pf2.f.c) def.eatClose = pf2.f.c; }
+    }
     // stacks live in one consolidated blob; legacy per-key blobs load as fallback
     const st = gj('stacks') || {};
     const di = Array.isArray(st.d) ? st.d : gj('deckItems'); if (Array.isArray(di) && di.length) def.deckItems = di;
@@ -237,6 +270,28 @@ export function setRepeat(id, value) {
 }
 export function openTerms() { setState({ termsOpen: true }); }
 export function closeTerms() { setState({ termsOpen: false }); }
+
+// ── onboarding ──
+export function savePrefsNow() {
+  const S = state;
+  save('prefs', JSON.stringify({ l: S.obLifestyle, b: S.obBody, i: S.obInterests, c: S.obCustom, lv: S.obLevels, a: S.obAnchors, cr: S.obCreators }));
+}
+export function finishOnboarding() {
+  const S = state;
+  save('onboarded', 1);
+  save('terms', S.termsOk ? 1 : 0);
+  save('reminders', S.reminders ? 1 : 0);
+  save('integrations', JSON.stringify(S.integrations));
+  save('courses', JSON.stringify(S.courseLinks));
+  savePrefsNow();
+  save('prefs2', JSON.stringify({ d: S.discreet, t: S.dayT, f: { on: S.fastOn, o: S.eatOpen, c: S.eatClose } }));
+  setState({ onboarded: true, obStep: 0, screen: 'stack' });
+}
+// toggle a value in a string-array field (chip select)
+export function toggleInList(key, label) {
+  const arr = state[key] || [];
+  setState({ [key]: arr.includes(label) ? arr.filter((x) => x !== label) : arr.concat(label) });
+}
 export function repeatLabel(repeat) {
   const r = repeat === undefined ? 'daily' : repeat;
   if (r === 'daily') return 'Every day';

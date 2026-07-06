@@ -22,6 +22,7 @@ import MediaViewer from './screens/MediaViewer.jsx';
 import CompletedSheet from './screens/CompletedSheet.jsx';
 import RepeatSheet from './screens/RepeatSheet.jsx';
 import TermsScreen from './screens/TermsScreen.jsx';
+import OnboardingScreen from './screens/OnboardingScreen.jsx';
 import {
   useStore5, getState, setState, save,
   stackFor, todayKey, markDone, setItemTime, deleteItem, overLimit,
@@ -258,6 +259,7 @@ export default function App5() {
         <MediaViewer />
         <CompletedSheet />
         <RepeatSheet />
+        <OnboardingScreen />
         <TermsScreen />
         <UpsellModal />
       </div>
