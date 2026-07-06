@@ -1,0 +1,45 @@
+# Claude Design Transfer + Premium/Gumroad Build — Handoff
+
+**Read this file FIRST if resuming after a credit cutout or new session.**
+
+Repo: `C:\Users\Victor\Documents\PPW-Code\ppw-fascia-app`
+Branch: `feat/claude-design-transfer-2026-07-06`
+Rollback point (pre-this-work): `3fc415107e17a7e5758cd0cfc8782189bc271fca` (branch `feat/mlt-full-build-2026-06-23`, also `origin/main` as of 2026-07-06)
+
+To roll back completely: `git checkout main` (or `feat/mlt-full-build-2026-06-23`) — nothing on this branch touches those.
+
+## How to resume
+
+1. `cd C:\Users\Victor\Documents\PPW-Code\ppw-fascia-app`
+2. `git checkout feat/claude-design-transfer-2026-07-06 && git pull origin feat/claude-design-transfer-2026-07-06`
+3. Read the STATUS section below — it names the last completed step and the next one.
+4. Check `git log --oneline -15` against the STATUS section to confirm nothing is ahead/behind what's recorded.
+
+## Plan (from Vic's brief)
+
+- STEP 0 — Get Vic's new Claude Design Fascia App code (pasted or file path). **NOT YET RECEIVED.**
+- STEP 1 — Orient: framework/entry points/backend/deploy/paywall state. DONE (see below).
+- STEP 2 — Transfer: swap UI to the new Claude Design build, re-wire real data/backend so nothing existing breaks.
+- STEP 3 — Premium payments: Gumroad as the rail (PayPal dead). Settings keeps a premium toggle UI; real state driven by Gumroad entitlement; Vic keeps a manual override so he can flip Premium on for his own testing without buying anything. No hardcoded Gumroad product ID/keys — config placeholder only.
+
+## STATUS (update this after every meaningful chunk, then commit + push)
+
+**Last updated:** 2026-07-06, session start.
+**Last completed step:** Step 1 orientation + resume-system setup (this file + branch).
+**Next step:** Waiting on Vic to paste/point to the new Claude Design code (Step 0). Nothing else should proceed until that lands.
+**Blocked on:** Vic — needs to provide the new UI code.
+
+## Step 1 findings (current app, before any change)
+
+- Stack: Vite + React 18 + react-router-dom 6 + Tailwind 3 + @dnd-kit + `motion`. localStorage-only, no backend/auth. Vitest for tests (`npm run test`).
+- Deploy: `.github/workflows/deploy.yml` builds + deploys to GitHub Pages on push to `main`. Live at `https://victorcassiusoffice-sketch.github.io/ppw-fascia-app/`.
+- Premium/paywall today: `src/lib/entitlement.js` — `isProMember()` reads `localStorage['ppw.entitlement'] === 'pro'`, defaults to free (fail-closed). Gates the separate paid "Wellness Assistant" launch button (`FEATURE_ASSISTANT_LAUNCH` in `src/config.js`, currently `true`) shown in `src/pages/Settings.jsx` and `src/pages/Today.jsx`. **No UI toggle currently wired to `ppw.entitlement` in Settings** — Vic says there's a premium switch in Settings; that's either part of the incoming new build or needs adding fresh. To confirm with Vic once code lands.
+- No Gumroad integration exists yet anywhere in the repo (grepped, zero hits).
+
+## Working discipline for this build (so a credit cutout never loses more than one small step)
+
+1. Commit after every small, working, logically-complete change — never one giant commit at the end.
+2. `git push origin feat/claude-design-transfer-2026-07-06` after every commit (this is the off-machine backup; GitHub is source of truth if the session dies).
+3. Update the STATUS section above in the same commit as the code change it describes.
+4. Before any destructive-feeling step (large file replace, deleting old components), confirm the commit before it is already pushed.
+5. Final production deploy (merge to `main` / trigger Pages) requires Vic's explicit yes — this branch stays isolated until then.
