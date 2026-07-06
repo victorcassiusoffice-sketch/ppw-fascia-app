@@ -121,7 +121,7 @@ function StackScreen() {
   };
 
   return (
-    <div style={{ position: 'absolute', inset: 0, overflowY: 'auto', padding: '28px 20px 140px', animation: 'ppwScreenIn .62s cubic-bezier(.26,1,.4,1)' }}>
+    <div style={{ position: 'absolute', inset: 0, overflowY: 'auto', padding: '28px 20px 140px', animation: 'ppwScreenIn .38s cubic-bezier(.26,1,.4,1)' }}>
       {/* header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -176,7 +176,10 @@ function StackScreen() {
             {next.url && (
               <a href={next.url} target="_blank" rel="noopener noreferrer" aria-label="Play now" style={{ height: 48, width: 52, flex: 'none', borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{IPlay}</a>
             )}
-            <button onClick={() => markDone(next.id, key)} style={{ flex: 1, height: 48, borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', boxShadow: 'var(--acc-glow)', color: 'var(--acc-ink)', fontWeight: 600, fontSize: 15, textShadow: 'var(--label-shadow)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>{ICheck} Done</button>
+            {/* 2026-07-06 (Vic): icon-only tick — the "Done" text sat flush to the button edge. */}
+            <button onClick={() => markDone(next.id, key)} aria-label="Done" title="Done" style={{ flex: 1, height: 48, borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', boxShadow: 'var(--acc-glow)', color: 'var(--acc-ink)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+            </button>
             <button onClick={() => setItemTime(next.id, addMinutes(next.time, 15))} aria-label="Snooze" style={{ height: 48, padding: '0 16px', borderRadius: 16, border: '1px solid var(--rim)', background: 'transparent', color: 'var(--dim)', fontWeight: 600, fontSize: 13.5, display: 'flex', alignItems: 'center', gap: 7 }}>{ISnooze} Snooze</button>
             <button onClick={() => deleteItem(next.id)} aria-label="Delete this slot" style={{ height: 48, width: 48, flex: 'none', borderRadius: 16, border: '1px solid var(--rim)', background: 'transparent', color: 'var(--dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{ITrash}</button>
           </div>

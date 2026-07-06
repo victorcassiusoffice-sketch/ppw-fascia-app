@@ -89,7 +89,7 @@ export default function OnboardingScreen() {
       <div style={{ position: 'relative', flex: 1, overflowY: 'auto', padding: '20px 24px 24px', display: 'flex', flexDirection: 'column' }}>
 
         {step === 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', paddingTop: 8, animation: 'ppwScreenIn .62s cubic-bezier(.26,1,.4,1)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', paddingTop: 8, animation: 'ppwScreenIn .38s cubic-bezier(.26,1,.4,1)' }}>
             {/* per-theme logo render (assets copied 2026-07-06). Soft themes sit on
                 the raised plaque slab; the glass/gel theme floats free with a drop
                 shadow — exactly the prototype's two branches. */}
@@ -118,7 +118,7 @@ export default function OnboardingScreen() {
         )}
 
         {step === 1 && (
-          <div style={{ animation: 'ppwScreenIn .62s cubic-bezier(.26,1,.4,1)' }}>
+          <div style={{ animation: 'ppwScreenIn .38s cubic-bezier(.26,1,.4,1)' }}>
             <h1 style={H1}>Set up quick access</h1>
             <p style={SUB}>All optional. You can add or change these any time in Settings.</p>
             <div style={{ marginTop: 22, padding: 16, borderRadius: 20, ...CARD, display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -179,7 +179,7 @@ export default function OnboardingScreen() {
         )}
 
         {step === 2 && (
-          <div style={{ animation: 'ppwScreenIn .62s cubic-bezier(.26,1,.4,1)' }}>
+          <div style={{ animation: 'ppwScreenIn .38s cubic-bezier(.26,1,.4,1)' }}>
             <h1 style={H1}>How does your day flow?</h1>
             <p style={SUB}>Tap everything that sounds like you — it shapes when your stacks land.</p>
             <Chips list={LIFESTYLES} field="obLifestyle" S={S} h={52} />
@@ -218,7 +218,7 @@ export default function OnboardingScreen() {
         )}
 
         {step === 3 && (
-          <div style={{ animation: 'ppwScreenIn .62s cubic-bezier(.26,1,.4,1)' }}>
+          <div style={{ animation: 'ppwScreenIn .38s cubic-bezier(.26,1,.4,1)' }}>
             <h1 style={H1}>What do you want to manage?</h1>
             <p style={SUB}>Pick as many as you like.</p>
             <div style={{ marginTop: 24, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -264,7 +264,7 @@ export default function OnboardingScreen() {
         )}
 
         {step === 4 && (
-          <div style={{ animation: 'ppwScreenIn .62s cubic-bezier(.26,1,.4,1)' }}>
+          <div style={{ animation: 'ppwScreenIn .38s cubic-bezier(.26,1,.4,1)' }}>
             <h1 style={H1}>Choose your modules</h1>
             <p style={SUB}>You can change these any time.</p>
             <div style={{ marginTop: 24, borderRadius: 24, ...CARD, backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', overflow: 'hidden' }}>
@@ -279,7 +279,7 @@ export default function OnboardingScreen() {
         )}
 
         {step === 5 && (
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', animation: 'ppwScreenIn .62s cubic-bezier(.26,1,.4,1)' }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', animation: 'ppwScreenIn .38s cubic-bezier(.26,1,.4,1)' }}>
             <div style={{ width: 96, height: 96, borderRadius: 999, background: 'var(--disc)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)' }}>
               <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2.5H4.5L6 16z" /><path d="M10 20a2 2 0 0 0 4 0" /></svg>
             </div>
