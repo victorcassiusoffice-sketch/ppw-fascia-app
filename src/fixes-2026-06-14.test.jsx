@@ -17,15 +17,17 @@ describe('Fix 1 — home logo reaches the landing, not a redirect back to Today'
   });
   afterEach(() => cleanup());
 
-  it('header PPW-home link points to /welcome', () => {
+  // 2026-07-06 CUTOVER: the old header (and its PPW-home link) is retired —
+  // the New Design owns navigation via the nav dock. This mount-proofs the
+  // New Design instead of the retired header.
+  it('New Design chrome mounts on /today (old header retired)', () => {
     const { container } = render(
       <MemoryRouter initialEntries={['/today']}>
         <App />
       </MemoryRouter>
     );
-    const home = container.querySelector('header a[aria-label="PPW home"]');
-    expect(home).toBeTruthy();
-    expect(home.getAttribute('href')).toBe('/welcome');
+    expect(container.querySelector('header a[aria-label="PPW home"]')).toBeFalsy();
+    expect(container.querySelector('button[aria-label="Add a stack"]')).toBeTruthy();
   });
 });
 

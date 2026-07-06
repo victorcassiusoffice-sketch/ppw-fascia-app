@@ -29,7 +29,9 @@ describe('every route mounts after the pages extraction', () => {
         </MemoryRouter>
       );
       expect(container.childElementCount).toBeGreaterThan(0);
-      expect(container.querySelector('.botnav')).toBeTruthy();
+      // 2026-07-06 CUTOVER: New Design chrome (nav dock's raised Add button)
+      // replaces the old `.botnav` on every route.
+      expect(container.querySelector('button[aria-label="Add a stack"]')).toBeTruthy();
     });
   }
 });

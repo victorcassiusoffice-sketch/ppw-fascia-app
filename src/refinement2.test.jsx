@@ -113,7 +113,10 @@ describe('Add Stack — Apps row (Vic new feature)', () => {
   });
 });
 
-describe('Settings — Background card mounts', () => {
+// 2026-07-06 CUTOVER: the New Design is state-driven (one shell, nav dock) —
+// Settings is reached via its nav button, and the appearance control is the
+// Theme colourway picker (Background/glass scenes are last-priority per Vic).
+describe('Settings — New Design appearance mounts', () => {
   beforeEach(() => {
     localStorage.clear();
     Element.prototype.scrollTo = vi.fn();
@@ -121,13 +124,15 @@ describe('Settings — Background card mounts', () => {
   });
   afterEach(() => cleanup());
 
-  it('renders the Background control on /settings', () => {
+  it('nav → Settings shows the Theme picker + Membership card', () => {
     const { container } = render(
       <MemoryRouter initialEntries={['/settings']}>
         <App />
       </MemoryRouter>
     );
-    expect(container.textContent).toContain('Background');
-    expect(container.querySelector('[aria-label="Background"]')).toBeTruthy();
+    fireEvent.click(container.querySelector('button[aria-label="Settings"]'));
+    expect(container.textContent).toContain('Theme');
+    expect(container.textContent).toContain('Membership');
+    expect(container.querySelector('button[aria-label="Toggle premium"]')).toBeTruthy();
   });
 });

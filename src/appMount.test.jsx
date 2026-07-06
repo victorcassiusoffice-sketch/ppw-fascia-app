@@ -22,35 +22,28 @@ describe('App mounts (module graph resolves end-to-end)', () => {
   });
   afterEach(() => { cleanup(); });
 
-  it('renders /today with the redesign chrome (root is non-empty)', () => {
-    // Seed minimal active state so /today has content to render.
-    localStorage.setItem('ppw.activeRoutines', JSON.stringify({ savedZones: ['calf-left'], level: 'beginner', lifestyle: null, scheduledTime: '08:00' }));
-
+  // 2026-07-06 CUTOVER: the New Design (App5) is the whole app on every route
+  // (Vic: "change everything to be exactly the same as the new"). Mount proof
+  // asserts the New Design chrome: the nav dock with its raised Add button, the
+  // Stack header Notifications disc, and the Calendar nav label.
+  it('renders /today with the New Design chrome (root is non-empty)', () => {
     const { container } = render(
       <MemoryRouter initialEntries={['/today']}>
         <App />
       </MemoryRouter>
     );
-
-    // Mount proof: the persistent bottom nav + the approved glass logo are
-    // present, i.e. the App shell actually rendered (not a blank #root).
-    // (2026-06-12 revamp: glass logo replaced the legacy helix mark.)
-    expect(container.querySelector('.botnav')).toBeTruthy();
-    expect(container.querySelector('img[src*="ppw-glass-logo"]')).toBeTruthy();
-    // 2026-06-23 whole-app redesign: nav is [Today·Stack·＋Add·Calendar·Settings]
-    // with a raised centre Add pod (.nav-add). Alerts left the nav — the bell is
-    // now the notifications toggle in the Today top bar.
-    expect(container.querySelector('.botnav .nav-add')).toBeTruthy();
-    expect(container.querySelector('[aria-label*="Notifications"]')).toBeTruthy();
-    expect(container.querySelector('.botnav').textContent).toContain('Calendar');
+    expect(container.childElementCount).toBeGreaterThan(0);
+    expect(container.querySelector('button[aria-label="Add a stack"]')).toBeTruthy();
+    expect(container.querySelector('[aria-label="Notifications"]')).toBeTruthy();
+    expect(container.textContent).toContain('Calendar');
   });
 
-  it('renders the welcome/entry route too (covers the VideoIntro branch)', () => {
+  it('renders the welcome/entry route too (every route is the New Design)', () => {
     const { container } = render(
       <MemoryRouter initialEntries={['/welcome']}>
         <App />
       </MemoryRouter>
     );
-    expect(container.querySelector('.botnav')).toBeTruthy();
+    expect(container.querySelector('button[aria-label="Add a stack"]')).toBeTruthy();
   });
 });
