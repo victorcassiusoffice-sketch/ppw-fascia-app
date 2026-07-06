@@ -25,9 +25,9 @@ To roll back completely: `git checkout main` (or `feat/mlt-full-build-2026-06-23
 ## STATUS (update this after every meaningful chunk, then commit + push)
 
 **Last updated:** 2026-07-06, mid-session.
-**Last completed step:** Step 0 received — Vic's zip `C:\Users\Victor\Documents\PPW app- The one- rebuild-handoff.zip` extracted to scratchpad at `C:\Users\Victor\AppData\Local\Temp\claude\C--Users-Victor-Documents-PPW-Code-ppw-fascia-app\d2a165a4-4500-44a6-a1dd-4ba0d3411509\scratchpad\ppw-app-rebuild\`. Primary design file to implement: `...\ppw-fascia-app-rebuild\project\PPW Fascia App.dc.html` (per README + Vic's explicit instruction — v1/v2 siblings are earlier iterations, ignored). Dispatched a research agent to read the full `.dc.html` (3488 lines) + the design-system docs and write a structured implementation spec to `docs\claude-design-import\DESIGN-SPEC.md` in this repo.
-**Next step:** Read the agent's `DESIGN-SPEC.md`, confirm scope/ambiguities with Vic if needed, then start Step 2 (component-by-component transfer) in small committed increments.
-**Blocked on:** nothing right now — spec-generation in progress.
+**Last completed step:** Step 0 received — Vic's zip `C:\Users\Victor\Documents\PPW app- The one- rebuild-handoff.zip` extracted to scratchpad at `C:\Users\Victor\AppData\Local\Temp\claude\C--Users-Victor-Documents-PPW-Code-ppw-fascia-app\d2a165a4-4500-44a6-a1dd-4ba0d3411509\scratchpad\ppw-app-rebuild\`. Primary design file: `...\ppw-fascia-app-rebuild\project\PPW Fascia App.dc.html`. **Three background agent attempts to auto-digest the whole file failed silently (2 tool calls, ~120k tokens each, no output — do NOT repeat this approach, the file is too big for one-shot digestion).** Built `docs\claude-design-import\DESIGN-SPEC.md` myself instead via targeted Grep/Read — confirmed screen inventory (17 screens/modals) + FULL premium/paywall mechanics (single `premium` boolean, Settings toggle, upsell modal, 3 gated features) documented there in detail.
+**Next step:** Proposed to Vic: wire the premium/Gumroad gate on the CURRENT app first (small, well-understood, testable now) before the full 17-screen visual transfer (large, multi-session). Awaiting Vic's confirmation on sequencing + the open questions logged in DESIGN-SPEC.md (Stack/Library naming swap, Assistant-gate reconciliation, font choice).
+**Blocked on:** Vic — one sequencing confirmation.
 
 ## Where the source design lives (not in the repo — scratchpad is session-temporary)
 
