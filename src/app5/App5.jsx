@@ -12,6 +12,7 @@
 
 import React from 'react';
 import { themeVars, parseVars, THUMBS } from './theme5.js';
+import SettingsScreen from './screens/SettingsScreen.jsx';
 import {
   useStore5, getState, setState, save,
   stackFor, todayKey, markDone, setItemTime, deleteItem, overLimit,
@@ -194,7 +195,7 @@ export default function App5() {
   if (S.screen === 'stack') body = <StackScreen />;
   else if (S.screen === 'library') body = <Placeholder name="Library" />;
   else if (S.screen === 'calendar') body = <Placeholder name="Calendar" />;
-  else if (S.screen === 'settings') body = <Placeholder name="Settings" />;
+  else if (S.screen === 'settings') body = <SettingsScreen />;
   else body = <StackScreen />;
 
   return (
