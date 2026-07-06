@@ -54,6 +54,8 @@ function initialState() {
     stackTab: 'routines',
     // add sheet
     addOpen: false, customUrl: '', addedCustom: null,
+    // calendar → stack (per-date view; null = today)
+    viewDate: null,
     // selection / interaction
     selectedIds: [],
     // completed
@@ -208,6 +210,17 @@ export function addToStack(libItem, time = '09:00') {
   return true;
 }
 export function setTab(tab) { setState({ stackTab: tab }); }
+// open a specific date's stack (null / today → clear viewDate)
+export function openStackForDate(key) {
+  const isToday = !key || key === todayKey();
+  setState({ viewDate: isToday ? null : key, screen: 'stack' });
+}
+export function backToToday() { setState({ viewDate: null }); }
+// all items scheduled on `key` (incl. done — for calendar preview). done flag attached.
+export function itemsForDate(key) {
+  const done = (state.doneByDate[key] || []).map((x) => x.id);
+  return state.deckItems.filter((it) => itemOnDate(it, key)).map((it) => ({ ...it, done: done.indexOf(it.id) !== -1 }));
+}
 export function openAdd() { setState({ addOpen: true }); }
 export function closeAdd() { setState({ addOpen: false, addedCustom: null }); }
 export function setCustomUrl(v) { setState({ customUrl: v }); }

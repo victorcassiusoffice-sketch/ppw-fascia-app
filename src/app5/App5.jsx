@@ -16,10 +16,11 @@ import SettingsScreen from './screens/SettingsScreen.jsx';
 import LibraryScreen from './screens/LibraryScreen.jsx';
 import AddSheet from './screens/AddSheet.jsx';
 import UpsellModal from './screens/UpsellModal.jsx';
+import CalendarScreen from './screens/CalendarScreen.jsx';
 import {
   useStore5, getState, setState, save,
   stackFor, todayKey, markDone, setItemTime, deleteItem, overLimit,
-  openAdd,
+  openAdd, backToToday,
 } from './store5.js';
 
 // ── small inline-SVG icon helpers (match the prototype's line icons) ──
@@ -41,6 +42,8 @@ const ISnooze = svg(<><circle cx="12" cy="13" r="8" /><path d="M12 9v4l2.5 2M9 2
 
 // time "HH:MM" → minutes for ordering
 const toMin = (t) => { const [h, m] = String(t || '00:00').split(':').map(Number); return (h || 0) * 60 + (m || 0); };
+// "YYYY-M-D" key → Date
+const keyToDateLocal = (k) => { const p = String(k).split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); };
 
 // ── NAV DOCK ──
 function NavDock({ screen, onNav, onAdd }) {
@@ -89,13 +92,15 @@ function Disc({ children, onClick, label, badge }) {
 // ── STACK (daily) screen ──
 function StackScreen() {
   const S = useStore5();
-  const key = todayKey();
+  const key = S.viewDate || todayKey();
+  const notToday = !!S.viewDate && S.viewDate !== todayKey();
   const deck = [...stackFor(key)].sort((a, b) => toMin(a.time) - toMin(b.time));
   const next = deck[0] || null;
   const rest = deck.slice(1);
   const completedCount = (S.doneByDate[key] || []).length;
 
-  const dateLabel = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }).toUpperCase();
+  const labelDate = notToday ? keyToDateLocal(key) : new Date();
+  const dateLabel = labelDate.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }).toUpperCase();
 
   const cardIcon = (it) => {
     if (it.kind === 'note') return <div style={{ width: 46, height: 46, flex: 'none', borderRadius: 14, background: 'var(--disc)', border: '1px solid var(--rim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)' }}>{INote}</div>;
@@ -111,7 +116,12 @@ function StackScreen() {
       {/* header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--dim)', textShadow: 'var(--emboss)' }}>{dateLabel}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--dim)', textShadow: 'var(--emboss)' }}>{dateLabel}</div>
+            {notToday && (
+              <button onClick={backToToday} style={{ height: 24, padding: '0 10px', borderRadius: 999, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontSize: 10, fontWeight: 700, letterSpacing: '.08em' }}>TODAY</button>
+            )}
+          </div>
           <h1 style={{ margin: 0, fontSize: 30, fontWeight: 600, letterSpacing: '-.02em', textShadow: 'var(--emboss)' }}>Stack</h1>
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
@@ -136,7 +146,7 @@ function StackScreen() {
             {next.url && (
               <a href={next.url} target="_blank" rel="noopener noreferrer" aria-label="Play now" style={{ height: 48, width: 52, flex: 'none', borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{IPlay}</a>
             )}
-            <button onClick={() => markDone(next.id)} style={{ flex: 1, height: 48, borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', boxShadow: 'var(--acc-glow)', color: 'var(--acc-ink)', fontWeight: 600, fontSize: 15, textShadow: 'var(--label-shadow)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>{ICheck} Done</button>
+            <button onClick={() => markDone(next.id, key)} style={{ flex: 1, height: 48, borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', boxShadow: 'var(--acc-glow)', color: 'var(--acc-ink)', fontWeight: 600, fontSize: 15, textShadow: 'var(--label-shadow)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>{ICheck} Done</button>
             <button onClick={() => setItemTime(next.id, addMinutes(next.time, 15))} aria-label="Snooze" style={{ height: 48, padding: '0 16px', borderRadius: 16, border: '1px solid var(--rim)', background: 'transparent', color: 'var(--dim)', fontWeight: 600, fontSize: 13.5, display: 'flex', alignItems: 'center', gap: 7 }}>{ISnooze} Snooze</button>
             <button onClick={() => deleteItem(next.id)} aria-label="Delete this slot" style={{ height: 48, width: 48, flex: 'none', borderRadius: 16, border: '1px solid var(--rim)', background: 'transparent', color: 'var(--dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{ITrash}</button>
           </div>
@@ -162,7 +172,7 @@ function StackScreen() {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, flex: 'none' }}>
               <input type="time" value={it.time} onChange={(e) => setItemTime(it.id, e.target.value)} aria-label="Edit slot time" style={{ fontSize: 15, fontWeight: 600, color: 'var(--dim)', background: 'transparent', border: 'none', outline: 'none', textAlign: 'right', padding: 0, width: 84, cursor: 'pointer' }} />
-              <button onClick={() => markDone(it.id)} aria-label="Mark done" style={{ width: 26, height: 26, borderRadius: 999, border: '1.5px solid var(--acc-rim)', background: 'transparent', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}>{ICheck}</button>
+              <button onClick={() => markDone(it.id, key)} aria-label="Mark done" style={{ width: 26, height: 26, borderRadius: 999, border: '1.5px solid var(--acc-rim)', background: 'transparent', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}>{ICheck}</button>
             </div>
           </div>
         ))}
@@ -198,7 +208,7 @@ export default function App5() {
   let body;
   if (S.screen === 'stack') body = <StackScreen />;
   else if (S.screen === 'library') body = <LibraryScreen />;
-  else if (S.screen === 'calendar') body = <Placeholder name="Calendar" />;
+  else if (S.screen === 'calendar') body = <CalendarScreen />;
   else if (S.screen === 'settings') body = <SettingsScreen />;
   else body = <StackScreen />;
 
