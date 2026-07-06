@@ -5,7 +5,7 @@
 // date so weekly/every-N math (itemOnDate) works.
 
 import React from 'react';
-import { useStore5, closeRepeat, setRepeat } from '../store5.js';
+import { useStore5, closeRepeat, setRepeat, setNoTime } from '../store5.js';
 
 const OPTS = [
   { key: 'daily', label: 'Every day', desc: 'Repeats daily' },
@@ -59,6 +59,16 @@ export default function RepeatSheet() {
             </div>
           </div>
         )}
+        {/* Vic #3 — no fixed time: the stack queues at the top as Next Up. */}
+        <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '0 4px' }}>
+          <div>
+            <div style={{ fontSize: 13.5, fontWeight: 600 }}>No fixed time</div>
+            <div style={{ marginTop: 2, fontSize: 11.5, color: 'var(--dim)' }}>Sits at the top as Next Up until you do it</div>
+          </div>
+          <button onClick={() => setNoTime(it.id, !!it.time)} role="switch" aria-checked={!it.time} aria-label="Toggle no fixed time" style={{ position: 'relative', width: 60, height: 34, flex: 'none', borderRadius: 999, border: `1px solid ${!it.time ? 'var(--acc-rim)' : 'var(--hairline)'}`, background: !it.time ? 'var(--acc-surf)' : 'var(--track)', boxShadow: 'var(--inset)', transition: 'background .3s' }}>
+            <span style={{ position: 'absolute', top: 3, left: 3, width: 26, height: 26, borderRadius: 999, background: 'var(--thumb)', border: '1px solid var(--rim)', boxShadow: '0 3px 8px rgba(40,50,70,.25)', transform: `translateX(${!it.time ? 26 : 0}px)`, transition: 'transform .38s cubic-bezier(.3,1.3,.4,1)' }} />
+          </button>
+        </div>
         <button onClick={closeRepeat} style={{ marginTop: 16, width: '100%', height: 50, borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 600, fontSize: 15, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)' }}>Done</button>
       </div>
     </div>

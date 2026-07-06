@@ -28,7 +28,7 @@ import {
   useStore5, getState, setState, save,
   stackFor, todayKey, markDone, setItemTime, deleteItem, overLimit,
   openAdd, backToToday, openPlayer, openCompleted, openRepeat, repeatLabel,
-  startSlotEngine,
+  startSlotEngine, orderedStackFor, reorderTimed, reorderDeck, toggleAuto,
 } from './store5.js';
 import { installPressSound } from './sfx5.js';
 
@@ -103,10 +103,58 @@ function StackScreen() {
   const S = useStore5();
   const key = S.viewDate || todayKey();
   const notToday = !!S.viewDate && S.viewDate !== todayKey();
-  const deck = [...stackFor(key)].sort((a, b) => toMin(a.time) - toMin(b.time));
+  // Vic #3: no-time stacks queue FIRST as Next Up (deck order), then timed by time.
+  const deck = orderedStackFor(key);
   const next = deck[0] || null;
   const rest = deck.slice(1);
   const completedCount = (S.doneByDate[key] || []).length;
+
+  // Vic #2 — hold-and-drag reorder. Times stay with positions: dropping re-assigns
+  // which timed stack sits in which time slot; no-time stacks reorder their queue.
+  const [drag, setDrag] = React.useState(null); // { idx, dy, over }
+  const dragRef = React.useRef(null);
+  const suppressClick = React.useRef(false);
+  const commitDrag = (fromIdx, toIdx) => {
+    if (fromIdx === toIdx || toIdx == null) return;
+    const newRest = [...rest];
+    const [moved] = newRest.splice(fromIdx, 1);
+    newRest.splice(toIdx, 0, moved);
+    const visual = [next, ...newRest].filter(Boolean);
+    reorderTimed(key, visual.filter((x) => !!x.time).map((x) => x.id));
+    const ntNew = visual.filter((x) => !x.time).map((x) => x.id);
+    if (ntNew.length > 1) {
+      const ntSet = new Set(ntNew); let k = 0;
+      reorderDeck(getState().deckItems.map((x) => ntSet.has(x.id) ? ntNew[k++] : x.id));
+    }
+  };
+  const rowPointerDown = (idx) => (e) => {
+    if (e.target.closest('input,button,a,label')) return;
+    const startY = e.clientY; const el = e.currentTarget; const pid = e.pointerId;
+    let active = false;
+    const timer = setTimeout(() => { active = true; try { el.setPointerCapture(pid); } catch {} setDrag({ idx, dy: 0, over: idx }); }, 180);
+    const move = (ev) => {
+      const dy = ev.clientY - startY;
+      if (!active) { if (Math.abs(dy) > 10) cleanup(); return; }
+      if (ev.cancelable) ev.preventDefault();
+      const under = document.elementsFromPoint(ev.clientX, ev.clientY).find((n) => n.dataset && n.dataset.dragidx !== undefined);
+      const over = under ? +under.dataset.dragidx : dragRef.current?.over;
+      dragRef.current = { idx, dy, over };
+      setDrag({ idx, dy, over });
+    };
+    const up = () => {
+      clearTimeout(timer);
+      if (active) {
+        suppressClick.current = true;
+        setTimeout(() => { suppressClick.current = false; }, 80);
+        commitDrag(idx, dragRef.current?.over ?? idx);
+      }
+      cleanup();
+    };
+    const cleanup = () => { clearTimeout(timer); window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up); dragRef.current = null; setDrag(null); };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
+  };
 
   const labelDate = notToday ? keyToDateLocal(key) : new Date();
   const dateLabel = labelDate.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }).toUpperCase();
@@ -160,11 +208,16 @@ function StackScreen() {
           </svg>
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: 'var(--accent)', textShadow: 'var(--emboss)' }}>Next up</div>
-            <label style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--dim)', flex: 'none' }}><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" /></svg>
-              <span style={{ fontSize: 24, fontWeight: 600, lineHeight: 1, textShadow: 'var(--emboss)' }}>{next.time}</span>
-              <input type="time" value={next.time} onChange={(e) => setItemTime(next.id, e.target.value)} aria-label="Edit next slot time" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', margin: 0, padding: 0, opacity: 0, border: 'none', cursor: 'pointer' }} />
-            </label>
+            {next.time ? (
+              <label style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--dim)', flex: 'none' }}><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" /></svg>
+                <span style={{ fontSize: 24, fontWeight: 600, lineHeight: 1, textShadow: 'var(--emboss)' }}>{next.time}</span>
+                <input type="time" value={next.time} onChange={(e) => setItemTime(next.id, e.target.value)} aria-label="Edit next slot time" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', margin: 0, padding: 0, opacity: 0, border: 'none', cursor: 'pointer' }} />
+              </label>
+            ) : (
+              // Vic #3 — no-time stack: it simply IS Next Up, no clock attached.
+              <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--accent)', textShadow: 'var(--emboss)' }}>Anytime</span>
+            )}
           </div>
           <div style={{ marginTop: 12, fontSize: 23, fontWeight: 600, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>{next.title}</div>
           <div style={{ marginTop: 5, fontSize: 14, color: 'var(--dim)' }}>{next.meta}</div>
@@ -180,7 +233,9 @@ function StackScreen() {
             <button onClick={() => markDone(next.id, key)} aria-label="Done" title="Done" style={{ flex: 1, height: 48, borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', boxShadow: 'var(--acc-glow)', color: 'var(--acc-ink)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
             </button>
-            <button onClick={() => setItemTime(next.id, addMinutes(next.time, 15))} aria-label="Snooze" style={{ height: 48, padding: '0 16px', borderRadius: 16, border: '1px solid var(--rim)', background: 'transparent', color: 'var(--dim)', fontWeight: 600, fontSize: 13.5, display: 'flex', alignItems: 'center', gap: 7 }}>{ISnooze} Snooze</button>
+            {next.time && (
+              <button onClick={() => setItemTime(next.id, addMinutes(next.time, 15))} aria-label="Snooze" style={{ height: 48, padding: '0 16px', borderRadius: 16, border: '1px solid var(--rim)', background: 'transparent', color: 'var(--dim)', fontWeight: 600, fontSize: 13.5, display: 'flex', alignItems: 'center', gap: 7 }}>{ISnooze} Snooze</button>
+            )}
             <button onClick={() => deleteItem(next.id)} aria-label="Delete this slot" style={{ height: 48, width: 48, flex: 'none', borderRadius: 16, border: '1px solid var(--rim)', background: 'transparent', color: 'var(--dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{ITrash}</button>
           </div>
         </div>
@@ -196,19 +251,46 @@ function StackScreen() {
         <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--dim)', textShadow: 'var(--emboss)' }}>{rest.length ? 'Later today' : ''}</div>
       </div>
       <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {rest.map((it) => (
-          <div key={it.id} onClick={() => { if (it.embed || it.url) openPlayer(it); }} style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', minHeight: 68, borderRadius: 26, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)', cursor: (it.embed || it.url) ? 'pointer' : 'default' }}>
-            {cardIcon(it)}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 15.5, fontWeight: 600, letterSpacing: '-.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textShadow: 'var(--emboss)' }}>{it.title}</div>
-              <div style={{ marginTop: 3, fontSize: 12.5, color: 'var(--dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{it.meta}</div>
+        {rest.map((it, i) => {
+          const isDragged = drag && drag.idx === i;
+          const isOver = drag && drag.over === i && drag.idx !== i;
+          return (
+            <div
+              key={it.id}
+              data-dragidx={i}
+              onPointerDown={rowPointerDown(i)}
+              onClick={() => { if (suppressClick.current) return; if (it.embed || it.url) openPlayer(it); }}
+              style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', minHeight: 68, borderRadius: 26, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: `1px solid ${isOver ? 'var(--acc-rim)' : 'var(--rim)'}`, boxShadow: isDragged ? 'var(--elev-hi)' : 'var(--elev)', cursor: (it.embed || it.url) ? 'pointer' : 'grab', touchAction: 'pan-y', userSelect: 'none', WebkitUserSelect: 'none', transform: isDragged ? `translateY(${drag.dy}px) scale(1.03)` : 'none', zIndex: isDragged ? 5 : 1, transition: isDragged ? 'none' : 'transform .2s, border-color .2s' }}
+            >
+              {cardIcon(it)}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 15.5, fontWeight: 600, letterSpacing: '-.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textShadow: 'var(--emboss)' }}>{it.title}</div>
+                <div style={{ marginTop: 3, fontSize: 12.5, color: 'var(--dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{it.meta}</div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 5, flex: 'none' }}>
+                {it.time ? (
+                  <input type="time" value={it.time} onClick={(e) => e.stopPropagation()} onChange={(e) => setItemTime(it.id, e.target.value)} aria-label="Edit slot time" style={{ fontSize: 15, fontWeight: 600, color: 'var(--dim)', background: 'transparent', border: 'none', outline: 'none', textAlign: 'right', padding: 0, width: 84, cursor: 'pointer' }} />
+                ) : (
+                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', padding: '3px 8px', borderRadius: 999, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)' }}>Next Up</span>
+                )}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <button onClick={(e) => { e.stopPropagation(); openRepeat(it.id); }} aria-label="Repeat and time options" style={{ display: 'flex', alignItems: 'center', background: 'none', border: 'none', padding: '2px 0', color: 'var(--dim)' }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 2l4 4-4 4" /><path d="M3 11v-1a4 4 0 0 1 4-4h14" /><path d="M7 22l-4-4 4-4" /><path d="M21 13v1a4 4 0 0 1-4 4H3" /></svg>
+                  </button>
+                  {/* Vic #1 — AUTO tickbox: at slot time the item opens/plays itself. */}
+                  {(it.url || it.embed) && (
+                    <button onClick={(e) => { e.stopPropagation(); toggleAuto(it.id); }} aria-label={it.auto ? 'Autoplay on — tap to turn off' : 'Autoplay off — tap to turn on'} style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none', padding: '2px 0', color: 'var(--dim)', fontSize: 10.5, fontWeight: 600, letterSpacing: '.04em' }}>
+                      <span style={{ width: 15, height: 15, borderRadius: 5, border: `1.5px solid ${it.auto ? 'var(--acc-rim)' : 'var(--rim)'}`, background: it.auto ? 'var(--acc-surf)' : 'transparent', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'var(--acc-ink)', transition: 'all .2s' }}>
+                        {it.auto && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>}
+                      </span>
+                      AUTO
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, flex: 'none' }}>
-              <input type="time" value={it.time} onClick={(e) => e.stopPropagation()} onChange={(e) => setItemTime(it.id, e.target.value)} aria-label="Edit slot time" style={{ fontSize: 15, fontWeight: 600, color: 'var(--dim)', background: 'transparent', border: 'none', outline: 'none', textAlign: 'right', padding: 0, width: 84, cursor: 'pointer' }} />
-              <button onClick={(e) => { e.stopPropagation(); markDone(it.id, key); }} aria-label="Mark done" style={{ width: 26, height: 26, borderRadius: 999, border: '1.5px solid var(--acc-rim)', background: 'transparent', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}>{ICheck}</button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

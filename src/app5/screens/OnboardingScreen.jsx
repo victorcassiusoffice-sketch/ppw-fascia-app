@@ -99,7 +99,7 @@ export default function OnboardingScreen() {
               </div>
             ) : (
               <div style={{ position: 'relative', width: 'min(86%, 330px)', margin: '14px auto 0', borderRadius: 42, background: 'var(--intro-slab, var(--surface))', boxShadow: 'var(--intro-shadow, var(--elev-hi))', animation: 'ppwLogoFloat 7s ease-in-out 1.2s infinite' }}>
-                <img src={`${import.meta.env.BASE_URL}assets/ppw-logo-${['graphite', 'silver', 'ivory', 'black', 'gloft', 'indigo'].includes(S.soft) ? S.soft : 'graphite'}.png`} alt="PPW Wellness" style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 'inherit' }} />
+                <img src={`${import.meta.env.BASE_URL}assets/ppw-logo-${['graphite', 'silver', 'ivory', 'black', 'gloft', 'indigo', 'crimson'].includes(S.soft) ? S.soft : 'graphite'}.png`} alt="PPW Wellness" style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 'inherit' }} />
                 <div aria-hidden="true" style={{ position: 'absolute', inset: 0, borderRadius: 'inherit', pointerEvents: 'none', boxShadow: 'var(--intro-bevel, none)' }} />
               </div>
             )}

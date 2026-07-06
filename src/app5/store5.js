@@ -36,6 +36,9 @@ function initialState() {
     screen: 'stack',
     // theme
     skin: 'soft', bg: 'grey', soft: 'graphite', gelBg: 'zen', intensity: null, customBgUrl: null,
+    glassStyle: 'frosted', inkMode: 'light',
+    // routines (premium): [{ id, name, items: [snapshot…] }]
+    routines: [],
     a11y: { on: false, zoom: 1 },
     // membership
     premium: false, premiumUpsell: null, orbTipSeen: false,
@@ -102,6 +105,9 @@ function initialState() {
     if (g('reminders')) def.reminders = g('reminders') === '1';
     if (g('sounds') === '0') def.sounds = false;
     if (g('autoplay') === '1') def.autoplay = true;
+    if (g('glassStyle')) def.glassStyle = g('glassStyle');
+    if (g('inkMode')) def.inkMode = g('inkMode');
+    const rt = gj('routines'); if (Array.isArray(rt)) def.routines = rt;
     const ay = gj('a11y'); if (ay && typeof ay === 'object') def.a11y = { on: !!ay.on, zoom: (+ay.zoom >= .85 && +ay.zoom <= 1.4) ? +ay.zoom : 1 };
     const cs = gj('courses'); if (Array.isArray(cs)) def.courseLinks = cs;
     const ig = gj('integrations'); if (ig && typeof ig === 'object') def.integrations = ig;
@@ -218,6 +224,66 @@ export function reorderDeck(orderedIds) {
   const byId = Object.fromEntries(state.deckItems.map((it) => [it.id, it]));
   setState({ deckItems: orderedIds.map((id) => byId[id]).filter(Boolean) });
   saveStacks();
+}
+// per-item autoplay tickbox — when set, the slot engine opens the item at its
+// time without a Play press (Vic #1).
+export function toggleAuto(id) {
+  setState({ deckItems: state.deckItems.map((it) => it.id === id ? { ...it, auto: !it.auto } : it) });
+  saveStacks();
+}
+// no-time stacks (Vic #3, "Always Next Up first"): time:null → the item queues
+// at the very top as Next Up, ahead of all timed items, in deck order.
+export function setNoTime(id, on) {
+  setState({ deckItems: state.deckItems.map((it) => it.id === id ? { ...it, time: on ? null : (it._lastTime || '09:00'), _lastTime: on ? (it.time || '09:00') : it._lastTime } : it) });
+  saveStacks();
+}
+// day-ordered view: no-time items first (deck order), then timed sorted by time.
+const _toMin = (t) => { const [h, m] = String(t || '').split(':').map(Number); return (h || 0) * 60 + (m || 0); };
+export function orderedStackFor(key) {
+  const items = stackFor(key);
+  const noTime = items.filter((x) => !x.time);
+  const timed = items.filter((x) => !!x.time).sort((a, b) => _toMin(a.time) - _toMin(b.time));
+  return [...noTime, ...timed];
+}
+// drag reorder, times-stay-with-positions (Vic #2): the day's sorted times are
+// fixed slots; dragging re-assigns which TIMED stack occupies which slot.
+// orderedTimedIds = the timed items' ids in their new visual order.
+export function reorderTimed(key, orderedTimedIds) {
+  const timed = stackFor(key).filter((x) => !!x.time);
+  const slots = timed.map((x) => x.time).sort((a, b) => _toMin(a) - _toMin(b));
+  const timeById = {};
+  orderedTimedIds.forEach((id, i) => { if (slots[i] !== undefined) timeById[id] = slots[i]; });
+  setState({ deckItems: state.deckItems.map((it) => timeById[it.id] !== undefined ? { ...it, time: timeById[it.id] } : it) });
+  saveStacks();
+}
+
+// ── routines (Vic #5, premium): named bundles of stacks, applied to a day ──
+export function saveRoutines(list) {
+  setState({ routines: list });
+  try { localStorage.setItem(LS('routines'), JSON.stringify(list)); } catch {}
+}
+export function createRoutine(name, items) {
+  const r = { id: 'rt' + Date.now().toString(36), name: String(name).trim(), items };
+  saveRoutines([...state.routines, r]);
+  return r;
+}
+export function deleteRoutine(id) { saveRoutines(state.routines.filter((r) => r.id !== id)); }
+// add every stack in the routine to the given date at once (repeat: once,
+// anchored to that day). Items keep their saved times, staggered from 09:00
+// in 30-min steps when they don't have one.
+export function applyRoutineToDate(routineId, dateKey) {
+  const r = state.routines.find((x) => x.id === routineId);
+  if (!r) return { ok: false };
+  if (!state.premium) { setState({ premiumUpsell: 'Routines are part of Premium — bundle stacks and drop them onto any day in one tap.' }); return { upsell: true }; }
+  const base = 9 * 60;
+  const added = r.items.map((item, i) => {
+    const { id, anchor, repeat, ...rest } = item;
+    const t = item.time || (String(Math.floor((base + i * 30) / 60)).padStart(2, '0') + ':' + String((base + i * 30) % 60).padStart(2, '0'));
+    return { ...rest, id: 'ra' + Date.now().toString(36) + i, time: t, anchor: dateKey, repeat: 'once' };
+  });
+  setState({ deckItems: [...state.deckItems, ...added] });
+  saveStacks();
+  return { ok: true, count: added.length };
 }
 
 // ── add flows ──

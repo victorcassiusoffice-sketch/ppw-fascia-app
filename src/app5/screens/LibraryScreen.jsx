@@ -7,7 +7,70 @@
 
 import React from 'react';
 import { THUMBS } from '../theme5.js';
-import { useStore5, setTab, addToStack, setUpsell, openPlayer } from '../store5.js';
+import { useStore5, setTab, addToStack, setUpsell, openPlayer, createRoutine, deleteRoutine } from '../store5.js';
+
+// Routine builder (Vic #5, premium): name a routine, tick stacks into it, save.
+// Saved routines are applied to any day from the Calendar. Unlimited.
+function RoutineBuilder() {
+  const S = useStore5();
+  const [open, setOpen] = React.useState(false);
+  const [name, setName] = React.useState('');
+  const [sel, setSel] = React.useState({});
+  const choices = S.mediaItems;
+  const count = Object.values(sel).filter(Boolean).length;
+  const saveIt = () => {
+    if (!name.trim() || !count) return;
+    const items = choices.filter((c) => sel[c.id]).map(({ id, ...rest }) => ({ ...rest }));
+    createRoutine(name, items);
+    setOpen(false); setName(''); setSel({});
+  };
+  return (
+    <>
+      {/* saved routines */}
+      {S.routines.length > 0 && (
+        <div style={{ marginTop: 18, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {S.routines.map((r) => (
+            <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderRadius: 24, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)' }}>
+              <span style={{ width: 44, height: 44, flex: 'none', borderRadius: 14, background: 'var(--acc-surf)', border: '1px solid var(--acc-rim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--acc-ink)' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M4 6h16M4 12h16M4 18h10" /></svg>
+              </span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 15.5, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textShadow: 'var(--emboss)' }}>{r.name}</div>
+                <div style={{ marginTop: 2, fontSize: 12.5, color: 'var(--dim)' }}>{r.items.length} stack{r.items.length === 1 ? '' : 's'} · add it to a day from the Calendar</div>
+              </div>
+              <button onClick={() => deleteRoutine(r.id)} aria-label="Delete routine" style={{ width: 34, height: 34, flex: 'none', borderRadius: 10, border: '1px solid var(--hairline)', background: 'transparent', color: 'var(--dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16M10 4h4M6.5 7l1 13h9l1-13" /></svg>
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      {/* create */}
+      {!open ? (
+        <button onClick={() => setOpen(true)} style={{ marginTop: 16, width: '100%', height: 52, borderRadius: 18, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 700, fontSize: 15, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)' }}>Create Routine</button>
+      ) : (
+        <div style={{ marginTop: 16, borderRadius: 24, padding: 16, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)', animation: 'ppwRise .3s ease both' }}>
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Routine name — e.g. Morning Reset" aria-label="Routine name" style={{ width: '100%', height: 46, padding: '0 14px', borderRadius: 14, border: '1px solid var(--hairline)', background: 'var(--track)', boxShadow: 'var(--inset)', color: 'var(--ink)', outline: 'none', fontSize: 14 }} />
+          <div style={{ marginTop: 12, fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--dim)' }}>Add stacks</div>
+          <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {choices.map((c) => (
+              <button key={c.id} onClick={() => setSel((s) => ({ ...s, [c.id]: !s[c.id] }))} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 14, border: `1px solid ${sel[c.id] ? 'var(--acc-rim)' : 'var(--hairline)'}`, background: sel[c.id] ? 'var(--acc-surf)' : 'var(--track)', color: sel[c.id] ? 'var(--acc-ink)' : 'var(--ink)', textAlign: 'left', transition: 'all .2s' }}>
+                <span style={{ width: 18, height: 18, flex: 'none', borderRadius: 6, border: '1.5px solid currentColor', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {sel[c.id] && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>}
+                </span>
+                <span style={{ flex: 1, minWidth: 0, fontSize: 13.5, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.title}</span>
+              </button>
+            ))}
+          </div>
+          <div style={{ marginTop: 12, display: 'flex', gap: 10 }}>
+            <button onClick={() => { setOpen(false); setName(''); setSel({}); }} style={{ height: 46, padding: '0 16px', borderRadius: 14, border: '1px solid var(--rim)', background: 'transparent', color: 'var(--dim)', fontWeight: 600, fontSize: 13.5 }}>Cancel</button>
+            <button onClick={saveIt} disabled={!name.trim() || !count} style={{ flex: 1, height: 46, borderRadius: 14, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 600, fontSize: 14, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)', opacity: (!name.trim() || !count) ? .45 : 1 }}>Save routine{count ? ` (${count})` : ''}</button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
 
 const PREM_PRICE = '$4.99';
 const TABS = [
@@ -78,11 +141,12 @@ export default function LibraryScreen() {
             <span style={{ display: 'inline-flex', width: 52, height: 52, borderRadius: 16, alignItems: 'center', justifyContent: 'center', background: 'var(--acc-surf)', border: '1px solid var(--acc-rim)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)' }}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M4 6h16M4 12h16M4 18h10" /></svg>
             </span>
-            <div style={{ marginTop: 12, fontSize: 18, fontWeight: 700, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>Routines — you're Premium</div>
-            <p style={{ margin: '8px auto 0', maxWidth: 280, fontSize: 13, lineHeight: 1.55, color: 'var(--dim)', textShadow: 'var(--emboss)' }}>Ask the Assistant to build a routine — the full builder is on the way.</p>
+            <div style={{ marginTop: 12, fontSize: 18, fontWeight: 700, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>Routines</div>
+            <p style={{ margin: '8px auto 0', maxWidth: 280, fontSize: 13, lineHeight: 1.55, color: 'var(--dim)', textShadow: 'var(--emboss)' }}>Bundle stacks into a named routine, then drop the whole thing onto any day from the Calendar.</p>
           </div>
         )
       )}
+      {S.stackTab === 'routines' && S.premium && <RoutineBuilder />}
 
       {/* Media — list + add to stack */}
       {S.stackTab === 'media' && (

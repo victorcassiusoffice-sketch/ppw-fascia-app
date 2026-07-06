@@ -5,7 +5,7 @@
 // dimmed) + "Open in Stack" which views that date's own stack (per-date model).
 
 import React, { useState } from 'react';
-import { useStore5, itemsForDate, openStackForDate } from '../store5.js';
+import { useStore5, itemsForDate, openStackForDate, applyRoutineToDate } from '../store5.js';
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const keyOf = (d) => d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
@@ -14,10 +14,12 @@ const toMin = (t) => { const [h, m] = String(t || '00:00').split(':').map(Number
 const chev = (d) => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d={d} /></svg>;
 
 export default function CalendarScreen() {
-  useStore5(); // subscribe so dots refresh when items change
+  const S = useStore5(); // subscribe so dots refresh when items change
   const today = new Date();
   const [monthOff, setMonthOff] = useState(0);
   const [selKey, setSelKey] = useState(keyOf(today));
+  const [pickRoutine, setPickRoutine] = useState(false);
+  const [addedMsg, setAddedMsg] = useState(null);
 
   const view = new Date(today.getFullYear(), today.getMonth() + monthOff, 1);
   const y = view.getFullYear(), mo = view.getMonth();
@@ -78,6 +80,23 @@ export default function CalendarScreen() {
             <div style={{ fontSize: 13.5, color: 'var(--dim)' }}>Nothing scheduled — open this day and add to its stack.</div>
           )}
         </div>
+        {/* Vic #5 — drop a whole saved routine onto this day. */}
+        {S.routines.length > 0 && (
+          !pickRoutine ? (
+            <button onClick={() => { setPickRoutine(true); setAddedMsg(null); }} style={{ marginTop: 14, height: 46, width: '100%', borderRadius: 15, border: '1px solid var(--rim)', background: 'transparent', color: 'var(--accent)', fontWeight: 600, fontSize: 14 }}>+ Add a routine to this day</button>
+          ) : (
+            <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 8, animation: 'ppwRise .3s ease both' }}>
+              {S.routines.map((r) => (
+                <button key={r.id} onClick={() => { const res = applyRoutineToDate(r.id, selKey); setPickRoutine(false); if (res.ok) setAddedMsg(`${r.name} added — ${res.count} stack${res.count === 1 ? '' : 's'}`); }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, minHeight: 46, padding: '0 14px', borderRadius: 14, border: '1px solid var(--rim)', background: 'var(--surface)', color: 'var(--ink)', fontSize: 13.5, fontWeight: 600 }}>
+                  {r.name}
+                  <span style={{ fontSize: 11.5, fontWeight: 500, color: 'var(--dim)' }}>{r.items.length} stacks</span>
+                </button>
+              ))}
+              <button onClick={() => setPickRoutine(false)} style={{ height: 40, background: 'none', border: 'none', color: 'var(--dim)', fontSize: 13, fontWeight: 600 }}>Cancel</button>
+            </div>
+          )
+        )}
+        {addedMsg && <div style={{ marginTop: 10, fontSize: 12.5, fontWeight: 600, color: 'var(--accent)', textAlign: 'center' }}>{addedMsg}</div>}
         <button onClick={() => openStackForDate(selKey)} style={{ marginTop: 16, height: 46, width: '100%', borderRadius: 15, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 600, fontSize: 14.5, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)' }}>Open in Stack</button>
       </div>
     </div>

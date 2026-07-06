@@ -6,8 +6,8 @@
 // glass-skin intensity, tactile, easy-read/text-size, notifications, IF, terms.
 
 import React from 'react';
-import { SOFT, GLASS } from '../theme5.js';
-import { useStore5, setTheme, setPremium, openTerms, setSounds, setReminders, setAutoplay, setA11y } from '../store5.js';
+import { SOFT, BGS, bgUrl } from '../theme5.js';
+import { useStore5, setTheme, setState, setPremium, openTerms, setSounds, setReminders, setAutoplay, setA11y } from '../store5.js';
 
 // glass pill toggle (the prototype's 60×34 switch)
 function Switch({ on, onTap, label }) {
@@ -20,8 +20,18 @@ function Switch({ on, onTap, label }) {
 const ROW = { position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 18px', minHeight: 60, gap: 12 };
 const DIV = <div style={{ height: 1, background: 'var(--hairline)', margin: '0 18px' }} />;
 
-const SOFT_ORDER = ['graphite', 'silver', 'ivory', 'black', 'gloft', 'indigo', 'gel'];
-const GLASS_ORDER = Object.keys(GLASS);
+const SOFT_ORDER = ['graphite', 'silver', 'ivory', 'black', 'gloft', 'indigo', 'crimson', 'gel'];
+const BG_ORDER = Object.keys(BGS);
+// small gliding two/three-way segment used for Glass style + Text ink
+function Seg({ options, value, onPick }) {
+  return (
+    <div style={{ position: 'relative', height: 38, flex: 1, maxWidth: 190, borderRadius: 12, background: 'var(--track)', border: '1px solid var(--hairline)', boxShadow: 'var(--inset)', display: 'flex' }}>
+      {options.map(([v, label]) => (
+        <button key={v} onClick={() => onPick(v)} style={{ position: 'relative', flex: 1, margin: 3, borderRadius: 9, border: value === v ? '1px solid var(--acc-rim)' : 'none', background: value === v ? 'var(--acc-surf)' : 'none', fontSize: 11.5, fontWeight: 600, color: value === v ? 'var(--acc-ink)' : 'var(--dim)', transition: 'all .25s' }}>{label}</button>
+      ))}
+    </div>
+  );
+}
 
 function Eyebrow({ children }) {
   return <div style={{ marginTop: 26, fontSize: 11, fontWeight: 600, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--dim)', textShadow: 'var(--emboss)' }}>{children}</div>;
@@ -59,22 +69,35 @@ export default function SettingsScreen() {
           <>
             <div style={{ height: 1, background: 'var(--hairline)', margin: '0 18px' }} />
             <div style={{ padding: '16px 18px' }}>
-              <div style={{ fontSize: 15, fontWeight: 500, textShadow: 'var(--emboss)' }}>Glass Theme</div>
+              <div style={{ fontSize: 15, fontWeight: 500, textShadow: 'var(--emboss)' }}>Background</div>
+              {/* Vic 2026-07-06: his own uploaded photo set (prototype scenes removed). */}
               <div style={{ marginTop: 12, display: 'flex', flexWrap: 'nowrap', overflowX: 'auto', gap: 12, padding: '2px 2px 10px', WebkitOverflowScrolling: 'touch' }}>
-                {GLASS_ORDER.map((key) => {
-                  const g = GLASS[key];
+                {BG_ORDER.map((key) => {
                   const active = S.gelBg === key;
-                  // swatch: use the scene's base colour (image thumb loads later once assets are copied)
-                  const base = (g.ground || '').split(' url(')[0] || '#C9CDD3';
                   return (
                     <button key={key} onClick={() => setTheme({ gelBg: key })} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, background: 'none', border: 'none', padding: 0, flex: 'none' }}>
-                      <span style={{ width: 42, height: 66, borderRadius: 14, background: base, border: `2px solid ${active ? 'var(--accent)' : 'var(--rim)'}`, boxShadow: '3px 3px 8px rgba(0,0,0,.2), -3px -3px 8px rgba(255,255,255,.35)' }} />
-                      <span style={{ fontSize: 10.5, fontWeight: 600, color: active ? 'var(--accent)' : 'var(--dim)' }}>{g.name}</span>
+                      <span style={{ width: 42, height: 66, borderRadius: 14, background: `#20242B url("${bgUrl(key)}") center/cover no-repeat`, border: `2px solid ${active ? 'var(--accent)' : 'var(--rim)'}`, boxShadow: '3px 3px 8px rgba(0,0,0,.2)' }} />
+                      <span style={{ fontSize: 10.5, fontWeight: 600, color: active ? 'var(--accent)' : 'var(--dim)' }}>{BGS[key]}</span>
                     </button>
                   );
                 })}
+                {/* own photo (kept on this device for the session) */}
+                <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, flex: 'none', cursor: 'pointer' }}>
+                  <span style={{ width: 42, height: 66, borderRadius: 14, border: `2px dashed ${S.gelBg === 'custom' ? 'var(--accent)' : 'var(--hairline)'}`, background: S.gelBg === 'custom' && S.customBgUrl ? `url("${S.customBgUrl}") center/cover` : 'var(--track)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dim)' }}>
+                    {!(S.gelBg === 'custom' && S.customBgUrl) && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>}
+                  </span>
+                  <span style={{ fontSize: 10.5, fontWeight: 600, color: S.gelBg === 'custom' ? 'var(--accent)' : 'var(--dim)' }}>Photo</span>
+                  <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files && e.target.files[0]; if (f) setState({ customBgUrl: URL.createObjectURL(f), gelBg: 'custom' }); }} style={{ display: 'none' }} />
+                </label>
               </div>
-              <div style={{ fontSize: 11, lineHeight: 1.5, color: 'var(--dim)' }}>Scene photos load once the background assets are added to the build — the glass tuning per scene is live now.</div>
+              <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14 }}>
+                <div style={{ fontSize: 13.5, fontWeight: 600, flex: 'none' }}>Glass</div>
+                <Seg options={[['frosted', 'Frosted'], ['clear', 'Clear']]} value={S.glassStyle} onPick={(v) => setTheme({ glassStyle: v })} />
+              </div>
+              <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14 }}>
+                <div style={{ fontSize: 13.5, fontWeight: 600, flex: 'none' }}>Text</div>
+                <Seg options={[['light', 'Light'], ['dark', 'Dark']]} value={S.inkMode} onPick={(v) => setTheme({ inkMode: v })} />
+              </div>
             </div>
           </>
         )}

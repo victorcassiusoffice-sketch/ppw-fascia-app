@@ -25,45 +25,22 @@ export const SOFT = {
   black: { base: '#1C1E20', lite: '#4A4E53', light: 'rgba(255,255,255,.08)', dark: 'rgba(0,0,0,.78)', accent: '#3C4147', ink: '#E6E8EA', rim: '#33373B', well: '#0C0D0F', accInk: '#FFFFFF', name: 'Black', deep: '#000000', accDeep: '#0A0B0C', ground: 'radial-gradient(135% 110% at 25% 8%, #2B2D2F 0%, #1B1D1F 46%, #0E0F10 100%)', glossA: '.05', rimGlowA: '.06', emboss: 'rgba(0,0,0,.6)', labelSh: 'rgba(0,0,0,.5)', thumb: 'linear-gradient(145deg, #6E747B 0%, #43484E 100%)', logo: 'assets/ppw-logo-black.png', mark: 'assets/ppw-mark-black.png' },
   gloft: { base: '#C9C8C3', light: 'rgba(255,255,255,.85)', dark: 'rgba(120,112,100,.55)', accent: '#A5814F', ink: '#453F36', rim: '#B7B6B1', well: '#B5B4AF', accInk: '#FFFFFF', name: 'Gloft', deep: '#7A7468', accDeep: '#4A3A22', ground: 'radial-gradient(135% 110% at 25% 8%, #D8D9D4 0%, #C6C5C0 46%, #A4A3A0 100%)', glossA: '.34', rimGlowA: '.4', emboss: 'rgba(255,255,255,.88)', labelSh: 'rgba(70,50,30,.3)', halo: '0 0 22px rgba(232,168,120,.38)', logo: 'assets/ppw-logo-gloft.png', mark: 'assets/ppw-mark-gloft.png' },
   indigo: { base: '#2C4164', lite: '#5F7DA6', light: 'rgba(160,190,235,.24)', dark: 'rgba(4,10,24,.7)', accent: '#6B89B8', ink: '#DFE7F2', rim: '#3E567C', well: '#1A2A47', accInk: '#FFFFFF', name: 'Indigo', deep: '#0A1428', accDeep: '#101B30', ground: 'radial-gradient(135% 110% at 25% 8%, #4E6584 0%, #31476B 46%, #12294A 100%)', glossA: '.10', rimGlowA: '.10', emboss: 'rgba(0,10,30,.5)', labelSh: 'rgba(0,0,0,.35)', thumb: 'linear-gradient(145deg, #8FA6C8 0%, #5F7699 100%)', halo: '0 0 20px rgba(120,160,220,.22)', logo: 'assets/ppw-logo-indigo.png', mark: 'assets/ppw-mark-indigo.png' },
+  /* Crimson — matched to the red neumorphic logo Vic supplied 2026-07-06. */
+  crimson: { base: '#A94745', lite: '#D07A76', light: 'rgba(255,190,185,.30)', dark: 'rgba(70,15,14,.62)', accent: '#6E211F', ink: '#3B1210', rim: '#B85955', well: '#933B39', accInk: '#FFFFFF', name: 'Crimson', deep: '#5F1F1E', accDeep: '#3A1010', ground: 'radial-gradient(135% 110% at 25% 8%, #C05C58 0%, #A94745 46%, #7E2C2A 100%)', glossA: '.14', rimGlowA: '.16', emboss: 'rgba(255,255,255,.28)', labelSh: 'rgba(0,0,0,.32)', logo: 'assets/ppw-logo-crimson.png' },
   gel: { name: 'Glass', gel: true, base: 'linear-gradient(145deg, #FAFBFC 0%, #D9DDE0 45%, #AFB5B9 100%)', accent: 'rgba(255,255,255,.95)', rim: '#C6CBCF', dark: 'rgba(120,128,136,.4)' },
 };
 
-/* specular sheens — glossy dome, clear diagonal streak, soft frost */
-const G_GLOSS = 'linear-gradient(146deg, rgba(255,255,255,.92) 0%, rgba(255,255,255,.42) 15%, rgba(255,255,255,.08) 33%, rgba(255,255,255,0) 52%, rgba(255,255,255,0) 80%, rgba(255,255,255,.3) 100%)';
-const G_STREAK = 'linear-gradient(122deg, rgba(255,255,255,.34) 0%, rgba(255,255,255,.1) 20%, rgba(255,255,255,0) 42%, rgba(255,255,255,0) 100%)';
-const G_FROST = 'linear-gradient(180deg, rgba(255,255,255,.5) 0%, rgba(255,255,255,.14) 40%, rgba(255,255,255,0) 60%, rgba(255,255,255,.12) 100%)';
-
-const GLOW_L = '--glow-1:radial-gradient(circle, rgba(255,255,255,.85), rgba(255,255,255,0) 70%);--glow-2:radial-gradient(circle, rgba(200,215,235,.4), rgba(200,215,235,0) 70%);--glow-3:radial-gradient(circle, rgba(255,225,190,.35), rgba(255,225,190,0) 70%);--glow-op:1;';
-const GLOW_D = '--glow-1:radial-gradient(circle, rgba(255,255,255,.22), rgba(255,255,255,0) 70%);--glow-2:radial-gradient(circle, rgba(160,190,255,.25), rgba(160,190,255,0) 70%);--glow-3:radial-gradient(circle, rgba(255,190,140,.18), rgba(255,190,140,0) 70%);--glow-op:1;';
-
-const _scene = (key, name, dark, ink, accent, tint, sh) => ({
-  name, dark, clear: dark, ink, accent, tint, sh,
-  blur: dark ? 5 : 8, rimA: dark ? .6 : .92, sheen: dark ? G_STREAK : G_FROST,
-  ground: (dark ? '#1C2026' : '#C9CDD3') + ' url("assets/glass/' + key + '.png") center/cover no-repeat',
-  swatch: 'url("assets/glass/thumbs/' + key + '.png") center/cover',
-  glows: dark ? GLOW_D : GLOW_L,
-});
-
-/* Glass photographic scenes — each pairs a background with its own glass character. */
-export const GLASS = {
-  zen: _scene('zen', 'Zen', false, '#3D362A', '#7C6845', '255,252,244', '96,88,70'),
-  modern: _scene('modern', 'Studio', false, '#37332C', '#9A7B4E', '255,255,252', '90,86,78'),
-  boho: _scene('boho', 'Plaster', false, '#453D30', '#947D5B', '255,251,242', '100,90,74'),
-  courtyard: _scene('courtyard', 'Patio', false, '#383B2F', '#6C7C46', '255,255,250', '92,96,82'),
-  temple: _scene('temple', 'Temple', false, '#34291C', '#B06F2A', '255,249,238', '86,66,44'),
-  egypt: _scene('egypt', 'Giza', false, '#3A2F1E', '#A5691F', '255,246,230', '95,72,40'),
-  sky: _scene('sky', 'Dawn', false, '#3C3226', '#9C7845', '255,248,238', '96,78,56'),
-  forest: _scene('forest', 'Forest', false, '#2E3A32', '#587C62', '243,249,245', '60,76,66'),
-  jungle: _scene('jungle', 'Jungle', true, '#EFF7EC', '#A6D896', '222,244,216'),
-  island: _scene('island', 'Island', true, '#F2EFE9', '#D9C9A8', '244,238,224'),
-  calm: _scene('calm', 'Calm', true, '#F7EEE2', '#E0B183', '250,228,200'),
-  haven: _scene('haven', 'Haven', true, '#FAF0E4', '#EBB984', '255,232,205'),
-  rust: _scene('rust', 'Rust', true, '#FBEFE2', '#F2B27A', '255,226,196'),
-  savanna: _scene('savanna', 'Savanna', true, '#FBF1E0', '#F2B268', '255,228,196'),
-  reef: _scene('reef', 'Reef', true, '#ECFAFB', '#7FE0E8', '208,244,248'),
-  ocean: _scene('ocean', 'Deep', true, '#E6F1F8', '#8CCEE6', '202,232,248'),
-  whale: _scene('whale', 'Whale', true, '#E9F2FA', '#9AC6F0', '212,232,252'),
+/* Glass backgrounds — Vic's own uploaded photo set (2026-07-06, replaces the
+   prototype's built-in scenes per his instruction). Keys map to
+   public/assets/backgrounds/<key>.png. Glass character (frosted/clear) and
+   text ink (light/dark) are USER TOGGLES now, not per-scene presets. */
+export const BGS = {
+  zen: 'Zen', serene: 'Serene', peaceful: 'Peaceful', peaceful2: 'Calm',
+  studio: 'Studio', elegant: 'Elegant', symmetry: 'Symmetry', distant: 'Distant',
+  boho: 'Boho', temple: 'Temple', giza: 'Giza', savanna: 'Savanna',
+  jungle: 'Jungle', island: 'Island', deepblue: 'Deep Blue', vibrant: 'Vibrant', rust: 'Rust',
 };
+export const bgUrl = (key) => `${import.meta.env.BASE_URL}assets/backgrounds/${BGS[key] ? key : 'zen'}.png`;
 
 const GROUNDS = {
   grey: '#878E96 url("assets/bg-grey.png") center/cover no-repeat',
@@ -140,22 +117,25 @@ export function themeVars(S, glassIntensityProp) {
     const mixL = (p) => 'color-mix(in srgb, ' + c.base + ' ' + p + '%, ' + (c.lite || 'white') + ')';
     const mixD = (p) => 'color-mix(in srgb, ' + c.base + ' ' + p + '%, ' + (c.deep || '#5A5248') + ')';
     if (c.gel) {
-      const T = GLASS[S.gelBg] || GLASS.zen || GLASS[Object.keys(GLASS)[0]];
+      /* Glass over Vic's own backgrounds. Two user toggles drive the look:
+         glassStyle 'frosted' (heavy blur, milkier surfaces) | 'clear' (low
+         blur, see-through); inkMode 'light' (white text, dark scrims — for
+         darker photos) | 'dark' (dark text, bright surfaces — for pale photos). */
       const isCustom = S.gelBg === 'custom' && S.customBgUrl;
-      const darkBg = isCustom ? true : !!T.dark;
-      const ground = isCustom ? ('#15171C url(' + S.customBgUrl + ') center/cover no-repeat') : T.ground;
-      const ink = isCustom ? '#F4F5F7' : T.ink;
-      const acc = isCustom ? '#A9BCF2' : T.accent;
-      const GW = (a) => 'rgba(' + (T.tint || '255,255,255') + ',' + a + ')';
-      const GS = (a) => 'rgba(' + (T.sh || '55,65,80') + ',' + a + ')';
-      const gBl = (T.blur || 8) + 'px', gBlH = ((T.blur || 8) + 5) + 'px';
-      const gGlow = isCustom ? '--glow-1:radial-gradient(circle, rgba(150,170,195,.28), rgba(150,170,195,0) 70%);--glow-2:radial-gradient(circle, rgba(255,255,255,.14), rgba(255,255,255,0) 70%);--glow-3:radial-gradient(circle, rgba(120,140,160,.2), rgba(120,140,160,0) 70%);--glow-op:1;' : T.glows;
-      const gClear = !isCustom && !!T.clear;
-      const gEdge = (!isCustom && T.edge) ? ('0 0 22px ' + T.edge + ', 0 0 0 1px ' + T.edge + ', ') : '';
+      const ground = '#15171C url("' + (isCustom ? S.customBgUrl : bgUrl(S.gelBg)) + '") center/cover no-repeat';
+      const darkBg = S.inkMode !== 'dark';
+      const ink = darkBg ? '#F4F5F7' : '#23262C';
+      const acc = darkBg ? '#FFD9C2' : '#8A5A2E';
+      const GW = (a) => 'rgba(255,255,255,' + a + ')';
+      const GS = (a) => 'rgba(55,65,80,' + a + ')';
+      const frosted = S.glassStyle !== 'clear';
+      const gBl = frosted ? '16px' : '4px', gBlH = frosted ? '22px' : '8px';
+      const gGlow = '--glow-1:radial-gradient(circle, rgba(255,255,255,.2), rgba(255,255,255,0) 70%);--glow-2:radial-gradient(circle, rgba(160,190,255,.18), rgba(160,190,255,0) 70%);--glow-3:radial-gradient(circle, rgba(255,190,140,.14), rgba(255,190,140,0) 70%);--glow-op:1;';
+      const gEdge = '';
       if (darkBg) {
-        const sf = gClear ? .58 : 1;
-        const gSheen = T.sheen || ('linear-gradient(180deg, ' + GW(.11) + ' 0%, ' + GW(.02) + ' 34%, rgba(255,255,255,0) 55%, ' + GW(.03) + ' 100%)');
-        const gRim = GW(T.rimA || .32);
+        const sf = frosted ? 1 : .5;
+        const gSheen = 'linear-gradient(180deg, ' + GW(.11) + ' 0%, ' + GW(.02) + ' 34%, rgba(255,255,255,0) 55%, ' + GW(.03) + ' 100%)';
+        const gRim = GW(frosted ? .4 : .28);
         vars = '--ground:' + ground + ';' +
           '--scrim:linear-gradient(180deg, rgba(5,7,9,.3) 0%, rgba(5,7,9,0) 22%, rgba(5,7,9,0) 60%, rgba(5,7,9,.4) 100%);' +
           '--ink:' + ink + ';--dim:' + ink + 'A6;' +
@@ -178,13 +158,13 @@ export function themeVars(S, glassIntensityProp) {
           '--thumb:linear-gradient(160deg, ' + GW(.68) + ', ' + GW(.3) + ');' +
           '--disc:radial-gradient(120% 120% at 30% 20%, ' + GW(.3) + ', ' + GW(.07) + ');' + gGlow;
       } else {
-        const gSheenL = T.sheen || ('linear-gradient(180deg, ' + GW(.47) + ' 0%, ' + GW(.11) + ' 38%, rgba(255,255,255,0) 58%, ' + GW(.13) + ' 100%)');
-        const gRimL = GW(T.rimA || .92);
+        const gSheenL = 'linear-gradient(180deg, ' + GW(.47) + ' 0%, ' + GW(.11) + ' 38%, rgba(255,255,255,0) 58%, ' + GW(.13) + ' 100%)';
+        const gRimL = GW(frosted ? .92 : .6);
         vars = '--ground:' + ground + ';' +
           '--scrim:linear-gradient(180deg, ' + GW(.1) + ' 0%, rgba(255,255,255,0) 22%, rgba(255,255,255,0) 62%, ' + GS(.18) + ' 100%);' +
           '--ink:' + ink + ';--dim:' + ink + 'A6;' +
-          '--surface:linear-gradient(133deg, ' + GW(.42) + ' 0%, ' + GW(.17) + ' 36%, ' + GW(.08) + ' 62%, ' + GW(.21) + ' 100%);' +
-          '--surface-strong:linear-gradient(133deg, ' + GW(.58) + ' 0%, ' + GW(.32) + ' 36%, ' + GW(.2) + ' 62%, ' + GW(.36) + ' 100%);' +
+          '--surface:linear-gradient(133deg, ' + GW(.42 * (frosted ? 1 : .6)) + ' 0%, ' + GW(.17 * (frosted ? 1 : .6)) + ' 36%, ' + GW(.08 * (frosted ? 1 : .6)) + ' 62%, ' + GW(.21 * (frosted ? 1 : .6)) + ' 100%);' +
+          '--surface-strong:linear-gradient(133deg, ' + GW(.58 * (frosted ? 1 : .7)) + ' 0%, ' + GW(.32 * (frosted ? 1 : .7)) + ' 36%, ' + GW(.2 * (frosted ? 1 : .7)) + ' 62%, ' + GW(.36 * (frosted ? 1 : .7)) + ' 100%);' +
           '--gloss:' + gSheenL + ';' +
           '--blur:blur(' + gBl + ') saturate(135%);--blur-heavy:blur(' + gBlH + ') saturate(135%);' +
           '--rim:' + gRimL + ';' +
