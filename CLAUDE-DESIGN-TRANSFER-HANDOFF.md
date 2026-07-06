@@ -15,6 +15,20 @@ To roll back completely: `git checkout main` (or `feat/mlt-full-build-2026-06-23
 3. Read the STATUS section below — it names the last completed step and the next one.
 4. Check `git log --oneline -15` against the STATUS section to confirm nothing is ahead/behind what's recorded.
 
+## ⭐ BINDING DECISION (Vic, 2026-07-06): "Everything New Design. New Design overrules every time."
+
+When the incoming Claude Design build (`PPW Fascia App.dc.html`) conflicts with the
+current app in ANY way — naming, layout, fonts, colours, gating, structure — **the New
+Design wins.** Do not preserve old visual/UX choices out of caution. The only things
+carried over from the old app are the **working data/logic/backend** (localStorage state,
+recurrence engine, stacks, .ics reminders, entitlement flag) — re-wired behind the new UI.
+Resolved open questions accordingly:
+- Naming: new design's **"Stack"** = the daily view (old "Today"); new design's **"Library"**
+  = the library (old "Stack"). Use the new names.
+- Assistant: new design's **in-app Assistant orb, gated by the one `premium` flag**. (The old
+  separate-external-paid-Assistant model yields to the new design.)
+- Font: **Nunito** (new design), replacing Geist/EB Garamond/Inter.
+
 ## Plan (from Vic's brief)
 
 - STEP 0 — Get Vic's new Claude Design Fascia App code. **RECEIVED 2026-07-06** as a handoff-bundle zip (see below).

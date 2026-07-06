@@ -17,6 +17,17 @@
   font-style: normal;
   font-display: swap;
 }
+/* NEW DESIGN (2026-07-06) — Nunito is the Claude Design build's UI font, used
+   for body AND display/numerals. Self-hosted (latin variable woff2) to keep the
+   PWA offline-capable, same as Geist above. This is now the active app font
+   (--font-app below); Geist @font-face kept for a one-line revert. */
+@font-face {
+  font-family: 'Nunito';
+  src: url('./assets/fonts/Nunito-Variable.woff2') format('woff2');
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
 /* Tabular figures for timers/numerals (build-recipe: tnum on all times/numbers)
    — keeps digits from jittering as they tick. Geist supports `tnum`. */
 .tnum { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
@@ -44,9 +55,10 @@
   --page-max: 480px; --gutter: 20px; --rail-gap: 12px;
   --dur-fast: 140ms; --dur-mid: 200ms; --dur-slow: 240ms;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  /* THE font token (2026-06-15) — swap this one line to change the app font
-     (Vic's brand call). Geist = self-hosted SF-Pro-analog matched to REF-08. */
-  --font-app: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* THE font token — swap this one line to change the app font (Vic's brand
+     call). 2026-07-06: Geist → Nunito (the New Design build's font, overrules).
+     Revert = put 'Geist' back here; its @font-face is still loaded above. */
+  --font-app: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
   /* Liquid-glass framework Lens 3: hit areas >= 48px. */
   --ppw-tap-min: 48px;
 
