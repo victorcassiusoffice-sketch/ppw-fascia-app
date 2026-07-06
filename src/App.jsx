@@ -131,11 +131,12 @@ export default function App() {
     activeModules.length > 0 ||
     (activeRoutines.savedZones?.length || 0) > 0;
 
-  // /v2 — New Design (Claude Design) native port, in progress. Full-bleed: it
-  // owns its own shell/background/nav, so it bypasses the existing chrome
-  // (Header/AppBackground/BottomNav). Isolated route → the live app is untouched
-  // until the port reaches parity and Vic approves the cutover.
-  if (location.pathname === '/v2') {
+  // CUTOVER (Vic, 2026-07-06): "change everything to be exactly the same as the
+  // new [design]" — the New Design (App5) IS the app now, on every route. The
+  // old app below is retired but kept intact; flip NEW_DESIGN_ONLY to false for
+  // a one-line revert. App5 owns its own shell/background/nav (full-bleed).
+  const NEW_DESIGN_ONLY = true;
+  if (NEW_DESIGN_ONLY || location.pathname === '/v2') {
     return (
       <LazyMotion features={domAnimation}>
         <App5 />
