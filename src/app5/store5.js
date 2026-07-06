@@ -44,6 +44,12 @@ function initialState() {
     doneByDate: {},
     suppSel: {},
     importedProtos: [],
+    // media library (verbatim starters from the prototype)
+    mediaItems: [
+      { id: 'm1', title: 'Deep Tissue Soundscape', meta: 'Spotify · 20 min', thumb: 'sp', note: true, url: 'https://open.spotify.com' },
+      { id: 'm2', title: 'Yoga For Complete Beginners', meta: 'YouTube · Basic Yoga · 20 min', thumb: 'yt', url: 'https://www.youtube.com/watch?v=v7AYKMP6rOE', embed: 'https://www.youtube.com/embed/v7AYKMP6rOE?autoplay=1&playsinline=1&rel=0', thumbUrl: 'https://i.ytimg.com/vi/v7AYKMP6rOE/hqdefault.jpg' },
+      { id: 'm3', title: 'Wim Hof Guided Breathing', meta: 'YouTube · Breathwork · 11 min', thumb: 'yt', url: 'https://www.youtube.com/watch?v=tybOi4hjZFQ', embed: 'https://www.youtube.com/embed/tybOi4hjZFQ?autoplay=1&playsinline=1&rel=0', thumbUrl: 'https://i.ytimg.com/vi/tybOi4hjZFQ/hqdefault.jpg' },
+    ],
     // library tab
     stackTab: 'routines',
     // add sheet
@@ -192,6 +198,16 @@ export function addCustomUrl(url) {
   saveStacks();
   return { ok: true, item };
 }
+// add a library item into today's stack (free-tier cap → upsell). Returns bool added.
+export function addToStack(libItem, time = '09:00') {
+  if (overLimit()) { setState({ premiumUpsell: 'You have reached the free limit of 10 stacks. Go Premium for unlimited stacks.' }); return false; }
+  const id = 'l' + Date.now().toString(36);
+  const { note, ...rest } = libItem;
+  setState({ deckItems: [...state.deckItems, { ...rest, id, time, repeat: 'daily' }] });
+  saveStacks();
+  return true;
+}
+export function setTab(tab) { setState({ stackTab: tab }); }
 export function openAdd() { setState({ addOpen: true }); }
 export function closeAdd() { setState({ addOpen: false, addedCustom: null }); }
 export function setCustomUrl(v) { setState({ customUrl: v }); }

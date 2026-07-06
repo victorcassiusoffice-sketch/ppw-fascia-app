@@ -13,6 +13,7 @@
 import React from 'react';
 import { themeVars, parseVars, THUMBS } from './theme5.js';
 import SettingsScreen from './screens/SettingsScreen.jsx';
+import LibraryScreen from './screens/LibraryScreen.jsx';
 import AddSheet from './screens/AddSheet.jsx';
 import UpsellModal from './screens/UpsellModal.jsx';
 import {
@@ -196,7 +197,7 @@ export default function App5() {
 
   let body;
   if (S.screen === 'stack') body = <StackScreen />;
-  else if (S.screen === 'library') body = <Placeholder name="Library" />;
+  else if (S.screen === 'library') body = <LibraryScreen />;
   else if (S.screen === 'calendar') body = <Placeholder name="Calendar" />;
   else if (S.screen === 'settings') body = <SettingsScreen />;
   else body = <StackScreen />;
