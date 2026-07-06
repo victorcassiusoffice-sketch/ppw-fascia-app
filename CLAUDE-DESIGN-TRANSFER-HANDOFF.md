@@ -17,17 +17,21 @@ To roll back completely: `git checkout main` (or `feat/mlt-full-build-2026-06-23
 
 ## Plan (from Vic's brief)
 
-- STEP 0 — Get Vic's new Claude Design Fascia App code (pasted or file path). **NOT YET RECEIVED.**
+- STEP 0 — Get Vic's new Claude Design Fascia App code. **RECEIVED 2026-07-06** as a handoff-bundle zip (see below).
 - STEP 1 — Orient: framework/entry points/backend/deploy/paywall state. DONE (see below).
 - STEP 2 — Transfer: swap UI to the new Claude Design build, re-wire real data/backend so nothing existing breaks.
 - STEP 3 — Premium payments: Gumroad as the rail (PayPal dead). Settings keeps a premium toggle UI; real state driven by Gumroad entitlement; Vic keeps a manual override so he can flip Premium on for his own testing without buying anything. No hardcoded Gumroad product ID/keys — config placeholder only.
 
 ## STATUS (update this after every meaningful chunk, then commit + push)
 
-**Last updated:** 2026-07-06, session start.
-**Last completed step:** Step 1 orientation + resume-system setup (this file + branch).
-**Next step:** Waiting on Vic to paste/point to the new Claude Design code (Step 0). Nothing else should proceed until that lands.
-**Blocked on:** Vic — needs to provide the new UI code.
+**Last updated:** 2026-07-06, mid-session.
+**Last completed step:** Step 0 received — Vic's zip `C:\Users\Victor\Documents\PPW app- The one- rebuild-handoff.zip` extracted to scratchpad at `C:\Users\Victor\AppData\Local\Temp\claude\C--Users-Victor-Documents-PPW-Code-ppw-fascia-app\d2a165a4-4500-44a6-a1dd-4ba0d3411509\scratchpad\ppw-app-rebuild\`. Primary design file to implement: `...\ppw-fascia-app-rebuild\project\PPW Fascia App.dc.html` (per README + Vic's explicit instruction — v1/v2 siblings are earlier iterations, ignored). Dispatched a research agent to read the full `.dc.html` (3488 lines) + the design-system docs and write a structured implementation spec to `docs\claude-design-import\DESIGN-SPEC.md` in this repo.
+**Next step:** Read the agent's `DESIGN-SPEC.md`, confirm scope/ambiguities with Vic if needed, then start Step 2 (component-by-component transfer) in small committed increments.
+**Blocked on:** nothing right now — spec-generation in progress.
+
+## Where the source design lives (not in the repo — scratchpad is session-temporary)
+
+The design bundle is a **scratchpad extraction of a zip Vic provided**, NOT committed to the repo (it's ~140MB with video/image assets — don't add it to git). If resuming in a fresh session and the scratchpad path above no longer exists, ask Vic to re-share `C:\Users\Victor\Documents\PPW app- The one- rebuild-handoff.zip` and re-extract. The durable artifact that DOES survive in git is `docs\claude-design-import\DESIGN-SPEC.md` (once written) — that's the implementation source of truth going forward, not the raw zip.
 
 ## Step 1 findings (current app, before any change)
 
