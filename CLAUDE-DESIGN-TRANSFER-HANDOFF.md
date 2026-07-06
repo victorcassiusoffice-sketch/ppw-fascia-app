@@ -58,7 +58,11 @@ Resolved open questions accordingly:
 - [x] Fidelity pass — missing keyframes defined (app5.css — animations actually run now), ppwScreenIn entrances, Assistant orb in Stack header (gated, dimmed when free), hero border-trace + edit pencil. `71a8716`
 - [x] Onboarding wizard — full 6-step first-run flow, persists all prefs (ppw5.prefs/prefs2/courses/integrations), terms-gated CTA, Skip/Skip all. `684e166`
 - [x] Fasting corner badge (F/E) + info popup. `32a141e`
-- [ ] **Remaining** (needs external deps or lower value): Stack assistant orb CHAT panel (in-app AI builder — needs a real AI endpoint; prototype used Claude-Design's `window.claude`; orb currently opens the Wellness Assistant service when premium) · Note popup (affirmation full-screen display fired at its scheduled time — runtime timer) · Slot reminder popups + real `.ics`/push wiring · doc upload (Add/Library) · sounds/tactile engine (sfx) · Easy set-up flow + easy-read/text-size in Settings · Settings sections: notifications/day-rhythm/discreet/integrations · logo plaque raster (assets/ppw-logo-*.png from the design bundle) · **Glass Theme scene images — LAST priority (Vic)**
+- [x] Per-theme logo renders on the onboarding plaque (public/assets/ppw-logo-*.png). `2d473e3`
+- [x] Runtime slot engine — affirmation popup + slot reminder banner + autoplay fire at slot time; fasting window announcements. `7c5ef0f`
+- [x] Settings Vision (easy read + text size/zoom) + General (Sounds/Reminders/Autoplay). `c893a7e`
+- [x] ASMR sound engine — global soft tap on every press, Sounds-gated. `e78f8ef`
+- [ ] **Remaining** (needs external deps or lower value): Stack assistant orb CHAT panel (in-app AI builder — needs a real AI endpoint; prototype used Claude-Design's `window.claude`; orb currently opens the Wellness Assistant service when premium) · real lock-screen `.ics`/push wiring (in-app popups only fire while open) · doc upload (Add/Library) · blue-light filter + quiet hours rows · Connected apps + Course logins sections in Settings · Easy set-up guided flow · first-use coach tips (TUT) · **Glass Theme scene images — LAST priority (Vic)**
 - [ ] **Deferred polish**: copy scene-background image assets (`assets/glass/*.png`, `bg-grey.png`) into the build so glass/gel scenes show photos (default soft skins need none) · Settings a11y/notifications/IF/tactile sections · reminders wired to the existing `.ics`/push · route cutover (make `/` the New Design) — Vic's explicit go required
 
 **Native port architecture (DECIDED):** The New Design is a complete app with its own data model
