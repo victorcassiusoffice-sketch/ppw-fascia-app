@@ -60,6 +60,8 @@ function initialState() {
     viewDate: null,
     // in-app media viewer (null = closed)
     playerItem: null,
+    // completed-today sheet
+    completedOpen: false,
     // selection / interaction
     selectedIds: [],
     // completed
@@ -217,6 +219,17 @@ export function setTab(tab) { setState({ stackTab: tab }); }
 // in-app media viewer
 export function openPlayer(item) { if (item) setState({ playerItem: item }); }
 export function closePlayer() { setState({ playerItem: null }); }
+// completed-today sheet
+export function openCompleted() { setState({ completedOpen: true }); }
+export function closeCompleted() { setState({ completedOpen: false }); }
+// today's completed entries joined with their item (title/time), newest first
+export function completedToday(key = todayKey()) {
+  const done = state.doneByDate[key] || [];
+  return done.map((d) => {
+    const it = state.deckItems.find((x) => x.id === d.id) || {};
+    return { id: d.id, at: d.at, title: it.title || 'Item', time: it.time || '' };
+  }).sort((a, b) => (b.at || 0) - (a.at || 0));
+}
 // open a specific date's stack (null / today → clear viewDate)
 export function openStackForDate(key) {
   const isToday = !key || key === todayKey();

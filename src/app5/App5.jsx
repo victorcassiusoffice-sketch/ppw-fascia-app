@@ -18,10 +18,11 @@ import AddSheet from './screens/AddSheet.jsx';
 import UpsellModal from './screens/UpsellModal.jsx';
 import CalendarScreen from './screens/CalendarScreen.jsx';
 import MediaViewer from './screens/MediaViewer.jsx';
+import CompletedSheet from './screens/CompletedSheet.jsx';
 import {
   useStore5, getState, setState, save,
   stackFor, todayKey, markDone, setItemTime, deleteItem, overLimit,
-  openAdd, backToToday, openPlayer,
+  openAdd, backToToday, openPlayer, openCompleted,
 } from './store5.js';
 
 // ── small inline-SVG icon helpers (match the prototype's line icons) ──
@@ -126,7 +127,7 @@ function StackScreen() {
           <h1 style={{ margin: 0, fontSize: 30, fontWeight: 600, letterSpacing: '-.02em', textShadow: 'var(--emboss)' }}>Stack</h1>
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
-          <Disc label="Completed today" badge={completedCount || null}>{ICheck}</Disc>
+          <Disc label="Completed today" badge={completedCount || null} onClick={openCompleted}>{ICheck}</Disc>
           <Disc label="Notifications">{IBell}</Disc>
         </div>
       </div>
@@ -231,6 +232,7 @@ export default function App5() {
         {/* overlays */}
         <AddSheet />
         <MediaViewer />
+        <CompletedSheet />
         <UpsellModal />
       </div>
     </div>
