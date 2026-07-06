@@ -12,6 +12,35 @@ was built via direct targeted `Grep`/`Read` instead — cheaper and it worked. P
 pixel detail below is filled in as each screen is actually implemented (JIT), not
 upfront, to control token spend on a large file.
 
+## ⚠️ CRITICAL ARCHITECTURE FINDING (2026-07-06) — the design is a COMPLETE APP, not UI-with-mock-data
+
+The brief assumed the Claude Design export was "UI-only with mock data." **It is not.** Reality:
+- `support.js` = the generic Claude Design **DSL runtime** (`dc-runtime`) — parses `<x-dc>`
+  templates, `{{ }}` bindings, `sc-if`/`sc-for`, renders via `window.React`. NOT app logic. Ignore for logic.
+- `PPW Fascia App.dc.html` = **template** (`<x-dc>`, ~lines 9-1611) **+ a full working app**
+  in a `<script type="text/x-dc" data-dc-script>` block (~lines 1613-3488): `class Component extends
+  DCLogic` with a complete state model, its OWN localStorage persistence under the **`ppw5.` prefix**
+  (different namespace from the current app's `ppw.` keys → NO data collision), premium gating,
+  a curated YouTube library, an AI stack builder, IndexedDB media handling, onboarding, fasting,
+  a11y, an elaborate multi-skin theme engine.
+
+**Theme engine** (the `{{ vars }}` value) is computed in the script at **lines ~2257-2505**:
+`GROUNDS` (2337), `SOFT` colourways (2257), `GLASS` scenes (2273) lookup tables → a big `vars`
+CSS-custom-property string. Three registers: **glass** · **soft-neumorphism** (DEFAULT is
+`skin:'soft', bg:'grey', soft:'graphite'` → light soft-neumorphism) · **gel-glass-over-scene**.
+All plain JS string-generation — portable near-verbatim. The `var(--x, fallback)` fallbacks in
+the template are the light-glass values; the real per-skin values come from this engine.
+
+**Consequence for the port (given Vic's "New Design overrules every time"):** the New Design's
+own data model + `ppw5.` persistence is the reference. Port it as THE app; re-wire only the
+genuinely-external integrations a static prototype can't self-implement (real lock-screen `.ics`
+reminders via existing `src/lib/ics.js`, Web Push, protocol fetch, Assistant sync). Because
+`ppw5.` ≠ `ppw.`, the new app starts clean and the old app's data is untouched (reversible).
+
+**Scope reality:** this is a ~1900-line app-logic + ~1590-line template → React port. Large,
+multi-session. Build as a parallel `src/app5/` tree (theme engine + store + screens), swap routes
+per completed+verified screen, keep the app building at every commit. Never leave a broken checkpoint.
+
 ## Screen inventory (confirmed via `data-screen-label` attributes)
 
 | Screen | ~Line | Notes |
