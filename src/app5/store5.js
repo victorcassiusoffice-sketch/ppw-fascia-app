@@ -54,6 +54,8 @@ function initialState() {
     stackTab: 'routines',
     // add sheet
     addOpen: false, customUrl: '', addedCustom: null,
+    // note / affirmation composer
+    noteOpen: false, noteText: '', noteAnim: 'still', noteSpeed: 'med', noteTime: '09:00', noteDur: '5',
     // calendar → stack (per-date view; null = today)
     viewDate: null,
     // in-app media viewer (null = closed)
@@ -227,7 +229,26 @@ export function itemsForDate(key) {
   return state.deckItems.filter((it) => itemOnDate(it, key)).map((it) => ({ ...it, done: done.indexOf(it.id) !== -1 }));
 }
 export function openAdd() { setState({ addOpen: true }); }
-export function closeAdd() { setState({ addOpen: false, addedCustom: null }); }
+export function closeAdd() { setState({ addOpen: false, addedCustom: null, noteOpen: false }); }
+
+// note / affirmation composer
+export function openNoteComposer() { setState({ noteOpen: true }); }
+export function setNoteField(patch) { setState(patch); }
+export function addNote() {
+  const text = String(state.noteText || '').trim();
+  if (!text) return { ok: false };
+  if (overLimit()) { setState({ premiumUpsell: 'You have reached the free limit of 10 stacks. Go Premium for unlimited stacks.' }); return { upsell: true }; }
+  const anim = state.noteAnim || 'still';
+  const animLabel = anim.charAt(0).toUpperCase() + anim.slice(1);
+  const item = {
+    id: 'n' + Date.now().toString(36), title: text, meta: 'Affirmation · ' + animLabel,
+    time: state.noteTime || '09:00', kind: 'note', noteAnim: anim, noteSpeed: state.noteSpeed || 'med',
+    noteDur: state.noteDur || '5', repeat: 'daily',
+  };
+  setState({ deckItems: [...state.deckItems, item], noteOpen: false, addOpen: false, noteText: '' });
+  saveStacks();
+  return { ok: true, item };
+}
 export function setCustomUrl(v) { setState({ customUrl: v }); }
 export function goLibrary(tab) { setState({ addOpen: false, addedCustom: null, screen: 'library', ...(tab ? { stackTab: tab } : {}) }); }
 export function setUpsell(reason) { setState({ premiumUpsell: reason }); }
