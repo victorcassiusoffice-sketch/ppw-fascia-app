@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { SOFT, GLASS } from '../theme5.js';
-import { useStore5, setTheme, setPremium } from '../store5.js';
+import { useStore5, setTheme, setPremium, openTerms } from '../store5.js';
 
 const SOFT_ORDER = ['graphite', 'silver', 'ivory', 'black', 'gloft', 'indigo', 'gel'];
 const GLASS_ORDER = Object.keys(GLASS);
@@ -87,6 +87,18 @@ export default function SettingsScreen() {
           </button>
         </div>
         <div style={{ marginTop: 12, fontSize: 11, lineHeight: 1.5, color: S.premium ? 'rgba(255,255,255,.82)' : 'var(--dim)' }}>Manual test switch — no payment gateway wired yet. In code this is one <code>premium</code> flag (ppw5.premium), ready to wire to Gumroad checkout without touching anything else.</div>
+      </div>
+
+      {/* About */}
+      <Eyebrow>About</Eyebrow>
+      <div style={{ marginTop: 12, borderRadius: 24, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)', overflow: 'hidden' }}>
+        <button onClick={openTerms} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 18px', minHeight: 60, background: 'none', border: 'none', color: 'var(--ink)', textAlign: 'left' }}>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 500 }}>Terms &amp; Health Disclaimer</div>
+            <div style={{ marginTop: 2, fontSize: 12.5, color: 'var(--dim)' }}>What this app is, and how to use it safely</div>
+          </div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--dim)', flex: 'none' }}><path d="M9 6l6 6-6 6" /></svg>
+        </button>
       </div>
     </div>
   );

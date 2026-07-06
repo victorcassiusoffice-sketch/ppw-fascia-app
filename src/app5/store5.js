@@ -64,6 +64,8 @@ function initialState() {
     completedOpen: false,
     // repeat picker (repeatId = item being edited, null = closed)
     repeatId: null,
+    // terms & health disclaimer overlay
+    termsOpen: false,
     // selection / interaction
     selectedIds: [],
     // completed
@@ -233,6 +235,8 @@ export function setRepeat(id, value) {
     : it) });
   saveStacks();
 }
+export function openTerms() { setState({ termsOpen: true }); }
+export function closeTerms() { setState({ termsOpen: false }); }
 export function repeatLabel(repeat) {
   const r = repeat === undefined ? 'daily' : repeat;
   if (r === 'daily') return 'Every day';
