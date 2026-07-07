@@ -398,6 +398,7 @@ export default function App5() {
         {/* overlays */}
         <AddSheet />
         <MediaViewer />
+        <SchedulePicker />
         <CompletedSheet />
         <RepeatSheet />
         <SlotReminder />

@@ -290,6 +290,17 @@ export function deleteSelected() {
   setState({ deckItems: state.deckItems.filter((it) => !sel.has(it.id)), selectedIds: [] });
   saveStacks();
 }
+// ── Protocols from the build-time bundled manifest (Vic item 1) ──
+let _protocolsLoaded = false;
+export async function loadProtocols() {
+  if (_protocolsLoaded) return;
+  _protocolsLoaded = true;
+  setState({ protocolsStatus: 'loading' });
+  const { fetchProtocols } = await import('./protocols5.js');
+  const { status, list } = await fetchProtocols();
+  setState({ protocols: list, protocolsStatus: status });
+}
+
 // ── Library "Add to Stack" via calendar picker (Vic item 2) ──
 // scheduleTarget: { type: 'item', item } | { type: 'routine', id } | null
 export function openSchedule(target) { setState({ scheduleTarget: target }); }

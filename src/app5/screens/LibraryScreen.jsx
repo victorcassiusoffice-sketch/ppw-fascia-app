@@ -7,9 +7,21 @@
 
 import React from 'react';
 import { THUMBS } from '../theme5.js';
-import { useStore5, setTab, addToStack, setUpsell, openPlayer, createRoutine, deleteRoutine, updateRoutine, routineToMd, itemFromUrl } from '../store5.js';
+import { useStore5, setTab, addToStack, setUpsell, openPlayer, createRoutine, deleteRoutine, updateRoutine, routineToMd, itemFromUrl, openSchedule, loadProtocols } from '../store5.js';
 import { TILE_ICONS, DOC_ACCEPT } from './AddSheet.jsx';
 import { saveFile } from '../files5.js';
+import { protocolToItem } from '../protocols5.js';
+
+// small calendar "Add to Stack" disc — opens SchedulePicker to pick the day
+const ICal = <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="2.5" /><path d="M3.5 9.5h17M8 3.5v3M16 3.5v3M12 13v4M10 15h4" /></svg>;
+function AddToStackBtn({ onClick, label = 'Add to Stack on a day' }) {
+  return (
+    <button onClick={(e) => { e.stopPropagation(); onClick(); }} aria-label={label} title={label}
+      style={{ width: 40, height: 40, flex: 'none', borderRadius: 12, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      {ICal}
+    </button>
+  );
+}
 
 // share a routine as a .md file — native share sheet when the device supports
 // sharing files (phones), else a plain download.
@@ -86,6 +98,10 @@ function RoutineBuilder({ query = '' }) {
                 <div style={{ fontSize: 15.5, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textShadow: 'var(--emboss)' }}>{r.name}</div>
                 <div style={{ marginTop: 2, fontSize: 12.5, color: 'var(--dim)' }}>{r.items.length} stack{r.items.length === 1 ? '' : 's'} · tap to open &amp; edit</div>
               </div>
+              {/* Vic item 2 — schedule the whole routine onto a chosen day */}
+              <button onClick={(e) => { e.stopPropagation(); openSchedule({ type: 'routine', id: r.id, name: r.name }); }} aria-label="Add routine to a day" title="Add to a day" style={{ width: 34, height: 34, flex: 'none', borderRadius: 10, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {ICal}
+              </button>
               {/* Vic 2026-07-06 — share as a .md file others can import via ＋ Add */}
               <button onClick={(e) => { e.stopPropagation(); shareRoutine(r); }} aria-label="Share routine" style={{ width: 34, height: 34, flex: 'none', borderRadius: 10, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v7a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 19v-7" /><path d="M12 15V3M8 7l4-4 4 4" /></svg>
@@ -150,8 +166,17 @@ function RoutineBuilder({ query = '' }) {
             </div>
           )}
           {panel === 'protocol' && (
-            <div style={{ marginTop: 10, padding: '12px 14px', borderRadius: 14, border: '1px solid var(--hairline)', background: 'var(--track)', fontSize: 12.5, lineHeight: 1.5, color: 'var(--dim)', animation: 'ppwRise .25s ease both' }}>
-              The PPW protocol library is being wired up — protocols will be addable here soon.
+            <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 6, animation: 'ppwRise .25s ease both' }}>
+              {S.protocols.length > 0 ? S.protocols.map((p) => (
+                <button key={p.id} onClick={() => addFromLibrary(protocolToItem(p))} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 12, border: '1px solid var(--hairline)', background: 'var(--track)', color: 'var(--ink)', textAlign: 'left' }}>
+                  <span style={{ width: 18, height: 18, flex: 'none', borderRadius: 999, border: '1.5px solid var(--accent)', color: 'var(--accent)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, lineHeight: 1 }}>+</span>
+                  <span style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.title}</span>
+                </button>
+              )) : (
+                <div style={{ padding: '12px 14px', borderRadius: 14, border: '1px solid var(--hairline)', background: 'var(--track)', fontSize: 12.5, lineHeight: 1.5, color: 'var(--dim)' }}>
+                  Your PPW protocols will appear here as they’re approved for the app.
+                </div>
+              )}
             </div>
           )}
           {panel === 'text' && (
@@ -207,15 +232,41 @@ function MediaRow({ it }) {
         <div style={{ fontSize: 16, fontWeight: 600, letterSpacing: '-.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textShadow: 'var(--emboss)' }}>{it.title}</div>
         <div style={{ marginTop: 3, fontSize: 13, color: 'var(--dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{it.meta}</div>
       </div>
-      <button onClick={add} aria-label="Add to today's stack" style={{ width: 24, height: 24, flex: 'none', borderRadius: 8, border: `1.5px solid ${added ? 'var(--acc-rim)' : 'var(--rim)'}`, background: added ? 'var(--acc-surf)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--acc-ink)', padding: 0, transition: 'all .2s' }}>
-        {added && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>}
-      </button>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, flex: 'none' }}>
+        {/* calendar Add-to-Stack (item 2) — schedule onto a chosen day */}
+        <AddToStackBtn onClick={() => openSchedule({ type: 'item', item: it })} />
+        {/* quick add to today (existing tick) */}
+        <button onClick={add} aria-label="Add to today's stack" title="Quick add to today" style={{ width: 24, height: 24, flex: 'none', borderRadius: 8, border: `1.5px solid ${added ? 'var(--acc-rim)' : 'var(--rim)'}`, background: added ? 'var(--acc-surf)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--acc-ink)', padding: 0, transition: 'all .2s' }}>
+          {added && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// Protocol row — cleared PDF from the build-time bundle; View opens it, the
+// calendar disc schedules it onto a day.
+function ProtocolRow({ p }) {
+  return (
+    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', minHeight: 76, borderRadius: 24, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)' }}>
+      <div style={{ width: 48, height: 48, flex: 'none', borderRadius: 14, background: 'var(--disc)', border: '1px solid var(--rim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)' }}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h8l4 4v14H6z" /><path d="M14 3v4h4M9.5 12h5M9.5 15.5h5" /></svg>
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 16, fontWeight: 600, letterSpacing: '-.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textShadow: 'var(--emboss)' }}>{p.title}</div>
+        <div style={{ marginTop: 3, fontSize: 13, color: 'var(--dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Protocol · {p.category || 'PPW'}</div>
+      </div>
+      <a href={p.url} target="_blank" rel="noopener noreferrer" aria-label="View protocol" title="View" style={{ width: 40, height: 40, flex: 'none', borderRadius: 12, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>
+      </a>
+      <AddToStackBtn onClick={() => openSchedule({ type: 'item', item: protocolToItem(p) })} />
     </div>
   );
 }
 
 export default function LibraryScreen() {
   const S = useStore5();
+  React.useEffect(() => { loadProtocols(); }, []); // item 1 — pull the bundled manifest
   const idx = TABS.findIndex((t) => t.key === S.stackTab);
   const tabLeft = `calc(${idx < 0 ? 0 : idx} * 25% + 3px)`;
   // Vic #5 — search within whichever category is selected
@@ -285,10 +336,33 @@ export default function LibraryScreen() {
         </div>
       )}
 
-      {/* Protocols / Supps — faithful empty states until their sources are ported */}
-      {(S.stackTab === 'protocols' || S.stackTab === 'supps') && (
+      {/* Protocols — PPW protocol PDFs baked in at build time (item 1) */}
+      {S.stackTab === 'protocols' && (() => {
+        const protoFiltered = S.protocols.filter((p) => !query || p.title.toLowerCase().includes(query) || (p.tags || []).some((t) => t.toLowerCase().includes(query)));
+        if (S.protocols.length > 0) {
+          return (
+            <div style={{ marginTop: 18, display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {protoFiltered.map((p) => <ProtocolRow key={p.id} p={p} />)}
+              {query && protoFiltered.length === 0 && <div style={{ padding: '18px 0', textAlign: 'center', fontSize: 13, color: 'var(--dim)' }}>Nothing matches “{search.trim()}”.</div>}
+            </div>
+          );
+        }
+        return (
+          <div style={{ marginTop: 18, borderRadius: 24, padding: '24px 20px', textAlign: 'center', background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)' }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink)', textShadow: 'var(--emboss)' }}>Protocols</div>
+            <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.5, color: 'var(--dim)' }}>
+              {S.protocolsStatus === 'error'
+                ? 'Could not load the protocol library — check your connection and reopen.'
+                : 'Your PPW protocols will appear here as they’re approved for the app. Each one opens as a PDF and can be added to any day.'}
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Supps — untouched (item 4 affiliate flow arrives separately) */}
+      {S.stackTab === 'supps' && (
         <div style={{ marginTop: 18, borderRadius: 24, padding: '24px 20px', textAlign: 'center', background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)' }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink)', textShadow: 'var(--emboss)' }}>{S.stackTab === 'protocols' ? 'Protocols' : 'Supplements'}</div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink)', textShadow: 'var(--emboss)' }}>Supplements</div>
           <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.5, color: 'var(--dim)' }}>This library is being wired up in the New Design build.</div>
         </div>
       )}

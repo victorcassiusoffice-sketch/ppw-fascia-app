@@ -1,53 +1,43 @@
-// protocols5 — PPW Protocol PDFs, loaded from a GitHub-hosted manifest.
+// protocols5 — PPW Protocol PDFs surfaced in the app.
 //
-// A sibling pipeline is standing up a repo of Protocol PDFs indexed by a
-// manifest.json with entries: { id, title, filename, url, tags, version }.
-// ── PLUG-IN POINT ─────────────────────────────────────────────────────────
-// When Dispatch relays the repo, set PROTOCOLS_MANIFEST_URL to the RAW
-// manifest URL (e.g. https://raw.githubusercontent.com/<owner>/<repo>/main/manifest.json).
-// Until then it is null and the Protocols tab shows its "on the way" state.
-// ──────────────────────────────────────────────────────────────────────────
-export const PROTOCOLS_MANIFEST_URL = null;
+// The PDFs live in the PRIVATE repo `victorcassiusoffice-sketch/ppw-protocols`.
+// They are baked into THIS app at BUILD time by tools/sync-protocols.mjs, which
+// ships ONLY the cleared subset (app_eligible && approved; review/draft/the
+// fabricated testosterone sample are excluded) into public/protocols/. NO PAT
+// and NO private-repo access ever ship in the client — at runtime the app reads
+// its OWN same-origin bundled manifest below.
+//
+// Today this is EMPTY: both app_eligible protocols are status=review (Vic's
+// GATE-2 pending). The moment Vic approves one (manifest → app_eligible:true +
+// status:free), the next build bakes it in and it appears here automatically.
 
-const CACHE_KEY = 'ppw5.protocolsManifest';
+const MANIFEST_PATH = 'protocols/app-manifest.json'; // relative to import.meta.env.BASE_URL
 
-// normalise + validate one manifest entry to the agreed schema
-function toProtocol(e) {
-  if (!e || typeof e !== 'object') return null;
-  const id = String(e.id || '').trim();
-  const title = String(e.title || '').trim();
-  const url = String(e.url || '').trim();
-  if (!id || !title || !/^https:\/\//.test(url)) return null;
-  return {
-    id, title, url,
-    filename: String(e.filename || '').trim() || (title.replace(/[^a-z0-9]+/gi, '-') + '.pdf'),
-    tags: Array.isArray(e.tags) ? e.tags.map(String).slice(0, 8) : [],
-    version: e.version !== undefined ? String(e.version) : '1',
-  };
-}
-
-// fetch the manifest (network-first, localStorage fallback for offline).
-// Returns { status: 'unconfigured' | 'ready' | 'error', list }.
+// fetch the app's bundled protocol manifest (same-origin, public, no auth).
+// → { status: 'ready' | 'error', list }
 export async function fetchProtocols() {
-  if (!PROTOCOLS_MANIFEST_URL) return { status: 'unconfigured', list: [] };
+  const base = import.meta.env.BASE_URL || '/';
   try {
-    const res = await fetch(PROTOCOLS_MANIFEST_URL + (PROTOCOLS_MANIFEST_URL.includes('?') ? '&' : '?') + 'cb=' + Date.now(), { cache: 'no-store' });
+    const res = await fetch(base + MANIFEST_PATH + '?cb=' + Date.now(), { cache: 'no-store' });
     if (!res.ok) throw new Error('http ' + res.status);
     const data = await res.json();
-    const raw = Array.isArray(data) ? data : Array.isArray(data.protocols) ? data.protocols : [];
-    const list = raw.map(toProtocol).filter(Boolean);
-    try { localStorage.setItem(CACHE_KEY, JSON.stringify(list)); } catch {}
+    const raw = Array.isArray(data.protocols) ? data.protocols : [];
+    const list = raw.map((p) => ({
+      id: String(p.id || ''),
+      slug: String(p.slug || p.id || ''),
+      title: String(p.title || ''),
+      category: String(p.category || ''),
+      tags: Array.isArray(p.tags) ? p.tags : [],
+      version: String(p.version || '1'),
+      url: base + String(p.url || ''), // resolve bundled PDF to an absolute app URL
+    })).filter((p) => p.id && p.title && p.url);
     return { status: 'ready', list };
   } catch {
-    try {
-      const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
-      if (Array.isArray(cached) && cached.length) return { status: 'ready', list: cached };
-    } catch {}
     return { status: 'error', list: [] };
   }
 }
 
-// a protocol as a stack-item snapshot (viewer shows the PDF; Add-to-Stack schedules it)
+// a protocol as a stack-item snapshot (Add-to-Stack schedules it; tap opens PDF)
 export function protocolToItem(p) {
-  return { title: p.title, meta: 'Protocol · v' + p.version, thumb: 'doc', kind: 'pdf', url: p.url };
+  return { title: p.title, meta: 'Protocol · ' + p.version, thumb: 'doc', kind: 'pdf', url: p.url };
 }
