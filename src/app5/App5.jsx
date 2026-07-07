@@ -24,6 +24,7 @@ import RepeatSheet from './screens/RepeatSheet.jsx';
 import TermsScreen from './screens/TermsScreen.jsx';
 import OnboardingScreen from './screens/OnboardingScreen.jsx';
 import { NotePopup, SlotReminder } from './screens/Popups.jsx';
+import SchedulePicker from './screens/SchedulePicker.jsx';
 import {
   useStore5, getState, setState, save,
   stackFor, todayKey, markDone, setItemTime, deleteItem, overLimit,

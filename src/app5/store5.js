@@ -57,6 +57,10 @@ function initialState() {
     stackTab: 'routines',
     // add sheet
     addOpen: false, customUrl: '', addedCustom: null,
+    // library "Add to Stack" calendar picker
+    scheduleTarget: null,
+    // protocols from the GitHub manifest (item 1)
+    protocols: [], protocolsStatus: 'idle',
     // note / affirmation composer
     noteOpen: false, noteText: '', noteAnim: 'still', noteSpeed: 'med', noteTime: '09:00', noteDur: '5',
     // calendar → stack (per-date view; null = today)
@@ -286,6 +290,23 @@ export function deleteSelected() {
   setState({ deckItems: state.deckItems.filter((it) => !sel.has(it.id)), selectedIds: [] });
   saveStacks();
 }
+// ── Library "Add to Stack" via calendar picker (Vic item 2) ──
+// scheduleTarget: { type: 'item', item } | { type: 'routine', id } | null
+export function openSchedule(target) { setState({ scheduleTarget: target }); }
+export function closeSchedule() { setState({ scheduleTarget: null }); }
+// schedule one item snapshot onto an arbitrary date (repeat once, anchored)
+export function addItemToDate(snapshot, dateKey, time = '09:00') {
+  if (!state.premium && state.deckItems.length + 1 > 10) {
+    setState({ premiumUpsell: 'You have reached the free limit of 10 stacks. Go Premium for unlimited stacks.' });
+    return { upsell: true };
+  }
+  const { id, anchor, repeat, ...rest } = snapshot;
+  const item = { ...rest, id: 'sc' + Date.now().toString(36), time: snapshot.time || time, anchor: dateKey, repeat: 'once' };
+  setState({ deckItems: [...state.deckItems, item] });
+  saveStacks();
+  return { ok: true, item };
+}
+
 // add a Document stack to today (file already saved to IndexedDB → fileId)
 export function addDocToToday(name, fileId) {
   if (overLimit()) { setState({ premiumUpsell: 'You have reached the free limit of 10 stacks. Go Premium for unlimited stacks.' }); return { upsell: true }; }

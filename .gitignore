@@ -44,3 +44,7 @@ FIGMA_LINK.txt
 dist-build/
 dist-verify/
 scripts/_evidence/
+
+# Screenshot/verify artifacts + local worktrees
+.shots/
+.claude/worktrees/

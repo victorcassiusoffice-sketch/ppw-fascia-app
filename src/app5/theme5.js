@@ -19,7 +19,10 @@
 /* Graphite — sampled from the embossed PPW logo. Further colourways arrive
    with matching logo variants. */
 export const SOFT = {
-  graphite: { base: '#7E8286', light: 'rgba(255,255,255,.40)', dark: 'rgba(34,38,42,.60)', accent: '#3E434A', ink: '#24282C', rim: '#8E9296', well: '#6F7377', accInk: '#FFFFFF', name: 'Graphite', deep: '#33373B', accDeep: '#17191C', ground: 'radial-gradient(135% 110% at 25% 8%, #97999C 0%, #82868A 46%, #676B6E 100%)', glossA: '.16', rimGlowA: '.14', emboss: 'rgba(255,255,255,.48)', labelSh: 'rgba(0,0,0,.32)', logo: 'assets/ppw-logo-graphite.png', mark: 'assets/ppw-mark-graphite.png' },
+  // 2026-07-07 (Vic item 3): embossed secondary text was too light on graphite —
+  // dim lifted 65%→84% (dimA) and the white emboss highlight calmed .48→.32 so
+  // thin text reads dark instead of washed. Emboss STYLE kept.
+  graphite: { base: '#7E8286', light: 'rgba(255,255,255,.40)', dark: 'rgba(34,38,42,.60)', accent: '#3E434A', ink: '#24282C', dimA: 'D6', rim: '#8E9296', well: '#6F7377', accInk: '#FFFFFF', name: 'Graphite', deep: '#33373B', accDeep: '#17191C', ground: 'radial-gradient(135% 110% at 25% 8%, #97999C 0%, #82868A 46%, #676B6E 100%)', glossA: '.16', rimGlowA: '.14', emboss: 'rgba(255,255,255,.32)', labelSh: 'rgba(0,0,0,.32)', logo: 'assets/ppw-logo-graphite.png', mark: 'assets/ppw-mark-graphite.png' },
   silver: { base: '#C8CCCE', light: 'rgba(255,255,255,.78)', dark: 'rgba(96,102,108,.52)', accent: '#5C6268', ink: '#33383C', rim: '#B4B8BB', well: '#B9BDBF', accInk: '#FFFFFF', name: 'Silver', deep: '#7E8489', accDeep: '#33373B', ground: 'radial-gradient(135% 110% at 25% 8%, #D6DADB 0%, #C9CDCF 46%, #B9BCBE 100%)', glossA: '.30', rimGlowA: '.35', emboss: 'rgba(255,255,255,.8)', labelSh: 'rgba(0,0,0,.22)', logo: 'assets/ppw-logo-silver.png', mark: 'assets/ppw-mark-silver.png' },
   ivory: { base: '#E0DFDA', light: 'rgba(255,255,255,.92)', dark: 'rgba(150,148,138,.56)', accent: '#6E6A61', ink: '#3A372F', rim: '#CFCEC8', well: '#D2D1CB', accInk: '#FFFFFF', name: 'Ivory', deep: '#96948A', accDeep: '#3A372F', ground: 'radial-gradient(135% 110% at 25% 8%, #EDECE9 0%, #E0E0DA 46%, #CDCDC5 100%)', glossA: '.45', rimGlowA: '.55', emboss: 'rgba(255,255,255,.95)', labelSh: 'rgba(0,0,0,.2)', logo: 'assets/ppw-logo-ivory.png', mark: 'assets/ppw-mark-ivory.png' },
   black: { base: '#1C1E20', lite: '#4A4E53', light: 'rgba(255,255,255,.08)', dark: 'rgba(0,0,0,.78)', accent: '#3C4147', ink: '#E6E8EA', rim: '#33373B', well: '#0C0D0F', accInk: '#FFFFFF', name: 'Black', deep: '#000000', accDeep: '#0A0B0C', ground: 'radial-gradient(135% 110% at 25% 8%, #2B2D2F 0%, #1B1D1F 46%, #0E0F10 100%)', glossA: '.05', rimGlowA: '.06', emboss: 'rgba(0,0,0,.6)', labelSh: 'rgba(0,0,0,.5)', thumb: 'linear-gradient(145deg, #6E747B 0%, #43484E 100%)', logo: 'assets/ppw-logo-black.png', mark: 'assets/ppw-mark-black.png' },
@@ -184,7 +187,7 @@ export function themeVars(S, glassIntensityProp) {
       }
     } else {
       vars = '--ground:' + (c.ground || ('radial-gradient(140% 105% at 30% 8%, ' + mixL(78) + ' 0%, ' + c.base + ' 52%, ' + mixD(82) + ' 100%)')) + ';--scrim:none;' +
-        '--ink:' + c.ink + ';--dim:' + c.ink + 'A6;' +
+        '--ink:' + c.ink + ';--dim:' + c.ink + (c.dimA || 'A6') + ';' +
         '--surface:linear-gradient(145deg, ' + mixL(60) + ' 0%, ' + c.base + ' 50%, ' + mixD(84) + ' 100%);' +
         '--surface-strong:linear-gradient(145deg, ' + mixL(54) + ' 0%, ' + c.base + ' 50%, ' + mixD(82) + ' 100%);' +
         '--gloss:radial-gradient(120% 90% at 50% -12%, rgba(255,255,255,' + (c.glossA || '.42') + '), rgba(255,255,255,0) 58%);' +
