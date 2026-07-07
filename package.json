@@ -7,7 +7,7 @@
   "scripts": {
     "start": "vite",
     "dev": "vite",
-    "prebuild": "node tools/sync-affiliates.mjs && node tools/sync-protocols.mjs",
+    "prebuild": "node tools/sync-affiliates.mjs && node tools/sync-supps-affiliates.mjs && node tools/sync-protocols.mjs",
     "build": "vite build",
     "build:gh": "VITE_BASE_PATH=/ppw-fascia-app/ vite build",
     "preview": "vite preview",

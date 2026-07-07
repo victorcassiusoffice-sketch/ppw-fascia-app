@@ -11,6 +11,7 @@ import { useStore5, setTab, addToStack, setUpsell, openPlayer, createRoutine, de
 import { TILE_ICONS, DOC_ACCEPT } from './AddSheet.jsx';
 import { saveFile } from '../files5.js';
 import { protocolToItem } from '../protocols5.js';
+import SuppsSection from './SuppsSection.jsx';
 
 // small calendar "Add to Stack" disc — opens SchedulePicker to pick the day
 const ICal = <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="2.5" /><path d="M3.5 9.5h17M8 3.5v3M16 3.5v3M12 13v4M10 15h4" /></svg>;
@@ -359,13 +360,8 @@ export default function LibraryScreen() {
         );
       })()}
 
-      {/* Supps — untouched (item 4 affiliate flow arrives separately) */}
-      {S.stackTab === 'supps' && (
-        <div style={{ marginTop: 18, borderRadius: 24, padding: '24px 20px', textAlign: 'center', background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)' }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink)', textShadow: 'var(--emboss)' }}>Supplements</div>
-          <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.5, color: 'var(--dim)' }}>This library is being wired up in the New Design build.</div>
-        </div>
-      )}
+      {/* Supps — affiliate multi-select + honest iHerb buy flow (item 4) */}
+      {S.stackTab === 'supps' && <SuppsSection query={query} />}
     </div>
   );
 }

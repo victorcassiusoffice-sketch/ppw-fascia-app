@@ -26,7 +26,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(__dirname, '..');
 const targetPath = join(repoRoot, 'src', 'config', 'affiliates.json');
 
-const DEFAULT_VAULT_PATH = 'C:/Users/Victor/Documents/PPW-Second-Brain/06-Roadmap/affiliate-dept/affiliate-registry.json';
+// 2026-07-07 (Vic supps item 2a): corrected path — registry lives under
+// marketing-dept/affiliate-dept/, not affiliate-dept/ (was silently never syncing).
+const DEFAULT_VAULT_PATH = 'C:/Users/Victor/Documents/PPW-Second-Brain/06-Roadmap/marketing-dept/affiliate-dept/affiliate-registry.json';
 const sourcePath = process.env.PPW_AFFILIATE_REGISTRY || DEFAULT_VAULT_PATH;
 
 if (!existsSync(sourcePath)) {
