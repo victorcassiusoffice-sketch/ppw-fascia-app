@@ -6,7 +6,12 @@ The app has no backend and no user accounts (`localStorage`-only PWA). Premium i
 - `src/app5/screens/SettingsScreen.jsx:169`
 - `src/app5/screens/UpsellModal.jsx:37-39`
 
-Price shown in-app: **$4.99/month** (`PREM_PRICE` constant, duplicated in both `UpsellModal.jsx:10` and `LibraryScreen.jsx:215`).
+**PRICE CHANGE — action required.** The app's code still shows the OLD price, **$4.99/month** (`PREM_PRICE` constant, duplicated in both `UpsellModal.jsx:10` and `LibraryScreen.jsx:215`). The Gumroad product has been finalized at a NEW, higher price with 3 tiers:
+- Monthly: **$9.99**
+- 6 months: **$47.94** total (billed once every 6 months — works out to $7.99/mo)
+- Yearly: **$59.88** total (billed once a year — works out to $4.99/mo)
+
+Update `PREM_PRICE` in both files to `'$9.99'` to match the monthly tier (the price actually shown pre-checkout in the app's upsell UI). If the UI is extended to show the 6-month/yearly options too, use the totals above, not the per-month rates, to match what Gumroad actually charges at each interval.
 
 A Gumroad membership product has been created (hidden — not on any public profile section, reachable only by direct permalink). Vic will supply the permalink/product URL once created.
 
