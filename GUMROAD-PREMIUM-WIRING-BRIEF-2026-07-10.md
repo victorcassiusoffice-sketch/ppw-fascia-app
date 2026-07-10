@@ -1,40 +1,44 @@
-# Wire Fascia App premium to Gumroad — brief for App Coder
+# Fascia App Premium — professional auto-unlock via backend (approach A)
 
-## Context
+> **Decision 2026-07-10 (Vic): approach A — the proper way.** NOT the license-key-paste stopgap. Pay on Gumroad → account auto-upgrades to premium; cancel → auto-downgrades; cross-device; nothing to paste. This supersedes the earlier license-key version of this brief.
 
-The app has no backend and no user accounts (`localStorage`-only PWA). Premium is currently a manual test toggle (`src/lib/entitlement.js`) with two explicit seam points marked in code:
-- `src/app5/screens/SettingsScreen.jsx:169`
-- `src/app5/screens/UpsellModal.jsx:37-39`
+## The foundation already exists
 
-**PRICE CHANGE — action required.** The app's code still shows the OLD price, **$4.99/month** (`PREM_PRICE` constant, duplicated in both `UpsellModal.jsx:10` and `LibraryScreen.jsx:215`). The Gumroad product has been finalized at a NEW, higher price with 3 tiers:
-- Monthly: **$9.99**
-- 6 months: **$47.94** total (billed once every 6 months — works out to $7.99/mo)
-- Yearly: **$59.88** total (billed once a year — works out to $4.99/mo)
+The `ppw-wellness-assistant` repo already contains the professional backend this needs — do NOT build accounts/billing from scratch:
+- `api/_lib/auth.ts` — real user accounts + entitlement field on `users`
+- `api/_lib/billing.ts` — **provider-agnostic** billing core. `applySubscription()` is the single place that flips `users.entitlement` between `paid`/`expired` from a normalised payment event. Idempotent, webhook-driven. Already has PayPal + Lemon Squeezy adapters (`billing-paypal.ts`, `billing-lemonsqueezy.ts`).
+- `api/_lib/db.ts` + `schema.sql` — Neon Postgres, `users` + `subscriptions` tables
+- Decision on record: **App + Assistant = one app** (2026-06-24). This backend is the app's backend.
 
-Update `PREM_PRICE` in both files to `'$9.99'` to match the monthly tier (the price actually shown pre-checkout in the app's upsell UI). If the UI is extended to show the 6-month/yearly options too, use the totals above, not the per-month rates, to match what Gumroad actually charges at each interval.
+## The build (App Coder / backend session)
 
-A Gumroad membership product has been created (hidden — not on any public profile section, reachable only by direct permalink). Vic will supply the permalink/product URL once created.
+1. **Add a Gumroad adapter** — `api/_lib/billing-gumroad.ts`, modelled on `billing-paypal.ts`/`billing-lemonsqueezy.ts`. It receives Gumroad's webhook (Gumroad "Ping" / resource-subscription events), normalises to the `Canon` type (`active`/`canceled`/`expired`), and calls `applySubscription()`. **Confirm exact Gumroad subscription webhook event names + payload at build time** (sale, subscription_ended, subscription_updated, cancellation, refund — verify against Gumroad's current docs; do not assume). Route it through `api/router.ts`.
+   - Note: the existing PayPal + Lemon Squeezy rails are effectively dead for PPW (LS denied, PayPal limited) — Gumroad is the live rail, so this adapter is the one that matters.
+2. **Connect the Fascia App to the backend for auth + entitlement.** The app is currently a localStorage-only PWA (`src/lib/entitlement.js` reads a local flag). Replace the local `isProMember()` source with a server-read of the logged-in user's `entitlement` (via the assistant backend's auth/session), keeping `isProMember()` as the single seam so nothing else in the app changes. Since App + Assistant are one app, the app gains the assistant's login.
+3. **Wire the two premium seam points** (`SettingsScreen.jsx:169`, `UpsellModal.jsx:37-39`): the "Enable Premium" button becomes a real Gumroad checkout link (opens the hidden membership product's permalink — Vic supplies it). On return, the app just reads server entitlement — the webhook will have flipped it. No key-pasting.
+4. **Update the in-app price.** `PREM_PRICE` is `'$4.99'` in both `UpsellModal.jsx:10` and `LibraryScreen.jsx:215`. Change to `'$9.99'` (the new monthly tier). If 6-month/yearly are shown, use totals $47.94 / $59.88, not per-month rates.
+5. Remove/hide the manual test toggle (or gate behind a dev flag) once server entitlement is live.
 
-## Recommended approach: Gumroad License Keys (no login system needed)
+## Gumroad product (Vic — mostly done)
 
-This fits the existing no-backend architecture with zero new infra — do NOT build a login/account system.
+Membership product "PPWellness App — Premium Service" created, hidden (not on any profile section). Pricing: **$9.99/mo · $47.94/6mo · $59.88/yr**. Keep it a DRAFT (don't Publish) until the webhook + backend are live. License-key generation is NOT needed for approach A (webhook does the unlock, not a pasted key).
 
-1. On the Gumroad product: enable **"Generate a unique license key per sale."**
-2. Replace the two seam-point buttons with:
-   - A real checkout link → opens the Gumroad product's direct permalink (new tab)
-   - A **"Redeem license key"** input field for the user to paste their key after purchase
-3. On redemption, call Gumroad's public license verification endpoint:
-   `POST https://api.gumroad.com/v2/licenses/verify`
-   with the product permalink + the entered key (public endpoint, no auth token needed).
-   Store the key in `localStorage` alongside the existing `LS_KEYS.ENTITLEMENT` pattern.
-4. **Re-verify periodically** (e.g. on app launch) using the stored key. Gumroad's verify response includes subscription-status fields — confirm exact field names against Gumroad's current API docs at build time (going from general knowledge here, verify before relying on it). A cancelled/ended subscription detected this way should call `setPremium(false)`.
-5. Handle offline gracefully: cache last-known-good status, re-check when back online rather than revoking premium on a single failed network call.
-6. Remove/hide the "Manual test switch" note and dev-only toggle once real wiring is live (or gate it behind a dev flag).
+## Vic gates — infra provisioning (the real blocker for approach A)
 
-## Not required
-- No backend server
-- No login/password system
-- No webhook receiver (the periodic re-verify pattern covers cancellation detection without needing Gumroad's server-side webhooks)
+Approach A only works once the assistant backend is actually deployed. Full runbook: `ppw-wellness-assistant/docs/P0-PROVISIONING.md`. The Vic-only account/key steps:
+- **Neon Postgres** — create a free EU project, copy the pooled `DATABASE_URL`
+- **Secrets** — generate `JWT_SECRET`, `ENCRYPTION_KEY`, `CRON_SECRET`, `OWNER_SETUP_TOKEN` (commands in the runbook)
+- **Vercel** — link/create a separate Hobby project, set env vars (token already in `junk files`)
+- **Anthropic API key** — only needed for the Assistant *coach* feature; the **payment gateway does not need it**, so it can be deferred if the immediate goal is just premium auto-unlock. Set with a hard spend cap when the coach goes live.
+- **Gumroad webhook URL** — once the backend has a live URL, set Gumroad's Ping/webhook to point at the Gumroad adapter's endpoint.
+
+## Sequence
+Provision backend infra (Vic, P0 runbook) → deploy assistant backend → add Gumroad adapter + webhook (build) → connect app auth/entitlement (build) → point Gumroad webhook at the live endpoint (Vic) → test a real purchase flips premium → publish the Gumroad product.
+
+## Build discipline (binding)
+- Branch-only, no deploy to production without Vic GATE-2. $0 net-new cost (free tiers only).
+- Verify-before-claim: confirm Gumroad's actual webhook events + payload against live docs; confirm entitlement flips end-to-end with a real test purchase before calling it done.
+- Split gates: GATE-1 = build + tests + render-verify green on a branch; GATE-2 = Vic ships + a real purchase flips premium live.
 
 ---
-*Prepared by Priority Guide session, 2026-07-10. Companion ledger row: RG-02 in `06-Roadmap/agentix-os/MASTER-LEDGER.json`.*
+*Prepared by Priority Guide session, 2026-07-10. Companion ledger row: RG-02 in `06-Roadmap/agentix-os/MASTER-LEDGER.json`. Approach A chosen by Vic 2026-07-10.*
