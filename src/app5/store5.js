@@ -291,6 +291,9 @@ export function deleteSelected() {
   saveStacks();
 }
 // ── Protocols from the build-time bundled manifest (Vic item 1) ──
+// Upsell copy shown when a non-Premium user taps a `monetised` protocol. Free
+// protocols never hit this — they open for everyone as a lead magnet.
+export const PREMIUM_PROTOCOL_UPSELL = 'This protocol is part of Premium. Unlock to open the full PDF and add it to any day.';
 let _protocolsLoaded = false;
 export async function loadProtocols() {
   if (_protocolsLoaded) return;

@@ -80,10 +80,15 @@ for (const p of all) {
   const srcPdf = join(SRC_DIR, 'protocols', filename);
   if (!existsSync(srcPdf)) reasons.push('pdf-missing');
   if (reasons.length) { excluded.push({ id: p.id, filename, why: reasons.join(', ') }); continue; }
+  // `register` (catalog: 'free' | 'monetised') is the monetisation signal — a
+  // free protocol opens for everyone (lead magnet), a monetised one is gated
+  // behind Premium in the app. Carry it through so the client can honour it;
+  // anything not explicitly 'monetised' is treated as free (fail-open to visible).
+  const register = String(p.register || 'free').toLowerCase() === 'monetised' ? 'monetised' : 'free';
   shipped.push({
     id: p.id, slug: p.slug || p.id, title: p.title, filename,
     category: p.category || '', tags: Array.isArray(p.tags) ? p.tags : [],
-    version: p.version || '1', url: 'protocols/pdf/' + filename,
+    version: p.version || '1', register, url: 'protocols/pdf/' + filename,
   });
 }
 

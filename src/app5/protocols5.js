@@ -29,6 +29,8 @@ export async function fetchProtocols() {
       category: String(p.category || ''),
       tags: Array.isArray(p.tags) ? p.tags : [],
       version: String(p.version || '1'),
+      // 'monetised' → Premium-gated in the Library; anything else → free/open.
+      register: p.register === 'monetised' ? 'monetised' : 'free',
       url: base + String(p.url || ''), // resolve bundled PDF to an absolute app URL
     })).filter((p) => p.id && p.title && p.url);
     return { status: 'ready', list };

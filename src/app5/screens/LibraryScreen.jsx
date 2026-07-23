@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { THUMBS } from '../theme5.js';
-import { useStore5, setTab, addToStack, setUpsell, openPlayer, createRoutine, deleteRoutine, updateRoutine, routineToMd, itemFromUrl, openSchedule, loadProtocols } from '../store5.js';
+import { useStore5, setTab, addToStack, setUpsell, openPlayer, createRoutine, deleteRoutine, updateRoutine, routineToMd, itemFromUrl, openSchedule, loadProtocols, PREMIUM_PROTOCOL_UPSELL } from '../store5.js';
 import { TILE_ICONS, DOC_ACCEPT } from './AddSheet.jsx';
 import { saveFile } from '../files5.js';
 import { protocolToItem } from '../protocols5.js';
@@ -245,22 +245,38 @@ function MediaRow({ it }) {
   );
 }
 
-// Protocol row — cleared PDF from the build-time bundle; View opens it, the
-// calendar disc schedules it onto a day.
+// Protocol row — cleared PDF from the build-time bundle. Free protocols open for
+// everyone (View → PDF, calendar disc → schedule onto a day). A `monetised`
+// protocol (catalog register) is Premium-gated: for a non-Premium user the row
+// shows a lock and both actions route to the upsell instead of opening. Premium
+// members (and every free protocol) behave exactly as before.
 function ProtocolRow({ p }) {
+  const S = useStore5();
+  const locked = p.register === 'monetised' && !S.premium;
   return (
     <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', minHeight: 76, borderRadius: 24, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)' }}>
-      <div style={{ width: 48, height: 48, flex: 'none', borderRadius: 14, background: 'var(--disc)', border: '1px solid var(--rim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)' }}>
+      <div style={{ position: 'relative', width: 48, height: 48, flex: 'none', borderRadius: 14, background: 'var(--disc)', border: '1px solid var(--rim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)' }}>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h8l4 4v14H6z" /><path d="M14 3v4h4M9.5 12h5M9.5 15.5h5" /></svg>
+        {locked && (
+          <span aria-hidden="true" style={{ position: 'absolute', right: -5, bottom: -5, width: 20, height: 20, borderRadius: 999, background: 'var(--acc-surf)', border: '1px solid var(--acc-rim)', color: 'var(--acc-ink)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--acc-glow)' }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2.5" /><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5" /></svg>
+          </span>
+        )}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 16, fontWeight: 600, letterSpacing: '-.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textShadow: 'var(--emboss)' }}>{p.title}</div>
-        <div style={{ marginTop: 3, fontSize: 13, color: 'var(--dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Protocol · {p.category || 'PPW'}</div>
+        <div style={{ marginTop: 3, fontSize: 13, color: 'var(--dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{locked ? 'Premium · ' : 'Protocol · '}{p.category || 'PPW'}</div>
       </div>
-      <a href={p.url} target="_blank" rel="noopener noreferrer" aria-label="View protocol" title="View" style={{ width: 40, height: 40, flex: 'none', borderRadius: 12, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>
-      </a>
-      <AddToStackBtn onClick={() => openSchedule({ type: 'item', item: protocolToItem(p) })} />
+      {locked ? (
+        <button onClick={() => setUpsell(PREMIUM_PROTOCOL_UPSELL)} aria-label={`Unlock ${p.title}`} title="Premium — unlock to open" style={{ width: 40, height: 40, flex: 'none', borderRadius: 12, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2.5" /><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5" /></svg>
+        </button>
+      ) : (
+        <a href={p.url} target="_blank" rel="noopener noreferrer" aria-label="View protocol" title="View" style={{ width: 40, height: 40, flex: 'none', borderRadius: 12, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>
+        </a>
+      )}
+      <AddToStackBtn onClick={() => locked ? setUpsell(PREMIUM_PROTOCOL_UPSELL) : openSchedule({ type: 'item', item: protocolToItem(p) })} />
     </div>
   );
 }
