@@ -5,8 +5,14 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 // Set VITE_BASE_PATH env var to deploy under a subdirectory.
-// Default '/' works for root domain. Set to '/app/' for ppwellness.co/app/
+// Default '/' works for root domain + local dev.
+//   GitHub Pages (staging) : VITE_BASE_PATH=/ppw-fascia-app/   (set by CI)
+//   ppwellness.co (target) : VITE_BASE_PATH=/lifestyle-app/    (npm run build:lifestyle)
 const base = process.env.VITE_BASE_PATH || '/';
+
+// Where the build lands. The lifestyle build writes to its own directory so a
+// subpath build can never overwrite the GitHub Pages `dist/` that CI publishes.
+const outDir = process.env.VITE_OUT_DIR || 'dist';
 
 // Build version — drives the SW cache name so EVERY deploy invalidates the old
 // cache (the root cause of returning PWA users being pinned to a stale build).
@@ -41,9 +47,17 @@ const BUILD_VERSION = computeBuildVersion();
 // serves a stamped copy in dev so the update flow is testable end-to-end.
 function ppwSwVersionPlugin() {
   const TOKEN = /__BUILD_VERSION__/g;
+  // Resolved from Vite rather than hardcoded to 'dist' — the lifestyle build
+  // emits elsewhere, and stamping the wrong directory would ship a service
+  // worker still carrying the literal __BUILD_VERSION__ token (no cache
+  // invalidation, i.e. returning users pinned to a stale build).
+  let resolvedOutDir = outDir;
   return {
     name: 'ppw-sw-version',
     apply: () => true,
+    configResolved(cfg) {
+      resolvedOutDir = cfg.build?.outDir || outDir;
+    },
     // dev: rewrite sw.js on the fly so the dev/preview SW carries a real version
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
@@ -71,7 +85,7 @@ function ppwSwVersionPlugin() {
       // Guard on dist existing — closeBundle can fire while rollup is unwinding
       // a failed build (no output written); writing then ENOENTs and MASKS the
       // real compile error. Skip silently when there's nothing to stamp.
-      const distDir = resolve(process.cwd(), 'dist');
+      const distDir = resolve(process.cwd(), resolvedOutDir);
       if (!existsSync(distDir)) return;
       const swOut = resolve(distDir, 'sw.js');
       if (existsSync(swOut)) {
@@ -101,7 +115,7 @@ export default defineConfig({
     include: ['src/**/*.test.{js,jsx}'],
   },
   build: {
-    outDir: 'dist',
+    outDir,
     assetsDir: 'assets',
     sourcemap: false,
     rollupOptions: {

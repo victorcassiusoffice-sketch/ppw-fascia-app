@@ -20,6 +20,10 @@ import { WELLNESS_ASSISTANT_URL } from '../config.js';
 
 const LS = (k) => 'ppw5.' + k;
 
+// Which app this is, in the backend's app registry (api/_lib/apps.ts). Drives the
+// magic-link email's branding and where that link lands.
+export const APP_ID = 'lifestyle';
+
 // ── GUMROAD PRODUCT SEAM ─────────────────────────────────────────────────────
 // The live permalink for "PPW Lifestyle App — Premium", e.g.
 // 'https://victorix08.gumroad.com/l/ppw-premium'. Stays null until Vic publishes
@@ -147,7 +151,11 @@ async function api(path, { method = 'GET', body, auth = false } = {}) {
 export async function requestSignIn(email) {
   const clean = String(email || '').trim().toLowerCase();
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(clean)) throw new Error('Enter a valid email address.');
-  const r = await api('/api/auth/login', { method: 'POST', body: { email: clean } });
+  // `app` tells the backend which product this is, so the email is branded
+  // "PPWellness Lifestyle App" and its magic link returns HERE rather than to
+  // the Assistant. The backend resolves it through its own registry — it never
+  // accepts a return URL from us.
+  const r = await api('/api/auth/login', { method: 'POST', body: { email: clean, app: APP_ID } });
   if (r?.devToken) {
     await completeSignIn(r.devToken, clean);
     return { completed: true };

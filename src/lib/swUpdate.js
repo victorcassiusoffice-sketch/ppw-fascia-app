@@ -143,7 +143,14 @@ export function registerServiceWorker({ immediate = false } = {}) {
       // updateViaCache:'none' — fetch the SW script itself from the network on
       // every check, never the HTTP cache. Without this a stale sw.js can be
       // served from cache and the new SW never installs (the stuck case).
-      reg = await navigator.serviceWorker.register(swUrl, { updateViaCache: 'none' });
+      // scope is pinned to BASE_URL so the app controls exactly its own subpath
+      // and nothing above it. At the root this is '/' (unchanged); served from
+      // ppwellness.co/lifestyle-app/ it confines the SW to that folder, so it
+      // can never intercept the marketing site around it.
+      reg = await navigator.serviceWorker.register(swUrl, {
+        updateViaCache: 'none',
+        scope: import.meta.env.BASE_URL || '/',
+      });
     } catch (err) {
       console.warn('SW registration failed:', err);
       return null;

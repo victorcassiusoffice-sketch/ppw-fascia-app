@@ -82,7 +82,7 @@ export function buildSlotIcs({ uid, title, dateISO, time, durationMin = 15, desc
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Peak Performance Wellness//PPW Fascia App//EN',
+    'PRODID:-//Peak Performance Wellness//PPWellness Lifestyle App//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',

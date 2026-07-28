@@ -352,7 +352,7 @@ export function routineToMd(r) {
   const lines = [
     `# ${r.name}`,
     '',
-    `PPW Routine · ${r.items.length} stack${r.items.length === 1 ? '' : 's'} · shared from the PPW Fascia App`,
+    `PPW Routine · ${r.items.length} stack${r.items.length === 1 ? '' : 's'} · shared from the PPWellness Lifestyle App`,
     '',
     'To use it: open the app → ＋ Add → **Import routine** → pick this file.',
     '',

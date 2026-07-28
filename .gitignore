@@ -48,3 +48,4 @@ scripts/_evidence/
 # Screenshot/verify artifacts + local worktrees
 .shots/
 .claude/worktrees/
+dist-lifestyle/

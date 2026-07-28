@@ -10,6 +10,7 @@
     "prebuild": "node tools/sync-affiliates.mjs && node tools/sync-supps-affiliates.mjs && node tools/sync-protocols.mjs",
     "build": "vite build",
     "build:gh": "VITE_BASE_PATH=/ppw-fascia-app/ vite build",
+    "build:lifestyle": "node tools/build-lifestyle.mjs",
     "preview": "vite preview",
     "sync-affiliates": "node tools/sync-affiliates.mjs",
     "add-media": "node tools/add_media.js",

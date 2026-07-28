@@ -1,6 +1,6 @@
 {
-  "name": "PPW Lifestyle App",
-  "short_name": "PPW Lifestyle",
+  "name": "PPWellness Lifestyle App",
+  "short_name": "PPWellness Lifestyle",
   "description": "Fascia therapy + protocol-driven daily routines, by Peak Performance Wellness.",
   "start_url": "./today",
   "scope": "./",

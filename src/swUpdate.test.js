@@ -90,7 +90,13 @@ describe('registerServiceWorker', () => {
 
     await registerServiceWorker({ immediate: true });
 
-    expect(container.register).toHaveBeenCalledWith(expect.stringContaining('sw.js'), { updateViaCache: 'none' });
+    // scope is pinned to BASE_URL (2026-07-28) so that when the app is served
+    // from ppwellness.co/lifestyle-app/ its service worker controls that folder
+    // and NOT the marketing site around it.
+    expect(container.register).toHaveBeenCalledWith(
+      expect.stringContaining('sw.js'),
+      { updateViaCache: 'none', scope: import.meta.env.BASE_URL || '/' },
+    );
     expect(reg.update).toHaveBeenCalled();
   });
 
