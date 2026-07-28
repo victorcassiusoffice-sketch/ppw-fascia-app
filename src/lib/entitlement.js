@@ -1,6 +1,16 @@
 // Pro/premium entitlement — client-side gate for Pro-only surfaces (the Wellness
 // Assistant launch button).
 //
+// ⚠ DO NOT GATE A PAID FEATURE ON THIS (2026-07-28). This is a local flag; anyone
+// can set ppw.entitlement='pro' in DevTools. It is safe only because the one thing
+// it touches — the Assistant launch button — costs nothing to reveal (the Assistant
+// service enforces its own paywall before spending a token).
+//
+// PAID features (routines, unlimited stacks, monetised protocol PDFs, the orb) use
+// a DIFFERENT, server-verified seam: `S.premium` in app5/store5.js, hydrated by
+// app5/membership.js from GET /api/me/entitlement. Gating anything monetised here
+// instead would re-open gap G3 — the bypass that made the whole paywall free.
+//
 // This app has no backend/auth of its own (localStorage-only PWA), so "is this a
 // Pro member?" is read from a local marker. That is a UI gate, NOT a security
 // boundary: the real spend boundary lives in the separate Assistant service, which
