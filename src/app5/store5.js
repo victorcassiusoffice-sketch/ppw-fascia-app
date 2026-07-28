@@ -11,6 +11,7 @@
 // ─────────────────────────────────────────────────────────────────────────
 
 import { useSyncExternalStore } from 'react';
+import { cachedPremium, fetchEntitlement, isSignedIn, signOut as membershipSignOut } from './membership.js';
 
 const LS = (k) => 'ppw5.' + k;
 
@@ -102,7 +103,13 @@ function initialState() {
     if (g('skin')) def.skin = g('skin');
     if (g('gelBg') && g('gelBg') !== 'custom') def.gelBg = g('gelBg');
     if (g('intensity')) def.intensity = g('intensity');
-    if (g('premium') === '1') def.premium = true;
+    // PREMIUM (G3, 2026-07-28): NOT hydrated from a bare localStorage flag any
+    // more. `ppw5.premium` used to be the whole paywall — set it to '1' in
+    // DevTools and everything unlocked. It is now only a mirror of the last
+    // server answer; cachedPremium() re-checks that the user is still signed in,
+    // that the value came from a verified /api/me/entitlement read, that it isn't
+    // stale, and that the paid period hasn't lapsed. Only the server grants Premium.
+    def.premium = cachedPremium();
     if (g('orbTip') === '1') def.orbTipSeen = true;
     if (g('onboarded') === '1') def.onboarded = true;
     if (g('terms') === '1') def.termsOk = true;
@@ -267,6 +274,14 @@ export function saveRoutines(list) {
   try { localStorage.setItem(LS('routines'), JSON.stringify(list)); } catch {}
 }
 export function createRoutine(name, items) {
+  // G1 (2026-07-28): the store enforces this, not just the UI. LibraryScreen hides
+  // the builder from free users, but hiding a button is not a paywall — anything
+  // that can reach this function (a stale view, a future caller, the console) was
+  // able to create routines for free until this guard existed.
+  if (!state.premium) {
+    setState({ premiumUpsell: 'Routines are part of Premium — bundle stacks and drop them onto any day in one tap.' });
+    return null;
+  }
   const r = { id: 'rt' + Date.now().toString(36), name: String(name).trim(), items };
   saveRoutines([...state.routines, r]);
   return r;
@@ -619,7 +634,36 @@ export function setTheme(patch) {
   Object.entries(patch).forEach(([k, v]) => save(k, v));
   setState(patch);
 }
-export function setPremium(on) { save('premium', on ? '1' : '0'); setState({ premium: !!on }); }
+// ── membership (server-verified) ──────────────────────────────────────────────
+// There is no setPremium(true) any more. Premium is whatever the backend last
+// said it was; the only way into that state is a real, verified purchase.
+
+/** Apply a verified answer from /api/me/entitlement. */
+export function applyServerEntitlement(ent) {
+  setState({ premium: !!(ent && ent.premium) });
+  return !!(ent && ent.premium);
+}
+
+/**
+ * Ask the server what this user is entitled to and unlock accordingly. Safe to
+ * call on boot, on app-resume and after sign-in. Signed-out users are free-tier
+ * with no network call at all. If the request fails (offline, server down) the
+ * cached value stands — we never lock a paying member out over a dropped request.
+ */
+export async function syncEntitlement() {
+  if (!isSignedIn()) { setState({ premium: cachedPremium() }); return false; }
+  try {
+    return applyServerEntitlement(await fetchEntitlement());
+  } catch {
+    setState({ premium: cachedPremium() });
+    return state.premium;
+  }
+}
+
+export function signOutMembership() {
+  membershipSignOut();
+  setState({ premium: false });
+}
 // general prefs (prototype key encodings)
 export function setSounds(on) { save('sounds', on ? '1' : '0'); setState({ sounds: !!on }); }
 export function setReminders(on) { save('reminders', on ? '1' : '0'); setState({ reminders: !!on }); }

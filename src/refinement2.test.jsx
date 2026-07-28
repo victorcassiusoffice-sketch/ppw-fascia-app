@@ -133,6 +133,10 @@ describe('Settings — New Design appearance mounts', () => {
     fireEvent.click(container.querySelector('button[aria-label="Settings"]'));
     expect(container.textContent).toContain('Theme');
     expect(container.textContent).toContain('Membership');
-    expect(container.querySelector('button[aria-label="Toggle premium"]')).toBeTruthy();
+    // 2026-07-28: the "Toggle premium" switch that used to be asserted here is
+    // GONE on purpose — it unlocked every paid feature in one tap, on any device.
+    // Membership is now an account, so a signed-out user gets a sign-in field.
+    expect(container.querySelector('button[aria-label="Toggle premium"]')).toBeNull();
+    expect(container.querySelector('input[aria-label="Email address"]')).toBeTruthy();
   });
 });

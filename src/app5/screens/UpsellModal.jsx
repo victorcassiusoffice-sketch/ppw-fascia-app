@@ -5,17 +5,13 @@
 // uses — this is the button a real Gumroad checkout replaces later.
 
 import React from 'react';
-import { useStore5, clearUpsell } from '../store5.js';
+import { useStore5, clearUpsell, setState } from '../store5.js';
+import { GUMROAD_URL, PREM_PRICE, PREM_PRICE_NOTE, checkoutUrl, isSignedIn } from '../membership.js';
 
-const PREM_PRICE = '$4.99';
-
-// ── GUMROAD CONFIG ────────────────────────────────────────────────────────────
-// Set this to the live Gumroad product URL once the membership product exists
-// (see _handoff/APP-AI-BRIDGE-BUILD-DOC-2026-07-28.md §5). Until then it stays
-// null and the paywall shows an honest "not yet on sale" note instead of a dead
-// link. NEVER put a licence key or seller token in this file — the bundle ships
-// to every user.
-export const GUMROAD_URL = null;
+// GUMROAD_URL + pricing now live in membership.js (one seam for the paywall, the
+// Library card and the Settings membership panel). Re-exported so anything still
+// importing it from here keeps working.
+export { GUMROAD_URL };
 
 const tick = (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flex: 'none' }}><path d="M20 6 9 17l-5-5" /></svg>
@@ -40,21 +36,29 @@ export default function UpsellModal() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13.5, color: 'var(--ink)' }}>{tick}Always-on Assistant in the corner</div>
         </div>
         <div style={{ marginTop: 18, fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>{PREM_PRICE} <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--dim)' }}>/ month</span></div>
+        <div style={{ marginTop: 2, fontSize: 12, color: 'var(--dim)' }}>{PREM_PRICE_NOTE}</div>
         {/* GUMROAD SEAM (2026-07-28): the old "Enable Premium (test)" button here
-            granted Premium to ANY user in one tap, straight from the paywall —
-            ~100% revenue leakage the moment checkout goes live. Removed. Vic's
-            own testing switch lives in Settings → Membership (a deliberate,
-            out-of-the-way action), so nothing is lost.
-            When Gumroad ships: this becomes the checkout/redeem entry point and
-            calls setPremium(true) ONLY after a verified licence check. */}
+            granted Premium to ANY user in one tap — ~100% revenue leakage the
+            moment checkout went live. Removed.
+            Buying needs an account first: the checkout URL carries app_user_id so
+            the webhook can match the purchase back to this user, and that id only
+            exists once they've signed in. So a signed-out tap routes to Settings →
+            Membership rather than to a checkout that couldn't be attributed. */}
         {GUMROAD_URL ? (
           <a
-            href={GUMROAD_URL}
-            target="_blank"
+            href={isSignedIn() ? (checkoutUrl(GUMROAD_URL) || GUMROAD_URL) : undefined}
+            onClick={(e) => {
+              if (isSignedIn()) return;
+              e.preventDefault();
+              clearUpsell();
+              setState({ screen: 'settings' });
+            }}
+            target={isSignedIn() ? '_blank' : undefined}
             rel="noopener noreferrer"
-            style={{ marginTop: 14, width: '100%', height: 52, borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 700, fontSize: 15, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
+            role="button"
+            style={{ marginTop: 14, width: '100%', height: 52, borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 700, fontSize: 15, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', cursor: 'pointer' }}
           >
-            Go Premium
+            {isSignedIn() ? 'Go Premium' : 'Sign in to go Premium'}
           </a>
         ) : (
           <div style={{ marginTop: 14, width: '100%', minHeight: 52, borderRadius: 16, border: '1px dashed var(--hairline)', color: 'var(--dim)', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px 14px', textAlign: 'center', lineHeight: 1.45 }}>

@@ -12,6 +12,7 @@ import { TILE_ICONS, DOC_ACCEPT } from './AddSheet.jsx';
 import { saveFile } from '../files5.js';
 import { protocolToItem } from '../protocols5.js';
 import SuppsSection from './SuppsSection.jsx';
+import { PREM_PRICE } from '../membership.js';
 
 // small calendar "Add to Stack" disc — opens SchedulePicker to pick the day
 const ICal = <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="2.5" /><path d="M3.5 9.5h17M8 3.5v3M16 3.5v3M12 13v4M10 15h4" /></svg>;
@@ -212,7 +213,6 @@ function RoutineBuilder({ query = '' }) {
   );
 }
 
-const PREM_PRICE = '$4.99';
 const TABS = [
   { key: 'routines', label: 'Routines' },
   { key: 'media', label: 'Media' },

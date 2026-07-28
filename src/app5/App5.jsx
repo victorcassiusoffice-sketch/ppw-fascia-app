@@ -31,7 +31,9 @@ import {
   openAdd, backToToday, openPlayer, openCompleted, openRepeat, repeatLabel,
   startSlotEngine, orderedStackFor, reorderTimed, reorderDeck, toggleAuto,
   toggleSelect, selectAll, clearSelection, deleteSelected, safeUrl,
+  syncEntitlement, applyServerEntitlement,
 } from './store5.js';
+import { completeSignIn } from './membership.js';
 import { installPressSound } from './sfx5.js';
 
 // ── small inline-SVG icon helpers (match the prototype's line icons) ──
@@ -370,6 +372,30 @@ export default function App5() {
   React.useEffect(() => startSlotEngine(), []);
   // global press sound — soft ASMR tap on any interactive press (Sounds-gated).
   React.useEffect(() => installPressSound(), []);
+
+  // MEMBERSHIP — the server is the authority on Premium, so ask it on boot and
+  // whenever the app comes back to the foreground (a purchase or a cancellation
+  // may have landed while it was backgrounded). Signed-out users make no request.
+  // A magic-link lands back here as ?login_token=… — consume it, then strip it
+  // from the URL so a one-time code never sits in history or gets shared.
+  React.useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const url = new URL(window.location.href);
+        const lt = url.searchParams.get('login_token');
+        if (lt) {
+          url.searchParams.delete('login_token');
+          window.history.replaceState({}, '', url.pathname + url.search + url.hash);
+          await completeSignIn(lt).then(applyServerEntitlement).catch(() => {});
+        }
+      } catch {}
+      if (alive) await syncEntitlement();
+    })();
+    const onVisible = () => { if (document.visibilityState === 'visible') syncEntitlement(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => { alive = false; document.removeEventListener('visibilitychange', onVisible); };
+  }, []);
 
   let body;
   if (S.screen === 'stack') body = <StackScreen />;

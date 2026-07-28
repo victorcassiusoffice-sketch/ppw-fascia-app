@@ -6,7 +6,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, cleanup, screen, waitFor, act } from '@testing-library/react';
 import { LazyMotion, domAnimation } from 'motion/react';
 import { fetchProtocols } from './protocols5.js';
-import { setState, setPremium, setTab } from './store5.js';
+import { setState, applyServerEntitlement, setTab } from './store5.js';
 import LibraryScreen from './screens/LibraryScreen.jsx';
 
 const manifest = {
@@ -50,7 +50,7 @@ describe('protocols5.fetchProtocols — register pass-through', () => {
 });
 
 describe('LibraryScreen Protocols tab — premium gate', () => {
-  beforeEach(() => { localStorage.clear(); setPremium(false); setTab('protocols'); stubFetch(manifest); });
+  beforeEach(() => { localStorage.clear(); applyServerEntitlement({ premium: false }); setTab('protocols'); stubFetch(manifest); });
   afterEach(() => { vi.unstubAllGlobals(); cleanup(); });
 
   it('opens free protocols for everyone but locks monetised ones for non-Premium users', async () => {
@@ -66,8 +66,8 @@ describe('LibraryScreen Protocols tab — premium gate', () => {
     expect(screen.getByLabelText('Unlock Premium Testosterone Protocol')).toBeTruthy();
     expect(screen.queryByText(/^Premium ·/)).toBeTruthy(); // subtitle flips to "Premium ·"
 
-    // grant Premium → the monetised protocol now opens like any other
-    act(() => setPremium(true));
+    // server says paid → the monetised protocol now opens like any other
+    act(() => applyServerEntitlement({ premium: true }));
     await waitFor(() => expect(screen.getAllByLabelText('View protocol').length).toBe(2));
     expect(screen.queryByLabelText('Unlock Premium Testosterone Protocol')).toBeNull();
   });

@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { SOFT, BGS, bgUrl } from '../theme5.js';
-import { useStore5, setTheme, setState, setPremium, openTerms, setSounds, setReminders, setAutoplay, setA11y } from '../store5.js';
+import { useStore5, setTheme, setState, openTerms, setSounds, setReminders, setAutoplay, setA11y } from '../store5.js';
+import MembershipCard from './MembershipCard.jsx';
 
 // glass pill toggle (the prototype's 60×34 switch)
 function Switch({ on, onTap, label }) {
@@ -149,25 +150,11 @@ export default function SettingsScreen() {
         </div>
       </div>
 
-      {/* Membership — Premium toggle (New Design's own flag; wired to store5.setPremium) */}
+      {/* Membership — real accounts + server-verified Premium (2026-07-28).
+          The manual toggle that used to live here unlocked every paid feature in
+          one tap, on any device. It is gone: Premium now comes from the backend. */}
       <Eyebrow>Membership</Eyebrow>
-      <div style={{ position: 'relative', marginTop: 12, borderRadius: 24, overflow: 'hidden', padding: 18, background: S.premium ? 'var(--acc-surf)' : 'var(--surface)', border: `1px solid ${S.premium ? 'var(--acc-rim)' : 'var(--rim)'}`, boxShadow: 'var(--elev)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
-            <span style={{ width: 44, height: 44, flex: 'none', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,.2)', border: `1px solid ${S.premium ? 'var(--acc-rim)' : 'var(--rim)'}`, color: S.premium ? 'var(--acc-ink)' : 'var(--ink)' }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-1.8 10H4.8L3 8z" /></svg>
-            </span>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 16, fontWeight: 700, color: S.premium ? 'var(--acc-ink)' : 'var(--ink)', textShadow: 'var(--emboss)' }}>Premium{S.premium ? ' · active' : ''}</div>
-              <div style={{ marginTop: 2, fontSize: 12.5, color: S.premium ? 'rgba(255,255,255,.82)' : 'var(--dim)' }}>Routines, unlimited stacks, always-on Assistant</div>
-            </div>
-          </div>
-          <button onClick={() => setPremium(!S.premium)} aria-label="Toggle premium" style={{ position: 'relative', width: 60, height: 34, flex: 'none', borderRadius: 999, border: `1px solid ${S.premium ? 'var(--acc-rim)' : 'var(--hairline)'}`, background: S.premium ? 'rgba(255,255,255,.32)' : 'var(--track)', boxShadow: 'var(--inset)' }}>
-            <span style={{ position: 'absolute', top: 3, left: 3, width: 26, height: 26, borderRadius: 999, background: 'var(--thumb)', border: '1px solid var(--rim)', boxShadow: '0 3px 8px rgba(40,50,70,.25)', transform: `translateX(${S.premium ? 26 : 0}px)`, transition: 'transform .38s cubic-bezier(.3,1.3,.4,1)' }} />
-          </button>
-        </div>
-        <div style={{ marginTop: 12, fontSize: 11, lineHeight: 1.5, color: S.premium ? 'rgba(255,255,255,.82)' : 'var(--dim)' }}>Manual test switch — no payment gateway wired yet. In code this is one <code>premium</code> flag (ppw5.premium), ready to wire to Gumroad checkout without touching anything else.</div>
-      </div>
+      <MembershipCard />
 
       {/* About */}
       <Eyebrow>About</Eyebrow>
