@@ -30,7 +30,7 @@ import {
   stackFor, todayKey, markDone, setItemTime, deleteItem, overLimit,
   openAdd, backToToday, openPlayer, openCompleted, openRepeat, repeatLabel,
   startSlotEngine, orderedStackFor, reorderTimed, reorderDeck, toggleAuto,
-  toggleSelect, selectAll, clearSelection, deleteSelected,
+  toggleSelect, selectAll, clearSelection, deleteSelected, safeUrl,
 } from './store5.js';
 import { installPressSound } from './sfx5.js';
 
@@ -229,8 +229,8 @@ function StackScreen() {
             {repeatLabel(next.repeat)}
           </button>
           <div style={{ marginTop: 18, display: 'flex', alignItems: 'center', gap: 10 }}>
-            {next.url && (
-              <a href={next.url} target="_blank" rel="noopener noreferrer" aria-label="Play now" style={{ height: 48, width: 52, flex: 'none', borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{IPlay}</a>
+            {safeUrl(next.url) && (
+              <a href={safeUrl(next.url)} target="_blank" rel="noopener noreferrer" aria-label="Play now" style={{ height: 48, width: 52, flex: 'none', borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{IPlay}</a>
             )}
             {/* 2026-07-06 (Vic): icon-only tick — the "Done" text sat flush to the button edge. */}
             <button onClick={() => markDone(next.id, key)} aria-label="Done" title="Done" style={{ flex: 1, height: 48, borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', boxShadow: 'var(--acc-glow)', color: 'var(--acc-ink)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

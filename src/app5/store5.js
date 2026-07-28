@@ -355,6 +355,21 @@ export function routineToMd(r) {
   ];
   return lines.join('\n');
 }
+// SECURITY (2026-07-28): only absolute http(s) URLs may ever reach an <a href>
+// or an <iframe src>. Item urls arrive from THREE untrusted places — an imported
+// .md routine (someone else's file), a pasted share link, and (soon) an
+// AI-generated plan — and are rendered raw in App5.jsx / MediaViewer.jsx. A
+// `javascript:` or `data:` url there executes on tap. Strict allow-list: the
+// string must literally begin with http:// or https://, so javascript:, data:,
+// vbscript:, blob:, and protocol-relative //evil.com are all rejected.
+export function safeUrl(u) {
+  if (typeof u !== 'string') return undefined;
+  const s = u.trim();
+  if (!/^https?:\/\//i.test(s)) return undefined;
+  try { new URL(s); } catch { return undefined; }
+  return s.slice(0, 500);
+}
+
 export function parseRoutineMd(text) {
   try {
     const m = /```ppw-routine\s*([\s\S]*?)```/.exec(String(text));
@@ -366,9 +381,9 @@ export function parseRoutineMd(text) {
       title: String(it.title || 'Stack').slice(0, 120),
       meta: it.meta ? String(it.meta).slice(0, 120) : undefined,
       thumb: typeof it.thumb === 'string' ? it.thumb.slice(0, 8) : undefined,
-      url: typeof it.url === 'string' ? it.url.slice(0, 500) : undefined,
-      embed: typeof it.embed === 'string' ? it.embed.slice(0, 500) : undefined,
-      thumbUrl: typeof it.thumbUrl === 'string' ? it.thumbUrl.slice(0, 500) : undefined,
+      url: safeUrl(it.url),
+      embed: safeUrl(it.embed),
+      thumbUrl: safeUrl(it.thumbUrl),
       kind: it.kind === 'note' ? 'note' : undefined,
       time: /^\d{1,2}:\d{2}$/.test(it.time || '') ? it.time : undefined,
     }));
@@ -422,7 +437,9 @@ export function parseYouTubeId(url) {
 // build a stack-item SNAPSHOT (no id/time) from a pasted share link — shared
 // by the main ＋ Add and the Routine builder.
 export function itemFromUrl(url) {
-  const raw = String(url || '').trim();
+  // Reject anything that isn't an absolute http(s) link before it can be stored
+  // and later rendered into an <a href> (see safeUrl).
+  const raw = safeUrl(url);
   if (!raw) return null;
   const yt = parseYouTubeId(raw);
   if (yt) return { title: 'YouTube video', meta: 'YouTube', thumb: 'yt', url: raw, embed: 'https://www.youtube.com/embed/' + yt + '?autoplay=1&playsinline=1&rel=0', thumbUrl: 'https://i.ytimg.com/vi/' + yt + '/hqdefault.jpg' };

@@ -5,9 +5,17 @@
 // uses — this is the button a real Gumroad checkout replaces later.
 
 import React from 'react';
-import { useStore5, clearUpsell, setPremium } from '../store5.js';
+import { useStore5, clearUpsell } from '../store5.js';
 
 const PREM_PRICE = '$4.99';
+
+// ── GUMROAD CONFIG ────────────────────────────────────────────────────────────
+// Set this to the live Gumroad product URL once the membership product exists
+// (see _handoff/APP-AI-BRIDGE-BUILD-DOC-2026-07-28.md §5). Until then it stays
+// null and the paywall shows an honest "not yet on sale" note instead of a dead
+// link. NEVER put a licence key or seller token in this file — the bundle ships
+// to every user.
+export const GUMROAD_URL = null;
 
 const tick = (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flex: 'none' }}><path d="M20 6 9 17l-5-5" /></svg>
@@ -16,8 +24,6 @@ const tick = (
 export default function UpsellModal() {
   const S = useStore5();
   if (!S.premiumUpsell) return null;
-
-  const enable = () => { setPremium(true); clearUpsell(); };
 
   return (
     <div style={{ position: 'absolute', inset: 0, zIndex: 47, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 26 }}>
@@ -34,9 +40,27 @@ export default function UpsellModal() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13.5, color: 'var(--ink)' }}>{tick}Always-on Assistant in the corner</div>
         </div>
         <div style={{ marginTop: 18, fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>{PREM_PRICE} <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--dim)' }}>/ month</span></div>
-        {/* GUMROAD SEAM: replace this button's action with the real checkout/redeem
-            flow; on verified purchase call setPremium(true). */}
-        <button onClick={enable} style={{ marginTop: 14, width: '100%', height: 52, borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 700, fontSize: 15, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)' }}>Enable Premium (test)</button>
+        {/* GUMROAD SEAM (2026-07-28): the old "Enable Premium (test)" button here
+            granted Premium to ANY user in one tap, straight from the paywall —
+            ~100% revenue leakage the moment checkout goes live. Removed. Vic's
+            own testing switch lives in Settings → Membership (a deliberate,
+            out-of-the-way action), so nothing is lost.
+            When Gumroad ships: this becomes the checkout/redeem entry point and
+            calls setPremium(true) ONLY after a verified licence check. */}
+        {GUMROAD_URL ? (
+          <a
+            href={GUMROAD_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ marginTop: 14, width: '100%', height: 52, borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 700, fontSize: 15, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
+          >
+            Go Premium
+          </a>
+        ) : (
+          <div style={{ marginTop: 14, width: '100%', minHeight: 52, borderRadius: 16, border: '1px dashed var(--hairline)', color: 'var(--dim)', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px 14px', textAlign: 'center', lineHeight: 1.45 }}>
+            Premium isn’t on sale yet — it’s coming soon.
+          </div>
+        )}
         <button onClick={clearUpsell} style={{ marginTop: 6, width: '100%', height: 44, background: 'none', border: 'none', color: 'var(--dim)', fontSize: 14, fontWeight: 600 }}>Not now</button>
       </div>
     </div>

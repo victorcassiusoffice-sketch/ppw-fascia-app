@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { THUMBS } from '../theme5.js';
-import { useStore5, closePlayer } from '../store5.js';
+import { useStore5, closePlayer, safeUrl } from '../store5.js';
 import { fileUrl } from '../files5.js';
 
 export default function MediaViewer() {
@@ -24,18 +24,22 @@ export default function MediaViewer() {
   }, [it && it.id]);
   if (!it) return null;
 
-  const poster = it.thumbUrl ? `url(${it.thumbUrl})` : (THUMBS[it.thumb] || THUMBS.au);
-  const openHref = it.kind === 'doc' ? docUrl : it.url;
+  // Defence in depth: items stored before the safeUrl fix (or hand-edited in
+  // localStorage) can still hold a javascript:/data: url. Never render one.
+  const safeThumb = safeUrl(it.thumbUrl);
+  const safeEmbed = safeUrl(it.embed);
+  const poster = safeThumb ? `url(${safeThumb})` : (THUMBS[it.thumb] || THUMBS.au);
+  const openHref = it.kind === 'doc' ? docUrl : safeUrl(it.url);
 
   return (
     <div style={{ position: 'absolute', inset: 0, zIndex: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div onClick={closePlayer} style={{ position: 'absolute', inset: 0, background: 'rgba(20,26,38,.5)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', animation: 'ppwFade .3s ease both' }} />
       <div style={{ position: 'relative', width: '100%', borderRadius: 28, padding: 18, background: 'var(--surface-strong)', backdropFilter: 'var(--blur-heavy)', WebkitBackdropFilter: 'var(--blur-heavy)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', animation: 'ppwSheetIn .45s cubic-bezier(.3,1.3,.4,1) both' }}>
-        {it.embed ? (
-          <iframe src={it.embed} title="Media player" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen style={{ position: 'relative', width: '100%', aspectRatio: '16/9', border: 'none', borderRadius: 18, background: '#000', display: 'block' }} />
+        {safeEmbed ? (
+          <iframe src={safeEmbed} title="Media player" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen style={{ position: 'relative', width: '100%', aspectRatio: '16/9', border: 'none', borderRadius: 18, background: '#000', display: 'block' }} />
         ) : (
           <div aria-hidden="true" style={{ position: 'relative', width: '100%', aspectRatio: '16/9', borderRadius: 18, background: poster, backgroundSize: 'cover', backgroundPosition: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,.9)' }}>
-            {!it.thumbUrl && <svg width="42" height="42" viewBox="0 0 24 24" fill="currentColor"><path d="M9 6.2v11.6l9.4-5.8L9 6.2z" /></svg>}
+            {!safeThumb && <svg width="42" height="42" viewBox="0 0 24 24" fill="currentColor"><path d="M9 6.2v11.6l9.4-5.8L9 6.2z" /></svg>}
           </div>
         )}
         <div style={{ position: 'relative', marginTop: 14, fontSize: 17, fontWeight: 600, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>{it.title}</div>
