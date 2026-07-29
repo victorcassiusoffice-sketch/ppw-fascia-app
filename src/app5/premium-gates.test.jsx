@@ -57,6 +57,57 @@ describe('G3 — boot does not trust a raw localStorage flag', () => {
   });
 });
 
+describe('W11 — updateRoutine is gated too (the last asymmetry)', () => {
+  it('refuses to persist an edit for a free user', async () => {
+    const s = await freshStore();
+    s.applyServerEntitlement({ premium: true });
+    const r = s.createRoutine('Morning', [{ id: 'x', title: 'thing' }]);
+    expect(r).not.toBeNull();
+
+    // the subscription lapses — the routine is still on disk from when they paid
+    s.applyServerEntitlement({ premium: false });
+    const out = s.updateRoutine(r.id, { name: 'Renamed while free' });
+
+    expect(out).toBeNull();
+    expect(s.getState().routines[0].name).toBe('Morning');           // memory untouched
+    expect(JSON.parse(localStorage.getItem('ppw5.routines'))[0].name).toBe('Morning'); // disk untouched
+    expect(s.getState().premiumUpsell).toMatch(/Premium/);
+  });
+
+  it('allows the edit once the server says paid', async () => {
+    const s = await freshStore();
+    s.applyServerEntitlement({ premium: true });
+    const r = s.createRoutine('Morning', [{ id: 'x', title: 'thing' }]);
+    expect(s.updateRoutine(r.id, { name: 'Evening' })).toBe(true);
+    expect(s.getState().routines[0].name).toBe('Evening');
+  });
+});
+
+describe('W12 — the free cap is one constant, not eleven literals', () => {
+  it('overLimit tracks FREE_STACK_CAP at its exact boundary', async () => {
+    const s = await freshStore();
+    s.applyServerEntitlement({ premium: false });
+    const deck = (n) => Array.from({ length: n }, (_, i) => ({ id: 'i' + i, title: 't' + i }));
+
+    s.setState({ deckItems: deck(s.FREE_STACK_CAP - 1) });
+    expect(s.overLimit()).toBe(false);
+    s.setState({ deckItems: deck(s.FREE_STACK_CAP) });
+    expect(s.overLimit()).toBe(true);
+  });
+
+  it('the upsell copy is derived from the constant, so they cannot drift', async () => {
+    const s = await freshStore();
+    expect(s.FREE_CAP_UPSELL).toContain(String(s.FREE_STACK_CAP));
+  });
+
+  it('the AI prompt computes its headroom from the same constant', async () => {
+    const s = await freshStore();
+    const { buildPrompt } = await import('./assistant/aiPrompt.js');
+    const prompt = buildPrompt({ deckItems: [], premium: false });
+    expect(prompt).toContain(`room for ${s.FREE_STACK_CAP} more`);
+  });
+});
+
 describe('free-tier limits still apply to non-Premium users', () => {
   it('caps the deck at 10 stacks', async () => {
     const s = await freshStore();

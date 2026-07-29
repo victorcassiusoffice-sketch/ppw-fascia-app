@@ -11,6 +11,8 @@
 // URLs are BANNED outright: models fabricate 11-char YouTube ids, and any url
 // they invent is stripped on import anyway (safeUrl).
 
+import { FREE_STACK_CAP } from '../store5.js';
+
 export const PROMPT_VERSION = 2;
 
 const BASE_PROMPT = `You are my day-planning assistant for an app called PPW Lifestyle App.
@@ -67,14 +69,15 @@ should check with a qualified professional, and keep the plan gentle.`;
 /**
  * buildPrompt(state) — prepends the user's real context + REAL headroom.
  *
- * The free cap is 10 items TOTAL (store5 overLimit), and a fresh install already
- * ships starter items — so telling the AI "plan 10 things" guarantees the upsell
- * wall on first use. Always compute the number from live state.
+ * The free cap is FREE_STACK_CAP items TOTAL (store5 overLimit), and a fresh
+ * install already ships starter items — so telling the AI "plan 10 things"
+ * guarantees the upsell wall on first use. Always compute the number from live
+ * state, and from the shared constant so a cap change lands here too (W12).
  */
 export function buildPrompt(S) {
   const used = (S && Array.isArray(S.deckItems)) ? S.deckItems.length : 0;
   const premium = !!(S && S.premium);
-  const headroom = premium ? 60 : Math.max(1, 10 - used);
+  const headroom = premium ? 60 : Math.max(1, FREE_STACK_CAP - used);
   const days = premium ? 7 : (headroom >= 6 ? 2 : 1);
 
   const bits = [];

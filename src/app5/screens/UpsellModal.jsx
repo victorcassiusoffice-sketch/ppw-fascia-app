@@ -5,7 +5,7 @@
 // uses — this is the button a real Gumroad checkout replaces later.
 
 import React from 'react';
-import { useStore5, clearUpsell, setState } from '../store5.js';
+import { useStore5, clearUpsell, setState, FREE_STACK_CAP } from '../store5.js';
 import { GUMROAD_URL, PREM_PRICE, PREM_PRICE_NOTE, checkoutUrl, isSignedIn } from '../membership.js';
 
 // GUMROAD_URL + pricing now live in membership.js (one seam for the paywall, the
@@ -32,8 +32,15 @@ export default function UpsellModal() {
         <p style={{ margin: '8px 0 0', fontSize: 13.5, lineHeight: 1.55, color: 'var(--dim)' }}>{S.premiumUpsell}</p>
         <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 9, textAlign: 'left' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13.5, color: 'var(--ink)' }}>{tick}Routines — chain many items into one stack</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13.5, color: 'var(--ink)' }}>{tick}Unlimited stacks (free is capped at 10)</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13.5, color: 'var(--ink)' }}>{tick}Always-on Assistant in the corner</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13.5, color: 'var(--ink)' }}>{tick}Unlimited stacks (free is capped at {FREE_STACK_CAP})</div>
+          {/* W15 (2026-07-29): this line used to read "Always-on Assistant in the
+              corner". Nothing in the app is that. The coach is a separate site
+              with its own sign-in and a session token that dies with the tab —
+              selling it as an always-on corner panel is the kind of promise that
+              gets refunded. Replaced with a benefit the store actually enforces:
+              applyRoutineToDate is premium-gated (store5.js), same as
+              createRoutine and updateRoutine. */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13.5, color: 'var(--ink)' }}>{tick}Drop a saved routine onto any day in one tap</div>
         </div>
         <div style={{ marginTop: 18, fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>{PREM_PRICE} <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--dim)' }}>/ month</span></div>
         <div style={{ marginTop: 2, fontSize: 12, color: 'var(--dim)' }}>{PREM_PRICE_NOTE}</div>

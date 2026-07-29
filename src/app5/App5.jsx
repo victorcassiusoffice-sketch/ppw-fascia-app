@@ -94,9 +94,9 @@ function NavDock({ screen, onNav, onAdd }) {
 }
 
 // ── glass round icon button (header discs) ──
-function Disc({ children, onClick, label, badge }) {
+function Disc({ children, onClick, label, badge, dim }) {
   return (
-    <button onClick={onClick} aria-label={label} style={{ position: 'relative', width: 46, height: 46, borderRadius: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--disc)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)', color: 'var(--ink)' }}>
+    <button onClick={onClick} aria-label={label} style={{ position: 'relative', width: 46, height: 46, borderRadius: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--disc)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)', color: 'var(--ink)', opacity: dim ? .45 : 1, transition: 'opacity .3s' }}>
       {children}
       {badge != null && (
         <span style={{ position: 'absolute', top: -3, right: -3, minWidth: 19, height: 19, padding: '0 5px', borderRadius: 999, background: 'var(--acc-surf)', border: '1px solid var(--acc-rim)', color: 'var(--acc-ink)', fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{badge}</span>
@@ -203,7 +203,13 @@ function StackScreen() {
             <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="9" width="14" height="9.5" rx="3.2" /><path d="M12 6v3" /><circle cx="12" cy="4.4" r="1.5" /><circle cx="9.2" cy="13.6" r="1.15" fill="currentColor" stroke="none" /><circle cx="14.8" cy="13.6" r="1.15" fill="currentColor" stroke="none" /><path d="M9.3 16.4h5.4" /><path d="M2.6 12.6v2.8M21.4 12.6v2.8" /></svg>
           </button>
           <Disc label="Completed today" badge={completedCount || null} onClick={openCompleted}>{ICheck}</Disc>
-          <Disc label="Notifications">{IBell}</Disc>
+          {/* W13 (2026-07-29): this was a full-size tappable disc in the primary
+              header with no onClick at all — a dead control sitting next to two
+              live ones. Reminders are a real shipped feature (the slot engine
+              fires them); they just live in Settings. It now goes there, and
+              dims when reminders are OFF so the bell states the truth rather
+              than implying something is armed when nothing is. */}
+          <Disc label="Notifications" onClick={() => setState({ screen: 'settings' })} dim={!S.reminders}>{IBell}</Disc>
         </div>
       </div>
 

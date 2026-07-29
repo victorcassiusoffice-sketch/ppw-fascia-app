@@ -210,7 +210,19 @@ export function stackFor(key) {
 }
 
 // ── stack operations ──
-export function overLimit() { return !state.premium && state.deckItems.length >= 10; }
+// W12 (2026-07-29): the free cap used to be the bare literal `10` at four call
+// sites, with its upsell copy hand-duplicated at seven more. Changing the number
+// meant finding eleven places and getting all of them right. One constant now,
+// and the copy is derived from it so the two can never drift apart.
+//
+// ⚠ This cap is TOTAL, not per-day — `deckItems.length` counts every item on
+// every date, forever (T7). A fresh install ships 4 starter items, so a free
+// user has 6 slots for the life of the app. The copy below deliberately still
+// reads as it shipped; whether that limit and that wording are right is a
+// product decision for Vic, not a refactor.
+export const FREE_STACK_CAP = 10;
+export const FREE_CAP_UPSELL = `You have reached the free limit of ${FREE_STACK_CAP} stacks. Go Premium for unlimited stacks.`;
+export function overLimit() { return !state.premium && state.deckItems.length >= FREE_STACK_CAP; }
 
 export function markDone(id, key = todayKey()) {
   const it = state.deckItems.find((x) => x.id === id);
@@ -291,7 +303,17 @@ export function createRoutine(name, items) {
 export function deleteRoutine(id) { saveRoutines(state.routines.filter((r) => r.id !== id)); }
 // edit a saved routine in place (Vic 1c)
 export function updateRoutine(id, patch) {
+  // W11 (2026-07-29): the last asymmetry in the routines paywall. `createRoutine`
+  // and `applyRoutineToDate` both guard; this did not. Not exploitable today —
+  // its only caller renders behind `S.premium` — but "the UI hides it" is the
+  // exact reasoning the G1 guard above was added to stop relying on. A lapsed
+  // subscriber whose routines are still on disk could otherwise keep editing them.
+  if (!state.premium) {
+    setState({ premiumUpsell: 'Routines are part of Premium — bundle stacks and drop them onto any day in one tap.' });
+    return null;
+  }
   saveRoutines(state.routines.map((r) => r.id === id ? { ...r, ...patch } : r));
+  return true;
 }
 
 // ── stack selection + bulk delete (Vic 4/4b) ──
@@ -329,8 +351,8 @@ export function openSchedule(target) { setState({ scheduleTarget: target }); }
 export function closeSchedule() { setState({ scheduleTarget: null }); }
 // schedule one item snapshot onto an arbitrary date (repeat once, anchored)
 export function addItemToDate(snapshot, dateKey, time = '09:00') {
-  if (!state.premium && state.deckItems.length + 1 > 10) {
-    setState({ premiumUpsell: 'You have reached the free limit of 10 stacks. Go Premium for unlimited stacks.' });
+  if (!state.premium && state.deckItems.length + 1 > FREE_STACK_CAP) {
+    setState({ premiumUpsell: FREE_CAP_UPSELL });
     return { upsell: true };
   }
   const { id, anchor, repeat, ...rest } = snapshot;
@@ -342,7 +364,7 @@ export function addItemToDate(snapshot, dateKey, time = '09:00') {
 
 // add a Document stack to today (file already saved to IndexedDB → fileId)
 export function addDocToToday(name, fileId) {
-  if (overLimit()) { setState({ premiumUpsell: 'You have reached the free limit of 10 stacks. Go Premium for unlimited stacks.' }); return { upsell: true }; }
+  if (overLimit()) { setState({ premiumUpsell: FREE_CAP_UPSELL }); return { upsell: true }; }
   const item = { id: 'doc' + Date.now().toString(36), title: name, meta: 'Document', thumb: 'doc', kind: 'doc', fileId, time: '09:00', repeat: 'daily' };
   setState({ deckItems: [...state.deckItems, item], addedCustom: item });
   saveStacks();
@@ -485,8 +507,8 @@ export function parsePlanDoc(data) {
 export function addItemsToPlan(items) {
   const list = Array.isArray(items) ? items : [];
   if (!list.length) return { ok: false, reason: 'empty' };
-  if (!state.premium && state.deckItems.length + list.length > 10) {
-    setState({ premiumUpsell: 'You have reached the free limit of 10 stacks. Go Premium for unlimited stacks.' });
+  if (!state.premium && state.deckItems.length + list.length > FREE_STACK_CAP) {
+    setState({ premiumUpsell: FREE_CAP_UPSELL });
     return { upsell: true };
   }
   const base = 9 * 60;
@@ -538,8 +560,8 @@ export function parseRoutineMd(text) {
 // bulk-add imported stacks to TODAY (repeat once, staggered from 09:00 when
 // untimed). Free tier: respects the 10-stack cap → upsell.
 export function addItemsToToday(items) {
-  if (!state.premium && state.deckItems.length + items.length > 10) {
-    setState({ premiumUpsell: 'You have reached the free limit of 10 stacks. Go Premium for unlimited stacks.' });
+  if (!state.premium && state.deckItems.length + items.length > FREE_STACK_CAP) {
+    setState({ premiumUpsell: FREE_CAP_UPSELL });
     return { upsell: true };
   }
   const key = todayKey();
@@ -595,7 +617,7 @@ export function addCustomUrl(url) {
   const snap = itemFromUrl(url);
   if (!snap) return { ok: false };
   if (overLimit()) {
-    setState({ premiumUpsell: 'You have reached the free limit of 10 stacks. Go Premium for unlimited stacks.' });
+    setState({ premiumUpsell: FREE_CAP_UPSELL });
     return { upsell: true };
   }
   const item = { ...snap, id: 'u' + Date.now().toString(36), time: '09:00', repeat: 'daily' };
@@ -605,7 +627,7 @@ export function addCustomUrl(url) {
 }
 // add a library item into today's stack (free-tier cap → upsell). Returns bool added.
 export function addToStack(libItem, time = '09:00') {
-  if (overLimit()) { setState({ premiumUpsell: 'You have reached the free limit of 10 stacks. Go Premium for unlimited stacks.' }); return false; }
+  if (overLimit()) { setState({ premiumUpsell: FREE_CAP_UPSELL }); return false; }
   const id = 'l' + Date.now().toString(36);
   const { note, ...rest } = libItem;
   setState({ deckItems: [...state.deckItems, { ...rest, id, time, repeat: 'daily' }] });
@@ -740,7 +762,7 @@ export function setNoteField(patch) { setState(patch); }
 export function addNote() {
   const text = String(state.noteText || '').trim();
   if (!text) return { ok: false };
-  if (overLimit()) { setState({ premiumUpsell: 'You have reached the free limit of 10 stacks. Go Premium for unlimited stacks.' }); return { upsell: true }; }
+  if (overLimit()) { setState({ premiumUpsell: FREE_CAP_UPSELL }); return { upsell: true }; }
   const anim = state.noteAnim || 'still';
   const animLabel = anim.charAt(0).toUpperCase() + anim.slice(1);
   const item = {

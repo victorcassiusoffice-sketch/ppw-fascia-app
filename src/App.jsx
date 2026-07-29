@@ -120,7 +120,11 @@ export default function App() {
 
   // D2 (2026-06-11) — pull Assistant plan ops on launch + on every return to
   // foreground. Silent no-op when unpaired or offline (assistantSync handles it).
-  useEffect(() => initAssistantSync(), []);
+  // 2026-07-29 (W10): this was the ONE legacy effect left unguarded above the
+  // early return, so it kept pumping under the New Design and writing into the
+  // dead `ppw.*` keys. Blast radius was zero only because nobody has ever paired
+  // a device — pairing anyone would have re-armed it. Guarded like line 130.
+  useEffect(() => { if (!NEW_DESIGN_ONLY) return initAssistantSync(); }, []);
 
   // 2026-06-19 — the OLD app's global press-sound. 2026-07-07 (Vic "sound off
   // switch not working"): this kept installing under the New Design too, and it

@@ -1,12 +1,15 @@
 // AddSheet — New Design "Add to your stack" bottom sheet (functional core port).
 //
-// Ported now: the 2×2 tile grid (tiles route to Library filtered), the
-// Assistant CTA (Premium-gated), the Custom-apps quick links, and the real
+// Ported now: the free "Talk to your AI" bridge, the 2×2 tile grid (tiles route
+// to Library filtered), the Custom-apps quick links, and the real
 // paste-a-share-link → adds a media item to today's stack. Deferred: the inline
 // note composer + document upload (need more logic) — tiles still present.
+//
+// The Premium "Assistant — build it for me" CTA was REMOVED 2026-07-29 (W14):
+// it had no builder behind it in either tier. See the note at its old site.
 
 import React from 'react';
-import { useStore5, closeAdd, setCustomUrl, addCustomUrl, goLibrary, setUpsell, openNoteComposer, setNoteField, addNote, parseRoutineMd, addItemsToToday, createRoutine, getState, addDocToToday, openAiBridge } from '../store5.js';
+import { useStore5, closeAdd, setCustomUrl, addCustomUrl, goLibrary, openNoteComposer, setNoteField, addNote, parseRoutineMd, addItemsToToday, createRoutine, getState, addDocToToday, openAiBridge } from '../store5.js';
 import { saveFile } from '../files5.js';
 
 const tsvg = (p) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">{p}</svg>;
@@ -55,12 +58,6 @@ export default function AddSheet() {
   if (!S.addOpen) return null;
   const hasSpeed = S.noteAnim !== 'still';
 
-  const onAssistant = () => {
-    if (!S.premium) { setUpsell('The Assistant is part of Premium — it plans, researches and rebuilds your day, right from this corner.'); return; }
-    // premium: assistant builder is a later port; for now route to Library
-    goLibrary('media');
-  };
-
   return (
     <div style={{ position: 'absolute', inset: 0, zIndex: 30 }}>
       <div onClick={closeAdd} style={{ position: 'absolute', inset: 0, background: 'rgba(30,38,52,.35)', animation: 'ppwFade .3s ease both' }} />
@@ -93,11 +90,14 @@ export default function AddSheet() {
             <span style={{ fontSize: 13, fontWeight: 600 }}>Document</span>
             <input type="file" accept={DOC_ACCEPT} onChange={async (e) => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (!f) return; const fileId = await saveFile(f); addDocToToday(f.name, fileId); }} style={{ display: 'none' }} />
           </label>
-          <button onClick={onAssistant} style={{ gridColumn: '1 / -1', height: 60, borderRadius: 20, border: '1px solid var(--rim)', background: 'var(--surface)', boxShadow: 'var(--elev)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.9 5.6L19.5 10.5l-5.6 1.9L12 18l-1.9-5.6L4.5 10.5l5.6-1.9z" /><path d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z" /></svg>
-            <span style={{ fontSize: 14, fontWeight: 600 }}>Assistant — build it for me</span>
-          </button>
         </div>
+        {/* W14 (2026-07-29): an "Assistant — build it for me" bar used to sit
+            here. It sold a builder that does not exist: free users got an upsell
+            for it, and a PAYING user who tapped it was routed to Library → media.
+            Charging for a button that goes somewhere else is the shape of a
+            refund, so it is gone. The zero-cost "Talk to your AI" bridge at the
+            top of this sheet is the real, shipped path to "build it for me" —
+            and it is free for everyone, which is the better offer anyway. */}
 
         {/* inline affirmation composer */}
         {S.noteOpen && (
