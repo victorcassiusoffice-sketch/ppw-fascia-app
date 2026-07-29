@@ -9,6 +9,7 @@ import React from 'react';
 import { SOFT, BGS, bgUrl } from '../theme5.js';
 import { useStore5, setTheme, setState, openTerms, setSounds, setReminders, setAutoplay, setA11y } from '../store5.js';
 import MembershipCard from './MembershipCard.jsx';
+import { InstallAppCard } from './InstallAppCard.jsx';
 
 // glass pill toggle (the prototype's 60×34 switch)
 function Switch({ on, onTap, label }) {
@@ -155,6 +156,11 @@ export default function SettingsScreen() {
           one tap, on any device. It is gone: Premium now comes from the backend. */}
       <Eyebrow>Membership</Eyebrow>
       <MembershipCard />
+
+      {/* Get the app — Row 15 (L2-LS-DISTRIB): install as a real PWA. Renders
+          nothing once already installed (standalone). */}
+      <Eyebrow>Get the app</Eyebrow>
+      <InstallAppCard />
 
       {/* About */}
       <Eyebrow>About</Eyebrow>

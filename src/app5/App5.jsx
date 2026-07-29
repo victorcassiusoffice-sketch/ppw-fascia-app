@@ -15,6 +15,7 @@ import './app5.css'; // the prototype's keyframes — required for all ppw* anim
 import { themeVars, parseVars, THUMBS } from './theme5.js';
 import SettingsScreen from './screens/SettingsScreen.jsx';
 import LibraryScreen from './screens/LibraryScreen.jsx';
+import { InstallBanner } from './screens/InstallAppCard.jsx';
 import AddSheet from './screens/AddSheet.jsx';
 import UpsellModal from './screens/UpsellModal.jsx';
 import CalendarScreen from './screens/CalendarScreen.jsx';
@@ -203,6 +204,10 @@ function StackScreen() {
           <Disc label="Notifications">{IBell}</Disc>
         </div>
       </div>
+
+      {/* Get the app — Row 15 (L2-LS-DISTRIB). Dismissible; renders nothing
+          once installed or already dismissed. */}
+      <InstallBanner />
 
       {/* NEXT UP hero */}
       {next ? (
