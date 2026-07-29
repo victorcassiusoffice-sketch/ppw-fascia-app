@@ -15,7 +15,7 @@ import { FREE_STACK_CAP } from '../store5.js';
 
 export const PROMPT_VERSION = 2;
 
-const BASE_PROMPT = `You are my day-planning assistant for an app called PPW Lifestyle App.
+const BASE_PROMPT = `You are my day-planning assistant for an app called PPWellness Lifestyle App.
 
 STEP 1 — Ask me these 5 questions in ONE short message, then STOP.
 Do not write any plan until I have replied.

@@ -25,7 +25,7 @@ const LS = (k) => 'ppw5.' + k;
 export const APP_ID = 'lifestyle';
 
 // ── GUMROAD PRODUCT SEAM ─────────────────────────────────────────────────────
-// The live permalink for "PPW Lifestyle App — Premium", e.g.
+// The live permalink for "PPWellness Lifestyle App — Premium", e.g.
 // 'https://victorix08.gumroad.com/l/ppw-premium'. Stays null until Vic publishes
 // the product and confirms the handle — an invented URL would send buyers to a
 // 404 with their card out. While null the paywall shows an honest "not on sale
