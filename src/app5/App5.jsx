@@ -26,6 +26,8 @@ import TermsScreen from './screens/TermsScreen.jsx';
 import OnboardingScreen from './screens/OnboardingScreen.jsx';
 import { NotePopup, SlotReminder } from './screens/Popups.jsx';
 import SchedulePicker from './screens/SchedulePicker.jsx';
+import AiBridgeSheet from './assistant/AiBridgeSheet.jsx';
+import CoachMarks, { hasSeenTour } from './coach/CoachMarks.jsx';
 import {
   useStore5, getState, setState, save,
   stackFor, todayKey, markDone, setItemTime, deleteItem, overLimit,
@@ -77,12 +79,12 @@ function NavDock({ screen, onNav, onAdd }) {
       </div>
       {items.map((it, i) => it.key === null ? (
         <div key="add" style={{ flex: 1, position: 'relative' }}>
-          <button onClick={onAdd} aria-label="Add a stack" style={{ position: 'absolute', left: '50%', top: -22, transform: 'translateX(-50%)', width: 56, height: 56, borderRadius: 999, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', boxShadow: 'var(--acc-glow)', color: 'var(--acc-ink)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <button onClick={onAdd} aria-label="Add a stack" data-tour="add" style={{ position: 'absolute', left: '50%', top: -22, transform: 'translateX(-50%)', width: 56, height: 56, borderRadius: 999, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', boxShadow: 'var(--acc-glow)', color: 'var(--acc-ink)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
           </button>
         </div>
       ) : (
-        <button key={it.key} onClick={() => onNav(it.key)} aria-label={it.label} style={{ position: 'relative', flex: 1, background: 'none', border: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, color: screen === it.key ? 'var(--ink)' : 'var(--dim)', transition: 'color .25s' }}>
+        <button key={it.key} onClick={() => onNav(it.key)} aria-label={it.label} data-tour={it.key} style={{ position: 'relative', flex: 1, background: 'none', border: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, color: screen === it.key ? 'var(--ink)' : 'var(--dim)', transition: 'color .25s' }}>
           {it.icon}
           <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '.02em' }}>{it.label}</span>
         </button>
@@ -211,7 +213,7 @@ function StackScreen() {
 
       {/* NEXT UP hero */}
       {next ? (
-        <div style={{ position: 'relative', marginTop: 24, borderRadius: 28, padding: '22px 22px 20px', background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', animation: 'ppwRise .45s cubic-bezier(.3,1.2,.4,1) both' }}>
+        <div data-tour="next-up" style={{ position: 'relative', marginTop: 24, borderRadius: 28, padding: '22px 22px 20px', background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', animation: 'ppwRise .45s cubic-bezier(.3,1.2,.4,1) both' }}>
           {/* slow accent border-trace (prototype ppwTrace) */}
           <svg aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} preserveAspectRatio="none" viewBox="0 0 100 100">
             <rect x="0.6" y="1.2" width="98.8" height="97.6" rx="7.5" fill="none" vectorEffect="non-scaling-stroke" stroke="var(--accent)" strokeWidth="1.5" pathLength="100" strokeDasharray="100" style={{ animation: 'ppwTrace 2.6s ease-out .4s both' }} />
@@ -372,6 +374,16 @@ export default function App5() {
   const vars = parseVars(themeVars(S));
   const nav = (screen) => setState({ screen });
 
+  // First-run guidance: after onboarding completes, teach over the real UI once.
+  const [tourOpen, setTourOpen] = React.useState(false);
+  React.useEffect(() => {
+    if (!S.onboarded) return;
+    if (hasSeenTour()) return;
+    if (S.aiOpen || S.addOpen || S.termsOpen) return;      // never fight a sheet
+    const t = setTimeout(() => setTourOpen(true), 700);     // let the screen settle
+    return () => clearTimeout(t);
+  }, [S.onboarded, S.aiOpen, S.addOpen, S.termsOpen]);
+
   // runtime slot engine — fires notes/reminders/autoplay when a slot's time
   // arrives (20s tick, ported from the prototype). Cleans up on unmount.
   React.useEffect(() => startSlotEngine(), []);
@@ -430,6 +442,11 @@ export default function App5() {
         <AddSheet />
         <MediaViewer />
         <SchedulePicker />
+        <AiBridgeSheet />
+        <CoachMarks
+          open={tourOpen}
+          onClose={() => setTourOpen(false)}
+        />
         <CompletedSheet />
         <RepeatSheet />
         <SlotReminder />

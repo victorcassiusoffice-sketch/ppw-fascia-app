@@ -60,6 +60,8 @@ function initialState() {
     addOpen: false, customUrl: '', addedCustom: null,
     // library "Add to Stack" calendar picker
     scheduleTarget: null,
+    // AI bridge sheet ("Talk to your AI") — zero-cost paste-prompt flow
+    aiOpen: false,
     // protocols from the GitHub manifest (item 1)
     protocols: [], protocolsStatus: 'idle',
     // note / affirmation composer
@@ -321,6 +323,8 @@ export async function loadProtocols() {
 
 // ── Library "Add to Stack" via calendar picker (Vic item 2) ──
 // scheduleTarget: { type: 'item', item } | { type: 'routine', id } | null
+export function openAiBridge() { setState({ aiOpen: true, addOpen: false }); }
+export function closeAiBridge() { setState({ aiOpen: false }); }
 export function openSchedule(target) { setState({ scheduleTarget: target }); }
 export function closeSchedule() { setState({ scheduleTarget: null }); }
 // schedule one item snapshot onto an arbitrary date (repeat once, anchored)
@@ -383,6 +387,130 @@ export function safeUrl(u) {
   if (!/^https?:\/\//i.test(s)) return undefined;
   try { new URL(s); } catch { return undefined; }
   return s.slice(0, 500);
+}
+
+// ── AI-bridge / plan v2 helpers ──────────────────────────────────────────────
+export const PLAN_MAX_ITEMS = 60;
+export const PLAN_MAX_OFFSET = 27;
+
+let _uidSeq = 0;
+// Date.now() alone collides when a loop stages several items in the same ms —
+// duplicate ids make deleteItem remove two rows and markDone tick two.
+export function uid(prefix) { return prefix + Date.now().toString(36) + (_uidSeq++).toString(36); }
+
+// "YYYY-M-D" — MUST match todayKey()'s UNPADDED format or the item files on a
+// day the app never renders.
+export function dateKeyFromOffset(n, from = new Date()) {
+  const d = new Date(from.getFullYear(), from.getMonth(), from.getDate() + (Number(n) || 0));
+  return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+}
+
+// The slot engine and <input type="time"> both need zero-padded 24h. AIs emit
+// "7am", "7:30", "07:30:00", "1300", "noon" — accept them all, or the time is
+// silently dropped and the item lands at the 09:00 default.
+export function normTime(v) {
+  if (v == null) return null;
+  let s = String(v).trim().toLowerCase().replace(/\s+/g, '').replace(/\./g, ':');
+  if (s === 'noon' || s === 'midday') return '12:00';
+  if (s === 'midnight') return '00:00';
+  if (/^\d{4}$/.test(s)) s = s.slice(0, 2) + ':' + s.slice(2);
+  const m = /^(\d{1,2})(?::(\d{2}))?(?::\d{2})?(am|pm|a|p)?$/.exec(s);
+  if (!m) return null;
+  let h = +m[1];
+  const min = m[2] === undefined ? 0 : +m[2];
+  if (min > 59) return null;
+  const ap = m[3] && m[3][0];
+  if (ap === 'p' && h < 12) h += 12;
+  if (ap === 'a' && h === 12) h = 0;
+  if (h > 23) return null;
+  return String(h).padStart(2, '0') + ':' + String(min).padStart(2, '0');
+}
+
+// Synonym-mapped onto the app's real vocabulary (once | daily | weekly | "N").
+// "every day" must NOT silently become a one-off.
+export function normRepeat(v) {
+  if (v == null) return undefined;
+  const s = String(v).trim().toLowerCase().replace(/\s+/g, ' ');
+  if (/^(daily|every ?day|everyday|each ?day|every single day)$/.test(s)) return 'daily';
+  if (/^(weekly|every ?week|each ?week|once a week|same day each week)$/.test(s)) return 'weekly';
+  if (/^(once|just once|one ?off|one time|single|today only)$/.test(s)) return 'once';
+  if (/^every other day$/.test(s)) return '2';
+  const m = /^(?:every )?(\d{1,2})(?: ?days?)?$/.exec(s);
+  if (m) { const n = +m[1]; if (n === 1) return 'daily'; if (n >= 2 && n <= 14) return String(n); }
+  return undefined; // unknown → default applied, and the preview shows it
+}
+
+export function normOffset(v) {
+  const n = Math.floor(Number(v));
+  if (!isFinite(n) || n < 0) return 0;
+  return Math.min(n, PLAN_MAX_OFFSET);
+}
+
+/**
+ * parsePlanDoc(data) — whitelist a parsed plan object into safe stack items.
+ * v1 (no dayOffset/repeat) stays backward compatible: everything lands today,
+ * repeat 'once', exactly as before.
+ * → { ok:true, name, items:[{...snapshot, _day, _repeat}] } | { ok:false, reason }
+ */
+export function parsePlanDoc(data) {
+  if (!data || data.ppw !== 'routine' || !Array.isArray(data.items) || !data.items.length) {
+    return { ok: false, reason: 'bad-shape' };
+  }
+  const items = data.items.slice(0, PLAN_MAX_ITEMS).map((it) => {
+    if (!it || typeof it !== 'object') return null;
+    const title = String(it.title || '').trim().slice(0, 120);
+    if (!title) return null; // a bare string in the list is not an item
+    return {
+      title,
+      meta: it.meta ? String(it.meta).slice(0, 120) : undefined,
+      thumb: typeof it.thumb === 'string' ? it.thumb.slice(0, 8) : undefined,
+      url: safeUrl(it.url),
+      embed: safeUrl(it.embed),
+      thumbUrl: safeUrl(it.thumbUrl),
+      kind: it.kind === 'note' ? 'note' : undefined,
+      time: normTime(it.time) || undefined,
+      _day: normOffset(it.dayOffset),
+      _repeat: normRepeat(it.repeat) || 'once',
+    };
+  }).filter(Boolean);
+  if (!items.length) return { ok: false, reason: 'bad-shape' };
+  return { ok: true, name: String(data.name || 'My plan').slice(0, 60), items };
+}
+
+/**
+ * addItemsToPlan(items) — apply a previewed plan across days.
+ * Each item carries _day (offset) and _repeat. Untimed items stagger from 09:00.
+ * Free tier: the 10-stack cap is checked ONCE for the whole batch.
+ */
+export function addItemsToPlan(items) {
+  const list = Array.isArray(items) ? items : [];
+  if (!list.length) return { ok: false, reason: 'empty' };
+  if (!state.premium && state.deckItems.length + list.length > 10) {
+    setState({ premiumUpsell: 'You have reached the free limit of 10 stacks. Go Premium for unlimited stacks.' });
+    return { upsell: true };
+  }
+  const base = 9 * 60;
+  let untimed = 0;
+  const added = list.map((it) => {
+    const { _day, _repeat, ...rest } = it;
+    let time = it.time;
+    if (!time) {
+      const mins = base + (untimed++ * 30);
+      time = String(Math.floor(mins / 60) % 24).padStart(2, '0') + ':' + String(mins % 60).padStart(2, '0');
+    }
+    return { ...rest, id: uid('ai'), time, anchor: dateKeyFromOffset(_day || 0), repeat: _repeat || 'once' };
+  });
+  setState({ deckItems: [...state.deckItems, ...added] });
+  saveStacks();
+  return { ok: true, count: added.length, ids: added.map((a) => a.id) };
+}
+
+// Undo the most recent plan apply (single slot — matches the preview's one-tap Apply).
+export function removeItemsByIds(ids) {
+  const set = new Set(ids || []);
+  if (!set.size) return;
+  setState({ deckItems: state.deckItems.filter((it) => !set.has(it.id)) });
+  saveStacks();
 }
 
 export function parseRoutineMd(text) {

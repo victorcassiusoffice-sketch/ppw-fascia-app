@@ -6,7 +6,7 @@
 // note composer + document upload (need more logic) — tiles still present.
 
 import React from 'react';
-import { useStore5, closeAdd, setCustomUrl, addCustomUrl, goLibrary, setUpsell, openNoteComposer, setNoteField, addNote, parseRoutineMd, addItemsToToday, createRoutine, getState, addDocToToday } from '../store5.js';
+import { useStore5, closeAdd, setCustomUrl, addCustomUrl, goLibrary, setUpsell, openNoteComposer, setNoteField, addNote, parseRoutineMd, addItemsToToday, createRoutine, getState, addDocToToday, openAiBridge } from '../store5.js';
 import { saveFile } from '../files5.js';
 
 const tsvg = (p) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">{p}</svg>;
@@ -66,6 +66,19 @@ export default function AddSheet() {
       <div onClick={closeAdd} style={{ position: 'absolute', inset: 0, background: 'rgba(30,38,52,.35)', animation: 'ppwFade .3s ease both' }} />
       <div style={{ position: 'absolute', left: 14, right: 14, bottom: 'calc(96px + env(safe-area-inset-bottom, 0px))', maxHeight: 'calc(100% - 130px)', overflowY: 'auto', borderRadius: 30, padding: '22px 20px 20px', background: 'var(--surface-strong)', backdropFilter: 'var(--blur-heavy)', WebkitBackdropFilter: 'var(--blur-heavy)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', transformOrigin: '50% 105%', animation: 'ppwSheetIn .5s cubic-bezier(.3,1.36,.4,1) both' }}>
         <div style={{ fontSize: 20, fontWeight: 600, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>Add to your stack</div>
+
+        {/* FREE, zero-cost AI path (Vic 2d): the user's OWN AI plans their day.
+            Sits above everything because it is the fastest way to a full day. */}
+        <button onClick={openAiBridge} style={{ marginTop: 14, width: '100%', display: 'flex', alignItems: 'center', gap: 13, padding: '14px 16px', borderRadius: 20, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)', textAlign: 'left' }}>
+          <span style={{ width: 42, height: 42, flex: 'none', borderRadius: 13, background: 'rgba(255,255,255,.18)', border: '1px solid var(--acc-rim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.9 5.6L19.5 10.5l-5.6 1.9L12 18l-1.9-5.6L4.5 10.5l5.6-1.9z" /></svg>
+          </span>
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ display: 'block', fontSize: 15, fontWeight: 700, textShadow: 'var(--label-shadow)' }}>Talk to your AI</span>
+            <span style={{ display: 'block', marginTop: 2, fontSize: 12, opacity: .9 }}>Use ChatGPT, Claude or Gemini to plan your day — free</span>
+          </span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flex: 'none' }}><path d="M9 6l6 6-6 6" /></svg>
+        </button>
 
         <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           {TILES.map((t) => (
