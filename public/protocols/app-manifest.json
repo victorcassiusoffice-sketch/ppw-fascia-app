@@ -1,7 +1,24 @@
 {
   "_schema": "ppw.app.protocols",
-  "generatedAt": "2026-07-06T19:23:10Z",
+  "generatedAt": "2026-07-28T11:05:51Z",
   "source": "ppw-protocols",
-  "count": 0,
-  "protocols": []
+  "count": 1,
+  "protocols": [
+    {
+      "id": "myofascial-recovery-v1",
+      "slug": "myofascial-recovery",
+      "title": "Myofascial Recovery Protocol",
+      "filename": "myofascial-recovery-v1.pdf",
+      "category": "recovery",
+      "tags": [
+        "fascia",
+        "recovery",
+        "myofascial",
+        "massage"
+      ],
+      "version": "v1",
+      "register": "free",
+      "url": "protocols/pdf/myofascial-recovery-v1.pdf"
+    }
+  ]
 }
