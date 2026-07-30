@@ -180,7 +180,12 @@ export async function completeSignIn(loginToken, email) {
  */
 export async function fetchEntitlement() {
   try {
-    const r = await api('/api/me/entitlement', { auth: true });
+    // ?app= is REQUIRED as of 2026-07-30. The backend serves several PPW apps
+    // from one set of accounts and grants access per app, so an entitlement read
+    // that doesn't name its app gets answered for the DEFAULT app — which would
+    // report a paying Lifestyle subscriber as not premium. APP_ID is the same
+    // constant sent at sign-in, so the two can never disagree.
+    const r = await api(`/api/me/entitlement?app=${encodeURIComponent(APP_ID)}`, { auth: true });
     const ent = {
       premium: r.premium === true,
       entitlement: r.entitlement ?? 'none',
