@@ -142,11 +142,18 @@ async function api(path, { method = 'GET', body, auth = false } = {}) {
 /**
  * Step 1 of sign-in: ask for a magic link.
  *
- * ⚠ The backend does not send email yet (api/_lib/handlers.ts#authLogin: "the raw
- * token is emailed (email provider out of scope here)"). Outside production it
- * returns the token as `devToken` and we complete sign-in immediately; in
- * production the caller must fall back to the paste-a-code path until a mailer
- * is wired. Returns { completed } so the UI can say the truthful thing.
+ * The backend DOES send email now — `api/_lib/mail.ts` (Resend) was wired
+ * 2026-07-28. This comment previously said it didn't; that is no longer true.
+ * The sender is inert until RESEND_API_KEY + MAIL_FROM are set, which is a
+ * deployment step, not missing code.
+ *
+ * Three outcomes, all handled:
+ *  - mailer configured  → a real email is sent, no token is ever returned here
+ *  - no key, non-prod   → the backend returns `devToken` and we finish sign-in at once
+ *  - no key, production → the backend 503s rather than hand a credential to an
+ *                         unauthenticated caller; the UI falls back to paste-a-code
+ * A failed send is a 502, never a cheerful "check your email" for mail that isn't coming.
+ * Returns { completed } so the UI can say the truthful thing.
  */
 export async function requestSignIn(email) {
   const clean = String(email || '').trim().toLowerCase();
