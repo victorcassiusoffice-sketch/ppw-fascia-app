@@ -190,18 +190,6 @@ function StackScreen() {
           <h1 style={{ margin: 0, fontSize: 30, fontWeight: 600, letterSpacing: '-.02em', textShadow: 'var(--emboss)' }}>Stack</h1>
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
-          {/* Assistant orb — accent disc, Premium-gated (prototype: openAssistantOrb).
-              When premium, opens the real Wellness Assistant service. */}
-          <button
-            onClick={() => {
-              if (!S.premium) { setState({ premiumUpsell: 'The Assistant is part of Premium — it plans, researches and rebuilds your day, right from this corner.' }); return; }
-              window.open('https://ppw-wellness-assistant.vercel.app/assistant', '_blank', 'noopener');
-            }}
-            aria-label="Assistant"
-            style={{ width: 46, height: 46, borderRadius: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--acc-surf)', border: '1px solid var(--acc-rim)', boxShadow: 'var(--acc-glow)', color: 'var(--acc-ink)', opacity: S.premium ? 1 : .45, transition: 'opacity .3s' }}
-          >
-            <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="9" width="14" height="9.5" rx="3.2" /><path d="M12 6v3" /><circle cx="12" cy="4.4" r="1.5" /><circle cx="9.2" cy="13.6" r="1.15" fill="currentColor" stroke="none" /><circle cx="14.8" cy="13.6" r="1.15" fill="currentColor" stroke="none" /><path d="M9.3 16.4h5.4" /><path d="M2.6 12.6v2.8M21.4 12.6v2.8" /></svg>
-          </button>
           <Disc label="Completed today" badge={completedCount || null} onClick={openCompleted}>{ICheck}</Disc>
           {/* W13 (2026-07-29): this was a full-size tappable disc in the primary
               header with no onClick at all — a dead control sitting next to two

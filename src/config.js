@@ -47,7 +47,7 @@ export const LS_KEYS = {
 // never spend tokens (see entitlement.js). To make the entry Pro-only instead,
 // gate the entry render on isProMember() — left open per Vic's "coach accessible
 // from within the app" goal.
-export const FEATURE_ASSISTANT_LAUNCH = true;
+export const FEATURE_ASSISTANT_LAUNCH = false;
 
 // Where the launch button points — the live, separately-deployed Assistant service.
 // Also the base URL the D2 sync client (src/lib/assistantSync.js) calls for the
