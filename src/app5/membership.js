@@ -25,13 +25,15 @@ const LS = (k) => 'ppw5.' + k;
 export const APP_ID = 'lifestyle';
 
 // ── GUMROAD PRODUCT SEAM ─────────────────────────────────────────────────────
-// The live permalink for "PPWellness Lifestyle App — Premium", e.g.
-// 'https://victorix08.gumroad.com/l/ppw-premium'. Stays null until Vic publishes
-// the product and confirms the handle — an invented URL would send buyers to a
-// 404 with their card out. While null the paywall shows an honest "not on sale
-// yet" note instead of a dead button.
+// The live permalink for "PPWellness Lifestyle App — Premium". Held at null until
+// Vic published, because an invented URL would send buyers to a 404 with their
+// card out; while null the paywall shows an honest "not on sale yet" note instead
+// of a dead button.
+// 2026-07-31: Vic published and a real sale went through. Verified public this run
+// — anonymous GET returns 200 with title "PPWellness Lifestyle App — Premium",
+// product id EMJCL86GkinlgVlWU7QDrw== and all three prices (9.99 / 47.94 / 59.88).
 // NEVER put a seller token or licence key here — this bundle ships to every user.
-export const GUMROAD_URL = null;
+export const GUMROAD_URL = 'https://victorix08.gumroad.com/l/ppw-premium';
 
 // Pricing shown in the paywall. Must match the Gumroad product exactly (plans spec
 // §3.1): $9.99/mo · $47.94/6mo · $59.88/yr.
