@@ -32,11 +32,22 @@ jobs:
       - name: Install dependencies
         run: npm ci || npm install
 
-      - name: Build (with repo-name as base path)
+      - name: Build (root base path — custom domain)
         env:
-          # Auto-derives '/<repo-name>/' so the same workflow works
-          # whatever Vic names the repo.
-          VITE_BASE_PATH: /${{ github.event.repository.name }}/
+          # 2026-08-01 cutover: the app is served from its own subdomain,
+          # https://app.ppwellness.co (public/CNAME), so it sits at the ROOT of
+          # that origin and the base path is '/'.
+          #
+          # This replaced '/${{ github.event.repository.name }}/'. A custom
+          # domain makes GitHub Pages 301 the old
+          # victorcassiusoffice-sketch.github.io/ppw-fascia-app/ URL to the
+          # apex of the custom domain, so a repo-name base would 404 every
+          # asset. One canonical origin, one base path.
+          #
+          # If the custom domain is ever removed, this must go back to
+          # '/${{ github.event.repository.name }}/' in the SAME change that
+          # deletes public/CNAME — the two are a pair.
+          VITE_BASE_PATH: /
         run: npm run build
 
       - name: Add 404 fallback for SPA routing
