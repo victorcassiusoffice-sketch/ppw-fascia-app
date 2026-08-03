@@ -31,12 +31,13 @@ import CoachMarks, { hasSeenTour } from './coach/CoachMarks.jsx';
 import {
   useStore5, getState, setState, save,
   stackFor, todayKey, markDone, setItemTime, deleteItem, overLimit,
-  openAdd, backToToday, openPlayer, openCompleted, openRepeat, repeatLabel,
+  openAdd, backToToday, openPlayer, openCompleted, openAccount, openRepeat, repeatLabel,
   startSlotEngine, orderedStackFor, reorderTimed, reorderDeck, toggleAuto,
   toggleSelect, selectAll, clearSelection, deleteSelected, safeUrl,
   syncEntitlement, applyServerEntitlement,
 } from './store5.js';
-import { completeSignIn } from './membership.js';
+import { completeSignIn, isSignedIn, readEmail } from './membership.js';
+import AccountSheet from './screens/AccountSheet.jsx';
 import { installPressSound } from './sfx5.js';
 
 // ── small inline-SVG icon helpers (match the prototype's line icons) ──
@@ -102,6 +103,29 @@ function Disc({ children, onClick, label, badge, dim }) {
         <span style={{ position: 'absolute', top: -3, right: -3, minWidth: 19, height: 19, padding: '0 5px', borderRadius: 999, background: 'var(--acc-surf)', border: '1px solid var(--acc-rim)', color: 'var(--acc-ink)', fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{badge}</span>
       )}
     </button>
+  );
+}
+
+// ── header account control ──
+// Sign-in existed but was invisible: you only met it on the paywall or by digging
+// into Settings → Membership. This puts it in the header of the screen the app
+// opens on. It opens the account sheet, which renders the same MembershipCard —
+// no second auth path.
+function AccountControl() {
+  const signedIn = isSignedIn();
+  const email = readEmail();
+  if (!signedIn) {
+    return (
+      <button onClick={openAccount} data-tour="signin" style={{ height: 46, flex: 'none', padding: '0 14px', borderRadius: 999, display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap', background: 'var(--acc-surf)', border: '1px solid var(--acc-rim)', boxShadow: 'var(--acc-glow)', color: 'var(--acc-ink)', fontSize: 13.5, fontWeight: 700, letterSpacing: '-.01em' }}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3.5h3.5A2.5 2.5 0 0 1 20 6v12a2.5 2.5 0 0 1-2.5 2.5H14" /><path d="M10 16l4-4-4-4M14 12H4" /></svg>
+        Sign in
+      </button>
+    );
+  }
+  return (
+    <Disc label={email ? `Account — signed in as ${email}` : 'Account'} onClick={openAccount}>
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8.5" r="3.6" /><path d="M4.8 20a7.2 7.2 0 0 1 14.4 0" /></svg>
+    </Disc>
   );
 }
 
@@ -180,7 +204,7 @@ function StackScreen() {
     <div style={{ position: 'absolute', inset: 0, overflowY: 'auto', padding: '28px 20px 140px', animation: 'ppwScreenIn .38s cubic-bezier(.26,1,.4,1)' }}>
       {/* header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0, flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--dim)', textShadow: 'var(--emboss)' }}>{dateLabel}</div>
             {notToday && (
@@ -189,7 +213,8 @@ function StackScreen() {
           </div>
           <h1 style={{ margin: 0, fontSize: 30, fontWeight: 600, letterSpacing: '-.02em', textShadow: 'var(--emboss)' }}>Stack</h1>
         </div>
-        <div style={{ display: 'flex', gap: 10 }}>
+        <div style={{ display: 'flex', gap: 10, flex: 'none' }}>
+          <AccountControl />
           <Disc label="Completed today" badge={completedCount || null} onClick={openCompleted}>{ICheck}</Disc>
           {/* W13 (2026-07-29): this was a full-size tappable disc in the primary
               header with no onClick at all — a dead control sitting next to two
@@ -442,6 +467,7 @@ export default function App5() {
           onClose={() => setTourOpen(false)}
         />
         <CompletedSheet />
+        <AccountSheet />
         <RepeatSheet />
         <SlotReminder />
         <NotePopup />

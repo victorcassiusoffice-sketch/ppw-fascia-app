@@ -72,6 +72,8 @@ function initialState() {
     playerItem: null,
     // completed-today sheet
     completedOpen: false,
+    // account sheet (sign in / membership, reachable from the Stack header)
+    accountOpen: false,
     // runtime popups: slot reminder banner + full-screen note (affirmation)
     slotPop: null, notePop: null, eatingNow: false, autoplay: false,
     // general prefs
@@ -693,6 +695,8 @@ export function noteAnimCss(anim, sp) {
 // completed-today sheet
 export function openCompleted() { setState({ completedOpen: true }); }
 export function closeCompleted() { setState({ completedOpen: false }); }
+export function openAccount() { setState({ accountOpen: true }); }
+export function closeAccount() { setState({ accountOpen: false }); }
 // repeat picker — set an item's recurrence (stamps an anchor so weekly/every-N works)
 export function openRepeat(id) { setState({ repeatId: id }); }
 export function closeRepeat() { setState({ repeatId: null }); }
