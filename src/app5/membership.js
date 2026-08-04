@@ -176,11 +176,14 @@ async function api(path, { method = 'GET', body, auth = false } = {}) {
 /**
  * Step 1 of sign-in: ask for a magic link.
  *
- * ⚠ The backend does not send email yet (api/_lib/handlers.ts#authLogin: "the raw
- * token is emailed (email provider out of scope here)"). Outside production it
- * returns the token as `devToken` and we complete sign-in immediately; in
- * production the caller must fall back to the paste-a-code path until a mailer
- * is wired. Returns { completed } so the UI can say the truthful thing.
+ * The mailer IS live (Resend, proven end-to-end 2026-08-04 — an earlier comment
+ * here said it wasn't, which stopped being true on 2026-07-29). The email carries
+ * a tap-through button and, since the backend's A2 change, a labelled copyable
+ * code beside it; both are the same `login_token`, and it now lasts 60 minutes
+ * rather than 15.
+ *
+ * Outside production the backend returns the token as `devToken` and we complete
+ * sign-in immediately. Returns { completed } so the UI can say the truthful thing.
  */
 export async function requestSignIn(email) {
   const clean = String(email || '').trim().toLowerCase();

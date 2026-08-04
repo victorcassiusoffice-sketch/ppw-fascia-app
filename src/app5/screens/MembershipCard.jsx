@@ -89,10 +89,12 @@ export default function MembershipCard() {
   const onSendLink = () => run(async () => {
     const r = await requestSignIn(email);
     if (r.completed) { await syncEntitlement(); setPhase('in'); setMsg('Signed in.'); }
-    // The old copy said "paste the code", the email says "open this link", and
-    // they are the same string — which is why people got stuck. Say both, and
-    // accept both (extractLoginToken).
-    else { setPhase('sent'); setMsg('We emailed you a sign-in link. Open it on this device — or copy the whole link and paste it below.'); }
+    // The old copy said "paste the code", the email said "open this link", and
+    // they were the same string — which is why people got stuck. As of the
+    // backend's A2 (2026-08-04) the email carries a button AND a labelled code,
+    // and lasts an hour. Say the same words the email says, and accept either
+    // (extractLoginToken takes a whole pasted link too).
+    else { setPhase('sent'); setMsg('We emailed you a sign-in link. Tap the button in it — or copy the code underneath the button and paste it below. It works for the next hour.'); }
   });
 
   const onCompleteCode = () => run(async () => {

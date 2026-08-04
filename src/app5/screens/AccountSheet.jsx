@@ -12,8 +12,21 @@
 
 import React from 'react';
 import { useStore5, closeAccount, signOutMembership } from '../store5.js';
-import { readEmail, staySignedIn, setStaySignedIn, deleteAccount } from '../membership.js';
+import { readEmail, staySignedIn, setStaySignedIn, deleteAccount, sessionExpiresAt } from '../membership.js';
 import MembershipCard from './MembershipCard.jsx';
+
+/**
+ * When this session actually runs out, read from the session token itself rather
+ * than from a number typed into this file. The backend moved from 60 minutes to
+ * 30 days on 2026-08-04 (SESSION_TTL, api/_lib/auth.ts); reading the token means
+ * the screen follows any future change instead of quietly lying about it.
+ */
+function signedInUntil() {
+  const ms = sessionExpiresAt();
+  if (!ms) return null;
+  const d = new Date(ms);
+  return Number.isNaN(d.getTime()) ? null : d.toLocaleDateString(undefined, { day: 'numeric', month: 'long' });
+}
 
 const row = {
   width: '100%', display: 'flex', alignItems: 'center', gap: 12, minHeight: 58,
@@ -35,6 +48,7 @@ export default function AccountSheet() {
   if (!S.accountOpen) return null;
   const signedIn = S.signedIn;
   const email = readEmail();
+  const until = signedIn && stay ? signedInUntil() : null;
 
   const onToggleStay = () => { const v = !stay; setStay(v); setStaySignedIn(v); };
 
@@ -85,7 +99,11 @@ export default function AccountSheet() {
               </span>
               <span style={{ flex: 1, minWidth: 0 }}>
                 <span style={{ display: 'block', ...rowTitle }}>Keep me signed in</span>
-                <span style={{ display: 'block', ...rowNote }}>{stay ? 'Stays signed in on this device.' : 'Signs out when you close the app.'}</span>
+                <span style={{ display: 'block', ...rowNote }}>
+                  {stay
+                    ? (until ? `Stays signed in on this device until ${until}.` : 'Stays signed in on this device.')
+                    : 'Signs out when you close the app.'}
+                </span>
               </span>
             </button>
 
@@ -119,11 +137,14 @@ export default function AccountSheet() {
         )}
 
         {/* Said out loud, deliberately. Silence about how sign-in works is what
-            made a finished design read as an unfinished one. */}
+            made a finished design read as an unfinished one.
+            ⚠ Nothing here may promise signing other devices out, or cutting a session
+            off remotely. Sessions are stateless JWTs with nothing stored server-side
+            to revoke, so that stays impossible until the backend's A4 lands. */}
         <div style={sectionNote}>
           Sign in with your email and password, or with a link we email you — whichever suits.
-          Passkeys are coming. Your password is stored scrambled, so it cannot be read back out
-          of our database by anyone, including us.
+          Signing out signs out this device. Passkeys are coming. Your password is stored
+          scrambled, so it cannot be read back out of our database by anyone, including us.
         </div>
       </div>
     </div>

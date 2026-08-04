@@ -58,6 +58,50 @@ describe('keep me signed in', () => {
     fireEvent.click(box);
     expect(staySignedIn()).toBe(false);
   });
+
+  // The backend moved SESSION_TTL 60m → 30d on 2026-08-04, so "stays signed in" is
+  // now true. The date is read from the token, never typed in here, so if the
+  // backend changes again the screen follows instead of lying.
+  it('says how long, straight from the session token', () => {
+    const exp = Math.floor((Date.now() + 30 * 86400000) / 1000);
+    const b64 = (o) => btoa(JSON.stringify(o)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    localStorage.setItem(LS('authToken'), `${b64({ alg: 'HS256' })}.${b64({ sub: 'usr_1', exp })}.sig`);
+    localStorage.setItem(LS('authEmail'), 'buyer@example.com');
+    setState({ accountOpen: true, signedIn: true });
+    render(<AccountSheet />);
+    const until = new Date(exp * 1000).toLocaleDateString(undefined, { day: 'numeric', month: 'long' });
+    expect(screen.getByText(new RegExp(`stays signed in on this device until ${until}`, 'i'))).toBeTruthy();
+  });
+
+  it('falls back to plain wording when the token says nothing about expiry', () => {
+    signedIn(); // token is not a JWT
+    render(<AccountSheet />);
+    expect(screen.getByText(/stays signed in on this device\./i)).toBeTruthy();
+  });
+});
+
+describe('what the screen must never claim', () => {
+  // A1 shipped as the one-line TTL bump, NOT refresh tokens. Sessions are stateless
+  // JWTs with nothing stored server-side, so signing out other devices or cutting a
+  // session off remotely is impossible until the backend's A4 lands. Promising it
+  // would be a lie a user could act on — e.g. after losing a phone.
+  it('never offers to sign out other devices or revoke a session remotely', () => {
+    signedIn();
+    const { container } = render(<AccountSheet />);
+    const text = container.textContent;
+    for (const claim of [
+      /sign out everywhere/i, /sign out of all/i, /all devices/i,
+      /other devices/i, /revoke/i, /log out everywhere/i,
+    ]) {
+      expect(text).not.toMatch(claim);
+    }
+  });
+
+  it('is explicit that signing out only covers this device', () => {
+    signedIn();
+    render(<AccountSheet />);
+    expect(screen.getByText(/signing out signs out this device/i)).toBeTruthy();
+  });
 });
 
 describe('deleting the account', () => {

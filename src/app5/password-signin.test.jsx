@@ -142,6 +142,19 @@ describe('the sign-in card', () => {
     await waitFor(() => expect(isSignedIn()).toBe(true));
   });
 
+  // The email (backend A2, 2026-08-04) carries a button AND a labelled code, and
+  // lasts 60 minutes. The app has to say the same words, or it recreates the exact
+  // "it asks for a code, the email gives a link" confusion this set out to fix.
+  it('the emailed-link path names the code and the hour, matching the email', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ sent: true }), { status: 200 })));
+    render(<MembershipCard />);
+    fireEvent.change(screen.getByLabelText(/email address/i), { target: { value: 'buyer@example.com' } });
+    fireEvent.click(screen.getByText(/no password yet, or forgotten it/i));
+    await waitFor(() => expect(screen.getByText(/copy the code underneath the button/i)).toBeTruthy());
+    expect(screen.getByText(/works for the next hour/i)).toBeTruthy();
+    expect(screen.getByLabelText(/sign-in link or code/i)).toBeTruthy();
+  });
+
   it('a signed-in member is offered a password', () => {
     localStorage.setItem(LS('authToken'), 'jwt');
     setState({ signedIn: true, premium: true });
