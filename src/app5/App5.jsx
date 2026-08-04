@@ -36,7 +36,7 @@ import {
   toggleSelect, selectAll, clearSelection, deleteSelected, safeUrl,
   syncEntitlement, applyServerEntitlement,
 } from './store5.js';
-import { completeSignIn, isSignedIn, readEmail } from './membership.js';
+import { completeSignIn, isSignedIn, readEmail, ensureFreshSession } from './membership.js';
 import AccountSheet from './screens/AccountSheet.jsx';
 import { installPressSound } from './sfx5.js';
 
@@ -426,11 +426,23 @@ export default function App5() {
           await completeSignIn(lt).then(applyServerEntitlement).catch(() => {});
         }
       } catch {}
-      if (alive) await syncEntitlement();
+      if (alive) { await ensureFreshSession(); await syncEntitlement(); }
     })();
-    const onVisible = () => { if (document.visibilityState === 'visible') syncEntitlement(); };
+    // STAYING SIGNED IN — the session the backend issues lasts 60 minutes, and
+    // the app never renewed it, so anyone who kept the app open long enough was
+    // silently signed out and met the paywall again. Renew on resume, and on a
+    // slow tick for the case where the app is simply left open.
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible') return;
+      ensureFreshSession().then(syncEntitlement);
+    };
     document.addEventListener('visibilitychange', onVisible);
-    return () => { alive = false; document.removeEventListener('visibilitychange', onVisible); };
+    const keepAlive = setInterval(() => { ensureFreshSession(); }, 10 * 60 * 1000);
+    return () => {
+      alive = false;
+      clearInterval(keepAlive);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
   }, []);
 
   let body;

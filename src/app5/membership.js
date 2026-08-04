@@ -65,13 +65,45 @@ function write(key, v) { try { localStorage.setItem(LS(key), v); } catch {} }
 function drop(key) { try { localStorage.removeItem(LS(key)); } catch {} }
 function readJson(key) { try { return JSON.parse(read(key) || 'null'); } catch { return null; } }
 
-/** The session JWT, or null when signed out. */
-export function readToken() { return read('authToken'); }
+// Tab-scoped twin of the above, for "don't keep me signed in".
+function sRead(key) { try { return sessionStorage.getItem(LS(key)); } catch { return null; } }
+function sWrite(key, v) { try { sessionStorage.setItem(LS(key), v); } catch {} }
+function sDrop(key) { try { sessionStorage.removeItem(LS(key)); } catch {} }
+
+/**
+ * "Keep me signed in" decides WHERE the session token is kept, not how long the
+ * server honours it. On (the default) → localStorage, so the session survives
+ * closing the app. Off → sessionStorage, so it dies with the tab, which is what
+ * a borrowed or shared device needs.
+ *
+ * ⚠ The ceiling is the server's, not ours: the backend signs a 60-minute session
+ * (SESSION_TTL, api/_lib/auth.ts). Even with this on, a session left untouched
+ * for longer than that is gone until the backend issues longer-lived sessions.
+ */
+export function staySignedIn() { return read('stayIn') !== '0'; }
+
+export function setStaySignedIn(on) {
+  write('stayIn', on ? '1' : '0');
+  // Move any live session to the store the new choice implies, so the setting
+  // takes effect now rather than at the next sign-in.
+  const tok = readToken();
+  if (!tok) return;
+  if (on) { write('authToken', tok); sDrop('authToken'); }
+  else { sWrite('authToken', tok); drop('authToken'); }
+}
+
+/** The session JWT, or null when signed out. Tab-scoped copy wins. */
+export function readToken() { return sRead('authToken') || read('authToken'); }
 export function readEmail() { return read('authEmail'); }
 export function isSignedIn() { return !!readToken(); }
 
 function writeSession(token, email) {
-  if (token) write('authToken', token);
+  if (token) {
+    // Exactly one store holds the token, so signing out of one can't leave the
+    // other quietly holding a live session.
+    if (staySignedIn()) { write('authToken', token); sDrop('authToken'); }
+    else { sWrite('authToken', token); drop('authToken'); }
+  }
   if (email) write('authEmail', String(email).toLowerCase());
 }
 
@@ -204,8 +236,63 @@ export async function fetchEntitlement() {
   }
 }
 
+// ── staying signed in ────────────────────────────────────────────────────────
+// The backend signs a 60-minute session (SESSION_TTL in api/_lib/auth.ts) and
+// nothing in the app ever renewed it. So a signed-in user was quietly signed out
+// about an hour in: the next entitlement read came back 401 and fetchEntitlement
+// called signOut(). Nobody typed anything wrong — the session simply died while
+// the app was open, and the paywall reappeared.
+//
+// POST /api/auth/refresh mints a fresh token from a still-valid one, so keeping
+// a session alive costs one cheap call. It cannot resurrect an EXPIRED session —
+// surviving a long close still needs a longer server-side session.
+
+/** Epoch ms this session expires, or 0 if unknown. Reads the JWT's own `exp`. */
+export function sessionExpiresAt() {
+  const t = readToken();
+  if (!t) return 0;
+  const parts = String(t).split('.');
+  if (parts.length !== 3) return 0;
+  try {
+    const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(atob(b64 + '='.repeat((4 - (b64.length % 4)) % 4)));
+    const exp = Number(payload?.exp);
+    return Number.isFinite(exp) ? exp * 1000 : 0;
+  } catch {
+    return 0; // not our shape — treat as unknown, ensureFreshSession will just refresh
+  }
+}
+
+/** Renew with this much life left, so a slow network never races the expiry. */
+export const SESSION_REFRESH_MARGIN_MS = 20 * 60 * 1000;
+
+/** Trade a still-valid session for a fresh one. True if the session was renewed. */
+export async function refreshSession() {
+  if (!isSignedIn()) return false;
+  try {
+    const r = await api('/api/auth/refresh', { method: 'POST', body: {}, auth: true });
+    if (!r?.token) return false;
+    writeSession(r.token, readEmail());
+    return true;
+  } catch (e) {
+    // 401 = already dead; anything else (offline, 500) leaves the session alone
+    // rather than signing a paying member out over a dropped request.
+    if (e.status === 401) signOut();
+    return false;
+  }
+}
+
+/** Renew only when the session is close to expiring. Safe to call on every resume. */
+export async function ensureFreshSession() {
+  if (!isSignedIn()) return false;
+  const exp = sessionExpiresAt();
+  if (exp && exp - Date.now() > SESSION_REFRESH_MARGIN_MS) return true;
+  return await refreshSession();
+}
+
 export function signOut() {
   drop('authToken');
+  sDrop('authToken');
   drop('authEmail');
   drop('ent');
   write('premium', '0');
