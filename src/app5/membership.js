@@ -345,6 +345,22 @@ export async function ensureFreshSession() {
   return await refreshSession();
 }
 
+/**
+ * Permanently delete the account.
+ *
+ * The backend runs `DELETE FROM users WHERE id=$1`, which cascades to everything
+ * that row owns — entitlement, subscription record, stored messages. Read from
+ * api/_lib/handlers.ts, not assumed.
+ *
+ * ⚠ It does NOT touch Gumroad. A live subscription carries on billing until it is
+ * cancelled there, so any UI that offers this must say so before it runs.
+ */
+export async function deleteAccount() {
+  await api('/api/me/data', { method: 'DELETE', auth: true });
+  signOut();
+  return true;
+}
+
 export function signOut() {
   drop('authToken');
   sDrop('authToken');
