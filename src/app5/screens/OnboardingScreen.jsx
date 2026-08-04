@@ -14,7 +14,8 @@
 // them behaves exactly as before — the user just isn't interrogated up front.
 
 import React from 'react';
-import { useStore5, setState, finishOnboarding, openTerms, openAiBridge } from '../store5.js';
+import { useStore5, setState, finishOnboarding, openTerms, openAiBridge, openAccount } from '../store5.js';
+import { readEmail } from '../membership.js';
 
 const STEPS = 3;
 
@@ -40,6 +41,21 @@ function DemoCard({ time, title, meta, accent }) {
 
 export default function OnboardingScreen() {
   const S = useStore5();
+
+  // RETURNING USER (2026-08-04). Setup used to be a wall: this screen covers
+  // everything, so the app's only "Sign in" button sat underneath it, unreachable.
+  // Someone who already had an account had to complete setup again just to get to
+  // the button that would have restored it. Sign-in is now offered here, and once
+  // it lands we jump past the two teaching screens to the one thing still legally
+  // required — the consent tick.
+  //
+  // It is not yet a full skip: the server records ENTITLEMENT only, so nothing on
+  // the account says "this person already agreed". That is the server-side profile
+  // (onboarded / termsAcceptedAt), which is a backend change, not this file.
+  React.useEffect(() => {
+    if (S.signedIn && (S.obStep || 0) < 2) setState({ obStep: 2 });
+  }, [S.signedIn]);
+
   if (S.onboarded) return null;
 
   const step = S.obStep || 0;
@@ -171,6 +187,18 @@ export default function OnboardingScreen() {
           style={{ position: 'relative', marginTop: 20, width: '100%', height: 54, borderRadius: 18, border: `1px solid ${step === 2 ? 'var(--rim)' : 'var(--acc-rim)'}`, background: step === 2 ? 'var(--surface)' : 'var(--acc-surf)', color: step === 2 ? 'var(--ink)' : 'var(--acc-ink)', fontWeight: 600, fontSize: 16, textShadow: step === 2 ? 'var(--emboss)' : 'var(--label-shadow)', boxShadow: step === 2 ? 'var(--elev)' : 'var(--acc-glow)', opacity: canNext ? 1 : .45, transition: 'opacity .25s' }}>
           {step === 0 ? 'Next' : step === 1 ? 'Next' : 'Start with an empty day'}
         </button>
+
+        {/* the way back in for someone who already has an account */}
+        {S.signedIn ? (
+          <div style={{ marginTop: 12, textAlign: 'center', fontSize: 12.5, color: 'var(--dim)' }}>
+            Signed in as <span style={{ color: 'var(--ink)', fontWeight: 600 }}>{readEmail() || 'your account'}</span>
+          </div>
+        ) : (
+          <button onClick={openAccount} data-tour="signin-onboarding"
+            style={{ marginTop: 10, width: '100%', minHeight: 44, background: 'none', border: 'none', color: 'var(--dim)', fontSize: 13.5, fontWeight: 600 }}>
+            Already have an account? <span style={{ color: 'var(--accent)', fontWeight: 700 }}>Sign in</span>
+          </button>
+        )}
       </div>
     </div>
   );

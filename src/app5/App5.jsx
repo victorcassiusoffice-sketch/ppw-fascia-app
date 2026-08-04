@@ -112,7 +112,8 @@ function Disc({ children, onClick, label, badge, dim }) {
 // opens on. It opens the account sheet, which renders the same MembershipCard —
 // no second auth path.
 function AccountControl() {
-  const signedIn = isSignedIn();
+  const S = useStore5();
+  const signedIn = S.signedIn;   // store state, so the header flips the instant sign-in lands
   const email = readEmail();
   if (!signedIn) {
     return (

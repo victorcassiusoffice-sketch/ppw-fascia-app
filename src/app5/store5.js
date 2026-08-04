@@ -41,8 +41,9 @@ function initialState() {
     // routines (premium): [{ id, name, items: [snapshot…] }]
     routines: [],
     a11y: { on: false, zoom: 1 },
-    // membership
-    premium: false, premiumUpsell: null, orbTipSeen: false,
+    // membership. `signedIn` is state, not a localStorage read at render time, so
+    // every surface (header, onboarding, settings) flips the moment sign-in lands.
+    premium: false, premiumUpsell: null, orbTipSeen: false, signedIn: isSignedIn(),
     // stack data
     deckItems: starterDeck(),
     doneByDate: {},
@@ -794,8 +795,14 @@ export function setTheme(patch) {
 
 /** Apply a verified answer from /api/me/entitlement. */
 export function applyServerEntitlement(ent) {
-  setState({ premium: !!(ent && ent.premium) });
+  setState({ premium: !!(ent && ent.premium), signedIn: isSignedIn() });
   return !!(ent && ent.premium);
+}
+
+/** Re-read whether there is a session, for surfaces that must show it. */
+export function syncAuthState() {
+  setState({ signedIn: isSignedIn() });
+  return state.signedIn;
 }
 
 /**
@@ -805,18 +812,18 @@ export function applyServerEntitlement(ent) {
  * cached value stands — we never lock a paying member out over a dropped request.
  */
 export async function syncEntitlement() {
-  if (!isSignedIn()) { setState({ premium: cachedPremium() }); return false; }
+  if (!isSignedIn()) { setState({ premium: cachedPremium(), signedIn: false }); return false; }
   try {
     return applyServerEntitlement(await fetchEntitlement());
   } catch {
-    setState({ premium: cachedPremium() });
+    setState({ premium: cachedPremium(), signedIn: isSignedIn() });
     return state.premium;
   }
 }
 
 export function signOutMembership() {
   membershipSignOut();
-  setState({ premium: false });
+  setState({ premium: false, signedIn: false });
 }
 // general prefs (prototype key encodings)
 export function setSounds(on) { save('sounds', on ? '1' : '0'); setState({ sounds: !!on }); }

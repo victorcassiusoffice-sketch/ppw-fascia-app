@@ -7,16 +7,19 @@
 
 import React from 'react';
 import { useStore5, closeAccount } from '../store5.js';
-import { isSignedIn } from '../membership.js';
 import MembershipCard from './MembershipCard.jsx';
 
 export default function AccountSheet() {
   const S = useStore5();
   if (!S.accountOpen) return null;
-  const signedIn = isSignedIn();
+  const signedIn = S.signedIn;
 
+  // z-index 42 sits ABOVE the onboarding wizard (40). Below that, a returning user
+  // could not sign in without first completing setup again: the wizard covers the
+  // whole screen, so this sheet opened underneath it and was never seen. Terms (50)
+  // and the coach marks (60) still sit above.
   return (
-    <div style={{ position: 'absolute', inset: 0, zIndex: 32 }}>
+    <div style={{ position: 'absolute', inset: 0, zIndex: 42 }}>
       <div onClick={closeAccount} style={{ position: 'absolute', inset: 0, background: 'rgba(30,38,52,.35)', animation: 'ppwFade .3s ease both' }} />
       <div style={{ position: 'absolute', left: 14, right: 14, bottom: 'calc(96px + env(safe-area-inset-bottom, 0px))', maxHeight: '78%', overflowY: 'auto', borderRadius: 30, padding: '22px 20px 20px', background: 'var(--surface-strong)', backdropFilter: 'var(--blur-heavy)', WebkitBackdropFilter: 'var(--blur-heavy)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', animation: 'ppwSheetIn .5s cubic-bezier(.3,1.36,.4,1) both' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
