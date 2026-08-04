@@ -28,7 +28,7 @@ export default function AccountSheet() {
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 19, fontWeight: 600, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>{signedIn ? 'Your account' : 'Sign in'}</div>
-            <div style={{ fontSize: 12.5, color: 'var(--dim)' }}>{signedIn ? 'Membership and sign-out' : 'We email you a link — no password'}</div>
+            <div style={{ fontSize: 12.5, color: 'var(--dim)' }}>{signedIn ? 'Membership and sign-out' : 'Email and password, or a link by email'}</div>
           </div>
           <button onClick={closeAccount} aria-label="Close" style={{ width: 34, height: 34, flex: 'none', borderRadius: 999, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>

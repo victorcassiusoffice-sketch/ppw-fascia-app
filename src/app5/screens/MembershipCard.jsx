@@ -14,6 +14,7 @@ import {
   requestSignIn, completeSignIn, fetchEntitlement, readEmail, isSignedIn,
   checkoutUrl, pollForPremium, readEntitlementCache,
   setDevPremium, devPremiumAvailable,
+  passwordSignIn, setPassword, PASSWORD_MIN, staySignedIn, setStaySignedIn,
 } from '../membership.js';
 
 const card = (accent) => ({
@@ -55,6 +56,8 @@ function fmtDate(iso) {
 export default function MembershipCard() {
   const S = useStore5();
   const [email, setEmail] = React.useState(readEmail() || '');
+  const [pw, setPw] = React.useState('');
+  const [stay, setStay] = React.useState(staySignedIn());
   const [code, setCode] = React.useState('');
   const [phase, setPhase] = React.useState(isSignedIn() ? 'in' : 'out'); // out | sent | in
   const [busy, setBusy] = React.useState(false);
@@ -70,10 +73,26 @@ export default function MembershipCard() {
     try { await fn(); } catch (e) { setErr(e?.message || 'Something went wrong.'); } finally { setBusy(false); }
   };
 
+  // The main door. Everything else on this card is a way to get here.
+  const onPasswordSignIn = () => run(async () => {
+    const ent = await passwordSignIn(email, pw);
+    applyServerEntitlement(ent);
+    setPw(''); setPhase('in'); setMsg('Signed in.');
+  });
+
+  const onToggleStay = () => {
+    const next = !stay;
+    setStay(next);
+    setStaySignedIn(next); // applies to the live session too, not just the next one
+  };
+
   const onSendLink = () => run(async () => {
     const r = await requestSignIn(email);
     if (r.completed) { await syncEntitlement(); setPhase('in'); setMsg('Signed in.'); }
-    else { setPhase('sent'); setMsg('Check your email for the sign-in link, then paste the code below.'); }
+    // The old copy said "paste the code", the email says "open this link", and
+    // they are the same string — which is why people got stuck. Say both, and
+    // accept both (extractLoginToken).
+    else { setPhase('sent'); setMsg('We emailed you a sign-in link. Open it on this device — or copy the whole link and paste it below.'); }
   });
 
   const onCompleteCode = () => run(async () => {
@@ -119,6 +138,7 @@ export default function MembershipCard() {
         <div style={note(true)}>
           {periodEnd ? `Access runs to ${periodEnd}.` : 'Renews automatically.'} Manage or cancel from your Gumroad account.
         </div>
+        <SetPasswordBlock accent />
         <button onClick={onRefresh} disabled={busy} style={{ ...quietBtn, color: 'rgba(255,255,255,.9)' }}>{busy ? 'Checking…' : 'Check membership'}</button>
         <button onClick={onSignOut} style={{ ...quietBtn, color: 'rgba(255,255,255,.7)' }}>Sign out</button>
         {err && <div style={{ ...note(true), color: '#ffd9d9' }}>{err}</div>}
@@ -148,6 +168,7 @@ export default function MembershipCard() {
             Premium isn’t on sale yet — it’s coming soon.
           </div>
         )}
+        <SetPasswordBlock />
         <button onClick={onRefresh} disabled={busy} style={quietBtn}>{busy ? 'Checking…' : 'Check membership'}</button>
         <button onClick={onSignOut} style={quietBtn}>Sign out</button>
         {msg && <div style={note(false)}>{msg}</div>}
@@ -173,18 +194,38 @@ export default function MembershipCard() {
           type="email" inputMode="email" autoComplete="email" placeholder="you@example.com"
           value={email} onChange={(e) => setEmail(e.target.value)} aria-label="Email address" style={input}
         />
-        <button onClick={onSendLink} disabled={busy} style={{ ...primaryBtn, opacity: busy ? .6 : 1 }}>
-          {busy ? 'Sending…' : 'Email me a sign-in link'}
+        <input
+          type="password" autoComplete="current-password" placeholder="Password"
+          value={pw} onChange={(e) => setPw(e.target.value)} aria-label="Password" style={input}
+          onKeyDown={(e) => { if (e.key === 'Enter' && pw && email) onPasswordSignIn(); }}
+        />
+
+        <button onClick={onToggleStay} role="checkbox" aria-checked={stay} aria-label="Keep me signed in"
+          style={{ display: 'flex', alignItems: 'center', gap: 10, minHeight: 44, padding: 0, background: 'none', border: 'none', color: 'var(--ink)', textAlign: 'left' }}>
+          <span style={{ width: 24, height: 24, flex: 'none', borderRadius: 8, border: `1px solid ${stay ? 'var(--acc-rim)' : 'var(--hairline)'}`, background: stay ? 'var(--acc-surf)' : 'var(--track)', boxShadow: 'var(--inset)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--acc-ink)' }}>
+            {stay && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
+          </span>
+          <span style={{ fontSize: 13.5, fontWeight: 600 }}>Keep me signed in</span>
+        </button>
+
+        <button onClick={onPasswordSignIn} disabled={busy || !email.trim() || !pw} style={{ ...primaryBtn, opacity: busy || !email.trim() || !pw ? .6 : 1 }}>
+          {busy ? 'Signing in…' : 'Sign in'}
+        </button>
+
+        {/* The backup door, and the way in for anyone who has no password yet. */}
+        <button onClick={onSendLink} disabled={busy || !email.trim()} style={{ ...quietBtn, marginTop: 2 }}>
+          No password yet, or forgotten it? Email me a sign-in link
         </button>
 
         {phase === 'sent' && (
           <>
             <input
-              type="text" inputMode="text" autoComplete="one-time-code" placeholder="Paste your sign-in code"
-              value={code} onChange={(e) => setCode(e.target.value)} aria-label="Sign-in code" style={input}
+              type="text" inputMode="text" autoComplete="one-time-code"
+              placeholder="Paste the link or code from your email"
+              value={code} onChange={(e) => setCode(e.target.value)} aria-label="Sign-in link or code" style={input}
             />
             <button onClick={onCompleteCode} disabled={busy || !code.trim()} style={{ ...primaryBtn, opacity: busy || !code.trim() ? .6 : 1 }}>
-              Sign in
+              Sign in with the link
             </button>
           </>
         )}
@@ -192,10 +233,65 @@ export default function MembershipCard() {
 
       <div style={note(false)}>
         The app is free without an account — signing in only matters for Premium. Your stacks stay on this device either way.
+        Once you are in, you can set a password from this screen.
       </div>
       {msg && <div style={note(false)}>{msg}</div>}
       {err && <div style={{ ...note(false), color: 'var(--bad, #c05)' }}>{err}</div>}
       <DevUnlock />
+    </div>
+  );
+}
+
+/**
+ * Set (or change) the account password, so the next sign-in needs no inbox.
+ *
+ * Collapsed by default: for a signed-in user this is housekeeping, not the point
+ * of the screen. There is deliberately no "you already have a password" state —
+ * the backend exposes no way to ask, and guessing would be worse than saying
+ * nothing, so the label covers both.
+ */
+function SetPasswordBlock({ accent }) {
+  const [open, setOpen] = React.useState(false);
+  const [pw, setPw] = React.useState('');
+  const [busy, setBusy] = React.useState(false);
+  const [saved, setSaved] = React.useState(false);
+  const [err, setErr] = React.useState(null);
+
+  const save = async () => {
+    setBusy(true); setErr(null);
+    try {
+      await setPassword(pw);
+      setPw(''); setSaved(true); setOpen(false);
+    } catch (e) {
+      setErr(e?.message || 'Could not save that password.');
+    } finally { setBusy(false); }
+  };
+
+  const quiet = { ...quietBtn, ...(accent ? { color: 'rgba(255,255,255,.9)' } : null) };
+
+  if (!open) {
+    return (
+      <>
+        <button onClick={() => { setOpen(true); setSaved(false); }} style={quiet}>
+          {saved ? 'Password saved · change it' : 'Set a password'}
+        </button>
+        {saved && <div style={note(accent)}>Saved. Next time you can sign in with your email and password — no waiting for an email.</div>}
+      </>
+    );
+  }
+
+  return (
+    <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <input
+        type="password" autoComplete="new-password" placeholder={`New password (${PASSWORD_MIN}+ characters)`}
+        value={pw} onChange={(e) => setPw(e.target.value)} aria-label="New password" style={input}
+      />
+      <button onClick={save} disabled={busy || pw.length < PASSWORD_MIN}
+        style={{ ...primaryBtn, height: 46, opacity: busy || pw.length < PASSWORD_MIN ? .6 : 1 }}>
+        {busy ? 'Saving…' : 'Save password'}
+      </button>
+      <button onClick={() => { setOpen(false); setPw(''); setErr(null); }} style={quiet}>Cancel</button>
+      {err && <div style={{ ...note(accent), color: accent ? '#ffd9d9' : 'var(--bad, #c05)' }}>{err}</div>}
     </div>
   );
 }

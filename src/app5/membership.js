@@ -197,10 +197,23 @@ export async function requestSignIn(email) {
   return { completed: false };
 }
 
+/**
+ * The emailed link and the "code" the app asks for are the SAME string: the
+ * email carries `…/?login_token=<32 chars>` and the box wants the part after the
+ * `=`. Nothing said so, so people pasted the whole link and were told it was
+ * invalid. Take either.
+ */
+export function extractLoginToken(pasted) {
+  const raw = String(pasted || '').trim();
+  const m = /[?&#]login_token=([^&\s#]+)/.exec(raw);
+  if (!m) return raw;
+  try { return decodeURIComponent(m[1]); } catch { return m[1]; }
+}
+
 /** Step 2: exchange the emailed/pasted one-time token for a session. */
 export async function completeSignIn(loginToken, email) {
-  const tok = String(loginToken || '').trim();
-  if (!tok) throw new Error('Paste the sign-in code from your email.');
+  const tok = extractLoginToken(loginToken);
+  if (!tok) throw new Error('Paste the sign-in link or code from your email.');
   const r = await api('/api/auth/callback', { method: 'POST', body: { token: tok } });
   if (!r?.token) throw new Error('That sign-in code is invalid or has expired.');
   writeSession(r.token, email || readEmail());
@@ -234,6 +247,48 @@ export async function fetchEntitlement() {
     if (e.status === 401) { signOut(); return { premium: false, entitlement: 'none', signedOut: true }; }
     throw e; // offline / server error — the cache keeps the user unlocked meanwhile
   }
+}
+
+// ── email + password ─────────────────────────────────────────────────────────
+// The backend has had these two routes all along (api/_lib/handlers.ts:
+// /api/auth/password/login and /api/auth/password/set — both answered live when
+// probed on 2026-08-04). The app never called either, so the only way in was an
+// inbox round-trip: leave the app, find the mail, tap a link that opens in the
+// DEFAULT browser rather than the window you started in. Password is now the
+// main door; the emailed link stays as the backup and the forgotten-password path.
+
+/** The backend's own minimum (setOwnPassword rejects shorter with a 400). */
+export const PASSWORD_MIN = 8;
+
+export async function passwordSignIn(email, password) {
+  const clean = String(email || '').trim().toLowerCase();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(clean)) throw new Error('Enter a valid email address.');
+  if (!password) throw new Error('Enter your password.');
+  let r;
+  try {
+    r = await api('/api/auth/password/login', { method: 'POST', body: { email: clean, password } });
+  } catch (e) {
+    // The server answers 401 for a wrong password AND for an account that has
+    // never set one, and deliberately does not say which (it would confirm
+    // whether an email is registered). So the copy has to cover both cases.
+    if (e.status === 401) {
+      const err = new Error('That email and password don’t match. If you have never set a password, use the email link instead.');
+      err.status = 401;
+      throw err;
+    }
+    throw e;
+  }
+  if (!r?.token) throw new Error('Sign-in failed — try the email link instead.');
+  writeSession(r.token, clean);
+  return await fetchEntitlement();
+}
+
+/** Set (or change) the password on the signed-in account. */
+export async function setPassword(password) {
+  const pw = String(password || '');
+  if (pw.length < PASSWORD_MIN) throw new Error(`Use at least ${PASSWORD_MIN} characters.`);
+  await api('/api/auth/password/set', { method: 'POST', body: { password: pw }, auth: true });
+  return true;
 }
 
 // ── staying signed in ────────────────────────────────────────────────────────
