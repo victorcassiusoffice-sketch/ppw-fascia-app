@@ -40,6 +40,8 @@ import { completeSignIn, isSignedIn, readEmail, ensureFreshSession, consumeNewAc
 import AccountSheet from './screens/AccountSheet.jsx';
 import UpdateBar from './screens/UpdateBar.jsx';
 import FirstRunChoice from './screens/FirstRunChoice.jsx';
+import LockScreen from './screens/LockScreen.jsx';
+import { isEnabled as passcodeEnabled, isLocked as passcodeLocked, lockNow, LOCK_AFTER_MS } from './passcode.js';
 import { installPressSound } from './sfx5.js';
 
 // ── small inline-SVG icon helpers (match the prototype's line icons) ──
@@ -406,6 +408,25 @@ export default function App5() {
     return () => clearTimeout(t);
   }, [S.onboarded, S.aiOpen, S.addOpen, S.termsOpen]);
 
+  // PASSCODE — lock after LOCK_AFTER_MS in the background, never while in use.
+  //
+  // Locking only drops the decrypted session from memory; the ciphertext stays on
+  // disk. Killing the app locks it too, for free: memory goes with the page, and
+  // nothing readable was ever written down.
+  React.useEffect(() => {
+    if (!passcodeEnabled()) return;
+    let t = null;
+    const onVis = () => {
+      if (document.visibilityState === 'hidden') {
+        t = setTimeout(() => { lockNow(); t = null; }, LOCK_AFTER_MS);
+      } else if (t) {
+        clearTimeout(t); t = null;   // back within the grace period — no keypad
+      }
+    };
+    document.addEventListener('visibilitychange', onVis);
+    return () => { if (t) clearTimeout(t); document.removeEventListener('visibilitychange', onVis); };
+  }, []);
+
   // runtime slot engine — fires notes/reminders/autoplay when a slot's time
   // arrives (20s tick, ported from the prototype). Cleans up on unmount.
   React.useEffect(() => startSlotEngine(), []);
@@ -515,6 +536,9 @@ export default function App5() {
             this screen were "Sign in" and "Already have an account?". */}
         <FirstRunChoice />
         <TermsScreen />
+        {/* Above everything, including the coach marks — while it is up there is
+            genuinely no session to reach underneath. */}
+        <LockScreen />
         <UpsellModal />
       </div>
     </div>

@@ -17,6 +17,11 @@
 // ─────────────────────────────────────────────────────────────────────────
 
 import { WELLNESS_ASSISTANT_URL } from '../config.js';
+// passcode.js deliberately imports nothing from here, so this stays one-way.
+import {
+  isEnabled as passcodeEnabled, passcodeToken, updateSealedToken,
+  disablePasscode, enablePasscode,
+} from './passcode.js';
 
 const LS = (k) => 'ppw5.' + k;
 
@@ -92,17 +97,38 @@ export function setStaySignedIn(on) {
   else { sWrite('authToken', tok); drop('authToken'); }
 }
 
-/** The session JWT, or null when signed out. Tab-scoped copy wins. */
-export function readToken() { return sRead('authToken') || read('authToken'); }
+/**
+ * The session JWT, or null when signed out. Tab-scoped copy wins.
+ *
+ * With a passcode set, the token is NOT on disk at all — only ciphertext is, and
+ * the plaintext lives in passcode.js's memory while unlocked. Everything in the
+ * app already reads the session through this one function, so that swap needed no
+ * changes anywhere else. Locked reads as "no session", which is correct: without
+ * the passcode there genuinely isn't one.
+ */
+export function readToken() {
+  if (passcodeEnabled()) return passcodeToken();
+  return sRead('authToken') || read('authToken');
+}
 export function readEmail() { return read('authEmail'); }
 export function isSignedIn() { return !!readToken(); }
 
 function writeSession(token, email) {
   if (token) {
-    // Exactly one store holds the token, so signing out of one can't leave the
-    // other quietly holding a live session.
-    if (staySignedIn()) { write('authToken', token); sDrop('authToken'); }
-    else { sWrite('authToken', token); drop('authToken'); }
+    if (passcodeEnabled()) {
+      // Re-seal instead of writing plaintext. Load-bearing: sessions rotate in
+      // the background (ensureFreshSession), so without this the vault would
+      // still hold the token from the day the passcode was set, and the next
+      // unlock would hand back a dead session.
+      updateSealedToken(token);
+      drop('authToken'); sDrop('authToken');
+    } else if (staySignedIn()) {
+      // Exactly one store holds the token, so signing out of one can't leave the
+      // other quietly holding a live session.
+      write('authToken', token); sDrop('authToken');
+    } else {
+      sWrite('authToken', token); drop('authToken');
+    }
   }
   if (email) write('authEmail', String(email).toLowerCase());
 }
@@ -404,6 +430,29 @@ export async function ensureFreshSession() {
 }
 
 /**
+ * Turn the passcode on: seal the live session and delete every plaintext copy.
+ *
+ * Lives here rather than in passcode.js because only this module knows where the
+ * token is kept — and the whole value of the feature depends on the plaintext
+ * being GONE afterwards, not merely shadowed.
+ */
+export async function setSessionPasscode(passcode) {
+  const t = readToken();
+  if (!t) throw new Error('Sign in first, then set a passcode.');
+  await enablePasscode(passcode, t);
+  drop('authToken');
+  sDrop('authToken');
+  return true;
+}
+
+/** Turn it off: hand the session back to ordinary storage. */
+export function clearSessionPasscode() {
+  const t = disablePasscode();
+  if (t) writeSession(t, null);
+  return true;
+}
+
+/**
  * Permanently delete the account.
  *
  * The backend runs `DELETE FROM users WHERE id=$1`, which cascades to everything
@@ -425,6 +474,9 @@ export function signOut() {
   drop('authEmail');
   drop('ent');
   write('premium', '0');
+  // The passcode vault holds the session itself. Leaving it behind would mean a
+  // later unlock resurrected a session the user had explicitly ended.
+  if (passcodeEnabled()) disablePasscode();
 }
 
 /**

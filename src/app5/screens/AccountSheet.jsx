@@ -12,7 +12,13 @@
 
 import React from 'react';
 import { useStore5, closeAccount, signOutMembership } from '../store5.js';
-import { readEmail, staySignedIn, setStaySignedIn, deleteAccount, sessionExpiresAt } from '../membership.js';
+import {
+  readEmail, staySignedIn, setStaySignedIn, deleteAccount, sessionExpiresAt,
+  setSessionPasscode, clearSessionPasscode,
+} from '../membership.js';
+import {
+  isEnabled as passcodeIsEnabled, passcodeAvailable, validPasscode, MAX_ATTEMPT_NOTE,
+} from '../passcode.js';
 import MembershipCard from './MembershipCard.jsx';
 
 /**
@@ -37,6 +43,95 @@ const row = {
 const rowTitle = { fontSize: 14.5, fontWeight: 600, textShadow: 'var(--emboss)' };
 const rowNote = { marginTop: 2, fontSize: 12, lineHeight: 1.45, color: 'var(--dim)' };
 const sectionNote = { margin: '12px 2px 0', fontSize: 11.5, lineHeight: 1.6, color: 'var(--dim)' };
+
+/**
+ * Passcode lock (Vic's pick: option B — privacy, done properly).
+ *
+ * Setting one seals the session with a key derived from the passcode and deletes
+ * every plaintext copy on the device. Turning it off hands the session back.
+ *
+ * The note is deliberately not sales copy. Four digits is ten thousand guesses and
+ * a web app has no security chip to count them, so this stops the person who picks
+ * up your phone and not a determined one. Saying that is what makes it honest;
+ * Face ID is the answer to the rest and is a later job.
+ */
+function PasscodeRow() {
+  const [enabled, setEnabled] = React.useState(passcodeIsEnabled());
+  const [open, setOpen] = React.useState(false);
+  const [pin, setPin] = React.useState('');
+  const [again, setAgain] = React.useState('');
+  const [busy, setBusy] = React.useState(false);
+  const [err, setErr] = React.useState(null);
+
+  if (!passcodeAvailable()) return null;   // no WebCrypto → don't offer what we can't honour
+
+  const save = async () => {
+    setErr(null);
+    if (!validPasscode(pin)) { setErr('Use 4 to 8 digits.'); return; }
+    if (pin !== again) { setErr('The two passcodes are not the same.'); return; }
+    setBusy(true);
+    try {
+      await setSessionPasscode(pin);
+      setEnabled(true); setOpen(false); setPin(''); setAgain('');
+    } catch (e) {
+      setErr(e?.message || 'Could not set the passcode.');
+    } finally { setBusy(false); }
+  };
+
+  const turnOff = () => { clearSessionPasscode(); setEnabled(false); setErr(null); };
+
+  if (enabled) {
+    return (
+      <div style={{ ...row, display: 'block' }}>
+        <div style={rowTitle}>Passcode is on</div>
+        <div style={rowNote}>Asked for when you have been away for 5 minutes, and whenever the app is reopened.</div>
+        <button onClick={turnOff} style={{ marginTop: 10, minHeight: 44, padding: '0 14px', borderRadius: 12, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--ink)', fontSize: 13, fontWeight: 600 }}>
+          Turn the passcode off
+        </button>
+      </div>
+    );
+  }
+
+  if (!open) {
+    return (
+      <button onClick={() => setOpen(true)} style={row}>
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <span style={{ display: 'block', ...rowTitle }}>Set a passcode</span>
+          <span style={{ display: 'block', ...rowNote }}>Lock the app on this device with a short code.</span>
+        </span>
+      </button>
+    );
+  }
+
+  const box = { width: '100%', height: 48, borderRadius: 14, padding: '0 14px', fontSize: 17, letterSpacing: '.2em', background: 'var(--track)', border: '1px solid var(--hairline)', color: 'var(--ink)', boxShadow: 'var(--inset)', outline: 'none' };
+
+  return (
+    <div style={{ ...row, display: 'block' }}>
+      <div style={rowTitle}>Set a passcode</div>
+      <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <input type="password" inputMode="numeric" autoComplete="new-password" placeholder="4–8 digits"
+          aria-label="New passcode" value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 8))} style={box} />
+        <input type="password" inputMode="numeric" autoComplete="new-password" placeholder="Again"
+          aria-label="Repeat passcode" value={again} onChange={(e) => setAgain(e.target.value.replace(/\D/g, '').slice(0, 8))} style={box} />
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={() => { setOpen(false); setPin(''); setAgain(''); setErr(null); }} disabled={busy}
+            style={{ flex: 1, height: 44, borderRadius: 14, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--ink)', fontWeight: 600, fontSize: 13.5 }}>
+            Cancel
+          </button>
+          <button onClick={save} disabled={busy || !pin || !again}
+            style={{ flex: 1, height: 44, borderRadius: 14, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 700, fontSize: 13.5, boxShadow: 'var(--acc-glow)', opacity: busy || !pin || !again ? .6 : 1 }}>
+            {busy ? 'Saving…' : 'Save passcode'}
+          </button>
+        </div>
+        {err && <div role="alert" style={{ ...rowNote, color: 'var(--bad, #c05)' }}>{err}</div>}
+        <div style={rowNote}>
+          {MAX_ATTEMPT_NOTE} If you forget it, signing in again clears it — there is no way to recover it,
+          because nothing anywhere stores it.
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function AccountSheet() {
   const S = useStore5();
@@ -111,6 +206,8 @@ export default function AccountSheet() {
                 </span>
               </span>
             </button>
+
+            <PasscodeRow />
 
             {!confirmDelete ? (
               <button onClick={() => { setConfirmDelete(true); setErr(null); }} style={{ ...row, color: 'var(--bad, #c05)' }}>
