@@ -25,10 +25,19 @@
 const BUILD = typeof __PPW_BUILD__ !== 'undefined' ? __PPW_BUILD__ : 'dev';
 
 let _waitingWorker = null;
+// The deployed build, recorded only when it DIFFERS from the one we are running.
+// Set even when no service worker is waiting yet — a device pinned to a stale
+// build by a stuck cache has a real update available and the user deserves to be
+// told, whether or not the SW machinery has managed to stage it.
+let _pendingBuild = null;
 const _listeners = new Set();
 
 function _emit() {
-  const state = { updateReady: !!_waitingWorker, version: BUILD };
+  const state = {
+    updateReady: !!_waitingWorker || !!_pendingBuild,
+    version: BUILD,
+    serverVersion: _pendingBuild,
+  };
   _listeners.forEach((cb) => {
     try { cb(state); } catch { /* a bad listener must not break the others */ }
   });
@@ -39,7 +48,7 @@ function _emit() {
  *  update that was detected before it subscribed. */
 export function onUpdateState(cb) {
   _listeners.add(cb);
-  try { cb({ updateReady: !!_waitingWorker, version: BUILD }); } catch { /* noop */ }
+  try { cb({ updateReady: !!_waitingWorker || !!_pendingBuild, version: BUILD, serverVersion: _pendingBuild }); } catch { /* noop */ }
   return () => _listeners.delete(cb);
 }
 
@@ -48,12 +57,29 @@ function _setWaiting(worker) {
   _emit();
 }
 
-/** Apply a pending update: tell the waiting SW to take over. The resulting
- *  controllerchange triggers the one-time reload. No-op if nothing is waiting. */
+/**
+ * Apply a pending update.
+ *
+ * BAR FIRST (2026-08-06). This used to be called automatically by the version
+ * sentinel the instant it saw a build mismatch, which is why the "new version is
+ * ready" bar never appeared for anyone: proved live on 6 Aug — a client parked on
+ * the old build swapped bundles silently and the bar was never rendered once.
+ * That is also a force-reload mid-session, which the spec forbids.
+ *
+ * It is now called from exactly two places: the user tapping Update, and the app
+ * being backgrounded (where a reload is invisible). Nothing applies an update
+ * while someone is looking at the screen.
+ */
 export function applyUpdate() {
   if (_waitingWorker) {
     _waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+    return true;
   }
+  // Nothing staged to hand over to — a stuck or blocked SW. The guarded hard
+  // reload is the only thing that shifts that, and it is exactly the recovery
+  // that fixed the pinned-build incident. It now runs only because the user
+  // asked for it, or because the app is in the background.
+  return hardReloadOnce();
 }
 
 /** Pure helper (unit-tested): a worker is an applyable UPDATE — as opposed to
@@ -85,6 +111,24 @@ export function shouldHardReload(serverBuild, runningBuild, reloadedFor) {
   return true;
 }
 
+/** The one-time guarded recovery reload. Only ever called from applyUpdate(). */
+function hardReloadOnce() {
+  let reloadedFor = null;
+  try { reloadedFor = sessionStorage.getItem(RELOAD_GUARD_KEY); } catch { /* ignore */ }
+  if (!shouldHardReload(_pendingBuild, BUILD, reloadedFor)) return false;
+  try { sessionStorage.setItem(RELOAD_GUARD_KEY, _pendingBuild); } catch { /* ignore */ }
+  if (typeof window !== 'undefined' && window.location) window.location.reload();
+  return true;
+}
+
+/**
+ * Compare the deployed build to the one this tab is running.
+ *
+ * It used to APPLY what it found — nudge the SW and, failing that, hard reload —
+ * which is why nobody ever saw the update bar. It now only RECORDS the mismatch
+ * and lets the bar say so; applying is the user's tap or the app being
+ * backgrounded. Staying on the old build is allowed. Being uninformed is not.
+ */
 async function checkVersion(reg) {
   if (BUILD === 'dev') return;                 // dev server has no deployed build to recover to
   if (typeof fetch !== 'function') return;     // unsupported env (jsdom unit tests)
@@ -97,27 +141,27 @@ async function checkVersion(reg) {
   } catch {
     return;                                    // offline / not deployed — keep working, never reload
   }
-  if (!serverBuild || serverBuild === BUILD) return;   // in sync
-
-  // Server is serving a different build than this tab is running. Prefer the
-  // graceful SW path first: pull the new SW and apply it if it's waiting — its
-  // controllerchange handler does the reload cleanly (no double reload).
-  try { if (reg) await reg.update(); } catch { /* ignore */ }
-  if (reg && reg.waiting) { _setWaiting(reg.waiting); applyUpdate(); return; }
-
-  // No SW update path budged (stuck / blocked / absent). One-time guarded hard
-  // reload as the last resort.
-  let reloadedFor = null;
-  try { reloadedFor = sessionStorage.getItem(RELOAD_GUARD_KEY); } catch { /* ignore */ }
-  if (shouldHardReload(serverBuild, BUILD, reloadedFor)) {
-    try { sessionStorage.setItem(RELOAD_GUARD_KEY, serverBuild); } catch { /* ignore */ }
-    if (typeof window !== 'undefined' && window.location) window.location.reload();
+  if (!serverBuild || serverBuild === BUILD) {
+    if (_pendingBuild) { _pendingBuild = null; _emit(); }   // caught up
+    return;
   }
+
+  // A newer build is deployed. Record it — this alone lights the bar, even if the
+  // SW is stuck and nothing can be staged, because the fact is true either way.
+  _pendingBuild = serverBuild;
+
+  // Stage the new worker so the user's tap is instant when it comes. Staging is
+  // silent and safe; it is the APPLY that would yank the page, and that no longer
+  // happens here.
+  try { if (reg) await reg.update(); } catch { /* ignore */ }
+  if (reg && reg.waiting) _setWaiting(reg.waiting);
+  else _emit();
 }
 
 /** For tests: reset module state between cases. */
 export function _resetForTest() {
   _waitingWorker = null;
+  _pendingBuild = null;
   _listeners.clear();
 }
 
@@ -178,8 +222,9 @@ export function registerServiceWorker({ immediate = false } = {}) {
 
     // Force a check now and whenever the app comes back to the foreground.
     // Two signals: reg.update() pulls a fresh sw.js (the normal SW path), and
-    // checkVersion() compares the deployed build sentinel to the running build
-    // and recovers a stuck cache that reg.update() alone can't shift.
+    // checkVersion() compares the deployed build sentinel to the running build,
+    // which is what catches a stuck cache that reg.update() alone can't shift.
+    // Neither one applies anything any more — they only surface the bar.
     const check = () => { reg.update().catch(() => {}); checkVersion(reg); };
     check();
 
@@ -187,9 +232,11 @@ export function registerServiceWorker({ immediate = false } = {}) {
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') {
           check();
-        } else if (document.visibilityState === 'hidden' && _waitingWorker) {
-          // Backgrounded with an update pending — apply it silently so the app
-          // is fresh on return, without interrupting the session they just left.
+        } else if (document.visibilityState === 'hidden' && (_waitingWorker || _pendingBuild)) {
+          // THE ONLY automatic apply. Backgrounded with an update pending, so a
+          // reload is invisible: the app is simply fresh on return. Covers the
+          // stuck-cache case too, since applyUpdate() falls through to the
+          // guarded hard reload when there is no worker to hand over to.
           applyUpdate();
         }
       });

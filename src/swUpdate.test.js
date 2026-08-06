@@ -166,3 +166,122 @@ describe('registerServiceWorker', () => {
     expect(ready).toBe(false);
   });
 });
+
+// ── BAR FIRST (2026-08-06) ───────────────────────────────────────────────────
+// The version sentinel used to APPLY whatever it found the moment it found it.
+// Proved live on 6 Aug: a client parked on the old build swapped bundles silently
+// and the "new version is ready" bar was never rendered once — a force-reload
+// mid-session, which is exactly what the spec forbids. These guard the fix.
+
+const flush = () => new Promise((r) => setTimeout(r, 20));
+
+function stubVersion(build) {
+  vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ build }), {
+    status: 200, headers: { 'content-type': 'application/json' },
+  })));
+}
+
+function stubReload() {
+  const reload = vi.fn();
+  const original = window.location;
+  Object.defineProperty(window, 'location', { configurable: true, writable: true, value: { ...original, reload } });
+  return { reload, restore: () => Object.defineProperty(window, 'location', { configurable: true, writable: true, value: original }) };
+}
+
+describe('bar first — nothing applies itself while you are looking at it', () => {
+  let loc;
+  beforeEach(() => { _resetForTest(); sessionStorage.clear(); loc = stubReload(); });
+  afterEach(() => { loc.restore(); vi.unstubAllGlobals(); clearFakeSW(); });
+
+  it('a newer deployed build raises the bar and touches nothing else', async () => {
+    const waiting = { postMessage: vi.fn() };
+    const reg = makeRegistration({ waiting });
+    installFakeSW({ reg });
+    stubVersion('a-newer-build');
+
+    let ready = false;
+    onUpdateState((s) => { if (s.updateReady) ready = true; });
+    await registerServiceWorker({ immediate: true });
+    await flush();
+
+    expect(ready).toBe(true);                        // the user is told
+    expect(waiting.postMessage).not.toHaveBeenCalled(); // and NOT yanked
+    expect(loc.reload).not.toHaveBeenCalled();
+  });
+
+  it('tells the user even when the service worker is stuck and nothing is staged', async () => {
+    const reg = makeRegistration({ waiting: null }); // nothing to hand over to
+    installFakeSW({ reg });
+    stubVersion('a-newer-build');
+
+    let ready = false;
+    onUpdateState((s) => { if (s.updateReady) ready = true; });
+    await registerServiceWorker({ immediate: true });
+    await flush();
+
+    expect(ready).toBe(true);
+    expect(loc.reload).not.toHaveBeenCalled();   // the old auto-recovery no longer fires here
+  });
+
+  it('says nothing when the deployed build is the one already running', async () => {
+    const reg = makeRegistration();
+    installFakeSW({ reg });
+    let version = null;
+    onUpdateState((s) => { version = s.version; });
+    await registerServiceWorker({ immediate: true });
+    stubVersion(version);            // server serves exactly what we run
+    await flush();
+
+    let ready = false;
+    onUpdateState((s) => { ready = s.updateReady; });
+    expect(ready).toBe(false);
+  });
+});
+
+describe('applying is the user’s tap, or the app going into the background', () => {
+  let loc;
+  beforeEach(() => { _resetForTest(); sessionStorage.clear(); loc = stubReload(); });
+  afterEach(() => { loc.restore(); vi.unstubAllGlobals(); clearFakeSW(); });
+
+  it('the tap hands over to the waiting worker', async () => {
+    const waiting = { postMessage: vi.fn() };
+    const reg = makeRegistration({ waiting });
+    installFakeSW({ reg });
+    stubVersion('a-newer-build');
+    await registerServiceWorker({ immediate: true });
+    await flush();
+
+    applyUpdate();
+    expect(waiting.postMessage).toHaveBeenCalledWith({ type: 'SKIP_WAITING' });
+  });
+
+  // The stuck-cache recovery that fixed the pinned-build incident is NOT gone —
+  // it moved behind the tap, so it can never reload someone mid-sentence.
+  it('the tap still rescues a stuck cache, once', async () => {
+    const reg = makeRegistration({ waiting: null });
+    installFakeSW({ reg });
+    stubVersion('a-newer-build');
+    await registerServiceWorker({ immediate: true });
+    await flush();
+
+    expect(applyUpdate()).toBe(true);
+    expect(loc.reload).toHaveBeenCalledTimes(1);
+    applyUpdate();                                  // loop guard holds
+    expect(loc.reload).toHaveBeenCalledTimes(1);
+  });
+
+  it('backgrounding applies it silently — the one automatic case', async () => {
+    const waiting = { postMessage: vi.fn() };
+    const reg = makeRegistration({ waiting });
+    installFakeSW({ reg });
+    stubVersion('a-newer-build');
+    await registerServiceWorker({ immediate: true });
+    await flush();
+
+    expect(waiting.postMessage).not.toHaveBeenCalled();
+    Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' });
+    document.dispatchEvent(new Event('visibilitychange'));
+    expect(waiting.postMessage).toHaveBeenCalledWith({ type: 'SKIP_WAITING' });
+    Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'visible' });
+  });
+});
