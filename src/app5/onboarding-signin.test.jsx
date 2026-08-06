@@ -27,18 +27,32 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('a returning user can sign in without finishing setup', () => {
-  it('offers sign-in on the very first setup screen', () => {
+  // Wave 2: this line used to read "Already have an account? Sign in" — the only
+  // account control on the screen, phrased so a NEW customer is told the path is
+  // not theirs. Both visitors now get a door.
+  it('offers both doors on the very first setup screen', () => {
     render(<Shell />);
-    expect(screen.getByText(/already have an account/i)).toBeTruthy();
+    expect(screen.getByText(/create an account/i)).toBeTruthy();
+    expect(screen.getByText(/i already have one/i)).toBeTruthy();
   });
 
   it('the sign-in form actually appears over the wizard when tapped', () => {
     render(<Shell />);
-    fireEvent.click(screen.getByText(/already have an account/i));
+    fireEvent.click(screen.getByText(/i already have one/i));
     expect(getState().accountOpen).toBe(true);
+    expect(getState().accountMode).toBe('signin');
     // the real form, not just a state flag: the one shared MembershipCard
     expect(screen.getByLabelText(/email address/i)).toBeTruthy();
-    expect(screen.getByText(/email me a sign-in link/i)).toBeTruthy();
+    expect(screen.getByLabelText(/^password$/i)).toBeTruthy();
+  });
+
+  it('the create-account door opens the same sheet in create mode', () => {
+    render(<Shell />);
+    fireEvent.click(screen.getByText(/create an account/i));
+    expect(getState().accountMode).toBe('create');
+    expect(screen.getByText(/create my account/i)).toBeTruthy();
+    // no password box: a brand-new account has no password to type
+    expect(screen.queryByLabelText(/^password$/i)).toBeNull();
   });
 
   it('the account sheet is stacked ABOVE the wizard, or it renders invisibly', () => {
@@ -65,7 +79,7 @@ describe('a returning user can sign in without finishing setup', () => {
     setState({ signedIn: true });
     render(<Shell />);
     expect(screen.getByText(/signed in as/i).textContent).toMatch(/buyer@example\.com/);
-    expect(screen.queryByText(/already have an account/i)).toBeNull();
+    expect(screen.queryByText(/create an account/i)).toBeNull();
   });
 
   it('consent is still required — signing in does not waive the terms tick', () => {

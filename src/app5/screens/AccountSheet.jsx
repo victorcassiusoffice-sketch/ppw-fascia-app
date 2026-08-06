@@ -47,6 +47,7 @@ export default function AccountSheet() {
 
   if (!S.accountOpen) return null;
   const signedIn = S.signedIn;
+  const creating = !signedIn && S.accountMode === 'create';
   const email = readEmail();
   const until = signedIn && stay ? signedInUntil() : null;
 
@@ -77,11 +78,15 @@ export default function AccountSheet() {
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8.5" r="3.6" /><path d="M4.8 20a7.2 7.2 0 0 1 14.4 0" /></svg>
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 19, fontWeight: 600, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>{signedIn ? 'Your account' : 'Sign in'}</div>
+            <div style={{ fontSize: 19, fontWeight: 600, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>
+              {signedIn ? 'Your account' : (creating ? 'Create an account' : 'Sign in')}
+            </div>
             {/* Who you are, permanently on screen — before this, a signed-in user
                 had no way to tell they were signed in. */}
             <div style={{ fontSize: 12.5, color: 'var(--dim)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {signedIn ? (email ? `Signed in as ${email}` : 'Signed in') : 'Email and password, or a link by email'}
+              {signedIn
+                ? (email ? `Signed in as ${email}` : 'Signed in')
+                : (creating ? 'One email address, that’s all' : 'Email and password, or a link by email')}
             </div>
           </div>
           <button onClick={closeAccount} aria-label="Close" style={{ width: 34, height: 34, flex: 'none', borderRadius: 999, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

@@ -173,6 +173,30 @@ async function api(path, { method = 'GET', body, auth = false } = {}) {
   return data;
 }
 
+/** The same fetch plumbing, for sibling modules (profile.js). Not for UI code. */
+export const apiRequest = api;
+
+// ── new account vs returning ─────────────────────────────────────────────────
+// The backend creates an account silently the first time it sees an email
+// (upsertUserByEmail), so a brand-new customer is never told an account was made
+// for them. The contract with the backend (Wave 2 item 7, Agent 4's half) is a
+// single boolean `isNewAccount` on the sign-in response — safe to return, because
+// it only ever reaches someone who has just proved control of that inbox.
+//
+// Stashed rather than returned, because the sign-in that matters most happens in
+// App5's ?login_token= handler, far from the screen that has to say the words.
+// Absent flag = we simply don't claim an account was created. Never guessed.
+function noteNewAccount(r) {
+  if (r && r.isNewAccount === true) write('newAccount', '1');
+}
+
+/** True once, for the sign-in that created the account. Clears itself. */
+export function consumeNewAccount() {
+  const was = read('newAccount') === '1';
+  if (was) drop('newAccount');
+  return was;
+}
+
 /**
  * Step 1 of sign-in: ask for a magic link.
  *
@@ -217,8 +241,23 @@ export function extractLoginToken(pasted) {
 export async function completeSignIn(loginToken, email) {
   const tok = extractLoginToken(loginToken);
   if (!tok) throw new Error('Paste the sign-in link or code from your email.');
-  const r = await api('/api/auth/callback', { method: 'POST', body: { token: tok } });
-  if (!r?.token) throw new Error('That sign-in code is invalid or has expired.');
+  let r;
+  try {
+    r = await api('/api/auth/callback', { method: 'POST', body: { token: tok } });
+  } catch (e) {
+    // A dead token is the single most common failure of this path, and "Request
+    // failed (401)" tells a customer nothing about what to do next. Single-use
+    // and time-limited both land here; the way forward is the same for both.
+    if (e.status === 401 || e.status === 400) {
+      const err = new Error('That link has expired or was already used. Ask for a new one — links last an hour and work once.');
+      err.status = e.status;
+      err.expiredLink = true;
+      throw err;
+    }
+    throw e;
+  }
+  if (!r?.token) throw new Error('That link has expired or was already used. Ask for a new one.');
+  noteNewAccount(r);
   writeSession(r.token, email || readEmail());
   return await fetchEntitlement();
 }
@@ -282,6 +321,7 @@ export async function passwordSignIn(email, password) {
     throw e;
   }
   if (!r?.token) throw new Error('Sign-in failed — try the email link instead.');
+  noteNewAccount(r);
   writeSession(r.token, clean);
   return await fetchEntitlement();
 }

@@ -34,10 +34,12 @@ import {
   openAdd, backToToday, openPlayer, openCompleted, openAccount, openRepeat, repeatLabel,
   startSlotEngine, orderedStackFor, reorderTimed, reorderDeck, toggleAuto,
   toggleSelect, selectAll, clearSelection, deleteSelected, safeUrl,
-  syncEntitlement, applyServerEntitlement,
+  syncEntitlement, applyServerEntitlement, syncProfile,
 } from './store5.js';
-import { completeSignIn, isSignedIn, readEmail, ensureFreshSession } from './membership.js';
+import { completeSignIn, isSignedIn, readEmail, ensureFreshSession, consumeNewAccount } from './membership.js';
 import AccountSheet from './screens/AccountSheet.jsx';
+import UpdateBar from './screens/UpdateBar.jsx';
+import FirstRunChoice from './screens/FirstRunChoice.jsx';
 import { installPressSound } from './sfx5.js';
 
 // ── small inline-SVG icon helpers (match the prototype's line icons) ──
@@ -424,10 +426,23 @@ export default function App5() {
         if (lt) {
           url.searchParams.delete('login_token');
           window.history.replaceState({}, '', url.pathname + url.search + url.hash);
-          await completeSignIn(lt).then(applyServerEntitlement).catch(() => {});
+          try {
+            applyServerEntitlement(await completeSignIn(lt));
+            // The link lands on the Stack screen, nowhere near the account. If
+            // this sign-in CREATED the account, open the account screen so the
+            // "your account is set up — set a password" moment is actually seen
+            // rather than happening invisibly, which is the whole Wave 2 fault.
+            if (consumeNewAccount()) { setState({ justCreated: true }); openAccount(); }
+          } catch (e) {
+            // A dead link used to fail in total silence, leaving someone staring
+            // at a signed-out app with no idea why. Send them somewhere they can
+            // ask for another one.
+            setState({ signInError: e?.message || 'That sign-in link did not work. Ask for a new one.' });
+            openAccount('signin');
+          }
         }
       } catch {}
-      if (alive) { await ensureFreshSession(); await syncEntitlement(); }
+      if (alive) { await ensureFreshSession(); await syncEntitlement(); await syncProfile(); }
     })();
     // STAYING SIGNED IN — the session the backend issues lasts 60 minutes, and
     // the app never renewed it, so anyone who kept the app open long enough was
@@ -480,11 +495,19 @@ export default function App5() {
           onClose={() => setTourOpen(false)}
         />
         <CompletedSheet />
+        {/* Tells the user a newer build exists and lets THEM choose. Since the
+            2026-07-06 New Design cutover no update prompt rendered at all — the
+            legacy UpdateToast lives in a branch of App.jsx that never runs. */}
+        <UpdateBar />
         <AccountSheet />
         <RepeatSheet />
         <SlotReminder />
         <NotePopup />
         <OnboardingScreen />
+        {/* Above the wizard (40), below the account sheet (42): the first thing a
+            brand-new visitor sees, because until now the only account words on
+            this screen were "Sign in" and "Already have an account?". */}
+        <FirstRunChoice />
         <TermsScreen />
         <UpsellModal />
       </div>

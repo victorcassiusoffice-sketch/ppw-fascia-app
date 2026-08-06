@@ -120,8 +120,18 @@ describe('the sign-in card', () => {
   it('leads with email + password and keeps the emailed link as the backup', () => {
     render(<MembershipCard />);
     expect(screen.getByLabelText(/^password$/i)).toBeTruthy();
-    expect(screen.getByText(/^sign in$/i)).toBeTruthy();
-    expect(screen.getByText(/no password yet, or forgotten it/i)).toBeTruthy();
+    expect(screen.getByRole('button', { name: /^sign in$/i })).toBeTruthy();
+    expect(screen.getByText(/email me a sign-in link instead/i)).toBeTruthy();
+  });
+
+  // Wave 2 item 2 — the cheapest, highest-value line in the whole wave. Every new
+  // account starts with NO password, and the server answers the same 401 whether
+  // the password is wrong or was never set. Without this line a new customer is
+  // told their correct details are wrong, with nothing to do about it. It must be
+  // visible BEFORE any failure, not surfaced as an error afterwards.
+  it('always shows the way out of the no-password trap, before any failure', () => {
+    render(<MembershipCard />);
+    expect(screen.getByText(/new here, or never set a password\? use the email link below/i)).toBeTruthy();
   });
 
   it('offers "keep me signed in", on by default', () => {
@@ -138,7 +148,7 @@ describe('the sign-in card', () => {
     render(<MembershipCard />);
     fireEvent.change(screen.getByLabelText(/email address/i), { target: { value: 'buyer@example.com' } });
     fireEvent.change(screen.getByLabelText(/^password$/i), { target: { value: 'hunter2!!' } });
-    fireEvent.click(screen.getByText(/^sign in$/i));
+    fireEvent.click(screen.getByRole('button', { name: /^sign in$/i }));
     await waitFor(() => expect(isSignedIn()).toBe(true));
   });
 
@@ -149,10 +159,61 @@ describe('the sign-in card', () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ sent: true }), { status: 200 })));
     render(<MembershipCard />);
     fireEvent.change(screen.getByLabelText(/email address/i), { target: { value: 'buyer@example.com' } });
-    fireEvent.click(screen.getByText(/no password yet, or forgotten it/i));
+    fireEvent.click(screen.getByText(/email me a sign-in link instead/i));
+    fireEvent.click(screen.getByText(/yes, send the link/i));       // the confirm step
     await waitFor(() => expect(screen.getByText(/copy the code underneath the button/i)).toBeTruthy());
     expect(screen.getByText(/works for the next hour/i)).toBeTruthy();
     expect(screen.getByLabelText(/sign-in link or code/i)).toBeTruthy();
+  });
+
+  // Wave 2 item 3. The backend answers "we sent you a link" for ANY address —
+  // correct, since telling strangers which addresses exist is a leak — so a typo
+  // produces a confident success message and an email that never comes.
+  describe('confirming the address before anything is sent', () => {
+    it('sends nothing until the address is confirmed', () => {
+      const spy = vi.fn(async () => new Response(JSON.stringify({ sent: true }), { status: 200 }));
+      vi.stubGlobal('fetch', spy);
+      render(<MembershipCard />);
+      fireEvent.change(screen.getByLabelText(/email address/i), { target: { value: 'buyer@example.com' } });
+      fireEvent.click(screen.getByText(/email me a sign-in link instead/i));
+      expect(screen.getByText(/is this right\?/i)).toBeTruthy();
+      expect(spy).not.toHaveBeenCalled();
+    });
+
+    it('shows the address IN FULL, since a masked one hides the typo', () => {
+      render(<MembershipCard />);
+      fireEvent.change(screen.getByLabelText(/email address/i), { target: { value: 'buyerr@example.com' } });
+      fireEvent.click(screen.getByText(/email me a sign-in link instead/i));
+      expect(screen.getByText('buyerr@example.com')).toBeTruthy();
+    });
+
+    it('lets you go back and fix it', () => {
+      render(<MembershipCard />);
+      fireEvent.change(screen.getByLabelText(/email address/i), { target: { value: 'buyer@example.com' } });
+      fireEvent.click(screen.getByText(/email me a sign-in link instead/i));
+      fireEvent.click(screen.getByText(/change the address/i));
+      expect(screen.getByLabelText(/email address/i)).toBeTruthy();
+    });
+
+    it('refuses a malformed address before the confirm step', () => {
+      render(<MembershipCard />);
+      fireEvent.change(screen.getByLabelText(/email address/i), { target: { value: 'not-an-email' } });
+      fireEvent.click(screen.getByText(/email me a sign-in link instead/i));
+      expect(screen.getByText(/enter a valid email address/i)).toBeTruthy();
+      expect(screen.queryByText(/is this right\?/i)).toBeNull();
+    });
+  });
+
+  // Wave 2 item 5 — "nothing arrived" was a dead end with no next move.
+  it('offers a way forward when no email turns up', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ sent: true }), { status: 200 })));
+    render(<MembershipCard />);
+    fireEvent.change(screen.getByLabelText(/email address/i), { target: { value: 'buyer@example.com' } });
+    fireEvent.click(screen.getByText(/email me a sign-in link instead/i));
+    fireEvent.click(screen.getByText(/yes, send the link/i));
+    await waitFor(() => expect(screen.getByText(/check your junk folder/i)).toBeTruthy());
+    expect(screen.getByText(/send it again/i)).toBeTruthy();
+    expect(screen.getByText(/use a different address/i)).toBeTruthy();
   });
 
   it('a signed-in member is offered a password', () => {

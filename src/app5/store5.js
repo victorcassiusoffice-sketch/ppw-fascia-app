@@ -12,6 +12,7 @@
 
 import { useSyncExternalStore } from 'react';
 import { cachedPremium, fetchEntitlement, isSignedIn, signOut as membershipSignOut } from './membership.js';
+import { fetchProfile, saveProfile } from './profile.js';
 
 const LS = (k) => 'ppw5.' + k;
 
@@ -73,8 +74,14 @@ function initialState() {
     playerItem: null,
     // completed-today sheet
     completedOpen: false,
-    // account sheet (sign in / membership, reachable from the Stack header)
-    accountOpen: false,
+    // account sheet (sign in / membership, reachable from the Stack header).
+    // accountMode: 'signin' | 'create' — the same sheet, two front doors, because
+    // a new customer and a returning one need different words for the same form.
+    // justCreated: the account was made by the sign-in that just happened.
+    // firstRunChoice: has this device been offered "create / already have one"?
+    // signInError: a sign-in that failed somewhere the user wasn't looking (a dead
+    // magic link lands on the Stack screen), carried to the screen that can act on it.
+    accountOpen: false, accountMode: 'signin', justCreated: false, firstRunChoice: false, signInError: null,
     // runtime popups: slot reminder banner + full-screen note (affirmation)
     slotPop: null, notePop: null, eatingNow: false, autoplay: false,
     // general prefs
@@ -118,6 +125,9 @@ function initialState() {
     if (g('orbTip') === '1') def.orbTipSeen = true;
     if (g('onboarded') === '1') def.onboarded = true;
     if (g('terms') === '1') def.termsOk = true;
+    // Someone who already set the app up has met the first-run choice by
+    // definition — don't show a "create an account" screen to an existing user.
+    if (g('frc') === '1' || def.onboarded) def.firstRunChoice = true;
     if (g('reminders')) def.reminders = g('reminders') === '1';
     if (g('sounds') === '0') def.sounds = false;
     if (g('autoplay') === '1') def.autoplay = true;
@@ -696,8 +706,15 @@ export function noteAnimCss(anim, sp) {
 // completed-today sheet
 export function openCompleted() { setState({ completedOpen: true }); }
 export function closeCompleted() { setState({ completedOpen: false }); }
-export function openAccount() { setState({ accountOpen: true }); }
-export function closeAccount() { setState({ accountOpen: false }); }
+// mode is optional. Existing callers pass it straight to onClick, so the first
+// argument can be a click event — anything that isn't the string 'create' means
+// the ordinary sign-in door.
+export function openAccount(mode) {
+  setState({ accountOpen: true, accountMode: mode === 'create' ? 'create' : 'signin' });
+}
+export function closeAccount() { setState({ accountOpen: false, justCreated: false }); }
+/** Remember this device has been offered the create/sign-in choice. */
+export function finishFirstRunChoice() { save('frc', 1); setState({ firstRunChoice: true }); }
 // repeat picker — set an item's recurrence (stamps an anchor so weekly/every-N works)
 export function openRepeat(id) { setState({ repeatId: id }); }
 export function closeRepeat() { setState({ repeatId: null }); }
@@ -725,6 +742,9 @@ export function finishOnboarding() {
   savePrefsNow();
   save('prefs2', JSON.stringify({ d: S.discreet, t: S.dayT, f: { on: S.fastOn, o: S.eatOpen, c: S.eatClose } }));
   setState({ onboarded: true, obStep: 0, screen: 'stack' });
+  // Tell the ACCOUNT it is set up, so the next device doesn't ask again. Silent
+  // by design: signed-out users skip it, and it fails soft while A3 is unbuilt.
+  saveProfile({ onboarded: true, termsAcceptedAt: new Date().toISOString() });
 }
 // toggle a value in a string-array field (chip select)
 export function toggleInList(key, label) {
@@ -803,6 +823,29 @@ export function applyServerEntitlement(ent) {
 export function syncAuthState() {
   setState({ signedIn: isSignedIn() });
   return state.signedIn;
+}
+
+/**
+ * Apply the account's own setup state, so setup follows the PERSON rather than
+ * the device. Called after every sign-in.
+ *
+ * Only ever moves flags to `true`. A null answer (route not deployed, offline,
+ * signed out) is "no opinion" and must change nothing — if it cleared the local
+ * flags, a returning customer would be pushed through the wizard by our own bug,
+ * which is the exact fault this is here to fix.
+ */
+export function applyServerProfile(p) {
+  if (!p) return false;
+  const patch = {};
+  if (p.onboarded && !state.onboarded) { patch.onboarded = true; save('onboarded', 1); }
+  if (p.termsAcceptedAt && !state.termsOk) { patch.termsOk = true; save('terms', 1); }
+  if (Object.keys(patch).length) setState(patch);
+  return !!patch.onboarded;
+}
+
+/** Read the account's setup state and apply it. Safe to call whenever. */
+export async function syncProfile() {
+  return applyServerProfile(await fetchProfile());
 }
 
 /**

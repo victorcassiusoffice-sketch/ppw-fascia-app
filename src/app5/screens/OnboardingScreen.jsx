@@ -188,16 +188,26 @@ export default function OnboardingScreen() {
           {step === 0 ? 'Next' : step === 1 ? 'Next' : 'Start with an empty day'}
         </button>
 
-        {/* the way back in for someone who already has an account */}
+        {/* A door for BOTH kinds of visitor.
+            This line used to read "Already have an account? Sign in" — the only
+            account control on the screen, phrased as a question that tells a new
+            customer the path is not for them, while offering no path that is. */}
         {S.signedIn ? (
           <div style={{ marginTop: 12, textAlign: 'center', fontSize: 12.5, color: 'var(--dim)' }}>
             Signed in as <span style={{ color: 'var(--ink)', fontWeight: 600 }}>{readEmail() || 'your account'}</span>
           </div>
         ) : (
-          <button onClick={openAccount} data-tour="signin-onboarding"
-            style={{ marginTop: 10, width: '100%', minHeight: 44, background: 'none', border: 'none', color: 'var(--dim)', fontSize: 13.5, fontWeight: 600 }}>
-            Already have an account? <span style={{ color: 'var(--accent)', fontWeight: 700 }}>Sign in</span>
-          </button>
+          <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+            <button onClick={() => openAccount('create')} data-tour="signup-onboarding"
+              style={{ minHeight: 44, padding: '0 10px', background: 'none', border: 'none', color: 'var(--accent)', fontSize: 13.5, fontWeight: 700 }}>
+              Create an account
+            </button>
+            <span style={{ color: 'var(--dim)', fontSize: 13 }}>·</span>
+            <button onClick={() => openAccount('signin')} data-tour="signin-onboarding"
+              style={{ minHeight: 44, padding: '0 10px', background: 'none', border: 'none', color: 'var(--dim)', fontSize: 13.5, fontWeight: 600 }}>
+              I already have one
+            </button>
+          </div>
         )}
       </div>
     </div>

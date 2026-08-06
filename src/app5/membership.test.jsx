@@ -139,9 +139,13 @@ describe('sign-in', () => {
     expect(isSignedIn()).toBe(false);
   });
 
-  it('rejects an expired one-time code', async () => {
+  // Copy changed 2026-08-06 (Wave 2 item 5): "Request failed (401)" told a
+  // customer nothing they could act on. Expired and already-used are the same
+  // dead end with the same way out, so they share one plain sentence.
+  it('rejects an expired one-time code, and says what to do about it', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ error: 'Invalid or expired link' }), { status: 401 })));
-    await expect(completeSignIn('stale-code', 'buyer@example.com')).rejects.toThrow(/invalid or expired/i);
+    await expect(completeSignIn('stale-code', 'buyer@example.com'))
+      .rejects.toThrow(/expired or was already used.*ask for a new one/is);
   });
 });
 

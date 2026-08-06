@@ -8,13 +8,14 @@
 // Signing in only matters for Premium.
 
 import React from 'react';
-import { useStore5, syncEntitlement, signOutMembership, applyServerEntitlement } from '../store5.js';
+import { useStore5, setState, syncEntitlement, signOutMembership, applyServerEntitlement, syncProfile } from '../store5.js';
 import {
   GUMROAD_URL, PREM_PRICE, PREM_PRICE_FULL,
   requestSignIn, completeSignIn, fetchEntitlement, readEmail, isSignedIn,
   checkoutUrl, pollForPremium, readEntitlementCache,
   setDevPremium, devPremiumAvailable,
   passwordSignIn, setPassword, PASSWORD_MIN, staySignedIn, setStaySignedIn,
+  consumeNewAccount,
 } from '../membership.js';
 
 const card = (accent) => ({
@@ -59,11 +60,23 @@ export default function MembershipCard() {
   const [pw, setPw] = React.useState('');
   const [stay, setStay] = React.useState(staySignedIn());
   const [code, setCode] = React.useState('');
-  const [phase, setPhase] = React.useState(isSignedIn() ? 'in' : 'out'); // out | sent | in
+  // out → confirm → sent → in. `confirm` exists because a mistyped address is
+  // silently unrecoverable: the backend answers "we sent you a link" for any
+  // address (correct — it stops strangers probing who has an account), so a typo
+  // produces a confident success message and an email that never arrives.
+  const [phase, setPhase] = React.useState(isSignedIn() ? 'in' : 'out');
   const [busy, setBusy] = React.useState(false);
   const [msg, setMsg] = React.useState(null);
   const [err, setErr] = React.useState(null);
   const [waiting, setWaiting] = React.useState(false);
+
+  // A sign-in can fail far from this card — a dead magic link lands on the Stack
+  // screen. App5 parks the reason here so the account screen can show it.
+  React.useEffect(() => {
+    if (S.signInError) { setErr(S.signInError); setState({ signInError: null }); }
+  }, [S.signInError]);
+
+  const creating = S.accountMode === 'create' && !isSignedIn();
 
   const cache = readEntitlementCache();
   const periodEnd = fmtDate(cache?.currentPeriodEnd);
@@ -77,6 +90,8 @@ export default function MembershipCard() {
   const onPasswordSignIn = () => run(async () => {
     const ent = await passwordSignIn(email, pw);
     applyServerEntitlement(ent);
+    if (consumeNewAccount()) setState({ justCreated: true });
+    await syncProfile();
     setPw(''); setPhase('in'); setMsg('Signed in.');
   });
 
@@ -86,9 +101,19 @@ export default function MembershipCard() {
     setStaySignedIn(next); // applies to the live session too, not just the next one
   };
 
+  // Two steps on purpose (Wave 2 item 3). Step one only checks the address is
+  // well-formed and shows it back; nothing is sent until the person confirms.
+  const onAskLink = () => {
+    setErr(null); setMsg(null);
+    const clean = String(email || '').trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(clean)) { setErr('Enter a valid email address.'); return; }
+    setEmail(clean);
+    setPhase('confirm');
+  };
+
   const onSendLink = () => run(async () => {
     const r = await requestSignIn(email);
-    if (r.completed) { await syncEntitlement(); setPhase('in'); setMsg('Signed in.'); }
+    if (r.completed) { await syncEntitlement(); await syncProfile(); setPhase('in'); setMsg('Signed in.'); }
     // The old copy said "paste the code", the email said "open this link", and
     // they were the same string — which is why people got stuck. As of the
     // backend's A2 (2026-08-04) the email carries a button AND a labelled code,
@@ -100,6 +125,8 @@ export default function MembershipCard() {
   const onCompleteCode = () => run(async () => {
     const ent = await completeSignIn(code, email);
     applyServerEntitlement(ent);
+    if (consumeNewAccount()) setState({ justCreated: true });
+    await syncProfile();
     setCode(''); setPhase('in'); setMsg('Signed in.');
   });
 
@@ -126,6 +153,27 @@ export default function MembershipCard() {
     });
   };
 
+  /**
+   * Wave 2 item 4 — say an account was made.
+   *
+   * The backend creates the account silently on first sight of an email, so
+   * until now a customer signed in and was never told they now HAVE an account,
+   * let alone that setting a password would spare them the next inbox trip.
+   *
+   * Shown only when the server confirms it (`isNewAccount`). If that flag is
+   * missing — the backend half is not built yet — nobody is told an account was
+   * created, because we would be guessing. The password nudge below stands on
+   * its own and is true either way.
+   */
+  const createdNote = S.justCreated ? (
+    <div style={{ marginTop: 12, padding: '14px 16px', borderRadius: 18, background: 'var(--acc-surf)', border: '1px solid var(--acc-rim)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)' }}>
+      <div style={{ fontSize: 14.5, fontWeight: 700, textShadow: 'var(--label-shadow)' }}>Your account is set up</div>
+      <div style={{ marginTop: 4, fontSize: 12.5, lineHeight: 1.5, opacity: .95 }}>
+        Set a password below and you can sign straight in next time, without waiting for an email.
+      </div>
+    </div>
+  ) : null;
+
   // ── signed in + Premium ────────────────────────────────────────────────────
   if (phase === 'in' && S.premium) {
     return (
@@ -140,7 +188,8 @@ export default function MembershipCard() {
         <div style={note(true)}>
           {periodEnd ? `Access runs to ${periodEnd}.` : 'Renews automatically.'} Manage or cancel from your Gumroad account.
         </div>
-        <SetPasswordBlock accent />
+        {createdNote}
+        <SetPasswordBlock accent defaultOpen={S.justCreated} />
         <button onClick={onRefresh} disabled={busy} style={{ ...quietBtn, color: 'rgba(255,255,255,.9)' }}>{busy ? 'Checking…' : 'Check membership'}</button>
         <button onClick={onSignOut} style={{ ...quietBtn, color: 'rgba(255,255,255,.7)' }}>Sign out</button>
         {err && <div style={{ ...note(true), color: '#ffd9d9' }}>{err}</div>}
@@ -170,12 +219,40 @@ export default function MembershipCard() {
             Premium isn’t on sale yet — it’s coming soon.
           </div>
         )}
-        <SetPasswordBlock />
+        {createdNote}
+        <SetPasswordBlock defaultOpen={S.justCreated} />
         <button onClick={onRefresh} disabled={busy} style={quietBtn}>{busy ? 'Checking…' : 'Check membership'}</button>
         <button onClick={onSignOut} style={quietBtn}>Sign out</button>
         {msg && <div style={note(false)}>{msg}</div>}
         {err && <div style={{ ...note(false), color: 'var(--bad, #c05)' }}>{err}</div>}
         <DevUnlock />
+      </div>
+    );
+  }
+
+  // ── confirm the address before anything is sent ────────────────────────────
+  // Wave 2 item 3. The FULL address is shown, not a masked one: the whole job of
+  // this step is spotting a typo, and "v…@gmail.com" hides the exact characters
+  // that would be wrong. (The spec sketched it masked; masking defeats its own
+  // stated purpose, so it is shown in full and flagged in the handoff.)
+  if (phase === 'confirm') {
+    return (
+      <div style={card(false)}>
+        <div style={{ fontSize: 16, fontWeight: 700, textShadow: 'var(--emboss)' }}>Is this right?</div>
+        <div style={{ marginTop: 10, padding: '14px 16px', borderRadius: 16, background: 'var(--track)', border: '1px solid var(--hairline)', boxShadow: 'var(--inset)', fontSize: 15.5, fontWeight: 600, wordBreak: 'break-all' }}>
+          {email}
+        </div>
+        <div style={note(false)}>
+          We’ll send your sign-in link here. If a single letter is wrong the email simply never arrives —
+          nothing will tell you, so it is worth a second look.
+        </div>
+        <button onClick={onSendLink} disabled={busy} style={{ ...primaryBtn, marginTop: 14, opacity: busy ? .6 : 1 }}>
+          {busy ? 'Sending…' : 'Yes, send the link'}
+        </button>
+        <button onClick={() => { setPhase('out'); setMsg(null); setErr(null); }} style={quietBtn}>
+          Change the address
+        </button>
+        {err && <div style={{ ...note(false), color: 'var(--bad, #c05)' }}>{err}</div>}
       </div>
     );
   }
@@ -186,8 +263,10 @@ export default function MembershipCard() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
         <span style={{ width: 44, height: 44, flex: 'none', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,.2)', border: '1px solid var(--rim)', color: 'var(--ink)' }}>{crown}</span>
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 16, fontWeight: 700, textShadow: 'var(--emboss)' }}>Membership</div>
-          <div style={{ marginTop: 2, fontSize: 12.5, color: 'var(--dim)' }}>Sign in to restore or buy Premium</div>
+          <div style={{ fontSize: 16, fontWeight: 700, textShadow: 'var(--emboss)' }}>{creating ? 'Create your account' : 'Sign in'}</div>
+          <div style={{ marginTop: 2, fontSize: 12.5, color: 'var(--dim)' }}>
+            {creating ? 'No password to invent — we email you a link' : 'Sign in to restore or buy Premium'}
+          </div>
         </div>
       </div>
 
@@ -195,29 +274,65 @@ export default function MembershipCard() {
         <input
           type="email" inputMode="email" autoComplete="email" placeholder="you@example.com"
           value={email} onChange={(e) => setEmail(e.target.value)} aria-label="Email address" style={input}
-        />
-        <input
-          type="password" autoComplete="current-password" placeholder="Password"
-          value={pw} onChange={(e) => setPw(e.target.value)} aria-label="Password" style={input}
-          onKeyDown={(e) => { if (e.key === 'Enter' && pw && email) onPasswordSignIn(); }}
+          onKeyDown={(e) => { if (e.key === 'Enter' && creating && email.trim()) onAskLink(); }}
         />
 
-        <button onClick={onToggleStay} role="checkbox" aria-checked={stay} aria-label="Keep me signed in"
-          style={{ display: 'flex', alignItems: 'center', gap: 10, minHeight: 44, padding: 0, background: 'none', border: 'none', color: 'var(--ink)', textAlign: 'left' }}>
-          <span style={{ width: 24, height: 24, flex: 'none', borderRadius: 8, border: `1px solid ${stay ? 'var(--acc-rim)' : 'var(--hairline)'}`, background: stay ? 'var(--acc-surf)' : 'var(--track)', boxShadow: 'var(--inset)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--acc-ink)' }}>
-            {stay && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
-          </span>
-          <span style={{ fontSize: 13.5, fontWeight: 600 }}>Keep me signed in</span>
-        </button>
+        {/* CREATING — no password field at all. A new account HAS no password
+            (the backend makes one silently on first sight of an email), so
+            offering the box here would hand every new customer the 401 dead end
+            this wave exists to remove. */}
+        {creating ? (
+          <>
+            <button onClick={onAskLink} disabled={busy || !email.trim()} style={{ ...primaryBtn, opacity: busy || !email.trim() ? .6 : 1 }}>
+              Create my account
+            </button>
+            <div style={note(false)}>
+              We’ll email you a link to finish. You can set a password afterwards, so next time you
+              sign straight in.
+            </div>
+            <button onClick={() => setState({ accountMode: 'signin' })} style={quietBtn}>
+              I already have an account
+            </button>
+          </>
+        ) : (
+          <>
+            <input
+              type="password" autoComplete="current-password" placeholder="Password"
+              value={pw} onChange={(e) => setPw(e.target.value)} aria-label="Password" style={input}
+              onKeyDown={(e) => { if (e.key === 'Enter' && pw && email) onPasswordSignIn(); }}
+            />
 
-        <button onClick={onPasswordSignIn} disabled={busy || !email.trim() || !pw} style={{ ...primaryBtn, opacity: busy || !email.trim() || !pw ? .6 : 1 }}>
-          {busy ? 'Signing in…' : 'Sign in'}
-        </button>
+            {/* Wave 2 item 2 — ALWAYS visible, not only after a failure. Every new
+                account starts with no password, and the server answers the same
+                401 "invalid email or password" whether the password is wrong or
+                was never set (it must not say which — that would confirm whether
+                an address is registered). Without this line, a new customer meets
+                a flat contradiction: their details are right, and the app says
+                they are wrong. This one sentence is the whole fix. */}
+            <div style={{ ...note(false), marginTop: 0 }}>
+              New here, or never set a password? Use the email link below.
+            </div>
 
-        {/* The backup door, and the way in for anyone who has no password yet. */}
-        <button onClick={onSendLink} disabled={busy || !email.trim()} style={{ ...quietBtn, marginTop: 2 }}>
-          No password yet, or forgotten it? Email me a sign-in link
-        </button>
+            <button onClick={onToggleStay} role="checkbox" aria-checked={stay} aria-label="Keep me signed in"
+              style={{ display: 'flex', alignItems: 'center', gap: 10, minHeight: 44, padding: 0, background: 'none', border: 'none', color: 'var(--ink)', textAlign: 'left' }}>
+              <span style={{ width: 24, height: 24, flex: 'none', borderRadius: 8, border: `1px solid ${stay ? 'var(--acc-rim)' : 'var(--hairline)'}`, background: stay ? 'var(--acc-surf)' : 'var(--track)', boxShadow: 'var(--inset)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--acc-ink)' }}>
+                {stay && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
+              </span>
+              <span style={{ fontSize: 13.5, fontWeight: 600 }}>Keep me signed in</span>
+            </button>
+
+            <button onClick={onPasswordSignIn} disabled={busy || !email.trim() || !pw} style={{ ...primaryBtn, opacity: busy || !email.trim() || !pw ? .6 : 1 }}>
+              {busy ? 'Signing in…' : 'Sign in'}
+            </button>
+
+            <button onClick={onAskLink} disabled={busy || !email.trim()} style={{ ...quietBtn, marginTop: 2 }}>
+              Email me a sign-in link instead
+            </button>
+            <button onClick={() => setState({ accountMode: 'create' })} style={quietBtn}>
+              New here? Create an account
+            </button>
+          </>
+        )}
 
         {phase === 'sent' && (
           <>
@@ -227,15 +342,24 @@ export default function MembershipCard() {
               value={code} onChange={(e) => setCode(e.target.value)} aria-label="Sign-in link or code" style={input}
             />
             <button onClick={onCompleteCode} disabled={busy || !code.trim()} style={{ ...primaryBtn, opacity: busy || !code.trim() ? .6 : 1 }}>
-              Sign in with the link
+              {creating ? 'Finish creating my account' : 'Sign in with the link'}
+            </button>
+            {/* Wave 2 item 5 — "nothing arrived" used to be a dead end with no
+                next move. Both real causes get an action. */}
+            <div style={note(false)}>
+              Nothing after a minute? Check your junk folder — and check the address above is exactly right.
+            </div>
+            <button onClick={onSendLink} disabled={busy} style={quietBtn}>Send it again</button>
+            <button onClick={() => { setPhase('out'); setCode(''); setMsg(null); setErr(null); }} style={quietBtn}>
+              Use a different address
             </button>
           </>
         )}
       </div>
 
       <div style={note(false)}>
-        The app is free without an account — signing in only matters for Premium. Your stacks stay on this device either way.
-        Once you are in, you can set a password from this screen.
+        The app is free without an account — an account saves your membership and lets you sign in on
+        another phone. Your stacks stay on this device either way.
       </div>
       {msg && <div style={note(false)}>{msg}</div>}
       {err && <div style={{ ...note(false), color: 'var(--bad, #c05)' }}>{err}</div>}
@@ -252,8 +376,8 @@ export default function MembershipCard() {
  * the backend exposes no way to ask, and guessing would be worse than saying
  * nothing, so the label covers both.
  */
-function SetPasswordBlock({ accent }) {
-  const [open, setOpen] = React.useState(false);
+function SetPasswordBlock({ accent, defaultOpen = false }) {
+  const [open, setOpen] = React.useState(defaultOpen);
   const [pw, setPw] = React.useState('');
   const [busy, setBusy] = React.useState(false);
   const [saved, setSaved] = React.useState(false);
