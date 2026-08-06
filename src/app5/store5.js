@@ -745,6 +745,10 @@ export function finishOnboarding() {
   // Tell the ACCOUNT it is set up, so the next device doesn't ask again. Silent
   // by design: signed-out users skip it, and it fails soft while A3 is unbuilt.
   saveProfile({ onboarded: true, termsAcceptedAt: new Date().toISOString() });
+  // An account created mid-setup had its "you now have an account, set a password"
+  // moment held back so it wouldn't stack on the consent screen. Setup is done —
+  // it can have the screen to itself now.
+  if (state.justCreated) setState({ accountOpen: true, accountMode: 'signin' });
 }
 // toggle a value in a string-array field (chip select)
 export function toggleInList(key, label) {

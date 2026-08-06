@@ -432,7 +432,13 @@ export default function App5() {
             // this sign-in CREATED the account, open the account screen so the
             // "your account is set up — set a password" moment is actually seen
             // rather than happening invisibly, which is the whole Wave 2 fault.
-            if (consumeNewAccount()) { setState({ justCreated: true }); openAccount(); }
+            // Don't stack the account moment on top of the consent screen. If
+            // setup is unfinished, the flag is kept and finishOnboarding() opens
+            // the account sheet the moment the wizard is done — one thing at a time.
+            if (consumeNewAccount()) {
+              setState({ justCreated: true });
+              if (getState().onboarded) openAccount();
+            }
           } catch (e) {
             // A dead link used to fail in total silence, leaving someone staring
             // at a signed-out app with no idea why. Send them somewhere they can

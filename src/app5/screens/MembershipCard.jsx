@@ -15,14 +15,33 @@ import {
   checkoutUrl, pollForPremium, readEntitlementCache,
   setDevPremium, devPremiumAvailable,
   passwordSignIn, setPassword, PASSWORD_MIN, staySignedIn, setStaySignedIn,
-  consumeNewAccount,
+  consumeNewAccount, isAdminGrant,
 } from '../membership.js';
 
+/**
+ * LEGIBILITY (Vic, 2026-08-06: the Premium panel is "hard to read").
+ *
+ * The Premium state used to paint the whole card in `--acc-surf` and write on it
+ * in white. On the light themes that token is a near-solid orange
+ * (rgba(242,121,43,.94)), so the card became a slab of paint carrying white body
+ * text at roughly 2.5:1 — the one surface in the app that did not look or read
+ * like its siblings.
+ *
+ * Two binding laws were being broken (skills/liquid-glass-implementation.md):
+ * accent is a rim and a glow, never opaque paint; and legibility comes from the
+ * scrim tier, not from filling a surface. So Premium is now the SAME glass card
+ * as everything else, marked by an accent rim, an accent glow and the crown —
+ * and its text uses the app's ordinary ink pairing.
+ *
+ * Deliberately no backdrop-filter here: this card renders inside AccountSheet,
+ * which is already blurred glass. Stacking blur is glass-on-glass — banned by
+ * the same skill, and a known renderer trap.
+ */
 const card = (accent) => ({
   position: 'relative', marginTop: 12, borderRadius: 24, overflow: 'hidden', padding: 18,
-  background: accent ? 'var(--acc-surf)' : 'var(--surface)',
+  background: 'var(--surface)',
   border: `1px solid ${accent ? 'var(--acc-rim)' : 'var(--rim)'}`,
-  boxShadow: 'var(--elev)',
+  boxShadow: accent ? 'var(--elev), var(--acc-glow)' : 'var(--elev)',
 });
 const input = {
   width: '100%', height: 48, borderRadius: 14, padding: '0 14px', fontSize: 15,
@@ -39,10 +58,39 @@ const quietBtn = {
   width: '100%', height: 44, background: 'none', border: 'none',
   color: 'var(--dim)', fontSize: 13.5, fontWeight: 600,
 };
-const note = (accent) => ({
-  marginTop: 12, fontSize: 11.5, lineHeight: 1.55,
-  color: accent ? 'rgba(255,255,255,.82)' : 'var(--dim)',
+// One ink pairing everywhere — white-on-orange body text is gone, see card().
+// Call sites may still pass the old `accent` argument; it is simply ignored.
+const note = () => ({
+  marginTop: 12, fontSize: 11.5, lineHeight: 1.55, color: 'var(--dim)',
 });
+
+/**
+ * The error the user actually sees.
+ *
+ * Vic typed a wrong password on his phone and saw nothing. The message existed and
+ * was correct — it was rendered at the FOOT of the card, below the buttons, the
+ * explanatory note and the dev block, inside a sheet that scrolls. On a phone it
+ * was simply off the bottom of the screen. An error the user cannot see is an
+ * error that does not exist, so this one sits directly under the field it is
+ * about, is coloured and iconed like an error, and scrolls itself into view.
+ */
+function FieldError({ children }) {
+  const ref = React.useRef(null);
+  React.useEffect(() => {
+    if (!ref.current) return;
+    try { ref.current.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch { /* jsdom / old webview */ }
+  }, [children]);
+  if (!children) return null;
+  return (
+    <div ref={ref} role="alert" aria-live="assertive"
+      style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginTop: 2, padding: '10px 12px', borderRadius: 14, background: 'var(--track)', border: '1px solid var(--bad, #c05)', color: 'var(--bad, #c05)', fontSize: 12.5, lineHeight: 1.5, fontWeight: 600 }}>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ flex: 'none', marginTop: 1 }}>
+        <circle cx="12" cy="12" r="9" /><path d="M12 7.5v5.5M12 16.2v.5" />
+      </svg>
+      <span>{children}</span>
+    </div>
+  );
+}
 
 const crown = (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-1.8 10H4.8L3 8z" /></svg>
@@ -87,12 +135,21 @@ export default function MembershipCard() {
   };
 
   // The main door. Everything else on this card is a way to get here.
+  const pwRef = React.useRef(null);
+
   const onPasswordSignIn = () => run(async () => {
-    const ent = await passwordSignIn(email, pw);
-    applyServerEntitlement(ent);
-    if (consumeNewAccount()) setState({ justCreated: true });
-    await syncProfile();
-    setPw(''); setPhase('in'); setMsg('Signed in.');
+    try {
+      const ent = await passwordSignIn(email, pw);
+      applyServerEntitlement(ent);
+      if (consumeNewAccount()) setState({ justCreated: true });
+      await syncProfile();
+      setPw(''); setPhase('in'); setMsg('Signed in.');
+    } catch (e) {
+      // Put the cursor back on the field that is wrong, so the fix is one tap
+      // away and the error lands next to what it is about.
+      try { pwRef.current?.focus(); } catch { /* noop */ }
+      throw e;
+    }
   });
 
   const onToggleStay = () => {
@@ -130,11 +187,26 @@ export default function MembershipCard() {
     setCode(''); setPhase('in'); setMsg('Signed in.');
   });
 
+  /**
+   * "Check membership" — always answer, in words.
+   *
+   * Vic tapped this on his own account and saw NOTHING change, and read the app
+   * as broken. He was right to. It did set a message, but the Premium branch of
+   * this card never rendered `msg` at all, so on a Premium account the button was
+   * a no-op with a 200ms flicker. A check that reports nothing is worse than no
+   * check: it teaches people the app is dead.
+   *
+   * Now: the button says "Checking…" while it works, and afterwards there is
+   * always a line saying what the server said — including the date, so "checked"
+   * cannot be confused with a stale answer from ten minutes ago.
+   */
   const onRefresh = () => run(async () => {
     const ent = await fetchEntitlement();
     applyServerEntitlement(ent);
-    if (ent.signedOut) { setPhase('out'); setErr('Your session expired — please sign in again.'); return; }
-    setMsg(ent.premium ? 'Premium is active.' : 'No active membership on this account yet.');
+    if (ent.signedOut) { setPhase('out'); setErr('Your session has ended — please sign in again.'); return; }
+    const until = fmtDate(readEntitlementCache()?.currentPeriodEnd);
+    if (ent.premium) setMsg(until ? `Checked — Premium, active until ${until}.` : 'Checked — Premium is active.');
+    else setMsg('Checked — you are on the Free plan. No payment has been picked up on this account.');
   });
 
   const onSignOut = () => { signOutMembership(); setPhase('out'); setCode(''); setMsg(null); setErr(null); };
@@ -165,6 +237,23 @@ export default function MembershipCard() {
    * created, because we would be guessing. The password nudge below stands on
    * its own and is true either way.
    */
+  /**
+   * Why the founder sees Premium without paying (Vic, 2026-08-06).
+   *
+   * `auth.ts` promotes every address on ADMIN_EMAILS to role:admin / paid on each
+   * login, and the entitlement endpoint computes premium from that role. So Vic's
+   * own account shows Premium with no purchase behind it, which reads exactly like
+   * a billing bug when you are the person testing the billing. Naming it costs one
+   * line and stops the founder's own view being misleading. Customers never see it.
+   */
+  const adminNote = isAdminGrant() ? (
+    <div style={{ marginTop: 10, padding: '10px 12px', borderRadius: 14, background: 'var(--track)', border: '1px solid var(--hairline)', boxShadow: 'var(--inset)', fontSize: 11.5, lineHeight: 1.5, color: 'var(--dim)' }}>
+      <strong style={{ color: 'var(--ink)' }}>Premium (admin account).</strong> This is on because your
+      address is on the staff list, not because a payment was found. A customer with the same account
+      state would see the Free plan.
+    </div>
+  ) : null;
+
   const createdNote = S.justCreated ? (
     <div style={{ marginTop: 12, padding: '14px 16px', borderRadius: 18, background: 'var(--acc-surf)', border: '1px solid var(--acc-rim)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)' }}>
       <div style={{ fontSize: 14.5, fontWeight: 700, textShadow: 'var(--label-shadow)' }}>Your account is set up</div>
@@ -179,20 +268,24 @@ export default function MembershipCard() {
     return (
       <div style={card(true)}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
-          <span style={{ width: 44, height: 44, flex: 'none', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,.2)', border: '1px solid var(--acc-rim)', color: 'var(--acc-ink)' }}>{crown}</span>
+          <span style={{ width: 44, height: 44, flex: 'none', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--acc-surf)', border: '1px solid var(--acc-rim)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)' }}>{crown}</span>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--acc-ink)', textShadow: 'var(--emboss)' }}>Premium · active</div>
-            <div style={{ marginTop: 2, fontSize: 12.5, color: 'rgba(255,255,255,.82)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{readEmail() || 'Signed in'}</div>
+            <div style={{ fontSize: 16, fontWeight: 700, textShadow: 'var(--emboss)' }}>Premium · active</div>
+            <div style={{ marginTop: 2, fontSize: 12.5, color: 'var(--dim)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{readEmail() || 'Signed in'}</div>
           </div>
         </div>
-        <div style={note(true)}>
+        {adminNote}
+        <div style={note()}>
           {periodEnd ? `Access runs to ${periodEnd}.` : 'Renews automatically.'} Manage or cancel from your Gumroad account.
         </div>
         {createdNote}
-        <SetPasswordBlock accent defaultOpen={S.justCreated} />
-        <button onClick={onRefresh} disabled={busy} style={{ ...quietBtn, color: 'rgba(255,255,255,.9)' }}>{busy ? 'Checking…' : 'Check membership'}</button>
-        <button onClick={onSignOut} style={{ ...quietBtn, color: 'rgba(255,255,255,.7)' }}>Sign out</button>
-        {err && <div style={{ ...note(true), color: '#ffd9d9' }}>{err}</div>}
+        <SetPasswordBlock defaultOpen={S.justCreated} />
+        <button onClick={onRefresh} disabled={busy} style={quietBtn}>{busy ? 'Checking…' : 'Check membership'}</button>
+        <button onClick={onSignOut} style={quietBtn}>Sign out</button>
+        {/* This card never rendered `msg`, which is why "Check membership"
+            looked dead on a Premium account. */}
+        {msg && <div style={note()}>{msg}</div>}
+        {err && <div style={{ ...note(), color: 'var(--bad, #c05)' }}>{err}</div>}
       </div>
     );
   }
@@ -297,10 +390,16 @@ export default function MembershipCard() {
         ) : (
           <>
             <input
+              ref={pwRef}
               type="password" autoComplete="current-password" placeholder="Password"
-              value={pw} onChange={(e) => setPw(e.target.value)} aria-label="Password" style={input}
+              value={pw} onChange={(e) => setPw(e.target.value)} aria-label="Password"
               onKeyDown={(e) => { if (e.key === 'Enter' && pw && email) onPasswordSignIn(); }}
+              style={{ ...input, ...(err ? { borderColor: 'var(--bad, #c05)' } : null) }}
             />
+            {/* Directly under the field it is about — not at the foot of a
+                scrolling card, where Vic never saw it. In the 'sent' phase the
+                error belongs to the code box instead, so it moves down there. */}
+            {phase !== 'sent' && <FieldError>{err}</FieldError>}
 
             {/* Wave 2 item 2 — ALWAYS visible, not only after a failure. Every new
                 account starts with no password, and the server answers the same
@@ -344,6 +443,7 @@ export default function MembershipCard() {
             <button onClick={onCompleteCode} disabled={busy || !code.trim()} style={{ ...primaryBtn, opacity: busy || !code.trim() ? .6 : 1 }}>
               {creating ? 'Finish creating my account' : 'Sign in with the link'}
             </button>
+            <FieldError>{err}</FieldError>
             {/* Wave 2 item 5 — "nothing arrived" used to be a dead end with no
                 next move. Both real causes get an action. */}
             <div style={note(false)}>
@@ -361,8 +461,11 @@ export default function MembershipCard() {
         The app is free without an account — an account saves your membership and lets you sign in on
         another phone. Your stacks stay on this device either way.
       </div>
-      {msg && <div style={note(false)}>{msg}</div>}
-      {err && <div style={{ ...note(false), color: 'var(--bad, #c05)' }}>{err}</div>}
+      {msg && <div style={note()}>{msg}</div>}
+      {/* Errors from the PASSWORD path are rendered under that field instead —
+          see FieldError. This foot position only carries errors from the
+          emailed-link path, where there is no single field to sit beneath. */}
+      {creating && phase !== 'sent' && <FieldError>{err}</FieldError>}
       <DevUnlock />
     </div>
   );

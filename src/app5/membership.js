@@ -123,6 +123,16 @@ function writeEntitlementCache(c) {
 export function userId() { return readEntitlementCache()?.userId ?? null; }
 
 /**
+ * True when Premium is coming from the ADMIN_EMAILS allow-list rather than from a
+ * payment — i.e. staff. Read from the entitlement response's own `role`, which the
+ * backend already returns; no backend change was needed for this.
+ */
+export function isAdminGrant() {
+  const c = readEntitlementCache();
+  return !!c && c.role === 'admin' && c.entitlement !== 'paid';
+}
+
+/**
  * G3 — the boot-time answer to "is this user Premium?", offline-safe but not forgeable.
  *
  * Four things must all hold. Setting ppw5.premium='1' by hand satisfies none of
@@ -278,6 +288,11 @@ export async function fetchEntitlement() {
     const ent = {
       premium: r.premium === true,
       entitlement: r.entitlement ?? 'none',
+      // The server computes premium as `role === "admin" || entitlement === "paid"
+      // || entitlement === "guest"`, so an address on ADMIN_EMAILS is Premium with
+      // no purchase behind it. Vic's own account is one, which made his view look
+      // like a billing fault. Keeping the role lets the UI say WHY.
+      role: r.role ?? null,
       currentPeriodEnd: r.currentPeriodEnd ?? null,
       userId: r.userId ?? null,
       checkedAt: Date.now(),

@@ -21,6 +21,13 @@ export default function UpsellModal() {
   const S = useStore5();
   if (!S.premiumUpsell) return null;
 
+  // ONE THING AT A TIME (Vic, 2026-08-06: account sheet + terms + this, all in the
+  // first seconds of signing in). Order of right-of-way: consent first, because it
+  // is legally required and blocks everything; then the account moment; then the
+  // sell. This does NOT drop the upsell — the reason stays in state, so it appears
+  // on the next beat, once the user is not being shouted at from three directions.
+  if (!S.onboarded || S.accountOpen) return null;
+
   return (
     <div style={{ position: 'absolute', inset: 0, zIndex: 47, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 26 }}>
       <div onClick={clearUpsell} style={{ position: 'absolute', inset: 0, background: 'rgba(20,26,38,.5)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', animation: 'ppwFade .3s ease both' }} />
