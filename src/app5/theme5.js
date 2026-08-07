@@ -18,19 +18,35 @@
 
 /* Graphite — sampled from the embossed PPW logo. Further colourways arrive
    with matching logo variants. */
+// ARTWORK PER COLOURWAY (tidied 2026-08-07).
+//
+// `logo` is the wordmark for that colourway, and it is now actually USED — the
+// first-run screen renders it (FirstRunChoice). Until today every entry carried
+// this field and nothing in the app read it, so eight files sat in public/assets
+// being shipped and never shown.
+//
+// Every entry also carried `mark: 'assets/ppw-mark-<colour>.png'`. NOT ONE of
+// those files exists — there are zero ppw-mark-* files in the repo — so those
+// six references were pointers to nothing. They are removed rather than faked
+// with placeholder art: a broken path that no code reads is invisible, and the
+// moment something did read it, it would render a broken image. If per-colourway
+// marks are wanted later, add the files first, then the field.
+//
+// `gel` (shown as "Glass") had no logo at all while ppw-logo-glass.png sat unused
+// on disk — the one genuine gap, now closed.
 export const SOFT = {
   // 2026-07-07 (Vic item 3): embossed secondary text was too light on graphite —
   // dim lifted 65%→84% (dimA) and the white emboss highlight calmed .48→.32 so
   // thin text reads dark instead of washed. Emboss STYLE kept.
-  graphite: { base: '#7E8286', light: 'rgba(255,255,255,.40)', dark: 'rgba(34,38,42,.60)', accent: '#3E434A', ink: '#24282C', dimA: 'D6', rim: '#8E9296', well: '#6F7377', accInk: '#FFFFFF', name: 'Graphite', deep: '#33373B', accDeep: '#17191C', ground: 'radial-gradient(135% 110% at 25% 8%, #97999C 0%, #82868A 46%, #676B6E 100%)', glossA: '.16', rimGlowA: '.14', emboss: 'rgba(255,255,255,.32)', labelSh: 'rgba(0,0,0,.32)', logo: 'assets/ppw-logo-graphite.png', mark: 'assets/ppw-mark-graphite.png' },
-  silver: { base: '#C8CCCE', light: 'rgba(255,255,255,.78)', dark: 'rgba(96,102,108,.52)', accent: '#5C6268', ink: '#33383C', rim: '#B4B8BB', well: '#B9BDBF', accInk: '#FFFFFF', name: 'Silver', deep: '#7E8489', accDeep: '#33373B', ground: 'radial-gradient(135% 110% at 25% 8%, #D6DADB 0%, #C9CDCF 46%, #B9BCBE 100%)', glossA: '.30', rimGlowA: '.35', emboss: 'rgba(255,255,255,.8)', labelSh: 'rgba(0,0,0,.22)', logo: 'assets/ppw-logo-silver.png', mark: 'assets/ppw-mark-silver.png' },
-  ivory: { base: '#E0DFDA', light: 'rgba(255,255,255,.92)', dark: 'rgba(150,148,138,.56)', accent: '#6E6A61', ink: '#3A372F', rim: '#CFCEC8', well: '#D2D1CB', accInk: '#FFFFFF', name: 'Ivory', deep: '#96948A', accDeep: '#3A372F', ground: 'radial-gradient(135% 110% at 25% 8%, #EDECE9 0%, #E0E0DA 46%, #CDCDC5 100%)', glossA: '.45', rimGlowA: '.55', emboss: 'rgba(255,255,255,.95)', labelSh: 'rgba(0,0,0,.2)', logo: 'assets/ppw-logo-ivory.png', mark: 'assets/ppw-mark-ivory.png' },
-  black: { base: '#1C1E20', lite: '#4A4E53', light: 'rgba(255,255,255,.08)', dark: 'rgba(0,0,0,.78)', accent: '#3C4147', ink: '#E6E8EA', rim: '#33373B', well: '#0C0D0F', accInk: '#FFFFFF', name: 'Black', deep: '#000000', accDeep: '#0A0B0C', ground: 'radial-gradient(135% 110% at 25% 8%, #2B2D2F 0%, #1B1D1F 46%, #0E0F10 100%)', glossA: '.05', rimGlowA: '.06', emboss: 'rgba(0,0,0,.6)', labelSh: 'rgba(0,0,0,.5)', thumb: 'linear-gradient(145deg, #6E747B 0%, #43484E 100%)', logo: 'assets/ppw-logo-black.png', mark: 'assets/ppw-mark-black.png' },
-  gloft: { base: '#C9C8C3', light: 'rgba(255,255,255,.85)', dark: 'rgba(120,112,100,.55)', accent: '#A5814F', ink: '#453F36', rim: '#B7B6B1', well: '#B5B4AF', accInk: '#FFFFFF', name: 'Gloft', deep: '#7A7468', accDeep: '#4A3A22', ground: 'radial-gradient(135% 110% at 25% 8%, #D8D9D4 0%, #C6C5C0 46%, #A4A3A0 100%)', glossA: '.34', rimGlowA: '.4', emboss: 'rgba(255,255,255,.88)', labelSh: 'rgba(70,50,30,.3)', halo: '0 0 22px rgba(232,168,120,.38)', logo: 'assets/ppw-logo-gloft.png', mark: 'assets/ppw-mark-gloft.png' },
-  indigo: { base: '#2C4164', lite: '#5F7DA6', light: 'rgba(160,190,235,.24)', dark: 'rgba(4,10,24,.7)', accent: '#6B89B8', ink: '#DFE7F2', rim: '#3E567C', well: '#1A2A47', accInk: '#FFFFFF', name: 'Indigo', deep: '#0A1428', accDeep: '#101B30', ground: 'radial-gradient(135% 110% at 25% 8%, #4E6584 0%, #31476B 46%, #12294A 100%)', glossA: '.10', rimGlowA: '.10', emboss: 'rgba(0,10,30,.5)', labelSh: 'rgba(0,0,0,.35)', thumb: 'linear-gradient(145deg, #8FA6C8 0%, #5F7699 100%)', halo: '0 0 20px rgba(120,160,220,.22)', logo: 'assets/ppw-logo-indigo.png', mark: 'assets/ppw-mark-indigo.png' },
+  graphite: { base: '#7E8286', light: 'rgba(255,255,255,.40)', dark: 'rgba(34,38,42,.60)', accent: '#3E434A', ink: '#24282C', dimA: 'D6', rim: '#8E9296', well: '#6F7377', accInk: '#FFFFFF', name: 'Graphite', deep: '#33373B', accDeep: '#17191C', ground: 'radial-gradient(135% 110% at 25% 8%, #97999C 0%, #82868A 46%, #676B6E 100%)', glossA: '.16', rimGlowA: '.14', emboss: 'rgba(255,255,255,.32)', labelSh: 'rgba(0,0,0,.32)', logo: 'assets/ppw-logo-graphite.webp' },
+  silver: { base: '#C8CCCE', light: 'rgba(255,255,255,.78)', dark: 'rgba(96,102,108,.52)', accent: '#5C6268', ink: '#33383C', rim: '#B4B8BB', well: '#B9BDBF', accInk: '#FFFFFF', name: 'Silver', deep: '#7E8489', accDeep: '#33373B', ground: 'radial-gradient(135% 110% at 25% 8%, #D6DADB 0%, #C9CDCF 46%, #B9BCBE 100%)', glossA: '.30', rimGlowA: '.35', emboss: 'rgba(255,255,255,.8)', labelSh: 'rgba(0,0,0,.22)', logo: 'assets/ppw-logo-silver.webp' },
+  ivory: { base: '#E0DFDA', light: 'rgba(255,255,255,.92)', dark: 'rgba(150,148,138,.56)', accent: '#6E6A61', ink: '#3A372F', rim: '#CFCEC8', well: '#D2D1CB', accInk: '#FFFFFF', name: 'Ivory', deep: '#96948A', accDeep: '#3A372F', ground: 'radial-gradient(135% 110% at 25% 8%, #EDECE9 0%, #E0E0DA 46%, #CDCDC5 100%)', glossA: '.45', rimGlowA: '.55', emboss: 'rgba(255,255,255,.95)', labelSh: 'rgba(0,0,0,.2)', logo: 'assets/ppw-logo-ivory.webp' },
+  black: { base: '#1C1E20', lite: '#4A4E53', light: 'rgba(255,255,255,.08)', dark: 'rgba(0,0,0,.78)', accent: '#3C4147', ink: '#E6E8EA', rim: '#33373B', well: '#0C0D0F', accInk: '#FFFFFF', name: 'Black', deep: '#000000', accDeep: '#0A0B0C', ground: 'radial-gradient(135% 110% at 25% 8%, #2B2D2F 0%, #1B1D1F 46%, #0E0F10 100%)', glossA: '.05', rimGlowA: '.06', emboss: 'rgba(0,0,0,.6)', labelSh: 'rgba(0,0,0,.5)', thumb: 'linear-gradient(145deg, #6E747B 0%, #43484E 100%)', logo: 'assets/ppw-logo-black.webp' },
+  gloft: { base: '#C9C8C3', light: 'rgba(255,255,255,.85)', dark: 'rgba(120,112,100,.55)', accent: '#A5814F', ink: '#453F36', rim: '#B7B6B1', well: '#B5B4AF', accInk: '#FFFFFF', name: 'Gloft', deep: '#7A7468', accDeep: '#4A3A22', ground: 'radial-gradient(135% 110% at 25% 8%, #D8D9D4 0%, #C6C5C0 46%, #A4A3A0 100%)', glossA: '.34', rimGlowA: '.4', emboss: 'rgba(255,255,255,.88)', labelSh: 'rgba(70,50,30,.3)', halo: '0 0 22px rgba(232,168,120,.38)', logo: 'assets/ppw-logo-gloft.webp' },
+  indigo: { base: '#2C4164', lite: '#5F7DA6', light: 'rgba(160,190,235,.24)', dark: 'rgba(4,10,24,.7)', accent: '#6B89B8', ink: '#DFE7F2', rim: '#3E567C', well: '#1A2A47', accInk: '#FFFFFF', name: 'Indigo', deep: '#0A1428', accDeep: '#101B30', ground: 'radial-gradient(135% 110% at 25% 8%, #4E6584 0%, #31476B 46%, #12294A 100%)', glossA: '.10', rimGlowA: '.10', emboss: 'rgba(0,10,30,.5)', labelSh: 'rgba(0,0,0,.35)', thumb: 'linear-gradient(145deg, #8FA6C8 0%, #5F7699 100%)', halo: '0 0 20px rgba(120,160,220,.22)', logo: 'assets/ppw-logo-indigo.webp' },
   /* Crimson — matched to the red neumorphic logo Vic supplied 2026-07-06. */
-  crimson: { base: '#A94745', lite: '#D07A76', light: 'rgba(255,190,185,.30)', dark: 'rgba(70,15,14,.62)', accent: '#6E211F', ink: '#3B1210', rim: '#B85955', well: '#933B39', accInk: '#FFFFFF', name: 'Crimson', deep: '#5F1F1E', accDeep: '#3A1010', ground: 'radial-gradient(135% 110% at 25% 8%, #C05C58 0%, #A94745 46%, #7E2C2A 100%)', glossA: '.14', rimGlowA: '.16', emboss: 'rgba(255,255,255,.28)', labelSh: 'rgba(0,0,0,.32)', logo: 'assets/ppw-logo-crimson.png' },
-  gel: { name: 'Glass', gel: true, base: 'linear-gradient(145deg, #FAFBFC 0%, #D9DDE0 45%, #AFB5B9 100%)', accent: 'rgba(255,255,255,.95)', rim: '#C6CBCF', dark: 'rgba(120,128,136,.4)' },
+  crimson: { base: '#A94745', lite: '#D07A76', light: 'rgba(255,190,185,.30)', dark: 'rgba(70,15,14,.62)', accent: '#6E211F', ink: '#3B1210', rim: '#B85955', well: '#933B39', accInk: '#FFFFFF', name: 'Crimson', deep: '#5F1F1E', accDeep: '#3A1010', ground: 'radial-gradient(135% 110% at 25% 8%, #C05C58 0%, #A94745 46%, #7E2C2A 100%)', glossA: '.14', rimGlowA: '.16', emboss: 'rgba(255,255,255,.28)', labelSh: 'rgba(0,0,0,.32)', logo: 'assets/ppw-logo-crimson.webp' },
+  gel: { name: 'Glass', gel: true, base: 'linear-gradient(145deg, #FAFBFC 0%, #D9DDE0 45%, #AFB5B9 100%)', accent: 'rgba(255,255,255,.95)', rim: '#C6CBCF', dark: 'rgba(120,128,136,.4)', logo: 'assets/ppw-logo-glass.webp' },
 };
 
 /* Glass backgrounds — Vic's own uploaded photo set (2026-07-06, replaces the
@@ -44,6 +60,23 @@ export const BGS = {
   jungle: 'Jungle', island: 'Island', deepblue: 'Deep Blue', vibrant: 'Vibrant', rust: 'Rust',
 };
 export const bgUrl = (key) => `${import.meta.env.BASE_URL}assets/backgrounds/${BGS[key] ? key : 'zen'}.png`;
+
+/**
+ * The wordmark for the active colourway, as a URL the browser can load.
+ *
+ * Base-path aware, because this app has shipped under both a subpath
+ * (github.io/ppw-fascia-app/) and a bare domain (app.ppwellness.co) — a relative
+ * 'assets/...' string resolves differently on each, which is exactly how you end
+ * up with a logo that works in dev and 404s in production.
+ *
+ * Falls back to the Glass wordmark for any colourway that has no art of its own,
+ * so a new colourway can never render a broken image.
+ */
+export function logoUrl(S) {
+  const key = (S && S.soft) || 'graphite';
+  const rel = (SOFT[key] && SOFT[key].logo) || SOFT.gel.logo;
+  return rel ? `${import.meta.env.BASE_URL}${rel}` : null;
+}
 
 const GROUNDS = {
   grey: '#878E96 url("assets/bg-grey.png") center/cover no-repeat',

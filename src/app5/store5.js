@@ -37,7 +37,12 @@ function initialState() {
   const def = {
     screen: 'stack',
     // theme
-    skin: 'soft', bg: 'grey', soft: 'graphite', gelBg: 'zen', intensity: null, customBgUrl: null,
+    // DEFAULT COLOURWAY (Vic, 2026-08-07): a new user opens on `gloft`, not
+    // graphite. This is the first-impression surface, so it is a product decision
+    // rather than a style tweak. Anyone who has already chosen a theme keeps it —
+    // the saved-preference read further down overrides this line, never the
+    // other way round.
+    skin: 'soft', bg: 'grey', soft: 'gloft', gelBg: 'zen', intensity: null, customBgUrl: null,
     glassStyle: 'frosted', inkMode: 'light',
     // routines (premium): [{ id, name, items: [snapshot…] }]
     routines: [],
