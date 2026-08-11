@@ -36,7 +36,7 @@ function BrandMark() {
   const src = logoUrl(S);
   if (!src || failed) {
     return (
-      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: 'var(--accent)', textShadow: 'var(--emboss)' }}>
+      <div style={{ alignSelf: 'center', fontSize: 11, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: 'var(--accent)', textShadow: 'var(--emboss)' }}>
         PPWellness
       </div>
     );
@@ -44,21 +44,43 @@ function BrandMark() {
   // The source art is OPAQUE — each colourway's wordmark is baked onto that
   // colourway's own base colour (verified: gloft 181,178,173 vs base #C9C8C3,
   // black 29,30,30 vs #1C1E20, and so on). Only the Glass one has transparency.
-  // The ground behind it is a radial GRADIENT, so a flat plate of the base colour
-  // lands as a visible rectangle wherever the gradient is lighter or darker than
-  // that one value. Feathering the outer edge dissolves the seam; the art itself
-  // is untouched, and the fade only ever eats the empty margin around the mark.
-  // The real fix is transparent exports per colourway — noted for Vic.
-  const feather = 'radial-gradient(closest-side, #000 68%, rgba(0,0,0,.55) 86%, transparent 100%)';
+  // Feathering the outer edge dissolves the plate into whatever sits behind it;
+  // the art itself is untouched, and the fade only eats the empty margin around
+  // the mark. The real fix is transparent exports per colourway.
+  const feather = 'radial-gradient(closest-side, #000 66%, rgba(0,0,0,.5) 86%, transparent 100%)';
+
+  // THE TILE (Vic, 2026-08-11): "it sits LEFT and unstyled. Centred, inside a
+  // soft-edge neumorphism square, matching the app's soft design language."
+  //
+  // Built from the app's OWN tokens rather than hand-rolled shadows:
+  // `--intro-shadow` and `--intro-bevel` are the soft skin's dual-light
+  // neumorphic pair (10-24px offsets, dark down-right + light up-left, plus an
+  // inner bevel) — defined in theme5.js and, like the logo itself was, used
+  // nowhere until now. That is what makes this match the language instead of
+  // imitating it, and it re-tints with every colourway for free.
+  //
+  // The tile's face is `--ground`, the same material as the screen behind it,
+  // because neumorphism only reads as "pressed out of the surface" when the
+  // surface and the ground are the same thing. A card colour here would make it
+  // a card sitting on the page, which is the opposite effect.
   return (
-    <img
-      src={src} alt="PPWellness" onError={() => setFailed(true)}
-      decoding="async"
-      style={{
-        display: 'block', width: 'min(196px, 56%)', height: 'auto', marginLeft: -6,
-        maskImage: feather, WebkitMaskImage: feather,
-      }}
-    />
+    <div style={{
+      alignSelf: 'center',
+      width: 'min(170px, 46vw)', aspectRatio: '1 / 1', flex: 'none',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      borderRadius: 38,
+      background: 'var(--ground)',
+      boxShadow: 'var(--intro-shadow, var(--elev)), var(--intro-bevel, none)',
+    }}>
+      <img
+        src={src} alt="PPWellness" onError={() => setFailed(true)}
+        decoding="async"
+        style={{
+          display: 'block', width: '80%', height: 'auto',
+          maskImage: feather, WebkitMaskImage: feather,
+        }}
+      />
+    </div>
   );
 }
 
@@ -90,10 +112,13 @@ export default function FirstRunChoice() {
 
         <BrandMark />
 
-        <h1 style={{ margin: '18px 0 0', fontSize: 29, fontWeight: 600, letterSpacing: '-.02em', textShadow: 'var(--emboss)' }}>
+        {/* Centred with the mark. A centred logo over left-flushed text reads as
+            a mistake — the two have to agree. Buttons below are already
+            full-width, so the whole column now shares one axis. */}
+        <h1 style={{ margin: '22px 0 0', fontSize: 29, fontWeight: 600, letterSpacing: '-.02em', textShadow: 'var(--emboss)', textAlign: 'center' }}>
           Your day, as a stack
         </h1>
-        <p style={{ margin: '12px 0 0', fontSize: 15, lineHeight: 1.6, color: 'var(--dim)' }}>
+        <p style={{ margin: '12px 0 0', fontSize: 15, lineHeight: 1.6, color: 'var(--dim)', textAlign: 'center' }}>
           Plan the things you mean to do, and tick them off as the day goes.
         </p>
 

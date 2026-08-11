@@ -65,6 +65,28 @@ describe('the wordmark is on the first screen', () => {
     expect(screen.getByText('I already have one')).toBeTruthy();
     expect(screen.getByText('Look around first')).toBeTruthy();
   });
+
+  // Vic, 2026-08-11: "it sits LEFT and unstyled. Centred, inside a soft-edge
+  // neumorphism square, matching the app's soft design language."
+  it('sits centred in a soft-edge square, not flush left', () => {
+    render(<FirstRunChoice />);
+    const tile = screen.getByAltText('PPWellness').parentElement;
+    expect(tile.style.alignSelf).toBe('center');
+    expect(tile.style.aspectRatio).toBe('1 / 1');
+    expect(parseInt(tile.style.borderRadius, 10)).toBeGreaterThanOrEqual(24);
+  });
+
+  // The tokens are what make it MATCH the language rather than imitate it: they
+  // are the soft skin's own dual-light neumorphic pair, and they re-tint per
+  // colourway for free. Hand-rolled shadows here would drift the first time a
+  // colourway changed.
+  it('is built from the app’s own neumorphic tokens, and on the ground material', () => {
+    render(<FirstRunChoice />);
+    const tile = screen.getByAltText('PPWellness').parentElement;
+    expect(tile.style.boxShadow).toContain('--intro-shadow');
+    expect(tile.style.boxShadow).toContain('--intro-bevel');
+    expect(tile.style.background).toContain('--ground');
+  });
 });
 
 describe('every artwork path points at a file that exists', () => {
