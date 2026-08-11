@@ -367,11 +367,27 @@ export async function passwordSignIn(email, password) {
   return await fetchEntitlement();
 }
 
+/**
+ * Whether a password was set from THIS device.
+ *
+ * F8 (UX pass 2026-08-11): the "Password saved · change it" label reverted to
+ * "Set a password" as soon as the card re-rendered into another state, because
+ * the confirmation lived only in component state and died with the component.
+ * Telling someone their password is unset moments after they set it is the kind
+ * of small lie that makes people stop trusting the rest of the screen.
+ *
+ * Device-local on purpose, and NOT a claim about the account: the backend still
+ * exposes no `hasPassword` (that ask is with Agent 4). It records what we did,
+ * which is the only thing we can honestly know.
+ */
+export function passwordSetHere() { return read('pwSet') === '1'; }
+
 /** Set (or change) the password on the signed-in account. */
 export async function setPassword(password) {
   const pw = String(password || '');
   if (pw.length < PASSWORD_MIN) throw new Error(`Use at least ${PASSWORD_MIN} characters.`);
   await api('/api/auth/password/set', { method: 'POST', body: { password: pw }, auth: true });
+  write('pwSet', '1');
   return true;
 }
 
@@ -474,6 +490,9 @@ export function signOut() {
   drop('authEmail');
   drop('ent');
   write('premium', '0');
+  // Belongs to the account that just left, not to the device — otherwise the next
+  // person to sign in here is told their password is already set.
+  drop('pwSet');
   // The passcode vault holds the session itself. Leaving it behind would mean a
   // later unlock resurrected a session the user had explicitly ended.
   if (passcodeEnabled()) disablePasscode();
@@ -502,9 +521,12 @@ export function checkoutUrl(gumroadUrl, uid = userId()) {
  * user is staring at the app, so we check every 5s for 2 minutes and stop the
  * moment Premium lands. Returns the entitlement that unlocked, or null on timeout.
  */
-export async function pollForPremium({ intervalMs = 5000, timeoutMs = 120000, onTick } = {}) {
+export async function pollForPremium({ intervalMs = 5000, timeoutMs = 120000, onTick, shouldStop } = {}) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
+    // The buyer can back out (they closed the checkout, or it never opened), and
+    // a poll that ignores that leaves the UI stuck on a spinner they cannot dismiss.
+    if (shouldStop?.()) return null;
     try {
       const ent = await fetchEntitlement();
       if (ent.premium) return ent;

@@ -9,7 +9,7 @@
 // Graphite neumorphic: opaque surfaces, dual-shadow, no blur.
 
 import React from 'react';
-import { useStore5, setState, closeAiBridge, addItemsToPlan, removeItemsByIds, parsePlanDoc, dateKeyFromOffset } from '../store5.js';
+import { useStore5, setState, closeAiBridge, addItemsToPlan, removeItemsByIds, parsePlanDoc, dateKeyFromOffset, finishOnboarding } from '../store5.js';
 import { buildPrompt } from './aiPrompt.js';
 import { extractPlanCandidates, PARSE_HELP } from './parsePlan.js';
 import { sharePrompt, copyText, readText, canShare } from './clipboard.js';
@@ -37,24 +37,41 @@ export default function AiBridgeSheet() {
   const [picked, setPicked] = React.useState({});     // index -> bool
   const [applied, setApplied] = React.useState(null); // { ids, count }
   const [toast, setToast] = React.useState(null);
+  const [showPrompt, setShowPrompt] = React.useState(false);
 
   if (!S.aiOpen) return null;
 
-  const close = () => { closeAiBridge(); setTimeout(() => { setStep(1); setRaw(''); setParsed(null); setAlts([]); setErr(null); setApplied(null); }, 250); };
+  // F3: while onboarding is unfinished this sheet is a SUB-flow of the start
+  // choice, so closing it returns there rather than stranding the user.
+  const midOnboarding = !S.onboarded;
+
+  const close = () => { closeAiBridge(); setTimeout(() => { setStep(1); setRaw(''); setParsed(null); setAlts([]); setErr(null); setApplied(null); setShowPrompt(false); }, 250); };
+
+  /** Leaving for good: the user arrived somewhere, so onboarding is done. */
+  const finishAndClose = () => { if (midOnboarding) finishOnboarding(); close(); };
+
+  /**
+   * F4 (UX pass 2026-08-11) — the flagship "talk to my AI" button appeared to do
+   * nothing. A cancelled share returned in silence, so no toast mounted on either
+   * success OR failure, and the prompt text existed nowhere on the page — if the
+   * copy failed there was nothing to select by hand. Every path now says
+   * something, and the prompt is always readable (see "Show me the prompt").
+   */
+  const flash = (text, ms = 2200) => { setToast(text); setTimeout(() => setToast(null), ms); };
 
   const send = async () => {
     const r = await sharePrompt(buildPrompt(S), 'Plan my day');
-    if (r.cancelled) return;
-    setToast(r.ok ? (r.via === 'share' ? 'Sent — paste it into your AI' : 'Prompt copied') : 'Could not copy — select the text below');
-    setTimeout(() => setToast(null), 2200);
-    if (r.ok) setStep(2);
+    if (r.cancelled) { flash('No app chosen — or copy it instead, below'); return; }
+    if (r.ok) { flash(r.via === 'share' ? 'Sent — paste it into your AI' : 'Prompt copied'); setStep(2); return; }
+    flash('Could not copy automatically — open “Show me the prompt” and copy it by hand', 3200);
+    setShowPrompt(true);
   };
 
   const copyOnly = async () => {
     const r = await copyText(buildPrompt(S));
-    setToast(r.ok ? 'Prompt copied' : 'Could not copy');
-    setTimeout(() => setToast(null), 2000);
-    if (r.ok) setStep(2);
+    if (r.ok) { flash('Prompt copied'); setStep(2); return; }
+    flash('Could not copy automatically — the prompt is below, select and copy it', 3200);
+    setShowPrompt(true);
   };
 
   const tryParse = (text) => {
@@ -145,6 +162,28 @@ export default function AiBridgeSheet() {
               <button onClick={copyOnly} style={{ ...BTN_GHOST, marginTop: 10 }}>Copy the prompt instead</button>
             )}
             <button onClick={() => setStep(2)} style={{ ...BTN_GHOST, marginTop: 10, border: 'none' }}>I’ve already got a reply →</button>
+
+            {/* F4: the prompt has to be readable, or a failed copy leaves the user
+                with nothing to select. Always available, not only after a failure. */}
+            <button onClick={() => setShowPrompt((v) => !v)} aria-expanded={showPrompt}
+              style={{ ...BTN_GHOST, marginTop: 10, border: 'none' }}>
+              {showPrompt ? 'Hide the prompt' : 'Show me the prompt'}
+            </button>
+            {showPrompt && (
+              <textarea
+                readOnly value={buildPrompt(S)} aria-label="The prompt to send to your AI"
+                onFocus={(e) => e.target.select()}
+                style={{ marginTop: 10, width: '100%', minHeight: 170, padding: 14, borderRadius: 16, border: '1px solid var(--hairline)', background: 'var(--track)', boxShadow: 'var(--inset)', color: 'var(--ink)', outline: 'none', fontSize: 12.5, lineHeight: 1.5, fontFamily: 'inherit', resize: 'vertical' }}
+              />
+            )}
+
+            {/* F3: the way back to "Start with an empty day". Before this the
+                choice was destroyed the moment the AI path was picked. */}
+            {midOnboarding && (
+              <button onClick={close} style={{ ...BTN_GHOST, marginTop: 16, border: 'none' }}>
+                ← Back — I’ll start with an empty day instead
+              </button>
+            )}
           </div>
         )}
 
@@ -162,7 +201,24 @@ export default function AiBridgeSheet() {
               aria-label="Paste your AI's reply"
               style={{ marginTop: 12, width: '100%', minHeight: 200, padding: 14, borderRadius: 16, border: `1px solid ${err ? 'var(--accent)' : 'var(--hairline)'}`, background: 'var(--track)', boxShadow: 'var(--inset)', color: 'var(--ink)', outline: 'none', fontSize: 13.5, lineHeight: 1.5, fontFamily: 'inherit', resize: 'vertical' }}
             />
-            {err && <div style={{ marginTop: 10, fontSize: 12.5, lineHeight: 1.5, color: 'var(--accent)', fontWeight: 600 }}>{err}</div>}
+            {err && (
+              <div style={{ marginTop: 10 }}>
+                <div style={{ fontSize: 12.5, lineHeight: 1.5, color: 'var(--accent)', fontWeight: 600 }}>{err}</div>
+                {/* F5: "paste it again" is a loop for the user whose AI genuinely
+                    never produced a code block. Give them the sentence that fixes
+                    it, and a way out that isn't this screen. */}
+                <div style={{ marginTop: 8, padding: '10px 12px', borderRadius: 14, background: 'var(--track)', border: '1px solid var(--hairline)', boxShadow: 'var(--inset)', fontSize: 12, lineHeight: 1.55, color: 'var(--dim)' }}>
+                  If your AI didn’t include a code block, send it this:{' '}
+                  <strong style={{ color: 'var(--ink)' }}>“Send that again as a single code block.”</strong>
+                  {' '}Then copy its whole reply and paste it here.
+                </div>
+                {midOnboarding && (
+                  <button onClick={close} style={{ ...BTN_GHOST, marginTop: 10, border: 'none' }}>
+                    ← Give up on this and start with an empty day
+                  </button>
+                )}
+              </div>
+            )}
             <button onClick={() => tryParse(raw)} disabled={!raw.trim()} style={{ ...BTN_PRIMARY, marginTop: 16, opacity: raw.trim() ? 1 : .45 }}>See my plan</button>
             <button onClick={() => setStep(1)} style={{ ...BTN_GHOST, marginTop: 10, border: 'none' }}>← Back</button>
           </div>
@@ -227,7 +283,7 @@ export default function AiBridgeSheet() {
             <p style={{ margin: '8px auto 0', maxWidth: 260, fontSize: 14, lineHeight: 1.55, color: 'var(--dim)' }}>
               {applied.count} thing{applied.count === 1 ? '' : 's'} scheduled. You can edit or delete any of them like anything else.
             </p>
-            <button onClick={close} style={{ ...BTN_PRIMARY, marginTop: 24 }}>See my stack</button>
+            <button onClick={finishAndClose} style={{ ...BTN_PRIMARY, marginTop: 24 }}>See my stack</button>
             <button onClick={undo} style={{ ...BTN_GHOST, marginTop: 10 }}>Undo — remove them again</button>
           </div>
         )}

@@ -34,6 +34,7 @@ import {
   openAdd, backToToday, openPlayer, openCompleted, openAccount, openRepeat, repeatLabel,
   startSlotEngine, orderedStackFor, reorderTimed, reorderDeck, toggleAuto,
   toggleSelect, selectAll, clearSelection, deleteSelected, safeUrl,
+  onlyExamplesLeft, clearExamples,
   syncEntitlement, applyServerEntitlement, syncProfile,
 } from './store5.js';
 import { completeSignIn, isSignedIn, readEmail, ensureFreshSession, consumeNewAccount } from './membership.js';
@@ -256,8 +257,15 @@ function StackScreen() {
             )}
           </div>
           <div style={{ marginTop: 12, fontSize: 23, fontWeight: 600, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>{next.title}</div>
-          <div style={{ marginTop: 5, fontSize: 14, color: 'var(--dim)' }}>{next.meta}</div>
-          <button onClick={() => openRepeat(next.id)} aria-label="Repeat schedule" style={{ marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 5, background: 'none', border: 'none', padding: 0, color: 'var(--dim)', fontSize: 11, fontWeight: 600, letterSpacing: '.05em' }}>
+          <div style={{ marginTop: 5, fontSize: 14, color: 'var(--dim)', display: 'flex', alignItems: 'center', gap: 7 }}>
+            {/* F6: the hero card is the FIRST thing a new customer reads, so the
+                example tag matters most here — this is the slot they think they chose. */}
+            {next.example && (
+              <span style={{ flex: 'none', fontSize: 9.5, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', padding: '2px 6px', borderRadius: 999, border: '1px solid var(--hairline)', background: 'var(--track)', color: 'var(--dim)' }}>Example</span>
+            )}
+            <span style={{ minWidth: 0 }}>{next.meta}</span>
+          </div>
+          <button onClick={() => openRepeat(next.id)} aria-label="Repeat schedule" style={{ marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 5, minHeight: 44, background: 'none', border: 'none', padding: '10px 0', color: 'var(--dim)', fontSize: 11, fontWeight: 600, letterSpacing: '.05em' }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 2l4 4-4 4" /><path d="M3 11v-1a4 4 0 0 1 4-4h14" /><path d="M7 22l-4-4 4-4" /><path d="M21 13v1a4 4 0 0 1-4 4H3" /></svg>
             {repeatLabel(next.repeat)}
           </button>
@@ -309,13 +317,28 @@ function StackScreen() {
               style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', minHeight: 68, borderRadius: 26, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: `1px solid ${isOver ? 'var(--acc-rim)' : 'var(--rim)'}`, boxShadow: isDragged ? 'var(--elev-hi)' : 'var(--elev)', cursor: (it.embed || it.url) ? 'pointer' : 'grab', touchAction: 'pan-y', userSelect: 'none', WebkitUserSelect: 'none', transform: isDragged ? `translateY(${drag.dy}px) scale(1.03)` : 'none', zIndex: isDragged ? 5 : 1, transition: isDragged ? 'none' : 'transform .2s, border-color .2s' }}
             >
               {/* Vic 4 — small selection tick, top-left of every stack card */}
-              <button onClick={(e) => { e.stopPropagation(); toggleSelect(it.id); }} aria-label={S.selectedIds.includes(it.id) ? 'Deselect' : 'Select for deletion'} style={{ width: 22, height: 22, flex: 'none', alignSelf: 'flex-start', marginTop: 2, borderRadius: 999, border: `1.5px solid ${S.selectedIds.includes(it.id) ? 'var(--acc-rim)' : 'var(--rim)'}`, background: S.selectedIds.includes(it.id) ? 'var(--acc-surf)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--acc-ink)', padding: 0, transition: 'all .2s' }}>
-                {S.selectedIds.includes(it.id) && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>}
+              {/* F10: 44px target, 22px circle. The button carries the hit area and
+                  the SPAN carries the look, so the padding cannot inflate the ring.
+                  Negative margins cancel the extra box, leaving the row as it was. */}
+              <button onClick={(e) => { e.stopPropagation(); toggleSelect(it.id); }}
+                role="checkbox" aria-checked={S.selectedIds.includes(it.id)}
+                aria-label={S.selectedIds.includes(it.id) ? 'Deselect' : 'Select for deletion'}
+                style={{ width: 44, height: 44, flex: 'none', alignSelf: 'flex-start', margin: '-9px -11px -11px -11px', padding: 0, background: 'none', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: 22, height: 22, borderRadius: 999, border: `1.5px solid ${S.selectedIds.includes(it.id) ? 'var(--acc-rim)' : 'var(--rim)'}`, background: S.selectedIds.includes(it.id) ? 'var(--acc-surf)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--acc-ink)', transition: 'all .2s' }}>
+                  {S.selectedIds.includes(it.id) && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>}
+                </span>
               </button>
               {cardIcon(it)}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 15.5, fontWeight: 600, letterSpacing: '-.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textShadow: 'var(--emboss)' }}>{it.title}</div>
-                <div style={{ marginTop: 3, fontSize: 12.5, color: 'var(--dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{it.meta}</div>
+                <div style={{ marginTop: 3, fontSize: 12.5, color: 'var(--dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  {/* F6: say what we put there. Without this the starter slots read
+                      as things the customer chose, on day one, in their own app. */}
+                  {it.example && (
+                    <span style={{ flex: 'none', fontSize: 9.5, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', padding: '2px 6px', borderRadius: 999, border: '1px solid var(--hairline)', background: 'var(--track)', color: 'var(--dim)' }}>Example</span>
+                  )}
+                  <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{it.meta}</span>
+                </div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 5, flex: 'none' }}>
                 {it.time ? (
@@ -323,13 +346,18 @@ function StackScreen() {
                 ) : (
                   <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', padding: '3px 8px', borderRadius: 999, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)' }}>Next Up</span>
                 )}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <button onClick={(e) => { e.stopPropagation(); openRepeat(it.id); }} aria-label="Repeat and time options" style={{ display: 'flex', alignItems: 'center', background: 'none', border: 'none', padding: '2px 0', color: 'var(--dim)' }}>
+                {/* F10 (UX pass 2026-08-11): these controls were 13x17 and 22x22
+                    against the app's own 48px floor. The ICONS are unchanged —
+                    only the padding grew, so the tappable area is real without
+                    the row looking different. `gap` drops to 0 because the new
+                    padding now provides the separation. */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+                  <button onClick={(e) => { e.stopPropagation(); openRepeat(it.id); }} aria-label="Repeat and time options" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 44, minHeight: 44, background: 'none', border: 'none', padding: '14px 12px', color: 'var(--dim)' }}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 2l4 4-4 4" /><path d="M3 11v-1a4 4 0 0 1 4-4h14" /><path d="M7 22l-4-4 4-4" /><path d="M21 13v1a4 4 0 0 1-4 4H3" /></svg>
                   </button>
                   {/* Vic #1 — AUTO tickbox: at slot time the item opens/plays itself. */}
                   {(it.url || it.embed) && (
-                    <button onClick={(e) => { e.stopPropagation(); toggleAuto(it.id); }} aria-label={it.auto ? 'Autoplay on — tap to turn off' : 'Autoplay off — tap to turn on'} style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none', padding: '2px 0', color: 'var(--dim)', fontSize: 10.5, fontWeight: 600, letterSpacing: '.04em' }}>
+                    <button onClick={(e) => { e.stopPropagation(); toggleAuto(it.id); }} aria-label={it.auto ? 'Autoplay on — tap to turn off' : 'Autoplay off — tap to turn on'} aria-pressed={!!it.auto} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, minHeight: 44, background: 'none', border: 'none', padding: '14px 10px', color: 'var(--dim)', fontSize: 10.5, fontWeight: 600, letterSpacing: '.04em' }}>
                       <span style={{ width: 15, height: 15, borderRadius: 5, border: `1.5px solid ${it.auto ? 'var(--acc-rim)' : 'var(--rim)'}`, background: it.auto ? 'var(--acc-surf)' : 'transparent', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'var(--acc-ink)', transition: 'all .2s' }}>
                         {it.auto && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>}
                       </span>
@@ -341,6 +369,21 @@ function StackScreen() {
             </div>
           );
         })}
+
+        {/* F6: one tap to a genuinely empty day. The examples are useful for
+            showing what a stack IS, and a dead weight the moment the user wants
+            their own — until now there was no way to say "not these". */}
+        {onlyExamplesLeft() && (
+          <div style={{ marginTop: 18, padding: '14px 16px', borderRadius: 18, border: '1px dashed var(--hairline)', background: 'var(--track)' }}>
+            <div style={{ fontSize: 12.5, lineHeight: 1.55, color: 'var(--dim)' }}>
+              These are examples, to show you what a stack looks like. Tap ＋ to add your own — or clear them and start empty.
+            </div>
+            <button onClick={clearExamples}
+              style={{ marginTop: 10, minHeight: 44, padding: '0 14px', borderRadius: 12, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--ink)', fontSize: 13, fontWeight: 600 }}>
+              Clear the examples
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -403,10 +446,13 @@ export default function App5() {
   React.useEffect(() => {
     if (!S.onboarded) return;
     if (hasSeenTour()) return;
-    if (S.aiOpen || S.addOpen || S.termsOpen) return;      // never fight a sheet
+    // F2 (2026-08-11): accountOpen added. The tour used to start ON TOP of an
+    // account sheet that was still open from sign-up, which is how a new customer
+    // ended up five layers deep and landed back on that panel afterwards.
+    if (S.aiOpen || S.addOpen || S.termsOpen || S.accountOpen) return;
     const t = setTimeout(() => setTourOpen(true), 700);     // let the screen settle
     return () => clearTimeout(t);
-  }, [S.onboarded, S.aiOpen, S.addOpen, S.termsOpen]);
+  }, [S.onboarded, S.aiOpen, S.addOpen, S.termsOpen, S.accountOpen]);
 
   // PASSCODE — lock after LOCK_AFTER_MS in the background, never while in use.
   //

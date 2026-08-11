@@ -68,10 +68,22 @@ export default function OnboardingScreen() {
     finishOnboarding();
   };
 
+  /**
+   * F3 (UX pass 2026-08-11) — the AI path used to be a ONE-WAY DOOR.
+   *
+   * This called finishOnboarding() BEFORE opening the AI sheet, so the choice
+   * screen was destroyed the instant you picked. Inside the AI flow "← Back" only
+   * looped between its own steps and the sole exit dropped you into the feature
+   * tour, so anyone who changed their mind could never reach "Start with an empty
+   * day" again — the alternative was simply gone.
+   *
+   * Onboarding now finishes when the user actually ARRIVES somewhere: either they
+   * apply a plan (AiBridgeSheet) or they choose the empty day. Until then this
+   * screen stays underneath, so closing the AI sheet returns to the choice.
+   */
   const startWithAi = () => {
     if (!S.termsOk) { setStep(2); return; }   // consent first, always
-    finishOnboarding();
-    setTimeout(() => openAiBridge(), 350);
+    openAiBridge();
   };
 
   return (
@@ -163,8 +175,11 @@ export default function OnboardingScreen() {
                 PPW organises and schedules the content <em>you</em> choose. It is not medical advice, and it
                 doesn’t host or sell any content. Your stacks stay on your device.
               </p>
+              {/* F9 (a11y): this carried no state at all, so a screen-reader user
+                  could not tell agreed from not-agreed on a LEGAL gate. */}
               <button onClick={() => setState({ termsOk: !S.termsOk })}
-                style={{ marginTop: 14, width: '100%', display: 'flex', alignItems: 'center', gap: 11, background: 'none', border: 'none', padding: 0, color: 'var(--ink)', textAlign: 'left', cursor: 'pointer' }}>
+                role="checkbox" aria-checked={!!S.termsOk} aria-label="I agree to the Terms and Health Disclaimer"
+                style={{ marginTop: 14, width: '100%', display: 'flex', alignItems: 'center', gap: 11, minHeight: 44, background: 'none', border: 'none', padding: 0, color: 'var(--ink)', textAlign: 'left', cursor: 'pointer' }}>
                 <span style={{ width: 26, height: 26, flex: 'none', borderRadius: 9, border: `1px solid ${S.termsOk ? 'var(--acc-rim)' : 'var(--hairline)'}`, background: S.termsOk ? 'var(--acc-surf)' : 'var(--track)', boxShadow: 'var(--inset)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--acc-ink)' }}>
                   {S.termsOk && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
                 </span>

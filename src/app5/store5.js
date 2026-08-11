@@ -17,9 +17,18 @@ import { fetchProfile, saveProfile } from './profile.js';
 const LS = (k) => 'ppw5.' + k;
 
 // ── curated starter deck (verbatim from the prototype) ──
+/**
+ * F6 (UX pass 2026-08-11) — these four are OURS, not the user's.
+ *
+ * They exist so the app has something to show instead of an empty screen, but
+ * they carried no marking, so after sign-up a new customer's "day" was three
+ * YouTube videos and an affirmation that they never chose and could not tell
+ * apart from their own. `example: true` lets the card say so, and lets the user
+ * clear the lot in one tap.
+ */
 function starterDeck() {
   const yt = (xid, time, id, title, meta) => ({
-    id: xid, time, title, meta, thumb: 'yt', repeat: 'daily',
+    id: xid, time, title, meta, thumb: 'yt', repeat: 'daily', example: true,
     url: 'https://www.youtube.com/watch?v=' + id,
     embed: 'https://www.youtube.com/embed/' + id + '?autoplay=1&playsinline=1&rel=0',
     thumbUrl: 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg',
@@ -28,8 +37,23 @@ function starterDeck() {
     yt('d1', '07:30', 'v7AYKMP6rOE', 'Yoga For Complete Beginners', 'YouTube · Basic Yoga · 20 min'),
     yt('d2', '12:30', 'O-6f5wQXSu8', 'Guided Meditation for Calm', 'YouTube · Meditation · 10 min'),
     yt('d3', '17:00', 'UBMk30rjy0o', 'Full Body Workout, No Equipment', 'YouTube · Fitness · 20 min'),
-    { id: 'd4', title: 'I did enough today. I am consistent.', meta: 'Text · Still', time: '21:00', kind: 'note', noteAnim: 'still', noteSpeed: 'med', noteDur: '5', repeat: 'daily' },
+    { id: 'd4', title: 'I did enough today. I am consistent.', meta: 'Text · Still', time: '21:00', kind: 'note', noteAnim: 'still', noteSpeed: 'med', noteDur: '5', repeat: 'daily', example: true },
   ];
+}
+
+/** True while the day is still entirely the examples we put there. */
+export function onlyExamplesLeft() {
+  const d = state.deckItems;
+  return d.length > 0 && d.every((it) => it.example);
+}
+
+/** Clear the examples in one tap, for someone who wants their own day. */
+export function clearExamples() {
+  setState({
+    deckItems: state.deckItems.filter((it) => !it.example),
+    selectedIds: [],
+  });
+  saveStacks();
 }
 
 // ── initial state (subset in use so far; grows as screens are ported) ──
@@ -363,7 +387,19 @@ export async function loadProtocols() {
 
 // ── Library "Add to Stack" via calendar picker (Vic item 2) ──
 // scheduleTarget: { type: 'item', item } | { type: 'routine', id } | null
-export function openAiBridge() { setState({ aiOpen: true, addOpen: false }); }
+/**
+ * ONE LAYER AT A TIME (F2, UX pass 2026-08-11).
+ *
+ * A new customer crossed seven stacked layers — welcome walkthrough, account
+ * sheet, password offer, terms, start choice, the four AI steps, a five-step
+ * tour — and the ACCOUNT SHEET STAYED OPEN UNDERNEATH ALL OF IT. Close the last
+ * overlay and you were dropped back onto a panel you had opened seven screens
+ * ago, with no idea why it was there. It reads as plumbing, not a welcome.
+ *
+ * Anything that takes over the screen now closes the account sheet on its way in,
+ * so each finished step leaves nothing behind it.
+ */
+export function openAiBridge() { setState({ aiOpen: true, addOpen: false, accountOpen: false }); }
 export function closeAiBridge() { setState({ aiOpen: false }); }
 export function openSchedule(target) { setState({ scheduleTarget: target }); }
 export function closeSchedule() { setState({ scheduleTarget: null }); }
@@ -746,7 +782,9 @@ export function finishOnboarding() {
   save('courses', JSON.stringify(S.courseLinks));
   savePrefsNow();
   save('prefs2', JSON.stringify({ d: S.discreet, t: S.dayT, f: { on: S.fastOn, o: S.eatOpen, c: S.eatClose } }));
-  setState({ onboarded: true, obStep: 0, screen: 'stack' });
+  // F2: land on the day view with NOTHING left open behind. Before this, the
+  // account sheet the user opened at the very start was still sitting there.
+  setState({ onboarded: true, obStep: 0, screen: 'stack', accountOpen: false, premiumUpsell: null });
   // Tell the ACCOUNT it is set up, so the next device doesn't ask again. Silent
   // by design: signed-out users skip it, and it fails soft while A3 is unbuilt.
   saveProfile({ onboarded: true, termsAcceptedAt: new Date().toISOString() });
