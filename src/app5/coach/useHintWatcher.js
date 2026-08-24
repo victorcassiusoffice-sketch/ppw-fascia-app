@@ -10,7 +10,7 @@
 // on the bell) — those call maybeHint() from the control itself.
 
 import React from 'react';
-import { useStore5, getState, FREE_CAP_UPSELL, useDayCount, todayKey, rearmHint } from '../store5.js';
+import { useStore5, getState, FREE_CAP_UPSELL, useDayCount, todayKey, rearmHint, questDone } from '../store5.js';
 import { maybeHint } from './hints5.js';
 import { isStandalone } from './quests5.js';
 
@@ -40,8 +40,9 @@ export default function useHintWatcher() {
     if (autoCount(S) > p.auto) { maybeHint('auto-box'); return; }
 
     // Ticked things vanish into an unlabelled disc. For anyone who skipped the
-    // guide, this is the only explanation they will get.
-    if (doneCount(S) > p.done) { maybeHint('done-vanish'); return; }
+    // guide, this is the only explanation they will get — and for anyone who
+    // played Quest 1, it is a thing they were already shown, so it stays quiet.
+    if (doneCount(S) > p.done) { if (!questDone('tick')) maybeHint('done-vanish'); return; }
 
     // Everything lands at 09:00 daily, silently, and nothing says so.
     if (S.lastAddedId && S.lastAddedId !== p.lastAddedId) { maybeHint('link-defaults'); return; }
