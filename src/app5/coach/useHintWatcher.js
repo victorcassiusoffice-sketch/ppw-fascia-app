@@ -10,8 +10,8 @@
 // on the bell) — those call maybeHint() from the control itself.
 
 import React from 'react';
-import { useStore5, getState, FREE_CAP_UPSELL, useDayCount, todayKey, rearmHint, questDone } from '../store5.js';
-import { maybeHint } from './hints5.js';
+import { useStore5, getState, useDayCount, todayKey, rearmHint, questDone } from '../store5.js';
+import { maybeHint, installSnoozed } from './hints5.js';
 import { isStandalone } from './quests5.js';
 
 const doneCount = (S) => ((S.doneByDate || {})[todayKey()] || []).length;
@@ -26,7 +26,7 @@ export default function useHintWatcher() {
     prev.current = {
       addOpen: S.addOpen, selected: S.selectedIds.length, auto: autoCount(S),
       done: doneCount(S), lastAddedId: S.lastAddedId, viewDate: S.viewDate,
-      upsell: S.premiumUpsell, tab: S.stackTab, screen: S.screen,
+      tab: S.stackTab, screen: S.screen,
       slotPop: !!S.slotPop, reminders: S.reminders,
     };
     if (!p) return;                 // first pass is the baseline, never a trigger
@@ -50,9 +50,6 @@ export default function useHintWatcher() {
     // The stack is showing a different day and the only way back is a chip the
     // size of a stamp.
     if (S.viewDate && S.viewDate !== p.viewDate && S.viewDate !== todayKey()) { maybeHint('today-chip'); return; }
-
-    // The free cap counts the four example cards we put there ourselves.
-    if (S.premiumUpsell && S.premiumUpsell !== p.upsell && S.premiumUpsell === FREE_CAP_UPSELL) { maybeHint('free-cap'); return; }
 
     if (S.screen === 'library' && S.stackTab !== p.tab) {
       if (S.stackTab === 'routines' && !S.premium) { maybeHint('routines-paywall'); return; }
@@ -81,7 +78,7 @@ export default function useHintWatcher() {
   React.useEffect(() => {
     if (!S.onboarded || S.screen !== 'stack') return;
     if (useDayCount() < 3) return;
-    if (isStandalone()) return;
+    if (isStandalone() || installSnoozed()) return;
     if (!(S.deckItems || []).some((x) => x.example !== true)) return;
     const t = setTimeout(() => { if (getState().screen === 'stack') maybeHint('install-nudge'); }, 4000);
     return () => clearTimeout(t);

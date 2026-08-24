@@ -87,6 +87,70 @@ describe('a do-step waits for the real thing', () => {
   });
 });
 
+// ── the two dead ends this build shipped, and the invariant that ends them ──
+//
+// Both had the same shape: a `do` step told the user to press something, and
+// the coach's own dimmer was covering it. A do-step that blocks its own answer
+// waits forever, and a do-step has no Next to escape with.
+
+describe('a do-step never blocks the thing it is asking for', () => {
+  it('does not dim the whole app when it has no hole to leave open', () => {
+    openCoach({
+      steps: [{ target: 'nothing-is-anchored-here', mode: 'do', title: 'Do it', body: 'b', advanceOn: () => false }],
+      questId: 'test',
+    });
+    const { container } = render(<CoachMarks />);
+    // the bubble is up...
+    expect(screen.getByText('Do it')).toBeTruthy();
+    // ...and nothing is painted over the app behind it
+    const dimmed = [...container.querySelectorAll('div')].filter((n) => /rgba\(18, ?22, ?28/.test(n.getAttribute('style') || ''));
+    expect(dimmed).toHaveLength(0);
+  });
+
+  it('the AI quest never dims — its sheet lives under the coach', () => {
+    const steps = QUESTS.find((q) => q.id === 'ai').build(getState());
+    // step 0 is the read-only intro; every step that asks for an action is open
+    for (const s of steps.filter((x) => x.mode === 'do')) expect(s.noDim).toBe(true);
+  });
+
+  it('the add and repeat steps leave their own sheets working', () => {
+    const add = QUESTS.find((q) => q.id === 'add').build(getState());
+    expect(add[1].noDim).toBe(true);                      // the Add sheet is z30
+    const time = QUESTS.find((q) => q.id === 'time').build(getState());
+    expect(time[1].noDim).toBe(true);                     // the repeat picker is z34
+    expect(typeof time[1].dormantWhen).toBe('function');
+    expect(time[1].dormantWhen({ repeatId: 'x' })).toBe(true);
+  });
+});
+
+describe('quest 3 rings the card it is actually watching', () => {
+  it('falls back to the visible hero, not the first row of the raw array', () => {
+    // deckItems[0] is ticked off and not on screen; the hero is the 12:30 card
+    reset({
+      deckItems: [
+        { id: 'done1', title: 'already done', time: '07:00', repeat: 'daily' },
+        { id: 'hero', title: 'the hero', time: '12:30', repeat: 'daily' },
+      ],
+      doneByDate: { [todayKey()]: [{ id: 'done1', at: Date.now() }] },
+      lastAddedId: null,
+    });
+    const steps = QUESTS.find((q) => q.id === 'time').build(getState());
+    expect(steps[0].advanceOn(getState())).toBe(false);
+    // changing the card that is NOT ringed must not complete the step
+    setState({ deckItems: [
+      { id: 'done1', title: 'already done', time: '08:00', repeat: 'daily' },
+      { id: 'hero', title: 'the hero', time: '12:30', repeat: 'daily' },
+    ] });
+    expect(steps[0].advanceOn(getState())).toBe(false);
+    // changing the ringed hero does
+    setState({ deckItems: [
+      { id: 'done1', title: 'already done', time: '08:00', repeat: 'daily' },
+      { id: 'hero', title: 'the hero', time: '14:00', repeat: 'daily' },
+    ] });
+    expect(steps[0].advanceOn(getState())).toBe(true);
+  });
+});
+
 describe('the pause never counts as finishing', () => {
   it('closes the coach and records nothing', () => {
     openCoach({ steps: [{ target: null, title: 'A', body: 'b', complete: true }], questId: 'tick' });

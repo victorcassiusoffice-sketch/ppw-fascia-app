@@ -177,8 +177,20 @@ export default function CoachMarks({ open, onClose, steps: propSteps = TOUR_STEP
     // hole was a lie — the cut-out looked empty but every tap landed on this
     // div. The dim panels and the bubble opt back in individually below.
     <div ref={hostRef} style={{ position: 'absolute', inset: 0, zIndex: 60, pointerEvents: 'none' }} role="dialog" aria-live="polite">
-      {/* dimmer with a cut-out over the target (4 panels — works on any ground) */}
-      {hole ? (
+      {/* dimmer with a cut-out over the target (4 panels — works on any ground).
+          A `noDim` step skips it entirely and keeps only the ring: the dim sits
+          at z60 and the app's own sheets sit at z30-34, so a step that invites
+          the user to use a WHOLE sheet ("paste a link, or tap Text") would
+          otherwise be pointing at controls its own dimmer has switched off. */}
+      {/* THE INVARIANT: a `do` step with no hole never dims. A do-step asks the
+          user to press something real; if we could not measure WHERE, then a
+          full-frame dimmer blocks every candidate at once and the step waits
+          forever for an action it has itself made impossible. Both dead ends
+          this build shipped were that exact shape. Blocking is only ever safe
+          when we know what we are leaving open. */}
+      {(step.noDim || (isDo && !hole)) ? (
+        hole && <div aria-hidden="true" style={{ position: 'absolute', left: hole.x, top: hole.y, width: hole.w, height: hole.h, borderRadius: 18, border: '2px solid var(--accent)', boxShadow: '0 0 0 3px rgba(232,119,46,.20)', pointerEvents: 'none', animation: 'ppwRise .32s ease both' }} />
+      ) : hole ? (
         <>
           <Dim style={{ left: 0, top: 0, right: 0, height: Math.max(0, hole.y) }} onClick={dimTap} />
           <Dim style={{ left: 0, top: hole.y, width: Math.max(0, hole.x), height: hole.h }} onClick={dimTap} />

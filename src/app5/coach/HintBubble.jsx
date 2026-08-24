@@ -10,11 +10,18 @@
 // frame rather than the viewport.
 
 import React from 'react';
-import { useStore5, getState } from '../store5.js';
-import { HINTS, hintCopy, hintDwell, hintQuestOffer, dismissHint } from './hints5.js';
-import { openJournal } from '../store5.js';
+import { useStore5, getState, setState } from '../store5.js';
+import { HINTS, hintCopy, hintDwell, hintQuestOffer, dismissHint, snoozeInstall } from './hints5.js';
 import { startQuest } from './quests5.js';
 import ReorderGhost from './ReorderGhost.jsx';
+
+// A hint's buttons are declared as data in the registry, so the action is a
+// NAME rather than a closure — the registry stays a plain table that can be
+// read (and tested) without pulling half the app in behind it.
+function runHintAction(action) {
+  if (action === 'settings-install') setState({ screen: 'settings' });
+  if (action === 'snooze-install') snoozeInstall(7);
+}
 
 export default function HintBubble() {
   const S = useStore5();
@@ -81,11 +88,13 @@ export default function HintBubble() {
   const takeQuest = (e) => {
     e.stopPropagation();
     dismissHint();
-    const s = getState();
-    // Offer the journal at that quest rather than yanking them into it — the
-    // user asked to see it, not to be moved.
-    if (offer) { openJournal(); setTimeout(() => { if (!getState().coach) startQuest(offer.quest); }, 220); }
-    void s;
+    if (!offer) return;
+    // Straight into the quest the line names. This used to open the journal
+    // first and swap it for the quest 220ms later — which meant the sheet was
+    // torn out halfway through its own entrance animation, for no gain: the
+    // user tapped a line about ONE quest, so showing them a list of eight was
+    // never the answer.
+    setTimeout(() => { if (!getState().coach) startQuest(offer.quest); }, 180);
   };
 
   return (
@@ -98,6 +107,18 @@ export default function HintBubble() {
         {h.ghost && <ReorderGhost />}
         {h.title && <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>{h.title}</div>}
         <p style={{ margin: h.title ? '6px 0 0' : 0, fontSize: 13, lineHeight: 1.55, color: 'var(--dim)' }}>{body}</p>
+        {Array.isArray(h.buttons) && h.buttons.length > 0 && (
+          <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
+            {h.buttons.map((btn, k) => (
+              <button key={btn.label} onClick={(e) => { e.stopPropagation(); runHintAction(btn.action); dismissHint(); }}
+                style={k === 0
+                  ? { minHeight: 42, padding: '0 15px', borderRadius: 13, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontSize: 13, fontWeight: 700, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)' }
+                  : { minHeight: 42, padding: '0 13px', borderRadius: 13, border: '1px solid var(--rim)', background: 'transparent', color: 'var(--dim)', fontSize: 12.5, fontWeight: 600 }}>
+                {btn.label}
+              </button>
+            ))}
+          </div>
+        )}
         {offer && (
           <button onClick={takeQuest} style={{ marginTop: 10, padding: 0, minHeight: 40, background: 'none', border: 'none', textAlign: 'left', color: 'var(--accent)', fontSize: 12.5, fontWeight: 700 }}>
             {offer.label}

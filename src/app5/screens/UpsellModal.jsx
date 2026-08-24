@@ -5,7 +5,7 @@
 // uses — this is the button a real Gumroad checkout replaces later.
 
 import React from 'react';
-import { useStore5, clearUpsell, openAccount, FREE_STACK_CAP } from '../store5.js';
+import { useStore5, clearUpsell, openAccount, FREE_STACK_CAP, FREE_CAP_UPSELL, onlyExamplesLeft, clearExamples } from '../store5.js';
 import { GUMROAD_URL, PREM_PRICE, PREM_PRICE_NOTE, checkoutUrl, isSignedIn } from '../membership.js';
 
 // GUMROAD_URL + pricing now live in membership.js (one seam for the paywall, the
@@ -39,6 +39,25 @@ export default function UpsellModal() {
         </span>
         <div style={{ marginTop: 14, fontSize: 21, fontWeight: 700, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>Premium feature</div>
         <p style={{ margin: '8px 0 0', fontSize: 13.5, lineHeight: 1.55, color: 'var(--dim)' }}>{S.premiumUpsell}</p>
+
+        {/* THE CAP COUNTS OUR OWN EXAMPLE CARDS. Four of the ten slots a free
+            user gets were filled by us before they arrived, and being told
+            "you have reached the free limit" without being told that reads as
+            a much smaller free tier than it is. Said here because THIS is the
+            refusal point — the moment the add was turned down. */}
+        {S.premiumUpsell === FREE_CAP_UPSELL && (
+          <>
+            <p style={{ margin: '10px 0 0', fontSize: 13.5, lineHeight: 1.55, color: 'var(--dim)' }}>
+              Free keeps up to {FREE_STACK_CAP} things, and the example cards count. Clearing them frees their slots.
+            </p>
+            {onlyExamplesLeft() && (
+              <button onClick={() => { clearExamples(); clearUpsell(); }}
+                style={{ marginTop: 12, width: '100%', minHeight: 46, borderRadius: 14, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--ink)', fontSize: 13.5, fontWeight: 600 }}>
+                Clear the examples
+              </button>
+            )}
+          </>
+        )}
         <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 9, textAlign: 'left' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13.5, color: 'var(--ink)' }}>{tick}Routines — chain many items into one stack</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13.5, color: 'var(--ink)' }}>{tick}Unlimited stacks (free is capped at {FREE_STACK_CAP})</div>

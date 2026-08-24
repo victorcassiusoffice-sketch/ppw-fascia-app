@@ -24,6 +24,7 @@
 import {
   getState, setHint, clearHint, hintCount, burnHint, anySheetOpen, questDone,
 } from '../store5.js';
+import { isLocked } from '../passcode.js';
 
 // ── registry ─────────────────────────────────────────────────────────────
 // anchor  = a [data-tour] key, or null for a centred bubble
@@ -91,22 +92,33 @@ export const HINTS = {
     copy: 'The app can only nudge you while it is open on screen. Closed or locked, it stays quiet. For the few things that must not slip, set your phone’s own alarm as well.',
   },
   'routines-paywall': {
-    anchor: 'lib-tabs', cap: 1,
+    anchor: 'routines-lock', cap: 1,
     title: 'Routines are the one paid thing here.',
     copy: 'A routine is a whole saved day you can reuse — Premium, $9.99 a month. The rest of the app is free. Nothing to decide now.',
   },
   'supps-intro': {
-    anchor: 'lib-tabs', cap: 1,
+    anchor: 'supps-top', cap: 1,
     title: 'A shopping list, not a commitment.',
     copy: 'These are supplement sets grouped by protocol. Tick what you want. Buying happens on iHerb, not here — the first item opens the basket there, and the rest follow it in.',
   },
   'free-cap': {
-    anchor: null, cap: 1,
+    // NOT a bubble. The refusal already puts a modal on the screen, and a
+    // guidance layer cannot open over one (nor should it — two panels arguing
+    // about the same refusal). This copy lives in UpsellModal, at the exact
+    // point the add was turned down, with its own [Clear the examples].
+    anchor: null, cap: Infinity, inline: true,
     title: 'You have hit the free limit.',
     copy: 'Free keeps up to 10 things, and the example cards count. Clearing them frees their slots. Premium removes the limit.',
   },
   'install-nudge': {
     anchor: null, cap: 3,
+    buttons: [
+      { label: 'Show me how', action: 'settings-install' },
+      // "Maybe later" has to mean later, not "in four seconds when you come
+      // back to the Stack" — otherwise all three lives burn in one sitting and
+      // the nudge becomes the nagging it was written to avoid.
+      { label: 'Maybe later', action: 'snooze-install' },
+    ],
     title: 'Put it on your home screen.',
     copy: 'Installed, the app opens full screen, loads faster, and is easier to keep open for its nudges. It takes about ten seconds.',
   },
@@ -145,6 +157,10 @@ function screenIsClear(h, S) {
   if (S.coach || S.journalOpen) return false;
   if (S.playerItem) return false;
   if (_dragging) return false;
+  // The lock screen is not store state, so it has to be asked directly. Without
+  // this a slot banner behind the keypad could burn a life of the reminders
+  // hint — the most important one in the set — where nobody could read it.
+  try { if (isLocked()) return false; } catch { /* passcode off */ }
   if (h.inSheet) {
     // Its own sheet may be up — but nothing else may be.
     return !(S.aiOpen || S.termsOpen || S.accountOpen || S.completedOpen || S.premiumUpsell || !S.onboarded);
@@ -187,6 +203,16 @@ export function hintQuestOffer(id) {
 }
 
 export function dismissHint() { clearHint(); }
+
+// "Maybe later" parks the install nudge for a week. Stored rather than held in
+// memory because the whole point is that it survives closing the app.
+const SNOOZE_KEY = 'ppw5.installSnoozeUntil';
+export function snoozeInstall(days = 7) {
+  try { localStorage.setItem(SNOOZE_KEY, String(Date.now() + days * 86400000)); } catch {}
+}
+export function installSnoozed() {
+  try { return +(localStorage.getItem(SNOOZE_KEY) || 0) > Date.now(); } catch { return false; }
+}
 
 /** Test seam — the cooldown is module state, not store state. */
 export function resetHintEngine() { _lastShownAt = 0; _dragging = false; }

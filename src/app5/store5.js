@@ -1053,6 +1053,20 @@ export function closeCoach() {
   setState({ coach: null });
 }
 
+/**
+ * Write the resume point WITHOUT closing the coach.
+ *
+ * Quest 6 sends the user out of the app on purpose — copy the prompt, go and
+ * talk to ChatGPT, come back. They will not tap the pause ✕ on their way out,
+ * and a phone may kill the tab while they are gone, so the place has to be on
+ * disk before they leave rather than as a side effect of closing.
+ */
+export function stashCoachPosition() {
+  const c = state.coach;
+  if (!c || !c.questId || c.questId === '__finale__' || questDone(c.questId)) return;
+  save('guideResume', JSON.stringify({ questId: c.questId, i: c.i }));
+}
+
 /** Where an interrupted quest left off, or null. */
 export function readResume() {
   try {

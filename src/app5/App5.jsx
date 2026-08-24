@@ -36,7 +36,7 @@ import {
   toggleSelect, selectAll, clearSelection, deleteSelected, safeUrl,
   onlyExamplesLeft, clearExamples,
   syncEntitlement, applyServerEntitlement, syncProfile,
-  openAiBridge, recordUseDay, guideWelcomed, markGuideWelcomed, guideDone, anySheetOpen,
+  openAiBridge, recordUseDay, guideWelcomed, markGuideWelcomed, anySheetOpen, stashCoachPosition,
   guideFocusItem,
 } from './store5.js';
 import GuideDisc from './screens/GuideDisc.jsx';
@@ -531,8 +531,7 @@ export default function App5() {
       const now = getState();
       if (now.coach || now.journalOpen || anySheetOpen(now) || now.guide.done) return;
       finaleFired.current = true;
-      guideDone();          // the disc starts leaving as the finale opens
-      startFinale();
+      startFinale();        // the finale's own [Done] is what retires the disc
     }, 1000);
     return () => clearTimeout(t);
   }, [S.guide, S.coach, S.journalOpen, S.onboarded, S.addOpen, S.aiOpen, S.accountOpen, S.completedOpen, S.termsOpen, S.playerItem]);
@@ -540,6 +539,20 @@ export default function App5() {
   // One place watches the store and asks for hints; the engine decides whether
   // to answer. See useHintWatcher for why the triggers live together.
   useHintWatcher();
+
+  // A quest mid-flight writes its place to disk the moment the app goes to the
+  // background. Quest 6 deliberately sends the user to their AI in another app;
+  // they will not tap pause on the way out, and the tab may not survive the
+  // trip. Coming back — or cold-booting — should not cost them the quest.
+  React.useEffect(() => {
+    const stash = () => { if (document.visibilityState === 'hidden') stashCoachPosition(); };
+    document.addEventListener('visibilitychange', stash);
+    window.addEventListener('pagehide', stashCoachPosition);
+    return () => {
+      document.removeEventListener('visibilitychange', stash);
+      window.removeEventListener('pagehide', stashCoachPosition);
+    };
+  }, []);
 
   // PASSCODE — lock after LOCK_AFTER_MS in the background, never while in use.
   //

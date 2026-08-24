@@ -100,7 +100,7 @@ export default function SuppsSection({ query = '' }) {
   };
 
   return (
-    <div style={{ marginTop: 18 }}>
+    <div data-tour="supps-top" style={{ marginTop: 18 }}>
       <Disclaimer />
 
       {groups.map((g) => {

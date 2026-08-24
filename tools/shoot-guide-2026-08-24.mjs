@@ -316,9 +316,15 @@ function clean(errs, label) {
     const fin = await page.getByText('Guide complete.').count();
     fin ? ok('the finale said goodbye') : bad('the finale never fired');
     await page.screenshot({ path: OUT + '/09-finale.png' });
-    const done = await page.evaluate(() => JSON.parse(localStorage.getItem('ppw5.guide') || '{}'));
-    done.done ? ok('the guide is marked finished') : bad('guide.done was not set');
+    const behind = await page.locator('[data-guide-sheet] >> text=8 of 8').count();
+    behind ? ok('the journal is open behind it, showing all eight') : bad('the finale is a bubble on an empty screen');
+    // [Done] is what retires the guide — not the moment the finale opened
+    const early = await page.evaluate(() => JSON.parse(localStorage.getItem('ppw5.guide') || '{}'));
+    !early.done ? ok('the guide is not retired until the user closes the finale') : bad('guide.done was set before [Done]');
     await page.locator('[data-coach-bubble] button', { hasText: 'Done' }).first().click();
+    await page.waitForTimeout(600);
+    const done = await page.evaluate(() => JSON.parse(localStorage.getItem('ppw5.guide') || '{}'));
+    done.done ? ok('and [Done] retires it') : bad('guide.done was never set');
     await page.waitForTimeout(1000);
     const disc = await page.locator('[data-tour="guide"]').count();
     !disc ? ok('the disc left the header') : bad('the disc is still there after the finale');

@@ -23,7 +23,7 @@
 import {
   getState, todayKey, tomorrowKey, openCoach, closeJournal, clearExamples,
   goLibrary, openAiBridge, setState, closeAdd, onlyExamplesLeft,
-  guideFocusItem, setCalMonth, keyToDate, orderedStackFor,
+  guideFocusItem, setCalMonth, keyToDate, orderedStackFor, FREE_CAP_UPSELL, guideDone,
 } from '../store5.js';
 
 // ── small helpers ────────────────────────────────────────────────────────
@@ -110,6 +110,10 @@ export const QUESTS = [
         {
           target: 'add-link',
           mode: 'do',
+          // The Add sheet sits at z30, under the coach's dimmer at z60 — so a
+          // spotlight here would switch off the Text tile the copy tells them
+          // to tap. Ring the paste box, dim nothing, leave the sheet working.
+          noDim: true,
           // While the note composer (and the phone keyboard) is up, the coach
           // gets out of the way entirely rather than sitting on top of the
           // thing the user is typing into. It stays armed underneath.
@@ -145,10 +149,15 @@ export const QUESTS = [
       const id = it ? it.id : null;
       const baseTime = it ? it.time : null;
       const baseRepeat = it ? it.repeat : null;
-      // No id means the step points at the hero card instead, and we compare
-      // against whatever is on top of the stack at the time.
-      const timeOf = (S) => (id ? (byId(S, id) || {}).time : ((S.deckItems || [])[0] || {}).time);
-      const repeatOf = (S) => (id ? (byId(S, id) || {}).repeat : ((S.deckItems || [])[0] || {}).repeat);
+      // No id means the step points at the hero card instead — so the fallback
+      // has to read the HERO, not deckItems[0]. Those are different cards more
+      // often than not: deckItems is raw add-order and still holds everything
+      // ticked off today, while the hero is orderedStackFor's first survivor.
+      // Reading the wrong one rang one card and waited on another, and a
+      // do-step with no button has no way out of that.
+      const heroOf = (S) => orderedStackFor(S.viewDate || todayKey())[0] || {};
+      const timeOf = (S) => (id ? (byId(S, id) || {}).time : heroOf(S).time);
+      const repeatOf = (S) => (id ? (byId(S, id) || {}).repeat : heroOf(S).repeat);
       const baseHeroTime = timeOf(S0);
       const baseHeroRepeat = repeatOf(S0);
       return [
@@ -159,11 +168,19 @@ export const QUESTS = [
           title: 'The time is secretly a button.',
           body: 'It does not look like one, but it is. Tap the time on this card and pick when it should pop up.',
           buttons: [{ label: 'Keep 9:00' }],
+          // Compare against the card that was ringed when the step opened. If
+          // the hero itself changes under them (they ticked something off),
+          // that counts as a change too — better a generous gate than a stall.
           advanceOn: (S) => timeOf(S) !== (id ? baseTime : baseHeroTime),
         },
         {
           target: 'item-repeat',
           mode: 'do',
+          // The repeat picker opens at z34, below the dimmer — so the coach
+          // steps aside completely while it is up, and comes back when the
+          // choice is made. Same reason the note composer gets dormancy.
+          dormantWhen: (S) => S.repeatId != null,
+          noDim: true,
           title: 'And how often.',
           body: 'The small arrows choose the rhythm — every day, weekly, every few days, just once. Tap them and pick one. Quest complete when you have.',
           advanceOn: (S) => repeatOf(S) !== (id ? baseRepeat : baseHeroRepeat),
@@ -243,11 +260,15 @@ export const QUESTS = [
           target: 'protocol-add',
           mode: 'do',
           before: () => goLibrary('protocols'),
-          title: (S) => (S.premiumUpsell ? 'Your free stack is full.' : 'Try a real protocol.'),
-          body: (S) => (S.premiumUpsell
+          // Specifically the FREE-CAP refusal. `premiumUpsell` also carries
+          // "Routines are part of Premium" and the protocol paywall, and
+          // answering either of those with "clear your examples" would be
+          // nonsense advice about a limit they have not hit.
+          title: (S) => (S.premiumUpsell === FREE_CAP_UPSELL ? 'Your free stack is full.' : 'Try a real protocol.'),
+          body: (S) => (S.premiumUpsell === FREE_CAP_UPSELL
             ? 'Your free stack is full — it holds 10 things, and the examples count. Clear the examples first.'
             : 'Myofascial Recovery is free. Add it to today and it joins your stack. In Media, the small tick means add to today and the calendar disc means pick a day. Quest complete.'),
-          buttons: (S) => (S.premiumUpsell && onlyExamplesLeft()
+          buttons: (S) => (S.premiumUpsell === FREE_CAP_UPSELL && onlyExamplesLeft()
             ? [{ label: 'Clear the examples', action: () => { clearExamples(); setState({ premiumUpsell: null }); }, advance: false }]
             : null),
           advanceOn: (S) => (S.deckItems || []).length > baseCount,
@@ -276,8 +297,15 @@ export const QUESTS = [
           // its paste screen), so the anchor has to let go with it. After that
           // the bubble centres over the paste screen, which is exactly where
           // the user's attention should be.
+          //
+          // noDim is not optional here. The AI sheet is z45 and the coach is
+          // z60, and a step with no target dims the WHOLE frame — which sealed
+          // the paste box, the Back button and the sheet's own close ✕ behind
+          // an invisible sheet of glass while the step waited for a paste that
+          // could no longer happen. Quest 6 was a room with the door painted on.
           target: (S) => (S.aiStep <= 1 ? 'ai-copy' : null),
           mode: 'do',
+          noDim: true,
           // This quest is the one that sends the user OUT of the app, so it is
           // the one most likely to be resumed cold. Every step from here on
           // makes sure the sheet it is talking about is actually open.
@@ -293,6 +321,9 @@ export const QUESTS = [
         {
           target: 'ai-preview',
           mode: 'do',
+          // Same reason as the step before: the user has to untick things and
+          // press Apply, and all of it lives under the dimmer.
+          noDim: true,
           before: (S) => { if (!S.aiOpen) openAiBridge(); },
           title: 'You approve everything.',
           body: 'Untick anything you do not want, then apply. One tap of Undo removes the lot if it went wrong. Quest complete.',
@@ -350,6 +381,11 @@ export const QUESTS = [
         {
           target: 'set-theme',
           mode: 'do',
+          // The step offers three things — colourway, text size, easy read —
+          // and they live in two different sections of Settings. One spotlight
+          // hole cannot hold all three, and dimming two thirds of the offer is
+          // worse than not dimming at all. Ring the colourways, block nothing.
+          noDim: true,
           before: () => setState({ screen: 'settings' }),
           title: 'Pick your look.',
           body: 'Try a colourway, set the text size, or switch Easy read on for bigger, calmer type. This quest completes the moment you change any one of them.',
@@ -366,9 +402,15 @@ export const QUESTS = [
 export const FINALE_STEPS = [
   {
     target: null,
+    // The journal is open behind this, showing all eight ticked and the ring
+    // full — the finale is a lap of honour over the thing they filled in, not
+    // a bubble on an empty screen.
+    before: () => setState({ journalOpen: true }),
     title: 'Guide complete.',
     body: 'You have used everything that matters — the stack, adding, times, other days, the Library, your AI, honest reminders and your own look. The guide moves to Settings now; every quest can be replayed there whenever you want. Tomorrow morning your stack rebuilds itself. See you then.',
-    buttons: [{ label: 'Done' }],
+    // [Done] is what retires the guide, so the disc leaves as the user closes
+    // the finale rather than a beat before it opens.
+    buttons: [{ label: 'Done', action: () => { guideDone(); closeJournal(); } }],
   },
 ];
 
