@@ -1024,7 +1024,15 @@ export function advanceCoach() {
   const c = state.coach;
   if (!c) return;
   const step = c.steps[c.i];
-  if (step && step.complete && c.questId) { recordQuest(c.questId); clearResume(); }
+  if (step && step.complete && c.questId) {
+    if (recordQuest(c.questId)) {
+      // The same soft tock the deck uses when something is ticked off — a quest
+      // completing is the same gesture as a card completing, so it makes the
+      // same sound. Sounds-gated like everything else; no fanfare, no confetti.
+      import('./sfx5.js').then((m) => m.sfx('drop')).catch(() => {});
+    }
+    clearResume();
+  }
   if (c.i + 1 >= c.steps.length) { setState({ coach: null }); return; }
   setState({ coach: { ...c, i: c.i + 1 } });
 }

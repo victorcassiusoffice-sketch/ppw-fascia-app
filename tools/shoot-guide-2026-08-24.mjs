@@ -258,6 +258,109 @@ function clean(errs, label) {
   await ctx.close();
 }
 
+// ── 8 · a hint actually fires, on the real screen ─────────────────────────
+{
+  console.log('\n[8] the hint engine answers a real tap');
+  const { ctx, page, errs } = await ctxWith({ ...ONBOARDED, 'ppw5.tourSeen': '1' });
+  await go(page);
+  // the selection circle is one tap from bulk delete and looks like a done tick
+  await page.locator('[data-tour="select-circle"]').first().click();
+  await page.waitForTimeout(900);
+  const bubble = await page.locator('[data-hint="select-circle"]').count();
+  bubble ? ok('the select-circle hint answered the tap') : bad('no hint fired for the selection circle');
+  const said = await page.getByText('That circle is for choosing, not finishing.').count();
+  said ? ok('and it says what the circle is for') : bad('the hint copy did not render');
+  await page.screenshot({ path: OUT + '/08-hint.png' });
+  // one tap anywhere dismisses
+  await page.mouse.click(215, 700);
+  await page.waitForTimeout(500);
+  const gone = await page.locator('[data-hint="select-circle"]').count();
+  !gone ? ok('one tap dismisses it') : bad('the hint would not go away');
+  // and it is one-shot
+  const burned = await page.evaluate(() => JSON.parse(localStorage.getItem('ppw5.hints') || '{}'));
+  burned['select-circle'] === 1 ? ok('it is spent, and will not repeat') : bad('the hint flag was not burned');
+  clean(errs, 'hint:');
+  await ctx.close();
+}
+
+// ── 9 · the finale: the guide leaves ──────────────────────────────────────
+{
+  console.log('\n[9] the eighth quest retires the guide');
+  const seven = { tick: 1, add: 1, time: 1, tomorrow: 1, library: 1, ai: 1, reminders: 1 };
+  const { ctx, page, errs } = await ctxWith({
+    ...ONBOARDED, 'ppw5.tourSeen': '1',
+    'ppw5.guide': JSON.stringify({ q: seven, welcomed: 1 }),
+  });
+  await go(page);
+  const label = await page.locator('[data-tour="guide"]').first().getAttribute('aria-label');
+  /7 of 8/.test(label || '') ? ok('the ring shows 7 of 8') : bad('disc reads: ' + label);
+
+  // finish the last one for real: Quest 8 completes on any look change
+  await page.locator('[data-tour="guide"]').first().click();
+  await page.waitForTimeout(500);
+  await page.locator('button', { hasText: 'Make it yours' }).first().click();
+  await page.waitForTimeout(1000);
+  const onSettings = await page.locator('[data-tour="set-theme"]').count();
+  onSettings ? ok('the quest walked itself to Settings') : bad('the quest did not navigate');
+
+  // tap a colourway through the spotlight hole
+  const sw = page.locator('[data-tour="set-theme"] button').nth(2);
+  const b = await sw.boundingBox();
+  if (!b) { bad('no colourway swatch on screen'); }
+  else {
+    await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
+    await page.waitForTimeout(1400);
+    const guide = await page.evaluate(() => JSON.parse(localStorage.getItem('ppw5.guide') || '{}'));
+    (guide.q && guide.q.yours) ? ok('the last quest completed on a real theme change') : bad('quest 8 did not complete');
+    await page.waitForTimeout(2600);            // the finale waits 1s, then opens
+    const fin = await page.getByText('Guide complete.').count();
+    fin ? ok('the finale said goodbye') : bad('the finale never fired');
+    await page.screenshot({ path: OUT + '/09-finale.png' });
+    const done = await page.evaluate(() => JSON.parse(localStorage.getItem('ppw5.guide') || '{}'));
+    done.done ? ok('the guide is marked finished') : bad('guide.done was not set');
+    await page.locator('[data-coach-bubble] button', { hasText: 'Done' }).first().click();
+    await page.waitForTimeout(1000);
+    const disc = await page.locator('[data-tour="guide"]').count();
+    !disc ? ok('the disc left the header') : bad('the disc is still there after the finale');
+    // and the journal lives on in Settings, forever
+    const row = await page.locator('[data-tour="set-guide"]').count();
+    row ? ok('the journal keeps its home in Settings') : bad('the Settings Guide row is missing');
+  }
+  clean(errs, 'finale:');
+  await ctx.close();
+}
+
+// ── 10 · easy read at 140% — the bubbles stay inside the phone ────────────
+{
+  console.log('\n[10] easy read, 140% zoom');
+  const { ctx, page, errs } = await ctxWith({
+    ...ONBOARDED, 'ppw5.tourSeen': '1',
+    'ppw5.a11y': JSON.stringify({ on: true, zoom: 1.4 }),
+  });
+  await go(page);
+  await page.locator('[data-tour="guide"]').first().click();
+  await page.waitForTimeout(500);
+  await page.locator('button', { hasText: 'Tick one off' }).first().click();
+  await page.waitForTimeout(1000);
+  const fits = await page.evaluate(() => {
+    const b = document.querySelector('[data-coach-bubble]');
+    if (!b) return { found: false };
+    const frame = b.closest('[data-easyread]');
+    if (!frame) return { found: false };
+    const br = b.getBoundingClientRect(), fr = frame.getBoundingClientRect();
+    return { found: true, left: br.left >= fr.left - 1, right: br.right <= fr.right + 1, top: br.top >= fr.top - 1, bottom: br.bottom <= fr.bottom + 1 };
+  });
+  if (!fits.found) bad('no coach bubble at 140% zoom');
+  else {
+    (fits.left && fits.right) ? ok('the bubble stays within the frame horizontally') : bad('the bubble overflows the frame sideways at 140%');
+    (fits.top && fits.bottom) ? ok('and vertically') : bad('the bubble overflows the frame vertically at 140%');
+  }
+  await page.screenshot({ path: OUT + '/10-easyread.png' });
+  clean(errs, 'easyread:');
+  await ctx.close();
+}
+
+
 console.log('\n──────────────────────────────');
 console.log(`${passes.length} passed, ${failures.length} failed`);
 await browser.close();

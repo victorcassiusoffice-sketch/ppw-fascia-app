@@ -23,3 +23,18 @@
 [data-easyread="1"] div, [data-easyread="1"] span, [data-easyread="1"] p,
 [data-easyread="1"] button, [data-easyread="1"] input, [data-easyread="1"] label,
 [data-easyread="1"] h1, [data-easyread="1"] h2, [data-easyread="1"] a { font-weight: 700 !important; }
+
+/* ── GUIDED ONBOARDING (2026-08-24) — reduced motion ──────────────────────
+   The guide leans on the app's own ppw* keyframes so it moves the way
+   everything else moves. Someone who has asked their phone to stop animating
+   things has asked for that too: the coach bubble, the hint bubble, the
+   journal, the quest ring and the guide disc all arrive instantly instead.
+   Nothing is hidden and nothing is skipped — only the travel is dropped. */
+@media (prefers-reduced-motion: reduce) {
+  [data-coach-bubble],
+  [data-hint],
+  [data-guide-sheet],
+  [data-guide-disc] { animation: none !important; }
+  [data-guide-disc] svg circle,
+  [data-guide-ring] circle { transition: none !important; }
+}

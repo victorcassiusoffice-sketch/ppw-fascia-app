@@ -30,7 +30,7 @@ export default function QuestJournalSheet() {
   return (
     <div style={{ position: 'absolute', inset: 0, zIndex: 43, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
       <div onClick={closeJournal} style={{ position: 'absolute', inset: 0, background: 'rgba(18,22,28,.45)', animation: 'ppwFade .3s ease both' }} />
-      <div role="dialog" aria-label="Your guide" style={{ position: 'relative', maxHeight: '82%', overflowY: 'auto', borderRadius: '28px 28px 0 0', padding: '22px 20px calc(26px + env(safe-area-inset-bottom, 0px))', background: 'var(--surface-strong)', backdropFilter: 'var(--blur-heavy)', WebkitBackdropFilter: 'var(--blur-heavy)', borderTop: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', animation: 'ppwSheetIn .42s cubic-bezier(.3,1.3,.4,1) both' }}>
+      <div role="dialog" aria-label="Your guide" data-guide-sheet="1" style={{ position: 'relative', maxHeight: '82%', overflowY: 'auto', borderRadius: '28px 28px 0 0', padding: '22px 20px calc(26px + env(safe-area-inset-bottom, 0px))', background: 'var(--surface-strong)', backdropFilter: 'var(--blur-heavy)', WebkitBackdropFilter: 'var(--blur-heavy)', borderTop: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', animation: 'ppwSheetIn .42s cubic-bezier(.3,1.3,.4,1) both' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <h2 style={{ margin: 0, fontSize: 24, fontWeight: 600, letterSpacing: '-.02em', textShadow: 'var(--emboss)' }}>Your guide</h2>

@@ -50,6 +50,7 @@ export default function GuideDisc() {
     <button
       onClick={tap}
       data-tour="guide"
+      data-guide-disc="1"
       aria-label={'Your guide — ' + done + ' of ' + QUEST_IDS.length + ' quests done'}
       style={{
         position: 'relative', width: SIZE, height: SIZE, flex: 'none', borderRadius: 999,

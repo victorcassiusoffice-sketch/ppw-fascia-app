@@ -38,6 +38,7 @@ export default function CompletedRing({ done = 0, remaining = 0, sweep = false }
     <svg
       width={SIZE + 6} height={SIZE + 6} viewBox={'0 0 ' + (SIZE + 6) + ' ' + (SIZE + 6)}
       aria-hidden="true"
+      data-guide-ring="1"
       style={{ position: 'absolute', left: -3, top: -3, pointerEvents: 'none', transform: 'rotate(-90deg)' }}
     >
       <circle cx={(SIZE + 6) / 2} cy={(SIZE + 6) / 2} r={R} fill="none" stroke="var(--hairline)" strokeWidth="2.2" />
