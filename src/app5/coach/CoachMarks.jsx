@@ -105,12 +105,13 @@ export default function CoachMarks({ open, onClose, steps: propSteps = TOUR_STEP
     if (!frameEl) return;
     const fr = frameEl.getBoundingClientRect();
     setFrame({ w: fr.width, h: fr.height });
-    if (!step.target) { setRect(null); return; }
-    const el = frameEl.querySelector('[data-tour="' + step.target + '"]');
+    const want = typeof step.target === 'function' ? safeCall(step.target) : step.target;
+    if (!want) { setRect(null); return; }
+    const el = frameEl.querySelector('[data-tour="' + want + '"]');
     if (!el) { setRect(null); return; }
     const r = el.getBoundingClientRect();
     setRect({ x: r.left - fr.left, y: r.top - fr.top, w: r.width, h: r.height });
-  }, [live, step]);
+  }, [live, step, S]);
 
   // Measure without depending on requestAnimationFrame alone: rAF does NOT fire
   // while the page isn't compositing (backgrounded tab, hidden pane, some
@@ -171,7 +172,11 @@ export default function CoachMarks({ open, onClose, steps: propSteps = TOUR_STEP
   const bubbleTop = hole ? (below ? hole.y + hole.h + 14 : Math.max(12, hole.y - 200)) : Math.round(frameH / 2) - 90;
 
   return (
-    <div ref={hostRef} style={{ position: 'absolute', inset: 0, zIndex: 60 }} role="dialog" aria-live="polite">
+    // THE HOST TAKES NO TAPS. It covers the whole frame so it can measure
+    // against it, and for as long as it also ATE pointer events the spotlight
+    // hole was a lie — the cut-out looked empty but every tap landed on this
+    // div. The dim panels and the bubble opt back in individually below.
+    <div ref={hostRef} style={{ position: 'absolute', inset: 0, zIndex: 60, pointerEvents: 'none' }} role="dialog" aria-live="polite">
       {/* dimmer with a cut-out over the target (4 panels — works on any ground) */}
       {hole ? (
         <>
@@ -188,7 +193,7 @@ export default function CoachMarks({ open, onClose, steps: propSteps = TOUR_STEP
       )}
 
       {/* the dialogue box */}
-      <div data-coach-bubble="1" style={{ position: 'absolute', left: 16, right: 16, top: bubbleTop, borderRadius: 22, padding: '18px 18px 14px', background: 'var(--surface-strong)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', animation: 'ppwSheetIn .42s cubic-bezier(.3,1.3,.4,1) both' }}>
+      <div data-coach-bubble="1" style={{ pointerEvents: 'auto', position: 'absolute', left: 16, right: 16, top: bubbleTop, borderRadius: 22, padding: '18px 18px 14px', background: 'var(--surface-strong)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', animation: 'ppwSheetIn .42s cubic-bezier(.3,1.3,.4,1) both' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--accent)', textShadow: 'var(--emboss)' }}>
@@ -248,6 +253,13 @@ export default function CoachMarks({ open, onClose, steps: propSteps = TOUR_STEP
   );
 }
 
+// A step's target/title/body/buttons may be written as functions of the store.
+// A throwing step must never wedge the guide, so every call is guarded.
+function safeCall(fn) { try { return fn(getState()); } catch { return null; } }
+
+// A dim panel BLOCKS (that is its job — everything outside the hole is off
+// limits), and in passive mode it also advances. It opts into pointer events
+// explicitly, because the host above it takes none.
 function Dim({ style, onClick }) {
-  return <div onClick={onClick} style={{ position: 'absolute', background: 'rgba(18,22,28,.58)', animation: 'ppwFade .3s ease both', cursor: onClick ? 'pointer' : 'default', ...style }} />;
+  return <div onClick={onClick} style={{ pointerEvents: 'auto', position: 'absolute', background: 'rgba(18,22,28,.58)', animation: 'ppwFade .3s ease both', cursor: onClick ? 'pointer' : 'default', ...style }} />;
 }

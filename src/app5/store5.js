@@ -146,7 +146,7 @@ function initialState() {
     //                local component state, which meant "they opened tomorrow"
     //                was invisible to everything outside that one component —
     //                and Quest 4 has to know. Lifted, not duplicated.
-    coach: null, journalOpen: false, hint: null, lastAddedId: null, aiStep: 0, calSelKey: null,
+    coach: null, journalOpen: false, hint: null, lastAddedId: null, aiStep: 0, calSelKey: null, calMonthOff: 0,
     guide: { q: {} }, hints: {}, hintsOff: false,
     // selection / interaction
     selectedIds: [],
@@ -1135,3 +1135,22 @@ export function anySheetOpen(s = state) {
 
 /** Which day the Calendar's panel is showing (unpadded `YYYY-M-D`, or null). */
 export function setCalSel(key) { if (state.calSelKey !== key) setState({ calSelKey: key }); }
+
+/**
+ * The item the guide should point at when it says "the thing you just added".
+ *
+ * SINGLE SOURCE OF TRUTH, deliberately: the quest steps and the [data-tour]
+ * anchors in the Stack both ask this, so they can never disagree about which
+ * row is being talked about. It only ever answers with something the user can
+ * actually SEE — an item scheduled for another date, or already ticked off, is
+ * not on screen, so the guide falls back to the top of the stack instead of
+ * spotlighting a row that is not there.
+ */
+export function guideFocusItem() {
+  const id = state.lastAddedId;
+  if (!id) return null;
+  return orderedStackFor(state.viewDate || todayKey()).find((x) => x.id === id) || null;
+}
+
+/** Which month the Calendar is showing, as an offset from this one. */
+export function setCalMonth(off) { if (state.calMonthOff !== off) setState({ calMonthOff: off }); }

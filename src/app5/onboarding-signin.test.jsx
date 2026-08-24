@@ -70,7 +70,9 @@ describe('a returning user can sign in without finishing setup', () => {
     render(<Shell />);
     expect(getState().obStep).toBe(0);
     act(() => { setState({ signedIn: true }); });   // sign-in lands while the wizard is open
-    expect(getState().obStep).toBe(2);
+    // 2026-08-24: the wizard is two screens now, so consent is step 1, not 2.
+    // The middle "Two ways to fill it" screen moved onto the real UI.
+    expect(getState().obStep).toBe(1);
     expect(screen.getByText(/I agree to the Terms/i)).toBeTruthy();
   });
 

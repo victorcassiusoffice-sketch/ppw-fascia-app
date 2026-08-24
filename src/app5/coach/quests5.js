@@ -23,6 +23,7 @@
 import {
   getState, todayKey, tomorrowKey, openCoach, closeJournal, clearExamples,
   goLibrary, openAiBridge, setState, closeAdd, onlyExamplesLeft,
+  guideFocusItem, setCalMonth, keyToDate, orderedStackFor,
 } from '../store5.js';
 
 // ── small helpers ────────────────────────────────────────────────────────
@@ -32,12 +33,27 @@ const byId = (S, id) => (S.deckItems || []).find((x) => x.id === id) || null;
 
 /**
  * The row a "your new thing" step should point at: whatever the user just
- * added, if it is still there — otherwise the hero card, so the step always has
- * something real to talk about.
+ * added, if it is still on screen — otherwise null, and the step falls back to
+ * the hero card, so it always has something real to talk about.
+ *
+ * This delegates to store5.guideFocusItem so the quest and the [data-tour]
+ * anchors in the Stack can never disagree about which row is being discussed.
  */
-export function focusItem(S) {
+export function focusItem() { return guideFocusItem(); }
+
+/**
+ * Is the thing the user just added sitting in the HERO card rather than in the
+ * list below it? The hero carries no `latest-item` anchor — it is `next-up` —
+ * so a step that talks about "the thing you just made" has to know which of the
+ * two it is pointing at. Also true when there is no focus item at all, because
+ * then the hero is the only honest thing to point at.
+ */
+export function isHeroFocus(S) {
   const s = S || getState();
-  return (s.lastAddedId && byId(s, s.lastAddedId)) || null;
+  const it = guideFocusItem();
+  if (!it) return true;
+  const top = orderedStackFor(s.viewDate || todayKey())[0];
+  return !!top && top.id === it.id;
 }
 
 // ── the eight ────────────────────────────────────────────────────────────
@@ -103,7 +119,11 @@ export const QUESTS = [
           advanceOn: (S) => realItems(S).length > baseReal,
         },
         {
-          target: 'latest-item',
+          // Usually the new thing is a row in the deck. If the user cleared the
+          // examples first, it is the hero card instead — and there is no
+          // `latest-item` on the hero, so point at the hero itself rather than
+          // ringing nothing.
+          target: (S) => (isHeroFocus(S) ? 'next-up' : 'latest-item'),
           // The sheet has to be out of the way for the user to see the row they
           // just made — the step is about the row, not the sheet.
           before: () => closeAdd(),
@@ -121,7 +141,7 @@ export const QUESTS = [
     title: 'Put a time on it',
     blurb: 'The time is secretly a button. So is the rhythm.',
     build(S0) {
-      const it = focusItem(S0);
+      const it = focusItem();
       const id = it ? it.id : null;
       const baseTime = it ? it.time : null;
       const baseRepeat = it ? it.repeat : null;
@@ -170,6 +190,14 @@ export const QUESTS = [
         {
           target: 'cal-tomorrow',
           mode: 'do',
+          // On the last day of a month, tomorrow is on the next page of the
+          // calendar — without this the step points at nothing and the user is
+          // told to tap a date that is not rendered.
+          before: () => {
+            const now = new Date();
+            const t = keyToDate(tk);
+            setCalMonth((t.getFullYear() - now.getFullYear()) * 12 + (t.getMonth() - now.getMonth()));
+          },
           title: 'Open tomorrow.',
           body: 'Tap tomorrow’s date. A dot on any day means that day already has something on it.',
           advanceOn: (S) => S.calSelKey === tk,
@@ -244,8 +272,16 @@ export const QUESTS = [
           buttons: [{ label: 'Next' }],
         },
         {
-          target: 'ai-copy',
+          // The copy button unmounts the moment it is used (the sheet moves to
+          // its paste screen), so the anchor has to let go with it. After that
+          // the bubble centres over the paste screen, which is exactly where
+          // the user's attention should be.
+          target: (S) => (S.aiStep <= 1 ? 'ai-copy' : null),
           mode: 'do',
+          // This quest is the one that sends the user OUT of the app, so it is
+          // the one most likely to be resumed cold. Every step from here on
+          // makes sure the sheet it is talking about is actually open.
+          before: (S) => { if (!S.aiOpen) openAiBridge(); },
           title: 'Copy, ask, come back.',
           body: 'Copy this prompt, open your AI wherever you normally use it, and paste in what it writes back. Bring the whole reply — do not trim it, the app reads through the messy bits.',
           // The user genuinely leaves the app here. The quest's place is
@@ -257,6 +293,7 @@ export const QUESTS = [
         {
           target: 'ai-preview',
           mode: 'do',
+          before: (S) => { if (!S.aiOpen) openAiBridge(); },
           title: 'You approve everything.',
           body: 'Untick anything you do not want, then apply. One tap of Undo removes the lot if it went wrong. Quest complete.',
           advanceOn: (S) => (S.deckItems || []).length > baseCount,
@@ -280,7 +317,9 @@ export const QUESTS = [
           buttons: [{ label: 'Next' }],
         },
         {
-          target: 'set-install',
+          // Someone who already installed has no install row to point at; the
+          // bubble centres rather than ringing an empty patch of screen.
+          target: () => (isStandalone() ? null : 'set-install'),
           title: 'Keep it one tap away.',
           body: 'Install the app to your home screen so it opens instantly, full screen, like any other app. On iPhone: Share, then Add to Home Screen.',
           // No fake detection: on iOS there is no install event to listen for,

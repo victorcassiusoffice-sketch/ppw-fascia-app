@@ -11,6 +11,11 @@
 import React from 'react';
 import { useStore5, closeAdd, setCustomUrl, addCustomUrl, goLibrary, openNoteComposer, setNoteField, addNote, parseRoutineMd, addItemsToToday, createRoutine, getState, addDocToToday, openAiBridge } from '../store5.js';
 import { saveFile } from '../files5.js';
+// The failed-paste sentence is registry copy (hints5.js `link-failed`), not
+// this screen's own words. It is marked `inline: true` there precisely because
+// this sheet renders it instead of the bubble engine — so read it from the
+// registry rather than keeping a second copy that can drift out of step.
+import { HINTS } from '../coach/hints5.js';
 
 const tsvg = (p) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">{p}</svg>;
 export const TILE_ICONS = {
@@ -50,6 +55,12 @@ export default function AddSheet() {
   // stale one sitting there — an error the user can re-trigger must be shown
   // again every time, never once.
   const [linkErr, setLinkErr] = React.useState(0);
+  // This component never unmounts — closing the sheet only makes it return
+  // null further down — so an error left in state would still be here on the
+  // next open, and could even sit alongside the success banner. An error
+  // belongs to the attempt that caused it and to nothing else, so clear it
+  // whenever the sheet opens or closes.
+  React.useEffect(() => { setLinkErr(0); }, [S.addOpen]);
   const onRoutineFile = (e) => {
     const f = e.target.files && e.target.files[0];
     e.target.value = '';
@@ -197,13 +208,33 @@ export default function AddSheet() {
           </a>
         </div>
         <div style={{ marginTop: 12, display: 'flex', gap: 10 }}>
-          <input data-tour="add-link" value={S.customUrl} onChange={(e) => { setCustomUrl(e.target.value); setLinkErr(0); }} placeholder="Paste a share link…" aria-label="Paste a share link" style={{ flex: 1, height: 48, padding: '0 16px', borderRadius: 15, border: '1px solid var(--hairline)', background: 'var(--track)', boxShadow: 'var(--inset)', color: 'var(--ink)', outline: 'none', fontSize: 14 }} />
-          <button onClick={() => { const r = addCustomUrl(S.customUrl); setLinkErr(r.ok || r.upsell ? 0 : (n) => n + 1); }} style={{ height: 48, padding: '0 20px', borderRadius: 15, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 600, fontSize: 14, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)' }}>Add</button>
+          <input data-tour="add-link" value={S.customUrl} onChange={(e) => { setCustomUrl(e.target.value); setLinkErr(0); }} placeholder="Paste a share link…" aria-label="Paste a share link" aria-invalid={linkErr > 0 ? 'true' : undefined} aria-describedby={linkErr > 0 ? 'add-link-error' : undefined} style={{ flex: 1, height: 48, padding: '0 16px', borderRadius: 15, border: `1px solid ${linkErr > 0 ? 'var(--accent)' : 'var(--hairline)'}`, background: 'var(--track)', boxShadow: 'var(--inset)', color: 'var(--ink)', outline: 'none', fontSize: 14 }} />
+          <button onClick={() => {
+            // An empty box is not a mistake. The user pasted nothing, so there
+            // is nothing to be wrong about — say nothing rather than accuse
+            // them of pasting something bad. The error is for a real value.
+            if (!String(S.customUrl || '').trim()) { setLinkErr(0); return; }
+            const r = addCustomUrl(S.customUrl);
+            setLinkErr(r.ok || r.upsell ? 0 : (n) => n + 1);
+          }} style={{ height: 48, padding: '0 20px', borderRadius: 15, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 600, fontSize: 14, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)' }}>Add</button>
         </div>
         {/* A free-cap refusal returns { upsell: true } and already raises the
-            upsell modal, so it must never also read as a broken link. */}
+            upsell modal, so it must never also read as a broken link.
+
+            The colour is --ink, the theme's own body text. There is no error
+            colour anywhere in this design system: the line used to ride
+            var(--bad, #c05), and --bad is defined in no stylesheet and by no
+            branch of theme5.js, so every skin was really showing that #c05
+            literal — pink text on dark glass, and too weak to read. --ink is
+            the one colour guaranteed legible in all six skins. The field's own
+            border turns accent while the error stands, so the message is not
+            carrying the whole signal on its own.
+
+            The id is what aria-describedby on the field points at; the key is
+            the nonce, so re-tapping Add on the same bad text remounts this node
+            and the alert speaks again. */}
         {linkErr > 0 && (
-          <div key={linkErr} role="alert" style={{ marginTop: 8, fontSize: 12.5, lineHeight: 1.45, fontWeight: 600, color: 'var(--bad, #c05)', animation: 'ppwRise .3s ease both' }}>That did not look like something we can add. YouTube, Spotify and most share links work. Plain web pages do too.</div>
+          <div key={linkErr} id="add-link-error" role="alert" style={{ marginTop: 8, fontSize: 12.5, lineHeight: 1.45, fontWeight: 600, color: 'var(--ink)', animation: 'ppwRise .3s ease both' }}>{HINTS['link-failed'].copy}</div>
         )}
         {S.addedCustom && (
           <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 18, border: '1px solid var(--rim)', background: 'var(--surface)', animation: 'ppwRise .3s ease both' }}>

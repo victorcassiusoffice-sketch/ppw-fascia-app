@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { THUMBS } from '../theme5.js';
-import { useStore5, getState, setTab, addToStack, setUpsell, openPlayer, createRoutine, deleteRoutine, updateRoutine, routineToMd, itemFromUrl, openSchedule, loadProtocols, hasLibSeen, markLibSeen, PREMIUM_PROTOCOL_UPSELL } from '../store5.js';
+import { useStore5, getState, setTab, addToStack, setUpsell, openPlayer, createRoutine, deleteRoutine, updateRoutine, routineToMd, itemFromUrl, openSchedule, loadProtocols, markLibSeen, PREMIUM_PROTOCOL_UPSELL } from '../store5.js';
 import { TILE_ICONS, DOC_ACCEPT } from './AddSheet.jsx';
 import { saveFile } from '../files5.js';
 import { protocolToItem } from '../protocols5.js';
@@ -304,37 +304,64 @@ function ProtocolRow({ p }) {
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, flex: 'none' }}>
         {/* calendar Add-to-Stack — schedule onto a chosen day */}
         <AddToStackBtn onClick={() => locked ? setUpsell(PREMIUM_PROTOCOL_UPSELL) : openSchedule({ type: 'item', item: protocolToItem(p) })} />
-        {/* quick add to today — same tick, same meaning, as a media row */}
-        <button data-tour="protocol-add" onClick={quickAdd} aria-label="Add to today's stack" title="Quick add to today" style={{ width: 24, height: 24, flex: 'none', borderRadius: 8, border: `1.5px solid ${added ? 'var(--acc-rim)' : 'var(--rim)'}`, background: added ? 'var(--acc-surf)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--acc-ink)', padding: 0, transition: 'all .2s' }}>
-          {added && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>}
+        {/* quick add to today — same tick, same meaning, as a media row. On a
+            monetised protocol a free user's tap can only ever reach the upsell,
+            so the control has to say that before it is tapped, not after: a
+            padlock where the tick would be, and the same words the View button
+            already uses. The paywall itself is unchanged. */}
+        <button data-tour="protocol-add" onClick={quickAdd} aria-label={locked ? `Unlock ${p.title} to add it to today` : "Add to today's stack"} title={locked ? 'Premium — unlock to add it' : 'Quick add to today'} style={{ width: 24, height: 24, flex: 'none', borderRadius: 8, border: `1.5px solid ${added ? 'var(--acc-rim)' : 'var(--rim)'}`, background: added ? 'var(--acc-surf)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: locked ? 'var(--dim)' : 'var(--acc-ink)', padding: 0, transition: 'all .2s' }}>
+          {locked
+            ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2.5" /><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5" /></svg>
+            : added && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>}
         </button>
       </div>
     </div>
   );
 }
 
+// First impression. A free user opening the Library landed on Routines, which
+// for them is a locked card — a paywall as the first thing the shelf ever showed
+// them. This has to be the DEFAULT rather than a one-off welcome: nothing
+// persists `stackTab`, so every launch starts on 'routines' again, and hanging
+// the correction on "have they been here before" put the paywall straight back
+// from the second session onward.
+//
+// So the default is corrected here, at import — App5 pulls this screen in at
+// boot, before anything renders and before the user has had a chance to ask for
+// anything. That is also what makes the rest honest: from this moment on, a
+// `stackTab` of 'routines' can only be something the user actually asked for —
+// the Routine tile in ＋ Add, or the tab bar below — and that request now always
+// wins, because nothing overrides the tab on entry any more.
+//
+// `premium` here is the cached entitlement the store boots with, so a Premium
+// member whose cache is cold lands on Media for one launch and taps back.
+{
+  const boot = getState();
+  if (boot.stackTab === 'routines' && !boot.premium) setTab('media');
+}
+
 export default function LibraryScreen() {
   const S = useStore5();
   React.useEffect(() => { loadProtocols(); }, []); // item 1 — pull the bundled manifest
 
-  // First impression. A brand-new free user opening the Library landed on
-  // Routines, which for them is a locked card — a paywall as the first thing the
-  // shelf ever showed them. Land them on Media instead, once, then remember it.
-  // An explicit tab (goLibrary('protocols'), which the guide does) has already
-  // moved us off the stored default, so it always wins. useLayoutEffect, not
-  // useEffect: the paywall must not flash before the switch.
-  React.useLayoutEffect(() => {
-    if (hasLibSeen()) return;
-    markLibSeen();
-    const s = getState();
-    if (s.stackTab === 'routines' && !s.premium) setTab('media');
-  }, []);
+  // `ppw5.libSeen` records that this device has met the Library. It no longer
+  // decides which tab you land on — that gate is what made the media-first fix
+  // last exactly one session — and nothing else reads it yet. It is kept
+  // because "has this person ever seen the Library" is a fact worth having, and
+  // it costs one key.
+  React.useEffect(() => { markLibSeen(); }, []);
 
-  // The Library's own toast (see ToastCtx above).
-  const [toast, setToast] = React.useState(null);
+  // The Library's own toast (see ToastCtx above). It carries a sequence number
+  // as well as its words: every quick-add says the same sentence, so without one
+  // React sees an identical node, leaves the mounted pill exactly where it is,
+  // and the second add neither replays the rise nor gives aria-live anything new
+  // to announce — as silent as it was before the toast existed.
+  const [toast, setToast] = React.useState(null); // { text, n } | null
   const toastTimer = React.useRef(null);
+  const toastSeq = React.useRef(0);
   const flash = React.useCallback((text) => {
-    setToast(text);
+    toastSeq.current += 1;
+    setToast({ text, n: toastSeq.current });
     if (toastTimer.current) clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => setToast(null), 2000);
   }, []);
@@ -446,7 +473,7 @@ export default function LibraryScreen() {
     {/* Sibling of the scrolling screen, not a child of it: a child would scroll
         away with the list. Sits above the nav dock (z20), under every sheet. */}
     {toast && (
-      <div role="status" aria-live="polite" style={{ position: 'absolute', left: 20, right: 20, bottom: 'calc(96px + env(safe-area-inset-bottom, 0px))', zIndex: 21, padding: '13px 16px', borderRadius: 999, textAlign: 'center', background: 'var(--surface-strong)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', color: 'var(--ink)', fontSize: 13, fontWeight: 600, pointerEvents: 'none', animation: reducedMotion() ? 'none' : 'ppwRise .3s ease both' }}>{toast}</div>
+      <div key={toast.n} role="status" aria-live="polite" style={{ position: 'absolute', left: 20, right: 20, bottom: 'calc(96px + env(safe-area-inset-bottom, 0px))', zIndex: 21, padding: '13px 16px', borderRadius: 999, textAlign: 'center', background: 'var(--surface-strong)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', color: 'var(--ink)', fontSize: 13, fontWeight: 600, pointerEvents: 'none', animation: reducedMotion() ? 'none' : 'ppwRise .3s ease both' }}>{toast.text}</div>
     )}
     </ToastCtx.Provider>
   );

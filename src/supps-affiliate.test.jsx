@@ -33,7 +33,7 @@ describe('SuppsSection — buy flow + disclaimer gating', () => {
     const SuppsSection = (await import('./app5/screens/SuppsSection.jsx')).default;
     const { container } = render(<SuppsSection />);
     expect(container.textContent).not.toMatch(/Shop \d+ on iHerb/);
-    expect(container.textContent).toContain('Tick what you want to shop');
+    expect(container.textContent).toContain('Tick what you want.');
     expect([...container.querySelectorAll('[role="checkbox"]')].some((c) => c.getAttribute('aria-checked') === 'true')).toBe(false);
   });
 

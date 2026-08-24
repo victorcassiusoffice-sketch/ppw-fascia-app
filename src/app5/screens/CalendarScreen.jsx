@@ -5,7 +5,7 @@
 // dimmed) + "Open in Stack" which views that date's own stack (per-date model).
 
 import React, { useState } from 'react';
-import { useStore5, itemsForDate, openStackForDate, applyRoutineToDate, tomorrowKey, setCalSel } from '../store5.js';
+import { useStore5, itemsForDate, openStackForDate, applyRoutineToDate, tomorrowKey, setCalSel, setCalMonth } from '../store5.js';
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const keyOf = (d) => d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
@@ -19,7 +19,11 @@ export default function CalendarScreen() {
   // Same unpadded `YYYY-M-D` shape keyOf builds, so the guide's tomorrow
   // anchor matches a real cell key instead of silently landing on nothing.
   const tomKey = tomorrowKey();
-  const [monthOff, setMonthOff] = useState(0);
+  // The month is in the store too, so the guide can make sure tomorrow's cell
+  // is actually on screen before it tells the user to tap it — on the last day
+  // of a month, tomorrow lives on the next page.
+  const monthOff = S.calMonthOff || 0;
+  const setMonthOff = (fn) => setCalMonth(typeof fn === 'function' ? fn(monthOff) : fn);
   const [selKey, setSelKey] = useState(keyOf(today));
   // The selected day used to live only in here, which made "they opened
   // tomorrow" invisible to anything outside this component — and the guide's

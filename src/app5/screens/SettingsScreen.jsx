@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { SOFT, BGS, bgUrl } from '../theme5.js';
-import { useStore5, setTheme, setState, openTerms, setSounds, setReminders, setAutoplay, setA11y } from '../store5.js';
+import { useStore5, setTheme, setState, openTerms, setSounds, setReminders, setAutoplay, setA11y, openJournal, setHintsOff } from '../store5.js';
+import { QUEST_IDS, doneCountOf } from '../coach/quests5.js';
 import MembershipCard from './MembershipCard.jsx';
 import { InstallAppCard } from './InstallAppCard.jsx';
 
@@ -155,6 +156,32 @@ export default function SettingsScreen() {
             <div style={{ marginTop: 2, fontSize: 12.5, color: 'var(--dim)' }}>Videos start on their own at slot time</div>
           </div>
           <Switch on={S.autoplay} onTap={() => setAutoplay(!S.autoplay)} label="Toggle autoplay" />
+        </div>
+      </div>
+
+      {/* THE GUIDE — its permanent home.
+          The old tour was one-shot, and a comment in CoachMarks.jsx claimed for
+          months that it was "replayable from Settings" when there was nothing
+          in Settings to replay it with. There is now. It stays here forever,
+          including after all eight quests are done and the header disc has
+          retired — someone who forgets how per-date stacks work in November
+          should be able to come back and be shown again. */}
+      <Eyebrow>Guide</Eyebrow>
+      <div style={{ marginTop: 12, borderRadius: 24, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)', overflow: 'hidden' }}>
+        <button onClick={openJournal} data-tour="set-guide" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 18px', minHeight: 60, background: 'none', border: 'none', color: 'var(--ink)', textAlign: 'left' }}>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 500 }}>Your guide</div>
+            <div style={{ marginTop: 2, fontSize: 12.5, color: 'var(--dim)' }}>{doneCountOf(S)} of {QUEST_IDS.length} quests done — replay any of them</div>
+          </div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--dim)', flex: 'none' }}><path d="M9 6l6 6-6 6" /></svg>
+        </button>
+        {DIV}
+        <div style={ROW}>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 500 }}>Hints</div>
+            <div style={{ marginTop: 2, fontSize: 12.5, color: 'var(--dim)' }}>One-off tips the first time you meet something</div>
+          </div>
+          <Switch on={!S.hintsOff} onTap={() => setHintsOff(!S.hintsOff)} label="Toggle hints" />
         </div>
       </div>
 

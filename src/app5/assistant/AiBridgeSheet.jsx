@@ -9,7 +9,7 @@
 // Graphite neumorphic: opaque surfaces, dual-shadow, no blur.
 
 import React from 'react';
-import { useStore5, setState, closeAiBridge, addItemsToPlan, removeItemsByIds, parsePlanDoc, dateKeyFromOffset, finishOnboarding, setAiStep } from '../store5.js';
+import { useStore5, setState, closeAiBridge, addItemsToPlan, removeItemsByIds, parsePlanDoc, dateKeyFromOffset, finishOnboarding, setAiStep, recordQuest } from '../store5.js';
 import { buildPrompt } from './aiPrompt.js';
 import { extractPlanCandidates, PARSE_HELP } from './parsePlan.js';
 import { sharePrompt, copyText, readText, canShare } from './clipboard.js';
@@ -57,7 +57,14 @@ export default function AiBridgeSheet() {
   // choice, so closing it returns there rather than stranding the user.
   const midOnboarding = !S.onboarded;
 
-  const close = () => { closeAiBridge(); setTimeout(() => { setStep(1); setRaw(''); setParsed(null); setAlts([]); setErr(null); setApplied(null); setShowPrompt(false); }, 250); };
+  // The reset runs here, in the same breath as the close. It used to run 250ms
+  // later, which left a window in which reopening the sheet republished the OLD
+  // step: Quest 6 opens this sheet on its very first step, and the empty Stack's
+  // "Plan with AI" button sits one tap away from a close, so a fast round trip
+  // wrote a stale 3 into the store and the quest skipped its own paste step.
+  // The delay protected nothing — the sheet stops rendering the instant aiOpen
+  // clears, so there is no frame in which the emptied screen can be seen.
+  const close = () => { closeAiBridge(); setStep(1); setRaw(''); setParsed(null); setAlts([]); setErr(null); setApplied(null); setShowPrompt(false); };
 
   /** Leaving for good: the user arrived somewhere, so onboarding is done. */
   const finishAndClose = () => { if (midOnboarding) finishOnboarding(); close(); };
@@ -118,7 +125,13 @@ export default function AiBridgeSheet() {
   const apply = () => {
     const res = addItemsToPlan(chosen);
     if (res.upsell) { close(); return; }
-    if (res.ok) { setApplied({ ids: res.ids, count: res.count }); setStep(4); }
+    if (res.ok) {
+      setApplied({ ids: res.ids, count: res.count }); setStep(4);
+      // Someone who took the AI fork out of the wizard has just done the whole
+      // of Quest 6 for real. Marking it here means the guide never asks them to
+      // repeat, in a tutorial, a thing they already did in the product.
+      if (midOnboarding) recordQuest('ai');
+    }
   };
   const undo = () => { if (applied) { removeItemsByIds(applied.ids); setApplied(null); close(); } };
 
@@ -259,8 +272,11 @@ export default function AiBridgeSheet() {
             )}
 
             {/* data-tour: one wrapper so the guide can point at the whole
-                parsed list, not a single day group. Unstyled on purpose —
-                the day groups keep their own spacing. */}
+                parsed list, not a single day group. The Add button lives INSIDE
+                it because the guide spotlights this wrapper in do-mode and dims
+                everything outside — leave the button out and the coach hides the
+                one control its own step is asking the user to press. Unstyled on
+                purpose — the list and the button keep their own spacing. */}
             <div data-tour="ai-preview">
             {groups.map((g) => (
               <div key={g.day} style={{ marginTop: 18 }}>
@@ -283,11 +299,10 @@ export default function AiBridgeSheet() {
                 </div>
               </div>
             ))}
-            </div>
-
             <button onClick={apply} disabled={!chosen.length} style={{ ...BTN_PRIMARY, marginTop: 22, opacity: chosen.length ? 1 : .45 }}>
               Add {chosen.length} to my day
             </button>
+            </div>
             <button onClick={() => setStep(2)} style={{ ...BTN_GHOST, marginTop: 10, border: 'none' }}>← Paste a different reply</button>
           </div>
         )}

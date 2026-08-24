@@ -105,7 +105,7 @@ describe('F2 — one layer at a time', () => {
 
 describe('F3 — the AI path is no longer a one-way door', () => {
   it('choosing AI does NOT destroy the choice screen', () => {
-    setState({ termsOk: true, obStep: 2 });
+    setState({ termsOk: true, obStep: 1 });
     render(<OnboardingScreen />);
     fireEvent.click(screen.getByText(/start by talking to my ai/i));
     expect(getState().aiOpen).toBe(true);
@@ -114,7 +114,7 @@ describe('F3 — the AI path is no longer a one-way door', () => {
   });
 
   it('the empty-day option is still reachable after picking AI', () => {
-    setState({ termsOk: true, obStep: 2 });
+    setState({ termsOk: true, obStep: 1 });
     const { rerender } = render(<OnboardingScreen />);
     fireEvent.click(screen.getByText(/start by talking to my ai/i));
     rerender(<OnboardingScreen />);
@@ -163,7 +163,7 @@ describe('F8 — the password confirmation stops forgetting itself', () => {
 
 describe('F9 — the terms gate exposes its state', () => {
   it('a screen reader can tell agreed from not agreed', () => {
-    setState({ obStep: 2, termsOk: false });
+    setState({ obStep: 1, termsOk: false });
     render(<OnboardingScreen />);
     const box = screen.getByRole('checkbox', { name: /terms and health disclaimer/i });
     expect(box.getAttribute('aria-checked')).toBe('false');

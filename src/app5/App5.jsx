@@ -37,6 +37,7 @@ import {
   onlyExamplesLeft, clearExamples,
   syncEntitlement, applyServerEntitlement, syncProfile,
   openAiBridge, recordUseDay, guideWelcomed, markGuideWelcomed, guideDone, anySheetOpen,
+  guideFocusItem,
 } from './store5.js';
 import GuideDisc from './screens/GuideDisc.jsx';
 import CompletedRing from './screens/CompletedRing.jsx';
@@ -167,7 +168,12 @@ function StackScreen() {
   // thing is one of the rows below. If it isn't (nothing added yet, or it landed
   // in the hero slot), they fall back to the hero card so they always point
   // somewhere real. S.lastAddedId is transient — no match is a normal state.
-  const restIsTarget = !!S.lastAddedId && rest.some((x) => x.id === S.lastAddedId);
+  // WHICH ROW THE GUIDE IS TALKING ABOUT. Asked of the store rather than worked
+  // out here, so these anchors and the quest predicates can never disagree
+  // about it — they disagreed once, and Quest 3 spotlighted one card while
+  // waiting for a change on another.
+  const focusId = (guideFocusItem() || {}).id || null;
+  const restIsTarget = !!focusId && rest.some((x) => x.id === focusId);
 
   // Vic #2 — hold-and-drag reorder. Times stay with positions: dropping re-assigns
   // which timed stack sits in which time slot; no-time stacks reorder their queue.
@@ -286,7 +292,7 @@ function StackScreen() {
               </label>
             ) : (
               // Vic #3 — no-time stack: it simply IS Next Up, no clock attached.
-              <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--accent)', textShadow: 'var(--emboss)' }}>Anytime</span>
+              <span data-tour={restIsTarget ? undefined : 'item-time'} style={{ fontSize: 13, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--accent)', textShadow: 'var(--emboss)' }}>Anytime</span>
             )}
           </div>
           <div style={{ marginTop: 12, fontSize: 23, fontWeight: 600, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>{next.title}</div>
@@ -359,7 +365,7 @@ function StackScreen() {
             <div
               key={it.id}
               data-dragidx={i}
-              data-tour={it.id === S.lastAddedId ? 'latest-item' : undefined}
+              data-tour={it.id === focusId ? 'latest-item' : undefined}
               onPointerDown={rowPointerDown(i)}
               onClick={() => { if (suppressClick.current) return; if (S.selectedIds.length) { toggleSelect(it.id); return; } if (it.embed || it.url || it.kind === 'doc') openPlayer(it); }}
               style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', minHeight: 68, borderRadius: 26, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: `1px solid ${isOver ? 'var(--acc-rim)' : 'var(--rim)'}`, boxShadow: isDragged ? 'var(--elev-hi)' : 'var(--elev)', cursor: (it.embed || it.url) ? 'pointer' : 'grab', touchAction: 'pan-y', userSelect: 'none', WebkitUserSelect: 'none', transform: isDragged ? `translateY(${drag.dy}px) scale(1.03)` : 'none', zIndex: isDragged ? 5 : 1, transition: isDragged ? 'none' : 'transform .2s, border-color .2s' }}
@@ -391,9 +397,9 @@ function StackScreen() {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 5, flex: 'none' }}>
                 {it.time ? (
-                  <input type="time" value={it.time} onClick={(e) => e.stopPropagation()} onChange={(e) => setItemTime(it.id, e.target.value)} aria-label="Edit slot time" data-tour={it.id === S.lastAddedId ? 'item-time' : undefined} style={{ fontSize: 15, fontWeight: 600, color: 'var(--dim)', background: 'transparent', border: 'none', outline: 'none', textAlign: 'right', padding: 0, width: 84, cursor: 'pointer' }} />
+                  <input type="time" value={it.time} onClick={(e) => e.stopPropagation()} onChange={(e) => setItemTime(it.id, e.target.value)} aria-label="Edit slot time" data-tour={it.id === focusId ? 'item-time' : undefined} style={{ fontSize: 15, fontWeight: 600, color: 'var(--dim)', background: 'transparent', border: 'none', outline: 'none', textAlign: 'right', padding: 0, width: 84, cursor: 'pointer' }} />
                 ) : (
-                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', padding: '3px 8px', borderRadius: 999, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)' }}>Next Up</span>
+                  <span data-tour={it.id === focusId ? 'item-time' : undefined} style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', padding: '3px 8px', borderRadius: 999, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)' }}>Next Up</span>
                 )}
                 {/* F10 (UX pass 2026-08-11): these controls were 13x17 and 22x22
                     against the app's own 48px floor. The ICONS are unchanged —
@@ -401,7 +407,7 @@ function StackScreen() {
                     the row looking different. `gap` drops to 0 because the new
                     padding now provides the separation. */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
-                  <button onClick={(e) => { e.stopPropagation(); openRepeat(it.id); }} aria-label="Repeat and time options" data-tour={it.id === S.lastAddedId ? 'item-repeat' : undefined} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 44, minHeight: 44, background: 'none', border: 'none', padding: '14px 12px', color: 'var(--dim)' }}>
+                  <button onClick={(e) => { e.stopPropagation(); openRepeat(it.id); }} aria-label="Repeat and time options" data-tour={it.id === focusId ? 'item-repeat' : undefined} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 44, minHeight: 44, background: 'none', border: 'none', padding: '14px 12px', color: 'var(--dim)' }}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 2l4 4-4 4" /><path d="M3 11v-1a4 4 0 0 1 4-4h14" /><path d="M7 22l-4-4 4-4" /><path d="M21 13v1a4 4 0 0 1-4 4H3" /></svg>
                   </button>
                   {/* Vic #1 — AUTO tickbox: at slot time the item opens/plays itself. */}

@@ -120,7 +120,9 @@ export default function SuppsSection({ query = '' }) {
       <button onClick={shop} disabled={!n}
         style={{ marginTop: 18, width: '100%', height: 52, borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 700, fontSize: 15, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)', opacity: n ? 1 : 0.45, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="20" r="1.4" /><circle cx="18" cy="20" r="1.4" /><path d="M2 3h3l2.4 12.5a1.5 1.5 0 0 0 1.5 1.2h8.2a1.5 1.5 0 0 0 1.5-1.2L21.5 7H6" /></svg>
-        {n ? `Shop ${n} on iHerb` : 'Tick what you want to shop'}
+        {/* With nothing ticked the button says what the Supps hint says, word for word,
+            so the screen only ever teaches one sentence for this idea. */}
+        {n ? `Shop ${n} on iHerb` : 'Tick what you want.'}
       </button>
       <div style={{ marginTop: 8, fontSize: 11, lineHeight: 1.5, color: 'var(--dim)', textAlign: 'center' }}>
         {affiliateLive()
