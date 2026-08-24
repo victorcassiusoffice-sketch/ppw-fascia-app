@@ -25,12 +25,26 @@ describe('SuppsSection — buy flow + disclaimer gating', () => {
   beforeEach(() => { localStorage.clear(); });
   afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.resetModules(); });
 
+  // 2026-08-24: nothing arrives pre-ticked any more. A basket of 14 supplements
+  // the user never chose made "Shop 14 on iHerb" the first thing a novice read
+  // on a screen they opened to look around. The buy flow itself is unchanged —
+  // this test now ticks one first, the way a real user has to.
+  it('starts with nothing ticked, and says so instead of naming a count', async () => {
+    const SuppsSection = (await import('./app5/screens/SuppsSection.jsx')).default;
+    const { container } = render(<SuppsSection />);
+    expect(container.textContent).not.toMatch(/Shop \d+ on iHerb/);
+    expect(container.textContent).toContain('Tick what you want to shop');
+    expect([...container.querySelectorAll('[role="checkbox"]')].some((c) => c.getAttribute('aria-checked') === 'true')).toBe(false);
+  });
+
   it('Shop on iHerb opens the FIRST selected supp (sets the cookie)', async () => {
     const SuppsSection = (await import('./app5/screens/SuppsSection.jsx')).default;
     const { buyUrl, suppsGroupedByProtocol } = await import('./lib/suppsAffiliates.js');
     const firstSupp = suppsGroupedByProtocol()[0].supps.find((s) => s.in_stock !== false);
     const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
     const { container } = render(<SuppsSection />);
+    // the user ticks it themselves
+    fireEvent.click(container.querySelector('[aria-label="Select ' + firstSupp.name + '"]'));
     const shopBtn = [...container.querySelectorAll('button')].find((b) => /Shop \d+ on iHerb/.test(b.textContent));
     expect(shopBtn).toBeTruthy();
     fireEvent.click(shopBtn);

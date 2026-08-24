@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { THUMBS } from '../theme5.js';
-import { useStore5, setTab, addToStack, setUpsell, openPlayer, createRoutine, deleteRoutine, updateRoutine, routineToMd, itemFromUrl, openSchedule, loadProtocols, PREMIUM_PROTOCOL_UPSELL } from '../store5.js';
+import { useStore5, getState, setTab, addToStack, setUpsell, openPlayer, createRoutine, deleteRoutine, updateRoutine, routineToMd, itemFromUrl, openSchedule, loadProtocols, hasLibSeen, markLibSeen, PREMIUM_PROTOCOL_UPSELL } from '../store5.js';
 import { TILE_ICONS, DOC_ACCEPT } from './AddSheet.jsx';
 import { saveFile } from '../files5.js';
 import { protocolToItem } from '../protocols5.js';
@@ -23,6 +23,20 @@ function AddToStackBtn({ onClick, label = 'Add to Stack on a day' }) {
       {ICal}
     </button>
   );
+}
+
+// Quick-add feedback. Tapping the tick used to do its work in silence — the only
+// sign anything happened was a 24px outline filling in, on a screen that is not
+// the stack the item just landed in. There is no shared toast anywhere in the
+// app, so the Library carries its own: a pill above the nav dock, inside the
+// phone frame, gone in two seconds. Context rather than props because the rows
+// that fire it sit well below this screen's root.
+const ToastCtx = React.createContext(() => {});
+const QUICK_ADD_TOAST = 'Added to today, 9:00.';
+// Motion is decoration on the toast — the words are the message, so a user who
+// has asked for less movement still gets the words, just without the rise.
+function reducedMotion() {
+  try { return !!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches; } catch { return false; }
 }
 
 // share a routine as a .md file — native share sheet when the device supports
@@ -176,7 +190,7 @@ function RoutineBuilder({ query = '' }) {
                 </button>
               )) : (
                 <div style={{ padding: '12px 14px', borderRadius: 14, border: '1px solid var(--hairline)', background: 'var(--track)', fontSize: 12.5, lineHeight: 1.5, color: 'var(--dim)' }}>
-                  Your PPW protocols will appear here as they’re approved for the app.
+                  Protocols land here as they are ready.
                 </div>
               )}
             </div>
@@ -225,7 +239,8 @@ const IPlay = <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor
 function MediaRow({ it }) {
   const bg = it.thumbUrl ? `url(${it.thumbUrl})` : (THUMBS[it.thumb] || THUMBS.au);
   const [added, setAdded] = React.useState(false);
-  const add = (e) => { e.stopPropagation(); if (addToStack(it)) setAdded(true); };
+  const flash = React.useContext(ToastCtx);
+  const add = (e) => { e.stopPropagation(); if (addToStack(it)) { setAdded(true); flash(QUICK_ADD_TOAST); } };
   return (
     <div onClick={() => { if (it.embed || it.url) openPlayer(it); }} style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', minHeight: 76, borderRadius: 24, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)', cursor: (it.embed || it.url) ? 'pointer' : 'default' }}>
       <div style={{ width: 56, height: 56, flex: 'none', borderRadius: 16, background: bg, backgroundSize: 'cover', backgroundPosition: 'center', border: '1px solid var(--rim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,.92)' }}>{!it.thumbUrl && IPlay}</div>
@@ -253,6 +268,16 @@ function MediaRow({ it }) {
 function ProtocolRow({ p }) {
   const S = useStore5();
   const locked = p.register === 'monetised' && !S.premium;
+  const [added, setAdded] = React.useState(false);
+  const flash = React.useContext(ToastCtx);
+  // Protocols now get the same one-tap add as media. Until this, the only way to
+  // put a protocol into today was the day picker — three taps to do the thing
+  // most people want first, which is simply "put it on today".
+  const quickAdd = (e) => {
+    e.stopPropagation();
+    if (locked) { setUpsell(PREMIUM_PROTOCOL_UPSELL); return; }
+    if (addToStack(protocolToItem(p))) { setAdded(true); flash(QUICK_ADD_TOAST); }
+  };
   return (
     <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', minHeight: 76, borderRadius: 24, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)' }}>
       <div style={{ position: 'relative', width: 48, height: 48, flex: 'none', borderRadius: 14, background: 'var(--disc)', border: '1px solid var(--rim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)' }}>
@@ -276,7 +301,14 @@ function ProtocolRow({ p }) {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>
         </a>
       )}
-      <AddToStackBtn onClick={() => locked ? setUpsell(PREMIUM_PROTOCOL_UPSELL) : openSchedule({ type: 'item', item: protocolToItem(p) })} />
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, flex: 'none' }}>
+        {/* calendar Add-to-Stack — schedule onto a chosen day */}
+        <AddToStackBtn onClick={() => locked ? setUpsell(PREMIUM_PROTOCOL_UPSELL) : openSchedule({ type: 'item', item: protocolToItem(p) })} />
+        {/* quick add to today — same tick, same meaning, as a media row */}
+        <button data-tour="protocol-add" onClick={quickAdd} aria-label="Add to today's stack" title="Quick add to today" style={{ width: 24, height: 24, flex: 'none', borderRadius: 8, border: `1.5px solid ${added ? 'var(--acc-rim)' : 'var(--rim)'}`, background: added ? 'var(--acc-surf)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--acc-ink)', padding: 0, transition: 'all .2s' }}>
+          {added && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>}
+        </button>
+      </div>
     </div>
   );
 }
@@ -284,6 +316,30 @@ function ProtocolRow({ p }) {
 export default function LibraryScreen() {
   const S = useStore5();
   React.useEffect(() => { loadProtocols(); }, []); // item 1 — pull the bundled manifest
+
+  // First impression. A brand-new free user opening the Library landed on
+  // Routines, which for them is a locked card — a paywall as the first thing the
+  // shelf ever showed them. Land them on Media instead, once, then remember it.
+  // An explicit tab (goLibrary('protocols'), which the guide does) has already
+  // moved us off the stored default, so it always wins. useLayoutEffect, not
+  // useEffect: the paywall must not flash before the switch.
+  React.useLayoutEffect(() => {
+    if (hasLibSeen()) return;
+    markLibSeen();
+    const s = getState();
+    if (s.stackTab === 'routines' && !s.premium) setTab('media');
+  }, []);
+
+  // The Library's own toast (see ToastCtx above).
+  const [toast, setToast] = React.useState(null);
+  const toastTimer = React.useRef(null);
+  const flash = React.useCallback((text) => {
+    setToast(text);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 2000);
+  }, []);
+  React.useEffect(() => () => { if (toastTimer.current) clearTimeout(toastTimer.current); }, []);
+
   const idx = TABS.findIndex((t) => t.key === S.stackTab);
   const tabLeft = `calc(${idx < 0 ? 0 : idx} * 25% + 3px)`;
   // Vic #5 — search within whichever category is selected
@@ -292,6 +348,7 @@ export default function LibraryScreen() {
   const mediaFiltered = S.mediaItems.filter((it) => !query || it.title.toLowerCase().includes(query) || (it.meta || '').toLowerCase().includes(query));
 
   return (
+    <ToastCtx.Provider value={flash}>
     <div style={{ position: 'absolute', inset: 0, overflowY: 'auto', padding: '28px 20px 140px', animation: 'ppwScreenIn .38s cubic-bezier(.26,1,.4,1)' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', minHeight: 44 }}>
         <h1 style={{ margin: 0, fontSize: 30, fontWeight: 600, letterSpacing: '-.02em', textShadow: 'var(--emboss)' }}>Library</h1>
@@ -299,7 +356,7 @@ export default function LibraryScreen() {
       <div style={{ marginTop: 5, fontSize: 14, color: 'var(--dim)' }}>Everything you can slot into a day.</div>
 
       {/* tab bar with gliding indicator */}
-      <div style={{ position: 'relative', marginTop: 22, height: 48, borderRadius: 16, background: 'var(--track)', border: '1px solid var(--hairline)', boxShadow: 'var(--inset)', display: 'flex' }}>
+      <div data-tour="lib-tabs" style={{ position: 'relative', marginTop: 22, height: 48, borderRadius: 16, background: 'var(--track)', border: '1px solid var(--hairline)', boxShadow: 'var(--inset)', display: 'flex' }}>
         <div style={{ position: 'absolute', top: 4, bottom: 4, width: 'calc(25% - 5px)', left: tabLeft, borderRadius: 12, background: 'var(--acc-surf)', border: '1px solid var(--acc-rim)', boxShadow: 'var(--acc-glow)', transition: 'left .38s cubic-bezier(.3,1.3,.4,1)' }} />
         {TABS.map((t) => (
           <button key={t.key} onClick={() => setTab(t.key)} style={{ position: 'relative', flex: 1, background: 'none', border: 'none', fontSize: 12, fontWeight: 600, color: S.stackTab === t.key ? 'var(--acc-ink)' : 'var(--dim)', textShadow: 'var(--label-shadow)', transition: 'color .25s' }}>{t.label}</button>
@@ -361,6 +418,10 @@ export default function LibraryScreen() {
             <div style={{ marginTop: 18, display: 'flex', flexDirection: 'column', gap: 14 }}>
               {protoFiltered.map((p) => <ProtocolRow key={p.id} p={p} />)}
               {query && protoFiltered.length === 0 && <div style={{ padding: '18px 0', textAlign: 'center', fontSize: 13, color: 'var(--dim)' }}>Nothing matches “{search.trim()}”.</div>}
+              {/* One protocol on the shelf looks like a mistake unless we say
+                  otherwise. Honest about the shelf being short, and about the
+                  one that is there being free. */}
+              {!query && <div style={{ padding: '4px 4px 0', fontSize: 12.5, lineHeight: 1.5, color: 'var(--dim)' }}>More protocols are on the way. Myofascial Recovery is free while you wait.</div>}
             </div>
           );
         }
@@ -368,9 +429,12 @@ export default function LibraryScreen() {
           <div style={{ marginTop: 18, borderRadius: 24, padding: '24px 20px', textAlign: 'center', background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)' }}>
             <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink)', textShadow: 'var(--emboss)' }}>Protocols</div>
             <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.5, color: 'var(--dim)' }}>
+              {/* This block only renders when the shelf is genuinely empty, so it
+                  cannot name the free protocol. It also no longer explains our
+                  internal approval queue to someone who does not work here. */}
               {S.protocolsStatus === 'error'
                 ? 'Could not load the protocol library — check your connection and reopen.'
-                : 'Your PPW protocols will appear here as they’re approved for the app. Each one opens as a PDF and can be added to any day.'}
+                : 'Protocols land here as they are ready.'}
             </div>
           </div>
         );
@@ -379,5 +443,11 @@ export default function LibraryScreen() {
       {/* Supps — affiliate multi-select + honest iHerb buy flow (item 4) */}
       {S.stackTab === 'supps' && <SuppsSection query={query} />}
     </div>
+    {/* Sibling of the scrolling screen, not a child of it: a child would scroll
+        away with the list. Sits above the nav dock (z20), under every sheet. */}
+    {toast && (
+      <div role="status" aria-live="polite" style={{ position: 'absolute', left: 20, right: 20, bottom: 'calc(96px + env(safe-area-inset-bottom, 0px))', zIndex: 21, padding: '13px 16px', borderRadius: 999, textAlign: 'center', background: 'var(--surface-strong)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', color: 'var(--ink)', fontSize: 13, fontWeight: 600, pointerEvents: 'none', animation: reducedMotion() ? 'none' : 'ppwRise .3s ease both' }}>{toast}</div>
+    )}
+    </ToastCtx.Provider>
   );
 }

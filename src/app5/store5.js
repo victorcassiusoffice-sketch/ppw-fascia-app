@@ -131,6 +131,23 @@ function initialState() {
     integrations: { spotify: false, youtube: true },
     courseLinks: [], courseLabel: '', courseUrl: '',
     obCreators: [], creatorInput: '',
+    // ── GUIDED ONBOARDING (2026-08-24) ──────────────────────────────────
+    // "Your Guide": eight one-minute quests that teach the app by doing the
+    // real thing on the real screen. The coach is store-driven (not App5-local)
+    // so a quest step can advance on a real store event — the whole point of a
+    // do-it-yourself tour.
+    //   coach:       null | { steps, questId?, i }  — the live spotlight tour
+    //   journalOpen: the quest journal sheet
+    //   hint:        null | { id } — the one-shot contextual hint bubble
+    //   lastAddedId: set by every add path, so a step can anchor "the thing you
+    //                just made" and a hint can point at it
+    //   aiStep:      AiBridgeSheet mirrors its internal step here (1..4)
+    //   calSelKey:   which day the Calendar's panel is showing. This lived as
+    //                local component state, which meant "they opened tomorrow"
+    //                was invisible to everything outside that one component —
+    //                and Quest 4 has to know. Lifted, not duplicated.
+    coach: null, journalOpen: false, hint: null, lastAddedId: null, aiStep: 0, calSelKey: null,
+    guide: { q: {} }, hints: {}, hintsOff: false,
     // selection / interaction
     selectedIds: [],
     // completed
@@ -164,6 +181,17 @@ function initialState() {
     if (g('inkMode')) def.inkMode = g('inkMode');
     const rt = gj('routines'); if (Array.isArray(rt)) def.routines = rt;
     const ay = gj('a11y'); if (ay && typeof ay === 'object') def.a11y = { on: !!ay.on, zoom: (+ay.zoom >= .85 && +ay.zoom <= 1.4) ? +ay.zoom : 1 };
+    const gd = gj('guide'); if (gd && typeof gd === 'object') def.guide = { q: (gd.q && typeof gd.q === 'object') ? gd.q : {}, ...(gd.done ? { done: gd.done } : {}), ...(gd.welcomed ? { welcomed: gd.welcomed } : {}) };
+    const hn = gj('hints'); if (hn && typeof hn === 'object') def.hints = hn;
+    if (g('hintsOff') === '1') def.hintsOff = true;
+    // MIGRATION (2026-08-24): anyone who already met the old 5-step tour, or is
+    // already onboarded, skips the new 2-step WELCOME only. Every quest and
+    // every hint stays armed — veterans of the old tour were never taught any
+    // of this, so silencing the guide for them would be a downgrade.
+    if (!def.guide.welcomed && (g('tourSeen') === '1' || g('onboarded') === '1')) {
+      def.guide = { ...def.guide, welcomed: 1 };
+      try { localStorage.setItem(LS('guide'), JSON.stringify(def.guide)); } catch {}
+    }
     const cs = gj('courses'); if (Array.isArray(cs)) def.courseLinks = cs;
     const ig = gj('integrations'); if (ig && typeof ig === 'object') def.integrations = ig;
     const pf = gj('prefs');
@@ -403,6 +431,13 @@ export function openAiBridge() { setState({ aiOpen: true, addOpen: false, accoun
 export function closeAiBridge() { setState({ aiOpen: false }); }
 export function openSchedule(target) { setState({ scheduleTarget: target }); }
 export function closeSchedule() { setState({ scheduleTarget: null }); }
+// ── add paths — every one records `lastAddedId` ────────────────────────────
+// WHY: the guide points at the thing the USER just made, not at a generic row.
+// "That one you just added" reads as help; anchoring the first row of a demo
+// deck reads as a canned tour. Each add path writes `lastAddedId` inside the
+// same setState that appends the item, so the anchor is live on the very render
+// the item first appears on — one render, never a flash of the wrong target.
+// Batch adds record the LAST id: the row nearest the bottom, where the eye lands.
 // schedule one item snapshot onto an arbitrary date (repeat once, anchored)
 export function addItemToDate(snapshot, dateKey, time = '09:00') {
   if (!state.premium && state.deckItems.length + 1 > FREE_STACK_CAP) {
@@ -411,7 +446,7 @@ export function addItemToDate(snapshot, dateKey, time = '09:00') {
   }
   const { id, anchor, repeat, ...rest } = snapshot;
   const item = { ...rest, id: 'sc' + Date.now().toString(36), time: snapshot.time || time, anchor: dateKey, repeat: 'once' };
-  setState({ deckItems: [...state.deckItems, item] });
+  setState({ deckItems: [...state.deckItems, item], lastAddedId: item.id });
   saveStacks();
   return { ok: true, item };
 }
@@ -420,7 +455,7 @@ export function addItemToDate(snapshot, dateKey, time = '09:00') {
 export function addDocToToday(name, fileId) {
   if (overLimit()) { setState({ premiumUpsell: FREE_CAP_UPSELL }); return { upsell: true }; }
   const item = { id: 'doc' + Date.now().toString(36), title: name, meta: 'Document', thumb: 'doc', kind: 'doc', fileId, time: '09:00', repeat: 'daily' };
-  setState({ deckItems: [...state.deckItems, item], addedCustom: item });
+  setState({ deckItems: [...state.deckItems, item], addedCustom: item, lastAddedId: item.id });
   saveStacks();
   return { ok: true, item };
 }
@@ -576,7 +611,7 @@ export function addItemsToPlan(items) {
     }
     return { ...rest, id: uid('ai'), time, anchor: dateKeyFromOffset(_day || 0), repeat: _repeat || 'once' };
   });
-  setState({ deckItems: [...state.deckItems, ...added] });
+  setState({ deckItems: [...state.deckItems, ...added], lastAddedId: added[added.length - 1].id });
   saveStacks();
   return { ok: true, count: added.length, ids: added.map((a) => a.id) };
 }
@@ -626,7 +661,7 @@ export function addItemsToToday(items) {
     time: item.time || (String(Math.floor((base + i * 30) / 60)).padStart(2, '0') + ':' + String((base + i * 30) % 60).padStart(2, '0')),
     anchor: key, repeat: 'once',
   }));
-  setState({ deckItems: [...state.deckItems, ...added] });
+  setState({ deckItems: [...state.deckItems, ...added], lastAddedId: added.length ? added[added.length - 1].id : state.lastAddedId });
   saveStacks();
   return { ok: true, count: added.length };
 }
@@ -643,7 +678,7 @@ export function applyRoutineToDate(routineId, dateKey) {
     const t = item.time || (String(Math.floor((base + i * 30) / 60)).padStart(2, '0') + ':' + String((base + i * 30) % 60).padStart(2, '0'));
     return { ...rest, id: 'ra' + Date.now().toString(36) + i, time: t, anchor: dateKey, repeat: 'once' };
   });
-  setState({ deckItems: [...state.deckItems, ...added] });
+  setState({ deckItems: [...state.deckItems, ...added], lastAddedId: added.length ? added[added.length - 1].id : state.lastAddedId });
   saveStacks();
   return { ok: true, count: added.length };
 }
@@ -675,7 +710,7 @@ export function addCustomUrl(url) {
     return { upsell: true };
   }
   const item = { ...snap, id: 'u' + Date.now().toString(36), time: '09:00', repeat: 'daily' };
-  setState({ deckItems: [...state.deckItems, item], addedCustom: item, customUrl: '' });
+  setState({ deckItems: [...state.deckItems, item], addedCustom: item, customUrl: '', lastAddedId: item.id });
   saveStacks();
   return { ok: true, item };
 }
@@ -684,7 +719,8 @@ export function addToStack(libItem, time = '09:00') {
   if (overLimit()) { setState({ premiumUpsell: FREE_CAP_UPSELL }); return false; }
   const id = 'l' + Date.now().toString(36);
   const { note, ...rest } = libItem;
-  setState({ deckItems: [...state.deckItems, { ...rest, id, time, repeat: 'daily' }] });
+  const item = { ...rest, id, time, repeat: 'daily' };
+  setState({ deckItems: [...state.deckItems, item], lastAddedId: id });
   saveStacks();
   return true;
 }
@@ -842,7 +878,7 @@ export function addNote() {
     time: state.noteTime || '09:00', kind: 'note', noteAnim: anim, noteSpeed: state.noteSpeed || 'med',
     noteDur: state.noteDur || '5', repeat: 'daily',
   };
-  setState({ deckItems: [...state.deckItems, item], noteOpen: false, addOpen: false, noteText: '' });
+  setState({ deckItems: [...state.deckItems, item], noteOpen: false, addOpen: false, noteText: '', lastAddedId: item.id });
   saveStacks();
   return { ok: true, item };
 }
@@ -931,3 +967,171 @@ export function setA11y(patch) {
 export function useStore5() {
   return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// GUIDED ONBOARDING — "Your Guide" (2026-08-24)
+//
+// The app's own metaphor is "your day is a stack of things you tick off", so
+// the tutorial is one more stack of things you tick off: eight one-minute
+// quests, each a guided do-it-yourself mini-tour on the REAL UI. The spotlight
+// hole is genuinely tappable and a `do` step only advances when the real store
+// event fires — the user learns by doing the thing, not by reading about it.
+//
+// Everything here is device-local under the `ppw5.` namespace and free. Two
+// flat JSON keys (`guide`, `hints`) so they can ride the profile POST body
+// later without a schema change.
+// ─────────────────────────────────────────────────────────────────────────
+
+/** Persist the guide blob and mirror it into state. */
+function writeGuide(next) {
+  save('guide', JSON.stringify(next));
+  setState({ guide: next });
+}
+
+/** Has this quest been completed? */
+export function questDone(id) { return !!(state.guide && state.guide.q && state.guide.q[id]); }
+/** How many of the eight are done. */
+export function questCount() { return Object.keys((state.guide && state.guide.q) || {}).length; }
+/** Has the welcome been shown (or migrated past)? */
+export function guideWelcomed() { return !!(state.guide && state.guide.welcomed); }
+export function markGuideWelcomed() {
+  if (guideWelcomed()) return;
+  writeGuide({ ...state.guide, welcomed: 1 });
+}
+/** Is the whole guide finished (the disc retires)? */
+export function guideFinished() { return !!(state.guide && state.guide.done); }
+
+/**
+ * Open the spotlight coach on a step list.
+ * `spec` = { steps, questId?, i? }. Never opens over another guidance layer or
+ * a sheet — the one-layer-at-a-time rule is law.
+ */
+export function openCoach(spec) {
+  if (!spec || !Array.isArray(spec.steps) || !spec.steps.length) return false;
+  setState({ coach: { i: 0, ...spec }, journalOpen: false, hint: null });
+  return true;
+}
+/**
+ * Advance to the next step.
+ *
+ * Completion is recorded HERE and nowhere else: the last step of every quest
+ * carries `complete: true`, and moving past it is what ticks the quest off.
+ * One place to be right, instead of eight step definitions each remembering to
+ * call recordQuest — and, more importantly, a quest can then only be completed
+ * by actually passing through its last step.
+ */
+export function advanceCoach() {
+  const c = state.coach;
+  if (!c) return;
+  const step = c.steps[c.i];
+  if (step && step.complete && c.questId) { recordQuest(c.questId); clearResume(); }
+  if (c.i + 1 >= c.steps.length) { setState({ coach: null }); return; }
+  setState({ coach: { ...c, i: c.i + 1 } });
+}
+
+/**
+ * Pause/close the coach WITHOUT recording completion (the ✕ escape).
+ *
+ * Where the user got to is written to disk, not just to memory: Quest 6 sends
+ * them out of the app entirely to talk to their AI, and coming back an hour
+ * later — or on a cold boot — should pick up where they left off rather than
+ * start the quest again.
+ */
+export function closeCoach() {
+  const c = state.coach;
+  if (c && c.questId && c.questId !== '__finale__' && !questDone(c.questId)) {
+    save('guideResume', JSON.stringify({ questId: c.questId, i: c.i }));
+  }
+  setState({ coach: null });
+}
+
+/** Where an interrupted quest left off, or null. */
+export function readResume() {
+  try {
+    const r = JSON.parse(localStorage.getItem(LS('guideResume')) || 'null');
+    if (r && r.questId && !questDone(r.questId)) return r;
+  } catch {}
+  return null;
+}
+export function clearResume() { try { localStorage.removeItem(LS('guideResume')); } catch {} }
+
+export function openJournal() { setState({ journalOpen: true, coach: null, hint: null }); }
+export function closeJournal() { setState({ journalOpen: false }); }
+
+/** Record a quest as complete. Idempotent — replaying never un-ticks. */
+export function recordQuest(id) {
+  if (!id || questDone(id)) return false;
+  const q = { ...((state.guide && state.guide.q) || {}), [id]: Date.now() };
+  writeGuide({ ...state.guide, q });
+  return true;
+}
+/** The finale ran — retire the GuideDisc for good. */
+export function guideDone() {
+  if (guideFinished()) return;
+  writeGuide({ ...state.guide, done: Date.now() });
+}
+
+// ── hints ────────────────────────────────────────────────────────────────
+export function setHint(id) { setState({ hint: id ? { id } : null }); }
+export function clearHint() { setState({ hint: null }); }
+/** How many times a hint has fired (count-based, so lifetime caps work). */
+export function hintCount(id) { return +(((state.hints || {})[id]) || 0); }
+/** Burn one use of a hint. */
+export function burnHint(id) {
+  const hints = { ...(state.hints || {}), [id]: hintCount(id) + 1 };
+  save('hints', JSON.stringify(hints));
+  setState({ hints });
+}
+/** Re-arm a hint that is allowed a second life (e.g. `today-chip`). */
+export function rearmHint(id) {
+  const hints = { ...(state.hints || {}) };
+  if (!hints[id]) return;
+  hints[id] = Math.max(0, hints[id] - 1);
+  save('hints', JSON.stringify(hints));
+  setState({ hints });
+}
+export function setHintsOff(off) { save('hintsOff', off ? '1' : '0'); setState({ hintsOff: !!off }); }
+
+// ── misc surfacing the guide needs ───────────────────────────────────────
+/** Remember the id of the thing the user just added, for "look what you made". */
+export function noteAdded(id) { if (id) setState({ lastAddedId: id }); }
+/** AiBridgeSheet mirrors its internal step so a quest can watch the round trip. */
+export function setAiStep(n) { if (state.aiStep !== n) setState({ aiStep: n }); }
+/** The Library has been visited once — drives the permanent media-first default. */
+export function markLibSeen() { try { if (localStorage.getItem(LS('libSeen')) !== '1') save('libSeen', '1'); } catch {} }
+export function hasLibSeen() { try { return localStorage.getItem(LS('libSeen')) === '1'; } catch { return false; } }
+
+/**
+ * Count this as a distinct day of use (max 10 kept) and return the total.
+ * Drives the install nudge, which should reward a habit rather than nag a
+ * first-time visitor.
+ */
+export function recordUseDay() {
+  let days = [];
+  try { days = JSON.parse(localStorage.getItem(LS('daysUsed')) || '[]'); } catch {}
+  if (!Array.isArray(days)) days = [];
+  const k = todayKey();
+  if (!days.includes(k)) { days.push(k); if (days.length > 10) days = days.slice(-10); save('daysUsed', JSON.stringify(days)); }
+  return days.length;
+}
+export function useDayCount() {
+  try { const d = JSON.parse(localStorage.getItem(LS('daysUsed')) || '[]'); return Array.isArray(d) ? d.length : 0; } catch { return 0; }
+}
+
+/** Tomorrow's date key, in the store's unpadded `YYYY-M-D` form. */
+export function tomorrowKey() {
+  const d = new Date(); d.setDate(d.getDate() + 1);
+  return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+}
+
+/**
+ * Is any layer that owns the screen currently up? Guidance never stacks on
+ * top of a sheet — the one-layer-at-a-time rule (F2), applied to the guide.
+ */
+export function anySheetOpen(s = state) {
+  return !!(s.aiOpen || s.addOpen || s.termsOpen || s.accountOpen || s.completedOpen ||
+            s.playerItem || s.scheduleTarget || s.repeatId || s.premiumUpsell || !s.onboarded);
+}
+
+/** Which day the Calendar's panel is showing (unpadded `YYYY-M-D`, or null). */
+export function setCalSel(key) { if (state.calSelKey !== key) setState({ calSelKey: key }); }

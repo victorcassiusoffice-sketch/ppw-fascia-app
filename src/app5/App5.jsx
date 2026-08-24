@@ -36,7 +36,16 @@ import {
   toggleSelect, selectAll, clearSelection, deleteSelected, safeUrl,
   onlyExamplesLeft, clearExamples,
   syncEntitlement, applyServerEntitlement, syncProfile,
+  openAiBridge, recordUseDay, guideWelcomed, markGuideWelcomed, guideDone, anySheetOpen,
 } from './store5.js';
+import GuideDisc from './screens/GuideDisc.jsx';
+import CompletedRing from './screens/CompletedRing.jsx';
+import QuestJournalSheet from './screens/QuestJournalSheet.jsx';
+import HintBubble from './coach/HintBubble.jsx';
+import { WELCOME_STEPS } from './coach/welcomeSteps.js';
+import { allDone, startFinale } from './coach/quests5.js';
+import { maybeHint, setDragging } from './coach/hints5.js';
+import useHintWatcher from './coach/useHintWatcher.js';
 import { completeSignIn, isSignedIn, readEmail, ensureFreshSession, consumeNewAccount } from './membership.js';
 import AccountSheet from './screens/AccountSheet.jsx';
 import UpdateBar from './screens/UpdateBar.jsx';
@@ -100,9 +109,14 @@ function NavDock({ screen, onNav, onAdd }) {
 }
 
 // ── glass round icon button (header discs) ──
-function Disc({ children, onClick, label, badge, dim }) {
+// `tour` is the coach-mark anchor name — the disc renders its own <button>, so a
+// data-tour on the call site would land on nothing. It stays undefined by default.
+// `ring` is an optional decoration drawn around the disc's edge (the day's
+// progress on the Completed disc). It sits behind the icon and takes no taps.
+function Disc({ children, onClick, label, badge, dim, tour, ring }) {
   return (
-    <button onClick={onClick} aria-label={label} style={{ position: 'relative', width: 46, height: 46, borderRadius: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--disc)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)', color: 'var(--ink)', opacity: dim ? .45 : 1, transition: 'opacity .3s' }}>
+    <button onClick={onClick} aria-label={label} data-tour={tour} style={{ position: 'relative', width: 46, height: 46, flex: 'none', borderRadius: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--disc)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)', color: 'var(--ink)', opacity: dim ? .45 : 1, transition: 'opacity .3s' }}>
+      {ring}
       {children}
       {badge != null && (
         <span style={{ position: 'absolute', top: -3, right: -3, minWidth: 19, height: 19, padding: '0 5px', borderRadius: 999, background: 'var(--acc-surf)', border: '1px solid var(--acc-rim)', color: 'var(--acc-ink)', fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{badge}</span>
@@ -145,6 +159,15 @@ function StackScreen() {
   const next = deck[0] || null;
   const rest = deck.slice(1);
   const completedCount = (S.doneByDate[key] || []).length;
+  // The finale plays one full lap of the day-progress ring, in the space the
+  // GuideDisc is vacating — the guide hands the header over rather than just
+  // disappearing out of it.
+  const finaleSweep = !!(S.coach && S.coach.questId === '__finale__');
+  // The time/repeat coach anchors follow the thing the user just added, when that
+  // thing is one of the rows below. If it isn't (nothing added yet, or it landed
+  // in the hero slot), they fall back to the hero card so they always point
+  // somewhere real. S.lastAddedId is transient — no match is a normal state.
+  const restIsTarget = !!S.lastAddedId && rest.some((x) => x.id === S.lastAddedId);
 
   // Vic #2 — hold-and-drag reorder. Times stay with positions: dropping re-assigns
   // which timed stack sits in which time slot; no-time stacks reorder their queue.
@@ -168,7 +191,7 @@ function StackScreen() {
     if (e.target.closest('input,button,a,label')) return;
     const startY = e.clientY; const el = e.currentTarget; const pid = e.pointerId;
     let active = false;
-    const timer = setTimeout(() => { active = true; try { el.setPointerCapture(pid); } catch {} setDrag({ idx, dy: 0, over: idx }); }, 180);
+    const timer = setTimeout(() => { active = true; setDragging(true); try { el.setPointerCapture(pid); } catch {} setDrag({ idx, dy: 0, over: idx }); }, 180);
     const move = (ev) => {
       const dy = ev.clientY - startY;
       if (!active) { if (Math.abs(dy) > 10) cleanup(); return; }
@@ -183,11 +206,16 @@ function StackScreen() {
       if (active) {
         suppressClick.current = true;
         setTimeout(() => { suppressClick.current = false; }, 80);
+        const moved = (dragRef.current?.over ?? idx) !== idx;
         commitDrag(idx, dragRef.current?.over ?? idx);
+        setDragging(false);
+        // Reordering swaps the things between time slots and leaves the slots
+        // alone, which is genuinely surprising the first time. Show it.
+        if (moved) setTimeout(() => maybeHint('reorder'), 450);
       }
       cleanup();
     };
-    const cleanup = () => { clearTimeout(timer); window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up); dragRef.current = null; setDrag(null); };
+    const cleanup = () => { clearTimeout(timer); setDragging(false); window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up); dragRef.current = null; setDrag(null); };
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', up);
     window.addEventListener('pointercancel', up);
@@ -214,21 +242,26 @@ function StackScreen() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--dim)', textShadow: 'var(--emboss)' }}>{dateLabel}</div>
             {notToday && (
-              <button onClick={backToToday} style={{ height: 24, padding: '0 10px', borderRadius: 999, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontSize: 10, fontWeight: 700, letterSpacing: '.08em' }}>TODAY</button>
+              <button onClick={backToToday} data-tour="today-chip" style={{ height: 24, padding: '0 10px', borderRadius: 999, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontSize: 10, fontWeight: 700, letterSpacing: '.08em' }}>TODAY</button>
             )}
           </div>
           <h1 style={{ margin: 0, fontSize: 30, fontWeight: 600, letterSpacing: '-.02em', textShadow: 'var(--emboss)' }}>Stack</h1>
         </div>
         <div style={{ display: 'flex', gap: 10, flex: 'none' }}>
           <AccountControl />
-          <Disc label="Completed today" badge={completedCount || null} onClick={openCompleted}>{ICheck}</Disc>
+          {/* The guide's home. It fills a segment per quest, and retires from
+              the header for good once all eight are done — a finished tutorial
+              should stop taking up the space. */}
+          <GuideDisc />
+          <Disc label="Completed today" badge={completedCount || null} onClick={openCompleted} tour="completed-disc"
+            ring={<CompletedRing done={completedCount} remaining={deck.length} sweep={finaleSweep} />}>{ICheck}</Disc>
           {/* W13 (2026-07-29): this was a full-size tappable disc in the primary
               header with no onClick at all — a dead control sitting next to two
               live ones. Reminders are a real shipped feature (the slot engine
               fires them); they just live in Settings. It now goes there, and
               dims when reminders are OFF so the bell states the truth rather
               than implying something is armed when nothing is. */}
-          <Disc label="Notifications" onClick={() => setState({ screen: 'settings' })} dim={!S.reminders}>{IBell}</Disc>
+          <Disc label="Notifications" onClick={() => { setState({ screen: 'settings' }); setTimeout(() => maybeHint('bell'), 600); }} dim={!S.reminders} tour="bell">{IBell}</Disc>
         </div>
       </div>
 
@@ -246,7 +279,7 @@ function StackScreen() {
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: 'var(--accent)', textShadow: 'var(--emboss)' }}>Next up</div>
             {next.time ? (
-              <label style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+              <label data-tour={restIsTarget ? undefined : 'item-time'} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--dim)', flex: 'none' }}><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" /></svg>
                 <span style={{ fontSize: 24, fontWeight: 600, lineHeight: 1, textShadow: 'var(--emboss)' }}>{next.time}</span>
                 <input type="time" value={next.time} onChange={(e) => setItemTime(next.id, e.target.value)} aria-label="Edit next slot time" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', margin: 0, padding: 0, opacity: 0, border: 'none', cursor: 'pointer' }} />
@@ -265,7 +298,7 @@ function StackScreen() {
             )}
             <span style={{ minWidth: 0 }}>{next.meta}</span>
           </div>
-          <button onClick={() => openRepeat(next.id)} aria-label="Repeat schedule" style={{ marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 5, minHeight: 44, background: 'none', border: 'none', padding: '10px 0', color: 'var(--dim)', fontSize: 11, fontWeight: 600, letterSpacing: '.05em' }}>
+          <button onClick={() => openRepeat(next.id)} aria-label="Repeat schedule" data-tour={restIsTarget ? undefined : 'item-repeat'} style={{ marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 5, minHeight: 44, background: 'none', border: 'none', padding: '10px 0', color: 'var(--dim)', fontSize: 11, fontWeight: 600, letterSpacing: '.05em' }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 2l4 4-4 4" /><path d="M3 11v-1a4 4 0 0 1 4-4h14" /><path d="M7 22l-4-4 4-4" /><path d="M21 13v1a4 4 0 0 1-4 4H3" /></svg>
             {repeatLabel(next.repeat)}
           </button>
@@ -274,7 +307,7 @@ function StackScreen() {
               <a href={safeUrl(next.url)} target="_blank" rel="noopener noreferrer" aria-label="Play now" style={{ height: 48, width: 52, flex: 'none', borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{IPlay}</a>
             )}
             {/* 2026-07-06 (Vic): icon-only tick — the "Done" text sat flush to the button edge. */}
-            <button onClick={() => markDone(next.id, key)} aria-label="Done" title="Done" style={{ flex: 1, height: 48, borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', boxShadow: 'var(--acc-glow)', color: 'var(--acc-ink)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <button onClick={() => markDone(next.id, key)} aria-label="Done" title="Done" data-tour="done" style={{ flex: 1, height: 48, borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', boxShadow: 'var(--acc-glow)', color: 'var(--acc-ink)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
             </button>
             {next.time && (
@@ -285,8 +318,22 @@ function StackScreen() {
         </div>
       ) : (
         <div style={{ position: 'relative', marginTop: 24, borderRadius: 28, padding: '28px 22px', textAlign: 'center', background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, color: 'var(--accent)' }}>{ICheck}<span style={{ fontSize: 18, fontWeight: 600, color: 'var(--ink)', textShadow: 'var(--emboss)' }}>All done for today</span></div>
-          <div style={{ marginTop: 6, fontSize: 13.5, color: 'var(--dim)' }}>Your stack resets tomorrow morning.</div>
+          {/* §6d — an empty deck is not an achievement. "All done" belongs only to
+              someone who actually ticked something off today; a day with nothing
+              planned and nothing done was being congratulated for doing nothing,
+              and given no way out of the empty screen. Split on the done count. */}
+          {completedCount === 0 ? (
+            <>
+              <div style={{ fontSize: 18, fontWeight: 600, color: 'var(--ink)', textShadow: 'var(--emboss)' }}>Nothing on this day yet.</div>
+              <div style={{ marginTop: 6, fontSize: 13.5, color: 'var(--dim)' }}>Add something with the ＋, or ask your AI to plan the whole day.</div>
+              <button onClick={openAiBridge} style={{ marginTop: 16, minHeight: 44, padding: '0 18px', borderRadius: 14, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', boxShadow: 'var(--acc-glow)', color: 'var(--acc-ink)', fontSize: 13.5, fontWeight: 600 }}>Plan with AI</button>
+            </>
+          ) : (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, color: 'var(--accent)' }}>{ICheck}<span style={{ fontSize: 18, fontWeight: 600, color: 'var(--ink)', textShadow: 'var(--emboss)' }}>All done for today</span></div>
+              <div style={{ marginTop: 6, fontSize: 13.5, color: 'var(--dim)' }}>Your stack resets tomorrow morning.</div>
+            </>
+          )}
         </div>
       )}
 
@@ -312,6 +359,7 @@ function StackScreen() {
             <div
               key={it.id}
               data-dragidx={i}
+              data-tour={it.id === S.lastAddedId ? 'latest-item' : undefined}
               onPointerDown={rowPointerDown(i)}
               onClick={() => { if (suppressClick.current) return; if (S.selectedIds.length) { toggleSelect(it.id); return; } if (it.embed || it.url || it.kind === 'doc') openPlayer(it); }}
               style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', minHeight: 68, borderRadius: 26, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: `1px solid ${isOver ? 'var(--acc-rim)' : 'var(--rim)'}`, boxShadow: isDragged ? 'var(--elev-hi)' : 'var(--elev)', cursor: (it.embed || it.url) ? 'pointer' : 'grab', touchAction: 'pan-y', userSelect: 'none', WebkitUserSelect: 'none', transform: isDragged ? `translateY(${drag.dy}px) scale(1.03)` : 'none', zIndex: isDragged ? 5 : 1, transition: isDragged ? 'none' : 'transform .2s, border-color .2s' }}
@@ -323,6 +371,7 @@ function StackScreen() {
               <button onClick={(e) => { e.stopPropagation(); toggleSelect(it.id); }}
                 role="checkbox" aria-checked={S.selectedIds.includes(it.id)}
                 aria-label={S.selectedIds.includes(it.id) ? 'Deselect' : 'Select for deletion'}
+                data-tour={i === 0 ? 'select-circle' : undefined}
                 style={{ width: 44, height: 44, flex: 'none', alignSelf: 'flex-start', margin: '-9px -11px -11px -11px', padding: 0, background: 'none', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <span style={{ width: 22, height: 22, borderRadius: 999, border: `1.5px solid ${S.selectedIds.includes(it.id) ? 'var(--acc-rim)' : 'var(--rim)'}`, background: S.selectedIds.includes(it.id) ? 'var(--acc-surf)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--acc-ink)', transition: 'all .2s' }}>
                   {S.selectedIds.includes(it.id) && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>}
@@ -342,7 +391,7 @@ function StackScreen() {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 5, flex: 'none' }}>
                 {it.time ? (
-                  <input type="time" value={it.time} onClick={(e) => e.stopPropagation()} onChange={(e) => setItemTime(it.id, e.target.value)} aria-label="Edit slot time" style={{ fontSize: 15, fontWeight: 600, color: 'var(--dim)', background: 'transparent', border: 'none', outline: 'none', textAlign: 'right', padding: 0, width: 84, cursor: 'pointer' }} />
+                  <input type="time" value={it.time} onClick={(e) => e.stopPropagation()} onChange={(e) => setItemTime(it.id, e.target.value)} aria-label="Edit slot time" data-tour={it.id === S.lastAddedId ? 'item-time' : undefined} style={{ fontSize: 15, fontWeight: 600, color: 'var(--dim)', background: 'transparent', border: 'none', outline: 'none', textAlign: 'right', padding: 0, width: 84, cursor: 'pointer' }} />
                 ) : (
                   <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', padding: '3px 8px', borderRadius: 999, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)' }}>Next Up</span>
                 )}
@@ -352,12 +401,12 @@ function StackScreen() {
                     the row looking different. `gap` drops to 0 because the new
                     padding now provides the separation. */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
-                  <button onClick={(e) => { e.stopPropagation(); openRepeat(it.id); }} aria-label="Repeat and time options" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 44, minHeight: 44, background: 'none', border: 'none', padding: '14px 12px', color: 'var(--dim)' }}>
+                  <button onClick={(e) => { e.stopPropagation(); openRepeat(it.id); }} aria-label="Repeat and time options" data-tour={it.id === S.lastAddedId ? 'item-repeat' : undefined} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 44, minHeight: 44, background: 'none', border: 'none', padding: '14px 12px', color: 'var(--dim)' }}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 2l4 4-4 4" /><path d="M3 11v-1a4 4 0 0 1 4-4h14" /><path d="M7 22l-4-4 4-4" /><path d="M21 13v1a4 4 0 0 1-4 4H3" /></svg>
                   </button>
                   {/* Vic #1 — AUTO tickbox: at slot time the item opens/plays itself. */}
                   {(it.url || it.embed) && (
-                    <button onClick={(e) => { e.stopPropagation(); toggleAuto(it.id); }} aria-label={it.auto ? 'Autoplay on — tap to turn off' : 'Autoplay off — tap to turn on'} aria-pressed={!!it.auto} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, minHeight: 44, background: 'none', border: 'none', padding: '14px 10px', color: 'var(--dim)', fontSize: 10.5, fontWeight: 600, letterSpacing: '.04em' }}>
+                    <button onClick={(e) => { e.stopPropagation(); toggleAuto(it.id); }} aria-label={it.auto ? 'Autoplay on — tap to turn off' : 'Autoplay off — tap to turn on'} aria-pressed={!!it.auto} data-tour={i === 0 ? 'auto-box' : undefined} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, minHeight: 44, background: 'none', border: 'none', padding: '14px 10px', color: 'var(--dim)', fontSize: 10.5, fontWeight: 600, letterSpacing: '.04em' }}>
                       <span style={{ width: 15, height: 15, borderRadius: 5, border: `1.5px solid ${it.auto ? 'var(--acc-rim)' : 'var(--rim)'}`, background: it.auto ? 'var(--acc-surf)' : 'transparent', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'var(--acc-ink)', transition: 'all .2s' }}>
                         {it.auto && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>}
                       </span>
@@ -441,11 +490,17 @@ export default function App5() {
   const vars = parseVars(themeVars(S));
   const nav = (screen) => setState({ screen });
 
-  // First-run guidance: after onboarding completes, teach over the real UI once.
+  // First-run guidance: after onboarding completes, a TWO-step welcome — this
+  // is your stack, and here is your guide. That is all.
+  //
+  // It used to be five boxes of reading before the user had touched anything,
+  // which is a wall rather than a welcome. The teaching moved into the eight
+  // quests, where it happens on the real screen with the user's own hands; the
+  // welcome's only job now is to hand over to them.
   const [tourOpen, setTourOpen] = React.useState(false);
   React.useEffect(() => {
     if (!S.onboarded) return;
-    if (hasSeenTour()) return;
+    if (hasSeenTour() || guideWelcomed()) return;
     // F2 (2026-08-11): accountOpen added. The tour used to start ON TOP of an
     // account sheet that was still open from sign-up, which is how a new customer
     // ended up five layers deep and landed back on that panel afterwards.
@@ -453,6 +508,32 @@ export default function App5() {
     const t = setTimeout(() => setTourOpen(true), 700);     // let the screen settle
     return () => clearTimeout(t);
   }, [S.onboarded, S.aiOpen, S.addOpen, S.termsOpen, S.accountOpen]);
+
+  // THE FINALE — the eighth quest lands and the guide says goodbye, once.
+  //
+  // Deferred until nothing else owns the screen: arriving on top of a sheet the
+  // user is in the middle of would make the last thing the guide ever does the
+  // most annoying thing it ever did.
+  const finaleFired = React.useRef(false);
+  React.useEffect(() => {
+    if (finaleFired.current) return;
+    if (!S.onboarded || S.guide.done) return;
+    if (!allDone(S)) return;
+    if (S.coach || S.journalOpen || anySheetOpen(S)) return;
+    const t = setTimeout(() => {
+      if (finaleFired.current) return;
+      const now = getState();
+      if (now.coach || now.journalOpen || anySheetOpen(now) || now.guide.done) return;
+      finaleFired.current = true;
+      guideDone();          // the disc starts leaving as the finale opens
+      startFinale();
+    }, 1000);
+    return () => clearTimeout(t);
+  }, [S.guide, S.coach, S.journalOpen, S.onboarded, S.addOpen, S.aiOpen, S.accountOpen, S.completedOpen, S.termsOpen, S.playerItem]);
+
+  // One place watches the store and asks for hints; the engine decides whether
+  // to answer. See useHintWatcher for why the triggers live together.
+  useHintWatcher();
 
   // PASSCODE — lock after LOCK_AFTER_MS in the background, never while in use.
   //
@@ -472,6 +553,11 @@ export default function App5() {
     document.addEventListener('visibilitychange', onVis);
     return () => { if (t) clearTimeout(t); document.removeEventListener('visibilitychange', onVis); };
   }, []);
+
+  // days-used counter — one distinct calendar day per boot. Nothing reads it yet;
+  // it is what lets a later nudge wait until someone has actually come back a
+  // few times, instead of asking on the first screen they ever see.
+  React.useEffect(() => { recordUseDay(); }, []);
 
   // runtime slot engine — fires notes/reminders/autoplay when a slot's time
   // arrives (20s tick, ported from the prototype). Cleans up on unmount.
@@ -565,8 +651,12 @@ export default function App5() {
         <AiBridgeSheet />
         <CoachMarks
           open={tourOpen}
-          onClose={() => setTourOpen(false)}
+          steps={WELCOME_STEPS}
+          onClose={() => { markGuideWelcomed(); setTourOpen(false); }}
         />
+        {/* the guide's journal (43) and the one-shot hint bubble (44) */}
+        <QuestJournalSheet />
+        <HintBubble />
         <CompletedSheet />
         {/* Tells the user a newer build exists and lets THEM choose. Since the
             2026-07-06 New Design cutover no update prompt rendered at all — the

@@ -49,7 +49,7 @@ export default function SettingsScreen() {
 
       <Eyebrow>Appearance</Eyebrow>
       <div style={{ marginTop: 12, borderRadius: 24, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)', overflow: 'hidden' }}>
-        <div style={{ padding: '16px 18px' }}>
+        <div data-tour="set-theme" style={{ padding: '16px 18px' }}>
           <div style={{ fontSize: 15, fontWeight: 500, textShadow: 'var(--emboss)' }}>Theme</div>
           <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: '12px 8px' }}>
             {SOFT_ORDER.map((key) => {
@@ -129,7 +129,7 @@ export default function SettingsScreen() {
       {/* General — sounds / reminders / autoplay (wired to the slot engine) */}
       <Eyebrow>General</Eyebrow>
       <div style={{ marginTop: 12, borderRadius: 24, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)', overflow: 'hidden' }}>
-        <div style={ROW}>
+        <div style={ROW} data-tour="set-sounds">
           <div>
             <div style={{ fontSize: 15, fontWeight: 500 }}>Sounds</div>
             <div style={{ marginTop: 2, fontSize: 12.5, color: 'var(--dim)' }}>Soft ASMR taps on every action</div>
@@ -137,8 +137,15 @@ export default function SettingsScreen() {
           <Switch on={S.sounds} onTap={() => setSounds(!S.sounds)} label="Toggle sounds" />
         </div>
         {DIV}
-        <div style={ROW}>
-          <div style={{ fontSize: 15, fontWeight: 500 }}>Reminders</div>
+        <div style={ROW} data-tour="set-reminders">
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 500 }}>Reminders</div>
+            {/* Permanent, not a warning state. The reminder engine is a 20 s
+                foreground timer — no push, no alarm, nothing fires with the app
+                closed or the phone locked. The toggle on its own reads like phone
+                alarms, so the truth sits under it every time it is seen. */}
+            <div style={{ marginTop: 2, fontSize: 12.5, color: 'var(--dim)' }}>Nudges appear while the app is open on screen. Nothing rings when it is closed.</div>
+          </div>
           <Switch on={S.reminders} onTap={() => setReminders(!S.reminders)} label="Toggle reminders" />
         </div>
         {DIV}
@@ -159,8 +166,10 @@ export default function SettingsScreen() {
 
       {/* Get the app — Row 15 (L2-LS-DISTRIB): install as a real PWA. Renders
           nothing once already installed (standalone). */}
-      <Eyebrow>Get the app</Eyebrow>
-      <InstallAppCard />
+      <div data-tour="set-install">
+        <Eyebrow>Get the app</Eyebrow>
+        <InstallAppCard />
+      </div>
 
       {/* About */}
       <Eyebrow>About</Eyebrow>

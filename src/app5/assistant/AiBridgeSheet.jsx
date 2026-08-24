@@ -9,7 +9,7 @@
 // Graphite neumorphic: opaque surfaces, dual-shadow, no blur.
 
 import React from 'react';
-import { useStore5, setState, closeAiBridge, addItemsToPlan, removeItemsByIds, parsePlanDoc, dateKeyFromOffset, finishOnboarding } from '../store5.js';
+import { useStore5, setState, closeAiBridge, addItemsToPlan, removeItemsByIds, parsePlanDoc, dateKeyFromOffset, finishOnboarding, setAiStep } from '../store5.js';
 import { buildPrompt } from './aiPrompt.js';
 import { extractPlanCandidates, PARSE_HELP } from './parsePlan.js';
 import { sharePrompt, copyText, readText, canShare } from './clipboard.js';
@@ -38,6 +38,18 @@ export default function AiBridgeSheet() {
   const [applied, setApplied] = React.useState(null); // { ids, count }
   const [toast, setToast] = React.useState(null);
   const [showPrompt, setShowPrompt] = React.useState(false);
+
+  // The guide has to know where the user is inside this sheet, and the step
+  // lives in local state that nothing outside can see. Mirror it into the store
+  // so a coach step can wait on it. The mapping is the sheet's own numbering:
+  //   1 = prompt sent or copied, awaiting the paste
+  //   2 = paste screen
+  //   3 = preview reached with parsed items  (Quest 6 gates on aiStep >= 3)
+  //   4 = applied
+  // Closed reads 0. One effect, so each step change writes exactly once —
+  // setAiStep already no-ops when the value is unchanged. It sits above the
+  // early return because hooks cannot be conditional.
+  React.useEffect(() => { setAiStep(S.aiOpen ? step : 0); }, [S.aiOpen, step]);
 
   if (!S.aiOpen) return null;
 
@@ -155,7 +167,9 @@ export default function AiBridgeSheet() {
                 <li>Paste it back here — done</li>
               </ol>
             </div>
-            <button onClick={send} style={{ ...BTN_PRIMARY, marginTop: 20 }}>
+            {/* data-tour: the guide points here. This button, not the ghost one
+                below it — it is the only copy path that exists on every device. */}
+            <button onClick={send} data-tour="ai-copy" style={{ ...BTN_PRIMARY, marginTop: 20 }}>
               {canShare() ? 'Send to my AI' : 'Copy the prompt'}
             </button>
             {canShare() && (
@@ -244,6 +258,10 @@ export default function AiBridgeSheet() {
               </div>
             )}
 
+            {/* data-tour: one wrapper so the guide can point at the whole
+                parsed list, not a single day group. Unstyled on purpose —
+                the day groups keep their own spacing. */}
+            <div data-tour="ai-preview">
             {groups.map((g) => (
               <div key={g.day} style={{ marginTop: 18 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--dim)', textShadow: 'var(--emboss)' }}>{DAY_LABEL(g.day)}</div>
@@ -265,6 +283,7 @@ export default function AiBridgeSheet() {
                 </div>
               </div>
             ))}
+            </div>
 
             <button onClick={apply} disabled={!chosen.length} style={{ ...BTN_PRIMARY, marginTop: 22, opacity: chosen.length ? 1 : .45 }}>
               Add {chosen.length} to my day

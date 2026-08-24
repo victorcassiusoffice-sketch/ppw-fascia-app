@@ -11,19 +11,13 @@
 
 import React from 'react';
 import { useStore5, openSchedule } from '../store5.js';
-import { suppsGroupedByProtocol, allSupps, buyUrl, affiliateLive, suppToStackItem } from '../../lib/suppsAffiliates.js';
+import { suppsGroupedByProtocol, buyUrl, affiliateLive, suppToStackItem } from '../../lib/suppsAffiliates.js';
 
 const PROTOCOL_LABEL = {
   'testosterone-optimisation-v1': 'Testosterone Optimisation',
   'testosterone_standard_v1': 'Testosterone (Standard)',
 };
 const labelFor = (id) => PROTOCOL_LABEL[id] || id.replace(/[-_]+/g, ' ').replace(/\bv\d+\b/i, '').trim();
-
-// default selection: publishable, else in-stock (so the flow is demonstrable today)
-const defaultSelected = (supps) => {
-  const anyPublishable = supps.some((s) => s.publishable);
-  return new Set(supps.filter((s) => s.in_stock && (anyPublishable ? s.publishable : true)).map((s) => s.id));
-};
 
 function Disclaimer() {
   const [open, setOpen] = React.useState(false);
@@ -76,7 +70,10 @@ function SuppRow({ s, checked, onToggle, protocolId }) {
 export default function SuppsSection({ query = '' }) {
   useStore5(); // subscribe (re-render on premium/theme changes)
   const groups = suppsGroupedByProtocol();
-  const [selected, setSelected] = React.useState(() => defaultSelected(allSupps()));
+  // Nothing starts ticked. A pre-ticked basket of 14 supplements is a sales pitch the
+  // user did not ask for, on a screen they opened to look around — it made "Shop 14 on
+  // iHerb" the first thing a novice read. The list is theirs to build, one tick at a time.
+  const [selected, setSelected] = React.useState(() => new Set());
   const [shopList, setShopList] = React.useState(null); // the "add these too" reveal
 
   if (!groups.length) {
@@ -123,7 +120,7 @@ export default function SuppsSection({ query = '' }) {
       <button onClick={shop} disabled={!n}
         style={{ marginTop: 18, width: '100%', height: 52, borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 700, fontSize: 15, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)', opacity: n ? 1 : 0.45, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="20" r="1.4" /><circle cx="18" cy="20" r="1.4" /><path d="M2 3h3l2.4 12.5a1.5 1.5 0 0 0 1.5 1.2h8.2a1.5 1.5 0 0 0 1.5-1.2L21.5 7H6" /></svg>
-        Shop {n} on iHerb
+        {n ? `Shop ${n} on iHerb` : 'Tick what you want to shop'}
       </button>
       <div style={{ marginTop: 8, fontSize: 11, lineHeight: 1.5, color: 'var(--dim)', textAlign: 'center' }}>
         {affiliateLive()

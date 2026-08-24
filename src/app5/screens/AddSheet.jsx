@@ -43,6 +43,13 @@ export default function AddSheet() {
   // anything is added.
   const [draft, setDraft] = React.useState(null); // { name, items } | { error }
   const [draftMsg, setDraftMsg] = React.useState(null);
+  // Pasting something unusable used to fail in total silence: addCustomUrl
+  // returned { ok: false } and this file threw the result away. This holds the
+  // inline error line under the field. It is a NONCE, not a flag, so tapping
+  // Add again on the same bad text replays the line rather than leaving a
+  // stale one sitting there — an error the user can re-trigger must be shown
+  // again every time, never once.
+  const [linkErr, setLinkErr] = React.useState(0);
   const onRoutineFile = (e) => {
     const f = e.target.files && e.target.files[0];
     e.target.value = '';
@@ -62,7 +69,7 @@ export default function AddSheet() {
     <div style={{ position: 'absolute', inset: 0, zIndex: 30 }}>
       <div onClick={closeAdd} style={{ position: 'absolute', inset: 0, background: 'rgba(30,38,52,.35)', animation: 'ppwFade .3s ease both' }} />
       <div style={{ position: 'absolute', left: 14, right: 14, bottom: 'calc(96px + env(safe-area-inset-bottom, 0px))', maxHeight: 'calc(100% - 130px)', overflowY: 'auto', borderRadius: 30, padding: '22px 20px 20px', background: 'var(--surface-strong)', backdropFilter: 'var(--blur-heavy)', WebkitBackdropFilter: 'var(--blur-heavy)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', transformOrigin: '50% 105%', animation: 'ppwSheetIn .5s cubic-bezier(.3,1.36,.4,1) both' }}>
-        <div style={{ fontSize: 20, fontWeight: 600, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>Add to your stack</div>
+        <div data-tour="add-header" style={{ fontSize: 20, fontWeight: 600, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>Add to your stack</div>
 
         {/* FREE, zero-cost AI path (Vic 2d): the user's OWN AI plans their day.
             Sits above everything because it is the fastest way to a full day. */}
@@ -79,7 +86,7 @@ export default function AddSheet() {
 
         <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           {TILES.map((t) => (
-            <button key={t.key} onClick={() => t.note ? openNoteComposer() : goLibrary(t.tab)} style={{ height: 92, borderRadius: 22, border: '1px solid var(--rim)', background: 'var(--surface)', boxShadow: 'var(--elev)', color: (t.note && S.noteOpen) ? 'var(--accent)' : 'var(--ink)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            <button key={t.key} data-tour={t.note ? 'add-text' : undefined} onClick={() => t.note ? openNoteComposer() : goLibrary(t.tab)} style={{ height: 92, borderRadius: 22, border: '1px solid var(--rim)', background: 'var(--surface)', boxShadow: 'var(--elev)', color: (t.note && S.noteOpen) ? 'var(--accent)' : 'var(--ink)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
               {t.icon}
               <span style={{ fontSize: 13, fontWeight: 600 }}>{t.name}</span>
             </button>
@@ -190,9 +197,14 @@ export default function AddSheet() {
           </a>
         </div>
         <div style={{ marginTop: 12, display: 'flex', gap: 10 }}>
-          <input value={S.customUrl} onChange={(e) => setCustomUrl(e.target.value)} placeholder="Paste a share link…" aria-label="Paste a share link" style={{ flex: 1, height: 48, padding: '0 16px', borderRadius: 15, border: '1px solid var(--hairline)', background: 'var(--track)', boxShadow: 'var(--inset)', color: 'var(--ink)', outline: 'none', fontSize: 14 }} />
-          <button onClick={() => addCustomUrl(S.customUrl)} style={{ height: 48, padding: '0 20px', borderRadius: 15, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 600, fontSize: 14, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)' }}>Add</button>
+          <input data-tour="add-link" value={S.customUrl} onChange={(e) => { setCustomUrl(e.target.value); setLinkErr(0); }} placeholder="Paste a share link…" aria-label="Paste a share link" style={{ flex: 1, height: 48, padding: '0 16px', borderRadius: 15, border: '1px solid var(--hairline)', background: 'var(--track)', boxShadow: 'var(--inset)', color: 'var(--ink)', outline: 'none', fontSize: 14 }} />
+          <button onClick={() => { const r = addCustomUrl(S.customUrl); setLinkErr(r.ok || r.upsell ? 0 : (n) => n + 1); }} style={{ height: 48, padding: '0 20px', borderRadius: 15, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 600, fontSize: 14, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)' }}>Add</button>
         </div>
+        {/* A free-cap refusal returns { upsell: true } and already raises the
+            upsell modal, so it must never also read as a broken link. */}
+        {linkErr > 0 && (
+          <div key={linkErr} role="alert" style={{ marginTop: 8, fontSize: 12.5, lineHeight: 1.45, fontWeight: 600, color: 'var(--bad, #c05)', animation: 'ppwRise .3s ease both' }}>That did not look like something we can add. YouTube, Spotify and most share links work. Plain web pages do too.</div>
+        )}
         {S.addedCustom && (
           <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 18, border: '1px solid var(--rim)', background: 'var(--surface)', animation: 'ppwRise .3s ease both' }}>
             <div style={{ flex: 1, fontSize: 13.5, color: 'var(--ink)' }}><strong>{S.addedCustom.title}</strong> added to today's stack</div>

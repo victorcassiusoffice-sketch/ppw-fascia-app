@@ -5,7 +5,7 @@
 // uses — this is the button a real Gumroad checkout replaces later.
 
 import React from 'react';
-import { useStore5, clearUpsell, setState, FREE_STACK_CAP } from '../store5.js';
+import { useStore5, clearUpsell, openAccount, FREE_STACK_CAP } from '../store5.js';
 import { GUMROAD_URL, PREM_PRICE, PREM_PRICE_NOTE, checkoutUrl, isSignedIn } from '../membership.js';
 
 // GUMROAD_URL + pricing now live in membership.js (one seam for the paywall, the
@@ -27,6 +27,8 @@ export default function UpsellModal() {
   // sell. This does NOT drop the upsell — the reason stays in state, so it appears
   // on the next beat, once the user is not being shouted at from three directions.
   if (!S.onboarded || S.accountOpen) return null;
+
+  const signedIn = isSignedIn();
 
   return (
     <div style={{ position: 'absolute', inset: 0, zIndex: 47, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 26 }}>
@@ -56,23 +58,32 @@ export default function UpsellModal() {
             moment checkout went live. Removed.
             Buying needs an account first: the checkout URL carries app_user_id so
             the webhook can match the purchase back to this user, and that id only
-            exists once they've signed in. So a signed-out tap routes to Settings →
-            Membership rather than to a checkout that couldn't be attributed. */}
+            exists once they've signed in. So a signed-out tap cannot go to a
+            checkout that couldn't be attributed.
+            2026-08-24: it used to drop the user on the Settings screen with no
+            word said — Settings cannot sign anyone in, so the tap looked broken.
+            Now the reason is stated on the card and the tap opens the account
+            sheet, which is the one surface that can actually sign them in. The
+            upsell is deliberately NOT cleared: it stays in state behind the
+            sheet (the guard above hides it while accountOpen), so once they are
+            signed in the card comes back with a live checkout button. */}
+        {GUMROAD_URL && !signedIn && (
+          <div style={{ marginTop: 12, fontSize: 12.5, lineHeight: 1.5, color: 'var(--dim)' }}>Sign in first — Premium attaches to an account.</div>
+        )}
         {GUMROAD_URL ? (
           <a
-            href={isSignedIn() ? (checkoutUrl(GUMROAD_URL) || GUMROAD_URL) : undefined}
+            href={signedIn ? (checkoutUrl(GUMROAD_URL) || GUMROAD_URL) : undefined}
             onClick={(e) => {
-              if (isSignedIn()) return;
+              if (signedIn) return;
               e.preventDefault();
-              clearUpsell();
-              setState({ screen: 'settings' });
+              openAccount('signin');
             }}
-            target={isSignedIn() ? '_blank' : undefined}
+            target={signedIn ? '_blank' : undefined}
             rel="noopener noreferrer"
             role="button"
-            style={{ marginTop: 14, width: '100%', height: 52, borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 700, fontSize: 15, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', cursor: 'pointer' }}
+            style={{ marginTop: signedIn ? 14 : 10, width: '100%', height: 52, borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 700, fontSize: 15, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', cursor: 'pointer' }}
           >
-            {isSignedIn() ? 'Go Premium' : 'Sign in to go Premium'}
+            {signedIn ? 'Go Premium' : 'Sign in to go Premium'}
           </a>
         ) : (
           <div style={{ marginTop: 14, width: '100%', minHeight: 52, borderRadius: 16, border: '1px dashed var(--hairline)', color: 'var(--dim)', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px 14px', textAlign: 'center', lineHeight: 1.45 }}>

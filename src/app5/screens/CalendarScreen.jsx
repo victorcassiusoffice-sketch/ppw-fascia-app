@@ -5,7 +5,7 @@
 // dimmed) + "Open in Stack" which views that date's own stack (per-date model).
 
 import React, { useState } from 'react';
-import { useStore5, itemsForDate, openStackForDate, applyRoutineToDate } from '../store5.js';
+import { useStore5, itemsForDate, openStackForDate, applyRoutineToDate, tomorrowKey, setCalSel } from '../store5.js';
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const keyOf = (d) => d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
@@ -16,8 +16,17 @@ const chev = (d) => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" 
 export default function CalendarScreen() {
   const S = useStore5(); // subscribe so dots refresh when items change
   const today = new Date();
+  // Same unpadded `YYYY-M-D` shape keyOf builds, so the guide's tomorrow
+  // anchor matches a real cell key instead of silently landing on nothing.
+  const tomKey = tomorrowKey();
   const [monthOff, setMonthOff] = useState(0);
   const [selKey, setSelKey] = useState(keyOf(today));
+  // The selected day used to live only in here, which made "they opened
+  // tomorrow" invisible to anything outside this component — and the guide's
+  // Plan-tomorrow quest has to see it. Mirrored into the store on every change;
+  // this component still owns it.
+  React.useEffect(() => { setCalSel(selKey); }, [selKey]);
+  React.useEffect(() => () => setCalSel(null), []);
   const [pickRoutine, setPickRoutine] = useState(false);
   const [addedMsg, setAddedMsg] = useState(null);
 
@@ -58,7 +67,7 @@ export default function CalendarScreen() {
             const isToday = k === keyOf(today);
             const hasItems = itemsForDate(k).length > 0;
             return (
-              <button key={k} onClick={() => setSelKey(k)} style={{ position: 'relative', height: 46, borderRadius: 14, border: `1px solid ${isSel ? 'var(--acc-rim)' : 'transparent'}`, background: isSel ? 'var(--acc-surf)' : 'transparent', color: isSel ? 'var(--acc-ink)' : 'var(--ink)', fontSize: 14, fontWeight: isToday ? 800 : 500, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background .2s, border-color .2s' }}>
+              <button key={k} data-tour={k === tomKey ? 'cal-tomorrow' : undefined} onClick={() => setSelKey(k)} style={{ position: 'relative', height: 46, borderRadius: 14, border: `1px solid ${isSel ? 'var(--acc-rim)' : 'transparent'}`, background: isSel ? 'var(--acc-surf)' : 'transparent', color: isSel ? 'var(--acc-ink)' : 'var(--ink)', fontSize: 14, fontWeight: isToday ? 800 : 500, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background .2s, border-color .2s' }}>
                 {d}
                 {hasItems && !isSel && <span style={{ position: 'absolute', bottom: 6, left: '50%', transform: 'translateX(-50%)', width: 4.5, height: 4.5, borderRadius: 999, background: 'var(--accent)' }} />}
               </button>
@@ -97,7 +106,7 @@ export default function CalendarScreen() {
           )
         )}
         {addedMsg && <div style={{ marginTop: 10, fontSize: 12.5, fontWeight: 600, color: 'var(--accent)', textAlign: 'center' }}>{addedMsg}</div>}
-        <button onClick={() => openStackForDate(selKey)} style={{ marginTop: 16, height: 46, width: '100%', borderRadius: 15, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 600, fontSize: 14.5, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)' }}>Open in Stack</button>
+        <button data-tour="open-in-stack" onClick={() => openStackForDate(selKey)} style={{ marginTop: 16, height: 46, width: '100%', borderRadius: 15, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 600, fontSize: 14.5, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)' }}>Open in Stack</button>
       </div>
     </div>
   );
