@@ -57,7 +57,9 @@ export default function CoachMarks({ open, onClose, steps: propSteps = TOUR_STEP
 
   const [rect, setRect] = React.useState(null);
   const [frame, setFrame] = React.useState(null);
+  const [bubbleSize, setBubbleSize] = React.useState(0);
   const hostRef = React.useRef(null);
+  const bubbleRef = React.useRef(null);
 
   const live = controlled || open;
   const step = live ? steps[i] : null;
@@ -97,6 +99,17 @@ export default function CoachMarks({ open, onClose, steps: propSteps = TOUR_STEP
     return () => clearTimeout(t);
   }, [controlled, step, S, i]);
 
+  // MEASURING INSIDE A ZOOMED FRAME. Easy read scales the whole phone with CSS
+  // `zoom` (up to 1.4). getBoundingClientRect answers in real screen pixels,
+  // but everything this component positions is a child of that zoomed frame,
+  // so its coordinates get multiplied by the zoom AGAIN on the way out. Divide
+  // once here and the two spaces agree. Without it the spotlight at 140% sat
+  // below and around the wrong thing, and grew half as big again as its target.
+  //
+  // The frame can also be TALLER than the phone once zoomed (932 x 1.4 = 1305
+  // in a 932px window), so we track the visible height separately — a bubble
+  // placed against the frame's bottom would be off the screen entirely, which
+  // is exactly where it went for the users who need it most.
   const measure = React.useCallback(() => {
     if (!live || !step) return;
     const host = hostRef.current;
@@ -104,13 +117,15 @@ export default function CoachMarks({ open, onClose, steps: propSteps = TOUR_STEP
     const frameEl = host ? host.parentElement : null;
     if (!frameEl) return;
     const fr = frameEl.getBoundingClientRect();
-    setFrame({ w: fr.width, h: fr.height });
+    const z = (S.a11y && S.a11y.zoom) || 1;
+    const visibleBottom = Math.min(fr.bottom, (typeof window !== 'undefined' && window.innerHeight) || fr.bottom);
+    setFrame({ w: fr.width / z, h: fr.height / z, visH: Math.max(0, visibleBottom - fr.top) / z });
     const want = typeof step.target === 'function' ? safeCall(step.target) : step.target;
     if (!want) { setRect(null); return; }
     const el = frameEl.querySelector('[data-tour="' + want + '"]');
     if (!el) { setRect(null); return; }
     const r = el.getBoundingClientRect();
-    setRect({ x: r.left - fr.left, y: r.top - fr.top, w: r.width, h: r.height });
+    setRect({ x: (r.left - fr.left) / z, y: (r.top - fr.top) / z, w: r.width / z, h: r.height / z });
   }, [live, step, S]);
 
   // Measure without depending on requestAnimationFrame alone: rAF does NOT fire
@@ -136,6 +151,23 @@ export default function CoachMarks({ open, onClose, steps: propSteps = TOUR_STEP
       document.removeEventListener('visibilitychange', measure);
     };
   }, [live, i, measure, dormant]);
+
+  // The bubble's own height feeds the clamp above, so it has to be measured
+  // after it renders — its copy varies from one line to a paragraph, and a
+  // fixed guess would put the long ones off the bottom again.
+  React.useLayoutEffect(() => {
+    if (!live || !step || dormant) return;
+    const read = () => {
+      const el = bubbleRef.current;
+      if (!el) return;
+      const z = (S.a11y && S.a11y.zoom) || 1;
+      const h = el.getBoundingClientRect().height / z;
+      setBubbleSize((prev) => (Math.abs(prev - h) > 1 ? h : prev));
+    };
+    read();
+    const t = setTimeout(read, 80);
+    return () => clearTimeout(t);
+  }, [live, step, dormant, i, S.a11y]);
 
   if (!live || !step) return null;
   if (dormant) return null;
@@ -166,10 +198,16 @@ export default function CoachMarks({ open, onClose, steps: propSteps = TOUR_STEP
   const PAD = 8;
   const hole = rect ? { x: rect.x - PAD, y: rect.y - PAD, w: rect.w + PAD * 2, h: rect.h + PAD * 2 } : null;
 
-  // place the bubble on whichever side has more room, so it never hides the target
+  // place the bubble on whichever side has more room, so it never hides the
+  // target — and then keep it on the screen whatever the measurement says.
   const frameH = (frame && frame.h) || 800;
-  const below = hole ? (frameH - (hole.y + hole.h)) > 210 : true;
-  const bubbleTop = hole ? (below ? hole.y + hole.h + 14 : Math.max(12, hole.y - 200)) : Math.round(frameH / 2) - 90;
+  const visH = (frame && frame.visH) || frameH;
+  const bubbleH = bubbleSize || 210;
+  const below = hole ? (visH - (hole.y + hole.h)) > (bubbleH + 24) : true;
+  const wanted = hole ? (below ? hole.y + hole.h + 14 : hole.y - bubbleH - 14) : Math.round(visH / 2) - Math.round(bubbleH / 2);
+  // The clamp is the part that matters: an instruction the user cannot see is
+  // worse than no instruction, because the dimmer is still there.
+  const bubbleTop = Math.max(12, Math.min(wanted, visH - bubbleH - 12));
 
   return (
     // THE HOST TAKES NO TAPS. It covers the whole frame so it can measure
@@ -205,7 +243,7 @@ export default function CoachMarks({ open, onClose, steps: propSteps = TOUR_STEP
       )}
 
       {/* the dialogue box */}
-      <div data-coach-bubble="1" style={{ pointerEvents: 'auto', position: 'absolute', left: 16, right: 16, top: bubbleTop, borderRadius: 22, padding: '18px 18px 14px', background: 'var(--surface-strong)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', animation: 'ppwSheetIn .42s cubic-bezier(.3,1.3,.4,1) both' }}>
+      <div ref={bubbleRef} data-coach-bubble="1" style={{ pointerEvents: 'auto', position: 'absolute', left: 16, right: 16, top: bubbleTop, borderRadius: 22, padding: '18px 18px 14px', background: 'var(--surface-strong)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', animation: 'ppwSheetIn .42s cubic-bezier(.3,1.3,.4,1) both' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--accent)', textShadow: 'var(--emboss)' }}>

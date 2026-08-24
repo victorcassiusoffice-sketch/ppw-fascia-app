@@ -348,19 +348,37 @@ function clean(errs, label) {
   await page.waitForTimeout(500);
   await page.locator('button', { hasText: 'Tick one off' }).first().click();
   await page.waitForTimeout(1000);
+  // Against the VIEWPORT, not the frame. Easy read scales the phone with CSS
+  // zoom, so the frame becomes 1305px tall inside a 932px window — "inside the
+  // frame" was true of a bubble sitting 8px below the bottom of the screen,
+  // which is exactly where this check used to pass while the user saw a dimmed
+  // screen and no instructions at all.
   const fits = await page.evaluate(() => {
     const b = document.querySelector('[data-coach-bubble]');
     if (!b) return { found: false };
-    const frame = b.closest('[data-easyread]');
-    if (!frame) return { found: false };
-    const br = b.getBoundingClientRect(), fr = frame.getBoundingClientRect();
-    return { found: true, left: br.left >= fr.left - 1, right: br.right <= fr.right + 1, top: br.top >= fr.top - 1, bottom: br.bottom <= fr.bottom + 1 };
+    const br = b.getBoundingClientRect();
+    return { found: true, box: { top: Math.round(br.top), bottom: Math.round(br.bottom), left: Math.round(br.left), right: Math.round(br.right) },
+      vw: innerWidth, vh: innerHeight,
+      onScreen: br.top >= -1 && br.bottom <= innerHeight + 1 && br.left >= -1 && br.right <= innerWidth + 1 };
   });
   if (!fits.found) bad('no coach bubble at 140% zoom');
-  else {
-    (fits.left && fits.right) ? ok('the bubble stays within the frame horizontally') : bad('the bubble overflows the frame sideways at 140%');
-    (fits.top && fits.bottom) ? ok('and vertically') : bad('the bubble overflows the frame vertically at 140%');
-  }
+  else fits.onScreen
+    ? ok('the bubble is fully on screen at 140% (' + JSON.stringify(fits.box) + ' in ' + fits.vw + 'x' + fits.vh + ')')
+    : bad('the bubble is off-screen at 140%: ' + JSON.stringify(fits.box) + ' in ' + fits.vw + 'x' + fits.vh);
+
+  // and the spotlight must ring its target, not a patch of screen beside it
+  const ring = await page.evaluate(() => {
+    const t = document.querySelector('[data-tour="next-up"]');
+    const r = [...document.querySelectorAll('div')].find((n) => (n.getAttribute('style') || '').includes('border: 2px solid var(--accent)'));
+    if (!t || !r) return null;
+    const a = t.getBoundingClientRect(), b = r.getBoundingClientRect();
+    return { dx: Math.abs(a.left - b.left), dy: Math.abs(a.top - b.top), dw: Math.abs(a.width - b.width) };
+  });
+  if (!ring) bad('no spotlight ring at 140%');
+  // the ring is the target plus an 8px pad each side, scaled by the zoom
+  else (ring.dx < 22 && ring.dy < 22 && ring.dw < 44)
+    ? ok('the spotlight rings its target at 140%')
+    : bad('the spotlight is misplaced at 140%: ' + JSON.stringify(ring));
   await page.screenshot({ path: OUT + '/10-easyread.png' });
   clean(errs, 'easyread:');
   await ctx.close();

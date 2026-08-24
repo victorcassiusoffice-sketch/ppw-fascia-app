@@ -30,21 +30,30 @@ export default function HintBubble() {
 
   const [rect, setRect] = React.useState(null);
   const [frame, setFrame] = React.useState(null);
+  const [bubbleSize, setBubbleSize] = React.useState(0);
   const hostRef = React.useRef(null);
+  const bubbleRef = React.useRef(null);
 
+  // Same two corrections as CoachMarks, and for the same reasons: easy read
+  // scales the frame with CSS `zoom`, so screen pixels have to be divided back
+  // into the frame's own space or the ring lands beside its target; and the
+  // zoomed frame is taller than the phone, so "inside the frame" is not the
+  // same as "on the screen".
   const measure = React.useCallback(() => {
     if (!h) return;
     const host = hostRef.current;
     const frameEl = host ? host.parentElement : null;
     if (!frameEl) return;
     const fr = frameEl.getBoundingClientRect();
-    setFrame({ w: fr.width, h: fr.height });
+    const z = (S.a11y && S.a11y.zoom) || 1;
+    const visibleBottom = Math.min(fr.bottom, (typeof window !== 'undefined' && window.innerHeight) || fr.bottom);
+    setFrame({ w: fr.width / z, h: fr.height / z, visH: Math.max(0, visibleBottom - fr.top) / z });
     if (!h.anchor) { setRect(null); return; }
     const el = frameEl.querySelector('[data-tour="' + h.anchor + '"]');
     if (!el) { setRect(null); return; }
     const r = el.getBoundingClientRect();
-    setRect({ x: r.left - fr.left, y: r.top - fr.top, w: r.width, h: r.height });
-  }, [h]);
+    setRect({ x: (r.left - fr.left) / z, y: (r.top - fr.top) / z, w: r.width / z, h: r.height / z });
+  }, [h, S.a11y]);
 
   React.useEffect(() => {
     if (!h) return;
@@ -54,6 +63,16 @@ export default function HintBubble() {
     window.addEventListener('resize', measure);
     return () => { cancelAnimationFrame(raf); clearTimeout(t); window.removeEventListener('resize', measure); };
   }, [h, measure]);
+
+  // Its own height feeds the clamp — hint copy runs from one line to a
+  // paragraph, and a fixed guess puts the long ones off the bottom.
+  React.useLayoutEffect(() => {
+    const el = bubbleRef.current;
+    if (!el) return;
+    const z = (S.a11y && S.a11y.zoom) || 1;
+    const hh = el.getBoundingClientRect().height / z;
+    setBubbleSize((prev) => (Math.abs(prev - hh) > 1 ? hh : prev));
+  });
 
   // Auto-dismiss. A hint the user ignored should leave on its own rather than
   // sit there waiting to be acknowledged.
@@ -82,8 +101,11 @@ export default function HintBubble() {
   const PAD = 6;
   const hole = rect ? { x: rect.x - PAD, y: rect.y - PAD, w: rect.w + PAD * 2, h: rect.h + PAD * 2 } : null;
   const frameH = (frame && frame.h) || 800;
-  const below = hole ? (frameH - (hole.y + hole.h)) > 190 : true;
-  const top = hole ? (below ? hole.y + hole.h + 12 : Math.max(12, hole.y - 178)) : Math.round(frameH / 2) - 100;
+  const visH = (frame && frame.visH) || frameH;
+  const bubbleH = bubbleSize || 178;
+  const below = hole ? (visH - (hole.y + hole.h)) > (bubbleH + 20) : true;
+  const wanted = hole ? (below ? hole.y + hole.h + 12 : hole.y - bubbleH - 12) : Math.round(visH / 2) - Math.round(bubbleH / 2);
+  const top = Math.max(12, Math.min(wanted, visH - bubbleH - 12));
 
   const takeQuest = (e) => {
     e.stopPropagation();
@@ -103,7 +125,7 @@ export default function HintBubble() {
       {hole && (
         <div aria-hidden="true" style={{ position: 'absolute', left: hole.x, top: hole.y, width: hole.w, height: hole.h, borderRadius: 16, border: '1.5px solid var(--acc-rim)', boxShadow: '0 0 0 4px rgba(232,119,46,.12)', pointerEvents: 'none', animation: 'ppwRise .3s ease both' }} />
       )}
-      <div data-hint={id} style={{ position: 'absolute', left: 16, right: 16, top, borderRadius: 20, padding: '15px 16px 14px', background: 'var(--surface-strong)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', pointerEvents: 'auto', animation: 'ppwSheetIn .34s cubic-bezier(.3,1.3,.4,1) both' }}>
+      <div ref={bubbleRef} data-hint={id} style={{ position: 'absolute', left: 16, right: 16, top, borderRadius: 20, padding: '15px 16px 14px', background: 'var(--surface-strong)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', pointerEvents: 'auto', animation: 'ppwSheetIn .34s cubic-bezier(.3,1.3,.4,1) both' }}>
         {h.ghost && <ReorderGhost />}
         {h.title && <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>{h.title}</div>}
         <p style={{ margin: h.title ? '6px 0 0' : 0, fontSize: 13, lineHeight: 1.55, color: 'var(--dim)' }}>{body}</p>
