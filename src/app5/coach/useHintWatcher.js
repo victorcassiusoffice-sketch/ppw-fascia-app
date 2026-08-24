@@ -12,7 +12,7 @@
 import React from 'react';
 import { useStore5, getState, useDayCount, todayKey, rearmHint, questDone } from '../store5.js';
 import { maybeHint, installSnoozed } from './hints5.js';
-import { isStandalone } from './quests5.js';
+import { isStandalone } from '../../lib/installPrompt.js';
 
 const doneCount = (S) => ((S.doneByDate || {})[todayKey()] || []).length;
 const autoCount = (S) => (S.deckItems || []).filter((x) => x.auto).length;

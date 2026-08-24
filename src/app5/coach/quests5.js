@@ -25,6 +25,10 @@ import {
   goLibrary, openAiBridge, setState, closeAdd, onlyExamplesLeft,
   guideFocusItem, setCalMonth, keyToDate, orderedStackFor, FREE_CAP_UPSELL, guideDone,
 } from '../store5.js';
+// The app already owns one beforeinstallprompt listener and the exact three
+// helpers this quest needs. A second listener would have been a second, quietly
+// diverging opinion about whether the app can be installed.
+import { canPromptInstall, promptInstall, isStandalone } from '../../lib/installPrompt.js';
 
 // ── small helpers ────────────────────────────────────────────────────────
 const doneCount = (S) => ((S.doneByDate || {})[todayKey()] || []).length;
@@ -355,8 +359,11 @@ export const QUESTS = [
           body: 'Install the app to your home screen so it opens instantly, full screen, like any other app. On iPhone: Share, then Add to Home Screen.',
           // No fake detection: on iOS there is no install event to listen for,
           // so the honest option is to say what to do and let the user tell us.
-          buttons: (S) => (canInstallNatively()
-            ? [{ label: 'Install now', action: () => promptInstall() }, { label: 'I will do it later' }]
+          // No fake detection. Where the browser gives us a real install event
+          // we use it; everywhere else (iOS, most notably) we say what to do
+          // and take the user's word for it, rather than pretending to know.
+          buttons: () => (canPromptInstall()
+            ? [{ label: 'Install now', action: () => { promptInstall(); } }, { label: 'I will do it later' }]
             : [{ label: 'I have done it' }, { label: 'I will do it later' }]),
         },
         {
@@ -413,27 +420,6 @@ export const FINALE_STEPS = [
     buttons: [{ label: 'Done', action: () => { guideDone(); closeJournal(); } }],
   },
 ];
-
-// ── install helpers (no fake detection) ──────────────────────────────────
-// The beforeinstallprompt event only exists on Chromium. Everywhere else the
-// honest answer is instructions plus the user's own word for it.
-let _deferredPrompt = null;
-if (typeof window !== 'undefined') {
-  window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); _deferredPrompt = e; });
-  window.addEventListener('appinstalled', () => { _deferredPrompt = null; });
-}
-export function canInstallNatively() { return !!_deferredPrompt; }
-export function promptInstall() {
-  if (!_deferredPrompt) return false;
-  try { _deferredPrompt.prompt(); } catch {}
-  _deferredPrompt = null;
-  return true;
-}
-export function isStandalone() {
-  try {
-    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-  } catch { return false; }
-}
 
 // ── lookups the journal + disc use ───────────────────────────────────────
 
