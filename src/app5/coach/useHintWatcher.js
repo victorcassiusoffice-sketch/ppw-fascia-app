@@ -10,7 +10,7 @@
 // on the bell) — those call maybeHint() from the control itself.
 
 import React from 'react';
-import { useStore5, getState, FREE_CAP_UPSELL, useDayCount, todayKey } from '../store5.js';
+import { useStore5, getState, FREE_CAP_UPSELL, useDayCount, todayKey, rearmHint } from '../store5.js';
 import { maybeHint } from './hints5.js';
 import { isStandalone } from './quests5.js';
 
@@ -27,6 +27,7 @@ export default function useHintWatcher() {
       addOpen: S.addOpen, selected: S.selectedIds.length, auto: autoCount(S),
       done: doneCount(S), lastAddedId: S.lastAddedId, viewDate: S.viewDate,
       upsell: S.premiumUpsell, tab: S.stackTab, screen: S.screen,
+      slotPop: !!S.slotPop, reminders: S.reminders,
     };
     if (!p) return;                 // first pass is the baseline, never a trigger
     if (!S.onboarded) return;
@@ -60,6 +61,17 @@ export default function useHintWatcher() {
     // Two ways to fill a day, and the tiles that look like they add things but
     // do not.
     if (!p.addOpen && S.addOpen) { maybeHint('add-intro'); return; }
+
+    // THE ONE THAT MATTERS MOST. The first time a nudge actually appears, say
+    // what it is and — more importantly — what it is not. This is the moment
+    // someone forms a belief about whether this app will wake them up, and it
+    // will not.
+    if (S.slotPop && !p.slotPop) { maybeHint('reminder-truth'); return; }
+
+    // Switching Reminders ON is the other moment that belief gets formed, and
+    // it can happen without ever having seen a banner — so it buys back one of
+    // this hint's two lives.
+    if (S.reminders && !p.reminders) { rearmHint('reminder-truth'); maybeHint('reminder-truth'); return; }
   }, [S]);
 
   // The install nudge waits for a habit rather than nagging a first-timer: the

@@ -121,6 +121,11 @@ export default function FirstRunChoice() {
         <p style={{ margin: '12px 0 0', fontSize: 15, lineHeight: 1.6, color: 'var(--dim)', textAlign: 'center' }}>
           Plan the things you mean to do, and tick them off as the day goes.
         </p>
+        {/* The first screen said what the app IS but not what it DOES for you.
+            One line, and it is the promise the rest of the app has to keep. */}
+        <p style={{ margin: '8px 0 0', fontSize: 15, lineHeight: 1.6, color: 'var(--dim)', textAlign: 'center' }}>
+          Everything you mean to do, popping up on time.
+        </p>
 
         <div style={{ flex: 1.4, minHeight: 20 }} />
 

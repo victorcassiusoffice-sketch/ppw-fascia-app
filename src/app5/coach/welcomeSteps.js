@@ -12,6 +12,8 @@
 
 import { markTourSeen } from './CoachMarks.jsx';
 import { startQuest } from './quests5.js';
+import { maybeHint } from './hints5.js';
+import { markGuideWelcomed } from '../store5.js';
 
 export const WELCOME_STEPS = [
   {
@@ -29,11 +31,13 @@ export const WELCOME_STEPS = [
         // The welcome runs UNCONTROLLED (it predates any quest), so it marks
         // itself seen and hands over. startQuest opens the controlled coach,
         // which takes the screen from here.
-        action: () => { markTourSeen(); setTimeout(() => startQuest('tick'), 60); },
+        action: () => { markTourSeen(); markGuideWelcomed(); setTimeout(() => startQuest('tick'), 60); },
       },
       {
         label: 'Later',
-        action: () => { markTourSeen(); },
+        // Not a nag — one soft pulse of the disc, five seconds later, so
+        // "later" has somewhere to point when it arrives. Once, ever.
+        action: () => { markTourSeen(); markGuideWelcomed(); setTimeout(() => maybeHint('guide-pulse'), 5000); },
       },
     ],
   },
