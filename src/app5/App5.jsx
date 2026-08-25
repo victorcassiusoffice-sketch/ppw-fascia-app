@@ -12,7 +12,7 @@
 
 import React from 'react';
 import './app5.css'; // the prototype's keyframes — required for all ppw* animations
-import { themeVars, parseVars, THUMBS } from './theme5.js';
+import { themeVars, parseVars, THUMBS, logoUrl } from './theme5.js';
 import SettingsScreen from './screens/SettingsScreen.jsx';
 import LibraryScreen from './screens/LibraryScreen.jsx';
 import { InstallBanner } from './screens/InstallAppCard.jsx';
@@ -490,6 +490,76 @@ function Placeholder({ name }) {
   );
 }
 
+// ── DESKTOP STAGE (2026-08-25) ────────────────────────────────────────────
+// On a desktop the app used to be a phone-shaped column floating on a flat
+// grey void — which read as "there is no desktop version". There is; it is
+// this one. The frame is load-bearing (the coach, the hints and every overlay
+// measure against it), so the desktop treatment leaves the frame byte-identical
+// and designs the ROOM it stands in instead: the theme's own ground and glow
+// at desktop scale, the pitch as brand chrome beside the device, and a QR that
+// hands the same URL to a phone.
+//
+// Gated on matchMedia so jsdom (no matchMedia) and every existing test render
+// exactly the mobile tree.
+function useDesktop() {
+  const [wide, setWide] = React.useState(() => {
+    try { return window.matchMedia('(min-width: 980px)').matches; } catch { return false; }
+  });
+  React.useEffect(() => {
+    let mq;
+    try { mq = window.matchMedia('(min-width: 980px)'); } catch { return undefined; }
+    const on = () => setWide(mq.matches);
+    if (mq.addEventListener) { mq.addEventListener('change', on); return () => mq.removeEventListener('change', on); }
+    mq.addListener(on); return () => mq.removeListener(on);
+  }, []);
+  return wide;
+}
+
+const deskImg = (name) => `${import.meta.env.BASE_URL}assets/onboarding/${name}.webp`;
+
+/** The brand panel beside the device. Pure chrome: nothing in the app depends
+ *  on it, and it never claims anything the app cannot do — in particular it
+ *  says NOTHING about data moving between desktop and phone, because it
+ *  doesn't (each device keeps its own local data until the profile backend
+ *  ships). "Scan to open on your phone" hands over the URL, not the data. */
+function DesktopStage({ S }) {
+  const src = logoUrl(S);
+  return (
+    <div aria-hidden="false" style={{ position: 'relative', zIndex: 1, width: 400, maxWidth: '34vw', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 0, color: 'var(--ink)' }}>
+      {src && (
+        <div style={{ width: 108, height: 108, borderRadius: 28, background: 'var(--ground)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+          <img src={src} alt="PPWellness" style={{ width: '86%', height: '86%', objectFit: 'contain' }} />
+        </div>
+      )}
+      <h1 style={{ margin: '26px 0 0', fontSize: 'clamp(30px, 2.6vw, 40px)', lineHeight: 1.12, fontWeight: 800, letterSpacing: '-.02em', textShadow: 'var(--emboss)' }}>
+        The most powerful app for your life.
+      </h1>
+      <p style={{ margin: '14px 0 0', fontSize: 19, fontWeight: 800, letterSpacing: '-.01em', lineHeight: 1.4 }}>
+        <span style={{ color: 'var(--accent)', textShadow: 'var(--emboss)' }}>Your Ideal Lifestyle.</span>{' '}
+        <span style={{ color: 'var(--ink)', textShadow: 'var(--emboss)' }}>Planned. Organised. Brought to you.</span>
+      </p>
+      {/* three of the clay lifestyle images, quiet, as texture not argument */}
+      <div style={{ marginTop: 22, display: 'flex', gap: 12 }}>
+        {['meditation', 'stretch', 'course'].map((n, i) => (
+          <img key={n} src={deskImg(n)} alt="" decoding="async" onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            style={{ width: 64, height: 64, borderRadius: 18, objectFit: 'cover', border: '1px solid var(--rim)', background: 'var(--surface)', boxShadow: 'var(--elev)', transform: `rotate(${i === 1 ? 3 : i === 0 ? -4 : 2}deg)` }} />
+        ))}
+      </div>
+      {/* the handoff — same URL, in a pocket */}
+      <div style={{ marginTop: 26, display: 'flex', alignItems: 'center', gap: 16, padding: '14px 18px 14px 14px', borderRadius: 22, background: 'var(--surface)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)' }}>
+        <div style={{ width: 96, height: 96, flex: 'none', borderRadius: 14, background: '#F4F1EA', border: '1px solid var(--rim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <img src={`${import.meta.env.BASE_URL}assets/onboarding/qr-app.svg`} alt="QR code for app.ppwellness.co" style={{ width: 82, height: 82, display: 'block' }} />
+        </div>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: 14.5, fontWeight: 700, textShadow: 'var(--emboss)' }}>Best in your pocket.</div>
+          <div style={{ marginTop: 3, fontSize: 12.5, lineHeight: 1.5, color: 'var(--dim)' }}>Scan to open it on your phone — free, straight in the browser.</div>
+          <div style={{ marginTop: 5, fontSize: 12, fontWeight: 700, color: 'var(--accent)' }}>app.ppwellness.co</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── APP SHELL ──
 export default function App5() {
   const S = useStore5();
@@ -646,9 +716,22 @@ export default function App5() {
   else if (S.screen === 'settings') body = <SettingsScreen />;
   else body = <StackScreen />;
 
+  const isDesktop = useDesktop();
   return (
-    <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#83878B' }}>
-      <div data-easyread={S.a11y.on ? '1' : '0'} style={{ position: 'relative', width: 'min(430px, 100vw)', height: 'min(932px, 100dvh)', overflow: 'hidden', borderRadius: 'clamp(0px, calc((100vw - 429px) * 99), 40px)', boxShadow: '0 40px 120px -30px rgba(20,26,36,.55)', fontFamily: "'Nunito', system-ui, sans-serif", fontWeight: 500, color: 'var(--ink, #23262C)', zoom: S.a11y.zoom || 1, ...vars }}>
+    // On desktop the room is themed with the app's own tokens — change the
+    // colourway inside the phone and the whole desktop changes with it. On
+    // mobile the frame covers the viewport, so the flat grey stays as-is.
+    <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative', ...(isDesktop ? { ...vars, gap: 'clamp(40px, 5vw, 84px)', background: 'var(--ground)', padding: '0 4vw' } : { background: '#83878B' }) }}>
+      {isDesktop && (
+        <>
+          {/* the same luminous ground the frame has inside, at room scale */}
+          <div aria-hidden="true" style={{ position: 'absolute', width: '44vw', height: '44vw', left: '-12vw', top: '-16vw', borderRadius: 999, background: 'var(--glow-1)', filter: 'blur(70px)', pointerEvents: 'none', opacity: 'var(--glow-op, 1)' }} />
+          <div aria-hidden="true" style={{ position: 'absolute', width: '38vw', height: '38vw', right: '-10vw', bottom: '-14vw', borderRadius: 999, background: 'var(--glow-2)', filter: 'blur(80px)', pointerEvents: 'none', opacity: 'var(--glow-op, 1)' }} />
+          <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'var(--scrim)', pointerEvents: 'none' }} />
+          <DesktopStage S={S} />
+        </>
+      )}
+      <div data-easyread={S.a11y.on ? '1' : '0'} style={{ position: 'relative', width: 'min(430px, 100vw)', height: isDesktop ? 'min(932px, 92dvh)' : 'min(932px, 100dvh)', overflow: 'hidden', borderRadius: 'clamp(0px, calc((100vw - 429px) * 99), 40px)', boxShadow: isDesktop ? '0 60px 140px -40px rgba(15,18,26,.6), 0 0 0 1px rgba(255,255,255,.09)' : '0 40px 120px -30px rgba(20,26,36,.55)', zIndex: 1, fontFamily: "'Nunito', system-ui, sans-serif", fontWeight: 500, color: 'var(--ink, #23262C)', zoom: S.a11y.zoom || 1, ...vars }}>
         {/* ground */}
         <div style={{ position: 'absolute', inset: 0, background: 'var(--ground)', transition: 'background .4s ease' }} />
         {/* luminous blobs the glass refracts */}
