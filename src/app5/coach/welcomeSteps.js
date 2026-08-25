@@ -18,8 +18,8 @@ import { markGuideWelcomed } from '../store5.js';
 export const WELCOME_STEPS = [
   {
     target: null,
-    title: 'This is your Stack.',
-    body: 'Everything you mean to do today, in one list, in order. The top card is always the next thing. We put four examples in so it is not empty — they are yours to tick off or clear.',
+    title: 'Your Stack — the real one.',
+    body: 'The one you watched build in the pitch was a demo. This one is yours: everything you mean to do today, in one list, in order — the top card is always the next thing. We put four examples in so it is not empty; tick them off or clear them.',
   },
   {
     target: 'guide',

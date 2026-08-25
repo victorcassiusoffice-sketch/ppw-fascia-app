@@ -133,15 +133,26 @@ function clean(errs, label) {
   });
   dots === 2 ? ok('the wizard is 2 screens, not 3') : bad('wizard step count is ' + dots + ', expected 2');
 
-  const tryIt = await page.getByText('Try it — tap a card to tick it off.').count();
-  tryIt ? ok('step 1 invites a real tap') : bad('the "try it" line is missing');
-  await page.locator('button', { hasText: 'Morning walk' }).first().click();
+  // THE PITCH — step 0 now builds the six-card show in front of the user:
+  // staged landings every 420ms, captions at ~3s. The show has been running
+  // behind the first-run choice since mount, so 3.2s from here is safely past
+  // the end — waiting for the finished state is the only non-flaky anchor.
+  await page.waitForTimeout(3200);
+  const cardA = await page.getByText('Anxiety meditation').count();
+  const cardZ = await page.getByText('Online course').count();
+  cardA && cardZ ? ok('all six show cards landed') : bad('show cards missing: first=' + cardA + ' last=' + cardZ);
+  const capA = await page.getByText('This is a Stack.').count();
+  capA ? ok('the assembled caption names the Stack') : bad('the "This is a Stack." caption is missing');
+  const capB = await page.getByText('= Your Ideal Lifestyle.').count();
+  capB ? ok('the payoff line resolved') : bad('the "= Your Ideal Lifestyle." payoff is missing');
+  // the show is over — a deliberate tap on a card must still tick for real
+  await page.locator('button', { hasText: 'Anxiety meditation' }).first().click();
   await page.waitForTimeout(400);
   const struck = await page.evaluate(() => !!document.querySelector('[style*="line-through"]'));
   struck ? ok('the demo card actually ticks') : bad('the demo card is still just a picture');
   await page.screenshot({ path: OUT + '/04a-wizard.png' });
 
-  await page.locator('button', { hasText: 'Next' }).last().click({ force: true });
+  await page.locator('button', { hasText: 'Build mine' }).last().click({ force: true });
   await page.waitForTimeout(600);
 
   const why = await page.getByText('Tick the box above to continue — it is the legal bit.').count();
@@ -152,7 +163,7 @@ function clean(errs, label) {
   await page.waitForTimeout(300);
   await page.locator('button', { hasText: 'Start with an empty day' }).first().click({ force: true });
   await page.waitForTimeout(1800);       // the welcome waits 700ms to settle
-  const w1 = await page.locator('text=This is your Stack.').count();
+  const w1 = await page.locator('text=Your Stack — the real one.').count();
   w1 ? ok('welcome step 1 shown') : bad('welcome step 1 missing');
   const counter = await page.locator('[data-coach-bubble] >> text=1 of 2').count();
   counter ? ok('welcome is 2 steps, not 5') : bad('welcome step count is not 2');

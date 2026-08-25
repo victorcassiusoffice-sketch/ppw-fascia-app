@@ -35,7 +35,11 @@ const CARD = { border: '1px solid var(--rim)', background: 'var(--surface)', box
 // rather than the app — and the core verb went untouched until they were three
 // screens deeper. Ticking one of these does nothing but strike it through, so
 // there is nothing to get wrong and nothing to undo.
-function DemoCard({ time, title, meta, accent }) {
+//
+// The optional `img` prop puts a clay lifestyle image in the disc for the
+// build-itself show. It is a prop on THIS card, not a rebuilt variant, so the
+// tick toggle, aria and sfx stay single-source.
+function DemoCard({ time, title, meta, accent, img }) {
   const [ticked, setTicked] = React.useState(false);
   return (
     <button
@@ -43,10 +47,13 @@ function DemoCard({ time, title, meta, accent }) {
       aria-pressed={ticked}
       aria-label={ticked ? `${title} — ticked off, tap to undo` : `${title} — tap to tick it off`}
       style={{ width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 18, ...CARD, borderColor: (ticked || accent) ? 'var(--acc-rim)' : 'var(--rim)', opacity: ticked ? .62 : 1, transition: 'opacity .3s, border-color .3s' }}>
-      <span style={{ width: 38, height: 38, flex: 'none', borderRadius: 999, background: (ticked || accent) ? 'var(--acc-surf)' : 'var(--disc)', border: `1px solid ${(ticked || accent) ? 'var(--acc-rim)' : 'var(--rim)'}`, color: (ticked || accent) ? 'var(--acc-ink)' : 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .3s cubic-bezier(.3,1.3,.4,1)' }}>
+      <span style={{ width: 38, height: 38, flex: 'none', borderRadius: 999, overflow: 'hidden', background: (ticked || accent) ? 'var(--acc-surf)' : 'var(--disc)', border: `1px solid ${(ticked || accent) ? 'var(--acc-rim)' : 'var(--rim)'}`, color: (ticked || accent) ? 'var(--acc-ink)' : 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .3s cubic-bezier(.3,1.3,.4,1)' }}>
         {ticked
           ? <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'ppwRise .32s cubic-bezier(.3,1.4,.4,1) both' }}><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
-          : <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3s6 6.3 6 10.3a6 6 0 0 1-12 0C6 9.3 12 3 12 3z" /></svg>}
+          : img
+            ? <img src={img} alt="" decoding="async" onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 999 }} />
+            : <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3s6 6.3 6 10.3a6 6 0 0 1-12 0C6 9.3 12 3 12 3z" /></svg>}
       </span>
       <span style={{ flex: 1, minWidth: 0 }}>
         <span style={{ display: 'block', fontSize: 14.5, fontWeight: 600, textShadow: 'var(--emboss)', textDecoration: ticked ? 'line-through' : 'none' }}>{title}</span>
@@ -56,6 +63,20 @@ function DemoCard({ time, title, meta, accent }) {
     </button>
   );
 }
+
+// The six cards the show lands, in time order — Vic's own examples. Same six
+// clay webps the FirstRunChoice montage loads, so every image is a cache hit.
+// BASE_URL-templated because GH Pages serves from the /ppw-fascia-app/ subpath;
+// a bare /assets/... path 404s there.
+const obImg = (name) => `${import.meta.env.BASE_URL}assets/onboarding/${name}.webp`;
+const SHOW_CARDS = [
+  { n: 'meditation',  time: '07:00', title: 'Anxiety meditation', meta: 'Audio · 10 min' },
+  { n: 'stretch',     time: '07:30', title: 'Stretching video',   meta: 'Online fitness · follow along' },
+  { n: 'affirmation', time: '08:00', title: 'Affirmation video',  meta: '2 min, before the mirror' },
+  { n: 'prayer',      time: '13:00', title: 'Prayer',             meta: 'Text or audio' },
+  { n: 'diet',        time: '13:30', title: 'Dietary reminder',   meta: 'Eat before you scroll' },
+  { n: 'course',      time: '18:00', title: 'Online course',      meta: 'The one you’re studying' },
+];
 
 export default function OnboardingScreen() {
   const S = useStore5();
@@ -84,6 +105,35 @@ export default function OnboardingScreen() {
   // count on that render — React #300, a blank screen at the exact moment the
   // user finishes signing up. The tests were green; only a real browser caught it.
   const [pulse, setPulse] = React.useState(false);
+
+  // The build-itself show. prefers-reduced-motion initialises FINISHED — full
+  // stack, final line, captions — zero travel (JS branch; CSS [data-ob-anim]
+  // backstop covers a mistimed mount).
+  const reduceMotion = React.useMemo(
+    () => typeof window !== 'undefined' && !!window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    []
+  );
+  const [landed, setLanded] = React.useState(reduceMotion ? 6 : 0);
+  const [assembled, setAssembled] = React.useState(reduceMotion);
+
+  // StrictMode-safe: cleanup clears the interval; dev double-mount cannot leak.
+  // S.onboarded is in the guard because these hooks sit ABOVE the onboarded bail (the React #300 law above) — an onboarded user's obStep is 0, so without it the interval would spin forever.
+  React.useEffect(() => {
+    if (S.onboarded || (S.obStep || 0) !== 0 || assembled) return undefined;
+    const iv = setInterval(() => setLanded((n) => (n >= 6 ? n : n + 1)), 420);
+    return () => clearInterval(iv);
+  }, [S.onboarded, S.obStep, assembled]);
+
+  React.useEffect(() => {
+    if (landed === 6 && !assembled) {
+      const t = setTimeout(() => setAssembled(true), 450);
+      return () => clearTimeout(t);
+    }
+  }, [landed, assembled]);
+
+  // SKIP — one guarded handler. Capture + stopPropagation means the tap that
+  // skips can never also tick a card; a second deliberate tap ticks.
+  const skipShow = (e) => { e.stopPropagation(); e.preventDefault(); setLanded(6); setAssembled(true); };
 
   if (S.onboarded) return null;
 
@@ -136,26 +186,55 @@ export default function OnboardingScreen() {
 
       <div style={{ position: 'relative', flex: 1, overflowY: 'auto', padding: '10px 24px 24px', display: 'flex', flexDirection: 'column' }}>
 
-        {/* ── 1 · WHAT A STACK IS ── */}
+        {/* ── 1 · THE PITCH — the stack builds itself ── */}
         {step === 0 && (
-          <div style={{ animation: 'ppwScreenIn .6s cubic-bezier(.26,1,.4,1)' }}>
-            <div style={{ marginTop: 8, fontSize: 11, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: 'var(--accent)', textShadow: 'var(--emboss)' }}>Welcome</div>
-            <h1 style={H1}>Your day, as a stack</h1>
-            <p style={SUB}>
-              A <strong style={{ color: 'var(--ink)' }}>stack</strong> is simply the things you mean to do today —
-              stacked in order, with a time on each.
+          <div data-ob-anim style={{ animation: 'ppwScreenIn .6s cubic-bezier(.26,1,.4,1)' }}>
+            <div style={{ marginTop: 8, fontSize: 11, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: 'var(--accent)', textShadow: 'var(--emboss)' }}>Your Ideal Lifestyle</div>
+            <h1 style={{ ...H1, fontWeight: 700 }}>Watch your Stack build itself.</h1>
+
+            {/* SWAP LINE — names each routine as it lands; resolves to the payoff.
+                minHeight reserves the row so swaps never shift layout. */}
+            <p style={{ margin: '12px 0 0', minHeight: 26, fontSize: 17, fontWeight: 800 }} aria-hidden="true">
+              {assembled ? (
+                <span key="final" data-ob-anim style={{ display: 'inline-block', animation: 'ppwRise .32s cubic-bezier(.3,1.4,.4,1) both' }}>
+                  <span style={{ color: 'var(--dim)' }}>= </span>
+                  <span style={{ color: 'var(--accent)' }}>Your Ideal Lifestyle.</span>
+                </span>
+              ) : landed > 0 ? (
+                <span key={landed} data-ob-anim style={{ display: 'inline-block', animation: 'ppwRise .32s cubic-bezier(.3,1.4,.4,1) both' }}>
+                  <span style={{ color: 'var(--dim)' }}>＋ </span>
+                  <span style={{ color: 'var(--accent)' }}>{SHOW_CARDS[landed - 1].title}</span>
+                </span>
+              ) : null}
             </p>
-            <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 9 }}>
-              <DemoCard accent time="07:30" title="Morning walk" meta="20 min, outside" />
-              <DemoCard time="13:00" title="Box breathing" meta="5 min" />
-              <DemoCard time="21:30" title="I did enough today." meta="A note to yourself" />
+
+            {/* THE STACK — six DemoCards fly in, alternating drift, time order.
+                aria-live announces landings; onClickCapture skips until assembled. */}
+            <div aria-live="polite"
+              onClickCapture={!assembled ? skipShow : undefined}
+              style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 9 }}>
+              {SHOW_CARDS.slice(0, landed).map((c, i) => (
+                <div key={c.n} data-ob-anim
+                  style={{ '--fly-x': i % 2 ? '48px' : '-48px', '--fly-r': i % 2 ? '6deg' : '-6deg', animation: 'ppwStackLand .52s cubic-bezier(.3,1,.4,1) both' }}>
+                  <DemoCard time={c.time} title={c.title} meta={c.meta} img={obImg(c.n)} />
+                </div>
+              ))}
             </div>
-            <p style={{ margin: '14px 0 0', fontSize: 13, fontWeight: 600, color: 'var(--accent)', textAlign: 'center' }}>
-              Try it — tap a card to tick it off.
-            </p>
-            <p style={{ ...SUB, marginTop: 16 }}>
-              Tick things off as the day goes. Tomorrow it rebuilds itself, so you never start from a blank page.
-            </p>
+
+            {assembled && (
+              <div data-ob-anim style={{ animation: 'ppwRise .32s cubic-bezier(.3,1.4,.4,1) both' }}>
+                <p style={{ margin: '16px 0 0', fontSize: 14.5, fontWeight: 700, textShadow: 'var(--emboss)' }}>This is a Stack.</p>
+                <p style={{ margin: '4px 0 0', fontSize: 13, lineHeight: 1.55, color: 'var(--dim)' }}>
+                  Anything a <strong style={{ color: 'var(--ink)' }}>link</strong> or a <strong style={{ color: 'var(--ink)' }}>file</strong> can carry — organised, and presented to you at the times you choose.
+                </p>
+                <p style={{ margin: '10px 0 0', fontSize: 13, fontWeight: 700, color: 'var(--accent)', textAlign: 'center' }}>
+                  Your turn — tap a card to tick it off!
+                </p>
+                <p style={{ margin: '14px 0 0', fontSize: 12.5, lineHeight: 1.5, color: 'var(--dim)', textAlign: 'center' }}>
+                  <strong style={{ color: 'var(--ink)' }}>Not just for you</strong> — build routines for others too. Any routine <strong style={{ color: 'var(--ink)' }}>shares as a small file</strong> another person can import from the ＋ menu.
+                </p>
+              </div>
+            )}
           </div>
         )}
 
@@ -200,7 +279,7 @@ export default function OnboardingScreen() {
         {/* primary CTA */}
         <button onClick={() => (canNext ? next() : nudgeConsent())} aria-disabled={!canNext}
           style={{ position: 'relative', marginTop: 20, width: '100%', height: 54, borderRadius: 18, border: `1px solid ${step === CONSENT ? 'var(--rim)' : 'var(--acc-rim)'}`, background: step === CONSENT ? 'var(--surface)' : 'var(--acc-surf)', color: step === CONSENT ? 'var(--ink)' : 'var(--acc-ink)', fontWeight: 600, fontSize: 16, textShadow: step === CONSENT ? 'var(--emboss)' : 'var(--label-shadow)', boxShadow: step === CONSENT ? 'var(--elev)' : 'var(--acc-glow)', opacity: canNext ? 1 : .45, transition: 'opacity .25s' }}>
-          {step === CONSENT ? 'Start with an empty day' : 'Next'}
+          {step === CONSENT ? 'Start with an empty day' : 'Build mine'}
         </button>
 
         {/* A door for BOTH kinds of visitor.

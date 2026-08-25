@@ -22,6 +22,18 @@ import { logoUrl } from '../theme5.js';
 
 const CARD = { border: '1px solid var(--rim)', background: 'var(--surface)', boxShadow: 'var(--elev)' };
 
+// GH Pages serves the app from /ppw-fascia-app/, so a bare /assets/... path
+// 404s in production. BASE_URL carries the subpath in builds and "/" in dev.
+const obImg = (name) => `${import.meta.env.BASE_URL}assets/onboarding/${name}.webp`;
+const MONTAGE = [
+  { n: 'meditation',  top: '2%',    left: '6%',    r: '-8deg', s: 78, d: 0.15, drift: 6.5 },
+  { n: 'stretch',     top: '0%',    right: '8%',   r: '7deg',  s: 70, d: 0.24, drift: 7   },
+  { n: 'affirmation', top: '40%',   left: '0%',    r: '-5deg', s: 66, d: 0.33, drift: 7.5 },
+  { n: 'prayer',      top: '42%',   right: '0%',   r: '6deg',  s: 70, d: 0.42, drift: 8   },
+  { n: 'diet',        bottom: '4%', left: '14%',   r: '5deg',  s: 78, d: 0.51, drift: 8.5 },
+  { n: 'course',      bottom: '0%', right: '16%',  r: '-6deg', s: 74, d: 0.6,  drift: 9   },
+];
+
 /**
  * The wordmark for whatever colourway is active.
  *
@@ -30,7 +42,7 @@ const CARD = { border: '1px solid var(--rim)', background: 'var(--surface)', box
  * The word "PPWellness" stays as the alt text, so a screen reader and a failed
  * load both still name the app.
  */
-function BrandMark() {
+function BrandMark({ size = 'min(170px, 46vw)' }) {
   const S = useStore5();
   const [failed, setFailed] = React.useState(false);
   const src = logoUrl(S);
@@ -66,7 +78,7 @@ function BrandMark() {
   return (
     <div style={{
       alignSelf: 'center',
-      width: 'min(170px, 46vw)', aspectRatio: '1 / 1', flex: 'none',
+      width: size, aspectRatio: '1 / 1', flex: 'none',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       borderRadius: 38,
       background: 'var(--ground)',
@@ -108,23 +120,40 @@ export default function FirstRunChoice() {
             once shown. The wordmark now fills that space, and it changes with the
             theme, so the first screen looks like the app the person is about to use.
             Spacers above and below centre it rather than leaving it stranded. */}
-        <div style={{ flex: 1, minHeight: 12 }} />
+        <div style={{ flex: 1, minHeight: 8 }} />
 
-        <BrandMark />
+        {/* POSTER STAGE — brand tile centred, six clay lifestyle images cut in around
+            it and settle into a slow drifting halo. Decorative: aria-hidden, no
+            pointer events, and a failed load removes the image cleanly. */}
+        <div style={{ position: 'relative', width: '100%', height: 'min(310px, 36dvh)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {MONTAGE.map((m) => (
+            <span key={m.n} aria-hidden="true" style={{ position: 'absolute', top: m.top, bottom: m.bottom, left: m.left, right: m.right, transform: `rotate(${m.r})`, pointerEvents: 'none' }}>
+              {/* Static tilt lives on this OUTER span; both animations live on the
+                  INNER span. ppwMontageIn holds transform:none via fill both until
+                  ppwDrift — later in the comma list — takes the transform over at
+                  its delay. That is why the layers are split. */}
+              <span data-ob-anim style={{ display: 'block', animation: `ppwMontageIn .7s cubic-bezier(.26,1,.4,1) ${m.d}s both, ppwDrift ${m.drift}s ease-in-out ${(1.6 + m.d).toFixed(2)}s infinite` }}>
+                <img src={obImg(m.n)} alt="" decoding="async"
+                  onError={(e) => { const s = e.currentTarget.closest('span[aria-hidden]'); if (s) s.style.display = 'none'; }}
+                  style={{ display: 'block', width: `min(${m.s}px, 18vw)`, aspectRatio: '1 / 1', objectFit: 'cover', borderRadius: 20, border: '1px solid var(--rim)', background: 'var(--surface)', boxShadow: 'var(--elev)' }} />
+              </span>
+            </span>
+          ))}
+          <div data-ob-anim style={{ zIndex: 1, animation: 'ppwLogoIn .7s cubic-bezier(.26,1,.4,1) both, ppwLogoFloat 6s ease-in-out 1.8s infinite' }}>
+            <BrandMark size="min(140px, 38vw)" />
+          </div>
+        </div>
 
-        {/* Centred with the mark. A centred logo over left-flushed text reads as
-            a mistake — the two have to agree. Buttons below are already
-            full-width, so the whole column now shares one axis. */}
-        <h1 style={{ margin: '22px 0 0', fontSize: 29, fontWeight: 600, letterSpacing: '-.02em', textShadow: 'var(--emboss)', textAlign: 'center' }}>
-          Your day, as a stack
+        {/* THE CLAIM — Vic's verbatim power line, then the mechanism as three beats. */}
+        <h1 data-ob-anim style={{ margin: '18px 0 0', fontSize: 'clamp(24px, 7.4vw, 29px)', fontWeight: 800, letterSpacing: '-.02em', textShadow: 'var(--emboss)', textAlign: 'center', animation: 'ppwRise .45s cubic-bezier(.26,1,.4,1) .05s both' }}>
+          The most powerful app for your life.
         </h1>
-        <p style={{ margin: '12px 0 0', fontSize: 15, lineHeight: 1.6, color: 'var(--dim)', textAlign: 'center' }}>
-          Plan the things you mean to do, and tick them off as the day goes.
-        </p>
-        {/* The first screen said what the app IS but not what it DOES for you.
-            One line, and it is the promise the rest of the app has to keep. */}
-        <p style={{ margin: '8px 0 0', fontSize: 15, lineHeight: 1.6, color: 'var(--dim)', textAlign: 'center' }}>
-          Everything you mean to do, popping up on time.
+        <p style={{ margin: '10px 0 0', textAlign: 'center', lineHeight: 1.35 }}>
+          <span data-ob-anim style={{ display: 'inline-block', fontSize: 21, fontWeight: 800, letterSpacing: '-.02em', color: 'var(--accent)', textShadow: 'var(--emboss)', animation: 'ppwRise .45s cubic-bezier(.26,1,.4,1) .2s both' }}>Your Ideal Lifestyle.</span>
+          <br />
+          {['Planned.', 'Organised.', 'Brought to you.'].map((w, i) => (
+            <span key={w} data-ob-anim style={{ display: 'inline-block', marginRight: i < 2 ? 8 : 0, fontSize: 18, fontWeight: 800, color: 'var(--ink)', textShadow: 'var(--emboss)', animation: `ppwRise .45s cubic-bezier(.26,1,.4,1) ${(0.35 + i * 0.15).toFixed(2)}s both` }}>{w}</span>
+          ))}
         </p>
 
         <div style={{ flex: 1.4, minHeight: 20 }} />
