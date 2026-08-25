@@ -78,6 +78,26 @@ const SHOW_CARDS = [
   { n: 'course',      time: '18:00', title: 'Online course',      meta: 'The one you’re studying' },
 ];
 
+// The mandatory facts, one bite each. `img` uses a clay asset (the reserved
+// stack-hero finally earns its place); `icon` draws an accent glyph disc.
+// Honesty: the AUTO line is anchored to "in the app" — autoplay is the slot
+// engine, which only runs while the app is open, and the copy must never
+// suggest otherwise.
+const INFO_CHIPS = [
+  { k: 'stack', img: 'stack-hero', title: 'This is a Stack.', body: 'Your day, in order — do it, tick it, done.' },
+  { k: 'link',  icon: 'link',  title: 'Anything a link or file can carry.', body: 'Videos, audio, PDFs, courses — organised, at the times you choose.' },
+  { k: 'auto',  icon: 'play',  title: 'It can even play itself.', body: 'Turn AUTO on and a card starts on its own when its time arrives in the app.' },
+  { k: 'share', icon: 'share', title: 'Not just for you.', body: 'Build routines for others — any routine shares as a small file, imported from ＋.' },
+];
+
+// Accent glyphs for the chips that have no clay image. Same 24-box stroke
+// style as every icon in the app.
+const CHIP_ICONS = {
+  link: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7" /><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7" /></svg>,
+  play: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M10 8.5l6 3.5-6 3.5z" /></svg>,
+  share: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="6" cy="12" r="2.6" /><circle cx="17.5" cy="5.5" r="2.6" /><circle cx="17.5" cy="18.5" r="2.6" /><path d="M8.4 10.8l6.8-4M8.4 13.2l6.8 4" /></svg>,
+};
+
 export default function OnboardingScreen() {
   const S = useStore5();
 
@@ -134,6 +154,29 @@ export default function OnboardingScreen() {
   // SKIP — one guarded handler. Capture + stopPropagation means the tap that
   // skips can never also tick a card; a second deliberate tap ticks.
   const skipShow = (e) => { e.stopPropagation(); e.preventDefault(); setLanded(6); setAssembled(true); };
+
+  // THE INFO CAROUSEL (Vic, 2026-08-25). The mandatory facts under the show
+  // were four stacked paragraphs — "too much text, jumbled". Same information,
+  // now four bite-sized cards in a scroll-snap row that walks itself: each one
+  // an image or icon plus two short lines, one card in view at a time. The
+  // first touch hands the wheel to the user for good — an auto-carousel that
+  // fights a thumb is worse than no carousel.
+  const [chip, setChip] = React.useState(0);
+  const chipRowRef = React.useRef(null);
+  const chipTouched = React.useRef(false);
+  React.useEffect(() => {
+    if (S.onboarded || (S.obStep || 0) !== 0 || !assembled || reduceMotion) return undefined;
+    const iv = setInterval(() => {
+      if (chipTouched.current) return;
+      setChip((c) => (c + 1) % INFO_CHIPS.length);
+    }, 2800);
+    return () => clearInterval(iv);
+  }, [S.onboarded, S.obStep, assembled, reduceMotion]);
+  React.useEffect(() => {
+    const row = chipRowRef.current;
+    if (!row || !row.children[chip]) return;
+    row.scrollTo({ left: Math.max(0, row.children[chip].offsetLeft - 14), behavior: reduceMotion ? 'auto' : 'smooth' });
+  }, [chip, reduceMotion]);
 
   if (S.onboarded) return null;
 
@@ -223,16 +266,50 @@ export default function OnboardingScreen() {
 
             {assembled && (
               <div data-ob-anim style={{ animation: 'ppwRise .32s cubic-bezier(.3,1.4,.4,1) both' }}>
-                <p style={{ margin: '16px 0 0', fontSize: 14.5, fontWeight: 700, textShadow: 'var(--emboss)' }}>This is a Stack.</p>
-                <p style={{ margin: '4px 0 0', fontSize: 13, lineHeight: 1.55, color: 'var(--dim)' }}>
-                  Anything a <strong style={{ color: 'var(--ink)' }}>link</strong> or a <strong style={{ color: 'var(--ink)' }}>file</strong> can carry — organised, and presented to you at the times you choose.
-                </p>
-                <p style={{ margin: '10px 0 0', fontSize: 13, fontWeight: 700, color: 'var(--accent)', textAlign: 'center' }}>
+                <p style={{ margin: '12px 0 0', fontSize: 13.5, fontWeight: 700, color: 'var(--accent)', textAlign: 'center', textShadow: 'var(--emboss)' }}>
                   Your turn — tap a card to tick it off!
                 </p>
-                <p style={{ margin: '14px 0 0', fontSize: 12.5, lineHeight: 1.5, color: 'var(--dim)', textAlign: 'center' }}>
-                  <strong style={{ color: 'var(--ink)' }}>Not just for you</strong> — build routines for others too. Any routine <strong style={{ color: 'var(--ink)' }}>shares as a small file</strong> another person can import from the ＋ menu.
-                </p>
+
+                {/* The mandatory facts as a self-walking scroll-snap row — one
+                    card in view at a time, image or icon first, two short lines.
+                    Swipeable by hand; the first touch stops the auto-walk. */}
+                <div
+                  ref={chipRowRef}
+                  onPointerDown={() => { chipTouched.current = true; }}
+                  onScroll={(e) => {
+                    // keep the dots honest when the user swipes by hand
+                    const row = e.currentTarget;
+                    const kids = [...row.children];
+                    let best = 0, bestD = Infinity;
+                    kids.forEach((k, i) => { const d = Math.abs(k.offsetLeft - 14 - row.scrollLeft); if (d < bestD) { bestD = d; best = i; } });
+                    if (chipTouched.current) setChip(best);
+                  }}
+                  style={{ marginTop: 12, display: 'flex', gap: 10, overflowX: 'auto', scrollSnapType: 'x mandatory', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', margin: '12px -24px 0', padding: '2px 24px 6px' }}>
+                  {INFO_CHIPS.map((c) => (
+                    <div key={c.k} style={{ flex: 'none', width: 'calc(100% - 44px)', scrollSnapAlign: 'center', display: 'flex', alignItems: 'center', gap: 12, padding: '13px 15px', borderRadius: 20, ...CARD }}>
+                      {c.img ? (
+                        <img src={obImg(c.img)} alt="" decoding="async" onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }}
+                          style={{ width: 46, height: 46, flex: 'none', borderRadius: 14, objectFit: 'cover', border: '1px solid var(--rim)' }} />
+                      ) : (
+                        <span style={{ width: 46, height: 46, flex: 'none', borderRadius: 14, background: 'var(--acc-surf)', border: '1px solid var(--acc-rim)', color: 'var(--acc-ink)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--acc-glow)' }}>
+                          {CHIP_ICONS[c.icon]}
+                        </span>
+                      )}
+                      <span style={{ flex: 1, minWidth: 0 }}>
+                        <span style={{ display: 'block', fontSize: 13.5, fontWeight: 700, textShadow: 'var(--emboss)' }}>{c.title}</span>
+                        <span style={{ display: 'block', marginTop: 2, fontSize: 12, lineHeight: 1.45, color: 'var(--dim)' }}>{c.body}</span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* dots — where the walk is, tappable to jump */}
+                <div style={{ marginTop: 8, display: 'flex', justifyContent: 'center', gap: 6 }}>
+                  {INFO_CHIPS.map((c, i) => (
+                    <button key={c.k} onClick={() => { chipTouched.current = true; setChip(i); }} aria-label={'Info ' + (i + 1) + ' of ' + INFO_CHIPS.length}
+                      style={{ width: i === chip ? 18 : 7, height: 7, padding: 0, borderRadius: 999, border: 'none', background: i === chip ? 'var(--accent)' : 'var(--hairline)', transition: 'all .3s cubic-bezier(.3,1.3,.4,1)' }} />
+                  ))}
+                </div>
               </div>
             )}
           </div>
