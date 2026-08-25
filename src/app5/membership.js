@@ -34,11 +34,21 @@ export const APP_ID = 'lifestyle';
 // Vic published, because an invented URL would send buyers to a 404 with their
 // card out; while null the paywall shows an honest "not on sale yet" note instead
 // of a dead button.
-// 2026-07-31: Vic published and a real sale went through. Verified public this run
-// — anonymous GET returns 200 with title "PPWellness Lifestyle App — Premium",
-// product id EMJCL86GkinlgVlWU7QDrw== and all three prices (9.99 / 47.94 / 59.88).
+// 2026-07-31: Vic published and a real sale went through.
+//
+// ⚠ 2026-08-22 — THE HANDLE MOVED, AND GUMROAD DOES NOT FORWARD. The profile was
+// renamed victorix08 → ppwellness, and the old subdomain simply 404s: verified
+// this run, https://victorix08.gumroad.com/l/ppw-premium → 404 (no redirect to
+// follow). Every second this constant was stale, "Go Premium" sent a buyer with
+// their card out to a dead page. A store rename is therefore a CODE change here,
+// not just an account change — there is no forwarding to save us.
+//
+// Verified this run on the new host: anonymous GET → 200, page titled
+// "PPWellness Lifestyle App — Premium", all three prices present
+// (9.99 / 47.94 / 59.88).
+//
 // NEVER put a seller token or licence key here — this bundle ships to every user.
-export const GUMROAD_URL = 'https://victorix08.gumroad.com/l/ppw-premium';
+export const GUMROAD_URL = 'https://ppwellness.gumroad.com/l/ppw-premium';
 
 // Pricing shown in the paywall. Must match the Gumroad product exactly (plans spec
 // §3.1): $9.99/mo · $47.94/6mo · $59.88/yr.

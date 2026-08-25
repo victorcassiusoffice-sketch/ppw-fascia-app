@@ -9,7 +9,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
-  cachedPremium, checkoutUrl, readEntitlementCache, signOut,
+  cachedPremium, checkoutUrl, readEntitlementCache, signOut, GUMROAD_URL,
   fetchEntitlement, completeSignIn, requestSignIn, isSignedIn, OFFLINE_GRACE_MS,
 } from './membership.js';
 
@@ -149,16 +149,31 @@ describe('sign-in', () => {
   });
 });
 
+// THE 22 AUG P0. The Gumroad profile was renamed victorix08 → ppwellness and the
+// old subdomain 404s with no forwarding, so the live "Go Premium" button pointed at
+// a dead page while the app looked perfectly healthy. Nothing failed: no test, no
+// build, no console error — the only symptom was a customer landing on a 404 with
+// their card out. This asserts the seam still points at the store that exists.
+describe('the checkout URL points at a real store', () => {
+  it('uses the current Gumroad handle, over https', () => {
+    expect(GUMROAD_URL).toMatch(/^https:\/\/ppwellness\.gumroad\.com\//);
+  });
+
+  it('does not point at the retired handle, which 404s and does not redirect', () => {
+    expect(GUMROAD_URL).not.toContain('victorix08');
+  });
+});
+
 describe('checkout link', () => {
   it('carries app_user_id so the webhook can match the purchase to this account', () => {
     seedVerified();
-    const url = checkoutUrl('https://victorix08.gumroad.com/l/ppw-premium');
-    expect(url).toBe('https://victorix08.gumroad.com/l/ppw-premium?app_user_id=usr_1');
+    const url = checkoutUrl('https://ppwellness.gumroad.com/l/ppw-premium');
+    expect(url).toBe('https://ppwellness.gumroad.com/l/ppw-premium?app_user_id=usr_1');
   });
 
   it('still returns a usable link when the user id is unknown', () => {
-    expect(checkoutUrl('https://victorix08.gumroad.com/l/ppw-premium', null))
-      .toBe('https://victorix08.gumroad.com/l/ppw-premium');
+    expect(checkoutUrl('https://ppwellness.gumroad.com/l/ppw-premium', null))
+      .toBe('https://ppwellness.gumroad.com/l/ppw-premium');
   });
 
   it('returns null while GUMROAD_URL is unset, so no dead button ships', () => {
@@ -167,6 +182,6 @@ describe('checkout link', () => {
 
   it('refuses a non-https URL', () => {
     expect(checkoutUrl('javascript:alert(1)')).toBeNull();
-    expect(checkoutUrl('http://victorix08.gumroad.com/l/x')).toBeNull();
+    expect(checkoutUrl('http://ppwellness.gumroad.com/l/x')).toBeNull();
   });
 });
