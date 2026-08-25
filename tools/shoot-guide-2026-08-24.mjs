@@ -57,8 +57,12 @@ async function mounted(page) {
 }
 
 async function go(page, seedless) {
-  await page.goto(BASE + '/', { waitUntil: 'networkidle' });
-  await page.waitForTimeout(seedless ? 1400 : 1200);
+  // domcontentloaded, NOT networkidle: the starter deck loads YouTube
+  // thumbnails from i.ytimg.com, and a slow external network keeps the page
+  // from ever going "idle" — which failed the whole suite while the app was
+  // fine. The app's own readiness is what each section asserts explicitly.
+  await page.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.waitForTimeout(seedless ? 1800 : 1600);
 }
 
 function clean(errs, label) {
