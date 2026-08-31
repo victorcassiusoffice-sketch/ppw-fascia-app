@@ -117,6 +117,11 @@ function initialState() {
     sounds: true,
     // repeat picker (repeatId = item being edited, null = closed)
     repeatId: null,
+    // edit-stack sheet (editId = the item whose settings are open, null = closed).
+    // The one place a stack's every setting can be changed after it was added —
+    // a note's message + Still/Pulse/Scroll/Flash style especially, which had no
+    // re-edit path at all before (Vic 2026-08-31).
+    editId: null,
     // terms & health disclaimer overlay
     termsOpen: false,
     // onboarding (first run: onboarded=false → wizard over the app)
@@ -313,6 +318,19 @@ export function setItemTime(id, time) {
 }
 export function deleteItem(id) {
   setState({ deckItems: state.deckItems.filter((it) => it.id !== id), selectedIds: state.selectedIds.filter((x) => x !== id) });
+  saveStacks();
+}
+// ── edit-stack sheet (Vic 2026-08-31): re-open ANY stack's settings ──────────
+// The gap this closes: a note (kind:'note') had NO re-edit path at all. Once
+// addNote() had run you could change its time and repeat, but never its message
+// or its Still/Pulse/Scroll/Flash style — so a wrong word or the wrong animation
+// meant deleting it and starting again. `updateItem` is the generic in-place
+// patch the EditStackSheet writes through; openEditItem/closeEditItem drive the
+// sheet. One-layer-at-a-time (F2): opening it closes the add + account sheets.
+export function openEditItem(id) { setState({ editId: id, addOpen: false, accountOpen: false }); }
+export function closeEditItem() { setState({ editId: null }); }
+export function updateItem(id, patch) {
+  setState({ deckItems: state.deckItems.map((it) => it.id === id ? { ...it, ...patch } : it) });
   saveStacks();
 }
 export function reorderDeck(orderedIds) {
@@ -758,14 +776,17 @@ export function startSlotEngine() {
       if (hm === S.eatOpen && _lastFast !== key + '|open') { _lastFast = key + '|open'; setState({ slotPop: { id: null, title: 'Eating window open', time: hm, hasUrl: false } }); return; }
       if (hm === S.eatClose && _lastFast !== key + '|close') { _lastFast = key + '|close'; setState({ slotPop: { id: null, title: 'Eating window closed · fasting begins', time: hm, hasUrl: false } }); return; }
     }
-    const eating = S.fastOn ? (hm >= S.eatOpen && hm < S.eatClose) : false;
+    const eating = S.fastOn ? isInEatWindow(hm, S.eatOpen, S.eatClose) : false;
     if (eating !== S.eatingNow) setState({ eatingNow: eating });
     const item = stackFor(key).find((x) => x.time === hm);
     if (!item) return;
     const fireKey = key + '|' + item.id + '|' + hm;
     if (_lastFire === fireKey) return;
     _lastFire = fireKey;
-    if (item.kind === 'note') { showNotePop({ text: item.title, anim: item.noteAnim, speed: item.noteSpeed, dur: item.noteDur }); return; }
+    // A note whose message was edited down to empty must not fire a blank
+    // full-screen popup — the add path forbids empty, so the edit path can't
+    // leave one that shows (Vic 2026-08-31 edit-stack review).
+    if (item.kind === 'note') { if (String(item.title || '').trim()) showNotePop({ text: item.title, anim: item.noteAnim, speed: item.noteSpeed, dur: item.noteDur }); return; }
     if (item.url && (S.autoplay || item.auto)) { setState({ playerItem: item, slotPop: null }); return; }
     if (S.reminders) { setState({ slotPop: { id: item.id, title: item.title, time: item.time, hasUrl: !!(item.url || item.embed) } }); }
   }, 20000);
@@ -817,7 +838,7 @@ export function finishOnboarding() {
   save('integrations', JSON.stringify(S.integrations));
   save('courses', JSON.stringify(S.courseLinks));
   savePrefsNow();
-  save('prefs2', JSON.stringify({ d: S.discreet, t: S.dayT, f: { on: S.fastOn, o: S.eatOpen, c: S.eatClose } }));
+  savePrefs2();
   // F2: land on the day view with NOTHING left open behind. Before this, the
   // account sheet the user opened at the very start was still sitting there.
   setState({ onboarded: true, obStep: 0, screen: 'stack', accountOpen: false, premiumUpsell: null });
@@ -955,6 +976,57 @@ export function signOutMembership() {
 export function setSounds(on) { save('sounds', on ? '1' : '0'); setState({ sounds: !!on }); }
 export function setReminders(on) { save('reminders', on ? '1' : '0'); setState({ reminders: !!on }); }
 export function setAutoplay(on) { save('autoplay', on ? '1' : '0'); setState({ autoplay: !!on }); }
+
+// ── intermittent-fasting eating window (Vic 2026-08-31) ─────────────────────
+// The state (fastOn/eatOpen/eatClose), the corner F/E badge and the open/close
+// reminders already shipped — the slot engine fires them and FastingBadge reads
+// them — but nothing let the user TURN IT ON or set the window. The old app had
+// that UI ("with options like it did before"): presets 16:8 / 18:6 / 20:4 plus
+// a custom window. This re-creates it, driving the state App5 already consumes.
+//
+// A preset is expressed as EATING hours; the close time is derived from the open
+// time so picking "16:8" keeps the user's chosen open and moves the close.
+export const FAST_PRESETS = [
+  { key: '16:8', label: '16:8', eatH: 8 },
+  { key: '18:6', label: '18:6', eatH: 6 },
+  { key: '20:4', label: '20:4', eatH: 4 },
+  { key: 'omad', label: 'OMAD', eatH: 1 },
+];
+// add whole/fractional hours to an "HH:MM" clock time, wrapping past midnight.
+export function addHoursHM(hm, hours) {
+  const [h, m] = String(hm || '00:00').split(':').map(Number);
+  const t = ((((h || 0) * 60 + (m || 0)) + Math.round(hours * 60)) % 1440 + 1440) % 1440;
+  return String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0');
+}
+// eating-window length in whole hours (close − open, wrapping), or null if it
+// doesn't land on a whole hour — used only to light up the matching preset chip.
+export function fastWindowHours(open, close) {
+  const d = (_toMin(close) - _toMin(open) + 1440) % 1440;
+  const h = (d === 0 ? 1440 : d) / 60;
+  return Number.isInteger(h) ? h : null;
+}
+// Whether an "HH:MM" time falls inside the eating window — WRAP-AWARE, so an
+// evening window that crosses midnight (18:00 → 02:00, which the 16:8 preset can
+// derive from a late open) is handled. The slot engine and FastingBadge BOTH use
+// this, so the F/E badge, the eating state, and the open/close popups can never
+// contradict each other.
+export function isInEatWindow(hm, open, close) {
+  const t = _toMin(hm), o = _toMin(open), c = _toMin(close);
+  if (o === c) return true;              // a full 24h "window"
+  return o < c ? (t >= o && t < c) : (t >= o || t < c);
+}
+// write prefs2 (discreet + day times + fasting) from live state. Single source
+// so setFasting and finishOnboarding can never encode the blob differently.
+function savePrefs2() {
+  const S = state;
+  save('prefs2', JSON.stringify({ d: S.discreet, t: S.dayT, f: { on: S.fastOn, o: S.eatOpen, c: S.eatClose } }));
+}
+// patch any of { fastOn, eatOpen, eatClose } and persist. The slot engine and
+// FastingBadge pick the new values up on their own.
+export function setFasting(patch) {
+  setState(patch);
+  savePrefs2();
+}
 // vision / a11y — easy-read (bold + full-strength dim) and zoom (.85–1.4)
 export function setA11y(patch) {
   const a = { on: !!(patch.on !== undefined ? patch.on : state.a11y.on), zoom: patch.zoom !== undefined ? patch.zoom : state.a11y.zoom };
@@ -1152,7 +1224,7 @@ export function tomorrowKey() {
  */
 export function anySheetOpen(s = state) {
   return !!(s.aiOpen || s.addOpen || s.termsOpen || s.accountOpen || s.completedOpen ||
-            s.playerItem || s.scheduleTarget || s.repeatId || s.premiumUpsell || !s.onboarded);
+            s.playerItem || s.scheduleTarget || s.repeatId || s.editId || s.premiumUpsell || !s.onboarded);
 }
 
 /** Which day the Calendar's panel is showing (unpadded `YYYY-M-D`, or null). */

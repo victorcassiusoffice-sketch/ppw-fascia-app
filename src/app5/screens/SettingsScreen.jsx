@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { SOFT, BGS, bgUrl } from '../theme5.js';
-import { useStore5, setTheme, setState, openTerms, setSounds, setReminders, setAutoplay, setA11y, openJournal, setHintsOff } from '../store5.js';
+import { useStore5, setTheme, setState, openTerms, setSounds, setReminders, setAutoplay, setA11y, openJournal, setHintsOff, setFasting, FAST_PRESETS, addHoursHM, fastWindowHours } from '../store5.js';
 import { QUEST_IDS, doneCountOf } from '../coach/quests5.js';
 import MembershipCard from './MembershipCard.jsx';
 import { InstallAppCard } from './InstallAppCard.jsx';
@@ -157,6 +157,57 @@ export default function SettingsScreen() {
           </div>
           <Switch on={S.autoplay} onTap={() => setAutoplay(!S.autoplay)} label="Toggle autoplay" />
         </div>
+      </div>
+
+      {/* Fasting — intermittent-fasting eating window (Vic 2026-08-31). The F/E
+          corner badge and the "eating window open/closed" reminders already
+          shipped (slot engine + FastingBadge); this is the config UI they were
+          missing. Preset options 16:8 / 18:6 / 20:4 / OMAD "like it did before",
+          plus a custom window via the two time pickers. */}
+      <Eyebrow>Fasting</Eyebrow>
+      <div style={{ marginTop: 12, borderRadius: 24, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)', overflow: 'hidden' }}>
+        <div style={ROW}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 15, fontWeight: 500 }}>Intermittent fasting</div>
+            <div style={{ marginTop: 2, fontSize: 12.5, color: 'var(--dim)' }}>Set an eating window. A small F / E badge shows your status, and reminders nudge you when the window opens and closes.</div>
+          </div>
+          <Switch on={S.fastOn} onTap={() => setFasting({ fastOn: !S.fastOn })} label="Toggle intermittent fasting" />
+        </div>
+        {S.fastOn && (() => {
+          const winH = fastWindowHours(S.eatOpen, S.eatClose);
+          const matched = FAST_PRESETS.some((p) => winH === p.eatH);
+          return (
+            <>
+              {DIV}
+              <div style={{ padding: '16px 18px' }}>
+                <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--dim)' }}>Eating window</div>
+                <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {FAST_PRESETS.map((p) => {
+                    const active = winH === p.eatH;
+                    return (
+                      <button key={p.key} onClick={() => setFasting({ eatClose: addHoursHM(S.eatOpen, p.eatH) })}
+                        style={{ height: 40, padding: '0 16px', borderRadius: 12, border: `1px solid ${active ? 'var(--acc-rim)' : 'var(--rim)'}`, background: active ? 'var(--acc-surf)' : 'transparent', color: active ? 'var(--acc-ink)' : 'var(--dim)', fontSize: 12.5, fontWeight: 600, textShadow: 'var(--label-shadow)' }}>
+                        {p.label}
+                      </button>
+                    );
+                  })}
+                  {/* no chip lights up when the times don't match a preset — that IS "custom" */}
+                  {!matched && <span style={{ display: 'flex', alignItems: 'center', height: 40, padding: '0 8px', borderRadius: 12, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontSize: 12.5, fontWeight: 600 }}>Custom</span>}
+                </div>
+                <div style={{ marginTop: 14, display: 'flex', gap: 12 }}>
+                  <label style={{ flex: 1 }}>
+                    <span style={{ display: 'block', fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--dim)' }}>Opens</span>
+                    <input type="time" value={S.eatOpen} onChange={(e) => setFasting({ eatOpen: e.target.value })} aria-label="Eating window opens" style={{ marginTop: 6, width: '100%', height: 44, padding: '0 12px', borderRadius: 12, border: '1px solid var(--hairline)', background: 'var(--track)', boxShadow: 'var(--inset)', color: 'var(--ink)', outline: 'none', fontSize: 16, fontWeight: 600 }} />
+                  </label>
+                  <label style={{ flex: 1 }}>
+                    <span style={{ display: 'block', fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--dim)' }}>Closes</span>
+                    <input type="time" value={S.eatClose} onChange={(e) => setFasting({ eatClose: e.target.value })} aria-label="Eating window closes" style={{ marginTop: 6, width: '100%', height: 44, padding: '0 12px', borderRadius: 12, border: '1px solid var(--hairline)', background: 'var(--track)', boxShadow: 'var(--inset)', color: 'var(--ink)', outline: 'none', fontSize: 16, fontWeight: 600 }} />
+                  </label>
+                </div>
+              </div>
+            </>
+          );
+        })()}
       </div>
 
       {/* THE GUIDE — its permanent home.

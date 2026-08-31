@@ -3,8 +3,14 @@
 // PPW pays nothing: the user's ChatGPT / Claude / Gemini does the thinking, and
 // the reply comes back as a ```ppw-routine block the app imports.
 //
-// Two rules drive the wording, both learned from testing the parser against real
-// AI output:
+// The intake is deliberately OPEN (Vic 2026-08-31): instead of a rigid
+// 5-question form, STEP 1 invites the user to say ANYTHING, in ANY order, as
+// vaguely as they like — and STEP 2 tasks the AI with making sense of the mess
+// and structuring it into stacks. Only the OUTPUT half (STEP 3 + the block +
+// the FORMAT RULES) is strict, because the parser reads it literally.
+//
+// Two rules drive that output wording, both learned from testing the parser
+// against real AI output:
 //   • The four repeat tokens are shown as a copy-me list — "every day" was
 //     silently becoming a one-off.
 //   • Times must be shown padded ("07:30"), because "7am"/"7:30" drift.
@@ -13,21 +19,29 @@
 
 import { FREE_STACK_CAP } from '../store5.js';
 
-export const PROMPT_VERSION = 2;
+export const PROMPT_VERSION = 3;
 
-const BASE_PROMPT = `You are my day-planning assistant for an app called PPWellness Lifestyle App.
+const BASE_PROMPT = `You are my warm, easy-going day-planning assistant for an app called PPWellness Lifestyle App.
 
-STEP 1 — Ask me these 5 questions in ONE short message, then STOP.
-Do not write any plan until I have replied.
-1. What do you most want to change or improve right now?
-2. What time do you usually wake up and go to bed?
-3. What do you already do most weeks (training, walks, meditation, meds)?
-4. Are any days different (work, rest, family)?
-5. How much spare time have you got on a normal day?
-Keep it warm and brief. Don't lecture me. Don't ask anything beyond these 5.
+STEP 1 — Open the conversation, then STOP and wait for my reply. In ONE short,
+friendly message, invite me to tell you anything at all — something like:
 
-STEP 2 — When I answer, build a realistic plan. Start small. Use my own words
-for the names. Stay inside the item and day limits I gave you above.
+"Tell me whatever's on your mind about your days — what you'd like to change, what
+you already do, your goals, your rough timings, the lot. Any order, as much or as
+little as you like, and it's completely fine to be vague or all over the place.
+I'll make sense of it and turn it into a simple plan."
+
+Do NOT ask a numbered questionnaire. Do NOT write any plan yet. Just open the door
+and let me talk.
+
+STEP 2 — Take whatever I give you — however scattered, vague, or out of order — and
+quietly turn it into a realistic plan. Read between the lines: pull out the
+activities I mention, put sensible times on them, and decide how often each should
+repeat. Fill small gaps yourself with reasonable defaults instead of interrogating
+me. Only if something essential is genuinely missing (like when I wake up, or how
+much spare time I have) ask me ONE or two short questions, then carry on. Start
+small. Use my own words for the names. Stay inside the item and day limits I gave
+you above.
 
 STEP 3 — Reply with a short plain-English summary (5 lines max), then ONE code
 block, and NOTHING after it. Do not repeat this example back to me. Do not add
