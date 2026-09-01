@@ -28,16 +28,17 @@ import { NotePopup, SlotReminder } from './screens/Popups.jsx';
 import SchedulePicker from './screens/SchedulePicker.jsx';
 import AiBridgeSheet from './assistant/AiBridgeSheet.jsx';
 import CoachMarks, { hasSeenTour } from './coach/CoachMarks.jsx';
+import EditStackSheet from './screens/EditStackSheet.jsx';
 import {
   useStore5, getState, setState, save,
   stackFor, todayKey, markDone, setItemTime, deleteItem, overLimit,
-  openAdd, backToToday, openPlayer, openCompleted, openAccount, openRepeat, repeatLabel,
+  openAdd, backToToday, openPlayer, openCompleted, openAccount, openRepeat, openEditItem, repeatLabel,
   startSlotEngine, orderedStackFor, reorderTimed, reorderDeck, toggleAuto,
   toggleSelect, selectAll, clearSelection, deleteSelected, safeUrl,
   onlyExamplesLeft, clearExamples,
   syncEntitlement, applyServerEntitlement, syncProfile,
   openAiBridge, recordUseDay, guideWelcomed, markGuideWelcomed, anySheetOpen, stashCoachPosition,
-  guideFocusItem,
+  guideFocusItem, isInEatWindow,
 } from './store5.js';
 import GuideDisc from './screens/GuideDisc.jsx';
 import CompletedRing from './screens/CompletedRing.jsx';
@@ -71,6 +72,7 @@ const INote = svg(<><path d="M5 4h14v11l-4 5H5z" /><path d="M15 20v-5h4M8.5 9h7M
 const IPlay = <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="M9 6.2v11.6l9.4-5.8L9 6.2z" /></svg>;
 const ITrash = svg(<path d="M4 7h16M10 4h4M6.5 7l1 13h9l1-13M10 11v6M14 11v6" />, { sw: 1.7 });
 const ISnooze = svg(<><circle cx="12" cy="13" r="8" /><path d="M12 9v4l2.5 2M9 2h6" /></>, { sw: 1.7, w: 16, h: 16 });
+const IEdit = svg(<><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" /></>, { sw: 1.7, w: 16, h: 16 });
 
 // time "HH:MM" → minutes for ordering
 const toMin = (t) => { const [h, m] = String(t || '00:00').split(':').map(Number); return (h || 0) * 60 + (m || 0); };
@@ -304,10 +306,17 @@ function StackScreen() {
             )}
             <span style={{ minWidth: 0 }}>{next.meta}</span>
           </div>
-          <button onClick={() => openRepeat(next.id)} aria-label="Repeat schedule" data-tour={restIsTarget ? undefined : 'item-repeat'} style={{ marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 5, minHeight: 44, background: 'none', border: 'none', padding: '10px 0', color: 'var(--dim)', fontSize: 11, fontWeight: 600, letterSpacing: '.05em' }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 2l4 4-4 4" /><path d="M3 11v-1a4 4 0 0 1 4-4h14" /><path d="M7 22l-4-4 4-4" /><path d="M21 13v1a4 4 0 0 1-4 4H3" /></svg>
-            {repeatLabel(next.repeat)}
-          </button>
+          <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+            <button onClick={() => openRepeat(next.id)} aria-label="Repeat schedule" data-tour={restIsTarget ? undefined : 'item-repeat'} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, minHeight: 44, background: 'none', border: 'none', padding: '10px 8px 10px 0', color: 'var(--dim)', fontSize: 11, fontWeight: 600, letterSpacing: '.05em' }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 2l4 4-4 4" /><path d="M3 11v-1a4 4 0 0 1 4-4h14" /><path d="M7 22l-4-4 4-4" /><path d="M21 13v1a4 4 0 0 1-4 4H3" /></svg>
+              {repeatLabel(next.repeat)}
+            </button>
+            {/* Vic 2026-08-31 — every stack is re-editable: reopen its full settings. */}
+            <button onClick={() => openEditItem(next.id)} aria-label="Edit this stack" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, minHeight: 44, background: 'none', border: 'none', padding: '10px 8px', color: 'var(--dim)', fontSize: 11, fontWeight: 600, letterSpacing: '.05em' }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" /></svg>
+              Edit
+            </button>
+          </div>
           <div style={{ marginTop: 18, display: 'flex', alignItems: 'center', gap: 10 }}>
             {safeUrl(next.url) && (
               <a href={safeUrl(next.url)} target="_blank" rel="noopener noreferrer" aria-label="Play now" style={{ height: 48, width: 52, flex: 'none', borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{IPlay}</a>
@@ -367,7 +376,7 @@ function StackScreen() {
               data-dragidx={i}
               data-tour={it.id === focusId ? 'latest-item' : undefined}
               onPointerDown={rowPointerDown(i)}
-              onClick={() => { if (suppressClick.current) return; if (S.selectedIds.length) { toggleSelect(it.id); return; } if (it.embed || it.url || it.kind === 'doc') openPlayer(it); }}
+              onClick={() => { if (suppressClick.current) return; if (S.selectedIds.length) { toggleSelect(it.id); return; } if (it.embed || it.url || it.kind === 'doc') openPlayer(it); else if (it.kind === 'note') openEditItem(it.id); }}
               style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', minHeight: 68, borderRadius: 26, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: `1px solid ${isOver ? 'var(--acc-rim)' : 'var(--rim)'}`, boxShadow: isDragged ? 'var(--elev-hi)' : 'var(--elev)', cursor: (it.embed || it.url) ? 'pointer' : 'grab', touchAction: 'pan-y', userSelect: 'none', WebkitUserSelect: 'none', transform: isDragged ? `translateY(${drag.dy}px) scale(1.03)` : 'none', zIndex: isDragged ? 5 : 1, transition: isDragged ? 'none' : 'transform .2s, border-color .2s' }}
             >
               {/* Vic 4 — small selection tick, top-left of every stack card */}
@@ -407,6 +416,12 @@ function StackScreen() {
                     the row looking different. `gap` drops to 0 because the new
                     padding now provides the separation. */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+                  {/* Vic 2026-08-31 — edit icon on every stack: opens its full
+                      settings (a note's message + Scroll/Flash style especially,
+                      which had no re-edit path before). */}
+                  <button onClick={(e) => { e.stopPropagation(); openEditItem(it.id); }} aria-label="Edit this stack" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 44, minHeight: 44, background: 'none', border: 'none', padding: '14px 12px', color: 'var(--dim)' }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" /></svg>
+                  </button>
                   <button onClick={(e) => { e.stopPropagation(); openRepeat(it.id); }} aria-label="Repeat and time options" data-tour={it.id === focusId ? 'item-repeat' : undefined} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 44, minHeight: 44, background: 'none', border: 'none', padding: '14px 12px', color: 'var(--dim)' }}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 2l4 4-4 4" /><path d="M3 11v-1a4 4 0 0 1 4-4h14" /><path d="M7 22l-4-4 4-4" /><path d="M21 13v1a4 4 0 0 1-4 4H3" /></svg>
                   </button>
@@ -456,8 +471,8 @@ function FastingBadge() {
   const [open, setOpen] = React.useState(false);
   if (!S.fastOn) return null;
   const now = new Date();
-  const mins = now.getHours() * 60 + now.getMinutes();
-  const eating = mins >= toMin(S.eatOpen) && mins < toMin(S.eatClose);
+  const hm = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+  const eating = isInEatWindow(hm, S.eatOpen, S.eatClose);
   return (
     <>
       <button onClick={() => setOpen(!open)} aria-label="Fasting status" style={{ position: 'absolute', top: 'calc(12px + env(safe-area-inset-top, 0px))', right: 14, zIndex: 31, width: 34, height: 34, borderRadius: 999, border: '1px solid var(--rim)', background: 'var(--surface-strong)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', boxShadow: 'var(--elev)', color: 'var(--accent)', fontWeight: 800, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -766,6 +781,7 @@ export default function App5() {
         <UpdateBar />
         <AccountSheet />
         <RepeatSheet />
+        <EditStackSheet />
         <SlotReminder />
         <NotePopup />
         <OnboardingScreen />
