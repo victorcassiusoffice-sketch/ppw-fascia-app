@@ -28,6 +28,29 @@
 
 import { FREE_STACK_CAP } from '../store5.js';
 
+// How much of the existing day the AI is allowed to see. The user picks this in
+// the sheet before the prompt is built, and that choice IS the consent — nothing
+// is echoed unless they asked for it.
+//   FRESH   nothing echoed. The day is empty, or they never asked.
+//   AROUND  echoed as fixed. "Keep all of it, fit new things around it."
+//   REBUILD echoed as a draft. "Send the whole day back." Replaceable only.
+export const PLAN_MODE = { FRESH: 'fresh', AROUND: 'around', REBUILD: 'rebuild' };
+
+// Redaction is by KIND, never by wording. A note's title IS the user's private
+// affirmation and a document's title is a filename, so neither is ever sent —
+// only the fact that the slot is taken. Doing it by kind means a future kind
+// (a medication) is excluded the day it exists, not the day someone remembers
+// to update a sentence.
+const PRIVATE_KINDS = { note: 'a note to myself', doc: 'a document', med: 'something I take' };
+export const isPrivateKind = (it) => !!(it && PRIVATE_KINDS[it.kind]);
+/** The stacks a REBUILD is allowed to replace. Private ones are pinned. */
+export const replaceableItems = (items) => (Array.isArray(items) ? items : []).filter((it) => !isPrivateKind(it));
+
+const REPEAT_WORD = { daily: 'every day', weekly: 'weekly', once: 'once' };
+const repeatWord = (r) => REPEAT_WORD[r] || (r ? `every ${r} days` : 'once');
+const byTime = (a, b) => String(a.time || '99:99').localeCompare(String(b.time || '99:99'));
+const planLine = (it) => `  ${it.time || 'anytime'}  ${PRIVATE_KINDS[it.kind] || String(it.title || '').slice(0, 80)}  ·  ${repeatWord(it.repeat)}`;
+
 // Mirrors the shipped defaults in store5.js (:129-133). Kept here so buildPrompt
 // can tell "the user chose this" apart from "nobody has ever set it".
 const DEFAULT_WAKE = '07:00';
@@ -114,9 +137,14 @@ should check with a qualified professional, and keep the plan gentle.`;
  * guarantees the upsell wall on first use. Always compute the number from live
  * state, and from the shared constant so a cap change lands here too (W12).
  */
-export function buildPrompt(S) {
-  const used = (S && Array.isArray(S.deckItems)) ? S.deckItems.length : 0;
+export function buildPrompt(S, mode = PLAN_MODE.FRESH) {
+  const all = (S && Array.isArray(S.deckItems)) ? S.deckItems : [];
   const premium = !!(S && S.premium);
+  // A rebuild replaces the stacks it was shown, so those slots are about to be
+  // free — only the pinned private ones still count against the cap. Charging
+  // the user for stacks the AI is about to delete made "redo my whole day" ask
+  // for a SMALLER plan than the day it was replacing.
+  const used = mode === PLAN_MODE.REBUILD ? all.length - replaceableItems(all).length : all.length;
   // Floor at 0, not 1. Math.max(1, …) told a user sitting at the cap there was
   // "room for 1 more thing"; they did the whole round trip out to their AI and
   // Apply refused on return (addItemsToPlan checks used + adds > cap).
@@ -154,7 +182,57 @@ export function buildPrompt(S) {
     );
   }
 
-  return `Some context about me: ${bits.join(' ')}\n\n${BASE_PROMPT}`;
+  return `Some context about me: ${bits.join(' ')}\n\n${planEcho(S, mode)}${BASE_PROMPT}`;
+}
+
+/**
+ * planEcho(S, mode) — what the AI is told about the day that already exists.
+ *
+ * Without this the AI is blind: it can only invent new things and bolt them on,
+ * which is why asking it to "reorganise my week" used to return a second set of
+ * stacks next to the first. Empty string unless the user chose a mode that needs
+ * it, so the default behaviour is unchanged and nothing leaves by accident.
+ */
+export function planEcho(S, mode) {
+  const all = (S && Array.isArray(S.deckItems)) ? S.deckItems : [];
+  if (!all.length || mode === PLAN_MODE.FRESH || !mode) return '';
+
+  const open = all.filter((it) => !isPrivateKind(it)).slice(0, 40).sort(byTime);
+  const shut = all.filter(isPrivateKind).slice(0, 20).sort(byTime);
+
+  if (mode === PLAN_MODE.AROUND) {
+    const lines = [...open, ...shut].sort(byTime).map(planLine);
+    return [
+      'WHAT IS ALREADY IN MY DAY — all of it stays exactly as it is:',
+      ...lines,
+      '',
+      'Do not repeat any of those back to me, and do not put anything on top of',
+      'those times. Send me ONLY the new things, arranged around what is above.',
+      '', '',
+    ].join('\n');
+  }
+
+  // REBUILD
+  const out = [
+    'MY DAY AS IT STANDS — you are rebuilding this, so treat it as a draft:',
+    ...open.map(planLine),
+  ];
+  if (shut.length) {
+    out.push(
+      '',
+      'These are private and they stay exactly where they are. Plan around them,',
+      'do not repeat them, and do not try to guess what they say:',
+      ...shut.map(planLine),
+    );
+  }
+  out.push(
+    '',
+    'Send me the WHOLE day back in one block: keep what still works (same wording),',
+    'move what belongs at a different time, drop what is not earning its place, and',
+    'add what is missing. Anything from the draft you leave out is removed.',
+    '', '',
+  );
+  return out.join('\n');
 }
 
 export { BASE_PROMPT };

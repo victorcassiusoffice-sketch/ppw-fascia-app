@@ -9,8 +9,8 @@
 // Graphite neumorphic: opaque surfaces, dual-shadow, no blur.
 
 import React from 'react';
-import { useStore5, setState, closeAiBridge, addItemsToPlan, removeItemsByIds, parsePlanDoc, dateKeyFromOffset, finishOnboarding, setAiStep, recordQuest, FREE_STACK_CAP } from '../store5.js';
-import { buildPrompt } from './aiPrompt.js';
+import { useStore5, setState, closeAiBridge, addItemsToPlan, applyPlanRebuild, removeItemsByIds, restoreItems, parsePlanDoc, dateKeyFromOffset, finishOnboarding, setAiStep, recordQuest, FREE_STACK_CAP } from '../store5.js';
+import { buildPrompt, PLAN_MODE, replaceableItems } from './aiPrompt.js';
 import { extractPlanCandidates, PARSE_HELP } from './parsePlan.js';
 import { sharePrompt, copyText, readText, canShare } from './clipboard.js';
 
@@ -38,6 +38,10 @@ export default function AiBridgeSheet() {
   const [applied, setApplied] = React.useState(null); // { ids, count }
   const [toast, setToast] = React.useState(null);
   const [capErr, setCapErr] = React.useState(null);   // free-cap refusal, shown in place
+  // Default to the non-destructive one. A rebuild deletes, so it is never where
+  // someone lands by accident.
+  const [mode, setMode] = React.useState(PLAN_MODE.AROUND);
+  const [confirmReplace, setConfirmReplace] = React.useState(false);
   const [showPrompt, setShowPrompt] = React.useState(false);
 
   // The guide has to know where the user is inside this sheet, and the step
@@ -58,6 +62,15 @@ export default function AiBridgeSheet() {
   // choice, so closing it returns there rather than stranding the user.
   const midOnboarding = !S.onboarded;
 
+  // The mode only means anything once there is a day to keep or rebuild. With an
+  // empty Stack there is nothing to echo, so the question is never asked and
+  // nothing about the existing plan is sent.
+  const deck = Array.isArray(S.deckItems) ? S.deckItems : [];
+  const replaceable = replaceableItems(deck);
+  const privateCount = deck.length - replaceable.length;
+  const effMode = deck.length ? mode : PLAN_MODE.FRESH;
+  const rebuilding = effMode === PLAN_MODE.REBUILD;
+
   // The reset runs here, in the same breath as the close. It used to run 250ms
   // later, which left a window in which reopening the sheet republished the OLD
   // step: Quest 6 opens this sheet on its very first step, and the empty Stack's
@@ -65,7 +78,7 @@ export default function AiBridgeSheet() {
   // wrote a stale 3 into the store and the quest skipped its own paste step.
   // The delay protected nothing — the sheet stops rendering the instant aiOpen
   // clears, so there is no frame in which the emptied screen can be seen.
-  const close = () => { closeAiBridge(); setStep(1); setRaw(''); setParsed(null); setAlts([]); setErr(null); setApplied(null); setShowPrompt(false); setCapErr(null); };
+  const close = () => { closeAiBridge(); setStep(1); setRaw(''); setParsed(null); setAlts([]); setErr(null); setApplied(null); setShowPrompt(false); setCapErr(null); setMode(PLAN_MODE.AROUND); setConfirmReplace(false); };
 
   /** Leaving for good: the user arrived somewhere, so onboarding is done. */
   const finishAndClose = () => { if (midOnboarding) finishOnboarding(); close(); };
@@ -80,7 +93,7 @@ export default function AiBridgeSheet() {
   const flash = (text, ms = 2200) => { setToast(text); setTimeout(() => setToast(null), ms); };
 
   const send = async () => {
-    const r = await sharePrompt(buildPrompt(S), 'Plan my day');
+    const r = await sharePrompt(buildPrompt(S, effMode), 'Plan my day');
     if (r.cancelled) { flash('No app chosen — or copy it instead, below'); return; }
     if (r.ok) { flash(r.via === 'share' ? 'Sent — paste it into your AI' : 'Prompt copied'); setStep(2); return; }
     flash('Could not copy automatically — open “Show me the prompt” and copy it by hand', 3200);
@@ -88,7 +101,7 @@ export default function AiBridgeSheet() {
   };
 
   const copyOnly = async () => {
-    const r = await copyText(buildPrompt(S));
+    const r = await copyText(buildPrompt(S, effMode));
     if (r.ok) { flash('Prompt copied'); setStep(2); return; }
     flash('Could not copy automatically — the prompt is below, select and copy it', 3200);
     setShowPrompt(true);
@@ -129,27 +142,41 @@ export default function AiBridgeSheet() {
 
   const apply = () => {
     setCapErr(null);
-    const res = addItemsToPlan(chosen);
+    // A rebuild deletes, so it asks twice. The first tap only arms it.
+    if (rebuilding && !confirmReplace) { setConfirmReplace(true); return; }
+    const res = rebuilding
+      ? applyPlanRebuild(chosen, replaceable.map((it) => it.id))
+      : addItemsToPlan(chosen);
     // The cap refusal used to close() — throwing away the parsed plan AND the
     // pasted reply, after the user had already been out to their AI and back,
     // with no message at all. Stay on the preview so they can untick down to what
     // fits. The global UpsellModal still fires (addItemsToPlan sets premiumUpsell);
     // this is what they see the moment they dismiss it.
     if (res.upsell) {
-      setCapErr(stackFull
+      const room = rebuilding ? (res.fits ?? 0) : headroom;
+      setConfirmReplace(false);
+      setCapErr(room === 0
         ? `Your Stack is full — ${used} of ${FREE_STACK_CAP}. Delete something on your Stack, or go Premium, then come back. Your plan is still here.`
-        : `That's ${chosen.length} items but you have room for ${headroom}. Untick ${chosen.length - headroom} and try again — nothing is lost.`);
+        : `That's ${chosen.length} items but you have room for ${room}. Untick ${chosen.length - room} and try again — nothing is lost.`);
       return;
     }
     if (res.ok) {
-      setApplied({ ids: res.ids, count: res.count }); setStep(4);
+      setApplied({ ids: res.ids, count: res.count, removed: res.removed || [] }); setStep(4);
       // Someone who took the AI fork out of the wizard has just done the whole
       // of Quest 6 for real. Marking it here means the guide never asks them to
       // repeat, in a tutorial, a thing they already did in the product.
       if (midOnboarding) recordQuest('ai');
     }
   };
-  const undo = () => { if (applied) { removeItemsByIds(applied.ids); setApplied(null); close(); } };
+  // Undo has to work in both directions now: take back what was added AND put
+  // back what a rebuild deleted. The old one only ever removed.
+  const undo = () => {
+    if (!applied) return;
+    removeItemsByIds(applied.ids);
+    if (applied.removed && applied.removed.length) restoreItems(applied.removed);
+    setApplied(null);
+    close();
+  };
 
   // group the preview by day so "a whole week" is legible
   const groups = [];
@@ -198,16 +225,43 @@ export default function AiBridgeSheet() {
             </div>
             {/* data-tour: the guide points here. This button, not the ghost one
                 below it — it is the only copy path that exists on every device. */}
-            {stackFull && (
-              <div role="alert" style={{ marginTop: 18, padding: '12px 14px', borderRadius: 14, border: '1px solid var(--accent)', background: 'var(--track)', boxShadow: 'var(--inset)', fontSize: 12.5, lineHeight: 1.55, color: 'var(--accent)', fontWeight: 600 }}>
-                Your Stack is full — {used} of {FREE_STACK_CAP}. Make room first, or go Premium. Otherwise your AI writes you a plan this app cannot take.
+            {/* The choice belongs HERE, before the prompt is built — it changes
+                what the prompt says. It is only asked when there is a day to
+                keep or rebuild; an empty Stack has nothing to decide, so the
+                question never appears and nothing about the plan is sent. */}
+            {deck.length > 0 && (
+              <div style={{ marginTop: 18 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, textShadow: 'var(--emboss)' }}>
+                  You already have {deck.length} thing{deck.length === 1 ? '' : 's'} on your Stack
+                </div>
+                <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {[
+                    { k: PLAN_MODE.AROUND, t: 'Keep what I have', s: 'Your AI fits new things around it. Nothing is removed.' },
+                    { k: PLAN_MODE.REBUILD, t: 'Redo my whole day', s: `Your AI rebuilds it from scratch. Can move, change and remove${privateCount ? ' — except your notes and documents, which stay put' : ''}.` },
+                  ].map((o) => (
+                    <button key={o.k} onClick={() => { setMode(o.k); setConfirmReplace(false); }} aria-pressed={mode === o.k}
+                      style={{ padding: '12px 14px', borderRadius: 16, textAlign: 'left', border: `1px solid ${mode === o.k ? 'var(--acc-rim)' : 'var(--rim)'}`, background: mode === o.k ? 'var(--acc-surf)' : 'var(--surface)', boxShadow: 'var(--elev)' }}>
+                      <span style={{ display: 'block', fontSize: 14, fontWeight: 700, color: mode === o.k ? 'var(--acc-ink)' : 'var(--ink)' }}>{o.t}</span>
+                      <span style={{ display: 'block', marginTop: 2, fontSize: 11.5, lineHeight: 1.45, color: mode === o.k ? 'var(--acc-ink)' : 'var(--dim)', opacity: mode === o.k ? .85 : 1 }}>{o.s}</span>
+                    </button>
+                  ))}
+                </div>
+                <div style={{ marginTop: 8, fontSize: 11, lineHeight: 1.5, color: 'var(--dim)' }}>
+                  Either way your AI is shown the titles and times on your Stack, so it can work around them.
+                  {privateCount > 0 && ' Your notes and documents are never sent — only that the slot is taken.'}
+                </div>
               </div>
             )}
-            <button onClick={send} disabled={stackFull} data-tour="ai-copy" style={{ ...BTN_PRIMARY, marginTop: 20, opacity: stackFull ? .45 : 1 }}>
+            {stackFull && !rebuilding && (
+              <div role="alert" style={{ marginTop: 18, padding: '12px 14px', borderRadius: 14, border: '1px solid var(--accent)', background: 'var(--track)', boxShadow: 'var(--inset)', fontSize: 12.5, lineHeight: 1.55, color: 'var(--accent)', fontWeight: 600 }}>
+                Your Stack is full — {used} of {FREE_STACK_CAP}. Make room first, go Premium, or choose “Redo my whole day” above.
+              </div>
+            )}
+            <button onClick={send} disabled={stackFull && !rebuilding} data-tour="ai-copy" style={{ ...BTN_PRIMARY, marginTop: 20, opacity: (stackFull && !rebuilding) ? .45 : 1 }}>
               {canShare() ? 'Send to my AI' : 'Copy the prompt'}
             </button>
             {canShare() && (
-              <button onClick={copyOnly} disabled={stackFull} style={{ ...BTN_GHOST, marginTop: 10, opacity: stackFull ? .45 : 1 }}>Copy the prompt instead</button>
+              <button onClick={copyOnly} disabled={stackFull && !rebuilding} style={{ ...BTN_GHOST, marginTop: 10, opacity: (stackFull && !rebuilding) ? .45 : 1 }}>Copy the prompt instead</button>
             )}
             <button onClick={() => setStep(2)} style={{ ...BTN_GHOST, marginTop: 10, border: 'none' }}>I’ve already got a reply →</button>
 
@@ -219,7 +273,7 @@ export default function AiBridgeSheet() {
             </button>
             {showPrompt && (
               <textarea
-                readOnly value={buildPrompt(S)} aria-label="The prompt to send to your AI"
+                readOnly value={buildPrompt(S, effMode)} aria-label="The prompt to send to your AI"
                 onFocus={(e) => e.target.select()}
                 style={{ marginTop: 10, width: '100%', minHeight: 170, padding: 14, borderRadius: 16, border: '1px solid var(--hairline)', background: 'var(--track)', boxShadow: 'var(--inset)', color: 'var(--ink)', outline: 'none', fontSize: 12.5, lineHeight: 1.5, fontFamily: 'inherit', resize: 'vertical' }}
               />
@@ -325,8 +379,15 @@ export default function AiBridgeSheet() {
                 {capErr}
               </div>
             )}
-            <button onClick={apply} disabled={!chosen.length} style={{ ...BTN_PRIMARY, marginTop: capErr ? 12 : 22, opacity: chosen.length ? 1 : .45 }}>
-              Add {chosen.length} to my day
+            {rebuilding && replaceable.length > 0 && (
+              <div style={{ marginTop: 16, padding: '12px 14px', borderRadius: 14, border: `1px solid ${confirmReplace ? 'var(--accent)' : 'var(--rim)'}`, background: 'var(--track)', boxShadow: 'var(--inset)', fontSize: 12.5, lineHeight: 1.55, color: confirmReplace ? 'var(--accent)' : 'var(--dim)', fontWeight: confirmReplace ? 700 : 500 }}>
+                {confirmReplace
+                  ? `This removes the ${replaceable.length} thing${replaceable.length === 1 ? '' : 's'} already on your Stack. Tap again to confirm — you can undo straight after.`
+                  : `Replacing will remove the ${replaceable.length} thing${replaceable.length === 1 ? '' : 's'} already on your Stack${privateCount ? `, and keep your ${privateCount} note${privateCount === 1 ? '' : 's'} and document${privateCount === 1 ? '' : 's'}` : ''}.`}
+              </div>
+            )}
+            <button onClick={apply} disabled={!chosen.length} style={{ ...BTN_PRIMARY, marginTop: (capErr || rebuilding) ? 12 : 22, opacity: chosen.length ? 1 : .45 }}>
+              {rebuilding ? (confirmReplace ? `Yes — replace my day with these ${chosen.length}` : `Replace my day with these ${chosen.length}`) : `Add ${chosen.length} to my day`}
             </button>
             </div>
             <button onClick={() => setStep(2)} style={{ ...BTN_GHOST, marginTop: 10, border: 'none' }}>← Paste a different reply</button>
@@ -341,7 +402,7 @@ export default function AiBridgeSheet() {
             </div>
             <div style={{ marginTop: 20, fontSize: 22, fontWeight: 700, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>Added to your day</div>
             <p style={{ margin: '8px auto 0', maxWidth: 260, fontSize: 14, lineHeight: 1.55, color: 'var(--dim)' }}>
-              {applied.count} thing{applied.count === 1 ? '' : 's'} scheduled. You can edit or delete any of them like anything else.
+              {applied.count} thing{applied.count === 1 ? '' : 's'} scheduled{applied.removed && applied.removed.length ? `, ${applied.removed.length} removed` : ''}. You can edit or delete any of them like anything else.
             </p>
             <button onClick={finishAndClose} style={{ ...BTN_PRIMARY, marginTop: 24 }}>See my stack</button>
             <button onClick={undo} style={{ ...BTN_GHOST, marginTop: 10 }}>Undo — remove them again</button>

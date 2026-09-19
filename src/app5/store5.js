@@ -623,16 +623,10 @@ export function parsePlanDoc(data) {
  * Each item carries _day (offset) and _repeat. Untimed items stagger from 09:00.
  * Free tier: the 10-stack cap is checked ONCE for the whole batch.
  */
-export function addItemsToPlan(items) {
-  const list = Array.isArray(items) ? items : [];
-  if (!list.length) return { ok: false, reason: 'empty' };
-  if (!state.premium && state.deckItems.length + list.length > FREE_STACK_CAP) {
-    setState({ premiumUpsell: FREE_CAP_UPSELL });
-    return { upsell: true };
-  }
+function stageItems(list) {
   const base = 9 * 60;
   let untimed = 0;
-  const added = list.map((it) => {
+  return list.map((it) => {
     const { _day, _repeat, ...rest } = it;
     let time = it.time;
     if (!time) {
@@ -641,11 +635,62 @@ export function addItemsToPlan(items) {
     }
     return { ...rest, id: uid('ai'), time, anchor: dateKeyFromOffset(_day || 0), repeat: _repeat || 'once' };
   });
+}
+
+export function addItemsToPlan(items) {
+  const list = Array.isArray(items) ? items : [];
+  if (!list.length) return { ok: false, reason: 'empty' };
+  if (!state.premium && state.deckItems.length + list.length > FREE_STACK_CAP) {
+    setState({ premiumUpsell: FREE_CAP_UPSELL });
+    return { upsell: true };
+  }
+  const added = stageItems(list);
   // Guarded like its two sibling call sites. Today list.length >= 1 guarantees a
   // non-empty `added`, but an op-based apply (drops only) would crash here.
   setState({ deckItems: [...state.deckItems, ...added], lastAddedId: added.length ? added[added.length - 1].id : state.lastAddedId });
   saveStacks();
   return { ok: true, count: added.length, ids: added.map((a) => a.id) };
+}
+
+/**
+ * applyPlanRebuild(items, replaceIds) — the "Start fresh" apply.
+ *
+ * Removes the stacks the AI was actually shown as replaceable, then adds what it
+ * sent back. Anything private (a note, a document) was never offered to the AI
+ * and is never touched here — see isPrivateKind in aiPrompt.js. The removed
+ * stacks come back in full so Undo can restore them; the append-only Undo could
+ * only ever take things away again, which is useless once a rebuild can delete.
+ */
+export function applyPlanRebuild(items, replaceIds) {
+  const list = Array.isArray(items) ? items : [];
+  if (!list.length) return { ok: false, reason: 'empty' };
+  const kill = new Set(replaceIds || []);
+  const removed = state.deckItems.filter((it) => kill.has(it.id));
+  const kept = state.deckItems.filter((it) => !kill.has(it.id));
+  // The cap counts what SURVIVES, not what was there before. A rebuild that
+  // shrinks the day must never trip the upsell.
+  if (!state.premium && kept.length + list.length > FREE_STACK_CAP) {
+    setState({ premiumUpsell: FREE_CAP_UPSELL });
+    return { upsell: true, fits: Math.max(0, FREE_STACK_CAP - kept.length) };
+  }
+  const added = stageItems(list);
+  setState({
+    deckItems: [...kept, ...added],
+    lastAddedId: added.length ? added[added.length - 1].id : state.lastAddedId,
+  });
+  saveStacks();
+  return { ok: true, count: added.length, ids: added.map((a) => a.id), removed };
+}
+
+/** Put back stacks a rebuild removed. Undo, for the half that deletes. */
+export function restoreItems(items) {
+  const list = Array.isArray(items) ? items : [];
+  if (!list.length) return;
+  const have = new Set(state.deckItems.map((it) => it.id));
+  const back = list.filter((it) => it && !have.has(it.id));
+  if (!back.length) return;
+  setState({ deckItems: [...state.deckItems, ...back] });
+  saveStacks();
 }
 
 // Undo the most recent plan apply (single slot — matches the preview's one-tap Apply).
