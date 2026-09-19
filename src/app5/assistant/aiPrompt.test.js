@@ -105,3 +105,32 @@ describe('buildPrompt — the strict output half survives', () => {
     expect(PROMPT_VERSION).toBeGreaterThanOrEqual(4);
   });
 });
+
+// v5: a plan cannot be timed sensibly without knowing when the person sleeps and
+// when they work. The open intake (v3) had dropped the questions entirely and
+// left it to "only if something essential is genuinely missing".
+describe('buildPrompt — it establishes work and sleep before it plans', () => {
+  it('names the three things it must know first', () => {
+    const p = buildPrompt({ deckItems: [], premium: false });
+    expect(p).toContain('when I usually wake up and go to bed');
+    expect(p).toContain('what hours I work, and which days');
+    expect(p).toContain('already fixed by someone else');
+  });
+
+  it('keeps the open intake — sentences, never a form', () => {
+    const p = buildPrompt({ deckItems: [], premium: false });
+    expect(p).toContain('ordinary sentences');
+    expect(p).toContain('never as a numbered form');
+    expect(p).toContain('Do NOT ask a numbered questionnaire');
+  });
+
+  it('refuses to schedule over sleep or work', () => {
+    const p = buildPrompt({ deckItems: [], premium: false });
+    expect(p).toContain('Nothing lands while I am asleep or at work');
+  });
+
+  it('keeps meals inside the hours the user actually eats', () => {
+    const p = buildPrompt({ deckItems: [], premium: false });
+    expect(p).toContain('sit with a meal goes inside');
+  });
+});

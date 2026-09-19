@@ -9,6 +9,13 @@
 // and structuring it into stacks. Only the OUTPUT half (STEP 3 + the block +
 // the FORMAT RULES) is strict, because the parser reads it literally.
 //
+// v5 adds the one thing the open intake lost: a plan cannot be timed sensibly
+// without knowing when the person sleeps and when they work. STEP 2 now names
+// three things the AI must establish first — sleep, work hours, and whatever is
+// already fixed by someone else — asked as sentences, not as a form, so the open
+// feel survives. (store5.js:133 declares dayT.ws/we for work hours; no screen has
+// ever written them, so asking is the only way to learn them today.)
+//
 // Two rules drive that output wording, both learned from testing the parser
 // against real AI output:
 //   • The four repeat tokens are shown as a copy-me list — "every day" was
@@ -29,7 +36,7 @@ const DEFAULT_BODY = ['Stress'];
 const DEFAULT_INTERESTS = ['Meditation'];
 const isDefaultList = (a, d) => a.length === d.length && a.every((v, i) => v === d[i]);
 
-export const PROMPT_VERSION = 4;
+export const PROMPT_VERSION = 5;
 
 const BASE_PROMPT = `You are my warm, easy-going day-planning assistant for an app called PPWellness Lifestyle App.
 
@@ -48,10 +55,19 @@ STEP 2 — Take whatever I give you — however scattered, vague, or out of orde
 quietly turn it into a realistic plan. Read between the lines: pull out the
 activities I mention, put sensible times on them, and decide how often each should
 repeat. Fill small gaps yourself with reasonable defaults instead of interrogating
-me. Only if something essential is genuinely missing (like when I wake up, or how
-much spare time I have) ask me ONE or two short questions, then carry on. Start
-small. Use my own words for the names. Stay inside the item and day limits I gave
-you above.
+me. Start small. Use my own words for the names. Stay inside the item and day
+limits I gave you above.
+
+Before you write the plan, make sure you know these three things. Ask only for the
+ones I have not already told you, in ONE short message, as ordinary sentences —
+never as a numbered form:
+  - when I usually wake up and go to bed;
+  - what hours I work, and which days;
+  - anything already fixed by someone else: a shift, the school run, a class, an
+    appointment, or something I have to take at a set time.
+Then build everything around those. Nothing lands while I am asleep or at work
+unless I told you it could, and anything that needs to sit with a meal goes inside
+the hours I actually eat.
 
 STEP 3 — Reply with a short plain-English summary (5 lines max), then ONE code
 block, and NOTHING after it. Do not repeat this example back to me. Do not add

@@ -39,6 +39,7 @@ import {
   syncEntitlement, applyServerEntitlement, syncProfile,
   openAiBridge, recordUseDay, guideWelcomed, markGuideWelcomed, anySheetOpen, stashCoachPosition,
   guideFocusItem, isInEatWindow,
+  noteAnimCss,
 } from './store5.js';
 import GuideDisc from './screens/GuideDisc.jsx';
 import CompletedRing from './screens/CompletedRing.jsx';
@@ -394,7 +395,18 @@ function StackScreen() {
               </button>
               {cardIcon(it)}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 15.5, fontWeight: 600, letterSpacing: '-.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textShadow: 'var(--emboss)' }}>{it.title}</div>
+                {/* A note set to "Scroll" only ever marqueed inside the full-screen
+                    popup (Popups.jsx). On the Stack card it was truncated with an
+                    ellipsis — so the single thing the user picked that animation
+                    FOR, reading a long affirmation, never happened where they
+                    actually look. Honour it here too. */}
+                {it.kind === 'note' && it.noteAnim === 'marquee' && String(it.title || '').trim() ? (
+                  <div style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                    <span className="ppwCardMarquee" style={{ display: 'inline-block', fontSize: 15.5, fontWeight: 600, letterSpacing: '-.01em', textShadow: 'var(--emboss)', animation: noteAnimCss('marquee', it.noteSpeed) }}>{it.title}</span>
+                  </div>
+                ) : (
+                  <div style={{ fontSize: 15.5, fontWeight: 600, letterSpacing: '-.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textShadow: 'var(--emboss)' }}>{it.title}</div>
+                )}
                 <div style={{ marginTop: 3, fontSize: 12.5, color: 'var(--dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: 6 }}>
                   {/* F6: say what we put there. Without this the starter slots read
                       as things the customer chose, on day one, in their own app. */}

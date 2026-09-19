@@ -9,6 +9,7 @@
 // Exposed as a tiny external store (useSyncExternalStore) so any app5 screen
 // subscribes with useStore5(). Grows one slice at a time as screens are ported.
 // ─────────────────────────────────────────────────────────────────────────
+import { deleteFile } from './files5.js';
 
 import { useSyncExternalStore } from 'react';
 import { cachedPremium, fetchEntitlement, isSignedIn, signOut as membershipSignOut } from './membership.js';
@@ -317,8 +318,13 @@ export function setItemTime(id, time) {
   saveStacks();
 }
 export function deleteItem(id) {
-  setState({ deckItems: state.deckItems.filter((it) => it.id !== id), selectedIds: state.selectedIds.filter((x) => x !== id) });
+  const gone = state.deckItems.find((it) => it.id === id);
+  const next = state.deckItems.filter((it) => it.id !== id);
+  setState({ deckItems: next, selectedIds: state.selectedIds.filter((x) => x !== id) });
   saveStacks();
+  // Free the blob only when the LAST stack pointing at it goes. Without this the
+  // file stayed in IndexedDB forever and the user had no way to erase it.
+  if (gone && gone.fileId && !next.some((it) => it.fileId === gone.fileId)) deleteFile(gone.fileId);
 }
 // ── edit-stack sheet (Vic 2026-08-31): re-open ANY stack's settings ──────────
 // The gap this closes: a note (kind:'note') had NO re-edit path at all. Once
@@ -772,7 +778,13 @@ export function showNotePop(note) {
 export function closeNotePop() { if (_noteTimer) clearTimeout(_noteTimer); setState({ notePop: null }); }
 export function dismissSlotPop() { setState({ slotPop: null }); }
 
-let _slotTimer = null, _lastFire = null, _lastFast = null;
+// `_fired` replaces a single `_lastFire` string. Two stacks can legitimately share
+// a time — a medicine taken with food and the stretch after it — but the engine
+// used .find() (singular) and then memoised that one id for the whole minute, so
+// every item after the first in insertion order NEVER fired. Not late: never, on
+// any day. The set is per-minute and resets when the minute turns.
+let _slotTimer = null, _lastFast = null, _firedMin = null;
+let _fired = new Set();
 export function startSlotEngine() {
   if (_slotTimer) return () => {};
   _slotTimer = setInterval(() => {
@@ -786,11 +798,15 @@ export function startSlotEngine() {
     }
     const eating = S.fastOn ? isInEatWindow(hm, S.eatOpen, S.eatClose) : false;
     if (eating !== S.eatingNow) setState({ eatingNow: eating });
-    const item = stackFor(key).find((x) => x.time === hm);
+    if (_firedMin !== key + '|' + hm) { _firedMin = key + '|' + hm; _fired = new Set(); }
+    // Never stomp something the user has not dealt with yet. The queue drains on
+    // the next tick once they dismiss it (the engine ticks every 20s).
+    if (S.slotPop || S.notePop || S.playerItem) return;
+    const due = stackFor(key).filter((x) => x.time === hm);
+    if (!due.length) return;
+    const item = due.find((x) => !_fired.has(x.id));
     if (!item) return;
-    const fireKey = key + '|' + item.id + '|' + hm;
-    if (_lastFire === fireKey) return;
-    _lastFire = fireKey;
+    _fired.add(item.id);
     // A note whose message was edited down to empty must not fire a blank
     // full-screen popup — the add path forbids empty, so the edit path can't
     // leave one that shows (Vic 2026-08-31 edit-stack review).

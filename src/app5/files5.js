@@ -27,6 +27,24 @@ export async function saveFile(file) {
 }
 
 const urlCache = {};
+
+// Nothing ever deleted a file. Removing a Document stack left its blob in
+// IndexedDB for good: dead weight, and no way for a user to actually erase a
+// document they had second thoughts about. Callers must check no OTHER stack
+// still references the id — the Library can place one file on several days.
+export async function deleteFile(id) {
+  if (!id) return;
+  if (urlCache[id]) { try { URL.revokeObjectURL(urlCache[id]); } catch { /* already revoked */ } delete urlCache[id]; }
+  try {
+    const d = await openDb();
+    await new Promise((res, rej) => {
+      const tx = d.transaction('files', 'readwrite');
+      tx.objectStore('files').delete(id);
+      tx.oncomplete = res;
+      tx.onerror = () => rej(tx.error);
+    });
+  } catch { /* no IndexedDB (private mode, test env) — nothing to free */ }
+}
 export async function fileUrl(id) {
   if (!id) return null;
   if (urlCache[id]) return urlCache[id];
