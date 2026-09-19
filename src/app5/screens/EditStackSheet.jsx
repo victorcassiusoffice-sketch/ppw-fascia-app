@@ -15,8 +15,9 @@
 import React from 'react';
 import {
   useStore5, closeEditItem, updateItem, setItemTime, setRepeat, setNoTime,
-  toggleAuto, deleteItem, noteAnimCss,
+  toggleAuto, deleteItem, noteAnimCss, todayKey,
 } from '../store5.js';
+import { downloadSlotIcs } from '../../lib/ics.js';
 
 const NOTE_STYLES = [
   { key: 'still', label: 'Still' },
@@ -62,6 +63,30 @@ export default function EditStackSheet() {
   const pickRepeat = (key) => setRepeat(it.id, key === 'custom' ? String(n) : key);
   const bump = (d) => setRepeat(it.id, String(Math.min(14, Math.max(2, n + d))));
   const del = () => { deleteItem(it.id); closeEditItem(); };
+
+  // Reminders that survive the app being closed.
+  //
+  // app5's own slot engine (store5.startSlotEngine) is a 20s setInterval — it
+  // only runs while the app is OPEN, which is not a reminder. Web Push is built
+  // (src/lib/push.js, public/sw.js) but its sender was never deployed
+  // (push-config.PUSH_SYNC_ENDPOINT is ''), so it cannot fire either. The phone's
+  // own Calendar can, needs no server, no account and no permission prompt — so
+  // that is what we offer, and we describe it exactly as what it is.
+  const [icsMsg, setIcsMsg] = React.useState(null);
+  const toCalendar = () => {
+    const ok = downloadSlotIcs({
+      itemId: it.id,
+      title: it.title,
+      dateISO: it.anchor || todayKey(),   // padDateKey handles app5's unpadded keys
+      time: it.time,
+      durationMin: 15,
+      description: it.meta || '',
+      repeat: it.repeat,                  // a repeating stack becomes a repeating alarm
+    });
+    setIcsMsg(ok
+      ? 'Sent to your calendar app — confirm it there and the alarm is set.'
+      : 'Your calendar app did not open. Try again, or add it by hand.');
+  };
 
   return (
     <div style={{ position: 'absolute', inset: 0, zIndex: 36 }}>
@@ -181,6 +206,19 @@ export default function EditStackSheet() {
               <button onClick={() => bump(-1)} aria-label="Fewer days" style={{ width: 42, height: 42, borderRadius: 999, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--ink)', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
               <div style={{ fontSize: 20, fontWeight: 600, minWidth: 74, textAlign: 'center', textShadow: 'var(--emboss)' }}>{n} days</div>
               <button onClick={() => bump(1)} aria-label="More days" style={{ width: 42, height: 42, borderRadius: 999, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--ink)', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+            </div>
+          </div>
+        )}
+
+        {/* ── remind me on my phone ── */}
+        {it.time && (
+          <div style={{ marginTop: 22 }}>
+            <div style={LABEL}>Remind me</div>
+            <button onClick={toCalendar} style={{ marginTop: 10, width: '100%', minHeight: 48, padding: '12px 16px', borderRadius: 14, border: '1px solid var(--rim)', background: 'var(--surface)', color: 'var(--ink)', fontSize: 14, fontWeight: 600, textAlign: 'left', textShadow: 'var(--label-shadow)', boxShadow: 'var(--elev)' }}>
+              Add this to my phone calendar
+            </button>
+            <div role={icsMsg ? 'status' : undefined} style={{ marginTop: 8, fontSize: 11.5, lineHeight: 1.5, color: icsMsg ? 'var(--acc-ink)' : 'var(--dim)' }}>
+              {icsMsg || `Your phone's own Calendar does the reminding, so it still goes off when this app is closed${it.repeat && it.repeat !== 'once' ? ', and it repeats the way this stack does' : ''}.`}
             </div>
           </div>
         )}

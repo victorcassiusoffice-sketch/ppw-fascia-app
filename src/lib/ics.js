@@ -18,9 +18,33 @@ function escapeText(s) {
     .replace(/\r?\n/g, '\\n');
 }
 
+/**
+ * Pad an app date key to real ISO. app5's keys are NOT zero-padded —
+ * store5.dateKeyFromOffset returns '2026-9-19' — so stripping the hyphens gave
+ * '202699', a silently malformed DTSTART that no calendar would accept. Every
+ * date entering this module goes through here.
+ */
+export function padDateKey(k) {
+  const p = String(k == null ? '' : k).split('-');
+  if (p.length !== 3) return String(k == null ? '' : k);
+  return p[0] + '-' + String(p[1]).padStart(2, '0') + '-' + String(p[2]).padStart(2, '0');
+}
+
+/**
+ * A stack that repeats should repeat in the calendar too. Without an RRULE a
+ * daily routine produced ONE alarm, once — which is not a reminder.
+ */
+export function rruleFor(repeat) {
+  if (!repeat || repeat === 'once') return null;
+  if (repeat === 'daily') return 'RRULE:FREQ=DAILY';
+  if (repeat === 'weekly') return 'RRULE:FREQ=WEEKLY';
+  const n = parseInt(repeat, 10);
+  return n > 1 ? `RRULE:FREQ=DAILY;INTERVAL=${n}` : 'RRULE:FREQ=DAILY';
+}
+
 // 'YYYY-MM-DD' + 'HH:MM' -> 'YYYYMMDDTHHMMSS' floating local timestamp.
 function toFloating(dateISO, hh, mm) {
-  const d = String(dateISO).replace(/-/g, '');
+  const d = padDateKey(dateISO).replace(/-/g, '');
   const h = String(hh).padStart(2, '0');
   const m = String(mm).padStart(2, '0');
   return `${d}T${h}${m}00`;
@@ -66,7 +90,7 @@ function foldLine(line) {
  * @param {string} [o.description]
  * @returns {string} full VCALENDAR text (CRLF line endings)
  */
-export function buildSlotIcs({ uid, title, dateISO, time, durationMin = 15, description = '' }) {
+export function buildSlotIcs({ uid, title, dateISO, time, durationMin = 15, description = '', repeat }) {
   const [hh, mm] = String(time).split(':').map((n) => parseInt(n, 10));
   if (Number.isNaN(hh) || Number.isNaN(mm)) {
     throw new Error('buildSlotIcs: invalid time ' + time);
@@ -90,6 +114,7 @@ export function buildSlotIcs({ uid, title, dateISO, time, durationMin = 15, desc
     `DTSTAMP:${stampNow()}`,
     `DTSTART:${dtStart}`,
     `DTEND:${dtEnd}`,
+    rruleFor(repeat),
     `SUMMARY:${escapeText('PPW · ' + title)}`,
     description ? `DESCRIPTION:${escapeText(description)}` : null,
     'BEGIN:VALARM',
@@ -110,7 +135,7 @@ export function buildSlotIcs({ uid, title, dateISO, time, durationMin = 15, desc
  */
 export function slotUid(itemId, dateISO, time) {
   const safe = String(itemId || 'slot').replace(/[^a-zA-Z0-9_-]/g, '');
-  return `ppw-${safe}-${String(dateISO).replace(/-/g, '')}-${String(time).replace(':', '')}@ppwellness.co`;
+  return `ppw-${safe}-${padDateKey(dateISO).replace(/-/g, '')}-${String(time).replace(':', '')}@ppwellness.co`;
 }
 
 /**
@@ -129,10 +154,10 @@ function isIOSDevice() {
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 }
 
-export function downloadSlotIcs({ itemId, title, dateISO, time, durationMin, description }) {
+export function downloadSlotIcs({ itemId, title, dateISO, time, durationMin, description, repeat }) {
   try {
     const uid = slotUid(itemId, dateISO, time);
-    const ics = buildSlotIcs({ uid, title, dateISO, time, durationMin, description });
+    const ics = buildSlotIcs({ uid, title, dateISO, time, durationMin, description, repeat });
 
     // iOS: navigate to a data: URL so Safari opens the Calendar add-event sheet.
     if (isIOSDevice()) {
