@@ -717,27 +717,41 @@ export function parseRoutineMd(text) {
       thumbUrl: safeUrl(it.thumbUrl),
       kind: it.kind === 'note' ? 'note' : undefined,
       time: /^\d{1,2}:\d{2}$/.test(it.time || '') ? it.time : undefined,
+      // A shared routine is a SCHEDULE, not a shopping list. routineToMd has
+      // always serialised `repeat` (it JSON.stringifies the items whole), but
+      // this whitelist dropped it and addItemsToToday then hard-set 'once' — so
+      // a practitioner's six-week DAILY programme arrived on the client's phone
+      // as six one-off items on the day they happened to open the file, and
+      // every reminder past day one silently did not exist.
+      repeat: normRepeat(it.repeat) || undefined,
+      _day: normOffset(it.dayOffset),
     }));
     return { ok: true, name: String(data.name || 'Shared routine').slice(0, 60), items };
   } catch {
     return { ok: false, reason: 'parse' };
   }
 }
-// bulk-add imported stacks to TODAY (repeat once, staggered from 09:00 when
-// untimed). Free tier: respects the 10-stack cap → upsell.
+// bulk-add imported stacks, honouring the schedule they were shared WITH:
+// each item keeps its own repeat and starts on its own day offset. Items that
+// carry neither behave exactly as before (once, today), so every existing
+// caller is unaffected. Untimed items stagger from 09:00.
+// Free tier: respects the 10-stack cap → upsell.
 export function addItemsToToday(items) {
   if (!state.premium && state.deckItems.length + items.length > FREE_STACK_CAP) {
     setState({ premiumUpsell: FREE_CAP_UPSELL });
     return { upsell: true };
   }
-  const key = todayKey();
   const base = 9 * 60;
-  const added = items.map((item, i) => ({
-    ...item,
-    id: 'im' + Date.now().toString(36) + i,
-    time: item.time || (String(Math.floor((base + i * 30) / 60)).padStart(2, '0') + ':' + String((base + i * 30) % 60).padStart(2, '0')),
-    anchor: key, repeat: 'once',
-  }));
+  const added = items.map((item, i) => {
+    const { _day, ...rest } = item;
+    return {
+      ...rest,
+      id: 'im' + Date.now().toString(36) + i,
+      time: item.time || (String(Math.floor((base + i * 30) / 60)).padStart(2, '0') + ':' + String((base + i * 30) % 60).padStart(2, '0')),
+      anchor: dateKeyFromOffset(_day || 0),
+      repeat: item.repeat || 'once',
+    };
+  });
   setState({ deckItems: [...state.deckItems, ...added], lastAddedId: added.length ? added[added.length - 1].id : state.lastAddedId });
   saveStacks();
   return { ok: true, count: added.length };
