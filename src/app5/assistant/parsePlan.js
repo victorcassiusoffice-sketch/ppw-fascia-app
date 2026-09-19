@@ -77,10 +77,28 @@ const looksLikePlan = (o) => o && typeof o === 'object' && o.ppw === 'routine' &
  *   → { ok:true, data, tier, alternates }
  *   → { ok:false, reason:'no-block'|'parse'|'truncated'|'bad-shape' }
  *
- * Candidates are SCORED, not "last one wins": most items → latest in the reply →
- * cleanest tier. If more than one DISTINCT plan parses, `alternates` is non-empty
- * and the preview asks which one — never guess silently.
+ * Candidates are SCORED: LATEST in the reply → most items → cleanest tier.
+ * Latest wins FIRST because a chat is a conversation — when the user says "that's
+ * too much", the AI's second, smaller block is the live one, and ranking by size
+ * handed the win to the plan it had just replaced.
+ * The prompt's own worked example is fingerprinted and dropped outright: models
+ * echo it back, and at 4 items it outranked a real 2-item plan and imported
+ * "Morning walk / Box breathing / Long session" as the user's own day.
+ * If more than one DISTINCT plan still parses, `alternates` is non-empty and the
+ * preview asks which one — never guess silently.
  */
+
+// The worked example shipped inside the prompt (aiPrompt.js). Matched on the exact
+// set of titles, so only the literal example is ever dropped — never a real plan
+// that happens to contain a morning walk.
+const EXAMPLE_TITLES = 'Box breathing|I did enough today.|Long session|Morning walk';
+function isEchoedExample(data) {
+  const t = (data.items || [])
+    .map((i) => String((i && i.title) || '').trim())
+    .filter(Boolean).sort().join('|');
+  return t === EXAMPLE_TITLES;
+}
+
 export function extractPlanCandidates(text) {
   const s = preclean(text);
   if (!s.trim()) return { ok: false, reason: 'no-block' };
@@ -117,10 +135,11 @@ export function extractPlanCandidates(text) {
   if (!cands.length) return { ok: false, reason: 'no-block' };
 
   const good = [], keys = new Set();
-  let sawTruncated = false, sawShape = false;
+  let sawTruncated = false, sawShape = false, sawExample = false;
   for (const c of cands) {
     const data = tryParse(c.raw.trim());
     if (looksLikePlan(data)) {
+      if (isEchoedExample(data)) { sawExample = true; continue; }
       const k = JSON.stringify(data);
       if (!keys.has(k)) { keys.add(k); good.push({ data, tier: c.tier, idx: c.idx }); }
     } else {
@@ -130,12 +149,13 @@ export function extractPlanCandidates(text) {
   }
 
   if (!good.length) {
+    if (sawExample) return { ok: false, reason: 'echoed-example' };
     if (sawShape) return { ok: false, reason: 'bad-shape' };
     if (sawTruncated) return { ok: false, reason: 'truncated' };
     return { ok: false, reason: /\{[\s\S]*"ppw"/.test(s) ? 'parse' : 'no-block' };
   }
 
-  good.sort((a, b) => (b.data.items.length - a.data.items.length) || (b.idx - a.idx) || (a.tier - b.tier));
+  good.sort((a, b) => (b.idx - a.idx) || (b.data.items.length - a.data.items.length) || (a.tier - b.tier));
   return { ok: true, data: good[0].data, tier: good[0].tier, alternates: good.slice(1) };
 }
 
@@ -145,4 +165,5 @@ export const PARSE_HELP = {
   'parse': 'That looks like a plan but I couldn’t read it. Ask your AI to “send the plan block again, on its own”.',
   'truncated': 'The plan looks cut off. Ask your AI to “send the whole block again” and copy all of it.',
   'bad-shape': 'That plan is missing its list of items. Ask your AI to send it again using the format from the prompt.',
+  'echoed-example': 'Your AI sent back the example from the prompt instead of a plan for you. Tell it: “That’s the example — now send MY plan.”',
 };

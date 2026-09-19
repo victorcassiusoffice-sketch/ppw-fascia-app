@@ -14,12 +14,22 @@
 //   • The four repeat tokens are shown as a copy-me list — "every day" was
 //     silently becoming a one-off.
 //   • Times must be shown padded ("07:30"), because "7am"/"7:30" drift.
-// URLs are BANNED outright: models fabricate 11-char YouTube ids, and any url
-// they invent is stripped on import anyway (safeUrl).
+// URLs are BANNED outright: models fabricate 11-char YouTube ids. As of v4 that
+// ban is genuinely enforced — parsePlanDoc drops url/embed/thumbUrl rather than
+// trusting safeUrl, which only ever checked the scheme, so an invented https
+// embed used to reach a live iframe.
 
 import { FREE_STACK_CAP } from '../store5.js';
 
-export const PROMPT_VERSION = 3;
+// Mirrors the shipped defaults in store5.js (:129-133). Kept here so buildPrompt
+// can tell "the user chose this" apart from "nobody has ever set it".
+const DEFAULT_WAKE = '07:00';
+const DEFAULT_BED = '22:30';
+const DEFAULT_BODY = ['Stress'];
+const DEFAULT_INTERESTS = ['Meditation'];
+const isDefaultList = (a, d) => a.length === d.length && a.every((v, i) => v === d[i]);
+
+export const PROMPT_VERSION = 4;
 
 const BASE_PROMPT = `You are my warm, easy-going day-planning assistant for an app called PPWellness Lifestyle App.
 
@@ -91,18 +101,42 @@ should check with a qualified professional, and keep the plan gentle.`;
 export function buildPrompt(S) {
   const used = (S && Array.isArray(S.deckItems)) ? S.deckItems.length : 0;
   const premium = !!(S && S.premium);
-  const headroom = premium ? 60 : Math.max(1, FREE_STACK_CAP - used);
+  // Floor at 0, not 1. Math.max(1, …) told a user sitting at the cap there was
+  // "room for 1 more thing"; they did the whole round trip out to their AI and
+  // Apply refused on return (addItemsToPlan checks used + adds > cap).
+  const headroom = premium ? 60 : Math.max(0, FREE_STACK_CAP - used);
   const days = premium ? 7 : (headroom >= 6 ? 2 : 1);
 
   const bits = [];
-  if (S && S.dayT && S.dayT.wake && S.dayT.bed) bits.push(`I'm usually up at ${S.dayT.wake} and in bed by ${S.dayT.bed}.`);
-  if (S && Array.isArray(S.obBody) && S.obBody.length) bits.push(`I want to work on: ${S.obBody.slice(0, 5).join(', ')}.`);
-  if (S && Array.isArray(S.obInterests) && S.obInterests.length) bits.push(`I enjoy: ${S.obInterests.slice(0, 5).join(', ')}.`);
-  bits.push(
-    `My app has room for ${headroom} more thing${headroom === 1 ? '' : 's'} in total, so plan ` +
-    `${days === 1 ? 'today only' : `today and the next ${days - 1} day${days > 2 ? 's' : ''}`} ` +
-    `and send me at most ${headroom} item${headroom === 1 ? '' : 's'}.`
-  );
+  // Only facts the user actually gave us. dayT/obBody/obInterests ship with
+  // defaults (store5.js:129-133) and NO app5 screen sets them, so sending them
+  // unconditionally told every user's AI, in the user's own voice, that they wake
+  // at 07:00, want to work on "Stress" and enjoy "Meditation". Three invented
+  // facts. If it is still the default, say nothing and let the AI ask.
+  if (S && S.dayT && S.dayT.wake && S.dayT.bed && !(S.dayT.wake === DEFAULT_WAKE && S.dayT.bed === DEFAULT_BED)) {
+    bits.push(`I'm usually up at ${S.dayT.wake} and in bed by ${S.dayT.bed}.`);
+  }
+  if (S && Array.isArray(S.obBody) && S.obBody.length && !isDefaultList(S.obBody, DEFAULT_BODY)) {
+    bits.push(`I want to work on: ${S.obBody.slice(0, 5).join(', ')}.`);
+  }
+  if (S && Array.isArray(S.obInterests) && S.obInterests.length && !isDefaultList(S.obInterests, DEFAULT_INTERESTS)) {
+    bits.push(`I enjoy: ${S.obInterests.slice(0, 5).join(', ')}.`);
+  }
+  // The fasting window IS user-set, and it constrains when anything food-adjacent
+  // can go. It was the one real schedule fact we were throwing away.
+  if (S && S.fastOn && S.eatOpen && S.eatClose) {
+    bits.push(`I eat between ${S.eatOpen} and ${S.eatClose} and fast outside that, so keep anything food-related inside that window.`);
+  }
+  if (headroom === 0) {
+    // Nothing will fit. Say so, rather than asking for a plan the app must refuse.
+    bits.push('My app is completely full right now, so do not send me a plan block yet — help me work out what to drop first.');
+  } else {
+    bits.push(
+      `My app has room for ${headroom} more thing${headroom === 1 ? '' : 's'} in total, so plan ` +
+      `${days === 1 ? 'today only' : days === 2 ? 'today and tomorrow' : `today and the next ${days - 1} days`} ` +
+      `and send me at most ${headroom} item${headroom === 1 ? '' : 's'}.`
+    );
+  }
 
   return `Some context about me: ${bits.join(' ')}\n\n${BASE_PROMPT}`;
 }

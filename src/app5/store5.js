@@ -592,10 +592,16 @@ export function parsePlanDoc(data) {
     return {
       title,
       meta: it.meta ? String(it.meta).slice(0, 120) : undefined,
-      thumb: typeof it.thumb === 'string' ? it.thumb.slice(0, 8) : undefined,
-      url: safeUrl(it.url),
-      embed: safeUrl(it.embed),
-      thumbUrl: safeUrl(it.thumbUrl),
+      // The prompt promises the model "any link you write is deleted on import"
+      // (aiPrompt.js). That was not true: safeUrl only validates the SCHEME, so a
+      // fabricated https://www.youtube.com/embed/<madeup> passed straight through
+      // and rendered as a live iframe. Make the promise true for the AI bridge.
+      // NOTE: the identical whitelist in parseRoutineMd is deliberately untouched —
+      // a routine shared by a real person may carry a real, curated video.
+      thumb: undefined,
+      url: undefined,
+      embed: undefined,
+      thumbUrl: undefined,
       kind: it.kind === 'note' ? 'note' : undefined,
       time: normTime(it.time) || undefined,
       _day: normOffset(it.dayOffset),
@@ -629,7 +635,9 @@ export function addItemsToPlan(items) {
     }
     return { ...rest, id: uid('ai'), time, anchor: dateKeyFromOffset(_day || 0), repeat: _repeat || 'once' };
   });
-  setState({ deckItems: [...state.deckItems, ...added], lastAddedId: added[added.length - 1].id });
+  // Guarded like its two sibling call sites. Today list.length >= 1 guarantees a
+  // non-empty `added`, but an op-based apply (drops only) would crash here.
+  setState({ deckItems: [...state.deckItems, ...added], lastAddedId: added.length ? added[added.length - 1].id : state.lastAddedId });
   saveStacks();
   return { ok: true, count: added.length, ids: added.map((a) => a.id) };
 }

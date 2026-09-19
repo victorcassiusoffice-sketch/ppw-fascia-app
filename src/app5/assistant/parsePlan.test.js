@@ -1,7 +1,7 @@
 // parsePlan — tested against what real AI replies actually look like.
 // Every fixture here is a shape ChatGPT / Claude / Gemini genuinely produce.
 import { describe, it, expect } from 'vitest';
-import { extractPlanCandidates } from './parsePlan.js';
+import { extractPlanCandidates, PARSE_HELP } from './parsePlan.js';
 
 const plan = (items, name = 'My week') => ({ ppw: 'routine', v: 2, name, items });
 const J = (o) => JSON.stringify(o, null, 2);
@@ -112,5 +112,59 @@ describe('extractPlanCandidates — real AI output shapes', () => {
   it('16. huge paste is scanned from the END, where the block lives', () => {
     const r = extractPlanCandidates('filler '.repeat(50000) + '\n```ppw-routine\n' + J(plan(ITEMS)) + '\n```');
     expect(r.ok).toBe(true);
+  });
+
+  // ── ranking + example-echo (Tier 1 correctness pass, 2026-09-19) ─────────
+  // The scorer used to rank by item count first. That handed the win to the
+  // superseded plan on every revision, and let the prompt's own 4-item example
+  // outrank a real 2-item plan and import itself as the user's day.
+  const EXAMPLE_ITEMS = [
+    { title: 'Morning walk', meta: '20 min, outside', time: '07:30', dayOffset: 0, repeat: 'daily' },
+    { title: 'Box breathing', meta: '5 min', time: '13:00', dayOffset: 0, repeat: 'daily' },
+    { title: 'Long session', meta: '45 min', time: '18:00', dayOffset: 1, repeat: 'weekly' },
+    { title: 'I did enough today.', kind: 'note', time: '21:30', dayOffset: 0, repeat: 'daily' },
+  ];
+
+  it('17. a corrected SMALLER second plan beats the bigger one it replaced', () => {
+    const big = plan([...ITEMS, { title: 'Long run', time: '18:00' }, { title: 'Sauna', time: '20:00' }]);
+    const small = plan([{ title: 'Just the walk', time: '07:30' }], 'Trimmed');
+    const r = extractPlanCandidates(
+      'Here is a full week.\n```ppw-routine\n' + J(big) + '\n```\n' +
+      'Too much? Here is a lighter one.\n```ppw-routine\n' + J(small) + '\n```'
+    );
+    expect(r.ok).toBe(true);
+    expect(r.data.name).toBe('Trimmed');
+    expect(r.data.items).toHaveLength(1);
+    expect(r.alternates).toHaveLength(1);
+  });
+
+  it('18. the prompt example is dropped even when it is the LAST block', () => {
+    const r = extractPlanCandidates(
+      'Here is your plan.\n```ppw-routine\n' + J(plan(ITEMS, 'Mine')) + '\n```\n' +
+      'For reference, the format was:\n```ppw-routine\n' + J(plan(EXAMPLE_ITEMS)) + '\n```'
+    );
+    expect(r.ok).toBe(true);
+    expect(r.data.name).toBe('Mine');
+    expect(r.alternates).toHaveLength(0);
+  });
+
+  it('19. an echoed example on its own is refused, never imported', () => {
+    const r = extractPlanCandidates('```ppw-routine\n' + J(plan(EXAMPLE_ITEMS)) + '\n```');
+    expect(r.ok).toBe(false);
+    expect(r.reason).toBe('echoed-example');
+  });
+
+  it('20. a real plan that merely reuses example titles is NOT dropped', () => {
+    const near = [...EXAMPLE_ITEMS.slice(0, 3), { title: 'Swim', time: '19:00' }];
+    const r = extractPlanCandidates('```ppw-routine\n' + J(plan(near)) + '\n```');
+    expect(r.ok).toBe(true);
+    expect(r.data.items).toHaveLength(4);
+  });
+
+  it('21. every refusal reason has help text the user can act on', () => {
+    for (const reason of ['no-block', 'parse', 'truncated', 'bad-shape', 'echoed-example']) {
+      expect(typeof PARSE_HELP[reason]).toBe('string');
+      expect(PARSE_HELP[reason].length).toBeGreaterThan(20);
+    }
   });
 });

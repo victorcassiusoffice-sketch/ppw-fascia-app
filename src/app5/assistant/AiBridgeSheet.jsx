@@ -9,7 +9,7 @@
 // Graphite neumorphic: opaque surfaces, dual-shadow, no blur.
 
 import React from 'react';
-import { useStore5, setState, closeAiBridge, addItemsToPlan, removeItemsByIds, parsePlanDoc, dateKeyFromOffset, finishOnboarding, setAiStep, recordQuest } from '../store5.js';
+import { useStore5, setState, closeAiBridge, addItemsToPlan, removeItemsByIds, parsePlanDoc, dateKeyFromOffset, finishOnboarding, setAiStep, recordQuest, FREE_STACK_CAP } from '../store5.js';
 import { buildPrompt } from './aiPrompt.js';
 import { extractPlanCandidates, PARSE_HELP } from './parsePlan.js';
 import { sharePrompt, copyText, readText, canShare } from './clipboard.js';
@@ -37,6 +37,7 @@ export default function AiBridgeSheet() {
   const [picked, setPicked] = React.useState({});     // index -> bool
   const [applied, setApplied] = React.useState(null); // { ids, count }
   const [toast, setToast] = React.useState(null);
+  const [capErr, setCapErr] = React.useState(null);   // free-cap refusal, shown in place
   const [showPrompt, setShowPrompt] = React.useState(false);
 
   // The guide has to know where the user is inside this sheet, and the step
@@ -64,7 +65,7 @@ export default function AiBridgeSheet() {
   // wrote a stale 3 into the store and the quest skipped its own paste step.
   // The delay protected nothing — the sheet stops rendering the instant aiOpen
   // clears, so there is no frame in which the emptied screen can be seen.
-  const close = () => { closeAiBridge(); setStep(1); setRaw(''); setParsed(null); setAlts([]); setErr(null); setApplied(null); setShowPrompt(false); };
+  const close = () => { closeAiBridge(); setStep(1); setRaw(''); setParsed(null); setAlts([]); setErr(null); setApplied(null); setShowPrompt(false); setCapErr(null); };
 
   /** Leaving for good: the user arrived somewhere, so onboarding is done. */
   const finishAndClose = () => { if (midOnboarding) finishOnboarding(); close(); };
@@ -122,9 +123,24 @@ export default function AiBridgeSheet() {
   };
 
   const chosen = parsed ? parsed.items.filter((_, i) => picked[i]) : [];
+  const used = Array.isArray(S.deckItems) ? S.deckItems.length : 0;
+  const headroom = S.premium ? Infinity : Math.max(0, FREE_STACK_CAP - used);
+  const stackFull = headroom === 0;
+
   const apply = () => {
+    setCapErr(null);
     const res = addItemsToPlan(chosen);
-    if (res.upsell) { close(); return; }
+    // The cap refusal used to close() — throwing away the parsed plan AND the
+    // pasted reply, after the user had already been out to their AI and back,
+    // with no message at all. Stay on the preview so they can untick down to what
+    // fits. The global UpsellModal still fires (addItemsToPlan sets premiumUpsell);
+    // this is what they see the moment they dismiss it.
+    if (res.upsell) {
+      setCapErr(stackFull
+        ? `Your Stack is full — ${used} of ${FREE_STACK_CAP}. Delete something on your Stack, or go Premium, then come back. Your plan is still here.`
+        : `That's ${chosen.length} items but you have room for ${headroom}. Untick ${chosen.length - headroom} and try again — nothing is lost.`);
+      return;
+    }
     if (res.ok) {
       setApplied({ ids: res.ids, count: res.count }); setStep(4);
       // Someone who took the AI fork out of the wizard has just done the whole
@@ -169,24 +185,29 @@ export default function AiBridgeSheet() {
           <div style={{ animation: 'ppwScreenIn .5s cubic-bezier(.26,1,.4,1)' }}>
             <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.6, color: 'var(--dim)' }}>
               Use the AI you already have — ChatGPT, Claude, Gemini, any of them. We send it a prompt,
-              it asks you a few questions, and it writes your plan. <strong style={{ color: 'var(--ink)' }}>It costs you nothing extra and we never see your chat.</strong>
+              it asks what you want to change, and it writes your plan. <strong style={{ color: 'var(--ink)' }}>It costs you nothing extra and we never see your chat.</strong>
             </p>
             <div style={{ marginTop: 18, padding: 16, borderRadius: 20, ...CARD }}>
               <div style={{ fontSize: 13, fontWeight: 700, textShadow: 'var(--emboss)' }}>How it works</div>
               <ol style={{ margin: '10px 0 0', paddingLeft: 18, fontSize: 13, lineHeight: 1.7, color: 'var(--dim)' }}>
                 <li>Send the prompt to your AI app</li>
-                <li>Answer its 5 quick questions</li>
+                <li>Tell it about your days — as much or as little as you like</li>
                 <li>Copy its whole reply</li>
                 <li>Paste it back here — done</li>
               </ol>
             </div>
             {/* data-tour: the guide points here. This button, not the ghost one
                 below it — it is the only copy path that exists on every device. */}
-            <button onClick={send} data-tour="ai-copy" style={{ ...BTN_PRIMARY, marginTop: 20 }}>
+            {stackFull && (
+              <div role="alert" style={{ marginTop: 18, padding: '12px 14px', borderRadius: 14, border: '1px solid var(--accent)', background: 'var(--track)', boxShadow: 'var(--inset)', fontSize: 12.5, lineHeight: 1.55, color: 'var(--accent)', fontWeight: 600 }}>
+                Your Stack is full — {used} of {FREE_STACK_CAP}. Make room first, or go Premium. Otherwise your AI writes you a plan this app cannot take.
+              </div>
+            )}
+            <button onClick={send} disabled={stackFull} data-tour="ai-copy" style={{ ...BTN_PRIMARY, marginTop: 20, opacity: stackFull ? .45 : 1 }}>
               {canShare() ? 'Send to my AI' : 'Copy the prompt'}
             </button>
             {canShare() && (
-              <button onClick={copyOnly} style={{ ...BTN_GHOST, marginTop: 10 }}>Copy the prompt instead</button>
+              <button onClick={copyOnly} disabled={stackFull} style={{ ...BTN_GHOST, marginTop: 10, opacity: stackFull ? .45 : 1 }}>Copy the prompt instead</button>
             )}
             <button onClick={() => setStep(2)} style={{ ...BTN_GHOST, marginTop: 10, border: 'none' }}>I’ve already got a reply →</button>
 
@@ -262,7 +283,7 @@ export default function AiBridgeSheet() {
             {alts.length > 0 && (
               <div style={{ marginTop: 12, padding: 12, borderRadius: 14, border: '1px solid var(--accent)', background: 'var(--track)' }}>
                 <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--accent)' }}>Your AI sent more than one plan</div>
-                <div style={{ marginTop: 4, fontSize: 12, color: 'var(--dim)' }}>Showing the fullest one. </div>
+                <div style={{ marginTop: 4, fontSize: 12, color: 'var(--dim)' }}>Showing the most recent one. </div>
                 {alts.map((a, k) => (
                   <button key={k} onClick={() => useAlternate(a)} style={{ marginTop: 8, width: '100%', height: 40, borderRadius: 12, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--ink)', fontSize: 12.5, fontWeight: 600 }}>
                     Use the other one ({(a.data.items || []).length} items) instead
@@ -299,7 +320,12 @@ export default function AiBridgeSheet() {
                 </div>
               </div>
             ))}
-            <button onClick={apply} disabled={!chosen.length} style={{ ...BTN_PRIMARY, marginTop: 22, opacity: chosen.length ? 1 : .45 }}>
+            {capErr && (
+              <div role="alert" style={{ marginTop: 16, padding: '12px 14px', borderRadius: 14, border: '1px solid var(--accent)', background: 'var(--track)', boxShadow: 'var(--inset)', fontSize: 12.5, lineHeight: 1.55, color: 'var(--accent)', fontWeight: 600 }}>
+                {capErr}
+              </div>
+            )}
+            <button onClick={apply} disabled={!chosen.length} style={{ ...BTN_PRIMARY, marginTop: capErr ? 12 : 22, opacity: chosen.length ? 1 : .45 }}>
               Add {chosen.length} to my day
             </button>
             </div>
