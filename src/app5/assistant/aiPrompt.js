@@ -108,7 +108,7 @@ a second block.
 FORMAT RULES — the app reads this block literally.
 - Valid JSON. Straight quotes only ("). No smart quotes, no trailing commas,
   no comments, no line breaks inside a value.
-- Allowed keys per item, nothing else: title, meta, time, dayOffset, repeat, kind.
+- Allowed keys per item, nothing else: title, meta, time, dayOffset, repeat, kind, video.
 - Every item MUST have a title. Never send a bare string in the list.
 - title: under 120 characters. meta: optional one-line detail.
 - time: exactly five characters, "HH:MM", 24-hour, leading zero.
@@ -121,13 +121,23 @@ FORMAT RULES — the app reads this block literally.
   If you are unsure, use "daily".
 - kind: only for a short written reminder that should appear on screen —
   set "kind":"note" and put the words in title.
-- NEVER include links, URLs, video IDs, image addresses or embeds. Not one.
-  I add my own videos inside the app. Any link you write is deleted on import.
+- video: OPTIONAL, and only where watching something genuinely helps — a stretch,
+  a breathing drill, a technique. Send it as
+      "video": {"q":"a youtube search I should run","yt":"11-char-id"}
+  Give "q" ALWAYS. Give "yt" ONLY if you are genuinely confident the id is real;
+  if you are not certain, send "q" on its own. A wrong id is worse than no id.
+  I check every id against YouTube before it is shown, I take the title and the
+  channel from YouTube rather than from you, and anything that fails the check
+  becomes a search instead.
+- NEVER write any other link, URL, image address or embed. Only the video field.
 - Send the block whole, in one piece, as the last thing in your reply.
 
 SAFETY: this is general wellbeing organisation, not medical advice. If I mention
 pain, injury, medication, pregnancy or a diagnosed condition, say plainly that I
-should check with a qualified professional, and keep the plan gentle.`;
+should check with a qualified professional, and keep the plan gentle.
+Only suggest a video for ordinary movement, stretching, breathing, meditation or
+sleep routine. Never suggest one for treating a condition, for a named diagnosis,
+for medication, or for a diet meant to manage an illness.`;
 
 /**
  * buildPrompt(state) — prepends the user's real context + REAL headroom.

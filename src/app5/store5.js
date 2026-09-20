@@ -587,6 +587,17 @@ export function normOffset(v) {
  * repeat 'once', exactly as before.
  * → { ok:true, name, items:[{...snapshot, _day, _repeat}] } | { ok:false, reason }
  */
+// An AI's video suggestion, kept as an unverified CLAIM. Nothing is attached to
+// the item here: the id is checked against YouTube in the preview first
+// (assistant/verifyVideo.js), because models fabricate ids that look real.
+const YT_ID_RE = /^[A-Za-z0-9_-]{11}$/;
+function videoClaim(v) {
+  if (!v || typeof v !== 'object') return undefined;
+  const q = v.q ? String(v.q).trim().slice(0, 120) : undefined;
+  const yt = YT_ID_RE.test(String(v.yt || '')) ? String(v.yt) : undefined;
+  return (q || yt) ? { q, yt } : undefined;
+}
+
 export function parsePlanDoc(data) {
   if (!data || data.ppw !== 'routine' || !Array.isArray(data.items) || !data.items.length) {
     return { ok: false, reason: 'bad-shape' };
@@ -608,6 +619,7 @@ export function parsePlanDoc(data) {
       url: undefined,
       embed: undefined,
       thumbUrl: undefined,
+      _video: videoClaim(it.video),
       kind: it.kind === 'note' ? 'note' : undefined,
       time: normTime(it.time) || undefined,
       _day: normOffset(it.dayOffset),

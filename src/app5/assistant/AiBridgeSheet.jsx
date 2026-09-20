@@ -11,6 +11,7 @@
 import React from 'react';
 import { useStore5, setState, closeAiBridge, addItemsToPlan, applyPlanRebuild, removeItemsByIds, restoreItems, parsePlanDoc, dateKeyFromOffset, finishOnboarding, setAiStep, recordQuest, FREE_STACK_CAP } from '../store5.js';
 import { buildPrompt, PLAN_MODE, replaceableItems } from './aiPrompt.js';
+import { verifyAll, mediaFor } from './verifyVideo.js';
 import { extractPlanCandidates, PARSE_HELP } from './parsePlan.js';
 import { sharePrompt, copyText, readText, canShare } from './clipboard.js';
 
@@ -42,6 +43,11 @@ export default function AiBridgeSheet() {
   // someone lands by accident.
   const [mode, setMode] = React.useState(PLAN_MODE.AROUND);
   const [confirmReplace, setConfirmReplace] = React.useState(false);
+  // Verdicts from YouTube, aligned index-for-index with parsed.items. null while
+  // the check is still in flight. A token guards against a second paste landing
+  // its results on top of a newer one.
+  const [vids, setVids] = React.useState(null);
+  const vidRun = React.useRef(0);
   const [showPrompt, setShowPrompt] = React.useState(false);
 
   // The guide has to know where the user is inside this sheet, and the step
@@ -78,7 +84,7 @@ export default function AiBridgeSheet() {
   // wrote a stale 3 into the store and the quest skipped its own paste step.
   // The delay protected nothing — the sheet stops rendering the instant aiOpen
   // clears, so there is no frame in which the emptied screen can be seen.
-  const close = () => { closeAiBridge(); setStep(1); setRaw(''); setParsed(null); setAlts([]); setErr(null); setApplied(null); setShowPrompt(false); setCapErr(null); setMode(PLAN_MODE.AROUND); setConfirmReplace(false); };
+  const close = () => { closeAiBridge(); setStep(1); setRaw(''); setParsed(null); setAlts([]); setErr(null); setApplied(null); setShowPrompt(false); setCapErr(null); setMode(PLAN_MODE.AROUND); setConfirmReplace(false); setVids(null); };
 
   /** Leaving for good: the user arrived somewhere, so onboarding is done. */
   const finishAndClose = () => { if (midOnboarding) finishOnboarding(); close(); };
@@ -118,6 +124,16 @@ export default function AiBridgeSheet() {
     const all = {}; doc.items.forEach((_, i) => { all[i] = true; });
     setPicked(all);
     setStep(3);
+    checkVideos(doc);
+  };
+
+  /** Ask YouTube about every id the model claimed, before the user commits. */
+  const checkVideos = (doc) => {
+    const run = ++vidRun.current;
+    const ids = doc.items.map((it) => (it._video && it._video.yt) || null);
+    if (!ids.some(Boolean)) { setVids(doc.items.map(() => ({ state: 'none' }))); return; }
+    setVids(null);
+    verifyAll(ids).then((vs) => { if (vidRun.current === run) setVids(vs); });
   };
 
   const pasteAssist = async () => {
@@ -135,7 +151,17 @@ export default function AiBridgeSheet() {
     setAlts(alts.filter((x) => x !== a));
   };
 
-  const chosen = parsed ? parsed.items.filter((_, i) => picked[i]) : [];
+  // What will ACTUALLY be added: the claim resolved into real media, or into a
+  // YouTube search, or into nothing. `_video` never reaches the store.
+  const materialised = parsed ? parsed.items.map((it, i) => {
+    const { _video, ...rest } = it;
+    if (!_video) return rest;
+    return { ...rest, ...mediaFor(vids && vids[i], _video.q, it.title) };
+  }) : [];
+  const chosen = parsed ? materialised.filter((_, i) => picked[i]) : [];
+  const vidClaimed = parsed ? parsed.items.filter((it) => it._video && it._video.yt).length : 0;
+  const vidFound = vids ? vids.filter((v) => v && v.state === 'ok').length : 0;
+  const vidChecking = vidClaimed > 0 && !vids;
   const used = Array.isArray(S.deckItems) ? S.deckItems.length : 0;
   const headroom = S.premium ? Infinity : Math.max(0, FREE_STACK_CAP - used);
   const stackFull = headroom === 0;
@@ -182,10 +208,10 @@ export default function AiBridgeSheet() {
   const groups = [];
   if (parsed) {
     for (let i = 0; i < parsed.items.length; i++) {
-      const d = parsed.items[i]._day || 0;
+      const d = materialised[i]._day || 0;
       let g = groups.find((x) => x.day === d);
       if (!g) { g = { day: d, rows: [] }; groups.push(g); }
-      g.rows.push({ it: parsed.items[i], i });
+      g.rows.push({ it: materialised[i], i });
     }
     groups.sort((a, b) => a.day - b.day);
   }
@@ -333,6 +359,15 @@ export default function AiBridgeSheet() {
             <div style={{ marginTop: 4, fontSize: 13, color: 'var(--dim)' }}>
               {chosen.length} of {parsed.items.length} selected · untick anything you don’t want
             </div>
+            {vidClaimed > 0 && (
+              <div style={{ marginTop: 6, fontSize: 12, lineHeight: 1.5, color: 'var(--dim)' }}>
+                {vidChecking
+                  ? `Checking ${vidClaimed} video${vidClaimed === 1 ? '' : 's'} with YouTube…`
+                  : vidFound === vidClaimed
+                    ? `${vidFound} of ${vidClaimed} video${vidClaimed === 1 ? '' : 's'} found. Titles come from YouTube, not from your AI.`
+                    : `${vidFound} of ${vidClaimed} videos found. The rest become a YouTube search — your AI was not sure of them.`}
+              </div>
+            )}
 
             {alts.length > 0 && (
               <div style={{ marginTop: 12, padding: 12, borderRadius: 14, border: '1px solid var(--accent)', background: 'var(--track)' }}>

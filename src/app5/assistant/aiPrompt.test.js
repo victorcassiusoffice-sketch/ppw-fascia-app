@@ -88,9 +88,25 @@ describe('buildPrompt — headroom tells the truth', () => {
 });
 
 describe('buildPrompt — the strict output half survives', () => {
-  it('still bans links, so the parser contract and the copy agree', () => {
+  // v6: the blanket URL ban is lifted for ONE field, and only because every id
+  // is now checked against YouTube before it is shown (assistant/verifyVideo.js).
+  // Everything else stays banned — the ban existed because models fabricate ids.
+  it('bans every link except the one video field it can verify', () => {
     const p = buildPrompt({ deckItems: [], premium: false });
-    expect(p).toContain('NEVER include links, URLs, video IDs');
+    expect(p).toContain('NEVER write any other link, URL, image address or embed');
+    expect(p).toContain('Only the video field');
+  });
+
+  it('tells the model an unverified id is worse than none', () => {
+    const p = buildPrompt({ deckItems: [], premium: false });
+    expect(p).toContain('A wrong id is worse than no id');
+    expect(p).toContain('I check every id against YouTube');
+  });
+
+  it('keeps suggested videos out of medical territory', () => {
+    const p = buildPrompt({ deckItems: [], premium: false });
+    expect(p).toContain('Never suggest one for treating a condition');
+    expect(p).toContain('not medical advice');
   });
 
   it('still pins the four repeat tokens and the padded time format', () => {
