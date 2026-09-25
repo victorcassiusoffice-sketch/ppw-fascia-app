@@ -142,7 +142,7 @@ export default function AccountSheet() {
 
   if (!S.accountOpen) return null;
   const signedIn = S.signedIn;
-  const creating = !signedIn && S.accountMode === 'create';
+  const licensing = !signedIn && S.accountMode === 'license';
   const email = readEmail();
   const until = signedIn && stay ? signedInUntil() : null;
 
@@ -174,14 +174,14 @@ export default function AccountSheet() {
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 19, fontWeight: 600, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>
-              {signedIn ? 'Your account' : (creating ? 'Create an account' : 'Sign in')}
+              {signedIn ? 'Your account' : (licensing ? 'Company licence' : 'Sign in')}
             </div>
             {/* Who you are, permanently on screen — before this, a signed-in user
                 had no way to tell they were signed in. */}
             <div style={{ fontSize: 12.5, color: 'var(--dim)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {signedIn
                 ? (email ? `Signed in as ${email}` : 'Signed in')
-                : (creating ? 'One email address, that’s all' : 'Email and password, or a link by email')}
+                : (licensing ? 'For licensed organisations and their staff' : 'Staff email and password, or a link by email')}
             </div>
           </div>
           <button onClick={closeAccount} aria-label="Close" style={{ width: 34, height: 34, flex: 'none', borderRadius: 999, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -221,8 +221,8 @@ export default function AccountSheet() {
                 <div style={rowTitle}>Delete this account?</div>
                 <div style={{ ...rowNote, marginTop: 6 }}>
                   This permanently removes your account and your membership record from our server. It cannot be undone.
-                  {' '}<strong style={{ color: 'var(--ink)' }}>It does not cancel your subscription</strong> — cancel that on
-                  Gumroad first, or you will keep being charged. The stacks saved on this device stay on this device.
+                  {' '}If a company invoice or an older subscription is billed elsewhere, deleting here does not stop it.
+                  The stacks saved on this device stay on this device.
                 </div>
                 <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
                   <button onClick={() => setConfirmDelete(false)} disabled={busy} style={{ flex: 1, height: 44, borderRadius: 14, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--ink)', fontWeight: 600, fontSize: 13.5 }}>
@@ -244,7 +244,7 @@ export default function AccountSheet() {
             off remotely. Sessions are stateless JWTs with nothing stored server-side
             to revoke, so that stays impossible until the backend's A4 lands. */}
         <div style={sectionNote}>
-          Sign in with your email and password, or with a link we email you — whichever suits.
+          Staff sign in with the email and password their organisation was given, or with a link we email to an account that already exists.
           Signing out signs out this device. Passkeys are coming. Your password is stored
           scrambled, so it cannot be read back out of our database by anyone, including us.
         </div>

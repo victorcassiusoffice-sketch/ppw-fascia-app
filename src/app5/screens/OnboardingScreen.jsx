@@ -17,6 +17,7 @@ import React from 'react';
 import { useStore5, setState, finishOnboarding, openTerms, openAiBridge, openAccount } from '../store5.js';
 import { sfx } from '../sfx5.js';
 import { readEmail } from '../membership.js';
+import { LICENSE_CONTACT_EMAIL, licenseMailto } from '../licensing.js';
 
 // TWO steps, not three (2026-08-24). The middle screen — "Two ways to fill it"
 // — was a page of reading about buttons the user could not see yet, placed
@@ -359,25 +360,21 @@ export default function OnboardingScreen() {
           {step === CONSENT ? 'Start with an empty day' : 'Build mine'}
         </button>
 
-        {/* A door for BOTH kinds of visitor.
-            This line used to read "Already have an account? Sign in" — the only
-            account control on the screen, phrased as a question that tells a new
-            customer the path is not for them, while offering no path that is. */}
+        {/* Staff sign in, over the wizard. Public registration is closed. */}
         {S.signedIn ? (
           <div style={{ marginTop: 12, textAlign: 'center', fontSize: 12.5, color: 'var(--dim)' }}>
             Signed in as <span style={{ color: 'var(--ink)', fontWeight: 600 }}>{readEmail() || 'your account'}</span>
           </div>
         ) : (
-          <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-            <button onClick={() => openAccount('create')} data-tour="signup-onboarding"
-              style={{ minHeight: 44, padding: '0 10px', background: 'none', border: 'none', color: 'var(--accent)', fontSize: 13.5, fontWeight: 700 }}>
-              Create an account
-            </button>
-            <span style={{ color: 'var(--dim)', fontSize: 13 }}>·</span>
+          <div style={{ marginTop: 10, textAlign: 'center' }}>
             <button onClick={() => openAccount('signin')} data-tour="signin-onboarding"
-              style={{ minHeight: 44, padding: '0 10px', background: 'none', border: 'none', color: 'var(--dim)', fontSize: 13.5, fontWeight: 600 }}>
-              I already have one
+              style={{ minHeight: 44, padding: '0 10px', background: 'none', border: 'none', color: 'var(--accent)', fontSize: 13.5, fontWeight: 700 }}>
+              Sign in
             </button>
+            <div style={{ fontSize: 11.5, lineHeight: 1.5, color: 'var(--dim)' }}>
+              Licensed organizations only.{' '}
+              <a href={licenseMailto()} style={{ color: 'var(--accent)', fontWeight: 700 }}>{LICENSE_CONTACT_EMAIL}</a>
+            </div>
           </div>
         )}
       </div>

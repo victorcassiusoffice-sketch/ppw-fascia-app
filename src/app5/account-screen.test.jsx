@@ -117,8 +117,8 @@ describe('deleting the account', () => {
     signedIn();
     render(<AccountSheet />);
     fireEvent.click(screen.getByText(/delete my account/i));
-    expect(screen.getByText(/does not cancel your subscription/i)).toBeTruthy();
-    expect(screen.getByText(/cancel that on\s+Gumroad first/i)).toBeTruthy();
+    expect(screen.getByText(/does not stop it/i)).toBeTruthy();
+    expect(screen.queryByText(/gumroad/i)).toBeNull();
   });
 
   it('backing out leaves the account alone', () => {

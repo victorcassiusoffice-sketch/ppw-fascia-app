@@ -32,12 +32,9 @@ export function isProMember() {
   }
 }
 
-// setProMember — the ONE seam for granting/revoking Pro. Called today by the
-// manual Settings toggle (2026-07-06, no payment gateway wired yet — Vic's own
-// on/off switch for testing). When a real Gumroad unlock ships (a redeemed
-// license-key page, or a checkout-redirect landing route), it should call this
-// exact same function with the verified result — nothing else in the app needs
-// to change, since every Pro-gated surface already reads through isProMember().
+// setProMember — legacy local flag. Nothing in the live app calls this.
+// Public checkout is closed. Do not wire a consumer store to this function.
+// Full access in the lifestyle app comes from the membership API.
 export function setProMember(isPro) {
   try {
     if (isPro) localStorage.setItem(LS_KEYS.ENTITLEMENT, 'pro');

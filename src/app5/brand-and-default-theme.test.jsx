@@ -59,11 +59,12 @@ describe('the wordmark is on the first screen', () => {
     expect(screen.getByAltText('PPWellness').getAttribute('src')).toMatch(/ppw-logo-indigo\.webp$/);
   });
 
-  it('still offers all three doors alongside it', () => {
+  it('still offers sign-in, look around, and a licence contact alongside it', () => {
     render(<FirstRunChoice />);
-    expect(screen.getByText('Create an account')).toBeTruthy();
-    expect(screen.getByText('I already have one')).toBeTruthy();
+    expect(screen.getByText('Sign in')).toBeTruthy();
     expect(screen.getByText('Look around first')).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'victor@ppwellness.co' })).toBeTruthy();
+    expect(screen.queryByText('Create an account')).toBeNull();
   });
 
   // Vic, 2026-08-11: "it sits LEFT and unstyled. Centred, inside a soft-edge

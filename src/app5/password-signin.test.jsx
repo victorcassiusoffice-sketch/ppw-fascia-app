@@ -131,7 +131,8 @@ describe('the sign-in card', () => {
   // visible BEFORE any failure, not surfaced as an error afterwards.
   it('always shows the way out of the no-password trap, before any failure', () => {
     render(<MembershipCard />);
-    expect(screen.getByText(/new here, or never set a password\? use the email link below/i)).toBeTruthy();
+    expect(screen.getByText(/use the email link below/i)).toBeTruthy();
+    expect(screen.getByText(/does not open a public sign-up/i)).toBeTruthy();
   });
 
   it('offers "keep me signed in", on by default', () => {

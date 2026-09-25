@@ -44,7 +44,7 @@ describe('"Check membership" always answers', () => {
     stubEntitlement({ premium: true, entitlement: 'paid', role: 'member', currentPeriodEnd: '2026-09-03T00:00:00Z', userId: 'usr_1' });
     render(<MembershipCard />);
     fireEvent.click(screen.getByText(/check membership/i));
-    await waitFor(() => expect(screen.getByText(/checked — premium, active until/i)).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/checked — full access, active until/i)).toBeTruthy());
   });
 
   it('says so out loud on a Free account too', async () => {
@@ -52,7 +52,7 @@ describe('"Check membership" always answers', () => {
     stubEntitlement({ premium: false, entitlement: 'none', role: 'member', userId: 'usr_1' });
     render(<MembershipCard />);
     fireEvent.click(screen.getByText(/check membership/i));
-    await waitFor(() => expect(screen.getByText(/checked — you are on the free plan/i)).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/full access comes with a company licence/i)).toBeTruthy());
   });
 
   it('shows it is working while it works', async () => {
@@ -155,22 +155,22 @@ describe('one thing at a time after signing in', () => {
   it('holds the upsell back while setup is unfinished', () => {
     setState({ onboarded: false, premiumUpsell: 'Routines are Premium.' });
     render(<UpsellModal />);
-    expect(screen.queryByText(/premium feature/i)).toBeNull();
+    expect(screen.queryByText(/company licence/i)).toBeNull();
   });
 
   it('holds the upsell back while the account screen is open', () => {
     setState({ onboarded: true, accountOpen: true, premiumUpsell: 'Routines are Premium.' });
     render(<UpsellModal />);
-    expect(screen.queryByText(/premium feature/i)).toBeNull();
+    expect(screen.queryByText(/company licence/i)).toBeNull();
   });
 
   it('does not DROP it — it arrives on the next beat', () => {
     setState({ onboarded: true, accountOpen: true, premiumUpsell: 'Routines are Premium.' });
     const { rerender } = render(<UpsellModal />);
-    expect(screen.queryByText(/premium feature/i)).toBeNull();
+    expect(screen.queryByText(/company licence/i)).toBeNull();
     setState({ accountOpen: false });
     rerender(<UpsellModal />);
-    expect(screen.getByText(/premium feature/i)).toBeTruthy();
+    expect(screen.getByText(/company licence/i)).toBeTruthy();
     expect(getState().premiumUpsell).toBeTruthy();
   });
 

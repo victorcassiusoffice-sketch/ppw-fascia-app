@@ -10,13 +10,14 @@
 import React from 'react';
 import { useStore5, setState, syncEntitlement, signOutMembership, applyServerEntitlement, syncProfile } from '../store5.js';
 import {
-  GUMROAD_URL, PREM_PRICE, PREM_PRICE_FULL,
   requestSignIn, completeSignIn, fetchEntitlement, readEmail, isSignedIn,
-  checkoutUrl, pollForPremium, readEntitlementCache,
+  readEntitlementCache,
   setDevPremium, devPremiumAvailable,
   passwordSignIn, setPassword, PASSWORD_MIN, staySignedIn, setStaySignedIn,
   consumeNewAccount, isAdminGrant, passwordSetHere,
 } from '../membership.js';
+import { isOwnerAdminEmail } from '../licensing.js';
+import LicenseNotice from './LicenseNotice.jsx';
 
 /**
  * LEGIBILITY (Vic, 2026-08-06: the Premium panel is "hard to read").
@@ -92,38 +93,6 @@ function FieldError({ children }) {
   );
 }
 
-/**
- * What the buyer sees while a purchase is in flight (F1, UX pass 2026-08-11).
- *
- * The rule this encodes: NEVER show a wait for a page the customer might not be
- * looking at. The checkout link is rendered every time — not only when the popup
- * was blocked — because a window can also be swallowed by a tab-switch, closed by
- * accident, or lost behind the app. A plain <a> works where window.open does not:
- * the tap is the user gesture, so no popup blocker applies.
- */
-function CheckoutWaiting({ href, blocked, onCancel }) {
-  return (
-    <div style={{ marginTop: 14, padding: 16, borderRadius: 18, border: `1px solid ${blocked ? 'var(--acc-rim)' : 'var(--rim)'}`, background: 'var(--track)', boxShadow: 'var(--inset)' }}>
-      <div style={{ fontSize: 14, fontWeight: 700, textShadow: 'var(--emboss)' }}>
-        {blocked ? 'Your browser blocked the checkout window' : 'Waiting for your purchase to confirm…'}
-      </div>
-      <div style={{ marginTop: 6, fontSize: 12.5, lineHeight: 1.5, color: 'var(--dim)' }}>
-        {blocked
-          ? 'That is a browser setting, not a problem with your card — use the link below.'
-          : 'It opened in another tab. If you cannot see it, use the link below.'}
-      </div>
-      <a href={href} target="_blank" rel="noopener noreferrer"
-        style={{ ...primaryBtn, marginTop: 12, textDecoration: 'none' }}>
-        Open the checkout page
-      </a>
-      <button onClick={onCancel} style={{ ...quietBtn, marginTop: 4 }}>Cancel</button>
-      <div style={{ fontSize: 11.5, lineHeight: 1.5, color: 'var(--dim)' }}>
-        Premium unlocks by itself the moment your payment goes through — you do not need to come back here.
-      </div>
-    </div>
-  );
-}
-
 const crown = (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-1.8 10H4.8L3 8z" /></svg>
 );
@@ -148,11 +117,6 @@ export default function MembershipCard() {
   const [busy, setBusy] = React.useState(false);
   const [msg, setMsg] = React.useState(null);
   const [err, setErr] = React.useState(null);
-  const [waiting, setWaiting] = React.useState(false);
-  // F1: the live checkout URL while a purchase is in flight, so it can always be
-  // offered as a link, and whether the browser refused to open the window for us.
-  const [checkoutHref, setCheckoutHref] = React.useState(null);
-  const [popupBlocked, setPopupBlocked] = React.useState(false);
 
   // A sign-in can fail far from this card — a dead magic link lands on the Stack
   // screen. App5 parks the reason here so the account screen can show it.
@@ -160,7 +124,7 @@ export default function MembershipCard() {
     if (S.signInError) { setErr(S.signInError); setState({ signInError: null }); }
   }, [S.signInError]);
 
-  const creating = S.accountMode === 'create' && !isSignedIn();
+  const showLicense = S.accountMode === 'license' && !isSignedIn();
 
   const cache = readEntitlementCache();
   const periodEnd = fmtDate(cache?.currentPeriodEnd);
@@ -241,55 +205,11 @@ export default function MembershipCard() {
     applyServerEntitlement(ent);
     if (ent.signedOut) { setPhase('out'); setErr('Your session has ended — please sign in again.'); return; }
     const until = fmtDate(readEntitlementCache()?.currentPeriodEnd);
-    if (ent.premium) setMsg(until ? `Checked — Premium, active until ${until}.` : 'Checked — Premium is active.');
-    else setMsg('Checked — you are on the Free plan. No payment has been picked up on this account.');
+    if (ent.premium) setMsg(until ? `Checked — full access, active until ${until}.` : 'Checked — full access is on.');
+    else setMsg('Checked — this account is signed in, but full access is not on it. Full access comes with a company licence.');
   });
 
   const onSignOut = () => { signOutMembership(); setPhase('out'); setCode(''); setMsg(null); setErr(null); };
-
-  /**
-   * Buy: open Gumroad with our user id attached, then watch for the webhook so
-   * Premium flips without the user doing anything else.
-   *
-   * F1 (UX pass 2026-08-11) — THE MONEY PATH WAS A DEAD END. This threw away
-   * window.open's return value, so the app could not tell whether the checkout
-   * had actually opened. It flipped to "Waiting for your purchase to confirm…"
-   * either way, the Go Premium button disappeared, and there was no link, no
-   * cancel and no retry. On iPhone Safari — which blocks popups by default — a
-   * customer holding a card sat on a spinner with no checkout anywhere and no way
-   * forward. That is money lost at the last step, to a browser default.
-   *
-   * Now: the return value decides the copy, the checkout URL is ALWAYS rendered
-   * as a real tappable link (a plain <a> navigates even when popups are blocked,
-   * because the tap is the user gesture), and Cancel genuinely stops the poll.
-   */
-  const buyCancelled = React.useRef(false);
-
-  const onBuy = () => {
-    const url = checkoutUrl(GUMROAD_URL);
-    if (!url) return;
-    buyCancelled.current = false;
-
-    let win = null;
-    try { win = window.open(url, '_blank', 'noopener,noreferrer'); } catch { win = null; }
-    const blocked = !win;
-
-    setCheckoutHref(url);
-    setPopupBlocked(blocked);
-    setWaiting(true); setErr(null); setMsg(null);
-
-    pollForPremium({ shouldStop: () => buyCancelled.current }).then((ent) => {
-      if (buyCancelled.current) return;
-      setWaiting(false); setCheckoutHref(null); setPopupBlocked(false);
-      if (ent) { applyServerEntitlement(ent); setMsg('Premium unlocked. Enjoy.'); }
-      else setMsg('Still waiting on confirmation. It can take a minute — tap “Check membership” once you’ve paid.');
-    });
-  };
-
-  const onCancelBuy = () => {
-    buyCancelled.current = true;
-    setWaiting(false); setCheckoutHref(null); setPopupBlocked(false); setMsg(null);
-  };
 
   /**
    * Wave 2 item 4 — say an account was made.
@@ -312,7 +232,14 @@ export default function MembershipCard() {
    * a billing bug when you are the person testing the billing. Naming it costs one
    * line and stops the founder's own view being misleading. Customers never see it.
    */
-  const adminNote = isAdminGrant() ? (
+  const ownerDemo = isOwnerAdminEmail(readEmail()) && S.premium;
+  const ownerNote = ownerDemo ? (
+    <div style={{ marginTop: 10, padding: '10px 12px', borderRadius: 14, background: 'var(--track)', border: '1px solid var(--hairline)', boxShadow: 'var(--inset)', fontSize: 11.5, lineHeight: 1.5, color: 'var(--dim)' }}>
+      <strong style={{ color: 'var(--ink)' }}>Owner demo account.</strong> Unlimited access for sales
+      walkthroughs — no paywall. This is the one owner admin, not a public purchase.
+    </div>
+  ) : null;
+  const adminNote = !ownerDemo && isAdminGrant() ? (
     <div style={{ marginTop: 10, padding: '10px 12px', borderRadius: 14, background: 'var(--track)', border: '1px solid var(--hairline)', boxShadow: 'var(--inset)', fontSize: 11.5, lineHeight: 1.5, color: 'var(--dim)' }}>
       <strong style={{ color: 'var(--ink)' }}>Premium (admin account).</strong> This is on because your
       address is on the staff list, not because a payment was found. A customer with the same account
@@ -336,13 +263,15 @@ export default function MembershipCard() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
           <span style={{ width: 44, height: 44, flex: 'none', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--acc-surf)', border: '1px solid var(--acc-rim)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)' }}>{crown}</span>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 16, fontWeight: 700, textShadow: 'var(--emboss)' }}>Premium · active</div>
+            <div style={{ fontSize: 16, fontWeight: 700, textShadow: 'var(--emboss)' }}>{ownerDemo ? 'Owner · full access' : 'Full access · active'}</div>
             <div style={{ marginTop: 2, fontSize: 12.5, color: 'var(--dim)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{readEmail() || 'Signed in'}</div>
           </div>
         </div>
+        {ownerNote}
         {adminNote}
         <div style={note()}>
-          {periodEnd ? `Access runs to ${periodEnd}.` : 'Renews automatically.'} Manage or cancel from your Gumroad account.
+          {periodEnd ? `Access runs to ${periodEnd}. ` : ''}
+          Included with your organisation’s licence. There is no public subscription to manage in this app.
         </div>
         {createdNote}
         <SetPasswordBlock defaultOpen={S.justCreated} />
@@ -356,30 +285,23 @@ export default function MembershipCard() {
     );
   }
 
-  // ── signed in, not Premium → buy ───────────────────────────────────────────
+  // ── signed in, no full access → licence, not a checkout ───────────────────
   if (phase === 'in') {
-    const url = checkoutUrl(GUMROAD_URL);
     return (
       <div style={card(false)}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
           <span style={{ width: 44, height: 44, flex: 'none', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,.2)', border: '1px solid var(--rim)', color: 'var(--ink)' }}>{crown}</span>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 16, fontWeight: 700, textShadow: 'var(--emboss)' }}>Free plan</div>
+            <div style={{ fontSize: 16, fontWeight: 700, textShadow: 'var(--emboss)' }}>Signed in</div>
             <div style={{ marginTop: 2, fontSize: 12.5, color: 'var(--dim)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{readEmail() || 'Signed in'}</div>
           </div>
         </div>
-        <div style={note(false)}>Premium adds unlimited stacks, saved routines and the full protocol library. {PREM_PRICE_FULL}.</div>
-        {url && waiting ? (
-          <CheckoutWaiting href={checkoutHref || url} blocked={popupBlocked} onCancel={onCancelBuy} />
-        ) : url ? (
-          <button onClick={onBuy} style={{ ...primaryBtn, marginTop: 14 }}>
-            {`Go Premium · ${PREM_PRICE}/mo`}
-          </button>
-        ) : (
-          <div style={{ marginTop: 14, minHeight: 50, borderRadius: 16, border: '1px dashed var(--hairline)', color: 'var(--dim)', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px 14px', textAlign: 'center', lineHeight: 1.45 }}>
-            Premium isn’t on sale yet — it’s coming soon.
-          </div>
-        )}
+        <div style={{ marginTop: 14 }}>
+          <LicenseNotice
+            heading="Full access is a company licence"
+            detail="Unlimited stacks, saved routines and the full protocol library are included for staff of a licensed organisation. They are not sold one person at a time."
+          />
+        </div>
         {createdNote}
         <SetPasswordBlock defaultOpen={S.justCreated} />
         <button onClick={onRefresh} disabled={busy} style={quietBtn}>{busy ? 'Checking…' : 'Check membership'}</button>
@@ -387,6 +309,17 @@ export default function MembershipCard() {
         {msg && <div style={note(false)}>{msg}</div>}
         {err && <div style={{ ...note(false), color: 'var(--bad, #c05)' }}>{err}</div>}
         <DevUnlock />
+      </div>
+    );
+  }
+
+  if (showLicense) {
+    return (
+      <div style={card(false)}>
+        <LicenseNotice />
+        <button onClick={() => setState({ accountMode: 'signin' })} style={quietBtn}>
+          I have a staff account
+        </button>
       </div>
     );
   }
@@ -424,9 +357,9 @@ export default function MembershipCard() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
         <span style={{ width: 44, height: 44, flex: 'none', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,.2)', border: '1px solid var(--rim)', color: 'var(--ink)' }}>{crown}</span>
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 16, fontWeight: 700, textShadow: 'var(--emboss)' }}>{creating ? 'Create your account' : 'Sign in'}</div>
+          <div style={{ fontSize: 16, fontWeight: 700, textShadow: 'var(--emboss)' }}>Sign in</div>
           <div style={{ marginTop: 2, fontSize: 12.5, color: 'var(--dim)' }}>
-            {creating ? 'No password to invent — we email you a link' : 'Sign in to restore or buy Premium'}
+            Staff of a licensed organisation
           </div>
         </div>
       </div>
@@ -435,28 +368,8 @@ export default function MembershipCard() {
         <input
           type="email" inputMode="email" autoComplete="email" placeholder="you@example.com"
           value={email} onChange={(e) => setEmail(e.target.value)} aria-label="Email address" style={input}
-          onKeyDown={(e) => { if (e.key === 'Enter' && creating && email.trim()) onAskLink(); }}
+          onKeyDown={(e) => { if (e.key === 'Enter' && pw && email) onPasswordSignIn(); }}
         />
-
-        {/* CREATING — no password field at all. A new account HAS no password
-            (the backend makes one silently on first sight of an email), so
-            offering the box here would hand every new customer the 401 dead end
-            this wave exists to remove. */}
-        {creating ? (
-          <>
-            <button onClick={onAskLink} disabled={busy || !email.trim()} style={{ ...primaryBtn, opacity: busy || !email.trim() ? .6 : 1 }}>
-              Create my account
-            </button>
-            <div style={note(false)}>
-              We’ll email you a link to finish. You can set a password afterwards, so next time you
-              sign straight in.
-            </div>
-            <button onClick={() => setState({ accountMode: 'signin' })} style={quietBtn}>
-              I already have an account
-            </button>
-          </>
-        ) : (
-          <>
             <input
               ref={pwRef}
               type="password" autoComplete="current-password" placeholder="Password"
@@ -477,7 +390,7 @@ export default function MembershipCard() {
                 a flat contradiction: their details are right, and the app says
                 they are wrong. This one sentence is the whole fix. */}
             <div style={{ ...note(false), marginTop: 0 }}>
-              New here, or never set a password? Use the email link below.
+              Staff account with no password yet? Use the email link below. It signs in an account that already exists — it does not open a public sign-up.
             </div>
 
             <button onClick={onToggleStay} role="checkbox" aria-checked={stay} aria-label="Keep me signed in"
@@ -495,11 +408,9 @@ export default function MembershipCard() {
             <button onClick={onAskLink} disabled={busy || !email.trim()} style={{ ...quietBtn, marginTop: 2 }}>
               Email me a sign-in link instead
             </button>
-            <button onClick={() => setState({ accountMode: 'create' })} style={quietBtn}>
-              New here? Create an account
+            <button onClick={() => setState({ accountMode: 'license' })} style={quietBtn}>
+              Need a company licence?
             </button>
-          </>
-        )}
 
         {phase === 'sent' && (
           <>
@@ -509,7 +420,7 @@ export default function MembershipCard() {
               value={code} onChange={(e) => setCode(e.target.value)} aria-label="Sign-in link or code" style={input}
             />
             <button onClick={onCompleteCode} disabled={busy || !code.trim()} style={{ ...primaryBtn, opacity: busy || !code.trim() ? .6 : 1 }}>
-              {creating ? 'Finish creating my account' : 'Sign in with the link'}
+              Sign in with the link
             </button>
             <FieldError>{err}</FieldError>
             {/* Wave 2 item 5 — "nothing arrived" used to be a dead end with no
@@ -526,14 +437,10 @@ export default function MembershipCard() {
       </div>
 
       <div style={note(false)}>
-        The app is free without an account — an account saves your membership and lets you sign in on
-        another phone. Your stacks stay on this device either way.
+        Licensed organizations only. You can look around without an account. A staff account
+        is how a licensed company signs in on another phone. Stacks on this device stay here either way.
       </div>
       {msg && <div style={note()}>{msg}</div>}
-      {/* Errors from the PASSWORD path are rendered under that field instead —
-          see FieldError. This foot position only carries errors from the
-          emailed-link path, where there is no single field to sit beneath. */}
-      {creating && phase !== 'sent' && <FieldError>{err}</FieldError>}
       <DevUnlock />
     </div>
   );

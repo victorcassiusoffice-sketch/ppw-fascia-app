@@ -1,3 +1,7 @@
+# RETIRED — do not follow
+
+Public checkout (Gumroad, Stripe, and other self-serve pay paths) is closed. The app is licensed per company. See `docs/B2B-LICENSING.md`. The notes below are historical and must not be used to put a store back in the app.
+
 # Fascia App Premium — professional auto-unlock via backend (approach A)
 
 > **Decision 2026-07-10 (Vic): approach A — the proper way.** NOT the license-key-paste stopgap. Pay on Gumroad → account auto-upgrades to premium; cancel → auto-downgrades; cross-device; nothing to paste. This supersedes the earlier license-key version of this brief.

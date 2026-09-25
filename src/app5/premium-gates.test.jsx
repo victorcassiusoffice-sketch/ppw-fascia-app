@@ -23,7 +23,7 @@ describe('G1 — createRoutine is gated in the store, not just the UI', () => {
 
     expect(r).toBeNull();
     expect(s.getState().routines.length).toBe(before); // nothing persisted
-    expect(s.getState().premiumUpsell).toMatch(/Premium/);
+    expect(s.getState().premiumUpsell).toMatch(/licen/i);
     expect(JSON.parse(localStorage.getItem('ppw5.routines') || 'null')).toBeNull();
   });
 
@@ -71,7 +71,7 @@ describe('W11 — updateRoutine is gated too (the last asymmetry)', () => {
     expect(out).toBeNull();
     expect(s.getState().routines[0].name).toBe('Morning');           // memory untouched
     expect(JSON.parse(localStorage.getItem('ppw5.routines'))[0].name).toBe('Morning'); // disk untouched
-    expect(s.getState().premiumUpsell).toMatch(/Premium/);
+    expect(s.getState().premiumUpsell).toMatch(/licen/i);
   });
 
   it('allows the edit once the server says paid', async () => {

@@ -182,7 +182,7 @@ export default function AiBridgeSheet() {
       const room = rebuilding ? (res.fits ?? 0) : headroom;
       setConfirmReplace(false);
       setCapErr(room === 0
-        ? `Your Stack is full — ${used} of ${FREE_STACK_CAP}. Delete something on your Stack, or go Premium, then come back. Your plan is still here.`
+        ? `Your Stack is full — ${used} of ${FREE_STACK_CAP}. Delete something on your Stack, or use a company licence, then come back. Your plan is still here.`
         : `That's ${chosen.length} items but you have room for ${room}. Untick ${chosen.length - room} and try again — nothing is lost.`);
       return;
     }
@@ -280,7 +280,7 @@ export default function AiBridgeSheet() {
             )}
             {stackFull && !rebuilding && (
               <div role="alert" style={{ marginTop: 18, padding: '12px 14px', borderRadius: 14, border: '1px solid var(--accent)', background: 'var(--track)', boxShadow: 'var(--inset)', fontSize: 12.5, lineHeight: 1.55, color: 'var(--accent)', fontWeight: 600 }}>
-                Your Stack is full — {used} of {FREE_STACK_CAP}. Make room first, go Premium, or choose “Redo my whole day” above.
+                Your Stack is full — {used} of {FREE_STACK_CAP}. Make room first, use a company licence, or choose “Redo my whole day” above.
               </div>
             )}
             <button onClick={send} disabled={stackFull && !rebuilding} data-tour="ai-copy" style={{ ...BTN_PRIMARY, marginTop: 20, opacity: (stackFull && !rebuilding) ? .45 : 1 }}>

@@ -297,7 +297,8 @@ export function stackFor(key) {
 // reads as it shipped; whether that limit and that wording are right is a
 // product decision for Vic, not a refactor.
 export const FREE_STACK_CAP = 10;
-export const FREE_CAP_UPSELL = `You have reached the free limit of ${FREE_STACK_CAP} stacks. Go Premium for unlimited stacks.`;
+export const FREE_CAP_UPSELL = `You have reached the preview limit of ${FREE_STACK_CAP} stacks. Unlimited stacks come with a company licence.`;
+export const ROUTINE_LICENSE_UPSELL = 'Saved routines are included with a company licence — bundle stacks and drop them onto any day in one tap.';
 export function overLimit() { return !state.premium && state.deckItems.length >= FREE_STACK_CAP; }
 
 export function markDone(id, key = todayKey()) {
@@ -387,7 +388,7 @@ export function createRoutine(name, items) {
   // that can reach this function (a stale view, a future caller, the console) was
   // able to create routines for free until this guard existed.
   if (!state.premium) {
-    setState({ premiumUpsell: 'Routines are part of Premium — bundle stacks and drop them onto any day in one tap.' });
+    setState({ premiumUpsell: ROUTINE_LICENSE_UPSELL });
     return null;
   }
   const r = { id: 'rt' + Date.now().toString(36), name: String(name).trim(), items };
@@ -403,7 +404,7 @@ export function updateRoutine(id, patch) {
   // exact reasoning the G1 guard above was added to stop relying on. A lapsed
   // subscriber whose routines are still on disk could otherwise keep editing them.
   if (!state.premium) {
-    setState({ premiumUpsell: 'Routines are part of Premium — bundle stacks and drop them onto any day in one tap.' });
+    setState({ premiumUpsell: ROUTINE_LICENSE_UPSELL });
     return null;
   }
   saveRoutines(state.routines.map((r) => r.id === id ? { ...r, ...patch } : r));
@@ -426,7 +427,7 @@ export function deleteSelected() {
 // ── Protocols from the build-time bundled manifest (Vic item 1) ──
 // Upsell copy shown when a non-Premium user taps a `monetised` protocol. Free
 // protocols never hit this — they open for everyone as a lead magnet.
-export const PREMIUM_PROTOCOL_UPSELL = 'This protocol is part of Premium. Unlock to open the full PDF and add it to any day.';
+export const PREMIUM_PROTOCOL_UPSELL = 'This protocol is included with a company licence. Sign in with a licensed staff account, or contact Peak Performance Wellness.';
 let _protocolsLoaded = false;
 export async function loadProtocols() {
   if (_protocolsLoaded) return;
@@ -774,7 +775,7 @@ export function addItemsToToday(items) {
 export function applyRoutineToDate(routineId, dateKey) {
   const r = state.routines.find((x) => x.id === routineId);
   if (!r) return { ok: false };
-  if (!state.premium) { setState({ premiumUpsell: 'Routines are part of Premium — bundle stacks and drop them onto any day in one tap.' }); return { upsell: true }; }
+  if (!state.premium) { setState({ premiumUpsell: ROUTINE_LICENSE_UPSELL }); return { upsell: true }; }
   const base = 9 * 60;
   const added = r.items.map((item, i) => {
     const { id, anchor, repeat, ...rest } = item;
@@ -900,10 +901,12 @@ export function noteAnimCss(anim, sp) {
 export function openCompleted() { setState({ completedOpen: true }); }
 export function closeCompleted() { setState({ completedOpen: false }); }
 // mode is optional. Existing callers pass it straight to onClick, so the first
-// argument can be a click event — anything that isn't the string 'create' means
-// the ordinary sign-in door.
+// argument can be a click event — anything that isn't 'create' or 'license'
+// means the ordinary sign-in door. 'create' is no longer a sign-up form: public
+// registration is closed, so it opens the company-licence notice.
 export function openAccount(mode) {
-  setState({ accountOpen: true, accountMode: mode === 'create' ? 'create' : 'signin' });
+  const accountMode = mode === 'create' || mode === 'license' ? 'license' : 'signin';
+  setState({ accountOpen: true, accountMode });
 }
 export function closeAccount() { setState({ accountOpen: false, justCreated: false }); }
 /** Remember this device has been offered the create/sign-in choice. */
