@@ -257,7 +257,7 @@ export const QUESTS = [
           // Never land a first-time visitor on the paywall shelf.
           before: () => goLibrary('media'),
           title: 'Everything lives in the Library.',
-          body: 'Media is links you have saved. Protocols are step-by-step plans. Supps is a supplement shopping list. Routines are whole saved days — that shelf is part of Premium; everything in this guide is free.',
+          body: 'Media is links you have saved. Protocols are step-by-step plans. Supps is a supplement shopping list. Routines are whole saved days — that shelf is included with a company licence; everything in this guide is available to look around.',
           buttons: [{ label: 'Next' }],
         },
         {

@@ -1,17 +1,13 @@
-// UpsellModal — New Design "Premium feature" paywall (faithful port).
+// UpsellModal — company-licence gate.
 //
-// Shown whenever a Premium-gated action fires (state.premiumUpsell holds the
-// reason). "Enable Premium" flips the same premium flag the Settings toggle
-// uses — this is the button a real Gumroad checkout replaces later.
+// Shown whenever a full-access action fires (state.premiumUpsell holds the
+// reason). There is no public checkout. The way forward is a company licence,
+// or signing in as staff who already have one.
 
 import React from 'react';
 import { useStore5, clearUpsell, openAccount, FREE_STACK_CAP, FREE_CAP_UPSELL, onlyExamplesLeft, clearExamples } from '../store5.js';
-import { GUMROAD_URL, PREM_PRICE, PREM_PRICE_NOTE, checkoutUrl, isSignedIn } from '../membership.js';
-
-// GUMROAD_URL + pricing now live in membership.js (one seam for the paywall, the
-// Library card and the Settings membership panel). Re-exported so anything still
-// importing it from here keeps working.
-export { GUMROAD_URL };
+import { isSignedIn } from '../membership.js';
+import LicenseNotice from './LicenseNotice.jsx';
 
 const tick = (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flex: 'none' }}><path d="M20 6 9 17l-5-5" /></svg>
@@ -21,11 +17,8 @@ export default function UpsellModal() {
   const S = useStore5();
   if (!S.premiumUpsell) return null;
 
-  // ONE THING AT A TIME (Vic, 2026-08-06: account sheet + terms + this, all in the
-  // first seconds of signing in). Order of right-of-way: consent first, because it
-  // is legally required and blocks everything; then the account moment; then the
-  // sell. This does NOT drop the upsell — the reason stays in state, so it appears
-  // on the next beat, once the user is not being shouted at from three directions.
+  // ONE THING AT A TIME. Consent first, then the account moment, then this.
+  // The reason stays in state so it appears once those are done.
   if (!S.onboarded || S.accountOpen) return null;
 
   const signedIn = isSignedIn();
@@ -37,18 +30,13 @@ export default function UpsellModal() {
         <span style={{ display: 'inline-flex', width: 56, height: 56, borderRadius: 18, alignItems: 'center', justifyContent: 'center', background: 'var(--acc-surf)', border: '1px solid var(--acc-rim)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)' }}>
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-1.8 10H4.8L3 8z" /></svg>
         </span>
-        <div style={{ marginTop: 14, fontSize: 21, fontWeight: 700, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>Premium feature</div>
+        <div style={{ marginTop: 14, fontSize: 21, fontWeight: 700, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>Company licence</div>
         <p style={{ margin: '8px 0 0', fontSize: 13.5, lineHeight: 1.55, color: 'var(--dim)' }}>{S.premiumUpsell}</p>
 
-        {/* THE CAP COUNTS OUR OWN EXAMPLE CARDS. Four of the ten slots a free
-            user gets were filled by us before they arrived, and being told
-            "you have reached the free limit" without being told that reads as
-            a much smaller free tier than it is. Said here because THIS is the
-            refusal point — the moment the add was turned down. */}
         {S.premiumUpsell === FREE_CAP_UPSELL && (
           <>
             <p style={{ margin: '10px 0 0', fontSize: 13.5, lineHeight: 1.55, color: 'var(--dim)' }}>
-              Free keeps up to {FREE_STACK_CAP} things, and the example cards count. Clearing them frees their slots.
+              The preview keeps up to {FREE_STACK_CAP} things, and the example cards count. Clearing them frees their slots.
             </p>
             {onlyExamplesLeft() && (
               <button onClick={() => { clearExamples(); clearUpsell(); }}
@@ -60,54 +48,22 @@ export default function UpsellModal() {
         )}
         <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 9, textAlign: 'left' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13.5, color: 'var(--ink)' }}>{tick}Routines — chain many items into one stack</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13.5, color: 'var(--ink)' }}>{tick}Unlimited stacks (free is capped at {FREE_STACK_CAP})</div>
-          {/* W15 (2026-07-29): this line used to read "Always-on Assistant in the
-              corner". Nothing in the app is that. The coach is a separate site
-              with its own sign-in and a session token that dies with the tab —
-              selling it as an always-on corner panel is the kind of promise that
-              gets refunded. Replaced with a benefit the store actually enforces:
-              applyRoutineToDate is premium-gated (store5.js), same as
-              createRoutine and updateRoutine. */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13.5, color: 'var(--ink)' }}>{tick}Unlimited stacks (the preview is capped at {FREE_STACK_CAP})</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13.5, color: 'var(--ink)' }}>{tick}Drop a saved routine onto any day in one tap</div>
         </div>
-        <div style={{ marginTop: 18, fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>{PREM_PRICE} <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--dim)' }}>/ month</span></div>
-        <div style={{ marginTop: 2, fontSize: 12, color: 'var(--dim)' }}>{PREM_PRICE_NOTE}</div>
-        {/* GUMROAD SEAM (2026-07-28): the old "Enable Premium (test)" button here
-            granted Premium to ANY user in one tap — ~100% revenue leakage the
-            moment checkout went live. Removed.
-            Buying needs an account first: the checkout URL carries app_user_id so
-            the webhook can match the purchase back to this user, and that id only
-            exists once they've signed in. So a signed-out tap cannot go to a
-            checkout that couldn't be attributed.
-            2026-08-24: it used to drop the user on the Settings screen with no
-            word said — Settings cannot sign anyone in, so the tap looked broken.
-            Now the reason is stated on the card and the tap opens the account
-            sheet, which is the one surface that can actually sign them in. The
-            upsell is deliberately NOT cleared: it stays in state behind the
-            sheet (the guard above hides it while accountOpen), so once they are
-            signed in the card comes back with a live checkout button. */}
-        {GUMROAD_URL && !signedIn && (
-          <div style={{ marginTop: 12, fontSize: 12.5, lineHeight: 1.5, color: 'var(--dim)' }}>Sign in first — Premium attaches to an account.</div>
-        )}
-        {GUMROAD_URL ? (
-          <a
-            href={signedIn ? (checkoutUrl(GUMROAD_URL) || GUMROAD_URL) : undefined}
-            onClick={(e) => {
-              if (signedIn) return;
-              e.preventDefault();
-              openAccount('signin');
-            }}
-            target={signedIn ? '_blank' : undefined}
-            rel="noopener noreferrer"
-            role="button"
-            style={{ marginTop: signedIn ? 14 : 10, width: '100%', height: 52, borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 700, fontSize: 15, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', cursor: 'pointer' }}
+        <div style={{ marginTop: 16, textAlign: 'left' }}>
+          <LicenseNotice
+            heading="Licensed per company"
+            detail="For the staff of a licensed organisation. Contact Peak Performance Wellness to arrange access — there is nothing to buy here."
+          />
+        </div>
+        {!signedIn && (
+          <button
+            onClick={() => openAccount('signin')}
+            style={{ marginTop: 8, width: '100%', height: 44, background: 'none', border: 'none', color: 'var(--ink)', fontSize: 14, fontWeight: 700 }}
           >
-            {signedIn ? 'Go Premium' : 'Sign in to go Premium'}
-          </a>
-        ) : (
-          <div style={{ marginTop: 14, width: '100%', minHeight: 52, borderRadius: 16, border: '1px dashed var(--hairline)', color: 'var(--dim)', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px 14px', textAlign: 'center', lineHeight: 1.45 }}>
-            Premium isn’t on sale yet — it’s coming soon.
-          </div>
+            Staff sign in
+          </button>
         )}
         <button onClick={clearUpsell} style={{ marginTop: 6, width: '100%', height: 44, background: 'none', border: 'none', color: 'var(--dim)', fontSize: 14, fontWeight: 600 }}>Not now</button>
       </div>

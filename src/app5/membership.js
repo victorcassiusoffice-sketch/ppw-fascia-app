@@ -12,11 +12,12 @@
 // hands the result to store5.applyServerEntitlement().
 //
 // Backend: the ppw-wellness-assistant API (own Vercel project + Neon DB). It owns
-// accounts, Gumroad webhooks and the entitlement column. This file never sees a
-// Gumroad token or a payment detail — the bundle ships to every user.
+// accounts and the entitlement column. This file never sees a payment token —
+// the bundle ships to every user. Public checkout is closed; see licensing.js.
 // ─────────────────────────────────────────────────────────────────────────
 
 import { WELLNESS_ASSISTANT_URL } from '../config.js';
+import { isOwnerAdminEmail, LICENSE_ONLY_MESSAGE, PUBLIC_CHECKOUT_ENABLED } from './licensing.js';
 // passcode.js deliberately imports nothing from here, so this stays one-way.
 import {
   isEnabled as passcodeEnabled, passcodeToken, updateSealedToken,
@@ -29,32 +30,11 @@ const LS = (k) => 'ppw5.' + k;
 // magic-link email's branding and where that link lands.
 export const APP_ID = 'lifestyle';
 
-// ── GUMROAD PRODUCT SEAM ─────────────────────────────────────────────────────
-// The live permalink for "PPWellness Lifestyle App — Premium". Held at null until
-// Vic published, because an invented URL would send buyers to a 404 with their
-// card out; while null the paywall shows an honest "not on sale yet" note instead
-// of a dead button.
-// 2026-07-31: Vic published and a real sale went through.
-//
-// ⚠ 2026-08-22 — THE HANDLE MOVED, AND GUMROAD DOES NOT FORWARD. The profile was
-// renamed victorix08 → ppwellness, and the old subdomain simply 404s: verified
-// this run, https://victorix08.gumroad.com/l/ppw-premium → 404 (no redirect to
-// follow). Every second this constant was stale, "Go Premium" sent a buyer with
-// their card out to a dead page. A store rename is therefore a CODE change here,
-// not just an account change — there is no forwarding to save us.
-//
-// Verified this run on the new host: anonymous GET → 200, page titled
-// "PPWellness Lifestyle App — Premium", all three prices present
-// (9.99 / 47.94 / 59.88).
-//
-// NEVER put a seller token or licence key here — this bundle ships to every user.
-export const GUMROAD_URL = 'https://ppwellness.gumroad.com/l/ppw-premium';
-
-// Pricing shown in the paywall. Must match the Gumroad product exactly (plans spec
-// §3.1): $9.99/mo · $47.94/6mo · $59.88/yr.
-export const PREM_PRICE = '$9.99';
-export const PREM_PRICE_NOTE = 'from $4.99/mo billed yearly';
-export const PREM_PRICE_FULL = '$9.99/mo · $47.94/6 mo · $59.88/yr';
+// ── PUBLIC CHECKOUT ──────────────────────────────────────────────────────────
+// Retired. The app is licensed per company. This stays null so no screen can
+// build a store link by accident. Do not point it at Gumroad, Stripe, or any
+// other public checkout. PUBLIC_CHECKOUT_ENABLED in licensing.js is the flag.
+export const GUMROAD_URL = PUBLIC_CHECKOUT_ENABLED ? '' : null;
 
 // Build-time override so a future custom domain doesn't need a code edit.
 export const API_BASE = String(
@@ -305,7 +285,28 @@ export async function completeSignIn(loginToken, email) {
   if (!r?.token) throw new Error('That link has expired or was already used. Ask for a new one.');
   noteNewAccount(r);
   writeSession(r.token, email || readEmail());
+  await closeUnlicensedSignup(r, email || readEmail());
   return await fetchEntitlement();
+}
+
+/**
+ * Public registration is closed. The membership API still creates a user the
+ * first time it sees an email. When it tells us that just happened, tear the
+ * account down — except the owner allow-list, who may sign in on a fresh
+ * install for a demo. Existing staff never hit this: isNewAccount is absent.
+ */
+async function closeUnlicensedSignup(authResponse, email) {
+  if (!authResponse || authResponse.isNewAccount !== true) return;
+  if (isOwnerAdminEmail(email)) return;
+  drop('newAccount');
+  try {
+    await deleteAccount();
+  } catch {
+    signOut();
+  }
+  const err = new Error(LICENSE_ONLY_MESSAGE);
+  err.code = 'unlicensed-signup';
+  throw err;
 }
 
 /**
@@ -374,6 +375,7 @@ export async function passwordSignIn(email, password) {
   if (!r?.token) throw new Error('Sign-in failed — try the email link instead.');
   noteNewAccount(r);
   writeSession(r.token, clean);
+  await closeUnlicensedSignup(r, clean);
   return await fetchEntitlement();
 }
 
@@ -485,8 +487,8 @@ export function clearSessionPasscode() {
  * that row owns — entitlement, subscription record, stored messages. Read from
  * api/_lib/handlers.ts, not assumed.
  *
- * ⚠ It does NOT touch Gumroad. A live subscription carries on billing until it is
- * cancelled there, so any UI that offers this must say so before it runs.
+ * Deleting the app account does not cancel a company invoice, or any older
+ * subscription that was billed outside this app.
  */
 export async function deleteAccount() {
   await api('/api/me/data', { method: 'DELETE', auth: true });
@@ -509,10 +511,9 @@ export function signOut() {
 }
 
 /**
- * The checkout link. `app_user_id` rides along as a URL parameter; Gumroad passes
- * unknown params straight through to its ping as url_params[app_user_id], which is
- * how the backend matches a purchase to this account even when the buyer pays with
- * a different email. Verified against the Gumroad source (Purchase#payload_for_ping_notification).
+ * Dormant. Public checkout is off, and nothing in the UI calls this.
+ * Kept so a non-https URL can never be handed to window.open if a caller
+ * passes one in. Returns null for anything that is not https.
  */
 export function checkoutUrl(gumroadUrl, uid = userId()) {
   if (!gumroadUrl) return null;
@@ -524,29 +525,6 @@ export function checkoutUrl(gumroadUrl, uid = userId()) {
   } catch {
     return null;
   }
-}
-
-/**
- * Poll while a purchase settles. Gumroad pings the backend within seconds, but the
- * user is staring at the app, so we check every 5s for 2 minutes and stop the
- * moment Premium lands. Returns the entitlement that unlocked, or null on timeout.
- */
-export async function pollForPremium({ intervalMs = 5000, timeoutMs = 120000, onTick, shouldStop } = {}) {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    // The buyer can back out (they closed the checkout, or it never opened), and
-    // a poll that ignores that leaves the UI stuck on a spinner they cannot dismiss.
-    if (shouldStop?.()) return null;
-    try {
-      const ent = await fetchEntitlement();
-      if (ent.premium) return ent;
-      onTick?.(ent);
-    } catch {
-      // transient — keep waiting rather than failing the purchase flow
-    }
-    await new Promise((r) => setTimeout(r, intervalMs));
-  }
-  return null;
 }
 
 /** Local-dev unlock so the app can be worked on without a deployed backend. */

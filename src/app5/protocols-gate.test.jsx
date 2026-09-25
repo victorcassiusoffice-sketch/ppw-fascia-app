@@ -64,7 +64,7 @@ describe('LibraryScreen Protocols tab — premium gate', () => {
     expect(screen.getByLabelText('View protocol')).toBeTruthy();
     // monetised (not premium) → a lock/unlock control, NOT an open link
     expect(screen.getByLabelText('Unlock Premium Testosterone Protocol')).toBeTruthy();
-    expect(screen.queryByText(/^Premium ·/)).toBeTruthy(); // subtitle flips to "Premium ·"
+    expect(screen.queryByText(/^Licence ·/)).toBeTruthy(); // subtitle flips to "Licence ·"
 
     // server says paid → the monetised protocol now opens like any other
     act(() => applyServerEntitlement({ premium: true }));

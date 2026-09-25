@@ -29,58 +29,20 @@ beforeEach(() => {
 });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
-describe('F1 — a blocked popup can no longer strand a buyer', () => {
-  it('offers the checkout as a real link when the browser blocks the window', async () => {
+describe('F1 — public checkout is closed', () => {
+  it('does not offer a store, a price, or a buy button', () => {
     signedInFree();
-    vi.stubGlobal('open', vi.fn(() => null));      // exactly what Safari does
+    const open = vi.fn();
+    vi.stubGlobal('open', open);
     render(<MembershipCard />);
-    fireEvent.click(screen.getByText(/go premium/i));
-
-    const link = await screen.findByRole('link', { name: /open the checkout page/i });
-    expect(link.tagName).toBe('A');
-    expect(link.getAttribute('href')).toContain(GUMROAD_URL);
-    expect(link.getAttribute('target')).toBe('_blank');
-    expect(screen.getByText(/blocked the checkout window/i)).toBeTruthy();
-  });
-
-  it('offers the link even when the popup DID open — windows get lost too', async () => {
-    signedInFree();
-    vi.stubGlobal('open', vi.fn(() => ({ closed: false })));
-    render(<MembershipCard />);
-    fireEvent.click(screen.getByText(/go premium/i));
-
-    const link = await screen.findByRole('link', { name: /open the checkout page/i });
-    expect(link.getAttribute('href')).toContain(GUMROAD_URL);
-    expect(screen.getByText(/waiting for your purchase/i)).toBeTruthy();
-    expect(screen.queryByText(/blocked the checkout window/i)).toBeNull();
-  });
-
-  it('blames the browser, not the card', async () => {
-    signedInFree();
-    vi.stubGlobal('open', vi.fn(() => null));
-    render(<MembershipCard />);
-    fireEvent.click(screen.getByText(/go premium/i));
-    expect(await screen.findByText(/browser setting, not a problem with your card/i)).toBeTruthy();
-  });
-
-  it('can be cancelled, and the buy button comes back', async () => {
-    signedInFree();
-    vi.stubGlobal('open', vi.fn(() => null));
-    render(<MembershipCard />);
-    fireEvent.click(screen.getByText(/go premium/i));
-    await screen.findByRole('link', { name: /open the checkout page/i });
-
-    fireEvent.click(screen.getByText(/^cancel$/i));
-    await waitFor(() => expect(screen.queryByText(/open the checkout page/i)).toBeNull());
-    expect(screen.getByText(/go premium/i)).toBeTruthy();   // not a dead end
-  });
-
-  it('says the unlock is automatic, so nobody sits waiting on this screen', async () => {
-    signedInFree();
-    vi.stubGlobal('open', vi.fn(() => null));
-    render(<MembershipCard />);
-    fireEvent.click(screen.getByText(/go premium/i));
-    expect(await screen.findByText(/unlocks by itself/i)).toBeTruthy();
+    expect(screen.queryByText(/go premium/i)).toBeNull();
+    expect(screen.queryByRole('link', { name: /checkout/i })).toBeNull();
+    expect(screen.queryByText(/\$\d/)).toBeNull();
+    const link = screen.getByRole('link', { name: /victor@ppwellness.co/i });
+    expect(link.getAttribute('href') || '').toMatch(/^mailto:victor@ppwellness\.co/);
+    expect(document.body.innerHTML).not.toMatch(/gumroad|stripe/i);
+    expect(GUMROAD_URL).toBeNull();
+    expect(open).not.toHaveBeenCalled();
   });
 });
 

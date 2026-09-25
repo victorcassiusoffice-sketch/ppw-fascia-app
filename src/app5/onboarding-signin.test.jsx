@@ -30,15 +30,16 @@ describe('a returning user can sign in without finishing setup', () => {
   // Wave 2: this line used to read "Already have an account? Sign in" — the only
   // account control on the screen, phrased so a NEW customer is told the path is
   // not theirs. Both visitors now get a door.
-  it('offers both doors on the very first setup screen', () => {
+  it('offers staff sign-in and no public registration', () => {
     render(<Shell />);
-    expect(screen.getByText(/create an account/i)).toBeTruthy();
-    expect(screen.getByText(/i already have one/i)).toBeTruthy();
+    expect(screen.getByText(/^sign in$/i)).toBeTruthy();
+    expect(screen.queryByText(/create an account/i)).toBeNull();
+    expect(screen.getByRole('link', { name: /victor@ppwellness.co/i })).toBeTruthy();
   });
 
   it('the sign-in form actually appears over the wizard when tapped', () => {
     render(<Shell />);
-    fireEvent.click(screen.getByText(/i already have one/i));
+    fireEvent.click(screen.getByText(/^sign in$/i));
     expect(getState().accountOpen).toBe(true);
     expect(getState().accountMode).toBe('signin');
     // the real form, not just a state flag: the one shared MembershipCard
@@ -46,13 +47,10 @@ describe('a returning user can sign in without finishing setup', () => {
     expect(screen.getByLabelText(/^password$/i)).toBeTruthy();
   });
 
-  it('the create-account door opens the same sheet in create mode', () => {
+  it('there is no create-account door on the wizard', () => {
     render(<Shell />);
-    fireEvent.click(screen.getByText(/create an account/i));
-    expect(getState().accountMode).toBe('create');
-    expect(screen.getByText(/create my account/i)).toBeTruthy();
-    // no password box: a brand-new account has no password to type
-    expect(screen.queryByLabelText(/^password$/i)).toBeNull();
+    expect(screen.queryByText(/create my account/i)).toBeNull();
+    expect(screen.queryByText(/create an account/i)).toBeNull();
   });
 
   it('the account sheet is stacked ABOVE the wizard, or it renders invisibly', () => {

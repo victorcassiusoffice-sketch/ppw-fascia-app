@@ -40,46 +40,43 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('a new visitor is offered a way in', () => {
-  it('opens with a real choice, not two buttons that both say sign in', () => {
+  it('opens on staff sign-in and a look-around, with no public sign-up', () => {
     render(<Shell />);
-    expect(screen.getByText(/^create an account$/i)).toBeTruthy();
-    expect(screen.getByText(/^i already have one$/i)).toBeTruthy();
+    expect(screen.getByText(/^sign in$/i)).toBeTruthy();
+    expect(screen.getByText(/look around first/i)).toBeTruthy();
+    expect(screen.queryByText(/create an account/i)).toBeNull();
+    expect(screen.getByRole('link', { name: /victor@ppwellness.co/i })).toBeTruthy();
   });
 
-  it('"Create an account" opens the account sheet in create mode', () => {
+  it('the licence notice is not a sign-up form', () => {
     render(<Shell />);
-    fireEvent.click(screen.getByText(/^create an account$/i));
-    expect(getState().accountMode).toBe('create');
-    expect(screen.getByText(/create my account/i)).toBeTruthy();
+    fireEvent.click(screen.getByRole('link', { name: /victor@ppwellness.co/i }));
+    // mailto does not open the account sheet or a create-account form
+    expect(getState().accountOpen).toBe(false);
+    expect(screen.queryByText(/create my account/i)).toBeNull();
   });
 
-  it('a new account is never asked for a password it cannot have', () => {
+  it('"Sign in" opens the staff sign-in sheet, not a registration form', () => {
     render(<Shell />);
-    fireEvent.click(screen.getByText(/^create an account$/i));
-    expect(screen.queryByLabelText(/^password$/i)).toBeNull();
-  });
-
-  it('"I already have one" opens the same sheet as sign-in', () => {
-    render(<Shell />);
-    fireEvent.click(screen.getByText(/^i already have one$/i));
+    fireEvent.click(screen.getByText(/^sign in$/i));
     expect(getState().accountMode).toBe('signin');
     expect(screen.getByLabelText(/^password$/i)).toBeTruthy();
+    expect(screen.queryByText(/create my account/i)).toBeNull();
   });
 
-  // The app has always worked without an account and says so in its own copy.
-  // A sign-up wall would trade one exclusion for another.
+  // The shell walkthrough stays one tap, with no account and no payment.
   it('lets someone look around without an account, and remembers that', () => {
     render(<Shell />);
     fireEvent.click(screen.getByText(/look around first/i));
     expect(getState().firstRunChoice).toBe(true);
     expect(localStorage.getItem(LS('frc'))).toBe('1');
-    expect(screen.queryByText(/^create an account$/i)).toBeNull();
+    expect(screen.queryByText(/^sign in$/i)).toBeNull();
   });
 
   it('is never shown to someone who already set the app up', () => {
     setState({ onboarded: true });
     render(<Shell />);
-    expect(screen.queryByText(/^create an account$/i)).toBeNull();
+    expect(screen.queryByText(/look around first/i)).toBeNull();
   });
 
   it('gets out of the way the moment someone signs in', () => {

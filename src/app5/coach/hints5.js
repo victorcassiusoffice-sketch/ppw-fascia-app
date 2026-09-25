@@ -93,8 +93,8 @@ export const HINTS = {
   },
   'routines-paywall': {
     anchor: 'routines-lock', cap: 1,
-    title: 'Routines are the one paid thing here.',
-    copy: 'A routine is a whole saved day you can reuse — Premium, $9.99 a month. The rest of the app is free. Nothing to decide now.',
+    title: 'Routines come with a company licence.',
+    copy: 'A routine is a whole saved day you can reuse. It is included for staff of a licensed organisation. Nothing to buy in the app.',
   },
   'supps-intro': {
     anchor: 'supps-top', cap: 1,
@@ -107,8 +107,8 @@ export const HINTS = {
     // about the same refusal). This copy lives in UpsellModal, at the exact
     // point the add was turned down, with its own [Clear the examples].
     anchor: null, cap: Infinity, inline: true,
-    title: 'You have hit the free limit.',
-    copy: 'Free keeps up to 10 things, and the example cards count. Clearing them frees their slots. Premium removes the limit.',
+    title: 'You have hit the preview limit.',
+    copy: 'The preview keeps up to 10 things, and the example cards count. Clearing them frees their slots. A company licence removes the limit for staff.',
   },
   'install-nudge': {
     anchor: null, cap: 3,

@@ -149,39 +149,61 @@ describe('sign-in', () => {
   });
 });
 
-// THE 22 AUG P0. The Gumroad profile was renamed victorix08 → ppwellness and the
-// old subdomain 404s with no forwarding, so the live "Go Premium" button pointed at
-// a dead page while the app looked perfectly healthy. Nothing failed: no test, no
-// build, no console error — the only symptom was a customer landing on a 404 with
-// their card out. This asserts the seam still points at the store that exists.
-describe('the checkout URL points at a real store', () => {
-  it('uses the current Gumroad handle, over https', () => {
-    expect(GUMROAD_URL).toMatch(/^https:\/\/ppwellness\.gumroad\.com\//);
-  });
-
-  it('does not point at the retired handle, which 404s and does not redirect', () => {
-    expect(GUMROAD_URL).not.toContain('victorix08');
+describe('public checkout is closed', () => {
+  it('ships no store URL', () => {
+    expect(GUMROAD_URL).toBeNull();
+    expect(String(GUMROAD_URL || '')).not.toMatch(/gumroad|stripe/i);
   });
 });
 
-describe('checkout link', () => {
-  it('carries app_user_id so the webhook can match the purchase to this account', () => {
+describe('checkout link helper stays inert', () => {
+  it('can still attach a user id to an https URL, and is not called by the UI', () => {
     seedVerified();
-    const url = checkoutUrl('https://ppwellness.gumroad.com/l/ppw-premium');
-    expect(url).toBe('https://ppwellness.gumroad.com/l/ppw-premium?app_user_id=usr_1');
+    const url = checkoutUrl('https://example.com/not-a-store');
+    expect(url).toBe('https://example.com/not-a-store?app_user_id=usr_1');
   });
 
   it('still returns a usable link when the user id is unknown', () => {
-    expect(checkoutUrl('https://ppwellness.gumroad.com/l/ppw-premium', null))
-      .toBe('https://ppwellness.gumroad.com/l/ppw-premium');
+    expect(checkoutUrl('https://example.com/not-a-store', null))
+      .toBe('https://example.com/not-a-store');
   });
 
-  it('returns null while GUMROAD_URL is unset, so no dead button ships', () => {
+  it('returns null while the URL is unset, so no dead button ships', () => {
     expect(checkoutUrl(null)).toBeNull();
+    expect(checkoutUrl(GUMROAD_URL)).toBeNull();
   });
 
   it('refuses a non-https URL', () => {
     expect(checkoutUrl('javascript:alert(1)')).toBeNull();
-    expect(checkoutUrl('http://ppwellness.gumroad.com/l/x')).toBeNull();
+    expect(checkoutUrl('http://example.com/x')).toBeNull();
+  });
+});
+
+describe('public sign-up does not finish', () => {
+  it('deletes a brand-new account and stays signed out', async () => {
+    const spy = vi.fn(async (url, opts) => {
+      if (String(url).includes('/api/auth/callback')) {
+        return new Response(JSON.stringify({ token: 'jwt-new', isNewAccount: true }), { status: 200 });
+      }
+      if (opts?.method === 'DELETE') return new Response(JSON.stringify({ deleted: true }), { status: 200 });
+      return new Response(JSON.stringify({ premium: false, entitlement: 'none' }), { status: 200 });
+    });
+    vi.stubGlobal('fetch', spy);
+    await expect(completeSignIn('fresh-token', 'stranger@example.com')).rejects.toThrow(/licensed organizations only/i);
+    expect(isSignedIn()).toBe(false);
+    expect(spy.mock.calls.some((c) => c[1]?.method === 'DELETE')).toBe(true);
+  });
+
+  it('still lets the owner admin finish a first sign-in', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (url) => {
+      if (String(url).includes('/api/auth/callback')) {
+        return new Response(JSON.stringify({ token: 'jwt-owner', isNewAccount: true }), { status: 200 });
+      }
+      return new Response(JSON.stringify({ premium: true, entitlement: 'none', role: 'admin', userId: 'own' }), { status: 200 });
+    }));
+    const ent = await completeSignIn('fresh-token', 'victor@ppwellness.co');
+    expect(ent.premium).toBe(true);
+    expect(ent.role).toBe('admin');
+    expect(isSignedIn()).toBe(true);
   });
 });
