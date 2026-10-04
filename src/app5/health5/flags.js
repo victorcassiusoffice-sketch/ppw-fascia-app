@@ -27,12 +27,35 @@ const rank = (a) => {
 };
 export const strictest = (actions) => actions.slice().sort((a, b) => rank(a) - rank(b))[0] || null;
 
-/** Days between two ISO dates (b - a), calendar days. */
+/**
+ * Parse a date the way THIS APP writes them.
+ *
+ * store5.todayKey() and dateKeyFromOffset() produce "2026-9-19" — month and day
+ * are NOT zero-padded. `new Date("2026-9-19T00:00:00")` is an Invalid Date, so
+ * every date-gated rule in here (surgery windows, lab freshness, recent surgery)
+ * would have failed the moment it was handed a real key from the app rather than
+ * a padded one from a test. Pad first, always.
+ */
+export function parseDayKey(key) {
+  if (!key) return null;
+  const m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(String(key));
+  if (!m) return null;
+  const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  return isNaN(d) ? null : d;
+}
+
+/** Format a Date back to a padded ISO day, from LOCAL parts. */
+export function toDayISO(d) {
+  if (!d || isNaN(d)) return null;
+  const pad = (x) => String(x).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+/** Days between two day keys (b - a), calendar days. */
 function daysUntil(fromISO, toISO) {
-  if (!fromISO || !toISO) return null;
-  const a = new Date(`${String(fromISO).slice(0, 10)}T00:00:00`);
-  const b = new Date(`${String(toISO).slice(0, 10)}T00:00:00`);
-  if (isNaN(a) || isNaN(b)) return null;
+  const a = parseDayKey(fromISO);
+  const b = parseDayKey(toISO);
+  if (!a || !b) return null;
   return Math.round((b - a) / 86400000);
 }
 
@@ -270,9 +293,16 @@ export function flagsForNutrients({ data, profile = {}, cabinet = [], todayISO =
   const consider = (raw, source) => {
     const t = raw.target;
     if (!t || t.type !== 'nutrient') return;
-    // A nutrient-level view asks "does this apply to me at all", so a rule
-    // gated on a dose only counts when something in the cabinet reaches it.
-    const held = whenHolds(raw.when, { product: productWith(t.id, cabinet), target: t, cabinet, data, profile: prof, todayISO });
+    // "Does this apply to me at all?" is a question about the WHOLE cabinet, so
+    // a form-gated rule has to be tested against every product carrying the
+    // nutrient — not just the first one found. Checking only the first meant a
+    // pregnant person taking both beta-carotene and retinol lost the retinol
+    // `avoid` entirely, purely because the beta-carotene bottle came first in
+    // the list.
+    const holders = productsWith(t.id, cabinet);
+    const held = holders
+      .map((p) => whenHolds(raw.when, { product: p, target: t, cabinet, data, profile: prof, todayISO }))
+      .find((h) => h.active) || { active: false };
     if (!held.active) return;
     const action = source.kind === 'medicine' ? raw.badge : raw.action;
     if (!action) return;
@@ -300,9 +330,14 @@ export function flagsForNutrients({ data, profile = {}, cabinet = [], todayISO =
   return out;
 }
 
-/** The first product containing a nutrient — enough for a form check. */
-function productWith(nutrientId, cabinet) {
-  return (cabinet || []).find((p) => (p.perServing || []).some((l) => l.id === nutrientId)) || { perServing: [{ id: nutrientId }] };
+/**
+ * Every product containing a nutrient. A form-gated rule must be offered each
+ * of them — one bottle of retinol is enough to trigger a pregnancy flag, however
+ * many bottles of beta-carotene sit beside it.
+ */
+function productsWith(nutrientId, cabinet) {
+  const hits = (cabinet || []).filter((p) => (p.perServing || []).some((l) => l.id === nutrientId));
+  return hits.length ? hits : [{ perServing: [{ id: nutrientId }] }];
 }
 
 /**
@@ -322,23 +357,53 @@ export function surgeryPlan({ data, profile = {}, cabinet = [], todayISO = null 
   const arank = (a) => { const i = order.indexOf(a); return i === -1 ? order.length : i; };
   const items = [];
 
+  // What every supplement falls back to when an ingredient has no row of its own.
+  const defaultRow = rules.pauseBeforeSurgery.find((r) => r.target?.id === 'any_supplement') || null;
+  const rowActive = (row, product) =>
+    whenHolds(row.when, { product, target: row.target, cabinet, data, profile, todayISO }).active;
+
   for (const product of cabinet) {
-    const matched = [];
-    for (const row of rules.pauseBeforeSurgery) {
-      if (row.target?.type === 'group') {
-        if (matchesGroup(row.target.id, product, data)) matched.push(row);
-      } else if (targetMatches(row.target, product, data)) {
-        matched.push(row);
+    const lineIds = [...new Set((product.perServing || []).map((l) => l.id).filter(Boolean))];
+    if (!lineIds.length) continue;
+
+    // Fold PER INGREDIENT, as rules.pauseAdviceMeaning.matching requires — not
+    // per product. This is what makes the multivitamin case come out right: at
+    // 15 mg the vitamin E row is inactive (its `when` needs more than 100 mg),
+    // so vitamin E has NO row of its own and falls back to any_supplement
+    // (ask_pause). Iron and vitamin C have their own rows (continue_ask). The
+    // strictest across the three is ask_pause — "ask your team if you should
+    // pause this" — which is what the brief requires, and never "pause".
+    const collected = [];
+    for (const id of lineIds) {
+      const own = rules.pauseBeforeSurgery.filter((row) =>
+        row.target?.type !== 'group' && row.target?.id === id && rowActive(row, product));
+      if (own.length) { collected.push(...own); continue; }
+      if (defaultRow && matchesGroup('any_supplement', product, data) && rowActive(defaultRow, product)) {
+        collected.push(defaultRow);
       }
     }
-    if (!matched.length) continue;
 
-    // A specific row beats the any_supplement default.
-    const specific = matched.filter((r) => r.target?.id !== 'any_supplement');
-    const rows = specific.length ? specific : matched;
+    // Named group rows (venoactive and the like) apply on top.
+    for (const row of rules.pauseBeforeSurgery) {
+      if (row.target?.type !== 'group' || row.target.id === 'any_supplement') continue;
+      if (!matchesGroup(row.target.id, product, data)) continue;
+      if (!rowActive(row, product)) continue;
+      collected.push(row);
+    }
+
+    const rows = [...new Set(collected)];
+    if (!rows.length) continue;
+
+    // Strictest advice across the ingredients, and the EARLIEST date — taken
+    // only from rows that actually carry one. A continue_ask row has
+    // stopDaysBefore 0 and must never set a date, or something the team would
+    // happily continue would look like it needs stopping today.
     const best = rows.slice().sort((a, b) => arank(a.advice) - arank(b.advice))[0];
-    const days = Number(best.adviceFromDaysBefore ?? best.stopDaysBefore ?? 14);
-    const fromISO = sDate ? addDays(sDate, -days) : null;
+    const dated = rows.filter((r) => r.advice !== 'continue_ask');
+    const days = dated.length
+      ? Math.max(...dated.map((r) => Number(r.adviceFromDaysBefore ?? r.stopDaysBefore ?? 14)))
+      : null;
+    const fromISO = sDate && days != null ? addDays(sDate, -days) : null;
 
     items.push({
       productId: product.id,
@@ -366,12 +431,11 @@ export function surgeryPlan({ data, profile = {}, cabinet = [], todayISO = null 
 }
 
 function addDays(iso, n) {
-  const d = new Date(`${String(iso).slice(0, 10)}T00:00:00`);
-  if (isNaN(d)) return null;
+  const d = parseDayKey(iso);
+  if (!d) return null;
   d.setDate(d.getDate() + n);
-  // Format from LOCAL parts. toISOString() would convert local midnight to UTC
-  // and, anywhere east of Greenwich (Mauritius is UTC+4), hand back the day
+  // Formatted from LOCAL parts. toISOString() would convert local midnight to
+  // UTC and, anywhere east of Greenwich (Mauritius is UTC+4), hand back the day
   // before — every "pause from" date a day early.
-  const pad = (x) => String(x).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  return toDayISO(d);
 }

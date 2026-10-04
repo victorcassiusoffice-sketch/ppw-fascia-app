@@ -18,6 +18,53 @@ import { convertLine } from './units.js';
 
 const blank = () => ({ meter: 0, limitTotal: 0, supplementsOnly: 0, foodOnly: 0, lines: [], flagged: [] });
 
+/**
+ * How many times a day is this product actually taken?
+ *
+ * A product scheduled at 08:00 and 20:00 is two doses, not one. Counting it
+ * once hid real breaches: 2 x 200 mg of magnesium is 400 mg against a 250 mg
+ * limit, and the engine read it as 200 mg and said nothing.
+ */
+export function dosesPerDay(product) {
+  const times = product?.times;
+  if (Array.isArray(times) && times.length) return times.length;
+  const n = Number(product?.dosesPerDay);
+  return Number.isFinite(n) && n > 0 ? n : 1;
+}
+
+/**
+ * Which nutrients in this product does "my doctor prescribed this dose" cover?
+ *
+ * `supervisedFor` names them. A bare `supervised: true` is taken to cover the
+ * product, but when that product carries MORE THAN ONE nutrient with a limit we
+ * also report it as ambiguous: a doctor prescribing 65 mg of iron has not
+ * blessed the 50 mg of zinc sitting in the same tablet, and silently excusing
+ * that zinc from its own maximum is exactly the kind of quiet over-dose this
+ * engine exists to prevent. The UI asks which one.
+ */
+export function supervisedScope(product, data) {
+  if (!product?.supervised && !product?.supervisedFor) return { ids: new Set(), ambiguous: false };
+
+  // An explicit list is authoritative.
+  if (Array.isArray(product.supervisedFor) && product.supervisedFor.length) {
+    return { ids: new Set(product.supervisedFor), ambiguous: false };
+  }
+
+  const limited = (product.perServing || [])
+    .map((l) => l.id)
+    .filter((id) => data?.nutrientsById?.get(id)?.limit?.value != null);
+
+  // One nutrient with a limit: there is nothing to be unsure about.
+  if (limited.length <= 1) return { ids: new Set(limited), ambiguous: false };
+
+  // More than one: supervise NOTHING until the person says which. A doctor
+  // prescribing 65 mg of iron has not blessed the 50 mg of zinc in the same
+  // tablet, and excusing that zinc from its own maximum on a guess is exactly
+  // the quiet over-dose this engine exists to prevent. The breach keeps showing
+  // until the question is answered.
+  return { ids: new Set(), ambiguous: true, candidates: limited };
+}
+
 /** Ensure a bucket exists for a nutrient id. */
 function bucket(map, id) {
   if (!map[id]) map[id] = blank();
@@ -32,7 +79,8 @@ function bucket(map, id) {
  * not count (unknown unit, missing amount) — they must stay visible.
  */
 export function productContributions(product, data) {
-  const servings = Number(product?.servings) > 0 ? Number(product.servings) : 1;
+  // servings = how much is taken each time; dosesPerDay = how many times a day.
+  const servings = (Number(product?.servings) > 0 ? Number(product.servings) : 1) * dosesPerDay(product);
   const byNutrient = {};
   const flagged = [];
 
@@ -102,6 +150,7 @@ export function dayTotals({
   const out = {};
   const flagged = [];
   const supervisedNutrients = new Set();
+  const supervisedAmbiguous = [];
 
   for (const product of cabinet) {
     // Planned counts everything scheduled; an "I still take this" item with no
@@ -113,13 +162,19 @@ export function dayTotals({
     const { byNutrient, flagged: f } = productContributions(product, data);
     flagged.push(...f);
 
+    // NOT named `scope` — that is this function's own parameter ('today' |
+    // 'planned'), and shadowing it here returned the wrong thing to callers.
+    const sup = supervisedScope(product, data);
+    if (sup.ambiguous) supervisedAmbiguous.push({ productId: product.id, productName: product.name, ids: [...sup.ids] });
+
     for (const [id, add] of Object.entries(byNutrient)) {
       const b = bucket(out, id);
       b.meter += add.meter;
       b.limitTotal += add.limitTotal;
       b.supplementsOnly += add.supplementsOnly;
       b.lines.push(...add.lines);
-      if (product.supervised) supervisedNutrients.add(id);
+      // Supervision is per NUTRIENT, never blanket across the product.
+      if (sup.ids.has(id)) supervisedNutrients.add(id);
     }
   }
 
@@ -141,7 +196,7 @@ export function dayTotals({
   for (const f of foods) addFood(f?.nutrients, f?.name || 'Food');
   if (estimate && estimate.accepted !== false) addFood(estimate.nutrients || estimate, 'AI estimate');
 
-  return { byNutrient: out, flagged, supervisedNutrients, scope };
+  return { byNutrient: out, flagged, supervisedNutrients, supervisedAmbiguous, scope };
 }
 
 /**

@@ -58,21 +58,43 @@ export function resolveForm(nutrient, { form, name, label } = {}) {
 
   const text = `${label || ''} ${name || ''}`;
   const asPart = /\(\s*as\s+([^)]+)\)/i.exec(text);
-  const candidates = [];
-  if (asPart) candidates.push(norm(asPart[1]));
-  if (name) candidates.push(norm(name));
-  if (label) candidates.push(norm(label));
+  // Prefer the "(as …)" part when the label has one — that is the bit naming the
+  // form. Only read the whole name when it does not.
+  const candidates = asPart ? [norm(asPart[1])] : [norm(name), norm(label)];
 
   for (const c of candidates) {
     if (!c) continue;
     if (map[c]) return map[c];
-    // Longest synonym first so "vitamin d3" wins over "vitamin d".
-    const keys = Object.keys(map).sort((a, b) => b.length - a.length);
-    for (const k of keys) {
-      if (new RegExp(`(^|[^a-z0-9])${k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^a-z0-9]|$)`).test(c)) return map[k];
+
+    // Collect EVERY distinct form the text names — not the first, not the
+    // longest.
+    //
+    // This is the difference between safe and dangerous. A real multivitamin
+    // says "Vitamin A (as retinyl palmitate and beta-carotene)". Picking one of
+    // those two silently decides whether 3,000 µg counts toward the preformed-
+    // retinol limit (retinol: all of it) or not at all (beta-carotene: none of
+    // it) — and so whether a pregnant person sees "avoid" or sees nothing.
+    //
+    // Picking by synonym length made the engine LESS safe the MORE honest the
+    // label was: a bare "Vitamin A" correctly asked the question, while the
+    // fuller label resolved to beta-carotene and counted zero.
+    //
+    // Two named forms means we do not know which applies, so we say so: the
+    // caller falls back to the cautious `unknown` row and asks one question.
+    const found = new Set();
+    for (const k of Object.keys(map)) {
+      if (wholeWord(k).test(c)) found.add(map[k]);
     }
+    if (found.size === 1) return [...found][0];
+    if (found.size > 1) return null;   // ambiguous — never guess
   }
   return null;
+}
+
+/** Whole-word matcher for a synonym, so "d3" cannot match inside "d30". */
+function wholeWord(key) {
+  const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, (m) => `\\${m}`);
+  return new RegExp(`(^|[^a-z0-9])${escaped}([^a-z0-9]|$)`);
 }
 
 /**
@@ -176,7 +198,13 @@ export function convertLine(nutrient, line = {}) {
     return { ok: true, meter: base * p[0], limit: base * p[1], form, formKnown, unit };
   }
 
-  // 5. Count-style units (CFU) with no mass table — pass through as-is.
+  // 5. Count-style units. Probiotics carry their own `cfu` table because the
+  //    base unit is billions: without it "500 million CFU" was counted as 500
+  //    BILLION, a thousandfold over-read of the same bottle.
+  if (u.cfu && u.cfu[unit] != null) {
+    const factor = Number(u.cfu[unit]);
+    return { ok: true, meter: amount * factor, limit: amount * factor, form, formKnown, unit };
+  }
   if (['billion_cfu', 'million_cfu', 'cfu'].includes(unit)) {
     return { ok: true, meter: amount, limit: amount, form, formKnown, unit };
   }

@@ -13,6 +13,8 @@
 // Everything unmapped is kept as a plain note. Nothing is thrown away; it just
 // does not get to drive a recommendation.
 
+import { parseDayKey } from './flags.js';
+
 export const LAB_FRESH_MONTHS = 6;
 
 /**
@@ -74,10 +76,10 @@ export function normaliseTestName(raw) {
 
 /** Months between a date and today. null when undated or unparseable. */
 export function monthsSince(dateISO, todayISO) {
-  if (!dateISO || !todayISO) return null;
-  const a = new Date(`${String(dateISO).slice(0, 10)}T00:00:00`);
-  const b = new Date(`${String(todayISO).slice(0, 10)}T00:00:00`);
-  if (isNaN(a) || isNaN(b)) return null;
+  // parseDayKey, not new Date(): the app writes "2026-9-19" and Date rejects it.
+  const a = parseDayKey(dateISO);
+  const b = parseDayKey(todayISO);
+  if (!a || !b) return null;
   return (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth()) - (b.getDate() < a.getDate() ? 1 : 0);
 }
 

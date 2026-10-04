@@ -162,11 +162,26 @@ export function evaluate(nutrient, {
 /** Map an `appliesTo` key onto the right running total. */
 function pickCounted(appliesTo, totals) {
   switch (appliesTo) {
-    case 'supplements_only': return Number(totals.supplementsOnly) || 0;
-    case 'preformed_retinol': return Number(totals.limitTotal) || 0;  // beta-carotene already contributes 0
-    case 'folic_acid': return Number(totals.limitTotal) || 0;          // conversion already in µg folic acid
+    case 'supplements_only':
+      return Number(totals.supplementsOnly) || 0;
+
+    // These two limits count only PART of what food contains, and a single food
+    // figure cannot be split into its parts. The vitamin A limit counts
+    // preformed retinol but not the beta-carotene in a carrot; the folate limit
+    // counts folic acid from fortified food but not natural food folate. Adding
+    // a whole-food estimate to either would mean a plate of carrots or spinach
+    // reading as a limit breach.
+    //
+    // Fortified products reach these limits the honest way — as an ingredient in
+    // the cabinet (ingredients.json carries fortified_cereal), which lands in
+    // supplementsOnly.
+    case 'preformed_retinol':
+    case 'folic_acid':
+      return Number(totals.supplementsOnly) || 0;
+
     case 'total':
-    default: return Number(totals.limitTotal) || 0;
+    default:
+      return Number(totals.limitTotal) || 0;
   }
 }
 
