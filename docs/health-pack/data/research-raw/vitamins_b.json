@@ -1,0 +1,1974 @@
+[
+  {
+    "id": "vitamin_b1",
+    "name": "Vitamin B1 (Thiamin)",
+    "group": "vitamin",
+    "unit": "mg",
+    "unitNotes": "Amounts are in milligrams (mg) of thiamin.",
+    "conversions": [],
+    "rda": {
+      "type": "RDA",
+      "male_19_50": 1.2,
+      "female_19_50": 1.1,
+      "male_51_plus": 1.2,
+      "female_51_plus": 1.1,
+      "pregnancy": 1.4,
+      "lactation": 1.4,
+      "source": "https://ods.od.nih.gov/factsheets/Thiamin-HealthProfessional/"
+    },
+    "ul": {
+      "iom": null,
+      "efsa": null,
+      "efsa_year": 2001,
+      "applies_to": "total",
+      "notes": "No upper limit. US and EU expert panels found no harm from food or tablets. Absorption drops above about 5 mg at a time. Supplements up to 50 mg a day have been widely used without reported harm.",
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/Thiamin-HealthProfessional/",
+        "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+        "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf"
+      ]
+    },
+    "studyRange": {
+      "low": 150,
+      "high": 300,
+      "goal": "Lowering blood sugar in type 2 diabetes or prediabetes (thiamin)",
+      "evidence": "C",
+      "evidenceWhy": "Only small, short trials (12 to 24 people) in people with high blood sugar.",
+      "keyStudies": [
+        {
+          "title": "Effect of thiamine administration on metabolic profile, cytokines and inflammatory markers in drug-naive patients with type 2 diabetes",
+          "year": 2011,
+          "type": "RCT",
+          "finding": "In 24 people with type 2 diabetes, blood sugar fell slightly after 1 month of 150 mg a day.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/20652275/"
+        },
+        {
+          "title": "High-dose thiamine supplementation improves glucose tolerance in hyperglycemic individuals: a randomized, double-blind cross-over trial",
+          "year": 2013,
+          "type": "RCT",
+          "finding": "In 12 people with high blood sugar, 300 mg a day for 6 weeks improved a 2-hour sugar test.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/23715873/"
+        },
+        {
+          "title": "Benfotiamine in diabetic polyneuropathy (BENDIP): results of a randomised, double blind, placebo-controlled clinical study",
+          "year": 2008,
+          "type": "RCT",
+          "finding": "Benfotiamine 300 to 600 mg a day for 6 weeks slightly eased nerve symptoms; the main result was borderline.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/18473286/"
+        },
+        {
+          "title": "Effects of thiamine on cardiac function in patients with systolic heart failure: systematic review and metaanalysis of randomized, double-blind, placebo-controlled trials",
+          "year": 2013,
+          "type": "meta-analysis",
+          "finding": "Two small trials (38 people) showed a small rise in heart pumping strength.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/24357996/"
+        },
+        {
+          "title": "Thiamine for prevention and treatment of Wernicke-Korsakoff Syndrome in people who abuse alcohol",
+          "year": 2013,
+          "type": "Cochrane review",
+          "finding": "Not enough trial evidence to set the best B1 dose for heavy drinkers.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/23818100/"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 1.2,
+      "female": 1.1,
+      "basis": "rda",
+      "why": "Extra B1 has only been tested for illness in small trials, so the meter fills to the daily need."
+    },
+    "timing": {
+      "withFood": null,
+      "fatSoluble": false,
+      "bestTime": "any",
+      "splitAbove": null,
+      "separateFrom": []
+    },
+    "forms": {
+      "better": [],
+      "notes": "Supplements usually use thiamin hydrochloride or thiamin mononitrate. Both are stable and dissolve in water. Benfotiamine is a man-made form the body turns into thiamin. No form is proven better for healthy adults."
+    },
+    "interactions": [
+      {
+        "with": "Furosemide and similar water pills (loop diuretics)",
+        "severity": "moderate",
+        "effect": "Can wash B1 out in urine and may lead to low levels.",
+        "action": "If you take one long term, ask your doctor about your B1."
+      },
+      {
+        "with": "Fluorouracil (a chemotherapy drug)",
+        "severity": "moderate",
+        "effect": "Has caused rare cases of severe B1 shortage.",
+        "action": "Ask your cancer team before taking any supplements."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "alcohol_use",
+        "action": "may_need_more",
+        "why": "Alcohol lowers how much B1 you absorb and store. Heavy drinkers should ask a doctor about B1."
+      },
+      {
+        "condition": "bariatric_surgery",
+        "action": "may_need_more",
+        "why": "Weight-loss surgery can cause serious B1 shortage. Follow your surgical team's vitamin plan."
+      },
+      {
+        "condition": "type_1_diabetes",
+        "action": "may_need_more",
+        "why": "People with diabetes often have lower B1 levels. The health effect is not clear."
+      },
+      {
+        "condition": "type_2_diabetes",
+        "action": "may_need_more",
+        "why": "People with diabetes often have lower B1 levels. High doses for blood sugar are only tested in small trials."
+      },
+      {
+        "condition": "heart_disease",
+        "action": "may_need_more",
+        "why": "People with heart failure, especially on water pills, often run low on B1. Ask your doctor."
+      },
+      {
+        "condition": "age_65_plus",
+        "action": "may_need_more",
+        "why": "Up to 2 or 3 in 10 older adults show signs of low B1."
+      },
+      {
+        "condition": "cancer_treatment",
+        "action": "doctor_first",
+        "why": "Some chemotherapy can cause B1 shortage. Ask your cancer team before taking supplements."
+      },
+      {
+        "condition": "immunocompromised",
+        "action": "may_need_more",
+        "why": "People with HIV have a higher risk of low B1."
+      },
+      {
+        "condition": "pregnancy",
+        "action": "may_need_more",
+        "why": "Needs rise to 1.4 mg a day."
+      },
+      {
+        "condition": "breastfeeding",
+        "action": "may_need_more",
+        "why": "Needs rise to 1.4 mg a day."
+      }
+    ],
+    "deficiencySigns": [
+      "Poor appetite and weight loss",
+      "Confusion or short-term memory loss",
+      "Muscle weakness",
+      "Tingling, numbness or weakness in the hands and feet",
+      "Swollen legs or heart problems when severe"
+    ],
+    "excessSigns": [
+      "No known harm from food or tablets",
+      "Rare reactions only with high doses given by drip or injection"
+    ],
+    "foodSources": [
+      {
+        "food": "Breakfast cereal, fortified (100% of daily value)",
+        "serving": "1 serving",
+        "amount": 1.2
+      },
+      {
+        "food": "Egg noodles, enriched, cooked",
+        "serving": "1 cup",
+        "amount": 0.5
+      },
+      {
+        "food": "Pork chop, grilled",
+        "serving": "3 oz (85 g)",
+        "amount": 0.4
+      },
+      {
+        "food": "Trout, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 0.4
+      },
+      {
+        "food": "Black beans, boiled",
+        "serving": "½ cup",
+        "amount": 0.4
+      },
+      {
+        "food": "Mussels, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 0.3
+      },
+      {
+        "food": "Tuna, bluefin, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 0.2
+      },
+      {
+        "food": "Brown rice, cooked",
+        "serving": "½ cup",
+        "amount": 0.2
+      },
+      {
+        "food": "Acorn squash, baked",
+        "serving": "½ cup",
+        "amount": 0.2
+      },
+      {
+        "food": "Sunflower seeds, toasted",
+        "serving": "1 oz (28 g)",
+        "amount": 0.1
+      }
+    ],
+    "lowText": "Vitamin B1 is low on your meter today, and whole grains, pork, beans or fish can top it up.",
+    "highText": "You've had plenty of vitamin B1 today, and extra isn't needed.",
+    "notes": "Blood tests are not a reliable way to check B1. The body absorbs less once a dose is above about 5 mg. High doses for blood sugar (150 to 300 mg) and benfotiamine for diabetic nerve pain (300 to 600 mg) have only small, short trials, so use them only with a doctor. Heavy drinkers at risk of severe B1 shortage may need injections, as tablets may not raise levels enough. Average US intake from food and supplements is about 4.9 mg a day.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheets/Thiamin-HealthProfessional/",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf",
+      "https://pubmed.ncbi.nlm.nih.gov/20652275/",
+      "https://pubmed.ncbi.nlm.nih.gov/23715873/",
+      "https://pubmed.ncbi.nlm.nih.gov/18473286/",
+      "https://pubmed.ncbi.nlm.nih.gov/24357996/",
+      "https://pubmed.ncbi.nlm.nih.gov/23818100/"
+    ]
+  },
+  {
+    "id": "vitamin_b2",
+    "name": "Vitamin B2 (Riboflavin)",
+    "group": "vitamin",
+    "unit": "mg",
+    "unitNotes": "Amounts are in milligrams (mg) of riboflavin.",
+    "conversions": [],
+    "rda": {
+      "type": "RDA",
+      "male_19_50": 1.3,
+      "female_19_50": 1.1,
+      "male_51_plus": 1.3,
+      "female_51_plus": 1.1,
+      "pregnancy": 1.4,
+      "lactation": 1.6,
+      "source": "https://ods.od.nih.gov/factsheets/Riboflavin-HealthProfessional/"
+    },
+    "ul": {
+      "iom": null,
+      "efsa": null,
+      "efsa_year": 2000,
+      "applies_to": "total",
+      "notes": "No upper limit. No harm was reported at 400 mg a day for at least 3 months, but the US panel still urges caution with large amounts. The body takes in little more than about 27 mg at one time.",
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/Riboflavin-HealthProfessional/",
+        "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+        "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf"
+      ]
+    },
+    "studyRange": {
+      "low": 400,
+      "high": 400,
+      "goal": "Preventing migraine attacks in adults",
+      "evidence": "B",
+      "evidenceWhy": "One adult trial and later reviews show fewer migraine days, but trials are small and results vary.",
+      "keyStudies": [
+        {
+          "title": "Effectiveness of high-dose riboflavin in migraine prophylaxis. A randomized controlled trial",
+          "year": 1998,
+          "type": "RCT",
+          "finding": "In 55 adults, 400 mg a day for 3 months cut attacks; 59% had at least half as many headache days vs 15% on placebo.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/9484373/"
+        },
+        {
+          "title": "Evidence-based guideline update: NSAIDs and other complementary treatments for episodic migraine prevention in adults (AAN and American Headache Society)",
+          "year": 2012,
+          "type": "guideline",
+          "finding": "Rated riboflavin 'probably effective' (Level B) for migraine prevention; the AAN retired this guideline in 2015.",
+          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3335449/"
+        },
+        {
+          "title": "Canadian Headache Society guideline for migraine prophylaxis",
+          "year": 2012,
+          "type": "guideline",
+          "finding": "Strong recommendation for riboflavin 400 mg a day, based on low-quality evidence.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/22683887/"
+        },
+        {
+          "title": "The effect of riboflavin on the mean attack frequency, severity, and duration of migraine headaches: A systematic review and dose-response meta-analysis of clinical trials",
+          "year": 2026,
+          "type": "meta-analysis",
+          "finding": "12 trials (749 people): fewer and shorter attacks, with more benefit up to 400 mg; results varied a lot.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/41769676/"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 1.3,
+      "female": 1.1,
+      "basis": "rda",
+      "why": "The 400 mg migraine dose is a treatment dose, so the meter fills to the daily need."
+    },
+    "timing": {
+      "withFood": null,
+      "fatSoluble": false,
+      "bestTime": "any",
+      "splitAbove": null,
+      "separateFrom": []
+    },
+    "forms": {
+      "better": [],
+      "notes": "Most supplements use plain riboflavin; some use riboflavin 5'-phosphate. Both work. The body takes in up to about 27 mg at one time, and the rest leaves in urine, which can turn bright yellow."
+    },
+    "interactions": [],
+    "conditionFlags": [
+      {
+        "condition": "migraine",
+        "action": "doctor_first",
+        "why": "400 mg a day has been studied to help prevent migraine. That is far above daily needs, so agree it with your doctor first."
+      },
+      {
+        "condition": "vegan_vegetarian",
+        "action": "may_need_more",
+        "why": "Milk, eggs and meat are main sources. Vegans and people who eat little dairy can run low."
+      },
+      {
+        "condition": "athlete",
+        "action": "may_need_more",
+        "why": "Hard training puts extra demand on B2. Athletes who avoid dairy and eggs are most at risk."
+      },
+      {
+        "condition": "thyroid_disease",
+        "action": "may_need_more",
+        "why": "An underactive thyroid can lower B2 levels."
+      },
+      {
+        "condition": "pregnancy",
+        "action": "may_need_more",
+        "why": "Needs rise to 1.4 mg a day."
+      },
+      {
+        "condition": "breastfeeding",
+        "action": "may_need_more",
+        "why": "Needs rise to 1.6 mg a day."
+      }
+    ],
+    "deficiencySigns": [
+      "Cracks or sores at the corners of the mouth",
+      "Swollen, cracked lips",
+      "Sore throat and swollen mouth",
+      "Red, itchy eyes",
+      "Skin rash and hair loss",
+      "Low red blood cells when severe"
+    ],
+    "excessSigns": [
+      "Bright yellow urine, which is harmless",
+      "Rarely, loose stools or passing more urine at very high doses"
+    ],
+    "foodSources": [
+      {
+        "food": "Beef liver, pan fried",
+        "serving": "3 oz (85 g)",
+        "amount": 2.9
+      },
+      {
+        "food": "Breakfast cereal, fortified (100% of daily value)",
+        "serving": "1 serving",
+        "amount": 1.3
+      },
+      {
+        "food": "Instant oats, fortified, cooked with water",
+        "serving": "1 cup",
+        "amount": 1.1
+      },
+      {
+        "food": "Yogurt, plain, fat free",
+        "serving": "1 cup",
+        "amount": 0.6
+      },
+      {
+        "food": "Milk, 2% fat",
+        "serving": "1 cup",
+        "amount": 0.5
+      },
+      {
+        "food": "Beef steak, lean, grilled",
+        "serving": "3 oz (85 g)",
+        "amount": 0.4
+      },
+      {
+        "food": "Clams, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 0.4
+      },
+      {
+        "food": "Almonds, dry roasted",
+        "serving": "1 oz (28 g)",
+        "amount": 0.3
+      },
+      {
+        "food": "Swiss cheese",
+        "serving": "3 oz (85 g)",
+        "amount": 0.3
+      },
+      {
+        "food": "Egg, scrambled",
+        "serving": "1 large",
+        "amount": 0.2
+      },
+      {
+        "food": "Portabella mushrooms, grilled",
+        "serving": "½ cup",
+        "amount": 0.2
+      }
+    ],
+    "lowText": "Vitamin B2 is low on your meter today, and milk, yogurt, eggs or fortified oats can top it up.",
+    "highText": "You've had plenty of vitamin B2 today, and your body can only take in a small amount at once.",
+    "notes": "Migraine trials used 400 mg a day for at least 3 months. That is a treatment dose, so the meter fills to the daily need instead. The US guideline that rated it 'probably effective' (2012) was retired in 2015 over safety worries about a different remedy (butterbur), not riboflavin; the Canadian Headache Society still recommends 400 mg, based on low-quality evidence. No known medicine interactions. Average US intake from food and supplements is about 4.5 to 4.7 mg a day.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheets/Riboflavin-HealthProfessional/",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf",
+      "https://pubmed.ncbi.nlm.nih.gov/9484373/",
+      "https://pmc.ncbi.nlm.nih.gov/articles/PMC3335449/",
+      "https://www.aan.com/Guidelines/home/GuidelineDetail/537",
+      "https://pubmed.ncbi.nlm.nih.gov/22683887/",
+      "https://pubmed.ncbi.nlm.nih.gov/41769676/"
+    ]
+  },
+  {
+    "id": "vitamin_b3",
+    "name": "Vitamin B3 (Niacin)",
+    "group": "vitamin",
+    "unit": "mg",
+    "unitNotes": "Daily needs are in mg niacin equivalents (NE): 1 mg NE = 1 mg niacin or 60 mg tryptophan. The upper limit counts only niacin from supplements and fortified foods.",
+    "conversions": [
+      {
+        "from": "mg nicotinic acid",
+        "to": "mg NE",
+        "multiply": 1,
+        "note": "Counts toward the upper limit."
+      },
+      {
+        "from": "mg nicotinamide (niacinamide)",
+        "to": "mg NE",
+        "multiply": 1,
+        "note": "Counts toward the upper limit."
+      },
+      {
+        "from": "mg tryptophan",
+        "to": "mg NE",
+        "multiply": 0.0167,
+        "note": "60 mg tryptophan = 1 mg NE. The real rate varies a lot between people."
+      }
+    ],
+    "rda": {
+      "type": "RDA",
+      "male_19_50": 16,
+      "female_19_50": 14,
+      "male_51_plus": 16,
+      "female_51_plus": 14,
+      "pregnancy": 18,
+      "lactation": 17,
+      "source": "https://ods.od.nih.gov/factsheets/Niacin-HealthProfessional/"
+    },
+    "ul": {
+      "iom": 35,
+      "efsa": 10,
+      "efsa_year": 2002,
+      "applies_to": "supplemental_only",
+      "notes": "Limits count niacin from supplements and fortified foods, not natural food. US limit: 35 mg a day for both forms, based on flushing. EFSA has two limits: 10 mg a day for nicotinic acid and 900 mg a day for nicotinamide (niacinamide); EFSA set none for pregnancy or breastfeeding. Use 10 mg if the form is nicotinic acid or unknown, and 35 mg if it is nicotinamide. Limits do not apply to doctor-supervised treatment.",
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/Niacin-HealthProfessional/",
+        "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+        "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf",
+        "https://nap.nationalacademies.org/read/6015/chapter/2"
+      ]
+    },
+    "studyRange": {
+      "low": 1500,
+      "high": 2000,
+      "goal": "Preventing heart attacks and strokes with prescription nicotinic acid (no benefit found)",
+      "evidence": "C",
+      "evidenceWhy": "Large trials found no fewer heart attacks, strokes or deaths, and more side effects.",
+      "keyStudies": [
+        {
+          "title": "Niacin in patients with low HDL cholesterol levels receiving intensive statin therapy (AIM-HIGH)",
+          "year": 2011,
+          "type": "RCT",
+          "finding": "Adding 1,500 to 2,000 mg slow-release niacin to a statin in 3,414 heart patients gave no fewer heart events; the trial stopped early.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/22085343/"
+        },
+        {
+          "title": "Effects of extended-release niacin with laropiprant in high-risk patients (HPS2-THRIVE)",
+          "year": 2014,
+          "type": "RCT",
+          "finding": "2 g a day (with an anti-flushing drug) in 25,673 people gave no fewer heart events, but more diabetes problems, bleeding, infections and stomach, muscle and skin problems.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/25014686/"
+        },
+        {
+          "title": "Niacin for primary and secondary prevention of cardiovascular events",
+          "year": 2017,
+          "type": "Cochrane review",
+          "finding": "23 trials (39,195 people): no fewer deaths, heart attacks or strokes, and people were about twice as likely to stop due to side effects.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/28616955/"
+        },
+        {
+          "title": "A Phase 3 Randomized Trial of Nicotinamide for Skin-Cancer Chemoprevention (ONTRAC)",
+          "year": 2015,
+          "type": "RCT",
+          "finding": "In 386 people with past skin cancers, nicotinamide 500 mg twice a day lowered new non-melanoma skin cancers by 23%; the effect ended when they stopped.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/26488693/"
+        },
+        {
+          "title": "Definition of a tolerable upper intake level of niacin: a systematic review and meta-analysis of the dose-dependent effects of nicotinamide and nicotinic acid supplementation",
+          "year": 2017,
+          "type": "meta-analysis",
+          "finding": "47 studies: in healthy people, nicotinic acid caused major side effects below 1,000 mg a day; the authors think current limits may be cautious.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/28541582/"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 16,
+      "female": 14,
+      "basis": "rda",
+      "why": "High-dose niacin brought no heart benefit and caused harm, so the meter fills to the daily need (mg NE)."
+    },
+    "timing": {
+      "withFood": true,
+      "fatSoluble": false,
+      "bestTime": "with_meal",
+      "splitAbove": null,
+      "separateFrom": []
+    },
+    "forms": {
+      "better": [
+        "nicotinamide (niacinamide)"
+      ],
+      "notes": "Nicotinamide does not cause flushing and has fewer side effects. Nicotinic acid causes flushing from about 30 to 50 mg; taking it with food helps. 'Flush-free' inositol hexanicotinate is absorbed about 30% less on average. Slow-release nicotinic acid is more likely to harm the liver. Nicotinamide riboside and NMN are not sold as niacin sources and are not counted here."
+    },
+    "interactions": [
+      {
+        "with": "Statins and other cholesterol medicines",
+        "severity": "high",
+        "effect": "Adding high-dose niacin did not prevent heart attacks or strokes and caused more side effects.",
+        "action": "Don't take high-dose niacin unless your doctor prescribes it."
+      },
+      {
+        "with": "Diabetes medicines",
+        "severity": "moderate",
+        "effect": "Niacin at 1,500 mg a day or more can raise blood sugar.",
+        "action": "Avoid high-dose niacin unless your doctor agrees and checks your blood sugar."
+      },
+      {
+        "with": "Isoniazid and pyrazinamide (TB medicines)",
+        "severity": "moderate",
+        "effect": "Can lower the niacin your body makes and lead to deficiency.",
+        "action": "Ask your doctor if you need extra niacin."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "heart_disease",
+        "action": "doctor_first",
+        "why": "High-dose niacin did not prevent heart attacks or strokes in large trials and caused harm. Only take it if prescribed."
+      },
+      {
+        "condition": "high_cholesterol",
+        "action": "doctor_first",
+        "why": "High-dose niacin improves blood fats but did not prevent heart events, and caused side effects. Don't self-treat."
+      },
+      {
+        "condition": "liver_disease",
+        "action": "doctor_first",
+        "why": "High-dose niacin can harm the liver. Keep to normal amounts unless your doctor says otherwise."
+      },
+      {
+        "condition": "type_1_diabetes",
+        "action": "caution",
+        "why": "High doses can raise blood sugar. Keep to normal amounts."
+      },
+      {
+        "condition": "type_2_diabetes",
+        "action": "caution",
+        "why": "High doses can raise blood sugar. Keep to normal amounts."
+      },
+      {
+        "condition": "prediabetes",
+        "action": "caution",
+        "why": "In a large trial, high-dose niacin led to more new cases of diabetes."
+      },
+      {
+        "condition": "gout",
+        "action": "caution",
+        "why": "Doctors check uric acid on high-dose niacin and stop it if gout flares. Keep to normal amounts."
+      },
+      {
+        "condition": "blood_thinners",
+        "action": "caution",
+        "why": "In a large trial, high-dose niacin led to more bleeding. Ask your doctor first."
+      },
+      {
+        "condition": "kidney_disease",
+        "action": "doctor_first",
+        "why": "In people on dialysis, high-dose nicotinamide caused low platelets and loose stools."
+      },
+      {
+        "condition": "age_65_plus",
+        "action": "caution",
+        "why": "Flushing from niacin can drop blood pressure and cause dizziness or falls."
+      },
+      {
+        "condition": "alcohol_use",
+        "action": "may_need_more",
+        "why": "Heavy drinking can lead to low niacin."
+      },
+      {
+        "condition": "inflammatory_bowel_disease",
+        "action": "may_need_more",
+        "why": "Bowel disease can lead to low niacin."
+      },
+      {
+        "condition": "pregnancy",
+        "action": "may_need_more",
+        "why": "Needs rise to 18 mg a day. Avoid high-dose niacin, as safety data are limited."
+      },
+      {
+        "condition": "breastfeeding",
+        "action": "may_need_more",
+        "why": "Needs rise to 17 mg a day. Avoid high-dose niacin."
+      }
+    ],
+    "deficiencySigns": [
+      "Rough, sunburn-like or brown rash on sun-exposed skin",
+      "Bright red tongue",
+      "Vomiting, loose stools or constipation",
+      "Tiredness, headache, low mood or memory loss"
+    ],
+    "excessSigns": [
+      "Flushing: red, warm, itchy or tingling skin",
+      "Headache or dizziness",
+      "Low blood pressure and falls at high doses",
+      "Nausea, heartburn or stomach pain",
+      "Higher blood sugar",
+      "Liver damage with long-term high doses",
+      "Blurred vision at very high doses"
+    ],
+    "foodSources": [
+      {
+        "food": "Beef liver, pan fried",
+        "serving": "3 oz (85 g)",
+        "amount": 14.9
+      },
+      {
+        "food": "Chicken breast, grilled",
+        "serving": "3 oz (85 g)",
+        "amount": 10.3
+      },
+      {
+        "food": "Turkey breast, roasted",
+        "serving": "3 oz (85 g)",
+        "amount": 10.0
+      },
+      {
+        "food": "Salmon, sockeye, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 8.6
+      },
+      {
+        "food": "Tuna, light, canned in water",
+        "serving": "3 oz (85 g)",
+        "amount": 8.6
+      },
+      {
+        "food": "Pork tenderloin, roasted",
+        "serving": "3 oz (85 g)",
+        "amount": 6.3
+      },
+      {
+        "food": "Beef mince, 90% lean, browned",
+        "serving": "3 oz (85 g)",
+        "amount": 5.8
+      },
+      {
+        "food": "Brown rice, cooked",
+        "serving": "1 cup",
+        "amount": 5.2
+      },
+      {
+        "food": "Peanuts, dry roasted",
+        "serving": "1 oz (28 g)",
+        "amount": 4.2
+      },
+      {
+        "food": "Potato, baked",
+        "serving": "1 medium",
+        "amount": 2.3
+      }
+    ],
+    "lowText": "Niacin is low on your meter today, but most people get plenty from foods like chicken, fish and peanuts.",
+    "highText": "Your niacin from supplements is near the safe limit, so don't add more today.",
+    "notes": "Never suggest high-dose niacin. Large trials (AIM-HIGH, HPS2-THRIVE) and a Cochrane review found no fewer heart attacks, strokes or deaths, and more side effects, including new diabetes, bleeding and infections; AIM-HIGH also saw more strokes from blocked arteries. The daily need (16 mg men, 14 mg women) is above EFSA's 10 mg limit for nicotinic acid, so do not fill this meter with nicotinic acid supplements. US adults average about 21 to 31 mg a day from food alone. Food values do not include tryptophan from protein. The skin cancer trial dose (1,000 mg nicotinamide a day) is a doctor-led treatment, far above the US limit.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheets/Niacin-HealthProfessional/",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf",
+      "https://nap.nationalacademies.org/read/6015/chapter/2",
+      "https://pubmed.ncbi.nlm.nih.gov/22085343/",
+      "https://pubmed.ncbi.nlm.nih.gov/25014686/",
+      "https://pubmed.ncbi.nlm.nih.gov/28616955/",
+      "https://pubmed.ncbi.nlm.nih.gov/26488693/",
+      "https://pubmed.ncbi.nlm.nih.gov/28541582/"
+    ]
+  },
+  {
+    "id": "vitamin_b5",
+    "name": "Vitamin B5 (Pantothenic acid)",
+    "group": "vitamin",
+    "unit": "mg",
+    "unitNotes": "Amounts are in milligrams (mg) of pantothenic acid.",
+    "conversions": [],
+    "rda": {
+      "type": "AI",
+      "male_19_50": 5,
+      "female_19_50": 5,
+      "male_51_plus": 5,
+      "female_51_plus": 5,
+      "pregnancy": 6,
+      "lactation": 7,
+      "source": "https://ods.od.nih.gov/factsheets/PantothenicAcid-HealthProfessional/"
+    },
+    "ul": {
+      "iom": null,
+      "efsa": null,
+      "efsa_year": 2002,
+      "applies_to": "total",
+      "notes": "No upper limit. No toxicity is known in people. Very large doses (about 10 g a day) can cause mild loose stools and stomach upset.",
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/PantothenicAcid-HealthProfessional/",
+        "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+        "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf"
+      ]
+    },
+    "studyRange": {
+      "low": 600,
+      "high": 900,
+      "goal": "Lowering LDL cholesterol with pantethine (a form of B5)",
+      "evidence": "C",
+      "evidenceWhy": "Only small, short trials of pantethine (a review of 28 trials plus two 16-week RCTs) show modest drops in blood fats.",
+      "keyStudies": [
+        {
+          "title": "Pantethine, a derivative of vitamin B(5) used as a nutritional supplement, favorably alters low-density lipoprotein cholesterol metabolism in low- to moderate-cardiovascular risk North American subjects",
+          "year": 2011,
+          "type": "RCT",
+          "finding": "In 120 adults on a heart-healthy diet, 600 to 900 mg a day for 16 weeks lowered LDL a little more than diet alone (about 4%).",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/21925346/"
+        },
+        {
+          "title": "Pantethine, a derivative of vitamin B5, favorably alters total, LDL and non-HDL cholesterol in low to moderate cardiovascular risk subjects eligible for statin therapy",
+          "year": 2014,
+          "type": "RCT",
+          "finding": "In 32 adults, 600 to 900 mg a day for 16 weeks lowered LDL by about 11% from the start.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/24600231/"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 5,
+      "female": 5,
+      "basis": "ai",
+      "why": "No study supports more for healthy adults, so the meter fills to the daily adequate amount."
+    },
+    "timing": {
+      "withFood": null,
+      "fatSoluble": false,
+      "bestTime": "any",
+      "splitAbove": null,
+      "separateFrom": []
+    },
+    "forms": {
+      "better": [],
+      "notes": "Supplements use calcium pantothenate or pantethine. No studies compare how well they are absorbed. Pantethine is the form tested for cholesterol; plain pantothenic acid did not show this effect."
+    },
+    "interactions": [],
+    "conditionFlags": [
+      {
+        "condition": "high_cholesterol",
+        "action": "doctor_first",
+        "why": "Pantethine at 600 to 900 mg a day lowered LDL a little in small trials. Talk to your doctor; it is not a swap for prescribed medicine."
+      },
+      {
+        "condition": "pregnancy",
+        "action": "may_need_more",
+        "why": "Needs rise to 6 mg a day."
+      },
+      {
+        "condition": "breastfeeding",
+        "action": "may_need_more",
+        "why": "Needs rise to 7 mg a day."
+      }
+    ],
+    "deficiencySigns": [
+      "Numbness and burning in the hands and feet",
+      "Headache and tiredness",
+      "Irritability, restlessness and poor sleep",
+      "Stomach upset and poor appetite"
+    ],
+    "excessSigns": [
+      "Mild loose stools or stomach upset at very large doses"
+    ],
+    "foodSources": [
+      {
+        "food": "Beef liver, boiled",
+        "serving": "3 oz (85 g)",
+        "amount": 8.3
+      },
+      {
+        "food": "Breakfast cereal, fortified (100% of daily value)",
+        "serving": "1 serving",
+        "amount": 5
+      },
+      {
+        "food": "Shiitake mushrooms, cooked",
+        "serving": "½ cup",
+        "amount": 2.6
+      },
+      {
+        "food": "Sunflower seeds",
+        "serving": "¼ cup",
+        "amount": 2.4
+      },
+      {
+        "food": "Chicken breast, roasted",
+        "serving": "3 oz (85 g)",
+        "amount": 1.3
+      },
+      {
+        "food": "Tuna, bluefin, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 1.2
+      },
+      {
+        "food": "Avocado",
+        "serving": "½ fruit",
+        "amount": 1.0
+      },
+      {
+        "food": "Milk, 2% fat",
+        "serving": "1 cup",
+        "amount": 0.9
+      },
+      {
+        "food": "White mushrooms, stir fried",
+        "serving": "½ cup",
+        "amount": 0.8
+      },
+      {
+        "food": "Egg, hard boiled",
+        "serving": "1 large",
+        "amount": 0.7
+      },
+      {
+        "food": "Potato, baked",
+        "serving": "1 medium",
+        "amount": 0.7
+      }
+    ],
+    "lowText": "Vitamin B5 is low on your meter today, but almost every food has some, so most people get enough.",
+    "highText": "You've had a lot of vitamin B5 today, and very large amounts can upset your stomach.",
+    "notes": "Deficiency is rare because almost all foods contain B5. A 2005 review of 28 small trials (median 900 mg pantethine a day for about 13 weeks) also found lower blood fats, but this is a treatment use for a doctor to guide. A typical US diet gives about 6 mg a day, and the body absorbs about half of the B5 in food. Supplements range from about 10 mg (multivitamins) to 1,000 mg. No known medicine interactions.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheets/PantothenicAcid-HealthProfessional/",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf",
+      "https://pubmed.ncbi.nlm.nih.gov/21925346/",
+      "https://pubmed.ncbi.nlm.nih.gov/24600231/"
+    ]
+  },
+  {
+    "id": "vitamin_b6",
+    "name": "Vitamin B6",
+    "group": "vitamin",
+    "unit": "mg",
+    "unitNotes": "Amounts are in milligrams (mg) of vitamin B6. Labels may say pyridoxine, pyridoxal 5'-phosphate (P5P) or pyridoxamine.",
+    "conversions": [],
+    "rda": {
+      "type": "RDA",
+      "male_19_50": 1.3,
+      "female_19_50": 1.3,
+      "male_51_plus": 1.7,
+      "female_51_plus": 1.5,
+      "pregnancy": 1.9,
+      "lactation": 2.0,
+      "source": "https://ods.od.nih.gov/factsheets/VitaminB6-HealthProfessional/"
+    },
+    "ul": {
+      "iom": 100,
+      "efsa": 12,
+      "efsa_year": 2023,
+      "applies_to": "total",
+      "notes": "EFSA (2023) set 12 mg a day for all adults, including pregnancy and breastfeeding. The US limit is 100 mg. Use 12 mg. Both limits count food and supplements. Nerve damage has been reported below 50 mg a day, and Australia requires a warning label on products over 10 mg a day.",
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/VitaminB6-HealthProfessional/",
+        "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC10189633/",
+        "https://www.tga.gov.au/news/safety-updates/medicines-containing-vitamin-b6-pyridoxine-pyridoxal-or-pyridoxamine"
+      ]
+    },
+    "studyRange": {
+      "low": 30,
+      "high": 75,
+      "goal": "Easing nausea in early pregnancy (doctor-led)",
+      "evidence": "B",
+      "evidenceWhy": "Two trials eased nausea, but a Cochrane review could not draw firm conclusions.",
+      "keyStudies": [
+        {
+          "title": "Pyridoxine for nausea and vomiting of pregnancy: a randomized, double-blind, placebo-controlled trial",
+          "year": 1995,
+          "type": "RCT",
+          "finding": "In 342 pregnant women, 30 mg a day for 5 days eased nausea; vomiting fell but not significantly.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/7573262/"
+        },
+        {
+          "title": "Vitamin B6 is effective therapy for nausea and vomiting of pregnancy: a randomized, double-blind placebo-controlled study",
+          "year": 1991,
+          "type": "RCT",
+          "finding": "In 59 women, 25 mg every 8 hours for 3 days eased severe nausea and reduced vomiting.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/2047064/"
+        },
+        {
+          "title": "Efficacy of vitamin B-6 in the treatment of premenstrual syndrome: systematic review",
+          "year": 1999,
+          "type": "meta-analysis",
+          "finding": "9 mostly low-quality trials (940 women) suggested up to 100 mg a day may ease PMS symptoms.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/10334745/"
+        },
+        {
+          "title": "Combined analyses and extended follow-up of two randomized controlled homocysteine-lowering B-vitamin trials",
+          "year": 2010,
+          "type": "meta-analysis",
+          "finding": "In 6,837 heart patients, 40 mg B6 a day (alone or with folic acid and B12) did not lower heart events.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/20698927/"
+        },
+        {
+          "title": "Scientific opinion on the tolerable upper intake level for vitamin B6 (EFSA)",
+          "year": 2023,
+          "type": "guideline",
+          "finding": "Set a safe upper limit of 12 mg a day for all adults, based on reports of nerve damage.",
+          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10189633/"
+        },
+        {
+          "title": "Medicines containing vitamin B6 (pyridoxine, pyridoxal or pyridoxamine) - Australian TGA safety update",
+          "year": 2026,
+          "type": "guideline",
+          "finding": "Nerve damage cannot be ruled out below 50 mg a day; products over 10 mg a day must carry a warning.",
+          "url": "https://www.tga.gov.au/news/safety-updates/medicines-containing-vitamin-b6-pyridoxine-pyridoxal-or-pyridoxamine"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 1.3,
+      "female": 1.3,
+      "basis": "rda",
+      "why": "Studied doses are above the EU safe limit, so use the daily need; it rises to 1.7 mg (men) and 1.5 mg (women) after 50."
+    },
+    "timing": {
+      "withFood": null,
+      "fatSoluble": false,
+      "bestTime": "any",
+      "splitAbove": null,
+      "separateFrom": []
+    },
+    "forms": {
+      "better": [],
+      "notes": "Most supplements use pyridoxine hydrochloride; some use pyridoxal 5'-phosphate (P5P). The body absorbs them about the same. Labels may only show the chemical name, so look for 'pyridoxine' or 'pyridoxal'. B6 is often added to magnesium, zinc and multivitamin products."
+    },
+    "interactions": [
+      {
+        "with": "Seizure medicines (phenytoin, phenobarbital, valproate, carbamazepine)",
+        "severity": "high",
+        "effect": "Some of these medicines lower B6, and B6 at 200 mg a day can lower phenytoin and phenobarbital levels.",
+        "action": "Ask your doctor before taking B6 supplements."
+      },
+      {
+        "with": "Cycloserine (a TB antibiotic)",
+        "severity": "moderate",
+        "effect": "Makes you lose more B6 in urine, which may worsen its side effects.",
+        "action": "Your doctor may prescribe B6 with it, so follow their advice."
+      },
+      {
+        "with": "Theophylline (a lung medicine)",
+        "severity": "low",
+        "effect": "People taking it often have low B6.",
+        "action": "Ask your doctor whether you need a B6 check."
+      },
+      {
+        "with": "Magnesium, zinc, multivitamin and B-complex products, and drinks with added B6",
+        "severity": "moderate",
+        "effect": "Many contain hidden B6, so the daily total adds up fast.",
+        "action": "Add up B6 from every product you take."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "pregnancy",
+        "action": "doctor_first",
+        "why": "B6 is used for morning sickness, but the doses used are above the EU safe limit. Ask your doctor or midwife first. Daily needs rise to 1.9 mg."
+      },
+      {
+        "condition": "breastfeeding",
+        "action": "may_need_more",
+        "why": "Needs rise to 2 mg a day. Stay under 12 mg a day in total."
+      },
+      {
+        "condition": "epilepsy",
+        "action": "doctor_first",
+        "why": "B6 can lower some seizure medicine levels, and some seizure medicines lower B6."
+      },
+      {
+        "condition": "kidney_disease",
+        "action": "doctor_first",
+        "why": "Kidney disease can lower B6, but a high-dose B vitamin mix sped up kidney decline in a trial of diabetic kidney disease."
+      },
+      {
+        "condition": "inflammatory_bowel_disease",
+        "action": "may_need_more",
+        "why": "Crohn's disease and colitis often lower B6 levels."
+      },
+      {
+        "condition": "coeliac",
+        "action": "may_need_more",
+        "why": "Coeliac disease can lower B6 absorption."
+      },
+      {
+        "condition": "alcohol_use",
+        "action": "may_need_more",
+        "why": "Alcohol lowers B6 levels."
+      },
+      {
+        "condition": "smoker",
+        "action": "caution",
+        "why": "One large study linked more than 20 mg of B6 a day for years to more lung cancer in men, especially smokers."
+      }
+    ],
+    "deficiencySigns": [
+      "Low red blood cells (tiredness, pale skin)",
+      "Cracks at the corners of the mouth and scaly lips",
+      "Swollen tongue",
+      "Skin rash",
+      "Low mood or confusion",
+      "Weaker immune system",
+      "Tingling or numbness (this can also be a sign of too much)"
+    ],
+    "excessSigns": [
+      "Tingling, burning or numbness in hands or feet",
+      "Unsteady walking or clumsiness",
+      "Painful skin patches",
+      "Skin sensitive to sunlight",
+      "Nausea or heartburn"
+    ],
+    "foodSources": [
+      {
+        "food": "Chickpeas, canned",
+        "serving": "1 cup",
+        "amount": 1.1
+      },
+      {
+        "food": "Beef liver, pan fried",
+        "serving": "3 oz (85 g)",
+        "amount": 0.9
+      },
+      {
+        "food": "Tuna, yellowfin, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 0.9
+      },
+      {
+        "food": "Salmon, sockeye, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 0.6
+      },
+      {
+        "food": "Chicken breast, roasted",
+        "serving": "3 oz (85 g)",
+        "amount": 0.5
+      },
+      {
+        "food": "Potatoes, boiled",
+        "serving": "1 cup",
+        "amount": 0.4
+      },
+      {
+        "food": "Turkey, roasted",
+        "serving": "3 oz (85 g)",
+        "amount": 0.4
+      },
+      {
+        "food": "Banana",
+        "serving": "1 medium",
+        "amount": 0.4
+      },
+      {
+        "food": "Breakfast cereal, fortified (25% of daily value)",
+        "serving": "1 serving",
+        "amount": 0.4
+      },
+      {
+        "food": "Beef mince, 85% lean, grilled",
+        "serving": "3 oz (85 g)",
+        "amount": 0.3
+      }
+    ],
+    "lowText": "Vitamin B6 is low on your meter today, and chickpeas, fish, chicken, potatoes or a banana can top it up.",
+    "highText": "Your vitamin B6 is near the safe limit, so skip any more today to protect your nerves.",
+    "notes": "Use EFSA's 12 mg a day as the cap. With average food intake (about 1.5 to 2 mg a day), that leaves about 10 mg for supplements. Australia has required a nerve-damage warning on products over 10 mg a day since March 2022, and from 1 June 2027 products over 50 mg a day will need a pharmacist (over 200 mg, a prescription). Australia's regulator says nerve damage cannot be ruled out below 50 mg a day, and France reported a likely case at 21 mg a day. Signs of too much B6 can look like signs of too little. Doses studied for morning sickness (30 to 75 mg) and PMS (up to 100 mg) are above the EFSA limit, so they must be doctor-led.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheets/VitaminB6-HealthProfessional/",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://pmc.ncbi.nlm.nih.gov/articles/PMC10189633/",
+      "https://www.tga.gov.au/news/safety-updates/medicines-containing-vitamin-b6-pyridoxine-pyridoxal-or-pyridoxamine",
+      "https://pubmed.ncbi.nlm.nih.gov/7573262/",
+      "https://pubmed.ncbi.nlm.nih.gov/2047064/",
+      "https://pubmed.ncbi.nlm.nih.gov/10334745/",
+      "https://pubmed.ncbi.nlm.nih.gov/20698927/",
+      "https://pubmed.ncbi.nlm.nih.gov/28829668/",
+      "https://pubmed.ncbi.nlm.nih.gov/20424250/"
+    ]
+  },
+  {
+    "id": "vitamin_b7",
+    "name": "Vitamin B7 (Biotin)",
+    "group": "vitamin",
+    "unit": "µg",
+    "unitNotes": "Amounts are in micrograms (µg). 1 mg = 1,000 µg, and many biotin labels use mg.",
+    "conversions": [
+      {
+        "from": "mg biotin",
+        "to": "µg biotin",
+        "multiply": 1000,
+        "note": "Many biotin labels list mg."
+      }
+    ],
+    "rda": {
+      "type": "AI",
+      "male_19_50": 30,
+      "female_19_50": 30,
+      "male_51_plus": 30,
+      "female_51_plus": 30,
+      "pregnancy": 30,
+      "lactation": 35,
+      "source": "https://ods.od.nih.gov/factsheets/Biotin-HealthProfessional/"
+    },
+    "ul": {
+      "iom": null,
+      "efsa": null,
+      "efsa_year": 2001,
+      "applies_to": "total",
+      "notes": "No upper limit. No toxicity is known, but doses above daily needs can upset some blood test results.",
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/Biotin-HealthProfessional/",
+        "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+        "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf"
+      ]
+    },
+    "studyRange": {
+      "low": 2500,
+      "high": 2500,
+      "goal": "Brittle nails",
+      "evidence": "C",
+      "evidenceWhy": "Only three small studies, none with a placebo group.",
+      "keyStudies": [
+        {
+          "title": "Bioavailability of biotin given orally to humans in pharmacologic doses",
+          "year": 1999,
+          "type": "pharmacokinetic study",
+          "finding": "Large doses of biotin taken by mouth were fully absorbed in 6 healthy adults.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/10075337/"
+        },
+        {
+          "title": "Biotin Interference with Troponin Lab Tests - Assays Subject to Biotin Interference (FDA)",
+          "year": 2022,
+          "type": "guideline",
+          "finding": "FDA warns biotin can cause wrong lab results that may go unnoticed, including falsely low heart attack tests.",
+          "url": "https://www.fda.gov/medical-devices/in-vitro-diagnostics/biotin-interference-troponin-lab-tests-assays-subject-biotin-interference"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 30,
+      "female": 30,
+      "basis": "ai",
+      "why": "No good evidence supports more, and high doses upset blood tests, so the meter fills to the daily adequate amount."
+    },
+    "timing": {
+      "withFood": null,
+      "fatSoluble": false,
+      "bestTime": "any",
+      "splitAbove": null,
+      "separateFrom": [
+        {
+          "what": "Blood tests",
+          "hours": null,
+          "why": "Biotin can give false results, and no safe gap is proven, so tell your doctor and the lab you take it."
+        }
+      ]
+    },
+    "forms": {
+      "better": [],
+      "notes": "Free biotin in supplements is fully absorbed, even at high doses. Raw egg white blocks biotin, but cooked egg does not."
+    },
+    "interactions": [
+      {
+        "with": "Blood tests (thyroid, heart troponin, hormones, vitamin D)",
+        "severity": "high",
+        "effect": "Biotin can make some results falsely high or low; one person died after a heart attack test wrongly looked normal.",
+        "action": "Tell your doctor and the lab you take biotin before any blood test."
+      },
+      {
+        "with": "Seizure medicines (carbamazepine, primidone, phenytoin, phenobarbital)",
+        "severity": "low",
+        "effect": "Long-term use can lower biotin levels.",
+        "action": "Ask your doctor if you need more biotin."
+      },
+      {
+        "with": "Raw egg white",
+        "severity": "low",
+        "effect": "A protein in raw egg white blocks biotin absorption.",
+        "action": "Cook eggs, as cooking stops this."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "thyroid_disease",
+        "action": "caution",
+        "why": "Biotin can upset thyroid blood tests and has led to wrong diagnoses. Tell your doctor before any test."
+      },
+      {
+        "condition": "heart_disease",
+        "action": "caution",
+        "why": "Biotin can make heart attack blood tests look normal when they are not. Tell staff you take it."
+      },
+      {
+        "condition": "low_vitamin_d",
+        "action": "caution",
+        "why": "Biotin can upset vitamin D blood test results. Tell the lab before testing."
+      },
+      {
+        "condition": "upcoming_surgery",
+        "action": "caution",
+        "why": "Biotin can upset blood tests done before surgery. Tell your care team you take it."
+      },
+      {
+        "condition": "recent_surgery",
+        "action": "caution",
+        "why": "Biotin can upset blood tests done after surgery, including heart tests. Tell your care team you take it."
+      },
+      {
+        "condition": "epilepsy",
+        "action": "may_need_more",
+        "why": "Some seizure medicines lower biotin levels."
+      },
+      {
+        "condition": "alcohol_use",
+        "action": "may_need_more",
+        "why": "Long-term drinking lowers biotin absorption."
+      },
+      {
+        "condition": "pregnancy",
+        "action": "may_need_more",
+        "why": "Biotin levels often dip in pregnancy. The health effect is unclear."
+      },
+      {
+        "condition": "breastfeeding",
+        "action": "may_need_more",
+        "why": "Needs rise to 35 µg a day."
+      }
+    ],
+    "deficiencySigns": [
+      "Thinning hair or hair loss",
+      "Red, scaly rash around the eyes, nose and mouth",
+      "Brittle nails",
+      "Pink, sore eyes",
+      "Low mood, tiredness or tingling in hands and feet"
+    ],
+    "excessSigns": [
+      "No known toxic effects",
+      "False blood test results, such as thyroid or heart tests"
+    ],
+    "foodSources": [
+      {
+        "food": "Beef liver, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 30.8
+      },
+      {
+        "food": "Egg, whole, cooked",
+        "serving": "1 egg",
+        "amount": 10.0
+      },
+      {
+        "food": "Salmon, pink, canned in water",
+        "serving": "3 oz (85 g)",
+        "amount": 5.0
+      },
+      {
+        "food": "Pork chop, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 3.8
+      },
+      {
+        "food": "Beef burger, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 3.8
+      },
+      {
+        "food": "Sunflower seeds, roasted",
+        "serving": "¼ cup",
+        "amount": 2.6
+      },
+      {
+        "food": "Sweet potato, cooked",
+        "serving": "½ cup",
+        "amount": 2.4
+      },
+      {
+        "food": "Almonds, roasted",
+        "serving": "¼ cup",
+        "amount": 1.5
+      },
+      {
+        "food": "Tuna, canned in water",
+        "serving": "3 oz (85 g)",
+        "amount": 0.6
+      },
+      {
+        "food": "Spinach, boiled",
+        "serving": "½ cup",
+        "amount": 0.5
+      }
+    ],
+    "lowText": "Biotin is low on your meter today, and eggs, salmon, seeds or sweet potato can top it up.",
+    "highText": "That's a lot of biotin, so tell your doctor before any blood test as it can upset results.",
+    "notes": "The main risk is false blood test results, not toxicity. In a small study, 10 mg a day for a week upset 9 of 23 biotin-based lab tests, and a single 10 mg dose has affected thyroid tests within 24 hours. The FDA reports a death after a heart attack test wrongly read low in a person taking high-dose biotin, and says there is not enough data to know how long to stop biotin before a test. The FDA has said hair, skin and nail products may contain up to 20 mg, and doctors may advise up to 300 mg a day for some conditions such as multiple sclerosis. Nail evidence comes from three small studies at 2.5 mg a day without a placebo group; there is no good evidence for hair or skin in healthy people. Average food intake is about 35 to 70 µg a day.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheets/Biotin-HealthProfessional/",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf",
+      "https://www.fda.gov/medical-devices/in-vitro-diagnostics/biotin-interference-troponin-lab-tests-assays-subject-biotin-interference",
+      "https://www.asahq.org/advocacy-and-asapac/fda-and-washington-alerts/fda-alerts/2017/12/biotin-vitamin-b7-safety-communication-may-interfere-with-lab-tests",
+      "https://pubmed.ncbi.nlm.nih.gov/10075337/",
+      "https://pubmed.ncbi.nlm.nih.gov/28973622/",
+      "https://pubmed.ncbi.nlm.nih.gov/2273113/",
+      "https://pubmed.ncbi.nlm.nih.gov/8477615/"
+    ]
+  },
+  {
+    "id": "vitamin_b9",
+    "name": "Vitamin B9 (Folate)",
+    "group": "vitamin",
+    "unit": "µg",
+    "unitNotes": "Daily needs and food amounts are in µg DFE (dietary folate equivalents). The upper limit and study doses are in µg of folic acid; 1 µg folic acid with food = 1.7 µg DFE.",
+    "conversions": [
+      {
+        "from": "µg folic acid (with food, or in fortified food)",
+        "to": "µg DFE",
+        "multiply": 1.7,
+        "note": "Official label factor. Also count it as µg folic acid toward the upper limit."
+      },
+      {
+        "from": "µg folic acid (supplement on an empty stomach)",
+        "to": "µg DFE",
+        "multiply": 2,
+        "note": "US panel: 0.5 µg folic acid on an empty stomach = 1 µg DFE."
+      },
+      {
+        "from": "µg food folate",
+        "to": "µg DFE",
+        "multiply": 1,
+        "note": "Natural folate in food does not count toward the upper limit."
+      },
+      {
+        "from": "µg 5-MTHF (methylfolate)",
+        "to": "µg DFE",
+        "multiply": 1.7,
+        "note": "No official factor; US labels may use up to 1.7. EFSA counts it toward the upper limit."
+      },
+      {
+        "from": "µg DFE (from folic acid)",
+        "to": "µg folic acid",
+        "multiply": 0.6,
+        "note": "Use to check the upper limit when a label shows only DFE (slightly cautious)."
+      }
+    ],
+    "rda": {
+      "type": "RDA",
+      "male_19_50": 400,
+      "female_19_50": 400,
+      "male_51_plus": 400,
+      "female_51_plus": 400,
+      "pregnancy": 600,
+      "lactation": 500,
+      "source": "https://ods.od.nih.gov/factsheets/Folate-HealthProfessional/"
+    },
+    "ul": {
+      "iom": 1000,
+      "efsa": 1000,
+      "efsa_year": 2023,
+      "applies_to": "folic_acid_only",
+      "notes": "The limit is 1,000 µg a day of folic acid from supplements and fortified foods; EFSA also counts methylfolate (5-MTHF) supplements. Folate in natural food does not count. This is µg folic acid, not µg DFE (1,000 µg folic acid = about 1,667 µg DFE). It applies in pregnancy too, but not to doses a doctor prescribes.",
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/Folate-HealthProfessional/",
+        "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC10641704/",
+        "https://nap.nationalacademies.org/read/6015/chapter/2"
+      ]
+    },
+    "studyRange": {
+      "low": 400,
+      "high": 800,
+      "goal": "Lowering the risk of spine and brain birth defects, before and in early pregnancy (µg folic acid)",
+      "evidence": "A",
+      "evidenceWhy": "Trials and a US Task Force grade A rating show high certainty of benefit.",
+      "keyStudies": [
+        {
+          "title": "Prevention of neural tube defects: results of the Medical Research Council Vitamin Study",
+          "year": 1991,
+          "type": "RCT",
+          "finding": "In 1,817 women with a past affected pregnancy, folic acid before pregnancy cut repeat defects by 72%.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/1677062/"
+        },
+        {
+          "title": "Effects and safety of periconceptional oral folate supplementation for preventing birth defects",
+          "year": 2015,
+          "type": "Cochrane review",
+          "finding": "5 trials (7,391 women): folic acid around conception cut these defects by about two thirds; 400 µg worked as well as higher doses.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/26662928/"
+        },
+        {
+          "title": "Folic Acid Supplementation to Prevent Neural Tube Defects: US Preventive Services Task Force Reaffirmation Recommendation Statement",
+          "year": 2023,
+          "type": "guideline",
+          "finding": "Anyone planning or able to become pregnant should take 400 to 800 µg folic acid daily (grade A, high certainty).",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/37526713/"
+        },
+        {
+          "title": "Efficacy of folic acid therapy in primary prevention of stroke among adults with hypertension in China: the CSPPT randomized clinical trial",
+          "year": 2015,
+          "type": "RCT",
+          "finding": "In 20,702 adults with high blood pressure in China, 800 µg folic acid with a blood pressure drug lowered first strokes by 21%.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/25771069/"
+        },
+        {
+          "title": "Folic acid for the prevention of colorectal adenomas: a randomized clinical trial",
+          "year": 2007,
+          "type": "RCT",
+          "finding": "1 mg a day did not prevent bowel polyps and may have raised advanced polyps.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/17551129/"
+        },
+        {
+          "title": "Cancer incidence and mortality after treatment with folic acid and vitamin B12",
+          "year": 2009,
+          "type": "RCT",
+          "finding": "In Norwegian heart patients, 800 µg folic acid plus B12 was linked to more cancer and more deaths.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/19920236/"
+        },
+        {
+          "title": "Effect of B-vitamin therapy on progression of diabetic nephropathy: a randomized controlled trial",
+          "year": 2010,
+          "type": "RCT",
+          "finding": "2.5 mg folic acid with B6 and B12 sped up kidney decline and doubled a combined count of heart attacks, strokes, artery procedures and deaths.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/20424250/"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 400,
+      "female": 400,
+      "basis": "rda",
+      "why": "Daily need for adults; anyone who could become pregnant should also take 400 µg folic acid a day (see pregnancy flags)."
+    },
+    "timing": {
+      "withFood": null,
+      "fatSoluble": false,
+      "bestTime": "any",
+      "splitAbove": null,
+      "separateFrom": []
+    },
+    "forms": {
+      "better": [
+        "folic acid",
+        "5-MTHF (methylfolate)"
+      ],
+      "notes": "Both are absorbed better than folate in food (about 85 to 100% vs about 50%). Folic acid is the form proven to lower the risk of spine and brain birth defects, and US health officials advise folic acid even for people with the MTHFR gene change."
+    },
+    "interactions": [
+      {
+        "with": "Methotrexate",
+        "severity": "high",
+        "effect": "Folate can weaken methotrexate used for cancer; for arthritis or psoriasis, doctors sometimes add folate to ease side effects.",
+        "action": "Only take folate with methotrexate if your doctor advises it."
+      },
+      {
+        "with": "Seizure medicines (phenytoin, carbamazepine, valproate)",
+        "severity": "moderate",
+        "effect": "They can lower folate, and folate can lower the medicine's level.",
+        "action": "Check with your doctor before taking folate supplements."
+      },
+      {
+        "with": "Sulfasalazine",
+        "severity": "moderate",
+        "effect": "Lowers folate absorption and can cause deficiency.",
+        "action": "Ask your doctor if you need more folate."
+      },
+      {
+        "with": "Vitamin B12",
+        "severity": "high",
+        "effect": "High folic acid can hide low B12 while nerve damage goes on.",
+        "action": "If you take high-dose folic acid, make sure your B12 has been checked."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "trying_to_conceive",
+        "action": "may_need_more",
+        "why": "Take 400 to 800 µg folic acid a day, starting at least 1 month before pregnancy. It lowers the risk of spine and brain birth defects."
+      },
+      {
+        "condition": "pregnancy",
+        "action": "may_need_more",
+        "why": "Needs rise to 600 µg DFE. Keep taking folic acid through the first 2 to 3 months."
+      },
+      {
+        "condition": "breastfeeding",
+        "action": "may_need_more",
+        "why": "Needs rise to 500 µg DFE a day."
+      },
+      {
+        "condition": "type_1_diabetes",
+        "action": "doctor_first",
+        "why": "If you plan a pregnancy, UK guidance advises a higher prescribed dose (5 mg). Ask your doctor."
+      },
+      {
+        "condition": "type_2_diabetes",
+        "action": "doctor_first",
+        "why": "If you plan a pregnancy, UK guidance advises a higher prescribed dose (5 mg). Ask your doctor."
+      },
+      {
+        "condition": "b12_deficiency",
+        "action": "doctor_first",
+        "why": "High folic acid can hide low B12 and let nerve damage worsen. Get B12 treated first."
+      },
+      {
+        "condition": "age_65_plus",
+        "action": "caution",
+        "why": "Low B12 is more common with age, and high folic acid can hide it. Stay under 1,000 µg folic acid."
+      },
+      {
+        "condition": "epilepsy",
+        "action": "doctor_first",
+        "why": "Folate and some seizure medicines affect each other's levels."
+      },
+      {
+        "condition": "cancer_treatment",
+        "action": "doctor_first",
+        "why": "Folate can weaken some cancer drugs, such as methotrexate. Ask your cancer team first."
+      },
+      {
+        "condition": "kidney_disease",
+        "action": "doctor_first",
+        "why": "A high-dose mix of folic acid, B6 and B12 sped up kidney decline in a trial of diabetic kidney disease."
+      },
+      {
+        "condition": "heart_disease",
+        "action": "caution",
+        "why": "In heart patients, folic acid with B12 did not prevent heart events, and one trial linked it to more cancer."
+      },
+      {
+        "condition": "inflammatory_bowel_disease",
+        "action": "may_need_more",
+        "why": "Many people with bowel disease are low in folate, and some bowel medicines block it."
+      },
+      {
+        "condition": "coeliac",
+        "action": "may_need_more",
+        "why": "Coeliac disease can reduce folate absorption."
+      },
+      {
+        "condition": "alcohol_use",
+        "action": "may_need_more",
+        "why": "Alcohol lowers folate absorption and speeds its loss."
+      }
+    ],
+    "deficiencySigns": [
+      "Tiredness and weakness",
+      "Shortness of breath or a racing heartbeat",
+      "Headache, poor focus or irritability",
+      "Sore tongue or mouth ulcers",
+      "Changes in the look of skin, hair or nails"
+    ],
+    "excessSigns": [
+      "Can hide low B12, so nerve damage may go unnoticed",
+      "May make the symptoms of low B12 worse",
+      "Long-term high doses raise other concerns that are still being studied"
+    ],
+    "foodSources": [
+      {
+        "food": "Beef liver, braised",
+        "serving": "3 oz (85 g)",
+        "amount": 215
+      },
+      {
+        "food": "Spinach, boiled",
+        "serving": "½ cup",
+        "amount": 131
+      },
+      {
+        "food": "Black-eyed peas, boiled",
+        "serving": "½ cup",
+        "amount": 105
+      },
+      {
+        "food": "Breakfast cereal, fortified (25% of daily value)",
+        "serving": "1 serving",
+        "amount": 100
+      },
+      {
+        "food": "White rice, enriched, cooked",
+        "serving": "½ cup",
+        "amount": 90
+      },
+      {
+        "food": "Asparagus, boiled",
+        "serving": "4 spears",
+        "amount": 89
+      },
+      {
+        "food": "Brussels sprouts, boiled",
+        "serving": "½ cup",
+        "amount": 78
+      },
+      {
+        "food": "Romaine lettuce, shredded",
+        "serving": "1 cup",
+        "amount": 64
+      },
+      {
+        "food": "Avocado, sliced",
+        "serving": "½ cup",
+        "amount": 59
+      },
+      {
+        "food": "Broccoli, cooked",
+        "serving": "½ cup",
+        "amount": 52
+      },
+      {
+        "food": "Kidney beans, canned",
+        "serving": "½ cup",
+        "amount": 46
+      }
+    ],
+    "lowText": "Folate is low on your meter today, and leafy greens, beans, peas or asparagus can top it up.",
+    "highText": "Your folic acid is near the safe limit, so don't add more today unless your doctor advised it.",
+    "notes": "The meter counts µg DFE, but the upper limit counts µg of folic acid (and methylfolate) from supplements and fortified foods, so track folic acid separately. 400 µg DFE from a supplement is about 235 µg folic acid. Fortified cereal and enriched bread, pasta and rice also add folic acid. Higher doses (4 to 5 mg) are only for special cases, such as a past pregnancy with a spine or brain defect or, in UK guidance, diabetes when planning pregnancy, and need a doctor. Trials of folic acid (often at high doses) for heart attacks, memory or bowel polyps showed little or no benefit, and some raised concerns. Folic acid did lower first strokes in a large trial in China, where food is not fortified.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheets/Folate-HealthProfessional/",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://pmc.ncbi.nlm.nih.gov/articles/PMC10641704/",
+      "https://nap.nationalacademies.org/read/6015/chapter/2",
+      "https://www.nice.org.uk/guidance/ng3/chapter/Recommendations",
+      "https://pubmed.ncbi.nlm.nih.gov/1677062/",
+      "https://pubmed.ncbi.nlm.nih.gov/26662928/",
+      "https://pubmed.ncbi.nlm.nih.gov/37526713/",
+      "https://pubmed.ncbi.nlm.nih.gov/25771069/",
+      "https://pubmed.ncbi.nlm.nih.gov/17551129/",
+      "https://pubmed.ncbi.nlm.nih.gov/19920236/",
+      "https://pubmed.ncbi.nlm.nih.gov/20424250/"
+    ]
+  },
+  {
+    "id": "vitamin_b12",
+    "name": "Vitamin B12",
+    "group": "vitamin",
+    "unit": "µg",
+    "unitNotes": "Amounts are in micrograms (µg) of vitamin B12. 1 mg = 1,000 µg.",
+    "conversions": [
+      {
+        "from": "mg vitamin B12",
+        "to": "µg vitamin B12",
+        "multiply": 1000,
+        "note": "Some labels and guidelines use mg."
+      }
+    ],
+    "rda": {
+      "type": "RDA",
+      "male_19_50": 2.4,
+      "female_19_50": 2.4,
+      "male_51_plus": 2.4,
+      "female_51_plus": 2.4,
+      "pregnancy": 2.6,
+      "lactation": 2.8,
+      "source": "https://ods.od.nih.gov/factsheets/VitaminB12-HealthProfessional/"
+    },
+    "ul": {
+      "iom": null,
+      "efsa": null,
+      "efsa_year": 2000,
+      "applies_to": "total",
+      "notes": "No upper limit. Neither the US panel nor EFSA found any defined harm from high doses. The body absorbs only a small part of large doses (about 2% of 500 µg).",
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/VitaminB12-HealthProfessional/",
+        "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+        "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf"
+      ]
+    },
+    "studyRange": {
+      "low": 1000,
+      "high": 2000,
+      "goal": "Correcting low B12 with tablets instead of injections",
+      "evidence": "B",
+      "evidenceWhy": "Three small trials (153 people) show tablets raise B12 levels about as well as injections; the evidence is low quality.",
+      "keyStudies": [
+        {
+          "title": "Oral vitamin B12 versus intramuscular vitamin B12 for vitamin B12 deficiency",
+          "year": 2018,
+          "type": "Cochrane review",
+          "finding": "3 small trials (153 people): 1,000 to 2,000 µg a day by mouth raised B12 levels about as well as injections.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/29543316/"
+        },
+        {
+          "title": "Oral cyanocobalamin supplementation in older people with vitamin B12 deficiency: a dose-finding trial",
+          "year": 2005,
+          "type": "RCT",
+          "finding": "In 120 older people with mild deficiency, about 650 to 1,000 µg a day was needed to correct a key blood marker.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/15911731/"
+        },
+        {
+          "title": "Vitamin B12 deficiency in over 16s: diagnosis and management (NICE guideline NG239)",
+          "year": 2024,
+          "type": "guideline",
+          "finding": "Tablets of at least 1 mg a day for absorption problems, lifelong injections for autoimmune stomach causes, and pick cyanocobalamin, methylcobalamin or adenosylcobalamin.",
+          "url": "https://www.nice.org.uk/guidance/ng239/chapter/Recommendations"
+        },
+        {
+          "title": "Long-term Metformin Use and Vitamin B12 Deficiency in the Diabetes Prevention Program Outcomes Study",
+          "year": 2016,
+          "type": "RCT",
+          "finding": "Each year of metformin use raised the odds of low B12 by about 13%.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/26900641/"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 2.4,
+      "female": 2.4,
+      "basis": "rda",
+      "why": "Healthy adults need only a little; high doses are for treating low B12 with a doctor."
+    },
+    "timing": {
+      "withFood": null,
+      "fatSoluble": false,
+      "bestTime": "any",
+      "splitAbove": null,
+      "separateFrom": []
+    },
+    "forms": {
+      "better": [
+        "cyanocobalamin",
+        "methylcobalamin",
+        "adenosylcobalamin"
+      ],
+      "notes": "UK guidance (NICE) advises choosing a supplement with one of these forms, as some products do not contain enough or the right type. No form has been shown to be absorbed better than another. Tablets under the tongue work the same as swallowed tablets."
+    },
+    "interactions": [
+      {
+        "with": "Metformin",
+        "severity": "moderate",
+        "effect": "Long-term use can lower B12 levels.",
+        "action": "Ask your doctor to check your B12 from time to time."
+      },
+      {
+        "with": "Acid-reducing medicines (PPIs such as omeprazole, and H2 blockers)",
+        "severity": "moderate",
+        "effect": "Can reduce B12 absorption from food; use for 2 years or more is linked to low B12.",
+        "action": "Ask your doctor about a B12 test if you use them long term."
+      },
+      {
+        "with": "Colchicine, pregabalin, topiramate, phenobarbital or primidone",
+        "severity": "low",
+        "effect": "UK guidance lists these as risk factors for low B12.",
+        "action": "Ask your doctor if a B12 check is needed."
+      },
+      {
+        "with": "Folic acid (high doses)",
+        "severity": "high",
+        "effect": "Can hide the blood signs of low B12 while nerve damage continues.",
+        "action": "Get B12 checked before taking high-dose folic acid."
+      },
+      {
+        "with": "Nitrous oxide ('laughing gas') used recreationally",
+        "severity": "high",
+        "effect": "Can cause B12 deficiency.",
+        "action": "Get medical advice if you use it, especially if you have tingling or weakness."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "vegan_vegetarian",
+        "action": "may_need_more",
+        "why": "B12 is only found naturally in animal foods. Vegans need fortified foods or a supplement."
+      },
+      {
+        "condition": "age_65_plus",
+        "action": "may_need_more",
+        "why": "The body absorbs less B12 from food with age, so fortified foods or a supplement help."
+      },
+      {
+        "condition": "type_2_diabetes",
+        "action": "check_level",
+        "why": "Metformin can lower B12 over time. Ask for a B12 test."
+      },
+      {
+        "condition": "prediabetes",
+        "action": "check_level",
+        "why": "If you take metformin, it can lower B12 over time. Ask for a B12 test."
+      },
+      {
+        "condition": "type_1_diabetes",
+        "action": "check_level",
+        "why": "Autoimmune conditions like type 1 diabetes raise the risk of low B12."
+      },
+      {
+        "condition": "thyroid_disease",
+        "action": "check_level",
+        "why": "Autoimmune thyroid disease raises the risk of low B12."
+      },
+      {
+        "condition": "bariatric_surgery",
+        "action": "may_need_more",
+        "why": "Weight-loss surgery cuts B12 absorption. You may need high doses or injections, so follow your team's plan."
+      },
+      {
+        "condition": "coeliac",
+        "action": "may_need_more",
+        "why": "Coeliac disease raises the risk of low B12."
+      },
+      {
+        "condition": "inflammatory_bowel_disease",
+        "action": "check_level",
+        "why": "Bowel disease or bowel surgery can affect B12 absorption."
+      },
+      {
+        "condition": "b12_deficiency",
+        "action": "doctor_first",
+        "why": "Treatment needs a doctor. Tablets of 1,000 µg a day or injections are used."
+      },
+      {
+        "condition": "pregnancy",
+        "action": "may_need_more",
+        "why": "Needs rise to 2.6 µg a day. Low B12 in pregnancy may harm the baby."
+      },
+      {
+        "condition": "breastfeeding",
+        "action": "may_need_more",
+        "why": "Needs rise to 2.8 µg a day. Babies of vegan mothers can become low."
+      },
+      {
+        "condition": "kidney_disease",
+        "action": "doctor_first",
+        "why": "A high-dose mix of B12, folic acid and B6 sped up kidney decline in a trial of diabetic kidney disease."
+      },
+      {
+        "condition": "smoker",
+        "action": "caution",
+        "why": "One large study linked more than 55 µg of B12 a day for years to more lung cancer in men, especially smokers."
+      }
+    ],
+    "deficiencySigns": [
+      "Tiredness and weakness",
+      "Pale skin and a racing heartbeat",
+      "Sore, red tongue",
+      "Pins and needles or numbness in hands and feet",
+      "Balance problems or unsteady walking",
+      "Memory problems or low mood"
+    ],
+    "excessSigns": [
+      "No known harm, even at high doses",
+      "Acne has been reported after some high-dose injections"
+    ],
+    "foodSources": [
+      {
+        "food": "Beef liver, pan fried",
+        "serving": "3 oz (85 g)",
+        "amount": 70.7
+      },
+      {
+        "food": "Clams, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 17
+      },
+      {
+        "food": "Oysters, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 14.9
+      },
+      {
+        "food": "Nutritional yeast, fortified (varies by brand, 8.3 to 24)",
+        "serving": "¼ cup",
+        "amount": 8.3
+      },
+      {
+        "food": "Salmon, Atlantic, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 2.6
+      },
+      {
+        "food": "Tuna, light, canned in water",
+        "serving": "3 oz (85 g)",
+        "amount": 2.5
+      },
+      {
+        "food": "Beef mince, 85% lean, browned",
+        "serving": "3 oz (85 g)",
+        "amount": 2.4
+      },
+      {
+        "food": "Milk, 2% fat",
+        "serving": "1 cup",
+        "amount": 1.3
+      },
+      {
+        "food": "Yogurt, plain, fat free",
+        "serving": "6 oz (170 g) pot",
+        "amount": 1.0
+      },
+      {
+        "food": "Breakfast cereal, fortified (25% of daily value)",
+        "serving": "1 serving",
+        "amount": 0.6
+      },
+      {
+        "food": "Egg, cooked",
+        "serving": "1 large",
+        "amount": 0.5
+      },
+      {
+        "food": "Cheddar cheese",
+        "serving": "1½ oz (43 g)",
+        "amount": 0.5
+      }
+    ],
+    "lowText": "Vitamin B12 is low on your meter today; fish, dairy and eggs help, and vegans need fortified foods or a supplement.",
+    "highText": "You've had plenty of vitamin B12 today, and your body only takes in a small part of large doses.",
+    "notes": "The body absorbs about half of a small dose (1 to 2 µg) but only about 2% of 500 µg and 1.3% of 1,000 µg, so high-dose tablets overfill the meter by a lot. US experts advise adults over 50 to get most of their B12 from fortified foods or supplements. About 3.6% of US adults are deficient and 12.5% are borderline, and symptoms can take years to show. UK guidance (NICE 2024) uses at least 1 mg a day by mouth for absorption problems and lifelong injections for autoimmune stomach causes. One large observational study linked long-term B12 above 55 µg a day with more lung cancer in men, especially smokers; this does not prove cause. Long-term acid-reducing medicines (2 years or more) are linked to low B12.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheets/VitaminB12-HealthProfessional/",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf",
+      "https://nap.nationalacademies.org/read/6015/chapter/2",
+      "https://www.nice.org.uk/guidance/ng239/chapter/Recommendations",
+      "https://pubmed.ncbi.nlm.nih.gov/29543316/",
+      "https://pubmed.ncbi.nlm.nih.gov/15911731/",
+      "https://pubmed.ncbi.nlm.nih.gov/26900641/",
+      "https://pubmed.ncbi.nlm.nih.gov/24327038/",
+      "https://pubmed.ncbi.nlm.nih.gov/28829668/",
+      "https://pubmed.ncbi.nlm.nih.gov/20424250/"
+    ]
+  }
+]

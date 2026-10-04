@@ -1,0 +1,2408 @@
+[
+  {
+    "id": "omega_3",
+    "name": "Omega-3 (EPA + DHA)",
+    "group": "other",
+    "unit": "mg",
+    "unitNotes": "Milligrams of EPA plus DHA added together. Use the EPA and DHA lines on the label, not the total fish oil weight.",
+    "conversions": [
+      {
+        "from": "g EPA+DHA",
+        "to": "mg EPA+DHA",
+        "multiply": 1000,
+        "note": "1 g = 1,000 mg."
+      },
+      {
+        "from": "mg fish oil (typical 1,000 mg capsule)",
+        "to": "mg EPA+DHA",
+        "multiply": 0.3,
+        "note": "A typical 1,000 mg fish oil capsule gives about 180 mg EPA and 120 mg DHA. Use the label when you can."
+      }
+    ],
+    "rda": {
+      "type": "AI",
+      "male_19_50": 250,
+      "female_19_50": 250,
+      "male_51_plus": 250,
+      "female_51_plus": 250,
+      "pregnancy": 350,
+      "lactation": 350,
+      "source": "https://www.efsa.europa.eu/en/efsajournal/pub/1461"
+    },
+    "ul": {
+      "iom": null,
+      "efsa": null,
+      "efsa_year": 2012,
+      "applies_to": "supplements_only",
+      "notes": "No official upper limit: neither IOM nor EFSA set one. EFSA (2012) says up to about 5 g a day of EPA plus DHA from supplements raises no safety concerns for adults (EPA alone up to 1.8 g, DHA alone up to about 1 g). The US FDA says supplements giving up to 5 g a day are safe, but labels should not suggest more than 2 g a day. The risk of an irregular heartbeat rises with dose and is clearly higher above 1 g a day. Suggested app rule: count supplements only, warn above 1,000 mg, and never suggest more than 2,000 mg without a doctor.",
+      "sources": [
+        "https://www.efsa.europa.eu/en/efsajournal/pub/2815",
+        "https://ods.od.nih.gov/factsheets/Omega3FattyAcids-HealthProfessional/",
+        "https://pubmed.ncbi.nlm.nih.gov/34612056/"
+      ]
+    },
+    "studyRange": {
+      "low": 840,
+      "high": 4000,
+      "goal": "Heart events and blood fats. About 1 g a day (840 mg EPA plus DHA) was tested for prevention in healthy older adults. 4 g a day (prescription medicines) was tested in people at high heart risk with high triglycerides.",
+      "evidence": "B",
+      "evidenceWhy": "Triglycerides clearly fall, but heart results are mixed: one 4 g trial helped, another did not, and 1 g a day did not lower major heart events overall.",
+      "keyStudies": [
+        {
+          "title": "EFSA scientific opinion on the Tolerable Upper Intake Level of EPA, DHA and DPA (EFSA Journal 2012;10(7):2815)",
+          "year": 2012,
+          "type": "guideline",
+          "finding": "No upper limit could be set, but up to about 5 g a day of EPA plus DHA from supplements raised no safety concerns for adults.",
+          "url": "https://www.efsa.europa.eu/en/efsajournal/pub/2815"
+        },
+        {
+          "title": "Cardiovascular Risk Reduction with Icosapent Ethyl for Hypertriglyceridemia",
+          "year": 2019,
+          "type": "RCT",
+          "finding": "4 g a day of a purified EPA medicine cut heart events by a quarter in high-risk people on statins, but more went to hospital with an irregular heartbeat (3.1% vs 2.1%).",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/30415628/"
+        },
+        {
+          "title": "Effect of High-Dose Omega-3 Fatty Acids vs Corn Oil on Major Adverse Cardiovascular Events in Patients at High Cardiovascular Risk: The STRENGTH Randomized Clinical Trial",
+          "year": 2020,
+          "type": "RCT",
+          "finding": "4 g a day of EPA plus DHA gave no heart benefit compared with corn oil, and the trial was stopped early.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/33190147/"
+        },
+        {
+          "title": "Effect of Long-Term Marine ω-3 Fatty Acids Supplementation on the Risk of Atrial Fibrillation in Randomized Controlled Trials of Cardiovascular Outcomes: A Systematic Review and Meta-Analysis",
+          "year": 2021,
+          "type": "meta-analysis",
+          "finding": "Omega-3 supplements raised the risk of an irregular heartbeat by 25% overall, and by 49% in trials using more than 1 g a day.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/34612056/"
+        },
+        {
+          "title": "Marine n-3 Fatty Acids and Prevention of Cardiovascular Disease and Cancer",
+          "year": 2019,
+          "type": "RCT",
+          "finding": "1 g a day (840 mg EPA plus DHA) for about 5 years did not lower major heart events or cancer in 25,871 older adults, and did not raise bleeding.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/30415637/"
+        },
+        {
+          "title": "Fish Oil and Perioperative Bleeding",
+          "year": 2018,
+          "type": "RCT",
+          "finding": "High-dose fish oil before and after heart surgery did not increase bleeding, and fewer blood transfusions were needed.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/30571332/"
+        },
+        {
+          "title": "Omega-3 fatty acids for the primary and secondary prevention of cardiovascular disease",
+          "year": 2020,
+          "type": "Cochrane review",
+          "finding": "Omega-3 supplements had little or no effect on deaths or strokes, may slightly lower heart disease events, and lowered blood fats (triglycerides) by about 15%.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/32114706/"
+        },
+        {
+          "title": "Omega-3 fatty acid addition during pregnancy",
+          "year": 2018,
+          "type": "Cochrane review",
+          "finding": "Omega-3 in pregnancy lowered the chance of an early (preterm) birth.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/30480773/"
+        },
+        {
+          "title": "Omega-3 Fatty Acids for the Management of Hypertriglyceridemia: A Science Advisory From the American Heart Association",
+          "year": 2019,
+          "type": "guideline",
+          "finding": "Prescription omega-3 at 4 g a day lowers very high blood fats (triglycerides) by 30% or more.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/31422671/"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 250,
+      "female": 250,
+      "basis": "ai",
+      "why": "EFSA says 250 mg a day of EPA plus DHA is enough for most adults."
+    },
+    "timing": {
+      "withFood": true,
+      "fatSoluble": true,
+      "bestTime": "with_meal",
+      "splitAbove": null,
+      "separateFrom": []
+    },
+    "forms": {
+      "better": [
+        "re-esterified triglyceride",
+        "natural triglyceride",
+        "free fatty acid"
+      ],
+      "notes": "These forms are absorbed a little better than ethyl esters. Ethyl esters are absorbed far better with a fatty meal. Algal oil is a plant-based source of DHA. Cod liver oil also contains vitamins A and D, so log those too."
+    },
+    "interactions": [
+      {
+        "with": "warfarin and other blood thinners",
+        "severity": "moderate",
+        "effect": "Fish oil might lengthen clotting time, although 3–6 g a day did not change clotting much in most studies.",
+        "action": "Tell the doctor who manages your blood thinner before you start."
+      },
+      {
+        "with": "vitamin A and vitamin D (cod liver oil)",
+        "severity": "moderate",
+        "effect": "Cod liver oil adds vitamins A and D on top of omega-3.",
+        "action": "Count these in your vitamin A and D totals, and avoid cod liver oil in pregnancy."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "blood_thinners",
+        "action": "doctor_first",
+        "why": "Fish oil may add to the effect of blood thinners such as warfarin."
+      },
+      {
+        "condition": "heart_disease",
+        "action": "doctor_first",
+        "why": "The risk of an irregular heartbeat rises with dose, especially above 1 g a day."
+      },
+      {
+        "condition": "upcoming_surgery",
+        "action": "caution",
+        "why": "A large trial found fish oil did not raise bleeding in heart surgery, but tell your surgical team what you take."
+      },
+      {
+        "condition": "high_cholesterol",
+        "action": "caution",
+        "why": "4 g doses are prescription treatments for very high blood fats and can raise LDL ('bad') cholesterol in some people. Use them only with a doctor."
+      },
+      {
+        "condition": "pregnancy",
+        "action": "may_need_more",
+        "why": "EFSA suggests an extra 100–200 mg of DHA a day. Choose fish or algal oil, not cod liver oil."
+      },
+      {
+        "condition": "breastfeeding",
+        "action": "may_need_more",
+        "why": "EFSA suggests an extra 100–200 mg of DHA a day while breastfeeding."
+      },
+      {
+        "condition": "vegan_vegetarian",
+        "action": "may_need_more",
+        "why": "Plant omega-3 (ALA) turns into EPA and DHA poorly (under 15%). Algal oil gives DHA."
+      },
+      {
+        "condition": "immunocompromised",
+        "action": "caution",
+        "why": "Very high doses (about 1.5 g or more of EPA plus DHA for several weeks) might dampen immune responses."
+      }
+    ],
+    "deficiencySigns": [
+      "Rough, scaly skin or a rash (very rare in healthy people)"
+    ],
+    "excessSigns": [
+      "Fishy taste, burps or bad breath",
+      "Heartburn, nausea or loose stools",
+      "Headache",
+      "Smelly sweat",
+      "Easier bleeding at high doses",
+      "Higher chance of an irregular heartbeat above 1 g a day"
+    ],
+    "foodSources": [
+      {
+        "food": "Salmon, Atlantic, farmed, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 1830
+      },
+      {
+        "food": "Herring, Atlantic, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 1710
+      },
+      {
+        "food": "Salmon, Atlantic, wild, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 1570
+      },
+      {
+        "food": "Sardines, canned in tomato sauce, drained",
+        "serving": "3 oz (85 g)",
+        "amount": 1190
+      },
+      {
+        "food": "Mackerel, Atlantic, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 1020
+      },
+      {
+        "food": "Salmon, pink, canned, drained",
+        "serving": "3 oz (85 g)",
+        "amount": 910
+      },
+      {
+        "food": "Trout, rainbow, wild, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 840
+      },
+      {
+        "food": "Sea bass, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 650
+      },
+      {
+        "food": "Oysters, eastern, wild, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 530
+      },
+      {
+        "food": "Shrimp, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 240
+      },
+      {
+        "food": "Tuna, light, canned in water, drained",
+        "serving": "3 oz (85 g)",
+        "amount": 190
+      },
+      {
+        "food": "Egg, cooked",
+        "serving": "1 egg",
+        "amount": 30
+      }
+    ],
+    "lowText": "Your omega-3 is under 250 mg today. An oily fish meal or your usual supplement would cover it.",
+    "highText": "Your omega-3 from supplements is over 1,000 mg today. At higher doses the risk of an irregular heartbeat goes up, so only take more if your doctor advised it.",
+    "notes": "Count supplements only toward warnings. Fish meals are encouraged: adults are advised at least 8 oz (about 225 g) of seafood a week, and 8–12 oz of lower-mercury fish in pregnancy. Doses above 1 g a day belong in doctor-led care; 4 g doses are prescription medicines. For pregnancy and breastfeeding EFSA adds 100–200 mg of DHA; the target here uses the lower end (350 mg). Do not use cod liver oil in pregnancy because it contains vitamin A.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheets/Omega3FattyAcids-HealthProfessional/",
+      "https://www.efsa.europa.eu/en/efsajournal/pub/2815",
+      "https://www.efsa.europa.eu/en/efsajournal/pub/1461",
+      "https://www.nccih.nih.gov/health/omega3-supplements-what-you-need-to-know",
+      "https://www.nhs.uk/pregnancy/keeping-well/vitamins-supplements-and-nutrition/",
+      "https://pubmed.ncbi.nlm.nih.gov/30415628/",
+      "https://pubmed.ncbi.nlm.nih.gov/33190147/",
+      "https://pubmed.ncbi.nlm.nih.gov/34612056/",
+      "https://pubmed.ncbi.nlm.nih.gov/30415637/",
+      "https://pubmed.ncbi.nlm.nih.gov/33724323/",
+      "https://pubmed.ncbi.nlm.nih.gov/30571332/",
+      "https://pubmed.ncbi.nlm.nih.gov/32114706/",
+      "https://pubmed.ncbi.nlm.nih.gov/30480773/",
+      "https://pubmed.ncbi.nlm.nih.gov/31422671/",
+      "https://pubmed.ncbi.nlm.nih.gov/30799231/"
+    ]
+  },
+  {
+    "id": "collagen",
+    "name": "Collagen peptides",
+    "group": "other",
+    "unit": "g",
+    "unitNotes": "Grams of collagen peptides (hydrolysed collagen) or gelatin. Undenatured type II collagen is a different product taken at about 40 mg; log it separately.",
+    "conversions": [
+      {
+        "from": "mg",
+        "to": "g",
+        "multiply": 0.001,
+        "note": "1,000 mg = 1 g."
+      },
+      {
+        "from": "g gelatin powder",
+        "to": "g protein",
+        "multiply": 0.856,
+        "note": "Unsweetened gelatin powder is about 86% protein (USDA)."
+      }
+    ],
+    "rda": {
+      "type": "none",
+      "male_19_50": null,
+      "female_19_50": null,
+      "male_51_plus": null,
+      "female_51_plus": null,
+      "pregnancy": null,
+      "lactation": null,
+      "source": null
+    },
+    "ul": {
+      "iom": null,
+      "efsa": null,
+      "efsa_year": null,
+      "applies_to": "supplements_only",
+      "notes": "No official upper limit. Most studies used 2.5–15 g a day; some exercise studies gave 30 g around training sessions. Gelatin at 5–10 g raised oxalate in the urine, which matters if you get kidney stones. Suggested app rule: gentle note above 15 g a day, and keep protocols at or below 15 g a day unless a professional advises more.",
+      "sources": [
+        "https://pubmed.ncbi.nlm.nih.gov/31096622/",
+        "https://pubmed.ncbi.nlm.nih.gov/17021603/",
+        "https://pubmed.ncbi.nlm.nih.gov/27852613/",
+        "https://pubmed.ncbi.nlm.nih.gov/38007183/",
+        "https://pubmed.ncbi.nlm.nih.gov/40100255/"
+      ]
+    },
+    "studyRange": {
+      "low": 2.5,
+      "high": 15,
+      "goal": "Skin (2.5–10 g a day for 8–12 weeks), joint comfort (about 10 g a day) and tendons with strength training (5–15 g a day, some with vitamin C about 1 hour before exercise). Some exercise studies gave 30 g around training sessions.",
+      "evidence": "B",
+      "evidenceWhy": "Many small trials show benefits for skin, joint pain and tendons, but independent and high-quality skin trials found no clear effect.",
+      "keyStudies": [
+        {
+          "title": "Effects of Oral Collagen for Skin Anti-Aging: A Systematic Review and Meta-Analysis",
+          "year": 2023,
+          "type": "meta-analysis",
+          "finding": "In 26 trials (1,721 people), collagen improved skin moisture and stretch, mostly after 8 weeks or more.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/37432180/"
+        },
+        {
+          "title": "Effects of Collagen Supplements on Skin Aging: A Systematic Review and Meta-Analysis of Randomized Controlled Trials",
+          "year": 2025,
+          "type": "meta-analysis",
+          "finding": "In 23 trials, skin benefits showed up overall, but not in trials free of industry funding or in high-quality trials.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/40324552/"
+        },
+        {
+          "title": "Effect of collagen supplementation on knee osteoarthritis: an updated systematic review and meta-analysis of randomised controlled trials",
+          "year": 2025,
+          "type": "meta-analysis",
+          "finding": "In 11 trials (870 people), collagen eased knee pain and improved function.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/39212129/"
+        },
+        {
+          "title": "Scientific Opinion on the substantiation of a health claim related to collagen hydrolysate and maintenance of joints pursuant to Article 13(5) of Regulation (EC) No 1924/2006",
+          "year": 2011,
+          "type": "guideline",
+          "finding": "EFSA found the evidence did not show that 10 g a day helps maintain joints.",
+          "url": "https://efsa.europa.eu/en/efsajournal/pub/2291"
+        },
+        {
+          "title": "Vitamin C-enriched gelatin supplementation before intermittent activity augments collagen synthesis",
+          "year": 2017,
+          "type": "RCT",
+          "finding": "15 g of gelatin with vitamin C, 1 hour before short exercise, doubled a blood marker of collagen building (8 men).",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/27852613/"
+        },
+        {
+          "title": "The Collagen Synthesis Response to an Acute Bout of Resistance Exercise Is Greater when Ingesting 30 g Hydrolyzed Collagen Compared with 15 g and 0 g in Resistance-Trained Young Men",
+          "year": 2024,
+          "type": "RCT",
+          "finding": "30 g of collagen with 50 mg vitamin C before squats raised the collagen-building marker more than 15 g or none (10 men).",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/38007183/"
+        },
+        {
+          "title": "Specific collagen peptides increase adaptions of patellar tendon morphology following 14-weeks of high-load resistance training: A randomized-controlled trial",
+          "year": 2023,
+          "type": "RCT",
+          "finding": "5 g a day with 14 weeks of strength training grew the knee tendon more than training alone (50 men).",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/37424319/"
+        },
+        {
+          "title": "Hydrolysed Collagen Supplementation Enhances Patellar Tendon Adaptations to 12 Weeks' Resistance Training in Middle-Aged Men",
+          "year": 2025,
+          "type": "RCT",
+          "finding": "30 g with vitamin C after training, twice a week for 12 weeks, made knee tendons thicker and stiffer in middle-aged men (20 men).",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/40100255/"
+        },
+        {
+          "title": "Collagen Peptide Supplementation Enhances Muscle-Tendon Stiffness and Explosive Strength: A 16-wk Randomized Controlled Trial",
+          "year": 2025,
+          "type": "RCT",
+          "finding": "10 g a day for 16 weeks made the calf muscle and Achilles tendon stiffer in 50 young men who did not train.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/40623147/"
+        },
+        {
+          "title": "Collagen Peptide Supplementation during Training Does Not Further Increase Connective Tissue Protein Synthesis Rates",
+          "year": 2024,
+          "type": "RCT",
+          "finding": "15 g twice a day during 1 week of hard training did not raise muscle connective tissue building in young men.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/39086044/"
+        },
+        {
+          "title": "Impact of Collagen Peptide Supplementation in Combination with Long-Term Physical Training on Strength, Musculotendinous Remodeling, Functional Recovery, and Body Composition in Healthy Adults: A Systematic Review with Meta-analysis",
+          "year": 2024,
+          "type": "meta-analysis",
+          "finding": "In 19 trials (768 people), collagen plus training gave small gains in lean mass, strength and tendon size, with low to very low certainty.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/39060741/"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": null,
+      "female": null,
+      "basis": "none",
+      "why": "Optional and not needed by everyone; studies mostly used 2.5–15 g a day."
+    },
+    "timing": {
+      "withFood": null,
+      "fatSoluble": false,
+      "bestTime": "before_exercise",
+      "splitAbove": null,
+      "separateFrom": []
+    },
+    "forms": {
+      "better": [
+        "hydrolysed collagen (collagen peptides)",
+        "gelatin with vitamin C, taken before exercise"
+      ],
+      "notes": "Collagen peptides were used in most skin and tendon trials. Gelatin was used in the exercise study. Collagen lacks one essential amino acid (tryptophan), so it should not replace other protein. In older women, whey raised muscle-building rates more than collagen."
+    },
+    "interactions": [],
+    "conditionFlags": [
+      {
+        "condition": "kidney_stones",
+        "action": "doctor_first",
+        "why": "Collagen and gelatin can raise oxalate in the urine (5–10 g did so in a study), which matters for stone formers."
+      },
+      {
+        "condition": "kidney_disease",
+        "action": "doctor_first",
+        "why": "Collagen adds to your protein total, which may need limiting in kidney disease."
+      },
+      {
+        "condition": "vegan_vegetarian",
+        "action": "caution",
+        "why": "Collagen and gelatin come from animals such as fish, cows, pigs or chickens."
+      }
+    ],
+    "deficiencySigns": [],
+    "excessSigns": [
+      "More oxalate in the urine from 5 g or more of gelatin (matters if you get kidney stones)"
+    ],
+    "foodSources": [
+      {
+        "food": "Gelatin powder, unsweetened",
+        "serving": "1 envelope (7 g)",
+        "amount": 7
+      }
+    ],
+    "lowText": "No collagen logged today. That's fine — it's optional.",
+    "highText": "You've logged more than 15 g of collagen today, above the usual amount in studies. There's no set safe limit, so keep it moderate and count it in your protein.",
+    "notes": "Optional; show it as tracked, not as a meter. Evidence is best when collagen is paired with strength training (tendons) and for skin after 8 weeks or more. No human trials measuring fascia itself were found in this review; tendon and skin studies are the closest evidence. Collagen counts toward daily protein, but should not be the main protein source.",
+    "sources": [
+      "https://pubmed.ncbi.nlm.nih.gov/37432180/",
+      "https://pubmed.ncbi.nlm.nih.gov/33742704/",
+      "https://pubmed.ncbi.nlm.nih.gov/40324552/",
+      "https://pubmed.ncbi.nlm.nih.gov/39212129/",
+      "https://pubmed.ncbi.nlm.nih.gov/30368550/",
+      "https://efsa.europa.eu/en/efsajournal/pub/2291",
+      "https://www.e-lactancia.org/media/papers/Collagen-EFSA2011.pdf",
+      "https://pubmed.ncbi.nlm.nih.gov/27852613/",
+      "https://pubmed.ncbi.nlm.nih.gov/38007183/",
+      "https://pubmed.ncbi.nlm.nih.gov/37424319/",
+      "https://pubmed.ncbi.nlm.nih.gov/40100255/",
+      "https://pubmed.ncbi.nlm.nih.gov/40623147/",
+      "https://pubmed.ncbi.nlm.nih.gov/39086044/",
+      "https://pubmed.ncbi.nlm.nih.gov/39060741/",
+      "https://pubmed.ncbi.nlm.nih.gov/31096622/",
+      "https://pubmed.ncbi.nlm.nih.gov/31919527/",
+      "https://pubmed.ncbi.nlm.nih.gov/17021603/",
+      "https://pubmed.ncbi.nlm.nih.gov/35377244/",
+      "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_2018-04.zip"
+    ]
+  },
+  {
+    "id": "probiotics",
+    "name": "Probiotics",
+    "group": "other",
+    "unit": "billion_cfu",
+    "unitNotes": "Billions of live microbes (colony-forming units, CFU). Use the CFU at the end of shelf life and note the strain name. Some yeast products list milligrams; log the CFU if it is shown.",
+    "conversions": [
+      {
+        "from": "CFU",
+        "to": "billion_cfu",
+        "multiply": 1e-09,
+        "note": "1 billion CFU = 1,000,000,000 CFU."
+      },
+      {
+        "from": "million CFU",
+        "to": "billion_cfu",
+        "multiply": 0.001,
+        "note": "1,000 million CFU = 1 billion CFU."
+      }
+    ],
+    "rda": {
+      "type": "none",
+      "male_19_50": null,
+      "female_19_50": null,
+      "male_51_plus": null,
+      "female_51_plus": null,
+      "pregnancy": null,
+      "lactation": null,
+      "source": "https://ods.od.nih.gov/factsheets/Probiotics-HealthProfessional/"
+    },
+    "ul": {
+      "iom": null,
+      "efsa": null,
+      "efsa_year": null,
+      "applies_to": "supplements_only",
+      "notes": "No upper limit exists. Many products give 1–10 billion CFU a dose; some give 50 billion or more. Safety depends more on your health than on the dose: people who are very ill, have a weak immune system or a central line have had serious infections.",
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/Probiotics-HealthProfessional/",
+        "https://www.nccih.nih.gov/health/probiotics-what-you-need-to-know",
+        "https://anesth.unboundmedicine.com/view/Davis-Drug-Guide/109984/all/saccharomyces_boulardii"
+      ]
+    },
+    "studyRange": {
+      "low": 5,
+      "high": 20,
+      "goal": "Preventing diarrhoea during antibiotics with specific strains (Lactobacillus rhamnosus GG or Saccharomyces boulardii), started within 2 days of the first antibiotic dose.",
+      "evidence": "B",
+      "evidenceWhy": "Reviews show fewer antibiotic-related diarrhoea cases, but certainty is low to moderate and results depend on the strain.",
+      "keyStudies": [
+        {
+          "title": "Probiotics for the prevention of pediatric antibiotic-associated diarrhea",
+          "year": 2019,
+          "type": "Cochrane review",
+          "finding": "In children, antibiotic diarrhoea fell from 19% to 8%; doses of 5 billion CFU or more a day worked better.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/31039287/"
+        },
+        {
+          "title": "Probiotics for the Prevention of Antibiotic-associated Diarrhea in Adults: A Meta-Analysis of Randomized Placebo-Controlled Trials",
+          "year": 2021,
+          "type": "meta-analysis",
+          "finding": "In 36 adult trials (9,312 people), probiotics lowered antibiotic diarrhoea by 38% with no extra side effects.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/33234881/"
+        },
+        {
+          "title": "Probiotics for the prevention of Clostridioides difficile-associated diarrhea in adults and children",
+          "year": 2025,
+          "type": "Cochrane review",
+          "finding": "Probiotics may halve a serious gut infection during antibiotics (1.6% vs 3.2%) in people without weak immune systems.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/40931979/"
+        },
+        {
+          "title": "Systematic review with meta-analysis: Lactobacillus rhamnosus GG in the prevention of antibiotic-associated diarrhoea in children and adults",
+          "year": 2015,
+          "type": "meta-analysis",
+          "finding": "This strain cut antibiotic diarrhoea from 22% to 12% overall; in adults alone the benefit was not clear.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/26365389/"
+        },
+        {
+          "title": "Systematic review and meta-analysis of Saccharomyces boulardii in adult patients",
+          "year": 2010,
+          "type": "meta-analysis",
+          "finding": "This yeast probiotic roughly halved antibiotic diarrhoea in adults.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/20458757/"
+        },
+        {
+          "title": "Strain-Specificity and Disease-Specificity of Probiotic Efficacy: A Systematic Review and Meta-Analysis",
+          "year": 2018,
+          "type": "meta-analysis",
+          "finding": "Across 228 trials, benefits depended on the exact strain and the health problem.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/29868585/"
+        },
+        {
+          "title": "AGA Clinical Practice Guidelines on the Role of Probiotics in the Management of Gastrointestinal Disorders",
+          "year": 2020,
+          "type": "guideline",
+          "finding": "Suggests only certain strains to prevent a serious gut infection during antibiotics, and probiotics for IBS, Crohn's or colitis only in research studies.",
+          "url": "https://gastroenterology.acponline.org/archives/2020/06/26/1.htm"
+        },
+        {
+          "title": "Gut-microbiota-targeted diets modulate human immune status",
+          "year": 2021,
+          "type": "RCT",
+          "finding": "In 36 healthy adults, 10 weeks of more fermented foods raised gut microbe variety and lowered 19 inflammation markers.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/34256014/"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": null,
+      "female": null,
+      "basis": "none",
+      "why": "Optional; effects depend on the strain and there is no daily amount everyone needs."
+    },
+    "timing": {
+      "withFood": null,
+      "fatSoluble": false,
+      "bestTime": "any",
+      "splitAbove": null,
+      "separateFrom": [
+        {
+          "what": "antifungal medicines (for the yeast probiotic Saccharomyces boulardii)",
+          "hours": 2,
+          "why": "Antifungals can make this yeast probiotic work less well. Take it at least 1 hour before or 2 hours after."
+        }
+      ]
+    },
+    "forms": {
+      "better": [
+        "Named, studied strains such as Lactobacillus rhamnosus GG or Saccharomyces boulardii",
+        "Products that list CFU at the end of shelf life"
+      ],
+      "notes": "Effects depend on the exact strain and the reason you take it. Some products need the fridge. Some products have contained microbes not listed on the label. Most fermented foods have live microbes but not proven probiotic strains; some yogurts have proven strains added."
+    },
+    "interactions": [
+      {
+        "with": "antifungal medicines",
+        "severity": "moderate",
+        "effect": "Antifungals can make the yeast probiotic Saccharomyces boulardii less effective.",
+        "action": "Take it at least 1 hour before or 2 hours after the antifungal."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "immunocompromised",
+        "action": "avoid",
+        "why": "Probiotic microbes can cause serious blood infections when the immune system is weak. Only use one if your doctor advises it."
+      },
+      {
+        "condition": "cancer_treatment",
+        "action": "doctor_first",
+        "why": "If treatment has weakened your immune system, probiotics carry a higher infection risk."
+      },
+      {
+        "condition": "recent_surgery",
+        "action": "doctor_first",
+        "why": "Rare but serious infections have happened in very ill hospital patients, especially with a central line or tube feeding."
+      },
+      {
+        "condition": "inflammatory_bowel_disease",
+        "action": "doctor_first",
+        "why": "Guidelines advise probiotics for Crohn's or colitis only within research studies."
+      },
+      {
+        "condition": "pregnancy",
+        "action": "caution",
+        "why": "The safety of the yeast probiotic Saccharomyces boulardii in pregnancy has not been established."
+      },
+      {
+        "condition": "breastfeeding",
+        "action": "caution",
+        "why": "The safety of the yeast probiotic Saccharomyces boulardii while breastfeeding has not been established."
+      },
+      {
+        "condition": "age_65_plus",
+        "action": "caution",
+        "why": "Studies have not shown a clear benefit for antibiotic diarrhoea in people over 65."
+      }
+    ],
+    "deficiencySigns": [],
+    "excessSigns": [
+      "Gas or bloating, usually mild and short-lived",
+      "Rash, nausea or constipation (uncommon)",
+      "Rarely, in very ill or immune-weakened people: a serious blood infection"
+    ],
+    "foodSources": [
+      {
+        "food": "Yogurt or kefir with live cultures",
+        "serving": "1 serving",
+        "amount": null
+      },
+      {
+        "food": "Kimchi or other fermented vegetables",
+        "serving": "1 serving",
+        "amount": null
+      },
+      {
+        "food": "Fermented cottage cheese",
+        "serving": "1 serving",
+        "amount": null
+      },
+      {
+        "food": "Kombucha",
+        "serving": "1 serving",
+        "amount": null
+      }
+    ],
+    "lowText": "No probiotic logged today. That's fine — it's optional.",
+    "highText": "That's more probiotic than most products give in a day. There's no set limit, but stick to the label dose, and check with your doctor if your immune system is weak.",
+    "notes": "Optional; show it as tracked, not as a meter. The app cannot measure your gut bacteria; that needs a stool test. Benefits depend on the strain and the reason for use. For antibiotic-related diarrhoea, studies used about 5–20 billion CFU a day of Lactobacillus rhamnosus GG or Saccharomyces boulardii, started within 2 days of the first antibiotic dose. There is no formal advice for healthy people. Fermented foods are a food-first option. CFU amounts in fermented foods vary and could not be verified.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheets/Probiotics-HealthProfessional/",
+      "https://www.nccih.nih.gov/health/probiotics-what-you-need-to-know",
+      "https://anesth.unboundmedicine.com/view/Davis-Drug-Guide/109984/all/saccharomyces_boulardii",
+      "https://gastroenterology.acponline.org/archives/2020/06/26/1.htm",
+      "https://med.stanford.edu/news/all-news/2021/07/fermented-food-diet-increases-microbiome-diversity-lowers-inflammation",
+      "https://pubmed.ncbi.nlm.nih.gov/31039287/",
+      "https://pubmed.ncbi.nlm.nih.gov/33234881/",
+      "https://pubmed.ncbi.nlm.nih.gov/40931979/",
+      "https://pubmed.ncbi.nlm.nih.gov/26365389/",
+      "https://pubmed.ncbi.nlm.nih.gov/20458757/",
+      "https://pubmed.ncbi.nlm.nih.gov/29868585/",
+      "https://pubmed.ncbi.nlm.nih.gov/34256014/",
+      "https://pubmed.ncbi.nlm.nih.gov/36806741/",
+      "https://pubmed.ncbi.nlm.nih.gov/32531291/"
+    ]
+  },
+  {
+    "id": "fiber",
+    "name": "Fibre",
+    "group": "other",
+    "unit": "g",
+    "unitNotes": "Grams of dietary fibre from food and from supplements such as psyllium.",
+    "conversions": [
+      {
+        "from": "kcal per day",
+        "to": "g fibre target",
+        "multiply": 0.014,
+        "note": "14 g of fibre per 1,000 kcal (IOM adequate intake)."
+      }
+    ],
+    "rda": {
+      "type": "AI",
+      "male_19_50": 38,
+      "female_19_50": 25,
+      "male_51_plus": 30,
+      "female_51_plus": 21,
+      "pregnancy": 28,
+      "lactation": 29,
+      "source": "https://www.ncbi.nlm.nih.gov/books/NBK56068/table/summarytables.t4/"
+    },
+    "ul": {
+      "iom": null,
+      "efsa": null,
+      "efsa_year": null,
+      "applies_to": "total",
+      "notes": "No upper limit was found in the sources checked. EFSA (2010) set 25 g a day as adequate for normal bowel habits. Too much too fast can cause gas, bloating and cramps; raise intake by about 5 g every few days and drink enough fluid. Suggested app rule: flag fast increases rather than a ceiling.",
+      "sources": [
+        "https://www.efsa.europa.eu/en/efsajournal/pub/1462",
+        "https://www.uclahealth.org/news/article/beat-bloat-4-tips-increasing-your-fiber-intake",
+        "https://www.ecfr.gov/api/renderer/v1/content/enhanced/current/title-21?part=101&section=101.17"
+      ]
+    },
+    "studyRange": {
+      "low": 7,
+      "high": 10.2,
+      "goal": "Psyllium on top of food fibre: the FDA heart claim uses 7 g or more a day of soluble fibre from psyllium husk; trials used about 10 g of psyllium a day to lower LDL cholesterol and improve blood sugar in type 2 diabetes.",
+      "evidence": "A",
+      "evidenceWhy": "Many trials and meta-analyses show psyllium lowers LDL cholesterol; blood sugar benefits are seen mainly in type 2 diabetes.",
+      "keyStudies": [
+        {
+          "title": "NASEM Dietary Reference Intakes summary table: water and macronutrients",
+          "year": 2005,
+          "type": "guideline",
+          "finding": "Adequate intake is 38 g (men) and 25 g (women) a day up to age 50, then 30 g and 21 g; 28 g in pregnancy and 29 g when breastfeeding.",
+          "url": "https://www.ncbi.nlm.nih.gov/books/NBK56068/table/summarytables.t4/"
+        },
+        {
+          "title": "Position of the Academy of Nutrition and Dietetics: Health Implications of Dietary Fiber",
+          "year": 2015,
+          "type": "position stand",
+          "finding": "Adequate intake is 14 g per 1,000 kcal; the US average is only 17 g a day and just 5% of people reach the target.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/26514720/"
+        },
+        {
+          "title": "US FDA health claim rule for soluble fibre and heart disease (21 CFR 101.81)",
+          "year": null,
+          "type": "guideline",
+          "finding": "7 g or more a day of soluble fibre from psyllium husk, in a diet low in saturated fat, may lower heart disease risk.",
+          "url": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/current/title-21?part=101&section=101.81"
+        },
+        {
+          "title": "Effect of psyllium (Plantago ovata) fiber on LDL cholesterol and alternative lipid targets, non-HDL cholesterol and apolipoprotein B: a systematic review and meta-analysis of randomized controlled trials",
+          "year": 2018,
+          "type": "meta-analysis",
+          "finding": "In 28 trials, about 10 g of psyllium a day lowered LDL ('bad') cholesterol by 0.33 mmol/L.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/30239559/"
+        },
+        {
+          "title": "Psyllium fiber improves glycemic control proportional to loss of glycemic control: a meta-analysis of data in euglycemic subjects, patients at risk of type 2 diabetes mellitus, and patients being treated for type 2 diabetes mellitus",
+          "year": 2015,
+          "type": "meta-analysis",
+          "finding": "Psyllium before meals lowered fasting and long-term blood sugar (HbA1c) in type 2 diabetes, with little effect when blood sugar was normal.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/26561625/"
+        },
+        {
+          "title": "Psyllium supplementation and lipid profiles: systematic review and dose-response meta-analysis of randomized controlled trials",
+          "year": 2025,
+          "type": "meta-analysis",
+          "finding": "In 41 trials (2,049 adults), psyllium lowered LDL ('bad') and total cholesterol.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/41366295/"
+        },
+        {
+          "title": "EFSA scientific opinion on dietary reference values for carbohydrates and dietary fibre (EFSA Journal 2010;8(3):1462)",
+          "year": 2010,
+          "type": "guideline",
+          "finding": "25 g of fibre a day is adequate for normal bowel habits in adults.",
+          "url": "https://www.efsa.europa.eu/en/efsajournal/pub/1462"
+        },
+        {
+          "title": "5. Facilitating Positive Health Behaviors and Well-being to Improve Health Outcomes: Standards of Care in Diabetes-2026",
+          "year": 2026,
+          "type": "guideline",
+          "finding": "People with diabetes should eat at least 14 g of fibre per 1,000 kcal, with at least half of grains whole.",
+          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12690188/"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 38,
+      "female": 25,
+      "basis": "ai",
+      "why": "IOM adequate intake: 14 g per 1,000 kcal, so 38 g for men and 25 g for women up to age 50 (30 g and 21 g after 50)."
+    },
+    "timing": {
+      "withFood": true,
+      "fatSoluble": false,
+      "bestTime": "with_meal",
+      "splitAbove": null,
+      "separateFrom": [
+        {
+          "what": "digoxin, aspirin or nitrofurantoin (when taking psyllium)",
+          "hours": 3,
+          "why": "Psyllium can interfere with these medicines."
+        }
+      ]
+    },
+    "forms": {
+      "better": [
+        "Whole foods: beans, lentils, whole grains, fruit, vegetables, nuts and seeds",
+        "Psyllium husk (for cholesterol and blood sugar)"
+      ],
+      "notes": "Food fibre comes with other nutrients. Psyllium is the best-studied fibre supplement. Always take psyllium with at least a full glass (240 ml) of liquid."
+    },
+    "interactions": [
+      {
+        "with": "digoxin, aspirin or nitrofurantoin",
+        "severity": "moderate",
+        "effect": "Psyllium can interfere with these medicines.",
+        "action": "Take them at least 3 hours apart from psyllium."
+      },
+      {
+        "with": "diabetes medicines (insulin and others)",
+        "severity": "moderate",
+        "effect": "Psyllium can lower blood sugar in type 2 diabetes, adding to your medicine's effect.",
+        "action": "Check your blood sugar more often when you start, and tell your doctor."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "type_2_diabetes",
+        "action": "caution",
+        "why": "Psyllium can lower blood sugar, so check levels if you take diabetes medicines."
+      },
+      {
+        "condition": "type_1_diabetes",
+        "action": "doctor_first",
+        "why": "Talk to your doctor before starting a psyllium supplement."
+      },
+      {
+        "condition": "high_cholesterol",
+        "action": "may_need_more",
+        "why": "About 10 g of psyllium a day can lower LDL ('bad') cholesterol."
+      },
+      {
+        "condition": "kidney_disease",
+        "action": "doctor_first",
+        "why": "Tell your doctor before using psyllium if you have kidney disease."
+      },
+      {
+        "condition": "pregnancy",
+        "action": "may_need_more",
+        "why": "Fibre needs rise to 28 g a day in pregnancy. Ask your doctor before using psyllium."
+      },
+      {
+        "condition": "breastfeeding",
+        "action": "may_need_more",
+        "why": "Fibre needs rise to 29 g a day while breastfeeding."
+      }
+    ],
+    "deficiencySigns": [
+      "Constipation or hard stools"
+    ],
+    "excessSigns": [
+      "Gas and bloating",
+      "Stomach cramps",
+      "Constipation or diarrhoea if fibre is increased too fast",
+      "Choking risk if psyllium is taken without enough liquid"
+    ],
+    "foodSources": [
+      {
+        "food": "High-fibre bran cereal, unsweetened",
+        "serving": "1/2 cup",
+        "amount": 14.0
+      },
+      {
+        "food": "Navy beans, cooked",
+        "serving": "1/2 cup",
+        "amount": 9.6
+      },
+      {
+        "food": "Artichoke, cooked",
+        "serving": "1 cup",
+        "amount": 9.6
+      },
+      {
+        "food": "Green peas, cooked",
+        "serving": "1 cup",
+        "amount": 8.8
+      },
+      {
+        "food": "Split peas, cooked",
+        "serving": "1/2 cup",
+        "amount": 8.2
+      },
+      {
+        "food": "Raspberries",
+        "serving": "1 cup",
+        "amount": 8.0
+      },
+      {
+        "food": "Lentils, cooked",
+        "serving": "1/2 cup",
+        "amount": 7.8
+      },
+      {
+        "food": "Chickpeas, cooked",
+        "serving": "1/2 cup",
+        "amount": 6.3
+      },
+      {
+        "food": "Pear",
+        "serving": "1 medium",
+        "amount": 5.5
+      },
+      {
+        "food": "Broccoli, cooked",
+        "serving": "1 cup",
+        "amount": 5.2
+      },
+      {
+        "food": "Apple, with skin",
+        "serving": "1 medium",
+        "amount": 4.8
+      },
+      {
+        "food": "Chia seeds",
+        "serving": "1 tablespoon",
+        "amount": 4.1
+      },
+      {
+        "food": "Almonds",
+        "serving": "1 oz (28 g)",
+        "amount": 3.5
+      },
+      {
+        "food": "Chapati or roti, whole wheat",
+        "serving": "1 oz (28 g)",
+        "amount": 2.8
+      }
+    ],
+    "lowText": "Your fibre is low so far today. Add beans, lentils, fruit, vegetables or whole grains, a little at a time, with water.",
+    "highText": "That's a lot more fibre than usual. If you feel bloated or crampy, ease back a little and drink more water.",
+    "notes": "Raise fibre slowly, by about 5 g every few days, and drink plenty of fluid. Take psyllium with at least a full glass (240 ml) of liquid; don't use it if you have trouble swallowing, and ask your doctor first if you have had a bowel blockage. As a laxative, psyllium is not meant for more than 1 week unless a doctor advises it. Fibre supplements count toward this total. The US food label Daily Value is 28 g for a 2,000 kcal diet.",
+    "sources": [
+      "https://www.ncbi.nlm.nih.gov/books/NBK56068/table/summarytables.t4/",
+      "https://pubmed.ncbi.nlm.nih.gov/26514720/",
+      "https://www.efsa.europa.eu/en/efsajournal/pub/1462",
+      "https://www.ecfr.gov/api/renderer/v1/content/enhanced/current/title-21?part=101&section=101.81",
+      "https://www.ecfr.gov/api/renderer/v1/content/enhanced/current/title-21?part=101&section=101.17",
+      "https://www.ecfr.gov/api/renderer/v1/content/enhanced/current/title-21?part=101&section=101.9",
+      "https://medlineplus.gov/druginfo/meds/a601104.html",
+      "https://www.uclahealth.org/news/article/beat-bloat-4-tips-increasing-your-fiber-intake",
+      "https://www.uhhospitals.org/-/media/files/health-information/nourish/usda-fiber-food-sources.pdf",
+      "https://pmc.ncbi.nlm.nih.gov/articles/PMC12690188/",
+      "https://pubmed.ncbi.nlm.nih.gov/30239559/",
+      "https://pubmed.ncbi.nlm.nih.gov/26561625/",
+      "https://pubmed.ncbi.nlm.nih.gov/41366295/"
+    ]
+  },
+  {
+    "id": "protein",
+    "name": "Protein",
+    "group": "other",
+    "unit": "g",
+    "unitNotes": "Grams of protein from all food and supplements, including protein powders and collagen. Targets depend on body weight (grams per kg).",
+    "conversions": [
+      {
+        "from": "g per kg body weight",
+        "to": "g per day (70 kg man)",
+        "multiply": 70,
+        "note": "Multiply by your own weight in kg; 70 kg is the reference man."
+      },
+      {
+        "from": "g per kg body weight",
+        "to": "g per day (60 kg woman)",
+        "multiply": 60,
+        "note": "Multiply by your own weight in kg; 60 kg is the reference woman."
+      },
+      {
+        "from": "g protein",
+        "to": "kcal",
+        "multiply": 4,
+        "note": "Food labels count 4 kcal per gram of protein."
+      }
+    ],
+    "rda": {
+      "type": "RDA",
+      "male_19_50": 56,
+      "female_19_50": 46,
+      "male_51_plus": 56,
+      "female_51_plus": 46,
+      "pregnancy": 71,
+      "lactation": 71,
+      "source": "https://www.ncbi.nlm.nih.gov/books/NBK56068/table/summarytables.t4/"
+    },
+    "ul": {
+      "iom": null,
+      "efsa": null,
+      "efsa_year": 2012,
+      "applies_to": "total",
+      "notes": "EFSA (2012) found the data too limited to set an upper limit. It says intakes up to twice the reference (about 1.7 g per kg) are eaten by active adults and are safe. No safety concerns are reported in athletes up to about 2.0 g per kg. An IOM upper limit could not be confirmed in the sources opened. Healthy range is 10–35% of energy. Kidney disease is the main exception: your kidney team may set a lower limit. Suggested app rule: gentle note above 2.0 g per kg, or above any limit a doctor sets.",
+      "sources": [
+        "https://www.efsa.europa.eu/en/efsajournal/pub/2557",
+        "https://ods.od.nih.gov/factsheets/ExerciseAndAthleticPerformance-HealthProfessional/",
+        "https://www.ncbi.nlm.nih.gov/books/NBK56068/table/summarytables.t5/",
+        "https://www.frontiersin.org/journals/medicine/articles/10.3389/fmed.2021.654250/pdf"
+      ]
+    },
+    "studyRange": {
+      "low": 84,
+      "high": 112,
+      "goal": "1.2–1.6 g per kg of body weight a day with regular strength training, shown here in grams for a 70 kg adult (72–96 g at 60 kg). Gains in muscle and strength level off above about 1.6 g per kg.",
+      "evidence": "A",
+      "evidenceWhy": "A meta-analysis of 49 trials found small but consistent gains in muscle and strength when protein was added to strength training.",
+      "keyStudies": [
+        {
+          "title": "NASEM Dietary Reference Intakes summary table: water and macronutrients",
+          "year": 2005,
+          "type": "guideline",
+          "finding": "The RDA is 0.8 g per kg a day: 56 g for men, 46 g for women, and 71 g in pregnancy and breastfeeding.",
+          "url": "https://www.ncbi.nlm.nih.gov/books/NBK56068/table/summarytables.t4/"
+        },
+        {
+          "title": "A systematic review, meta-analysis and meta-regression of the effect of protein supplementation on resistance training-induced gains in muscle mass and strength in healthy adults",
+          "year": 2018,
+          "type": "meta-analysis",
+          "finding": "In 49 trials (1,863 people), extra protein with strength training increased strength and lean mass, with no further gain above about 1.6 g per kg a day.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/28698222/"
+        },
+        {
+          "title": "International Society of Sports Nutrition Position Stand: protein and exercise",
+          "year": 2017,
+          "type": "position stand",
+          "finding": "1.4–2.0 g per kg a day suits most exercising people, spread every 3–4 hours in servings of about 20–40 g.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/28642676/"
+        },
+        {
+          "title": "Evidence-based recommendations for optimal dietary protein intake in older people: a position paper from the PROT-AGE Study Group",
+          "year": 2013,
+          "type": "position stand",
+          "finding": "Adults over 65 should aim for at least 1.0–1.2 g per kg a day, more if active or ill, unless they have severe kidney disease.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/23867520/"
+        },
+        {
+          "title": "ESPEN guideline: Clinical nutrition in surgery",
+          "year": 2017,
+          "type": "guideline",
+          "finding": "Protein needs of surgical patients can be estimated at 1.5 g per kg of ideal body weight a day.",
+          "url": "https://www.espen.org/files/ESPEN-guideline_Clinical-nutrition-in-surgery.pdf"
+        },
+        {
+          "title": "KDOQI Clinical Practice Guideline for Nutrition in CKD: 2020 Update (as summarised in Molina et al., Front Med 2021)",
+          "year": 2020,
+          "type": "guideline",
+          "finding": "Stable adults with kidney disease stage 3–5, not on dialysis, are advised 0.55–0.60 g per kg a day (0.6–0.8 g per kg with diabetes), under supervision.",
+          "url": "https://www.frontiersin.org/journals/medicine/articles/10.3389/fmed.2021.654250/pdf"
+        },
+        {
+          "title": "EFSA scientific opinion on dietary reference values for protein (EFSA Journal 2012;10(2):2557)",
+          "year": 2012,
+          "type": "guideline",
+          "finding": "Adults need 0.83 g per kg a day; up to twice that is considered safe, and no upper limit could be set.",
+          "url": "https://www.efsa.europa.eu/en/efsajournal/pub/2557"
+        },
+        {
+          "title": "5. Facilitating Positive Health Behaviors and Well-being to Improve Health Outcomes: Standards of Care in Diabetes-2026",
+          "year": 2026,
+          "type": "guideline",
+          "finding": "For people with diabetes, changing protein above or below the usual 0.8–1.5 g per kg has not been shown to improve health.",
+          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12690188/"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 56,
+      "female": 48,
+      "basis": "rda",
+      "why": "RDA is 0.8 g per kg a day (56 g at 70 kg, 48 g at 60 kg); 1.2–1.6 g per kg with strength training; 1.0–1.2 g per kg over 65."
+    },
+    "timing": {
+      "withFood": true,
+      "fatSoluble": false,
+      "bestTime": "with_meal",
+      "splitAbove": 40,
+      "separateFrom": []
+    },
+    "forms": {
+      "better": [
+        "Whole foods that provide all essential amino acids, such as fish, eggs, dairy and meat",
+        "Whey protein, if you use a powder"
+      ],
+      "notes": "Spread protein across the day, about 20–40 g per meal. Collagen counts toward protein but lacks one essential amino acid, so it should not be the main source. Plant eaters can meet needs with a mix of protein foods each day."
+    },
+    "interactions": [],
+    "conditionFlags": [
+      {
+        "condition": "kidney_disease",
+        "action": "doctor_first",
+        "why": "Kidney disease often needs a lower protein limit (guidelines use about 0.55–0.8 g per kg), set by your kidney team."
+      },
+      {
+        "condition": "age_65_plus",
+        "action": "may_need_more",
+        "why": "Older adults are advised at least 1.0–1.2 g per kg a day to keep muscle, more if active or unwell."
+      },
+      {
+        "condition": "athlete",
+        "action": "may_need_more",
+        "why": "Regular strength training works best with about 1.2–1.6 g per kg a day."
+      },
+      {
+        "condition": "recent_surgery",
+        "action": "may_need_more",
+        "why": "Recovery after surgery raises protein needs (about 1.5 g per kg in hospital guidance); follow your care team."
+      },
+      {
+        "condition": "cancer_treatment",
+        "action": "doctor_first",
+        "why": "Protein needs often change during treatment; follow your care team's advice."
+      },
+      {
+        "condition": "pregnancy",
+        "action": "may_need_more",
+        "why": "The RDA rises to 71 g a day in pregnancy."
+      },
+      {
+        "condition": "breastfeeding",
+        "action": "may_need_more",
+        "why": "The RDA rises to 71 g a day while breastfeeding."
+      },
+      {
+        "condition": "type_2_diabetes",
+        "action": "caution",
+        "why": "Usual protein advice applies (0.8–1.5 g per kg); if your kidneys are affected, ask your doctor."
+      },
+      {
+        "condition": "vegan_vegetarian",
+        "action": "caution",
+        "why": "Mix different plant protein foods through the day to cover all essential amino acids."
+      }
+    ],
+    "deficiencySigns": [
+      "Losing muscle and strength over time"
+    ],
+    "excessSigns": [
+      "With kidney disease, too much protein adds work for the kidneys"
+    ],
+    "foodSources": [
+      {
+        "food": "Chicken breast, roasted",
+        "serving": "3 oz (85 g)",
+        "amount": 26.4
+      },
+      {
+        "food": "Cottage cheese, 2% fat",
+        "serving": "1 cup (226 g)",
+        "amount": 23.6
+      },
+      {
+        "food": "Beef mince, 85% lean, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 22.0
+      },
+      {
+        "food": "Tofu, firm",
+        "serving": "1/2 cup (126 g)",
+        "amount": 21.8
+      },
+      {
+        "food": "Salmon, Atlantic, farmed, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 18.8
+      },
+      {
+        "food": "Lentils, cooked",
+        "serving": "1 cup (198 g)",
+        "amount": 17.9
+      },
+      {
+        "food": "Greek yogurt, plain, nonfat",
+        "serving": "1 pot (170 g)",
+        "amount": 17.3
+      },
+      {
+        "food": "Black beans, cooked",
+        "serving": "1 cup (172 g)",
+        "amount": 15.2
+      },
+      {
+        "food": "Chickpeas, cooked",
+        "serving": "1 cup (164 g)",
+        "amount": 14.5
+      },
+      {
+        "food": "Milk, 2% fat",
+        "serving": "1 cup (244 g)",
+        "amount": 8.1
+      },
+      {
+        "food": "Peanut butter, smooth",
+        "serving": "2 tbsp (32 g)",
+        "amount": 7.1
+      },
+      {
+        "food": "Egg, hard-boiled",
+        "serving": "1 large (50 g)",
+        "amount": 6.3
+      },
+      {
+        "food": "Almonds",
+        "serving": "1 oz (28 g)",
+        "amount": 6.0
+      }
+    ],
+    "lowText": "Your protein is below today's goal. A portion of fish, eggs, dairy, tofu, beans or lentils with your next meal would help.",
+    "highText": "Your protein is well above your goal today. That's usually fine for healthy adults, but if you have kidney disease, stick to the limit your doctor set.",
+    "notes": "The app should ask for body weight and work in grams per kg. Defaults: 0.8 g per kg (RDA); 1.0–1.2 g per kg over 65; 1.2–1.6 g per kg with regular strength training. The NASEM table values (56 g and 46 g) use reference body weights. Suggested high-note trigger: above 2.0 g per kg a day, or above any limit set by a doctor. Kidney disease: never raise protein targets; use the limit from the kidney team. Kidney guidance differs (KDOQI suggests 0.55–0.8 g per kg; the diabetes guideline says people with kidney disease do not need to go below 0.8 g per kg), so the app should not pick a number for these users. The US label Daily Value for protein is 50 g.",
+    "sources": [
+      "https://www.ncbi.nlm.nih.gov/books/NBK56068/table/summarytables.t4/",
+      "https://www.ncbi.nlm.nih.gov/books/NBK56068/table/summarytables.t5/",
+      "https://www.efsa.europa.eu/en/efsajournal/pub/2557",
+      "https://pubmed.ncbi.nlm.nih.gov/28698222/",
+      "https://openrepository.aut.ac.nz/items/8dea98a4-4e37-4c60-be43-4b6ece0bd9a5/full",
+      "https://pubmed.ncbi.nlm.nih.gov/28642676/",
+      "https://pubmed.ncbi.nlm.nih.gov/23867520/",
+      "https://www.espen.org/files/ESPEN-guideline_Clinical-nutrition-in-surgery.pdf",
+      "https://www.frontiersin.org/journals/medicine/articles/10.3389/fmed.2021.654250/pdf",
+      "https://pubmed.ncbi.nlm.nih.gov/32829751/",
+      "https://pmc.ncbi.nlm.nih.gov/articles/PMC12690188/",
+      "https://ods.od.nih.gov/factsheets/ExerciseAndAthleticPerformance-HealthProfessional/",
+      "https://www.ecfr.gov/api/renderer/v1/content/enhanced/current/title-21?part=101&section=101.9",
+      "https://pubmed.ncbi.nlm.nih.gov/31919527/",
+      "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_2018-04.zip"
+    ]
+  },
+  {
+    "id": "carbohydrates",
+    "name": "Carbohydrates",
+    "group": "other",
+    "unit": "g",
+    "unitNotes": "Grams of total carbohydrate (starches, sugars and fibre) as shown on food labels.",
+    "conversions": [
+      {
+        "from": "g carbohydrate",
+        "to": "kcal",
+        "multiply": 4,
+        "note": "Food labels count 4 kcal per gram of carbohydrate."
+      },
+      {
+        "from": "% of energy (2,000 kcal day)",
+        "to": "g per day",
+        "multiply": 5,
+        "note": "1% of a 2,000 kcal day is 20 kcal, which is 5 g of carbohydrate."
+      }
+    ],
+    "rda": {
+      "type": "RDA",
+      "male_19_50": 130,
+      "female_19_50": 130,
+      "male_51_plus": 130,
+      "female_51_plus": 130,
+      "pregnancy": 175,
+      "lactation": 210,
+      "source": "https://www.ncbi.nlm.nih.gov/books/NBK56068/table/summarytables.t4/"
+    },
+    "ul": {
+      "iom": null,
+      "efsa": null,
+      "efsa_year": 2010,
+      "applies_to": "total",
+      "notes": "No upper limit. EFSA (2010) found too little basis to set one for total carbohydrate. The healthy range is 45–65% of energy (IOM); EFSA uses 45–60%. For a 2,000 kcal day, 45–65% is about 225–325 g. IOM suggests keeping added sugars to no more than 25% of energy; the US label Daily Value for added sugars is 50 g. Suggested app rule: no ceiling warnings; let users set their own goal.",
+      "sources": [
+        "https://www.efsa.europa.eu/en/efsajournal/pub/1462",
+        "https://www.ncbi.nlm.nih.gov/books/NBK56068/table/summarytables.t5/",
+        "https://www.ncbi.nlm.nih.gov/books/NBK56068/table/summarytables.t6/",
+        "https://www.ecfr.gov/api/renderer/v1/content/enhanced/current/title-21?part=101&section=101.9"
+      ]
+    },
+    "studyRange": {
+      "low": 130,
+      "high": null,
+      "goal": "130 g is the minimum that covers the brain's daily glucose needs, not a tested health benefit. The healthy range is 45–65% of energy.",
+      "evidence": "C",
+      "evidenceWhy": "The 130 g floor comes from the brain's glucose use; no single best carb amount has been shown, and diabetes advice is personal.",
+      "keyStudies": [
+        {
+          "title": "NASEM Dietary Reference Intakes summary table: water and macronutrients",
+          "year": 2005,
+          "type": "guideline",
+          "finding": "The RDA for carbohydrate is 130 g a day for adults, 175 g in pregnancy and 210 g when breastfeeding.",
+          "url": "https://www.ncbi.nlm.nih.gov/books/NBK56068/table/summarytables.t4/"
+        },
+        {
+          "title": "NASEM Dietary Reference Intakes: acceptable macronutrient distribution ranges",
+          "year": 2005,
+          "type": "guideline",
+          "finding": "Adults should get 45–65% of energy from carbohydrate, 10–35% from protein and 20–35% from fat.",
+          "url": "https://www.ncbi.nlm.nih.gov/books/NBK56068/table/summarytables.t5/"
+        },
+        {
+          "title": "EFSA scientific opinion on dietary reference values for carbohydrates and dietary fibre (EFSA Journal 2010;8(3):1462)",
+          "year": 2010,
+          "type": "guideline",
+          "finding": "130 g a day covers the brain's glucose needs; the reference range is 45–60% of energy, and no upper limit could be set.",
+          "url": "https://www.efsa.europa.eu/en/efsajournal/pub/1462"
+        },
+        {
+          "title": "5. Facilitating Positive Health Behaviors and Well-being to Improve Health Outcomes: Standards of Care in Diabetes-2026",
+          "year": 2026,
+          "type": "guideline",
+          "finding": "There is no ideal carb percentage for diabetes; goals should be personal, and very low-carb plans are unsafe with SGLT2 inhibitor medicines.",
+          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12690188/"
+        },
+        {
+          "title": "NASEM Dietary Reference Intakes: additional macronutrient recommendations",
+          "year": 2005,
+          "type": "guideline",
+          "finding": "Added sugars should be no more than 25% of total energy.",
+          "url": "https://www.ncbi.nlm.nih.gov/books/NBK56068/table/summarytables.t6/"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 130,
+      "female": 130,
+      "basis": "rda",
+      "why": "130 g a day is the minimum the brain needs; most adults eat more, so the app should let each person set their own goal."
+    },
+    "timing": {
+      "withFood": null,
+      "fatSoluble": false,
+      "bestTime": "any",
+      "splitAbove": null,
+      "separateFrom": []
+    },
+    "forms": {
+      "better": [
+        "Whole grains, beans, lentils, fruit, vegetables and plain dairy"
+      ],
+      "notes": "Choose mostly whole, high-fibre carbohydrates and keep added sugars low. The US label Daily Value for added sugars is 50 g a day."
+    },
+    "interactions": [
+      {
+        "with": "mealtime insulin",
+        "severity": "high",
+        "effect": "Changing how many carbs you eat changes how much insulin you need.",
+        "action": "Don't make big changes to your carbs without your diabetes team."
+      },
+      {
+        "with": "SGLT2 inhibitor diabetes medicines",
+        "severity": "high",
+        "effect": "Very low-carb eating while on these medicines can lead to a dangerous build-up of ketones.",
+        "action": "Avoid very low-carb diets on these medicines unless your doctor says otherwise."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "type_1_diabetes",
+        "action": "doctor_first",
+        "why": "Carbs need to be matched with insulin; set your goal with your diabetes team."
+      },
+      {
+        "condition": "type_2_diabetes",
+        "action": "doctor_first",
+        "why": "There is no single best carb amount; set a personal goal with your care team, especially if you take insulin or SGLT2 inhibitors."
+      },
+      {
+        "condition": "prediabetes",
+        "action": "caution",
+        "why": "Ask your doctor about a personal carb goal."
+      },
+      {
+        "condition": "pregnancy",
+        "action": "may_need_more",
+        "why": "The RDA rises to 175 g a day, and very low-carb plans are not advised in pregnancy."
+      },
+      {
+        "condition": "breastfeeding",
+        "action": "may_need_more",
+        "why": "The RDA rises to 210 g a day, and very low-carb plans are not advised while breastfeeding."
+      },
+      {
+        "condition": "kidney_disease",
+        "action": "caution",
+        "why": "Very low-carb eating plans are not advised for people with kidney disease."
+      },
+      {
+        "condition": "athlete",
+        "action": "may_need_more",
+        "why": "Endurance athletes need enough carbohydrate to perform well."
+      }
+    ],
+    "deficiencySigns": [],
+    "excessSigns": [
+      "Higher blood sugar after meals if you have diabetes",
+      "Very high-carb diets can worsen blood fats",
+      "Frequent sugary foods raise the risk of tooth decay"
+    ],
+    "foodSources": [
+      {
+        "food": "Chickpeas, cooked",
+        "serving": "1 cup (164 g)",
+        "amount": 45.0
+      },
+      {
+        "food": "White rice, cooked",
+        "serving": "1 cup (158 g)",
+        "amount": 44.5
+      },
+      {
+        "food": "Sweet potato, baked",
+        "serving": "1 cup (200 g)",
+        "amount": 41.4
+      },
+      {
+        "food": "Black beans, cooked",
+        "serving": "1 cup (172 g)",
+        "amount": 40.8
+      },
+      {
+        "food": "Lentils, cooked",
+        "serving": "1 cup (198 g)",
+        "amount": 39.9
+      },
+      {
+        "food": "Pasta, cooked",
+        "serving": "1 cup (124 g)",
+        "amount": 38.3
+      },
+      {
+        "food": "Potato, baked with skin",
+        "serving": "1 medium (173 g)",
+        "amount": 36.6
+      },
+      {
+        "food": "Apple, with skin",
+        "serving": "1 medium (182 g)",
+        "amount": 25.1
+      },
+      {
+        "food": "Banana",
+        "serving": "1 small (101 g)",
+        "amount": 23.1
+      },
+      {
+        "food": "Oats, dry",
+        "serving": "1/3 cup (27 g)",
+        "amount": 18.3
+      },
+      {
+        "food": "Orange",
+        "serving": "1 fruit (131 g)",
+        "amount": 15.4
+      },
+      {
+        "food": "Wholemeal bread",
+        "serving": "1 slice (32 g)",
+        "amount": 13.7
+      },
+      {
+        "food": "Milk, 2% fat",
+        "serving": "1 cup (244 g)",
+        "amount": 11.7
+      }
+    ],
+    "lowText": "You're under 130 g of carbs today, the basic amount your brain uses. If that isn't your plan, add whole grains, fruit, beans or starchy veg.",
+    "highText": "You're above the carb goal you set for today. That's fine for many people — choose mostly whole, high-fibre carbs and go easy on added sugar.",
+    "notes": "There is no upper limit, so the app should not warn on a ceiling. Use 130 g as the floor (175 g in pregnancy, 210 g when breastfeeding) and let each person set their own goal. People with diabetes should set goals with their care team; the diabetes guideline says there is no ideal carb percentage. People who follow a lower-carb plan agreed with their doctor should be able to switch off the low message.",
+    "sources": [
+      "https://www.ncbi.nlm.nih.gov/books/NBK56068/table/summarytables.t4/",
+      "https://www.ncbi.nlm.nih.gov/books/NBK56068/table/summarytables.t5/",
+      "https://www.ncbi.nlm.nih.gov/books/NBK56068/table/summarytables.t6/",
+      "https://www.efsa.europa.eu/en/efsajournal/pub/1462",
+      "https://pmc.ncbi.nlm.nih.gov/articles/PMC12690188/",
+      "https://www.ecfr.gov/api/renderer/v1/content/enhanced/current/title-21?part=101&section=101.9",
+      "https://pubmed.ncbi.nlm.nih.gov/28642676/",
+      "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_2018-04.zip"
+    ]
+  },
+  {
+    "id": "creatine",
+    "name": "Creatine (monohydrate)",
+    "group": "other",
+    "unit": "g",
+    "unitNotes": "Grams of creatine monohydrate from supplements. Food gives small amounts and is not counted.",
+    "conversions": [
+      {
+        "from": "mg",
+        "to": "g",
+        "multiply": 0.001,
+        "note": "1,000 mg = 1 g."
+      },
+      {
+        "from": "g per kg body weight",
+        "to": "g per day (70 kg adult)",
+        "multiply": 70,
+        "note": "For example, 0.1 g per kg is about 7 g for a 70 kg adult. Use your own weight."
+      }
+    ],
+    "rda": {
+      "type": "none",
+      "male_19_50": null,
+      "female_19_50": null,
+      "male_51_plus": null,
+      "female_51_plus": null,
+      "pregnancy": null,
+      "lactation": null,
+      "source": "https://pubmed.ncbi.nlm.nih.gov/28615996/"
+    },
+    "ul": {
+      "iom": null,
+      "efsa": null,
+      "efsa_year": null,
+      "applies_to": "supplements_only",
+      "notes": "No official upper limit. A 2006 risk assessment found strong long-term safety evidence up to 5 g a day. Higher amounts have been used safely in the short term (about 20 g a day for 5–7 days to load). Up to 30 g a day for 5 years was used in some patient studies without kidney harm, but long-term safety above 5 g a day is less certain. Suggested app rule: suggest 3–5 g a day with no loading; warn above 5 g a day.",
+      "sources": [
+        "https://pubmed.ncbi.nlm.nih.gov/16814437/",
+        "https://pubmed.ncbi.nlm.nih.gov/28615996/",
+        "https://ods.od.nih.gov/factsheets/ExerciseAndAthleticPerformance-HealthProfessional/"
+      ]
+    },
+    "studyRange": {
+      "low": 3,
+      "high": 5,
+      "goal": "Daily amount that fills muscle creatine stores within 3–4 weeks, used with strength training to build strength and lean mass, including in older adults.",
+      "evidence": "A",
+      "evidenceWhy": "Many trials and meta-analyses show added strength and lean mass when creatine is used with strength training, including in over-55s.",
+      "keyStudies": [
+        {
+          "title": "International Society of Sports Nutrition position stand: safety and efficacy of creatine supplementation in exercise, sport, and medicine",
+          "year": 2017,
+          "type": "position stand",
+          "finding": "Creatine monohydrate is the best-studied form; 3–5 g a day keeps stores full, and weight gain is the only consistent side effect.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/28615996/"
+        },
+        {
+          "title": "Common questions and misconceptions about creatine supplementation: what does the scientific evidence really show?",
+          "year": 2021,
+          "type": "position stand",
+          "finding": "Creatine is well tolerated at the usual 3–5 g a day (or 0.1 g per kg a day).",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/33557850/"
+        },
+        {
+          "title": "Part II. Common questions and misconceptions about creatine supplementation: what does the scientific evidence really show?",
+          "year": 2025,
+          "type": "position stand",
+          "finding": "Timing does not seem to matter much, and there are no good human trials on safety in pregnancy.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/39720835/"
+        },
+        {
+          "title": "EFSA scientific opinion: creatine in combination with resistance training and improvement in muscle strength in adults over 55",
+          "year": 2016,
+          "type": "guideline",
+          "finding": "At least 3 g a day with regular resistance training improves muscle strength in adults over 55.",
+          "url": "https://efsa.europa.eu/en/efsajournal/pub/4400"
+        },
+        {
+          "title": "Risk assessment for creatine monohydrate",
+          "year": 2006,
+          "type": "guideline",
+          "finding": "Long-term safety evidence is strong up to 5 g a day; data above this are not enough for a confident long-term conclusion.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/16814437/"
+        },
+        {
+          "title": "The impact of creatine supplementation associated with resistance training on muscular strength and lean tissue mass in the aged: a systematic review and meta-analysis",
+          "year": 2025,
+          "type": "meta-analysis",
+          "finding": "In 8 trials of older adults, creatine with strength training improved leg strength and lean mass more than training alone.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/41388441/"
+        },
+        {
+          "title": "Creatine monohydrate for lean mass, strength, and bone density in postmenopausal women: a systematic review and meta-analysis",
+          "year": 2026,
+          "type": "meta-analysis",
+          "finding": "In postmenopausal women, 5 g or more a day with strength training gave small gains in lean mass and strength; 3 g or less without training did not.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/42141930/"
+        },
+        {
+          "title": "Effect of creatine supplementation on kidney function: a systematic review and meta-analysis",
+          "year": 2025,
+          "type": "meta-analysis",
+          "finding": "Creatine raised blood creatinine slightly, but kidney filtration did not change.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/41199218/"
+        },
+        {
+          "title": "The Effect of Creatine Supplementation on Kidney Function: A Systematic Review and Meta-Analysis of Randomized Controlled Trials",
+          "year": 2026,
+          "type": "meta-analysis",
+          "finding": "Blood creatinine rose a little (about 0.13 mg/dL), but urea and kidney filtration did not change.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/42035842/"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": null,
+      "female": null,
+      "basis": "none",
+      "why": "Optional; most studies used 3–5 g a day, mainly alongside strength training."
+    },
+    "timing": {
+      "withFood": true,
+      "fatSoluble": false,
+      "bestTime": "any",
+      "splitAbove": 5,
+      "separateFrom": []
+    },
+    "forms": {
+      "better": [
+        "Creatine monohydrate"
+      ],
+      "notes": "Monohydrate is the most studied form. Taking it with a meal that has carbs or protein may help muscles take up more. Creatine breaks down in liquids over time, so mix the powder just before you drink it."
+    },
+    "interactions": [
+      {
+        "with": "caffeine",
+        "severity": "low",
+        "effect": "Normal caffeine intake does not seem to cancel out creatine in the short term.",
+        "action": "No change needed for usual coffee or tea."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "kidney_disease",
+        "action": "doctor_first",
+        "why": "Experts advise people with kidney disease to check with their doctor first. Creatine also raises blood creatinine on kidney tests."
+      },
+      {
+        "condition": "pregnancy",
+        "action": "avoid",
+        "why": "There are no good human trials on creatine safety in pregnancy."
+      },
+      {
+        "condition": "breastfeeding",
+        "action": "doctor_first",
+        "why": "Safety while breastfeeding has not been well studied."
+      },
+      {
+        "condition": "vegan_vegetarian",
+        "action": "may_need_more",
+        "why": "Vegetarians have lower muscle creatine stores and may gain more from creatine."
+      }
+    ],
+    "deficiencySigns": [],
+    "excessSigns": [
+      "Weight gain of about 1–2 kg in the first month, mostly water",
+      "Upset stomach, nausea or loose stools in some people",
+      "A small rise in blood creatinine on kidney tests (not kidney damage in studies)"
+    ],
+    "foodSources": [
+      {
+        "food": "Pork",
+        "serving": "1 lb (454 g)",
+        "amount": 2.3
+      },
+      {
+        "food": "Beef",
+        "serving": "1 lb (454 g)",
+        "amount": 2
+      },
+      {
+        "food": "Salmon",
+        "serving": "1 lb (454 g)",
+        "amount": 2
+      }
+    ],
+    "lowText": "No creatine logged today. That's fine — it's optional.",
+    "highText": "You've logged more than 5 g of creatine today. Long-term safety is best shown up to 5 g a day, so stick to 3–5 g unless your doctor set a short loading plan.",
+    "notes": "Optional; show it as tracked, not as a meter. 3–5 g a day fills muscle stores in 3–4 weeks without loading. Loading (about 20 g a day in four 5 g doses for 5–7 days) is faster but not needed, and goes above the 5 g long-term safety level. Benefits show up mainly with strength training. The body makes about 1 g a day and food gives some too. Tell your doctor you take creatine before kidney blood tests, because it raises creatinine. Food amounts are per pound (about 1–2 g per pound of uncooked beef or salmon).",
+    "sources": [
+      "https://pubmed.ncbi.nlm.nih.gov/28615996/",
+      "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC5469049/fullTextXML",
+      "https://pubmed.ncbi.nlm.nih.gov/33557850/",
+      "https://pubmed.ncbi.nlm.nih.gov/39720835/",
+      "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC11703406/fullTextXML",
+      "https://efsa.europa.eu/en/efsajournal/pub/4400",
+      "https://www.nutraingredients.com/Article/2016/02/24/EFSA-thumbs-up-for-creatine-muscle-strength-in-older-adults/",
+      "https://pubmed.ncbi.nlm.nih.gov/16814437/",
+      "https://pubmed.ncbi.nlm.nih.gov/41388441/",
+      "https://pubmed.ncbi.nlm.nih.gov/41062952/",
+      "https://pubmed.ncbi.nlm.nih.gov/42141930/",
+      "https://pubmed.ncbi.nlm.nih.gov/41199218/",
+      "https://pubmed.ncbi.nlm.nih.gov/42035842/",
+      "https://ods.od.nih.gov/factsheets/ExerciseAndAthleticPerformance-HealthProfessional/"
+    ]
+  },
+  {
+    "id": "coq10",
+    "name": "Coenzyme Q10 (CoQ10)",
+    "group": "other",
+    "unit": "mg",
+    "unitNotes": "Milligrams of CoQ10 from supplements (ubiquinone or ubiquinol). Food gives only a few milligrams a day and is not counted.",
+    "conversions": [
+      {
+        "from": "g",
+        "to": "mg",
+        "multiply": 1000,
+        "note": "1 g = 1,000 mg."
+      }
+    ],
+    "rda": {
+      "type": "none",
+      "male_19_50": null,
+      "female_19_50": null,
+      "male_51_plus": null,
+      "female_51_plus": null,
+      "pregnancy": null,
+      "lactation": null,
+      "source": "https://www.nccih.nih.gov/health/coenzyme-q10"
+    },
+    "ul": {
+      "iom": null,
+      "efsa": null,
+      "efsa_year": null,
+      "applies_to": "supplements_only",
+      "notes": "No official upper limit. A 2006 risk assessment found strong safety evidence up to 1,200 mg a day; higher doses (up to 3,000 mg) have been used without serious effects, but data above 1,200 mg are not enough to be sure. Stomach upset is more common at 200 mg a day or more. Suggested app rule: gentle note above 300 mg, warning above 1,200 mg.",
+      "sources": [
+        "https://pubmed.ncbi.nlm.nih.gov/16814438/",
+        "https://lpi.oregonstate.edu/mic/dietary-factors/coenzyme-Q10"
+      ]
+    },
+    "studyRange": {
+      "low": 100,
+      "high": 600,
+      "goal": "Statin-related muscle aches (100–600 mg a day for 30–90 days) and heart failure as add-on care (300 mg a day, in three doses).",
+      "evidence": "C",
+      "evidenceWhy": "Results for statin muscle aches are mixed; one heart failure trial was positive but needs confirming; it has no clear effect on blood pressure.",
+      "keyStudies": [
+        {
+          "title": "The effect of coenzyme Q10 on morbidity and mortality in chronic heart failure: results from Q-SYMBIO: a randomized double-blind trial",
+          "year": 2014,
+          "type": "RCT",
+          "finding": "300 mg a day for 2 years, added to usual care, lowered major heart events (15% vs 26%) in 420 people with heart failure.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/25282031/"
+        },
+        {
+          "title": "Coenzyme Q10 for heart failure",
+          "year": 2021,
+          "type": "Cochrane review",
+          "finding": "CoQ10 probably lowers deaths and hospital stays in heart failure, but the evidence is limited and mostly from one trial.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/35608922/"
+        },
+        {
+          "title": "Blood pressure lowering efficacy of coenzyme Q10 for primary hypertension",
+          "year": 2016,
+          "type": "Cochrane review",
+          "finding": "CoQ10 had no clinically important effect on blood pressure.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/26935713/"
+        },
+        {
+          "title": "Effects of Coenzyme Q10 on Statin-Induced Myopathy: An Updated Meta-Analysis of Randomized Controlled Trials",
+          "year": 2018,
+          "type": "meta-analysis",
+          "finding": "In 12 trials (575 people), CoQ10 eased statin-related muscle pain, weakness and cramps.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/30371340/"
+        },
+        {
+          "title": "Effect of Coenzyme Q10 on statin-associated myalgia and adherence to statin therapy: A systematic review and meta-analysis",
+          "year": 2020,
+          "type": "meta-analysis",
+          "finding": "In 7 trials (321 people), CoQ10 did not ease statin muscle pain or help people stay on statins.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/32179207/"
+        },
+        {
+          "title": "Effects of coenzyme Q10 on statin-induced myopathy: a meta-analysis of randomized controlled trials",
+          "year": 2015,
+          "type": "meta-analysis",
+          "finding": "CoQ10 had no significant effect on statin muscle pain.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/25440725/"
+        },
+        {
+          "title": "Effects of coenzyme Q10 supplementation on myopathy in statin-treated patients: a systematic review and meta-analysis",
+          "year": 2025,
+          "type": "meta-analysis",
+          "finding": "In 7 trials (389 people, 100–600 mg a day), CoQ10 modestly lowered statin muscle pain.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/41158831/"
+        },
+        {
+          "title": "Risk assessment for coenzyme Q10 (Ubiquinone)",
+          "year": 2006,
+          "type": "guideline",
+          "finding": "Safety evidence is strong up to 1,200 mg a day; side effects were no more common at 1,200 mg than at 60 mg.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/16814438/"
+        },
+        {
+          "title": "Effect of Coenzyme Q10 and Ginkgo biloba on warfarin dosage in patients on long-term warfarin treatment. A randomized, double-blind, placebo-controlled cross-over trial",
+          "year": 2003,
+          "type": "RCT",
+          "finding": "100 mg a day for 4 weeks did not change warfarin needs in 24 people.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/12772396/"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": null,
+      "female": null,
+      "basis": "none",
+      "why": "Optional; the body makes its own, and studies mostly used 100–300 mg a day."
+    },
+    "timing": {
+      "withFood": true,
+      "fatSoluble": true,
+      "bestTime": "with_meal",
+      "splitAbove": 100,
+      "separateFrom": []
+    },
+    "forms": {
+      "better": [
+        "Oil-based soft gels taken with a meal that contains fat"
+      ],
+      "notes": "CoQ10 is absorbed best with fat; oil-based forms absorb better than dry powder. Less than 5% of a dose reaches the blood. Both ubiquinone and ubiquinol are sold; this review did not confirm that one works better."
+    },
+    "interactions": [
+      {
+        "with": "warfarin",
+        "severity": "moderate",
+        "effect": "CoQ10 may weaken warfarin in some people; study results are mixed.",
+        "action": "Don't start it without the doctor who manages your warfarin, and have your clotting test checked more often."
+      },
+      {
+        "with": "insulin and other diabetes medicines",
+        "severity": "moderate",
+        "effect": "CoQ10 may lower how much insulin you need.",
+        "action": "Check your blood sugar more often and tell your doctor."
+      },
+      {
+        "with": "cancer treatment (chemotherapy or radiotherapy)",
+        "severity": "high",
+        "effect": "Antioxidant supplements, including CoQ10, may not mix well with some cancer treatments.",
+        "action": "Only take it during cancer treatment if your cancer team agrees."
+      },
+      {
+        "with": "statins",
+        "severity": "low",
+        "effect": "Statins lower CoQ10 levels in the blood; it's not clear this causes problems.",
+        "action": "Keep taking your statin. Evidence that CoQ10 eases statin aches is mixed."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "blood_thinners",
+        "action": "doctor_first",
+        "why": "CoQ10 may change how warfarin works."
+      },
+      {
+        "condition": "type_1_diabetes",
+        "action": "caution",
+        "why": "CoQ10 may lower insulin needs, so check your blood sugar."
+      },
+      {
+        "condition": "type_2_diabetes",
+        "action": "caution",
+        "why": "CoQ10 may lower insulin needs if you use insulin, so check your blood sugar."
+      },
+      {
+        "condition": "cancer_treatment",
+        "action": "doctor_first",
+        "why": "CoQ10 may not mix well with some cancer treatments."
+      },
+      {
+        "condition": "heart_disease",
+        "action": "doctor_first",
+        "why": "Heart failure studies used CoQ10 alongside usual care, not instead of it."
+      },
+      {
+        "condition": "high_cholesterol",
+        "action": "caution",
+        "why": "If you take a statin, keep taking it; CoQ10 for statin aches has mixed evidence."
+      },
+      {
+        "condition": "liver_disease",
+        "action": "caution",
+        "why": "Long-term use of 300 mg a day has raised liver enzymes in some people."
+      },
+      {
+        "condition": "pregnancy",
+        "action": "doctor_first",
+        "why": "Only one study (from 20 weeks) looked at safety in pregnancy."
+      },
+      {
+        "condition": "breastfeeding",
+        "action": "avoid",
+        "why": "There is no reliable safety information for breastfeeding."
+      },
+      {
+        "condition": "high_blood_pressure",
+        "action": "caution",
+        "why": "CoQ10 does not lower blood pressure in a meaningful way, so keep taking your blood pressure medicines."
+      }
+    ],
+    "deficiencySigns": [],
+    "excessSigns": [
+      "Nausea, diarrhoea, heartburn or loss of appetite, mostly at 200 mg a day or more",
+      "Trouble sleeping at 100 mg a day or more in some people",
+      "Rash (uncommon)",
+      "Raised liver enzymes with long use of 300 mg a day"
+    ],
+    "foodSources": [
+      {
+        "food": "Beef, fried",
+        "serving": "3 oz (85 g)",
+        "amount": 2.6
+      },
+      {
+        "food": "Herring, marinated",
+        "serving": "3 oz (85 g)",
+        "amount": 2.3
+      },
+      {
+        "food": "Chicken, fried",
+        "serving": "3 oz (85 g)",
+        "amount": 1.4
+      },
+      {
+        "food": "Soybean oil",
+        "serving": "1 tablespoon",
+        "amount": 1.3
+      },
+      {
+        "food": "Canola oil",
+        "serving": "1 tablespoon",
+        "amount": 1.0
+      },
+      {
+        "food": "Rainbow trout, steamed",
+        "serving": "3 oz (85 g)",
+        "amount": 0.9
+      },
+      {
+        "food": "Peanuts, roasted",
+        "serving": "1 oz (28 g)",
+        "amount": 0.8
+      },
+      {
+        "food": "Sesame seeds, roasted",
+        "serving": "1 oz (28 g)",
+        "amount": 0.7
+      },
+      {
+        "food": "Pistachio nuts, roasted",
+        "serving": "1 oz (28 g)",
+        "amount": 0.6
+      },
+      {
+        "food": "Broccoli, boiled",
+        "serving": "1/2 cup, chopped",
+        "amount": 0.5
+      },
+      {
+        "food": "Cauliflower, boiled",
+        "serving": "1/2 cup, chopped",
+        "amount": 0.4
+      },
+      {
+        "food": "Orange",
+        "serving": "1 medium",
+        "amount": 0.3
+      },
+      {
+        "food": "Strawberries",
+        "serving": "1/2 cup",
+        "amount": 0.1
+      },
+      {
+        "food": "Egg, boiled",
+        "serving": "1 medium",
+        "amount": 0.1
+      }
+    ],
+    "lowText": "No CoQ10 logged today. That's fine — it's optional, and your body makes its own.",
+    "highText": "You're near or above 1,200 mg of CoQ10 today, the highest amount with strong safety evidence. Please don't take more unless your doctor advised it.",
+    "notes": "Optional; show it as tracked, not as a meter. Food gives only about 3–6 mg a day. Studies usually used 90–390 mg a day. Split doses above 100 mg into two or three doses with meals. It does not replace heart, cholesterol or blood pressure medicines. People with heart failure should only use it alongside their usual care, with their doctor.",
+    "sources": [
+      "https://www.nccih.nih.gov/health/coenzyme-q10",
+      "https://www.cancer.gov/about-cancer/treatment/cam/hp/coenzyme-q10-pdq",
+      "https://lpi.oregonstate.edu/mic/dietary-factors/coenzyme-Q10",
+      "https://pubmed.ncbi.nlm.nih.gov/16814438/",
+      "https://pubmed.ncbi.nlm.nih.gov/25282031/",
+      "https://pubmed.ncbi.nlm.nih.gov/35608922/",
+      "https://pubmed.ncbi.nlm.nih.gov/26935713/",
+      "https://pubmed.ncbi.nlm.nih.gov/30371340/",
+      "https://pubmed.ncbi.nlm.nih.gov/32179207/",
+      "https://pubmed.ncbi.nlm.nih.gov/25440725/",
+      "https://pubmed.ncbi.nlm.nih.gov/41158831/",
+      "https://pubmed.ncbi.nlm.nih.gov/12772396/",
+      "https://pubmed.ncbi.nlm.nih.gov/17723077/"
+    ]
+  },
+  {
+    "id": "ashwagandha",
+    "name": "Ashwagandha (root extract)",
+    "group": "other",
+    "unit": "mg",
+    "unitNotes": "Milligrams of ashwagandha root extract. Products differ in strength (often standardised to a % of withanolides). Whole root powder doses are much larger and should not be compared with extract doses.",
+    "conversions": [
+      {
+        "from": "g",
+        "to": "mg",
+        "multiply": 1000,
+        "note": "1 g = 1,000 mg."
+      }
+    ],
+    "rda": {
+      "type": "none",
+      "male_19_50": null,
+      "female_19_50": null,
+      "male_51_plus": null,
+      "female_51_plus": null,
+      "pregnancy": null,
+      "lactation": null,
+      "source": "https://ods.od.nih.gov/factsheets/Ashwagandha-HealthProfessional/"
+    },
+    "ul": {
+      "iom": null,
+      "efsa": null,
+      "efsa_year": null,
+      "applies_to": "supplements_only",
+      "notes": "No official upper limit, and Denmark's 2020 assessment found no safe intake level could be set. It seems well tolerated for up to about 3 months; long-term safety is unknown. Liver injury has been reported, usually 2–12 weeks after starting, in cases taking about 450–2,100 mg a day. Suggested app rule: never suggest more than 600 mg a day or use beyond 3 months without a doctor.",
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/Ashwagandha-HealthProfessional/",
+        "https://www.ncbi.nlm.nih.gov/books/NBK548536/",
+        "https://www.nutraingredients.com/Article/2026/07/06/timeline-will-authorities-de-throne-the-king-of-herbs/"
+      ]
+    },
+    "studyRange": {
+      "low": 300,
+      "high": 600,
+      "goal": "Stress, anxiety and sleep in adults, usually for 6–12 weeks. Benefits were larger at about 600 mg a day and for 8 weeks or more.",
+      "evidence": "B",
+      "evidenceWhy": "Several small, short trials show less stress and anxiety and slightly better sleep, but study quality and results vary.",
+      "keyStudies": [
+        {
+          "title": "Ashwagandha: Fact Sheet for Health Professionals (NIH Office of Dietary Supplements)",
+          "year": 2025,
+          "type": "guideline",
+          "finding": "An expert taskforce suggests 300–600 mg a day of root extract for anxiety; it seems well tolerated for about 3 months, but long-term safety is unknown.",
+          "url": "https://ods.od.nih.gov/factsheets/Ashwagandha-HealthProfessional/"
+        },
+        {
+          "title": "Effect of Ashwagandha (Withania somnifera) extract on sleep: A systematic review and meta-analysis",
+          "year": 2021,
+          "type": "meta-analysis",
+          "finding": "In 5 trials (400 people), sleep improved slightly, more with 600 mg a day or more, 8 weeks or more, and in people with insomnia.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/34559859/"
+        },
+        {
+          "title": "Effects of ashwagandha (Withania somnifera) on mental health in adults: A systematic review and dose-response meta-analysis of randomized controlled trials",
+          "year": 2026,
+          "type": "meta-analysis",
+          "finding": "In 22 trials, ashwagandha lowered stress, anxiety and low-mood scores, but trials varied a lot.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/41644067/"
+        },
+        {
+          "title": "Safety and efficacy of Withania somnifera for anxiety and insomnia: Systematic review and meta-analysis",
+          "year": 2024,
+          "type": "meta-analysis",
+          "finding": "In 5 trials (254 people), anxiety scores and some sleep measures improved; larger trials are needed.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/39083548/"
+        },
+        {
+          "title": "Dual impact of Ashwagandha: Significant cortisol reduction but no effects on perceived stress - A systematic review and meta-analysis",
+          "year": 2025,
+          "type": "meta-analysis",
+          "finding": "Ashwagandha lowered the stress hormone cortisol, but people did not report feeling less stressed.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/40746175/"
+        },
+        {
+          "title": "Efficacy and Safety of Ashwagandha Root Extract in Subclinical Hypothyroid Patients: A Double-Blind, Randomized Placebo-Controlled Trial",
+          "year": 2018,
+          "type": "RCT",
+          "finding": "600 mg a day for 8 weeks raised thyroid hormone levels, showing it can change thyroid function.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/28829155/"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": null,
+      "female": null,
+      "basis": "none",
+      "why": "Optional; not needed by everyone, and there are safety concerns for some groups."
+    },
+    "timing": {
+      "withFood": null,
+      "fatSoluble": false,
+      "bestTime": "any",
+      "splitAbove": null,
+      "separateFrom": []
+    },
+    "forms": {
+      "better": [
+        "Root extract (the form used in most trials)"
+      ],
+      "notes": "Most trials used root extracts, often standardised to 5% withanolides. Leaf products raise more concern: India announced a ban on leaf use in 2026, which is being challenged in court. Products vary a lot in strength."
+    },
+    "interactions": [
+      {
+        "with": "sedatives and other medicines that calm the brain",
+        "severity": "high",
+        "effect": "Ashwagandha may add to their effects; France advises people on these medicines not to use it.",
+        "action": "Don't combine them unless your doctor agrees."
+      },
+      {
+        "with": "thyroid hormone medicines",
+        "severity": "high",
+        "effect": "Ashwagandha can raise thyroid hormone levels.",
+        "action": "Don't use it with thyroid medicine unless your doctor agrees."
+      },
+      {
+        "with": "immunosuppressants",
+        "severity": "high",
+        "effect": "Ashwagandha might interact with medicines that dampen the immune system.",
+        "action": "Ask your doctor first."
+      },
+      {
+        "with": "diabetes medicines",
+        "severity": "moderate",
+        "effect": "Ashwagandha might interact with diabetes medicines.",
+        "action": "Ask your doctor first and check your blood sugar."
+      },
+      {
+        "with": "blood pressure medicines",
+        "severity": "moderate",
+        "effect": "Ashwagandha might interact with blood pressure medicines.",
+        "action": "Ask your doctor first."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "pregnancy",
+        "action": "avoid",
+        "why": "Experts advise against it in pregnancy because of reports of miscarriage risk."
+      },
+      {
+        "condition": "breastfeeding",
+        "action": "avoid",
+        "why": "France's food safety agency advises against it while breastfeeding."
+      },
+      {
+        "condition": "trying_to_conceive",
+        "action": "doctor_first",
+        "why": "Food agencies have raised concerns about effects on pregnancy and sex hormones."
+      },
+      {
+        "condition": "liver_disease",
+        "action": "avoid",
+        "why": "It has caused liver injury, and deaths have been reported in people with advanced liver disease."
+      },
+      {
+        "condition": "thyroid_disease",
+        "action": "avoid",
+        "why": "It can change thyroid hormone levels, and cases of an overactive thyroid have been reported."
+      },
+      {
+        "condition": "heart_disease",
+        "action": "avoid",
+        "why": "France's food safety agency advises people with heart problems not to use it."
+      },
+      {
+        "condition": "immunocompromised",
+        "action": "doctor_first",
+        "why": "It might interact with medicines that dampen the immune system."
+      },
+      {
+        "condition": "type_1_diabetes",
+        "action": "doctor_first",
+        "why": "It might interact with diabetes medicines."
+      },
+      {
+        "condition": "type_2_diabetes",
+        "action": "doctor_first",
+        "why": "It might interact with diabetes medicines."
+      },
+      {
+        "condition": "high_blood_pressure",
+        "action": "doctor_first",
+        "why": "It might interact with blood pressure medicines."
+      },
+      {
+        "condition": "cancer_treatment",
+        "action": "doctor_first",
+        "why": "It may raise testosterone, which may be unsafe in hormone-sensitive prostate cancer."
+      }
+    ],
+    "deficiencySigns": [],
+    "excessSigns": [
+      "Upset stomach, loose stools or nausea",
+      "Drowsiness",
+      "Liver problems (rare): yellow skin or eyes, itching, tiredness or stomach discomfort — stop and see a doctor",
+      "Overactive thyroid (rare case reports)"
+    ],
+    "foodSources": [],
+    "lowText": "No ashwagandha logged today. That's fine — it's optional.",
+    "highText": "You've logged more than 600 mg of ashwagandha today, above most study doses. Please don't take more, and talk to your doctor before you carry on.",
+    "notes": "Optional; show it as tracked, not as a meter. Suggest a check-in with a doctor after 3 months of use. If yellow skin or eyes, itching, unusual tiredness or stomach pain appear, stop it and see a doctor. Rules differ by country: Denmark banned it in food supplements in 2023; France (2024) advises pregnant or breastfeeding women, under-18s, and people with thyroid or other hormone problems, liver or heart problems, or on calming medicines to avoid it; the Netherlands advises against it; Australia requires a pregnancy warning on some products; the UK is still reviewing it (a third draft statement was discussed in September 2026); and EU food agencies proposed an EU-wide review in 2024. Check local rules before selling it in a protocol.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheets/Ashwagandha-HealthProfessional/",
+      "https://www.ncbi.nlm.nih.gov/books/NBK548536/",
+      "https://pubmed.ncbi.nlm.nih.gov/42367407/",
+      "https://pubmed.ncbi.nlm.nih.gov/34559859/",
+      "https://pubmed.ncbi.nlm.nih.gov/41644067/",
+      "https://pubmed.ncbi.nlm.nih.gov/39083548/",
+      "https://pubmed.ncbi.nlm.nih.gov/40746175/",
+      "https://pubmed.ncbi.nlm.nih.gov/28829155/",
+      "https://www.nutraingredients.com/Article/2024/06/17/French-agency-warns-ashwagandha-unsafe-in-specific-populations",
+      "https://www.nutritioninsight.com/key-interviews/regulatory-update-spotlight-on-international-authorities-response-to-ashwagandha-safety-concerns.html",
+      "https://www.nutraingredients.com/Article/2026/07/06/timeline-will-authorities-de-throne-the-king-of-herbs/",
+      "https://www.gov.uk/government/publications/8th-september-2026-committee-on-toxicity-meeting",
+      "https://www.nutraingredients.com/Article/2026/07/17/mid-year-regulatory-round-up-updates-from-europe/"
+    ]
+  },
+  {
+    "id": "nmn",
+    "name": "NMN (nicotinamide mononucleotide)",
+    "group": "other",
+    "unit": "mg",
+    "unitNotes": "Milligrams of NMN (beta-NMN) from supplements.",
+    "conversions": [
+      {
+        "from": "mg NMN",
+        "to": "mg nicotinamide (vitamin B3)",
+        "multiply": 0.366,
+        "note": "EFSA: 300 mg NMN provides about 109.7 mg nicotinamide."
+      }
+    ],
+    "rda": {
+      "type": "none",
+      "male_19_50": null,
+      "female_19_50": null,
+      "male_51_plus": null,
+      "female_51_plus": null,
+      "pregnancy": null,
+      "lactation": null,
+      "source": "https://researchportal.lih.lu/en/publications/safety-of-beta-nicotinamide-mononucleotide-%CE%B2-nmn-pursuant-the-reg/"
+    },
+    "ul": {
+      "iom": null,
+      "efsa": null,
+      "efsa_year": 2026,
+      "applies_to": "supplements_only",
+      "notes": "No official upper limit. EFSA (May 2026) judged 300 mg a day safe for adults, not including pregnant or breastfeeding women. That gives about 110 mg of nicotinamide, below EFSA's 900 mg nicotinamide limit but above the US 35 mg limit for supplemental niacin. Trials used 250–2,000 mg a day for up to 24 weeks without clear harm, but long-term safety is unknown. Suggested app rule: warn above 300 mg a day.",
+      "sources": [
+        "https://researchportal.lih.lu/en/publications/safety-of-beta-nicotinamide-mononucleotide-%CE%B2-nmn-pursuant-the-reg/",
+        "https://www.nutraingredients.com/Article/2026/05/13/efsa-gives-positive-safety-opinion-on-nmn/",
+        "https://ods.od.nih.gov/factsheets/Niacin-HealthProfessional/",
+        "https://pubmed.ncbi.nlm.nih.gov/42514320/"
+      ]
+    },
+    "studyRange": {
+      "low": 250,
+      "high": 900,
+      "goal": "Raising blood NAD (a molecule cells use for energy), and possible effects on insulin sensitivity, walking distance and blood pressure in middle-aged and older adults, over 2–24 weeks. Some trials in reviews used up to 2,000 mg a day.",
+      "evidence": "C",
+      "evidenceWhy": "Trials are small and short; reviews found no clear benefit for blood sugar, blood fats or muscle.",
+      "keyStudies": [
+        {
+          "title": "Nicotinamide mononucleotide increases muscle insulin sensitivity in prediabetic women",
+          "year": 2021,
+          "type": "RCT",
+          "finding": "250 mg a day for 10 weeks improved muscle insulin sensitivity in postmenopausal women with prediabetes who were overweight.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/33888596/"
+        },
+        {
+          "title": "The efficacy and safety of β-nicotinamide mononucleotide (NMN) supplementation in healthy middle-aged adults: a randomized, multicenter, double-blind, placebo-controlled, parallel-group, dose-dependent clinical trial",
+          "year": 2023,
+          "type": "RCT",
+          "finding": "300–900 mg a day for 60 days raised blood NAD (a molecule cells use for energy) and walking distance, most at 600 mg, and was well tolerated.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/36482258/"
+        },
+        {
+          "title": "Effects of Nicotinamide Mononucleotide on Glucose and Lipid Metabolism in Adults: A Systematic Review and Meta-analysis of Randomised Controlled Trials",
+          "year": 2024,
+          "type": "meta-analysis",
+          "finding": "In 8 trials (250–2,000 mg a day, up to 12 weeks), NMN did not clearly improve blood sugar or blood fats.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/39531138/"
+        },
+        {
+          "title": "The Effect of Nicotinamide Mononucleotide and Riboside on Skeletal Muscle Mass and Function: A Systematic Review and Meta-Analysis",
+          "year": 2025,
+          "type": "meta-analysis",
+          "finding": "NMN did not help keep muscle mass or strength in adults over 60.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/40275690/"
+        },
+        {
+          "title": "Safety and Metabolism-Related Outcomes of Oral Nicotinamide Mononucleotide Supplementation in Adults: A Systematic Review and Meta-Analysis",
+          "year": 2026,
+          "type": "meta-analysis",
+          "finding": "In 15 trials (250–2,000 mg a day, 2–24 weeks), side effects and liver tests did not rise; the lower blood pressure number fell slightly.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/42514320/"
+        },
+        {
+          "title": "Safety of beta-nicotinamide mononucleotide (β-NMN) pursuant the regulation (EU) 2015/2283 and the bioavailability of nicotinamide from this source in the context of Directive 2002/46/EC",
+          "year": 2026,
+          "type": "guideline",
+          "finding": "EFSA judged 300 mg a day safe for adults, not including pregnant or breastfeeding women.",
+          "url": "https://researchportal.lih.lu/en/publications/safety-of-beta-nicotinamide-mononucleotide-%CE%B2-nmn-pursuant-the-reg/"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": null,
+      "female": null,
+      "basis": "none",
+      "why": "Optional; benefits in people are not proven and long-term safety is unknown."
+    },
+    "timing": {
+      "withFood": null,
+      "fatSoluble": false,
+      "bestTime": "any",
+      "splitAbove": null,
+      "separateFrom": []
+    },
+    "forms": {
+      "better": [],
+      "notes": "No form has been shown to work better. Beta-NMN is the form EFSA assessed."
+    },
+    "interactions": [
+      {
+        "with": "vitamin B3 (niacin or nicotinamide) supplements",
+        "severity": "low",
+        "effect": "NMN releases nicotinamide: 300 mg gives about 110 mg.",
+        "action": "Count it alongside any other B3 supplements."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "pregnancy",
+        "action": "avoid",
+        "why": "EFSA's safety opinion excludes pregnant women."
+      },
+      {
+        "condition": "breastfeeding",
+        "action": "avoid",
+        "why": "EFSA's safety opinion excludes breastfeeding women."
+      },
+      {
+        "condition": "trying_to_conceive",
+        "action": "doctor_first",
+        "why": "It is not considered safe in pregnancy, so check with your doctor before trying."
+      },
+      {
+        "condition": "cancer_treatment",
+        "action": "doctor_first",
+        "why": "Trials mainly involved generally healthy adults; check with your care team."
+      },
+      {
+        "condition": "type_2_diabetes",
+        "action": "caution",
+        "why": "Trials found no clear effect on blood sugar; don't use it in place of your treatment."
+      },
+      {
+        "condition": "prediabetes",
+        "action": "caution",
+        "why": "One small trial found better insulin sensitivity, but reviews found no clear blood sugar benefit."
+      }
+    ],
+    "deficiencySigns": [],
+    "excessSigns": [],
+    "foodSources": [],
+    "lowText": "No NMN logged today. That's fine — it's optional.",
+    "highText": "You've logged more than 300 mg of NMN today, above the amount EU food safety experts judged safe. Please don't take more without your doctor.",
+    "notes": "Optional; show it as tracked, not as a meter. Legal status varies. US: FDA said in November 2022 that NMN could not be sold as a supplement, then reversed this on 29 September 2025; makers still need a new dietary ingredient notification, and FDA did not judge its safety. EU: NMN is an unauthorised novel food and cannot be sold in foods or supplements; EFSA gave a positive safety opinion in May 2026, but no EU authorisation was found as of July 2026. Status in Mauritius was not checked. The app should decide whether NMN counts toward vitamin B3: 300 mg gives about 110 mg nicotinamide.",
+    "sources": [
+      "https://researchportal.lih.lu/en/publications/safety-of-beta-nicotinamide-mononucleotide-%CE%B2-nmn-pursuant-the-reg/",
+      "https://www.nutraingredients.com/Article/2026/05/13/efsa-gives-positive-safety-opinion-on-nmn/",
+      "https://www.cirs-group.com/en/food/nmn-major-breakthrough-effepharm-nmn-successfully-passes-efsa-safety-assessment",
+      "https://www.nutraingredients.com/Article/2026/07/17/mid-year-regulatory-round-up-updates-from-europe/",
+      "https://www.venable.com/insights/publications/2025/10/fda-declares-nicotinamide-mononucleotide-is",
+      "https://www.nutraingredients.com/Article/2025/12/09/fda-reinstates-ndi-status-of-nmn-with-new-letters-to-ingredient-players",
+      "https://www.verbraucherzentrale.de/faq/nad-und-nmn-in-nahrungsergaenzungsmitteln-38606",
+      "https://ods.od.nih.gov/factsheets/Niacin-HealthProfessional/",
+      "https://clinicaltrials.gov/api/v2/studies/NCT03151239",
+      "https://pubmed.ncbi.nlm.nih.gov/33888596/",
+      "https://pubmed.ncbi.nlm.nih.gov/36482258/",
+      "https://pubmed.ncbi.nlm.nih.gov/39531138/",
+      "https://pubmed.ncbi.nlm.nih.gov/40275690/",
+      "https://pubmed.ncbi.nlm.nih.gov/42514320/"
+    ]
+  }
+]

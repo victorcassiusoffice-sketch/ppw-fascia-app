@@ -1,0 +1,1564 @@
+[
+  {
+    "id": "vitamin_a",
+    "name": "Vitamin A",
+    "group": "vitamin",
+    "unit": "µg",
+    "unitNotes": "Amounts are µg RAE (retinol activity equivalents). Retinol counts in full and beta-carotene counts for less. Only preformed vitamin A (retinol and its esters) counts toward the upper limit, so track it separately.",
+    "conversions": [
+      {
+        "from": "IU (retinol, retinyl acetate or retinyl palmitate)",
+        "to": "µg",
+        "multiply": 0.3,
+        "note": "Preformed vitamin A: 1 IU = 0.3 µg RAE. Counts toward the upper limit."
+      },
+      {
+        "from": "IU (beta-carotene in supplements)",
+        "to": "µg",
+        "multiply": 0.3,
+        "note": "1 IU = 0.3 µg RAE. Does not count toward the upper limit."
+      },
+      {
+        "from": "IU (beta-carotene in food)",
+        "to": "µg",
+        "multiply": 0.05,
+        "note": "1 IU = 0.05 µg RAE. Beta-carotene in food is absorbed less well."
+      },
+      {
+        "from": "IU (alpha-carotene or beta-cryptoxanthin in food)",
+        "to": "µg",
+        "multiply": 0.025,
+        "note": "1 IU = 0.025 µg RAE."
+      },
+      {
+        "from": "µg beta-carotene (supplement)",
+        "to": "µg",
+        "multiply": 0.5,
+        "note": "2 µg of supplement beta-carotene = 1 µg RAE."
+      },
+      {
+        "from": "mg beta-carotene (supplement)",
+        "to": "µg",
+        "multiply": 500,
+        "note": "15 mg of supplement beta-carotene = 7,500 µg RAE."
+      },
+      {
+        "from": "µg beta-carotene (food)",
+        "to": "µg",
+        "multiply": 0.0833,
+        "note": "12 µg of food beta-carotene = 1 µg RAE."
+      },
+      {
+        "from": "µg retinol or µg RE (preformed only)",
+        "to": "µg",
+        "multiply": 1,
+        "note": "For preformed vitamin A, 1 µg retinol = 1 µg RAE = 1 µg RE (the unit EFSA uses)."
+      }
+    ],
+    "rda": {
+      "type": "RDA",
+      "male_19_50": 900,
+      "female_19_50": 700,
+      "male_51_plus": 900,
+      "female_51_plus": 700,
+      "pregnancy": 770,
+      "lactation": 1300,
+      "source": "https://ods.od.nih.gov/factsheets/VitaminA-HealthProfessional/"
+    },
+    "ul": {
+      "iom": 3000,
+      "efsa": 3000,
+      "efsa_year": 2024,
+      "applies_to": "preformed_retinol_only",
+      "notes": "Both limits are 3,000 µg a day of preformed vitamin A (retinol and its esters) from animal foods and supplements, including in pregnancy. Beta-carotene does not count, and EFSA set no limit for it. UK NHS advice is to stay under 1,500 µg a day over the long term to protect bones.",
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/VitaminA-HealthProfessional/",
+        "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC11154838",
+        "https://www.nhs.uk/conditions/vitamins-and-minerals/vitamin-a/"
+      ]
+    },
+    "studyRange": {
+      "low": null,
+      "high": null,
+      "goal": "No dose above the daily need is supported for general health. Large trials gave high-dose beta-carotene, with or without retinol, to prevent lung cancer and heart disease.",
+      "evidence": "C",
+      "evidenceWhy": "No trial shows a benefit from extra vitamin A in well-fed adults, and high-dose trials found harm.",
+      "keyStudies": [
+        {
+          "title": "Effects of a combination of beta carotene and vitamin A on lung cancer and cardiovascular disease (CARET)",
+          "year": 1996,
+          "type": "RCT",
+          "finding": "In smokers and asbestos workers, 30 mg beta-carotene plus 25,000 IU vitamin A daily raised lung cancer by 28% and deaths by 17%.",
+          "url": "https://www.qxmd.com/r/8602180"
+        },
+        {
+          "title": "The effect of vitamin E and beta carotene on the incidence of lung cancer and other cancers in male smokers (ATBC)",
+          "year": 1994,
+          "type": "RCT",
+          "finding": "In 29,133 male smokers, 20 mg beta-carotene a day raised lung cancer risk by 18%.",
+          "url": "https://ods.od.nih.gov/factsheets/VitaminA-HealthProfessional/"
+        },
+        {
+          "title": "Antioxidant supplements for prevention of mortality in healthy participants and patients with various diseases",
+          "year": 2012,
+          "type": "Cochrane review",
+          "finding": "In this review of 78 trials, beta-carotene slightly raised death rates (by 5%), and high doses of vitamin A may too.",
+          "url": "https://cochranelibrary.com/cdsr/doi/10.1002/14651858.CD007176.pub2/pdf/CDSR/CD007176/CD007176_abstract.pdf"
+        },
+        {
+          "title": "Scientific opinion on the tolerable upper intake level for preformed vitamin A and beta-carotene (EFSA)",
+          "year": 2024,
+          "type": "guideline",
+          "finding": "Kept 3,000 µg a day for all adults, based on the risk of birth defects. Smokers should avoid beta-carotene supplements.",
+          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11154838"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 900,
+      "female": 700,
+      "basis": "rda",
+      "why": "Extra vitamin A has no proven benefit and can cause harm. Only above this with a blood test and a doctor's advice."
+    },
+    "timing": {
+      "withFood": true,
+      "fatSoluble": true,
+      "bestTime": "with_meal",
+      "splitAbove": null,
+      "separateFrom": [
+        {
+          "what": "orlistat (weight-loss medicine)",
+          "hours": 2,
+          "why": "It blocks fat absorption, so you absorb less of this vitamin. Take vitamins at least 2 hours apart, for example at bedtime."
+        }
+      ]
+    },
+    "forms": {
+      "better": [],
+      "notes": "Supplements use retinyl acetate, retinyl palmitate, beta-carotene or a mix. Retinyl forms work fully but count toward the safe limit. Beta-carotene is not known to cause birth defects and does not count toward the limit. But smokers and former smokers should avoid it, and EFSA says it should only be used to meet vitamin A needs."
+    },
+    "interactions": [
+      {
+        "with": "orlistat (weight-loss medicine)",
+        "severity": "moderate",
+        "effect": "Lowers how much vitamin A and beta-carotene you absorb.",
+        "action": "Take vitamins at least 2 hours before or after it, for example at bedtime."
+      },
+      {
+        "with": "retinoid medicines such as acitretin or bexarotene",
+        "severity": "high",
+        "effect": "Taken with vitamin A supplements, they raise the risk of vitamin A overload.",
+        "action": "Do not take vitamin A supplements with these medicines unless your doctor says so."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "pregnancy",
+        "action": "avoid",
+        "why": "Too much preformed vitamin A can cause birth defects. Avoid liver and high-dose vitamin A supplements, and use only a pregnancy supplement your midwife or doctor approves."
+      },
+      {
+        "condition": "trying_to_conceive",
+        "action": "avoid",
+        "why": "The risk to a baby is highest in the first weeks, often before you know you are pregnant. Avoid liver and high-dose vitamin A supplements."
+      },
+      {
+        "condition": "breastfeeding",
+        "action": "caution",
+        "why": "Your need rises to 1,300 µg a day. Still avoid high-dose vitamin A supplements (over 3,000 µg)."
+      },
+      {
+        "condition": "smoker",
+        "action": "avoid",
+        "why": "Supplements with beta-carotene raised lung cancer risk in smokers and former smokers. Avoid them."
+      },
+      {
+        "condition": "liver_disease",
+        "action": "doctor_first",
+        "why": "Liver disease makes vitamin A harm more likely. Only take vitamin A supplements if your doctor advises it."
+      },
+      {
+        "condition": "osteoporosis",
+        "action": "caution",
+        "why": "Over many years, more than 1,500 µg a day may weaken bones. Keep preformed vitamin A below this."
+      },
+      {
+        "condition": "menopause",
+        "action": "caution",
+        "why": "Over many years, more than 1,500 µg a day may weaken bones. Keep preformed vitamin A below this."
+      },
+      {
+        "condition": "age_65_plus",
+        "action": "caution",
+        "why": "Older adults, especially women, should keep long-term vitamin A below 1,500 µg a day to protect bones."
+      },
+      {
+        "condition": "inflammatory_bowel_disease",
+        "action": "check_level",
+        "why": "Crohn's disease and colitis can cause low vitamin A. Ask your doctor about a check."
+      },
+      {
+        "condition": "coeliac",
+        "action": "check_level",
+        "why": "Newly diagnosed coeliac disease can cause low vitamin A. Ask your doctor about a check."
+      }
+    ],
+    "deficiencySigns": [
+      "Poor vision in dim light (night blindness)",
+      "Dry eyes",
+      "More frequent or more serious infections"
+    ],
+    "excessSigns": [
+      "Severe headache and blurred vision",
+      "Nausea and dizziness",
+      "Aching muscles and joints",
+      "Dry skin",
+      "Tiredness and low mood",
+      "Abnormal liver blood tests",
+      "Birth defects if high doses are taken in pregnancy",
+      "Harmless yellow-orange skin from a lot of beta-carotene"
+    ],
+    "foodSources": [
+      {
+        "food": "Beef liver, pan fried",
+        "serving": "3 oz (85 g)",
+        "amount": 6582
+      },
+      {
+        "food": "Sweet potato, baked in skin",
+        "serving": "1 whole",
+        "amount": 1403
+      },
+      {
+        "food": "Spinach, frozen, boiled",
+        "serving": "1/2 cup",
+        "amount": 573
+      },
+      {
+        "food": "Carrots, raw",
+        "serving": "1/2 cup",
+        "amount": 459
+      },
+      {
+        "food": "Cantaloupe melon, raw",
+        "serving": "1/2 cup",
+        "amount": 135
+      },
+      {
+        "food": "Red sweet pepper, raw",
+        "serving": "1/2 cup",
+        "amount": 117
+      },
+      {
+        "food": "Mango, raw",
+        "serving": "1 whole",
+        "amount": 112
+      },
+      {
+        "food": "Egg, hard boiled",
+        "serving": "1 large",
+        "amount": 75
+      },
+      {
+        "food": "Broccoli, boiled",
+        "serving": "1/2 cup",
+        "amount": 60
+      },
+      {
+        "food": "Salmon, sockeye, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 59
+      }
+    ],
+    "lowText": "Your vitamin A is below today's target, and sweet potato, carrots, spinach and eggs are good sources.",
+    "highText": "You are near the safe daily limit for vitamin A from retinol (3,000 µg), so do not take more today.",
+    "notes": "The meter counts all vitamin A as µg RAE, but the safe limit counts only preformed vitamin A (retinol) from animal foods and supplements. Beta-carotene supplements raised lung cancer risk in smokers: by 18% in one trial and 28% in another. In a later eye study, more lung cancers occurred with beta-carotene (23 vs 11), mostly in former smokers. A US study linked more than 10,000 IU a day of vitamin A supplements in early pregnancy to more birth defects. EFSA advises eating liver no more than once a month, and not at all when pregnant or trying. People with liver disease are more easily harmed by vitamin A. EFSA (2024) kept one limit of 3,000 µg for all adults, including women after menopause. UK advice is to stay under 1,500 µg a day long term.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheets/VitaminA-HealthProfessional/",
+      "https://e-lactancia.org/media/papers/Vitamin_A_-_Health_Professional_Fact_Sheet_NIH2018.pdf",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://pmc.ncbi.nlm.nih.gov/articles/PMC11154838",
+      "https://www.qxmd.com/r/8602180",
+      "https://atbcstudy.cancer.gov/study_details.html",
+      "https://cochranelibrary.com/cdsr/doi/10.1002/14651858.CD007176.pub2/pdf/CDSR/CD007176/CD007176_abstract.pdf",
+      "https://www.cochrane.org/CD007176/antioxidant-supplements-for-prevention-of-mortality-in-healthy-participants-and-patients-with-various",
+      "https://www.rti.org/publication/teratogenicity-high-vitamin-intake",
+      "https://www.nhs.uk/conditions/vitamins-and-minerals/vitamin-a/",
+      "https://www.ncbi.nlm.nih.gov/books/NBK548165/",
+      "https://pdr.net/drug-summary/Xenical-orlistat-2101"
+    ]
+  },
+  {
+    "id": "vitamin_d",
+    "name": "Vitamin D",
+    "group": "vitamin",
+    "unit": "µg",
+    "unitNotes": "Amounts are µg of vitamin D2 or D3. 1 µg = 40 IU.",
+    "conversions": [
+      {
+        "from": "IU",
+        "to": "µg",
+        "multiply": 0.025,
+        "note": "Vitamin D2 or D3: 1 µg = 40 IU."
+      },
+      {
+        "from": "µg calcifediol (calcidiol monohydrate)",
+        "to": "µg",
+        "multiply": 2.5,
+        "note": "EFSA counts 1 µg calcifediol as 2.5 µg vitamin D, for doses up to 10 µg a day."
+      }
+    ],
+    "rda": {
+      "type": "RDA",
+      "male_19_50": 15,
+      "female_19_50": 15,
+      "male_51_plus": 15,
+      "female_51_plus": 15,
+      "pregnancy": 15,
+      "lactation": 15,
+      "source": "https://ods.od.nih.gov/factsheets/vitaminD-healthprofessional/"
+    },
+    "ul": {
+      "iom": 100,
+      "efsa": 100,
+      "efsa_year": 2023,
+      "applies_to": "total",
+      "notes": "Both limits are 100 µg (4,000 IU) a day from food and supplements, including in pregnancy. EFSA based it on extra calcium in the urine seen at 250 µg a day. Only go above it if your doctor prescribes a dose.",
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/vitaminD-healthprofessional/",
+        "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+        "https://doaj.org/article/89e387e407ab418fb297d94eb355e85b",
+        "https://iris.unimore.it/retrieve/93e3ef73-2e6b-47b4-ab51-2314ce417a8b/EFSA%20Journal%20-%202023%20-%20%20-%20Scientific%20opinion%20on%20the%20tolerable%20upper%20intake%20level%20for%20vitamin%20D%20%20including%20the%20derivation%20of.pdf"
+      ]
+    },
+    "studyRange": {
+      "low": 22.5,
+      "high": 50,
+      "goal": "General disease prevention in adults, at about 900 to 2,000 IU a day: cancer, heart disease, falls, fractures, infections and autoimmune disease.",
+      "evidence": "C",
+      "evidenceWhy": "Big trials at 2,000 IU found no effect on cancer, heart disease or fractures, with only small gains for infections and autoimmune disease.",
+      "keyStudies": [
+        {
+          "title": "Vitamin D for the prevention of disease: an Endocrine Society clinical practice guideline",
+          "year": 2024,
+          "type": "guideline",
+          "finding": "Healthy adults aged 18 to 74 need no more than the daily amount. Extra is suggested from age 75, in pregnancy and in prediabetes, taken daily rather than in big occasional doses.",
+          "url": "https://www.endocrine.org/clinical-practice-guidelines/vitamin-d-for-prevention-of-disease"
+        },
+        {
+          "title": "Vitamin D supplements and prevention of cancer and cardiovascular disease (VITAL)",
+          "year": 2019,
+          "type": "RCT",
+          "finding": "In 25,871 adults, 2,000 IU a day for about 5 years did not lower cancer or heart disease.",
+          "url": "https://www.wikijournalclub.org/wiki/VITAL"
+        },
+        {
+          "title": "Vitamin D and marine omega 3 fatty acid supplementation and incident autoimmune disease (VITAL)",
+          "year": 2022,
+          "type": "RCT",
+          "finding": "2,000 IU a day lowered new autoimmune disease by about 22% over 5 years.",
+          "url": "https://www.bmj.com/content/376/bmj-2021-066452"
+        },
+        {
+          "title": "Supplemental vitamin D and incident fractures in midlife and older adults (VITAL)",
+          "year": 2022,
+          "type": "RCT",
+          "finding": "2,000 IU a day did not lower fractures in generally healthy adults.",
+          "url": "https://www.mcmasteroptimalaging.org/full-article/PLUS/supplemental-vitamin-incident-fractures-midlife-older-adults-105839"
+        },
+        {
+          "title": "Annual high-dose oral vitamin D and falls and fractures in older women",
+          "year": 2010,
+          "type": "RCT",
+          "finding": "One 500,000 IU dose each year raised falls by 15% and fractures by 26% in women aged 70 and over.",
+          "url": "https://researchonline.lshtm.ac.uk/id/eprint/4649084"
+        },
+        {
+          "title": "Monthly high-dose vitamin D treatment for the prevention of functional decline",
+          "year": 2016,
+          "type": "RCT",
+          "finding": "In 200 adults over 70, 60,000 IU a month led to more falls than 24,000 IU a month.",
+          "url": "https://pharmaceutical-journal.com/article/news/higher-doses-of-vitamin-d-heighten-risk-of-falls-in-older-people"
+        },
+        {
+          "title": "Vitamin D supplementation to prevent acute respiratory tract infections: systematic review and meta-analysis of individual participant data",
+          "year": 2017,
+          "type": "meta-analysis",
+          "finding": "Daily or weekly vitamin D slightly lowered colds and chest infections, but large single doses did not.",
+          "url": "https://www.bmj.com/content/356/bmj.i6583"
+        },
+        {
+          "title": "Bolland, Grey and Avenell meta-analysis of vitamin D and bone health (Lancet Diabetes and Endocrinology)",
+          "year": 2018,
+          "type": "meta-analysis",
+          "finding": "Across 81 trials, vitamin D did not meaningfully lower fractures or falls, at high or low doses.",
+          "url": "https://ajmc.com/newsroom/large-review-finds-vitamin-d-ineffective-in-preventing-fractures-falls-"
+        },
+        {
+          "title": "Vitamin D and risk for type 2 diabetes in people with prediabetes: a systematic review and meta-analysis of individual participant data from 3 randomized clinical trials",
+          "year": 2023,
+          "type": "meta-analysis",
+          "finding": "In 3 trials of people with prediabetes, vitamin D lowered the chance of getting diabetes by 15%.",
+          "url": "https://d2dstudy.org/wp-content/uploads/2024/02/2023-Pittas-AnnInternMed-vitamin-D-and-t2DM-IPD.pdf"
+        },
+        {
+          "title": "Vitamin D supplementation and prevention of type 2 diabetes (D2d)",
+          "year": 2019,
+          "type": "RCT",
+          "finding": "4,000 IU a day in prediabetes did not significantly lower diabetes risk in this trial alone.",
+          "url": "https://d2dstudy.org/wp-content/uploads/2024/02/2019-Pittas-NEJM-Vitamin-D-supplementation-and-prevention-of-type-2-diabetes.pdf"
+        },
+        {
+          "title": "Effects of intermittent overload doses of oral vitamin D3 on serum 25(OH)D concentrations and the incidence rates of fractures, falls, and mortality in elderly individuals: a systematic review and meta-analysis",
+          "year": 2024,
+          "type": "meta-analysis",
+          "finding": "Across 14 trials, big monthly doses did not lower falls or fractures, and the authors did not recommend them.",
+          "url": "https://doaj.org/article/05205ef510074336b887b955b3e3bae2"
+        },
+        {
+          "title": "Scientific opinion on the tolerable upper intake level for vitamin D, including the derivation of a conversion factor for calcidiol monohydrate (EFSA)",
+          "year": 2023,
+          "type": "guideline",
+          "finding": "Kept 100 µg (4,000 IU) a day for adults, based on extra calcium in the urine at 250 µg a day.",
+          "url": "https://doaj.org/article/89e387e407ab418fb297d94eb355e85b"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 15,
+      "female": 15,
+      "basis": "rda",
+      "why": "Guidelines say healthy adults under 75 need only the daily amount: 15 µg, or 20 µg from age 71. Take more only with a blood test and a doctor's advice."
+    },
+    "timing": {
+      "withFood": true,
+      "fatSoluble": true,
+      "bestTime": "with_meal",
+      "splitAbove": null,
+      "separateFrom": [
+        {
+          "what": "orlistat (weight-loss medicine)",
+          "hours": 2,
+          "why": "It blocks fat absorption, so you absorb less of this vitamin. Take vitamins at least 2 hours apart, for example at bedtime."
+        }
+      ]
+    },
+    "forms": {
+      "better": [
+        "vitamin D3 (cholecalciferol)"
+      ],
+      "notes": "D3 raises blood levels more, and keeps them up longer, than D2. Small daily doses are better than large monthly or yearly doses."
+    },
+    "interactions": [
+      {
+        "with": "orlistat (weight-loss medicine)",
+        "severity": "moderate",
+        "effect": "Lowers how much vitamin D you absorb.",
+        "action": "Take vitamins at least 2 hours before or after it, for example at bedtime."
+      },
+      {
+        "with": "statins (atorvastatin, lovastatin, simvastatin)",
+        "severity": "low",
+        "effect": "High vitamin D doses might make these statins work less well.",
+        "action": "Keep to the daily amount, or ask your doctor."
+      },
+      {
+        "with": "steroid tablets such as prednisone",
+        "severity": "moderate",
+        "effect": "Can weaken vitamin D's effect in the body.",
+        "action": "Ask your doctor whether you need a blood test or more vitamin D."
+      },
+      {
+        "with": "thiazide water pills",
+        "severity": "moderate",
+        "effect": "Raise the chance of high blood calcium when taken with vitamin D.",
+        "action": "Ask your doctor before taking more than the daily amount."
+      },
+      {
+        "with": "digoxin (heart medicine)",
+        "severity": "high",
+        "effect": "Calcium plus vitamin D can make digoxin's effects stronger.",
+        "action": "Only take calcium with vitamin D if your doctor agrees. They may check your calcium."
+      },
+      {
+        "with": "seizure medicines such as phenytoin or phenobarbital",
+        "severity": "moderate",
+        "effect": "Can weaken vitamin D's effect in the body.",
+        "action": "Ask your doctor about a blood test."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "pregnancy",
+        "action": "doctor_first",
+        "why": "Guidelines suggest a daily vitamin D supplement in pregnancy. Your midwife or doctor will advise the dose."
+      },
+      {
+        "condition": "prediabetes",
+        "action": "doctor_first",
+        "why": "Trials used about 3,500 to 4,000 IU a day to lower diabetes risk. Agree any dose above the daily amount with your doctor."
+      },
+      {
+        "condition": "age_65_plus",
+        "action": "may_need_more",
+        "why": "From age 71 the daily need rises to 20 µg (800 IU). Guidelines suggest a daily supplement from age 75."
+      },
+      {
+        "condition": "low_vitamin_d",
+        "action": "check_level",
+        "why": "A blood test shows how low you are. Doses to correct a low level are higher than the meter, and your doctor should set them."
+      },
+      {
+        "condition": "kidney_disease",
+        "action": "doctor_first",
+        "why": "Your kidneys help activate vitamin D and control calcium. Let your doctor set the dose."
+      },
+      {
+        "condition": "kidney_stones",
+        "action": "caution",
+        "why": "High calcium with vitamin D has been linked to more kidney stones. Keep to the daily amount unless your doctor advises more."
+      },
+      {
+        "condition": "high_blood_pressure",
+        "action": "caution",
+        "why": "Some water pills for blood pressure (thiazides) can raise blood calcium with vitamin D. Ask your doctor before going above the daily amount."
+      },
+      {
+        "condition": "osteoporosis",
+        "action": "doctor_first",
+        "why": "Your doctor may already include vitamin D in your bone care. Follow the dose they give."
+      },
+      {
+        "condition": "bariatric_surgery",
+        "action": "check_level",
+        "why": "Gastric bypass can lead to low vitamin D. Ask about regular blood tests."
+      },
+      {
+        "condition": "inflammatory_bowel_disease",
+        "action": "check_level",
+        "why": "Crohn's disease and colitis can reduce vitamin D absorption. Ask about a blood test."
+      },
+      {
+        "condition": "coeliac",
+        "action": "check_level",
+        "why": "Coeliac disease can reduce vitamin D absorption. Ask about a blood test."
+      },
+      {
+        "condition": "liver_disease",
+        "action": "check_level",
+        "why": "Some liver diseases reduce fat absorption, which can lower vitamin D. Ask about a blood test."
+      },
+      {
+        "condition": "epilepsy",
+        "action": "check_level",
+        "why": "Some seizure medicines can weaken vitamin D's effect. Ask your doctor about a blood test."
+      },
+      {
+        "condition": "heart_disease",
+        "action": "caution",
+        "why": "If you take digoxin, calcium with vitamin D can make it stronger. Ask your doctor first."
+      }
+    ],
+    "deficiencySigns": [
+      "Bone pain",
+      "Weak bones that break more easily",
+      "Muscle spasms from low calcium"
+    ],
+    "excessSigns": [
+      "Nausea and vomiting",
+      "Loss of appetite",
+      "Strong thirst and passing a lot of urine",
+      "Muscle weakness",
+      "Confusion",
+      "Kidney stones",
+      "High blood calcium"
+    ],
+    "foodSources": [
+      {
+        "food": "Cod liver oil",
+        "serving": "1 tablespoon",
+        "amount": 34
+      },
+      {
+        "food": "Rainbow trout, farmed, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 16.2
+      },
+      {
+        "food": "Salmon, sockeye, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 14.2
+      },
+      {
+        "food": "White mushrooms, UV-exposed, raw, sliced",
+        "serving": "1/2 cup",
+        "amount": 9.2
+      },
+      {
+        "food": "Milk, 2%, vitamin D fortified",
+        "serving": "1 cup",
+        "amount": 2.9
+      },
+      {
+        "food": "Sardines, canned in oil, drained",
+        "serving": "2 sardines",
+        "amount": 1.2
+      },
+      {
+        "food": "Egg, scrambled",
+        "serving": "1 large",
+        "amount": 1.1
+      },
+      {
+        "food": "Beef liver, braised",
+        "serving": "3 oz (85 g)",
+        "amount": 1.0
+      }
+    ],
+    "lowText": "Your vitamin D is below today's target, and oily fish, eggs, fortified milk and some safe sun can help.",
+    "highText": "You are near the vitamin D safe limit (100 µg or 4,000 IU), so take no more today unless your doctor prescribed it.",
+    "notes": "1 µg = 40 IU. Adults over 70 need 20 µg (800 IU) a day. The 2024 Endocrine Society guideline says healthy adults aged 18 to 74 need no more than the daily amount. It also advises against routine blood tests for them. In VITAL, 2,000 IU a day did not lower cancer or heart disease. It hinted at fewer cancer deaths after the first 2 years, but this was not a main result. The drop in autoimmune disease was also clearer after the first 2 years. Take vitamin D daily, not in big doses. One 500,000 IU dose a year raised falls and fractures. A dose of 60,000 IU a month raised falls. A 2024 review of monthly high doses found no overall rise in falls, but its authors still did not recommend them. The safe limit is a daily average, so a weekly dose prescribed by a doctor will look high on the day it is taken. Blood levels below 30 nmol/L (12 ng/mL) are low. Levels of 50 nmol/L (20 ng/mL) or more are enough for most people. Levels above 125 nmol/L (50 ng/mL) may cause harm. People with obesity or darker skin may need more. People with sarcoidosis or other conditions that raise calcium should ask a doctor before taking vitamin D. UK advice is 10 µg a day, especially in autumn and winter.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheets/vitaminD-healthprofessional/",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://doaj.org/article/89e387e407ab418fb297d94eb355e85b",
+      "https://iris.unimore.it/retrieve/93e3ef73-2e6b-47b4-ab51-2314ce417a8b/EFSA%20Journal%20-%202023%20-%20%20-%20Scientific%20opinion%20on%20the%20tolerable%20upper%20intake%20level%20for%20vitamin%20D%20%20including%20the%20derivation%20of.pdf",
+      "https://www.endocrine.org/clinical-practice-guidelines/vitamin-d-for-prevention-of-disease",
+      "https://www.wikijournalclub.org/wiki/VITAL",
+      "https://www.tctmd.com/news/vital-no-benefits-vitamin-d-and-omega-3s-reducing-major-cv-events-cancer",
+      "https://www.bmj.com/content/376/bmj-2021-066452",
+      "https://hospitalpharmacyeurope.com/clinical/rheumatology/vitamin-d-and-omega-3-fatty-acids-reduce-development-of-autoimmune-diseases/",
+      "https://www.mcmasteroptimalaging.org/full-article/PLUS/supplemental-vitamin-incident-fractures-midlife-older-adults-105839",
+      "https://researchonline.lshtm.ac.uk/id/eprint/4649084",
+      "https://pharmaceutical-journal.com/article/news/higher-doses-of-vitamin-d-heighten-risk-of-falls-in-older-people",
+      "https://www.bmj.com/content/356/bmj.i6583",
+      "https://ajmc.com/newsroom/large-review-finds-vitamin-d-ineffective-in-preventing-fractures-falls-",
+      "https://d2dstudy.org/wp-content/uploads/2024/02/2023-Pittas-AnnInternMed-vitamin-D-and-t2DM-IPD.pdf",
+      "https://d2dstudy.org/wp-content/uploads/2024/02/2019-Pittas-NEJM-Vitamin-D-supplementation-and-prevention-of-type-2-diabetes.pdf",
+      "https://doaj.org/article/05205ef510074336b887b955b3e3bae2",
+      "https://www.nhs.uk/conditions/vitamins-and-minerals/vitamin-d/",
+      "https://gpnotebook.com/pages/nutrition/vitamin-d/interaction-of-some-drugs-and-vitamin-d-supplementation",
+      "https://pdr.net/drug-summary/Xenical-orlistat-2101"
+    ]
+  },
+  {
+    "id": "vitamin_e",
+    "name": "Vitamin E",
+    "group": "vitamin",
+    "unit": "mg",
+    "unitNotes": "Amounts are mg of alpha-tocopherol. Natural (d-alpha) and synthetic (dl-alpha) forms convert differently. Keep two totals: 'mg' fills the meter, and 'mg_ul' is checked against the safe limit (they are the same except for synthetic vitamin E).",
+    "conversions": [
+      {
+        "from": "IU (natural, d-alpha-tocopherol or RRR)",
+        "to": "mg",
+        "multiply": 0.67,
+        "note": "Natural form: 1 IU = 0.67 mg. Use for both the meter and the safe limit."
+      },
+      {
+        "from": "IU (synthetic, dl-alpha-tocopherol or all-rac)",
+        "to": "mg",
+        "multiply": 0.45,
+        "note": "Synthetic form, for the daily meter only: 1 IU = 0.45 mg, because only half of it is active."
+      },
+      {
+        "from": "IU (synthetic, dl-alpha-tocopherol or all-rac)",
+        "to": "mg_ul",
+        "multiply": 0.91,
+        "note": "Synthetic form, for the safe-limit check: EFSA and the US count all of it, so 1 IU = 0.91 mg and 400 IU = about 364 mg."
+      },
+      {
+        "from": "mg d-alpha-tocopheryl acetate (natural)",
+        "to": "mg",
+        "multiply": 0.91,
+        "note": "Label shows mg of the acetate form. Use for both the meter and the safe limit."
+      },
+      {
+        "from": "mg d-alpha-tocopheryl succinate (natural)",
+        "to": "mg",
+        "multiply": 0.81,
+        "note": "Label shows mg of the succinate form. Use for both the meter and the safe limit."
+      },
+      {
+        "from": "mg dl-alpha-tocopheryl acetate (synthetic)",
+        "to": "mg",
+        "multiply": 0.45,
+        "note": "1 mg of synthetic acetate = 1 IU. Daily meter only."
+      },
+      {
+        "from": "mg dl-alpha-tocopheryl acetate (synthetic)",
+        "to": "mg_ul",
+        "multiply": 0.91,
+        "note": "1 mg of synthetic acetate = 1 IU. Use this for the safe-limit check."
+      },
+      {
+        "from": "mg alpha-tocopherol on label (any form)",
+        "to": "mg",
+        "multiply": 1,
+        "note": "If a label lists vitamin E only as mg of alpha-tocopherol, use that number for the meter."
+      },
+      {
+        "from": "mg alpha-tocopherol on label, synthetic (dl-alpha) form",
+        "to": "mg_ul",
+        "multiply": 2.02,
+        "note": "Cautious safe-limit count for synthetic vitamin E: 1 label mg = 2.22 IU = about 2.02 mg. Example: 180 mg (400 IU) dl-alpha counts as about 364 mg. This may over-count some labels, which is the safe side."
+      }
+    ],
+    "rda": {
+      "type": "RDA",
+      "male_19_50": 15,
+      "female_19_50": 15,
+      "male_51_plus": 15,
+      "female_51_plus": 15,
+      "pregnancy": 15,
+      "lactation": 19,
+      "source": "https://ods.od.nih.gov/factsheets/vitamine-healthprofessional/"
+    },
+    "ul": {
+      "iom": 1000,
+      "efsa": 300,
+      "efsa_year": 2024,
+      "applies_to": "total",
+      "notes": "EFSA (2024): 300 mg a day from food and supplements, counting all forms. That is about 450 IU of natural or 330 IU of synthetic vitamin E. US: 1,000 mg a day from supplements only (1,500 IU natural or 1,100 IU synthetic). Use the lower EFSA limit. EFSA says its limit does not cover people on blood thinners or aspirin, people with heart disease, or people who absorb vitamin K poorly. These people need their doctor's advice.",
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/vitamine-healthprofessional/",
+        "https://pubmed.ncbi.nlm.nih.gov/39099617/",
+        "https://iris.unimore.it//retrieve/handle/11380/1357527/700268/EFSA%20Journal%20-%202024%20-%20%20-%20Scientific%20opinion%20on%20the%20tolerable%20upper%20intake%20level%20for%20vitamin%20E.pdf",
+        "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf"
+      ]
+    },
+    "studyRange": {
+      "low": null,
+      "high": null,
+      "goal": "Trials used 50 mg to 400 IU a day to try to prevent heart disease and cancer. None showed a benefit, so no study dose is given.",
+      "evidence": "C",
+      "evidenceWhy": "Big trials found no benefit, and 400 IU a day raised prostate cancer and bleeding stroke risk.",
+      "keyStudies": [
+        {
+          "title": "Vitamin E and the risk of prostate cancer (SELECT)",
+          "year": 2011,
+          "type": "RCT",
+          "finding": "In 34,887 healthy men, 400 IU a day of synthetic vitamin E raised prostate cancer risk by 17%.",
+          "url": "https://scholars.duke.edu/publication/804805"
+        },
+        {
+          "title": "Physicians' Health Study II, vitamin E arm (as summarised by NIH)",
+          "year": 2008,
+          "type": "RCT",
+          "finding": "400 IU every other day for 8 years did not lower heart disease events and was linked to more bleeding strokes.",
+          "url": "https://ods.od.nih.gov/factsheets/vitamine-healthprofessional/"
+        },
+        {
+          "title": "HOPE and HOPE-TOO trials, vitamin E arm (as summarised by NIH)",
+          "year": 2005,
+          "type": "RCT",
+          "finding": "400 IU a day of natural vitamin E did not prevent heart events and raised heart failure by 13%.",
+          "url": "https://ods.od.nih.gov/factsheets/vitamine-healthprofessional/"
+        },
+        {
+          "title": "Meta-analysis: high-dosage vitamin E supplementation may increase all-cause mortality",
+          "year": 2005,
+          "type": "meta-analysis",
+          "finding": "In 19 trials, 400 IU a day or more was linked to slightly more deaths, with risk starting above 150 IU.",
+          "url": "https://www.qxmd.com/r/15537682"
+        },
+        {
+          "title": "Antioxidant supplements for prevention of mortality in healthy participants and patients with various diseases",
+          "year": 2012,
+          "type": "Cochrane review",
+          "finding": "In well-run trials, vitamin E supplements slightly raised death rates (by 3%).",
+          "url": "https://cochranelibrary.com/cdsr/doi/10.1002/14651858.CD007176.pub2/pdf/CDSR/CD007176/CD007176_abstract.pdf"
+        },
+        {
+          "title": "Scientific opinion on the tolerable upper intake level for vitamin E (EFSA)",
+          "year": 2024,
+          "type": "guideline",
+          "finding": "Kept 300 mg a day for adults, based on bleeding risk. The limit does not apply to people on blood thinners or aspirin.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/39099617/"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 15,
+      "female": 15,
+      "basis": "rda",
+      "why": "Extra vitamin E showed no benefit and some harm in trials. Only above this with a blood test and a doctor's advice."
+    },
+    "timing": {
+      "withFood": true,
+      "fatSoluble": true,
+      "bestTime": "with_meal",
+      "splitAbove": null,
+      "separateFrom": [
+        {
+          "what": "orlistat (weight-loss medicine)",
+          "hours": 2,
+          "why": "It blocks fat absorption, so you absorb less of this vitamin. Take vitamins at least 2 hours apart, for example at bedtime."
+        }
+      ]
+    },
+    "forms": {
+      "better": [
+        "natural vitamin E (d-alpha-tocopherol, also called RRR)"
+      ],
+      "notes": "Synthetic vitamin E (dl-alpha) is only half as active per mg. The acetate and succinate forms are absorbed as well as plain vitamin E."
+    },
+    "interactions": [
+      {
+        "with": "warfarin, other blood thinners and antiplatelet medicines, including aspirin",
+        "severity": "high",
+        "effect": "Large doses of vitamin E can raise the risk of bleeding.",
+        "action": "Do not take vitamin E supplements unless your doctor agrees."
+      },
+      {
+        "with": "chemotherapy and radiotherapy",
+        "severity": "moderate",
+        "effect": "Antioxidants might make cancer treatment work less well.",
+        "action": "Ask your cancer team before taking it."
+      },
+      {
+        "with": "a statin taken with niacin",
+        "severity": "low",
+        "effect": "An antioxidant mix with vitamin E blunted the rise in good (HDL) cholesterol.",
+        "action": "Ask your doctor if you take this combination."
+      },
+      {
+        "with": "orlistat (weight-loss medicine)",
+        "severity": "moderate",
+        "effect": "Lowers how much vitamin E you absorb.",
+        "action": "Take vitamins at least 2 hours before or after it, for example at bedtime."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "blood_thinners",
+        "action": "doctor_first",
+        "why": "Vitamin E can thin the blood. On blood thinners or daily aspirin, only take a supplement if your doctor agrees."
+      },
+      {
+        "condition": "upcoming_surgery",
+        "action": "avoid",
+        "why": "Stop vitamin E supplements 2 weeks before surgery, as they may raise bleeding risk. Tell your surgeon what you take."
+      },
+      {
+        "condition": "recent_surgery",
+        "action": "doctor_first",
+        "why": "Ask your surgeon when it is safe to restart vitamin E."
+      },
+      {
+        "condition": "heart_disease",
+        "action": "doctor_first",
+        "why": "Vitamin E did not prevent heart problems in trials, and one trial found more heart failure. Ask your doctor first."
+      },
+      {
+        "condition": "cancer_treatment",
+        "action": "doctor_first",
+        "why": "Antioxidants like vitamin E might make chemotherapy or radiotherapy work less well. Ask your cancer team first."
+      },
+      {
+        "condition": "type_1_diabetes",
+        "action": "doctor_first",
+        "why": "Medical advice is to check with your doctor before taking vitamin E if you have diabetes."
+      },
+      {
+        "condition": "type_2_diabetes",
+        "action": "doctor_first",
+        "why": "Medical advice is to check with your doctor before taking vitamin E if you have diabetes."
+      },
+      {
+        "condition": "liver_disease",
+        "action": "doctor_first",
+        "why": "Medical advice is to check with your doctor before taking vitamin E if you have liver disease."
+      },
+      {
+        "condition": "inflammatory_bowel_disease",
+        "action": "check_level",
+        "why": "Crohn's disease can reduce fat absorption, which can lead to low vitamin E."
+      },
+      {
+        "condition": "smoker",
+        "action": "caution",
+        "why": "In a trial of smokers, 50 mg a day was linked to more bleeding strokes. Keep to the daily need."
+      }
+    ],
+    "deficiencySigns": [
+      "Numbness or tingling in hands and feet",
+      "Poor balance and coordination",
+      "Muscle weakness",
+      "Eye and vision problems",
+      "Weaker immune response"
+    ],
+    "excessSigns": [
+      "Bleeding more easily, as blood clots less well",
+      "Higher risk of a bleeding stroke"
+    ],
+    "foodSources": [
+      {
+        "food": "Wheat germ oil",
+        "serving": "1 tablespoon",
+        "amount": 20.3
+      },
+      {
+        "food": "Sunflower seeds, dry roasted",
+        "serving": "1 oz (28 g)",
+        "amount": 7.4
+      },
+      {
+        "food": "Almonds, dry roasted",
+        "serving": "1 oz (28 g)",
+        "amount": 6.8
+      },
+      {
+        "food": "Sunflower oil",
+        "serving": "1 tablespoon",
+        "amount": 5.6
+      },
+      {
+        "food": "Safflower oil",
+        "serving": "1 tablespoon",
+        "amount": 4.6
+      },
+      {
+        "food": "Hazelnuts, dry roasted",
+        "serving": "1 oz (28 g)",
+        "amount": 4.3
+      },
+      {
+        "food": "Peanut butter",
+        "serving": "2 tablespoons",
+        "amount": 2.9
+      }
+    ],
+    "lowText": "Your vitamin E is below today's target, and nuts, seeds and plant oils are good sources.",
+    "highText": "You are near the safe daily limit for vitamin E (300 mg), and more can raise bleeding risk, so do not take more today.",
+    "notes": "Natural vitamin E (d-alpha) is twice as strong per mg as synthetic (dl-alpha) for meeting your needs. EFSA counts every form toward the safe limit. So 400 IU of synthetic vitamin E is about 180 mg on the meter, but about 364 mg toward the limit. That is over 300 mg. If you cannot tell how a label counts synthetic vitamin E, use the higher number for the limit. In the SELECT trial, 400 IU a day of synthetic vitamin E raised prostate cancer risk by 17% in healthy men. Trials in smokers (50 mg a day) and in male doctors (400 IU every other day) found more bleeding strokes. A review of 19 trials linked 400 IU a day or more to slightly more deaths. UK advice says up to 540 mg a day from supplements is unlikely to harm; this file uses EFSA's lower 300 mg limit. Low vitamin E is mostly seen in people who cannot absorb fat well. Stop vitamin E supplements 2 weeks before surgery.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheets/vitamine-healthprofessional/",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://pubmed.ncbi.nlm.nih.gov/39099617/",
+      "https://iris.unimore.it//retrieve/handle/11380/1357527/700268/EFSA%20Journal%20-%202024%20-%20%20-%20Scientific%20opinion%20on%20the%20tolerable%20upper%20intake%20level%20for%20vitamin%20E.pdf",
+      "https://scholars.duke.edu/publication/804805",
+      "https://www.qxmd.com/r/15537682",
+      "https://cochranelibrary.com/cdsr/doi/10.1002/14651858.CD007176.pub2/pdf/CDSR/CD007176/CD007176_abstract.pdf",
+      "https://www.cochrane.org/CD007176/antioxidant-supplements-for-prevention-of-mortality-in-healthy-participants-and-patients-with-various",
+      "https://atbcstudy.cancer.gov/study_details.html",
+      "https://www.mayoclinic.org/drugs-supplements-vitamin-e/art-20364144",
+      "https://www.nhs.uk/conditions/vitamins-and-minerals/vitamin-e/",
+      "https://pdr.net/drug-summary/Xenical-orlistat-2101"
+    ]
+  },
+  {
+    "id": "vitamin_k",
+    "name": "Vitamin K",
+    "group": "vitamin",
+    "unit": "µg",
+    "unitNotes": "Amounts are µg of vitamin K1 and K2 (MK-4, MK-7) added together.",
+    "conversions": [
+      {
+        "from": "mg",
+        "to": "µg",
+        "multiply": 1000,
+        "note": "Some labels (for example MK-4) list mg. 1 mg = 1,000 µg."
+      }
+    ],
+    "rda": {
+      "type": "AI",
+      "male_19_50": 120,
+      "female_19_50": 90,
+      "male_51_plus": 120,
+      "female_51_plus": 90,
+      "pregnancy": 90,
+      "lactation": 90,
+      "source": "https://ods.od.nih.gov/factsheets/VitaminK-HealthProfessional/"
+    },
+    "ul": {
+      "iom": null,
+      "efsa": null,
+      "efsa_year": null,
+      "applies_to": "total",
+      "notes": "No upper limit has been set. US experts saw no harm from food or supplements, and EU experts (in 2003) found too little data. The real risk is for people on warfarin-type blood thinners.",
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/VitaminK-HealthProfessional/",
+        "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf"
+      ]
+    },
+    "studyRange": {
+      "low": 180,
+      "high": 500,
+      "goal": "Slowing bone loss after menopause (MK-7, 180 µg) and slowing calcium build-up in heart arteries (K1, 500 µg).",
+      "evidence": "C",
+      "evidenceWhy": "Single trials with mixed results, and no proven drop in fractures outside Japan.",
+      "keyStudies": [
+        {
+          "title": "Three-year low-dose menaquinone-7 supplementation helps decrease bone loss in healthy postmenopausal women",
+          "year": 2013,
+          "type": "RCT",
+          "finding": "In 244 women after menopause, 180 µg MK-7 a day for 3 years slowed bone loss at the spine and hip neck.",
+          "url": "https://link.springer.com/article/10.1007/s00198-013-2325-6"
+        },
+        {
+          "title": "Vitamin K supplementation and progression of coronary artery calcium in older men and women",
+          "year": 2009,
+          "type": "RCT",
+          "finding": "500 µg K1 a day for 3 years did not slow artery calcium overall, only in people who took it reliably.",
+          "url": "https://www.nutraingredients.com/Article/2009/05/26/Study-strengthens-Vitamin-K1-s-heart-benefits/"
+        },
+        {
+          "title": "Vitamin K and the prevention of fractures: systematic review and meta-analysis of randomized controlled trials",
+          "year": 2006,
+          "type": "meta-analysis",
+          "finding": "Japanese trials of 45 mg MK-4 a day showed fewer fractures, but some of these trials were later questioned.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/16801507/"
+        },
+        {
+          "title": "Vitamin K-containing dietary supplements: comparison of synthetic vitamin K1 and natto-derived menaquinone-7",
+          "year": 2007,
+          "type": "pharmacokinetic study",
+          "finding": "MK-7 stays in the blood much longer than K1, and 50 µg a day or more may upset blood thinner treatment.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/17158229/"
+        },
+        {
+          "title": "Vitamin K for improved anticoagulation control in patients receiving warfarin",
+          "year": 2014,
+          "type": "Cochrane review",
+          "finding": "Two small trials of 150 to 175 µg a day gave too little evidence that it steadies warfarin.",
+          "url": "https://www.cochrane.org/CD009917/PVD_vitamin-k-improved-anticoagulation-control-patients-receiving-warfarin"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 120,
+      "female": 90,
+      "basis": "ai",
+      "why": "Higher doses had mixed results in trials, so the meter fills to the daily need."
+    },
+    "timing": {
+      "withFood": true,
+      "fatSoluble": true,
+      "bestTime": "with_meal",
+      "splitAbove": null,
+      "separateFrom": [
+        {
+          "what": "orlistat (weight-loss medicine)",
+          "hours": 2,
+          "why": "It blocks fat absorption, so you absorb less of this vitamin. Take vitamins at least 2 hours apart, for example at bedtime."
+        }
+      ]
+    },
+    "forms": {
+      "better": [
+        "vitamin K1 (phylloquinone)",
+        "vitamin K2 as MK-7"
+      ],
+      "notes": "Both are well absorbed from supplements. MK-7 stays in the blood longer and builds up more. The body absorbs only 4 to 17% as much K1 from spinach as from a tablet, and eating greens with some fat helps."
+    },
+    "interactions": [
+      {
+        "with": "warfarin and similar blood thinners (acenocoumarol, phenprocoumon)",
+        "severity": "high",
+        "effect": "Sudden changes in vitamin K can make these medicines work less or more.",
+        "action": "Keep your vitamin K intake steady. Never start or stop vitamin K supplements without your doctor."
+      },
+      {
+        "with": "antibiotics",
+        "severity": "low",
+        "effect": "Long courses can reduce the vitamin K made by gut bacteria.",
+        "action": "A supplement is usually not needed unless the course lasts weeks and your diet is poor. Ask your doctor."
+      },
+      {
+        "with": "cholesterol binders (cholestyramine, colestipol)",
+        "severity": "moderate",
+        "effect": "Can lower how much vitamin K you absorb.",
+        "action": "If you take them long term, ask your doctor about checking your vitamin K."
+      },
+      {
+        "with": "orlistat (weight-loss medicine)",
+        "severity": "moderate",
+        "effect": "Lowers how much vitamin K you absorb, which can change clotting tests in people on warfarin.",
+        "action": "Take vitamins at least 2 hours apart. If you also take warfarin, your doctor should check your clotting."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "blood_thinners",
+        "action": "doctor_first",
+        "why": "Vitamin K changes how warfarin-type blood thinners work. Keep intake steady and never start or stop it without your doctor."
+      },
+      {
+        "condition": "osteoporosis",
+        "action": "doctor_first",
+        "why": "Results for bones are mixed. Ask your doctor before using vitamin K for bones, and do not use it in place of bone medicine."
+      },
+      {
+        "condition": "inflammatory_bowel_disease",
+        "action": "check_level",
+        "why": "Crohn's disease and colitis can lower vitamin K absorption."
+      },
+      {
+        "condition": "coeliac",
+        "action": "check_level",
+        "why": "Coeliac disease can lower vitamin K absorption."
+      },
+      {
+        "condition": "bariatric_surgery",
+        "action": "check_level",
+        "why": "Weight-loss surgery can lower vitamin K absorption."
+      }
+    ],
+    "deficiencySigns": [
+      "Bleeding more easily",
+      "This only happens when the lack is severe"
+    ],
+    "excessSigns": [
+      "No harm has been reported from high intake in healthy people",
+      "Changes in intake can upset warfarin-type blood thinners"
+    ],
+    "foodSources": [
+      {
+        "food": "Natto (fermented soybeans)",
+        "serving": "3 oz (85 g)",
+        "amount": 850
+      },
+      {
+        "food": "Collard greens, frozen, boiled",
+        "serving": "1/2 cup",
+        "amount": 530
+      },
+      {
+        "food": "Turnip greens, frozen, boiled",
+        "serving": "1/2 cup",
+        "amount": 426
+      },
+      {
+        "food": "Spinach, raw",
+        "serving": "1 cup",
+        "amount": 145
+      },
+      {
+        "food": "Kale, raw",
+        "serving": "1 cup",
+        "amount": 113
+      },
+      {
+        "food": "Broccoli, chopped, boiled",
+        "serving": "1/2 cup",
+        "amount": 110
+      },
+      {
+        "food": "Soybean oil",
+        "serving": "1 tablespoon",
+        "amount": 25
+      },
+      {
+        "food": "Chicken breast, rotisserie",
+        "serving": "3 oz (85 g)",
+        "amount": 13
+      }
+    ],
+    "lowText": "Your vitamin K is below today's target, and leafy greens are good sources, but if you take warfarin keep your intake steady instead.",
+    "highText": "Vitamin K has no set safe limit, but if you take warfarin, keep your daily amount steady and ask your doctor before changing it.",
+    "notes": "No upper limit has been set because no harm has been seen from food or supplements. K1 comes from leafy greens and plant oils. K2 (MK-7) comes from fermented foods like natto. MK-7 stays in the blood longer, so even 50 µg a day may change how warfarin works. In Japan, 45 mg a day of MK-4 is used as a bone medicine. That is a drug dose, and some of the fracture trials behind it were later questioned. EFSA sets the adult need at 70 µg a day for everyone, lower than the US values used here.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheets/VitaminK-HealthProfessional/",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://doaj.org/article/6e6b66c4265a4cbab46215616c0729f9",
+      "https://link.springer.com/article/10.1007/s00198-013-2325-6",
+      "https://www.plthealth.com/resources/three-year-low-dose-menaquinone-7-supplementation-helps-decrease-bone-loss-in-healthy-postmenopausal-women",
+      "https://www.nutraingredients.com/Article/2009/05/26/Study-strengthens-Vitamin-K1-s-heart-benefits/",
+      "https://pubmed.ncbi.nlm.nih.gov/16801507/",
+      "https://pubmed.ncbi.nlm.nih.gov/17158229/",
+      "https://www.cochrane.org/CD009917/PVD_vitamin-k-improved-anticoagulation-control-patients-receiving-warfarin",
+      "https://pdr.net/drug-summary/Xenical-orlistat-2101"
+    ]
+  },
+  {
+    "id": "vitamin_c",
+    "name": "Vitamin C",
+    "group": "vitamin",
+    "unit": "mg",
+    "unitNotes": "Amounts are mg of vitamin C (ascorbic acid).",
+    "conversions": [
+      {
+        "from": "g",
+        "to": "mg",
+        "multiply": 1000,
+        "note": "1 g = 1,000 mg."
+      }
+    ],
+    "rda": {
+      "type": "RDA",
+      "male_19_50": 90,
+      "female_19_50": 75,
+      "male_51_plus": 90,
+      "female_51_plus": 75,
+      "pregnancy": 85,
+      "lactation": 120,
+      "source": "https://ods.od.nih.gov/factsheets/vitaminC-HealthProfessional/"
+    },
+    "ul": {
+      "iom": 2000,
+      "efsa": null,
+      "efsa_year": null,
+      "applies_to": "total",
+      "notes": "The US limit is 2,000 mg a day from food and supplements, based on stomach upset. EFSA (2004) found too little data to set a limit. Men taking 1,000 mg or more a day have a higher kidney stone risk.",
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/vitaminC-HealthProfessional/",
+        "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf"
+      ]
+    },
+    "studyRange": {
+      "low": 200,
+      "high": 1000,
+      "goal": "Shorter colds with regular daily use, and fewer colds in people under heavy physical stress.",
+      "evidence": "B",
+      "evidenceWhy": "Many trials show colds end a little sooner, and blood levels level off near 200 mg.",
+      "keyStudies": [
+        {
+          "title": "Vitamin C pharmacokinetics in healthy volunteers: evidence for a recommended dietary allowance",
+          "year": 1996,
+          "type": "pharmacokinetic study",
+          "finding": "Blood levels flattened from about 200 mg a day, cells were full at 100 mg, and doses above 400 mg added no clear value.",
+          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC39676"
+        },
+        {
+          "title": "Vitamin C for preventing and treating the common cold",
+          "year": 2013,
+          "type": "Cochrane review",
+          "finding": "Regular vitamin C (200 mg a day or more) shortened colds by 8% in adults, and halved colds in people under heavy physical stress.",
+          "url": "https://www.cochrane.org/CD000980/"
+        },
+        {
+          "title": "Antioxidant supplements for prevention of mortality in healthy participants and patients with various diseases",
+          "year": 2012,
+          "type": "Cochrane review",
+          "finding": "Vitamin C supplements did not change death rates.",
+          "url": "https://cochranelibrary.com/cdsr/doi/10.1002/14651858.CD007176.pub2/pdf/CDSR/CD007176/CD007176_abstract.pdf"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 200,
+      "female": 200,
+      "basis": "study",
+      "why": "Blood levels level off near 200 mg a day, fruit and vegetables can supply it, and regular use from 200 mg slightly shortened colds."
+    },
+    "timing": {
+      "withFood": null,
+      "fatSoluble": false,
+      "bestTime": "any",
+      "splitAbove": 500,
+      "separateFrom": []
+    },
+    "forms": {
+      "better": [
+        "ascorbic acid"
+      ],
+      "notes": "Plain ascorbic acid is the preferred form. It is absorbed as well as vitamin C from foods like orange juice and broccoli."
+    },
+    "interactions": [
+      {
+        "with": "iron from plant foods and iron tablets",
+        "severity": "low",
+        "effect": "Vitamin C helps your body absorb this iron.",
+        "action": "Helpful if you need iron. Avoid high doses if you have iron overload."
+      },
+      {
+        "with": "chemotherapy and radiotherapy",
+        "severity": "moderate",
+        "effect": "Antioxidants might protect cancer cells from treatment.",
+        "action": "Ask your cancer team before taking vitamin C, especially high doses."
+      },
+      {
+        "with": "a statin taken with niacin",
+        "severity": "low",
+        "effect": "An antioxidant mix with vitamin C blunted the rise in good (HDL) cholesterol.",
+        "action": "Ask your doctor if you take this combination."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "smoker",
+        "action": "may_need_more",
+        "why": "Smokers need 35 mg more vitamin C each day."
+      },
+      {
+        "condition": "hemochromatosis",
+        "action": "avoid",
+        "why": "Vitamin C boosts iron uptake and may worsen iron overload. Avoid supplements unless your doctor agrees."
+      },
+      {
+        "condition": "kidney_stones",
+        "action": "caution",
+        "why": "High doses (1,000 mg a day or more) are linked to more kidney stones in men. Keep to low doses."
+      },
+      {
+        "condition": "kidney_disease",
+        "action": "doctor_first",
+        "why": "With kidney problems, extra vitamin C can raise stone-forming substances in urine. Ask your doctor for a safe dose."
+      },
+      {
+        "condition": "cancer_treatment",
+        "action": "doctor_first",
+        "why": "High-dose antioxidants might affect chemotherapy or radiotherapy. Ask your cancer team first."
+      },
+      {
+        "condition": "athlete",
+        "action": "may_need_more",
+        "why": "Under heavy training, 250 to 1,000 mg a day halved colds in trials. Men should stay under 1,000 mg."
+      }
+    ],
+    "deficiencySigns": [
+      "Tiredness and feeling unwell",
+      "Swollen or bleeding gums",
+      "Small red or purple spots, and bruising easily",
+      "Joint pain",
+      "Slow wound healing",
+      "Low mood",
+      "Low iron (anaemia)",
+      "Loose teeth in severe cases"
+    ],
+    "excessSigns": [
+      "Loose stools",
+      "Nausea",
+      "Stomach cramps",
+      "Higher kidney stone risk in men at 1,000 mg a day or more"
+    ],
+    "foodSources": [
+      {
+        "food": "Red sweet pepper, raw",
+        "serving": "1/2 cup",
+        "amount": 95
+      },
+      {
+        "food": "Orange juice",
+        "serving": "3/4 cup",
+        "amount": 93
+      },
+      {
+        "food": "Orange",
+        "serving": "1 medium",
+        "amount": 70
+      },
+      {
+        "food": "Grapefruit juice",
+        "serving": "3/4 cup",
+        "amount": 70
+      },
+      {
+        "food": "Kiwifruit",
+        "serving": "1 medium",
+        "amount": 64
+      },
+      {
+        "food": "Green pepper, raw",
+        "serving": "1/2 cup",
+        "amount": 60
+      },
+      {
+        "food": "Broccoli, cooked",
+        "serving": "1/2 cup",
+        "amount": 51
+      },
+      {
+        "food": "Strawberries, sliced",
+        "serving": "1/2 cup",
+        "amount": 49
+      },
+      {
+        "food": "Brussels sprouts, cooked",
+        "serving": "1/2 cup",
+        "amount": 48
+      }
+    ],
+    "lowText": "Your vitamin C is below today's target, and peppers, citrus fruit, kiwi and broccoli are rich sources.",
+    "highText": "You are near the vitamin C safe limit (2,000 mg), and more can upset your stomach and raise kidney stone risk in men.",
+    "notes": "Blood levels rise fast up to 100 mg a day and level off from about 200 mg. Blood was fully saturated only at 1,000 mg in one study, but that study found no clear value above 400 mg a day. Single doses of 500 mg or more are absorbed less well, so split larger amounts. Regular vitamin C did not prevent colds in most people, but colds were slightly shorter. Taking it only after a cold starts did not help. In men, 1,000 mg a day or more is linked to more kidney stones. One Swedish study found twice the risk. So men should keep supplements below 1,000 mg. Smokers need 35 mg more each day. EFSA has not set an upper limit. The Linus Pauling Institute suggests 400 mg a day, higher than the target used here.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheets/vitaminC-HealthProfessional/",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://pmc.ncbi.nlm.nih.gov/articles/PMC39676",
+      "https://www.cochrane.org/CD000980/",
+      "https://cochranelibrary.com/cdsr/doi/10.1002/14651858.CD007176.pub2/pdf/CDSR/CD007176/CD007176_abstract.pdf",
+      "https://news.ki.se/vitamin-c-supplements-linked-to-kidney-stones",
+      "https://www.unboundmedicine.com/medline/citation/26463139/full_citation",
+      "https://lpi.oregonstate.edu/mic/vitamins/vitamin-C/Pauling-recommendation"
+    ]
+  },
+  {
+    "id": "choline",
+    "name": "Choline",
+    "group": "other",
+    "unit": "mg",
+    "unitNotes": "Amounts are mg of choline itself. For choline salts such as choline bitartrate, use the choline amount on the label.",
+    "conversions": [
+      {
+        "from": "g",
+        "to": "mg",
+        "multiply": 1000,
+        "note": "1 g = 1,000 mg."
+      }
+    ],
+    "rda": {
+      "type": "AI",
+      "male_19_50": 550,
+      "female_19_50": 425,
+      "male_51_plus": 550,
+      "female_51_plus": 425,
+      "pregnancy": 450,
+      "lactation": 550,
+      "source": "https://ods.od.nih.gov/factsheet/Choline-HealthProfessional/"
+    },
+    "ul": {
+      "iom": 3500,
+      "efsa": null,
+      "efsa_year": null,
+      "applies_to": "total",
+      "notes": "The US limit is 3,500 mg a day from food and supplements, based on low blood pressure and fishy body smell. EFSA has not set a limit.",
+      "sources": [
+        "https://ods.od.nih.gov/factsheet/Choline-HealthProfessional/",
+        "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf"
+      ]
+    },
+    "studyRange": {
+      "low": 480,
+      "high": 930,
+      "goal": "Baby's attention and processing speed when the mother had this total daily intake in late pregnancy.",
+      "evidence": "C",
+      "evidenceWhy": "Only one small trial of 26 women, in late pregnancy.",
+      "keyStudies": [
+        {
+          "title": "Maternal choline supplementation during the third trimester of pregnancy improves infant information processing speed: a randomized, double-blind, controlled feeding study",
+          "year": 2018,
+          "type": "RCT",
+          "finding": "In 26 pregnant women, 930 mg a day in late pregnancy gave babies faster reaction times than 480 mg.",
+          "url": "https://library.fabresearch.org/viewItem.php?id=11421"
+        },
+        {
+          "title": "Dietary reference values for choline (EFSA)",
+          "year": 2016,
+          "type": "guideline",
+          "finding": "Set the adequate intake at 400 mg a day for adults, 480 mg in pregnancy and 520 mg when breastfeeding.",
+          "url": "https://doaj.org/article/cea816344b144004ba04d2a8ac04b46d"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 550,
+      "female": 425,
+      "basis": "ai",
+      "why": "No benefit has been shown above the daily need in healthy adults."
+    },
+    "timing": {
+      "withFood": null,
+      "fatSoluble": false,
+      "bestTime": "any",
+      "splitAbove": null,
+      "separateFrom": []
+    },
+    "forms": {
+      "better": [],
+      "notes": "Supplements use choline bitartrate, phosphatidylcholine or lecithin. No form has been shown to be better. Check the label for the amount of choline itself."
+    },
+    "interactions": [],
+    "conditionFlags": [
+      {
+        "condition": "pregnancy",
+        "action": "may_need_more",
+        "why": "Most pregnant women get less than they need, and many pregnancy vitamins contain little or none."
+      },
+      {
+        "condition": "breastfeeding",
+        "action": "may_need_more",
+        "why": "The daily need rises to 550 mg while breastfeeding."
+      },
+      {
+        "condition": "liver_disease",
+        "action": "doctor_first",
+        "why": "Choline matters for the liver, but very high doses can harm it. Ask your doctor for the right amount."
+      },
+      {
+        "condition": "heart_disease",
+        "action": "caution",
+        "why": "Choline raises TMAO, a substance some studies link to heart disease, though choline intake itself was not linked. Stay at the daily need."
+      }
+    ],
+    "deficiencySigns": [
+      "Fat building up in the liver",
+      "Liver damage",
+      "Muscle damage"
+    ],
+    "excessSigns": [
+      "Fishy body smell",
+      "Vomiting",
+      "Heavy sweating and drooling",
+      "Low blood pressure, feeling faint",
+      "Liver damage"
+    ],
+    "foodSources": [
+      {
+        "food": "Beef liver, pan fried",
+        "serving": "3 oz (85 g)",
+        "amount": 356
+      },
+      {
+        "food": "Egg, hard boiled",
+        "serving": "1 large",
+        "amount": 147
+      },
+      {
+        "food": "Beef top round, lean, braised",
+        "serving": "3 oz (85 g)",
+        "amount": 117
+      },
+      {
+        "food": "Soybeans, roasted",
+        "serving": "1/2 cup",
+        "amount": 107
+      },
+      {
+        "food": "Chicken breast, roasted",
+        "serving": "3 oz (85 g)",
+        "amount": 72
+      },
+      {
+        "food": "Cod, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 71
+      },
+      {
+        "food": "Red potato, baked, with skin",
+        "serving": "1 large",
+        "amount": 57
+      },
+      {
+        "food": "Wheat germ, toasted",
+        "serving": "1 oz (28 g)",
+        "amount": 51
+      },
+      {
+        "food": "Kidney beans, canned",
+        "serving": "1/2 cup",
+        "amount": 45
+      },
+      {
+        "food": "Quinoa, cooked",
+        "serving": "1 cup",
+        "amount": 43
+      },
+      {
+        "food": "Milk, 1% fat",
+        "serving": "1 cup",
+        "amount": 43
+      }
+    ],
+    "lowText": "Your choline is below today's target, and eggs, meat, fish, soybeans and beans are good sources.",
+    "highText": "You are near the choline safe limit (3,500 mg), and more can cause a fishy body smell, sweating and low blood pressure.",
+    "notes": "A 2015 review of 13 studies, reported by NIH, found no clear memory or thinking benefit from choline supplements in healthy adults. Supplements usually contain 10 to 250 mg. About 90 to 95% of pregnant women get less than they need, and most pregnancy vitamins contain little or none. On average, US men get about 402 mg and women about 278 mg a day from food. EFSA sets the need at 400 mg a day for adults, 480 mg in pregnancy and 520 mg when breastfeeding. EFSA has not set an upper limit. Choline raises TMAO, which has been linked to heart disease, but large studies of choline intake found no link to heart disease.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheet/Choline-HealthProfessional/",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://doaj.org/article/cea816344b144004ba04d2a8ac04b46d",
+      "https://library.fabresearch.org/viewItem.php?id=11421"
+    ]
+  }
+]

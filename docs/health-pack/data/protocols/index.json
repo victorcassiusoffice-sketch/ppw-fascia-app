@@ -1,0 +1,88 @@
+{
+  "_schema": "ppw.protocol-index",
+  "_version": 1,
+  "generatedAt": "2026-10-04",
+  "protocols": [
+    {
+      "id": "daily-foundation",
+      "title": "Daily foundation",
+      "tagline": "A few simple, evidence-first basics for most healthy adults.",
+      "doctorFirst": false,
+      "evidence": "B",
+      "file": "protocols/daily-foundation.md",
+      "for": "Healthy adults who want a simple, evidence-first daily routine."
+    },
+    {
+      "id": "desk-worker-day",
+      "title": "Desk worker day",
+      "tagline": "Short, regular movement breaks for long days at a desk.",
+      "doctorFirst": false,
+      "evidence": "B",
+      "file": "protocols/desk-worker-day.md",
+      "for": "Office and remote staff who sit for long periods at work."
+    },
+    {
+      "id": "iron-repletion",
+      "title": "Iron top-up (low iron confirmed)",
+      "tagline": "Every-other-day iron, timed well, with planned blood tests.",
+      "doctorFirst": true,
+      "evidence": "B",
+      "file": "protocols/iron-repletion.md",
+      "for": "Adults whose blood test shows low iron (low ferritin) and whose doctor has advised iron tablets."
+    },
+    {
+      "id": "blood-sugar-support",
+      "title": "Blood sugar support",
+      "tagline": "Daily habits that help keep blood sugar steadier, alongside your care.",
+      "doctorFirst": true,
+      "evidence": "B",
+      "file": "protocols/blood-sugar-support.md",
+      "for": "Adults with prediabetes or type 2 diabetes, working with their doctor or diabetes team."
+    },
+    {
+      "id": "vein-health",
+      "title": "Vein health",
+      "tagline": "Calf-pump moves, leg rest and stockings, with doctor-guided vein supplements.",
+      "doctorFirst": true,
+      "evidence": "B",
+      "file": "protocols/vein-health.md",
+      "for": "Adults with varicose veins or chronic venous insufficiency, alongside their doctor's care."
+    },
+    {
+      "id": "surgery-prep-and-recovery",
+      "title": "Surgery prep and recovery",
+      "tagline": "Simple steps before and after a planned operation, led by your surgical team.",
+      "doctorFirst": true,
+      "evidence": "B",
+      "file": "protocols/surgery-prep-and-recovery.md",
+      "for": "Adults with a planned (non-emergency) operation. Day 0 is the day of surgery: negative days are before, positive days after."
+    },
+    {
+      "id": "gut-and-microbiome",
+      "title": "Gut and microbiome",
+      "tagline": "More fibre, fermented foods and plant variety, built up slowly.",
+      "doctorFirst": false,
+      "evidence": "B",
+      "file": "protocols/gut-and-microbiome.md",
+      "for": "Adults who want to support gut health through food and daily habits."
+    },
+    {
+      "id": "fascia-and-tissue",
+      "title": "Fascia and tissue support",
+      "tagline": "Load your tissues well, eat enough protein, and time collagen before sessions.",
+      "doctorFirst": false,
+      "evidence": "B",
+      "file": "protocols/fascia-and-tissue.md",
+      "for": "Active adults doing regular strength or movement sessions who want to support tendons and connective tissue."
+    },
+    {
+      "id": "plant-based-essentials",
+      "title": "Plant-based essentials",
+      "tagline": "The key nutrients to cover when you eat vegan or vegetarian.",
+      "doctorFirst": false,
+      "evidence": "B",
+      "file": "protocols/plant-based-essentials.md",
+      "for": "Adults who eat a vegan or vegetarian diet."
+    }
+  ]
+}

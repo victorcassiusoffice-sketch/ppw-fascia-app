@@ -1,0 +1,63 @@
+{
+  "generatedAt": "2026-10-04",
+  "files": {
+    "nutrients.json": {
+      "version": 1,
+      "generatedAt": "2026-10-04",
+      "sha256": "60f84516d536776700789025a32e942c769d250859bac0cbcc271fc13590f6d5",
+      "bytes": 525862
+    },
+    "ingredients.json": {
+      "version": 1,
+      "generatedAt": "2026-10-04",
+      "sha256": "04fb2372f5d793ab5befddf7015151b55c12f25f8f510b505540e13f5b749bb2",
+      "bytes": 12950
+    },
+    "rules.json": {
+      "version": 1,
+      "generatedAt": "2026-10-04",
+      "sha256": "2550214ffff74c4389687b40852d4508be6da33e44db3d526b4158810ee9fe3b",
+      "bytes": 320283
+    },
+    "protocols/blood-sugar-support.md": {
+      "sha256": "21afb1fd45a7b7d57994ae977b0e5d768f6c6a345a1b398e2d7d4be91af79002",
+      "bytes": 16932
+    },
+    "protocols/daily-foundation.md": {
+      "sha256": "143fdb4a67839fa9b20a6b6ff291b0cbe385af6bc06253c8efaf121586363025",
+      "bytes": 14495
+    },
+    "protocols/desk-worker-day.md": {
+      "sha256": "a099d9d35533c233449fbf8ba64c59340cc99b2e3522ee4b837f2f6c969d21bf",
+      "bytes": 12665
+    },
+    "protocols/fascia-and-tissue.md": {
+      "sha256": "1d9d93c0aff97c2d1ceee05366a2cce12d6223942b433ab9054b22c66f99d068",
+      "bytes": 13875
+    },
+    "protocols/gut-and-microbiome.md": {
+      "sha256": "6ee9bdb62f8d71a6a20b4c69df656df90dc52fd5ae8424ddf21c0b83b5bad0bd",
+      "bytes": 13352
+    },
+    "protocols/index.json": {
+      "sha256": "3c1559f07d1ac1463e2ba65cb41a19bac77a615d0d6c4afa1148f3454ac307cf",
+      "bytes": 3436
+    },
+    "protocols/iron-repletion.md": {
+      "sha256": "e4218b13a1d3d6d915cb7a75f4655ef85816702443bcb8a9c29a16ed2aee48c0",
+      "bytes": 14410
+    },
+    "protocols/plant-based-essentials.md": {
+      "sha256": "3fae9e8a7872b9a5a87d756e1199c392e28dc359648a5fc7db427b32e4d79118",
+      "bytes": 14109
+    },
+    "protocols/surgery-prep-and-recovery.md": {
+      "sha256": "859e0a80db65eaefc385e650acbd927f054072aa94c7db84e148a08e568af633",
+      "bytes": 16005
+    },
+    "protocols/vein-health.md": {
+      "sha256": "f78806a16aadf374e93d468cf82a4658167512ea26561261517396b9ef5b8864",
+      "bytes": 15169
+    }
+  }
+}

@@ -1,0 +1,2003 @@
+[
+  {
+    "id": "copper",
+    "name": "Copper",
+    "group": "trace_mineral",
+    "unit": "mg",
+    "unitNotes": "Stored in milligrams (mg). Some labels and food tables use micrograms (µg or mcg): 1 mg = 1,000 µg.",
+    "conversions": [
+      {
+        "from": "µg copper",
+        "to": "mg copper",
+        "multiply": 0.001,
+        "note": "1,000 µg = 1 mg."
+      },
+      {
+        "from": "mg copper gluconate",
+        "to": "mg copper",
+        "multiply": 0.14,
+        "note": "Use only if a label gives the compound weight instead of the copper amount. Worked out from molecular weights."
+      },
+      {
+        "from": "mg cupric sulfate pentahydrate",
+        "to": "mg copper",
+        "multiply": 0.2545,
+        "note": "Compound weight to copper. Worked out from molecular weights."
+      },
+      {
+        "from": "mg cupric oxide",
+        "to": "mg copper",
+        "multiply": 0.7989,
+        "note": "Compound weight to copper. Worked out from molecular weights."
+      }
+    ],
+    "rda": {
+      "type": "RDA",
+      "male_19_50": 0.9,
+      "female_19_50": 0.9,
+      "male_51_plus": 0.9,
+      "female_51_plus": 0.9,
+      "pregnancy": 1.0,
+      "lactation": 1.3,
+      "source": "https://ods.od.nih.gov/factsheets/Copper-HealthProfessional"
+    },
+    "ul": {
+      "iom": 10,
+      "efsa": 5,
+      "efsa_year": 2003,
+      "applies_to": "total",
+      "notes": "US limit: 10 mg a day from food and supplements. Europe: 5 mg a day, set in 2003. In 2023 EFSA reviewed copper and set a safe daily intake of 0.07 mg per kg of body weight, which it says equals 5 mg for adults. EFSA said new upper limits by age group would follow, but its August 2025 summary still lists the 2003 limit. The 2003 limit was not applied to pregnancy or breastfeeding for lack of data, and EFSA's 2025 summary still lists those as not defined. But the 2023 review says pregnant and breastfeeding women are at no greater risk than other women. UK expert group (EVM, 2003): safe upper level of 10 mg a day. The app should use 5 mg.",
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/Copper-HealthProfessional",
+        "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+        "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC9843535/",
+        "https://food.ec.europa.eu/system/files/2016-10/labelling_nutrition-supplements-responses-denmark_annex2_en.pdf"
+      ]
+    },
+    "studyRange": {
+      "low": 2,
+      "high": 2.5,
+      "goal": "Copper given together with zinc or other minerals: a large eye-disease trial (2 mg with 80 mg zinc) and a bone-loss trial in older women (2.5 mg with calcium, zinc and manganese). Copper on its own has not shown a benefit.",
+      "evidence": "C",
+      "evidenceWhy": "No trial shows a benefit from copper alone; it only appears in mixed formulas.",
+      "keyStudies": [
+        {
+          "title": "A randomized, placebo-controlled, clinical trial of high-dose supplementation with vitamins C and E, beta carotene, and zinc for age-related macular degeneration and vision loss: AREDS report no. 8",
+          "year": 2001,
+          "type": "RCT",
+          "finding": "3,640 people aged 55–80, about 6 years. Zinc 80 mg plus copper 2 mg, with antioxidants, lowered the risk of advanced macular degeneration. No serious side effects.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/11594942/"
+        },
+        {
+          "title": "Spinal bone loss in postmenopausal women supplemented with calcium and trace minerals",
+          "year": 1994,
+          "type": "RCT",
+          "finding": "59 women, 2 years. Calcium plus zinc, manganese and copper (2.5 mg) stopped spinal bone loss compared with placebo. Copper was not tested alone.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/8027856/"
+        },
+        {
+          "title": "Intake of copper has no effect on cognition in patients with mild Alzheimer's disease: a pilot phase 2 clinical trial",
+          "year": 2008,
+          "type": "RCT",
+          "finding": "68 people took 8 mg a day for 12 months. No effect on memory or thinking, good or bad.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/18587525/"
+        },
+        {
+          "title": "Re-evaluation of the existing health-based guidance values for copper and exposure assessment from all sources (EFSA Scientific Committee)",
+          "year": 2023,
+          "type": "guideline",
+          "finding": "Set a safe daily intake of 0.07 mg per kg body weight (5 mg a day for adults). No copper build-up in the liver is expected at 5 mg a day.",
+          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9843535/"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 0.9,
+      "female": 0.9,
+      "basis": "rda",
+      "why": "Fills to the adult RDA. Trials do not support more copper for general health."
+    },
+    "timing": {
+      "withFood": null,
+      "fatSoluble": false,
+      "bestTime": "any",
+      "splitAbove": null,
+      "separateFrom": [
+        {
+          "what": "High-dose zinc supplements",
+          "hours": null,
+          "why": "Zinc blocks copper uptake by building up a copper-binding protein in the gut. The total zinc dose matters more than timing."
+        }
+      ]
+    },
+    "forms": {
+      "better": [],
+      "notes": "Common forms are cupric oxide, cupric sulfate, copper amino acid chelates and copper gluconate. Studies have not compared how well they are absorbed. The body absorbs a bigger share when intake is low (about 75%) and a smaller share when intake is high (about 12%)."
+    },
+    "interactions": [
+      {
+        "with": "Zinc supplements (high dose)",
+        "severity": "high",
+        "effect": "Zinc at about 50–60 mg a day or more can lower copper. Over time this can cause anemia, low white blood cells and nerve problems.",
+        "action": "Keep total zinc within its upper limit. If a doctor prescribes high-dose zinc, ask whether copper should be added and checked."
+      },
+      {
+        "with": "Molybdenum (high dose)",
+        "severity": "low",
+        "effect": "Large amounts of molybdenum can lower copper levels.",
+        "action": "Keep molybdenum within its upper limit."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "liver_disease",
+        "action": "doctor_first",
+        "why": "Some liver diseases, especially ones that slow bile flow, can make copper build up in the liver."
+      },
+      {
+        "condition": "bariatric_surgery",
+        "action": "check_level",
+        "why": "Copper levels can drop after weight-loss surgery. Ask your care team to test."
+      },
+      {
+        "condition": "coeliac",
+        "action": "check_level",
+        "why": "Poor absorption can lead to low copper. In one study about 1 in 7 people with coeliac disease were low."
+      },
+      {
+        "condition": "pregnancy",
+        "action": "may_need_more",
+        "why": "Needs rise to 1 mg a day in pregnancy."
+      },
+      {
+        "condition": "breastfeeding",
+        "action": "may_need_more",
+        "why": "Needs rise to 1.3 mg a day while breastfeeding."
+      }
+    ],
+    "deficiencySigns": [
+      "Low red blood cells (anemia)",
+      "Lighter patches of skin or hair",
+      "Weaker bones",
+      "Unsteady walking or poor balance",
+      "More infections",
+      "Raised cholesterol"
+    ],
+    "excessSigns": [
+      "Stomach pain, cramps, nausea, vomiting or diarrhea",
+      "Liver damage with long-term high doses"
+    ],
+    "foodSources": [
+      {
+        "food": "Beef liver, pan fried",
+        "serving": "3 oz (85 g)",
+        "amount": 12.4
+      },
+      {
+        "food": "Oysters, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 4.85
+      },
+      {
+        "food": "Baking chocolate, unsweetened",
+        "serving": "1 oz (28 g)",
+        "amount": 0.938
+      },
+      {
+        "food": "Potato, cooked with skin",
+        "serving": "1 medium",
+        "amount": 0.675
+      },
+      {
+        "food": "Shiitake mushrooms, cooked",
+        "serving": "1/2 cup",
+        "amount": 0.65
+      },
+      {
+        "food": "Cashew nuts, dry roasted",
+        "serving": "1 oz (28 g)",
+        "amount": 0.629
+      },
+      {
+        "food": "Crab, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 0.624
+      },
+      {
+        "food": "Sunflower seeds, toasted",
+        "serving": "1/4 cup",
+        "amount": 0.615
+      },
+      {
+        "food": "Dark chocolate, 70–85% cocoa",
+        "serving": "1 oz (28 g)",
+        "amount": 0.501
+      },
+      {
+        "food": "Tofu, firm",
+        "serving": "1/2 cup",
+        "amount": 0.476
+      },
+      {
+        "food": "Chickpeas",
+        "serving": "1/2 cup",
+        "amount": 0.289
+      },
+      {
+        "food": "Salmon, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 0.273
+      },
+      {
+        "food": "Whole wheat pasta, cooked",
+        "serving": "1 cup",
+        "amount": 0.263
+      },
+      {
+        "food": "Avocado",
+        "serving": "1/2 cup",
+        "amount": 0.219
+      }
+    ],
+    "lowText": "Copper is a little low today; nuts, seeds, beans, whole grains and mushrooms can help.",
+    "highText": "You're near or over the safe daily copper limit (5 mg), so please don't add more today and check if two products both contain copper.",
+    "notes": "Supplements range from a few micrograms to 15 mg of copper, so one product can hold three times the European limit. People with Wilson disease (an inherited condition where copper builds up) should only take copper on medical advice. EFSA notes that people who carry one copy of the Wilson disease gene may hold on to more copper. Europe's 2003 limit came from a 12-week study of 7 adults taking 10 mg a day, halved for safety. Liver failure was reported in one person after 30 mg a day for 2 years, then 60 mg a day. EFSA's adequate intake for adults (1.6 mg men, 1.3 mg women) is higher than the US RDA of 0.9 mg. In one study, 15% of 200 adults and children with coeliac disease had low copper.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheets/Copper-HealthProfessional",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf",
+      "https://pmc.ncbi.nlm.nih.gov/articles/PMC9843535/",
+      "https://food.ec.europa.eu/system/files/2016-10/labelling_nutrition-supplements-responses-denmark_annex2_en.pdf",
+      "https://pubmed.ncbi.nlm.nih.gov/11594942/",
+      "https://pubmed.ncbi.nlm.nih.gov/8027856/",
+      "https://pubmed.ncbi.nlm.nih.gov/18587525/",
+      "https://pubmed.ncbi.nlm.nih.gov/2931973/",
+      "https://pubmed.ncbi.nlm.nih.gov/6486080/",
+      "https://pubmed.ncbi.nlm.nih.gov/42087025/",
+      "https://pubmed.ncbi.nlm.nih.gov/41353140/",
+      "https://www.fsai.ie/getmedia/278afeef-0e80-492b-9aae-61ce44307cbd/9565_fsai_vitaminsandminerals_report_fa3(1).pdf?ext=.pdf",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/copper%20gluconate/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/copper%28II%29%20sulfate%20pentahydrate/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/copper%28II%29%20oxide/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/periodictable/JSON"
+    ]
+  },
+  {
+    "id": "selenium",
+    "name": "Selenium",
+    "group": "trace_mineral",
+    "unit": "µg",
+    "unitNotes": "Stored in micrograms (µg, also written mcg). 1 mg = 1,000 µg. Labels usually list elemental selenium.",
+    "conversions": [
+      {
+        "from": "mg selenium",
+        "to": "µg selenium",
+        "multiply": 1000,
+        "note": "1 mg = 1,000 µg."
+      },
+      {
+        "from": "µg sodium selenite",
+        "to": "µg selenium",
+        "multiply": 0.4566,
+        "note": "Use only if a label gives the compound weight. Worked out from molecular weights."
+      },
+      {
+        "from": "µg sodium selenate",
+        "to": "µg selenium",
+        "multiply": 0.4179,
+        "note": "Compound weight to selenium. Worked out from molecular weights."
+      },
+      {
+        "from": "µg selenomethionine",
+        "to": "µg selenium",
+        "multiply": 0.4027,
+        "note": "Compound weight to selenium. Worked out from molecular weights."
+      }
+    ],
+    "rda": {
+      "type": "RDA",
+      "male_19_50": 55,
+      "female_19_50": 55,
+      "male_51_plus": 55,
+      "female_51_plus": 55,
+      "pregnancy": 60,
+      "lactation": 70,
+      "source": "https://ods.od.nih.gov/Factsheets/Selenium-HealthProfessional/"
+    },
+    "ul": {
+      "iom": 400,
+      "efsa": 255,
+      "efsa_year": 2023,
+      "applies_to": "total",
+      "notes": "US limit: 400 µg a day. Europe (EFSA, 2023): 255 µg a day, also in pregnancy and breastfeeding. EFSA lowered its old 300 µg limit after the large SELECT trial found more hair loss at about 330 µg a day in total (about 130 µg from food plus a 200 µg supplement). UK expert group (EVM, 2003): safe upper level of 450 µg a day. A 200 µg supplement plus a normal diet can pass the European limit. The app should use 255 µg.",
+      "sources": [
+        "https://ods.od.nih.gov/Factsheets/Selenium-HealthProfessional/",
+        "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC9854220/",
+        "https://food.ec.europa.eu/system/files/2016-10/labelling_nutrition-supplements-responses-denmark_annex2_en.pdf"
+      ]
+    },
+    "studyRange": {
+      "low": 80,
+      "high": 200,
+      "goal": "Lowering thyroid antibodies in Hashimoto's thyroiditis (80–200 µg a day for 3–12 months), and preventing cancer or heart disease (200 µg a day for years).",
+      "evidence": "C",
+      "evidenceWhy": "Large trials found no cancer or heart benefit and a possible rise in type 2 diabetes. Thyroid antibody drops are real, but their health value is unclear.",
+      "keyStudies": [
+        {
+          "title": "Effect of selenium and vitamin E on risk of prostate cancer and other cancers: the Selenium and Vitamin E Cancer Prevention Trial (SELECT)",
+          "year": 2009,
+          "type": "RCT",
+          "finding": "35,533 men were split into groups. Those given 200 µg a day (as selenomethionine) for about 5.5 years had no fall in prostate or other cancers. Type 2 diabetes was slightly more common, but this could have been chance.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/19066370/"
+        },
+        {
+          "title": "Effects of selenium supplementation for cancer prevention in patients with carcinoma of the skin (Nutritional Prevention of Cancer trial)",
+          "year": 1996,
+          "type": "RCT",
+          "finding": "1,312 people with past skin cancer took 200 µg a day or placebo for about 4.5 years. No effect on skin cancer. Fewer other cancers in side analyses, which later trials did not confirm.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/8971064/"
+        },
+        {
+          "title": "Effects of long-term selenium supplementation on the incidence of type 2 diabetes: a randomized trial",
+          "year": 2007,
+          "type": "RCT",
+          "finding": "1,202 people from the same trial, followed about 7.7 years. Those on 200 µg a day had 55% more type 2 diabetes than placebo, mostly people whose selenium was already high.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/17620655/"
+        },
+        {
+          "title": "Selenium for preventing cancer",
+          "year": 2018,
+          "type": "Cochrane review",
+          "finding": "10 trials, 27,232 people. No effect on overall cancer (high-certainty evidence). Trials showed a slightly higher risk of type 2 diabetes.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/29376219/"
+        },
+        {
+          "title": "Selenium supplementation for the primary prevention of cardiovascular disease",
+          "year": 2013,
+          "type": "Cochrane review",
+          "finding": "12 trials, 19,715 people. No effect on heart disease or deaths.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/23440843/"
+        },
+        {
+          "title": "Scientific opinion on the tolerable upper intake level for selenium (EFSA)",
+          "year": 2023,
+          "type": "guideline",
+          "finding": "Pooling 5 trials of 200 µg a day gave an 11% higher risk of type 2 diabetes. EFSA set the limit at 255 µg a day based on hair loss.",
+          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9854220/"
+        },
+        {
+          "title": "Selenium Supplementation in Patients with Hashimoto Thyroiditis: A Systematic Review and Meta-Analysis of Randomized Clinical Trials",
+          "year": 2024,
+          "type": "meta-analysis",
+          "finding": "35 studies. Selenium lowered thyroid antibodies, and slightly lowered a key thyroid blood test (TSH) in people not on thyroid hormone. Side effects were similar to placebo.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/38243784/"
+        },
+        {
+          "title": "Selenium supplementation for Hashimoto's thyroiditis",
+          "year": 2013,
+          "type": "Cochrane review",
+          "finding": "4 trials, 463 people. Evidence too weak to support or refute selenium for Hashimoto's.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/23744563/"
+        },
+        {
+          "title": "Insufficient documentation for clinical efficacy of selenium supplementation in chronic autoimmune thyroiditis, based on a systematic review and meta-analysis",
+          "year": 2017,
+          "type": "meta-analysis",
+          "finding": "No effect on thyroid blood tests, quality of life or thyroid scans in people not on thyroid hormone.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/27683225/"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 55,
+      "female": 55,
+      "basis": "rda",
+      "why": "Fills to the adult RDA. Higher doses showed no benefit and some risk in large trials."
+    },
+    "timing": {
+      "withFood": null,
+      "fatSoluble": false,
+      "bestTime": "any",
+      "splitAbove": null,
+      "separateFrom": []
+    },
+    "forms": {
+      "better": [
+        "selenomethionine",
+        "selenium yeast",
+        "sodium selenite",
+        "sodium selenate"
+      ],
+      "notes": "All common forms are well absorbed (up to about 90%), so the dose matters more than the form. Most thyroid trials used selenomethionine or sodium selenite."
+    },
+    "interactions": [
+      {
+        "with": "Brazil nuts and other selenium-containing products",
+        "severity": "moderate",
+        "effect": "Brazil nuts vary hugely: 5–6 nuts can hold about 100 to 2,000 µg.",
+        "action": "Count Brazil nuts and every selenium-containing product in your daily total."
+      },
+      {
+        "with": "Cisplatin (a chemotherapy medicine)",
+        "severity": "low",
+        "effect": "Can lower selenium levels. How much this matters is not known.",
+        "action": "Only take selenium during cancer treatment if your cancer team agrees."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "thyroid_disease",
+        "action": "doctor_first",
+        "why": "Selenium can lower thyroid antibodies, but the health benefit is unclear. Thyroid experts advise against it for thyroid antibodies in pregnancy."
+      },
+      {
+        "condition": "type_2_diabetes",
+        "action": "caution",
+        "why": "Long-term 200 µg a day was linked to more type 2 diabetes in large trials. Stay near the RDA unless your doctor advises otherwise."
+      },
+      {
+        "condition": "prediabetes",
+        "action": "caution",
+        "why": "Long-term 200 µg a day was linked to more type 2 diabetes in large trials."
+      },
+      {
+        "condition": "kidney_disease",
+        "action": "doctor_first",
+        "why": "People on dialysis can run low on selenium. Your kidney team should guide any dose."
+      },
+      {
+        "condition": "cancer_treatment",
+        "action": "doctor_first",
+        "why": "Some chemotherapy lowers selenium, and selenium does not prevent cancer. Ask your cancer team first."
+      },
+      {
+        "condition": "pregnancy",
+        "action": "may_need_more",
+        "why": "Needs rise to 60 µg a day. The safe limit still applies."
+      },
+      {
+        "condition": "breastfeeding",
+        "action": "may_need_more",
+        "why": "Needs rise to 70 µg a day. The safe limit still applies."
+      }
+    ],
+    "deficiencySigns": [
+      "Very rare in places like the US and Canada",
+      "In low-selenium regions, linked to a heart muscle disease (Keshan disease) and a joint disease (Kashin-Beck disease)"
+    ],
+    "excessSigns": [
+      "Hair loss",
+      "Brittle nails or nail loss",
+      "Garlic smell on the breath",
+      "Metallic taste",
+      "Skin rash",
+      "Nausea and diarrhea",
+      "Tiredness and irritability",
+      "Nerve problems"
+    ],
+    "foodSources": [
+      {
+        "food": "Brazil nuts (amount varies hugely)",
+        "serving": "1 oz (6–8 nuts)",
+        "amount": 544
+      },
+      {
+        "food": "Tuna, yellowfin, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 92
+      },
+      {
+        "food": "Sardines, canned",
+        "serving": "3 oz (85 g)",
+        "amount": 45
+      },
+      {
+        "food": "Shrimp, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 42
+      },
+      {
+        "food": "Pork chop, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 37
+      },
+      {
+        "food": "Beef steak, roasted",
+        "serving": "3 oz (85 g)",
+        "amount": 37
+      },
+      {
+        "food": "Spaghetti, cooked",
+        "serving": "1 cup",
+        "amount": 33
+      },
+      {
+        "food": "Turkey, roasted",
+        "serving": "3 oz (85 g)",
+        "amount": 26
+      },
+      {
+        "food": "Cod, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 24
+      },
+      {
+        "food": "Chicken, light meat, roasted",
+        "serving": "3 oz (85 g)",
+        "amount": 22
+      },
+      {
+        "food": "Cottage cheese, 1% fat",
+        "serving": "1 cup",
+        "amount": 20
+      },
+      {
+        "food": "Egg, hard-boiled",
+        "serving": "1 large",
+        "amount": 15
+      },
+      {
+        "food": "Brown rice, cooked",
+        "serving": "1 cup",
+        "amount": 12
+      },
+      {
+        "food": "Lentils, boiled",
+        "serving": "1 cup",
+        "amount": 6
+      }
+    ],
+    "lowText": "Selenium is a little low today; fish, seafood, eggs, meat and whole grains can help.",
+    "highText": "You're near or over the safe daily selenium limit (255 µg), so please don't add more today, as too much can cause hair loss.",
+    "notes": "Many multivitamins contain about 55 µg. Selenium-only products often contain 100–400 µg, which can pass the European limit on their own. Brazil nuts vary too much to be a reliable way to get selenium. In 2008, 201 people were harmed by a liquid supplement that held 200 times its labelled selenium. EFSA's 2023 review found no sign that selenium causes thyroid disease. One review notes that people whose blood selenium is already high (122 µg/L or more) should not take extra. Selenium for Hashimoto's is a doctor-led choice, not a general wellness dose.",
+    "sources": [
+      "https://ods.od.nih.gov/Factsheets/Selenium-HealthProfessional/",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://pmc.ncbi.nlm.nih.gov/articles/PMC9854220/",
+      "https://food.ec.europa.eu/system/files/2016-10/labelling_nutrition-supplements-responses-denmark_annex2_en.pdf",
+      "https://pubmed.ncbi.nlm.nih.gov/19066370/",
+      "https://pubmed.ncbi.nlm.nih.gov/8971064/",
+      "https://pubmed.ncbi.nlm.nih.gov/17620655/",
+      "https://pubmed.ncbi.nlm.nih.gov/29376219/",
+      "https://pubmed.ncbi.nlm.nih.gov/23440843/",
+      "https://pubmed.ncbi.nlm.nih.gov/38243784/",
+      "https://pmc.ncbi.nlm.nih.gov/articles/PMC10951571/",
+      "https://pubmed.ncbi.nlm.nih.gov/23744563/",
+      "https://pubmed.ncbi.nlm.nih.gov/27683225/",
+      "https://pubmed.ncbi.nlm.nih.gov/27702392/",
+      "https://www.epocrates.com/online/article/new-guidance-reshapes-thyroid-care-before-during-and-after-pregnancy",
+      "https://pubmed.ncbi.nlm.nih.gov/42219800/",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/sodium%20selenite/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/sodium%20selenate/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/selenomethionine/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/periodictable/JSON"
+    ]
+  },
+  {
+    "id": "iodine",
+    "name": "Iodine",
+    "group": "trace_mineral",
+    "unit": "µg",
+    "unitNotes": "Stored in micrograms (µg, also written mcg). Some labels list potassium iodide; the iodine amount is lower than the compound weight.",
+    "conversions": [
+      {
+        "from": "mg iodine",
+        "to": "µg iodine",
+        "multiply": 1000,
+        "note": "1 mg = 1,000 µg."
+      },
+      {
+        "from": "µg potassium iodide",
+        "to": "µg iodine",
+        "multiply": 0.7645,
+        "note": "Use only if a label gives the compound weight. Worked out from molecular weights."
+      },
+      {
+        "from": "µg potassium iodate",
+        "to": "µg iodine",
+        "multiply": 0.593,
+        "note": "Compound weight to iodine. Worked out from molecular weights."
+      }
+    ],
+    "rda": {
+      "type": "RDA",
+      "male_19_50": 150,
+      "female_19_50": 150,
+      "male_51_plus": 150,
+      "female_51_plus": 150,
+      "pregnancy": 220,
+      "lactation": 290,
+      "source": "https://ods.od.nih.gov/factsheets/Iodine-HealthProfessional/"
+    },
+    "ul": {
+      "iom": 1100,
+      "efsa": 600,
+      "efsa_year": 2002,
+      "applies_to": "total",
+      "notes": "US limit: 1,100 µg a day. Europe: 600 µg a day, set in 2002 and still current, also in pregnancy and breastfeeding. UK expert group (EVM, 2003) guidance level: 500 µg a day. The American Thyroid Association advises against iodine or kelp supplements over 500 µg a day, including in pregnancy. People with thyroid disease can react to amounts that are safe for others. The limits don't apply to people given iodine as treatment by a doctor. The app should use 600 µg, and also warn about any single product over 500 µg.",
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/Iodine-HealthProfessional/",
+        "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+        "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf",
+        "https://food.ec.europa.eu/system/files/2016-10/labelling_nutrition-supplements-responses-denmark_annex2_en.pdf",
+        "https://www.thyroid.org/ata-statement-on-the-potential-risks-of-excess-iodine-ingestion-and-exposure"
+      ]
+    },
+    "studyRange": {
+      "low": 150,
+      "high": 200,
+      "goal": "Iodine supplements before and during pregnancy and while breastfeeding, to support the mother's and baby's thyroid.",
+      "evidence": "B",
+      "evidenceWhy": "Trials show better iodine levels and experts advise 150 µg in pregnancy, but benefits for babies' growth and development are not proven.",
+      "keyStudies": [
+        {
+          "title": "ATA Statement on the Potential Risks of Excess Iodine Ingestion and Exposure (updated 2024)",
+          "year": 2024,
+          "type": "guideline",
+          "finding": "Advises 150 µg iodine a day (as potassium iodide) before and during pregnancy and while breastfeeding, and no iodine or kelp supplements over 500 µg a day.",
+          "url": "https://www.thyroid.org/ata-statement-on-the-potential-risks-of-excess-iodine-ingestion-and-exposure"
+        },
+        {
+          "title": "American Thyroid Association 2026 Guidelines for Thyroid Disease in Preconception, Pregnancy, and Postpartum",
+          "year": 2026,
+          "type": "guideline",
+          "finding": "Per a published summary (full text not reviewed): aim for about 250 µg a day in pregnancy and breastfeeding, start 150 µg before conception in women at risk, and avoid more than 500 µg a day.",
+          "url": "https://www.epocrates.com/online/article/new-guidance-reshapes-thyroid-care-before-during-and-after-pregnancy"
+        },
+        {
+          "title": "Iodine supplementation for women during the preconception, pregnancy and postpartum period",
+          "year": 2017,
+          "type": "Cochrane review",
+          "finding": "11 trials with over 2,700 women, low-quality evidence. Less overactive thyroid after birth but more stomach upset. No clear effect on other outcomes.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/28260263/"
+        },
+        {
+          "title": "Effects of iodine supplementation during pregnancy on pregnant women and their offspring: a systematic review and meta-analysis of trials over the past 3 decades",
+          "year": 2021,
+          "type": "meta-analysis",
+          "finding": "14 trials. Iodine improved mothers' iodine levels but did not improve babies' birth size or early development.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/33112293/"
+        },
+        {
+          "title": "Effects of iodine supplementation on thyroid function parameter: Systematic review and meta-analysis",
+          "year": 2023,
+          "type": "meta-analysis",
+          "finding": "11 studies. 200 µg a day improved iodine levels in pregnancy, best started before or early in pregnancy.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/37562272/"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 150,
+      "female": 150,
+      "basis": "rda",
+      "why": "Fills to the adult RDA. More is only advised in pregnancy and breastfeeding."
+    },
+    "timing": {
+      "withFood": null,
+      "fatSoluble": false,
+      "bestTime": "any",
+      "splitAbove": null,
+      "separateFrom": []
+    },
+    "forms": {
+      "better": [
+        "potassium iodide"
+      ],
+      "notes": "Potassium iodide is almost fully absorbed (about 96%) and is the form thyroid experts advise. Kelp and seaweed products vary hugely in iodine and can be far above safe limits."
+    },
+    "interactions": [
+      {
+        "with": "Antithyroid medicines (for example methimazole)",
+        "severity": "high",
+        "effect": "High iodine with these medicines can push thyroid levels too low.",
+        "action": "Only take iodine if your doctor agrees."
+      },
+      {
+        "with": "Kelp, seaweed or other iodine supplements",
+        "severity": "high",
+        "effect": "Some hold many times the safe daily limit in one dose, and amounts vary a lot between products.",
+        "action": "Avoid unless your doctor advises, and count every iodine source in your daily total."
+      },
+      {
+        "with": "ACE inhibitor blood pressure medicines",
+        "severity": "low",
+        "effect": "Potassium iodide can raise blood potassium with these medicines.",
+        "action": "Tell your doctor if you take potassium iodide with these medicines."
+      },
+      {
+        "with": "Potassium-sparing water pills (for example spironolactone)",
+        "severity": "low",
+        "effect": "Potassium iodide can raise blood potassium with these medicines.",
+        "action": "Tell your doctor if you take potassium iodide with these medicines."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "thyroid_disease",
+        "action": "doctor_first",
+        "why": "People with thyroid conditions can react badly to iodine amounts that are safe for others."
+      },
+      {
+        "condition": "pregnancy",
+        "action": "may_need_more",
+        "why": "Needs rise to 220 µg a day. Thyroid experts advise a 150 µg supplement, but nothing over 500 µg."
+      },
+      {
+        "condition": "breastfeeding",
+        "action": "may_need_more",
+        "why": "Needs rise to 290 µg a day."
+      },
+      {
+        "condition": "trying_to_conceive",
+        "action": "may_need_more",
+        "why": "Thyroid experts advise starting 150 µg a day before pregnancy."
+      },
+      {
+        "condition": "vegan_vegetarian",
+        "action": "may_need_more",
+        "why": "Diets with little dairy, eggs or seafood are often low in iodine."
+      },
+      {
+        "condition": "age_65_plus",
+        "action": "caution",
+        "why": "Older adults are more sensitive to too much iodine. Avoid high-dose iodine or kelp products."
+      }
+    ],
+    "deficiencySigns": [
+      "Swelling at the front of the neck (goiter)",
+      "Underactive thyroid",
+      "In pregnancy, severe lack can harm the baby's brain development"
+    ],
+    "excessSigns": [
+      "Underactive or overactive thyroid",
+      "Swollen thyroid (goiter)",
+      "Thyroid inflammation",
+      "Very large doses: stomach cramps and diarrhea"
+    ],
+    "foodSources": [
+      {
+        "food": "Cod, baked",
+        "serving": "3 oz (85 g)",
+        "amount": 146
+      },
+      {
+        "food": "Nori seaweed, dried",
+        "serving": "2 tbsp (5 g)",
+        "amount": 116
+      },
+      {
+        "food": "Oysters, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 93
+      },
+      {
+        "food": "Greek yogurt, plain, nonfat",
+        "serving": "3/4 cup",
+        "amount": 87
+      },
+      {
+        "food": "Milk, nonfat",
+        "serving": "1 cup",
+        "amount": 84
+      },
+      {
+        "food": "Iodized table salt",
+        "serving": "1/4 teaspoon",
+        "amount": 78
+      },
+      {
+        "food": "Fish sticks, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 57
+      },
+      {
+        "food": "Egg, hard-boiled",
+        "serving": "1 large",
+        "amount": 31
+      },
+      {
+        "food": "Pasta boiled in water with iodized salt",
+        "serving": "1 cup",
+        "amount": 30
+      },
+      {
+        "food": "Cheddar cheese",
+        "serving": "1 oz (28 g)",
+        "amount": 14
+      },
+      {
+        "food": "Shrimp, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 13
+      },
+      {
+        "food": "Tuna, canned in water",
+        "serving": "3 oz (85 g)",
+        "amount": 7
+      }
+    ],
+    "lowText": "Iodine is a little low today; dairy, eggs, fish and iodized salt can help.",
+    "highText": "You're near or over the safe daily iodine limit (600 µg), so please don't add more today, especially kelp or seaweed.",
+    "notes": "Dried seaweed ranges from 16 to 2,984 µg of iodine per gram. Kelp tablets have been found with up to 57 mg (57,000 µg) per dose. Many prenatal vitamins have no iodine: in one survey only 34 of 59 did (median 150 µg). People who don't use iodized salt, vegans and pregnant women are most likely to be low. Sea salt that is not iodized has almost none. In the US some bread is made with an iodine-containing dough improver (about 296 µg per 2 slices), so intake varies by country. The 2026 thyroid pregnancy guideline details come from a published summary; the full text was not reviewed.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheets/Iodine-HealthProfessional/",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf",
+      "https://food.ec.europa.eu/system/files/2016-10/labelling_nutrition-supplements-responses-denmark_annex2_en.pdf",
+      "https://www.thyroid.org/ata-statement-on-the-potential-risks-of-excess-iodine-ingestion-and-exposure",
+      "https://www.epocrates.com/online/article/new-guidance-reshapes-thyroid-care-before-during-and-after-pregnancy",
+      "https://pubmed.ncbi.nlm.nih.gov/42219800/",
+      "https://pubmed.ncbi.nlm.nih.gov/28260263/",
+      "https://pubmed.ncbi.nlm.nih.gov/33112293/",
+      "https://pubmed.ncbi.nlm.nih.gov/37562272/",
+      "https://pubmed.ncbi.nlm.nih.gov/36742462/",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/potassium%20iodide/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/potassium%20iodate/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/periodictable/JSON"
+    ]
+  },
+  {
+    "id": "manganese",
+    "name": "Manganese",
+    "group": "trace_mineral",
+    "unit": "mg",
+    "unitNotes": "Stored in milligrams (mg). 1 mg = 1,000 µg. Labels usually list elemental manganese.",
+    "conversions": [
+      {
+        "from": "µg manganese",
+        "to": "mg manganese",
+        "multiply": 0.001,
+        "note": "1,000 µg = 1 mg."
+      },
+      {
+        "from": "mg manganese sulfate monohydrate",
+        "to": "mg manganese",
+        "multiply": 0.325,
+        "note": "Use only if a label gives the compound weight. Worked out from molecular weights."
+      },
+      {
+        "from": "mg manganese gluconate",
+        "to": "mg manganese",
+        "multiply": 0.1234,
+        "note": "Compound weight to manganese (dry form). Worked out from molecular weights."
+      }
+    ],
+    "rda": {
+      "type": "AI",
+      "male_19_50": 2.3,
+      "female_19_50": 1.8,
+      "male_51_plus": 2.3,
+      "female_51_plus": 1.8,
+      "pregnancy": 2.0,
+      "lactation": 2.6,
+      "source": "https://ods.od.nih.gov/factsheets/Manganese-HealthProfessional/"
+    },
+    "ul": {
+      "iom": 11,
+      "efsa": 8,
+      "efsa_year": 2023,
+      "applies_to": "total",
+      "notes": "US limit: 11 mg a day. Europe (EFSA, 2023) could not set a true upper limit. Instead it set a 'safe level' of 8 mg a day from all sources, including supplements, also in pregnancy and breastfeeding. This is based on what high consumers already eat. UK expert group (EVM, 2003) guidance: up to 4 mg a day from supplements on top of food, or 0.5 mg a day for older people. The app should use 8 mg in total, and flag supplements over 4 mg (over 0.5 mg for older adults).",
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/Manganese-HealthProfessional/",
+        "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC10704406/"
+      ]
+    },
+    "studyRange": {
+      "low": 5,
+      "high": 5,
+      "goal": "Bone loss in older women, with manganese given alongside calcium, zinc and copper. No trial has tested manganese on its own.",
+      "evidence": "C",
+      "evidenceWhy": "Only one small mixed-mineral trial; manganese's own effect is unknown.",
+      "keyStudies": [
+        {
+          "title": "Spinal bone loss in postmenopausal women supplemented with calcium and trace minerals",
+          "year": 1994,
+          "type": "RCT",
+          "finding": "59 women, 2 years. Calcium plus trace minerals (including 5 mg manganese) stopped spinal bone loss. Manganese was not tested alone.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/8027856/"
+        },
+        {
+          "title": "Longitudinal changes of manganese-dependent superoxide dismutase and other indexes of manganese and iron status in women",
+          "year": 1992,
+          "type": "pharmacokinetic study",
+          "finding": "47 women got 15 mg a day, iron, both, or placebo for 124 days. Manganese raised blood manganese and a manganese enzyme. US experts treated 15 mg as the lowest dose with an effect when setting their 11 mg limit.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/1550052/"
+        },
+        {
+          "title": "Scientific opinion on the tolerable upper intake level for manganese (EFSA)",
+          "year": 2023,
+          "type": "guideline",
+          "finding": "Nerve effects are the main concern, but the data were too weak to set a true limit. A safe level of 8 mg a day was set from what high consumers already eat.",
+          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10704406/"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 2.3,
+      "female": 1.8,
+      "basis": "ai",
+      "why": "Fills to the adult adequate intake. European adults already eat about 3 mg a day on average."
+    },
+    "timing": {
+      "withFood": null,
+      "fatSoluble": false,
+      "bestTime": "any",
+      "splitAbove": null,
+      "separateFrom": []
+    },
+    "forms": {
+      "better": [],
+      "notes": "Many forms are used, such as sulfate, gluconate, citrate, chloride and amino acid chelates. There is little data comparing them. Only about 1–5% of manganese in food is absorbed."
+    },
+    "interactions": [],
+    "conditionFlags": [
+      {
+        "condition": "liver_disease",
+        "action": "avoid",
+        "why": "A damaged liver clears manganese poorly, and it can build up in the brain. Avoid manganese supplements unless your doctor advises them."
+      },
+      {
+        "condition": "iron_deficiency",
+        "action": "caution",
+        "why": "Low iron makes the body absorb more manganese."
+      },
+      {
+        "condition": "age_65_plus",
+        "action": "caution",
+        "why": "UK experts suggest older people keep manganese from supplements to 0.5 mg a day."
+      }
+    ],
+    "deficiencySigns": [
+      "Very rare; only seen in experiments",
+      "Skin rash and lighter hair",
+      "Mood changes",
+      "Weaker bones"
+    ],
+    "excessSigns": [
+      "Shaking (tremors) and muscle spasms",
+      "Ringing in the ears or hearing loss",
+      "Feeling unsteady",
+      "Mood changes, poor sleep or low mood",
+      "Movement problems like Parkinson's disease"
+    ],
+    "foodSources": [
+      {
+        "food": "Mussels, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 5.8
+      },
+      {
+        "food": "Hazelnuts, roasted",
+        "serving": "1 oz (28 g)",
+        "amount": 1.6
+      },
+      {
+        "food": "Pecans, roasted",
+        "serving": "1 oz (28 g)",
+        "amount": 1.1
+      },
+      {
+        "food": "Brown rice, cooked",
+        "serving": "1/2 cup",
+        "amount": 1.1
+      },
+      {
+        "food": "Oysters, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 1.0
+      },
+      {
+        "food": "Clams, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 0.9
+      },
+      {
+        "food": "Chickpeas, cooked",
+        "serving": "1/2 cup",
+        "amount": 0.9
+      },
+      {
+        "food": "Spinach, boiled",
+        "serving": "1/2 cup",
+        "amount": 0.8
+      },
+      {
+        "food": "Pineapple, raw",
+        "serving": "1/2 cup",
+        "amount": 0.8
+      },
+      {
+        "food": "Soybeans, boiled",
+        "serving": "1/2 cup",
+        "amount": 0.7
+      },
+      {
+        "food": "Whole wheat bread",
+        "serving": "1 slice",
+        "amount": 0.7
+      },
+      {
+        "food": "Oatmeal, cooked",
+        "serving": "1/2 cup",
+        "amount": 0.7
+      }
+    ],
+    "lowText": "Manganese is a little low today; whole grains, nuts, beans and brown rice can help.",
+    "highText": "You're near or over the safe daily manganese level (8 mg), so please don't add more today, as too much over time can affect the nerves.",
+    "notes": "Multivitamins with manganese usually give 1–4.5 mg. Single products often give 5–20 mg, which can pass the European safe level once food is added. Europe's food safety experts warned in 2000 that manganese beyond normal food amounts could carry a risk with no proven benefit. EFSA's adequate intake for adults is 3 mg a day, higher than the US figures. People exposed to manganese at work (welding, mining) or in drinking water already take in more.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheets/Manganese-HealthProfessional/",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://pmc.ncbi.nlm.nih.gov/articles/PMC10704406/",
+      "https://www.fsai.ie/getmedia/278afeef-0e80-492b-9aae-61ce44307cbd/9565_fsai_vitaminsandminerals_report_fa3(1).pdf?ext=.pdf",
+      "https://pubmed.ncbi.nlm.nih.gov/8027856/",
+      "https://pubmed.ncbi.nlm.nih.gov/1550052/",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/manganese%28II%29%20sulfate%20monohydrate/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/manganese%20gluconate/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/periodictable/JSON"
+    ]
+  },
+  {
+    "id": "chromium",
+    "name": "Chromium",
+    "group": "trace_mineral",
+    "unit": "µg",
+    "unitNotes": "Stored in micrograms (µg, also written mcg). Labels usually list elemental chromium.",
+    "conversions": [
+      {
+        "from": "mg chromium",
+        "to": "µg chromium",
+        "multiply": 1000,
+        "note": "1 mg = 1,000 µg."
+      },
+      {
+        "from": "µg chromium picolinate",
+        "to": "µg chromium",
+        "multiply": 0.1243,
+        "note": "Use only if a label gives the compound weight. Worked out from molecular weights."
+      },
+      {
+        "from": "µg chromium chloride hexahydrate",
+        "to": "µg chromium",
+        "multiply": 0.1952,
+        "note": "Compound weight to chromium. Worked out from molecular weights."
+      }
+    ],
+    "rda": {
+      "type": "AI",
+      "male_19_50": 35,
+      "female_19_50": 25,
+      "male_51_plus": 30,
+      "female_51_plus": 20,
+      "pregnancy": 30,
+      "lactation": 45,
+      "source": "https://ods.od.nih.gov/factsheets/Chromium-HealthProfessional/"
+    },
+    "ul": {
+      "iom": null,
+      "efsa": null,
+      "efsa_year": null,
+      "applies_to": "supplements_only",
+      "notes": "No official upper limit in the US or Europe, because the data are limited. EFSA (2014) found no convincing evidence that chromium is essential. Practical guides: the WHO advised that supplements should not go above 250 µg a day. Europe's 2003 review saw no harm in trials of up to 1,000 µg a day. UK experts (EVM, 2003) thought about 10 mg a day in total would be safe, but left chromium picolinate out. Case reports link high doses to kidney, liver and muscle damage. Suggest the app warns above 250 µg a day from supplements.",
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/Chromium-HealthProfessional/",
+        "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+        "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf"
+      ]
+    },
+    "studyRange": {
+      "low": 200,
+      "high": 1000,
+      "goal": "Blood sugar control in type 2 diabetes. This is a treatment use, not a general health dose.",
+      "evidence": "C",
+      "evidenceWhy": "Results are mixed. One large early trial in China was positive, but other trials and reviews found small or unclear effects.",
+      "keyStudies": [
+        {
+          "title": "Elevated intakes of supplemental chromium improve glucose and insulin variables in individuals with type 2 diabetes",
+          "year": 1997,
+          "type": "RCT",
+          "finding": "180 adults with type 2 diabetes, 4 months. 1,000 µg a day lowered average blood sugar (HbA1c 6.6% vs 8.5% on placebo). 200 µg a day had a smaller effect (7.5%).",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/9356027/"
+        },
+        {
+          "title": "Glucose and insulin responses to dietary chromium supplements: a meta-analysis",
+          "year": 2002,
+          "type": "meta-analysis",
+          "finding": "15 trials, 618 people. No effect on blood sugar or insulin in people without diabetes. Results in diabetes were inconclusive.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/12081828/"
+        },
+        {
+          "title": "Effects of chromium supplementation on glycemic control in patients with type 2 diabetes: a systematic review and meta-analysis of randomized controlled trials",
+          "year": 2020,
+          "type": "meta-analysis",
+          "finding": "28 trials in type 2 diabetes. Fasting blood sugar fell about 19 mg/dL and HbA1c about 0.7%, but results varied hugely between trials.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/32730903/"
+        },
+        {
+          "title": "New medications which decrease levothyroxine absorption",
+          "year": 2007,
+          "type": "pharmacokinetic study",
+          "finding": "7 volunteers. Chromium picolinate taken with levothyroxine lowered its absorption. The authors advise taking them several hours apart.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/17725434/"
+        },
+        {
+          "title": "American Diabetes Association: vitamins and supplements for people with diabetes",
+          "year": null,
+          "type": "guideline",
+          "finding": "Without an underlying deficiency, vitamin or mineral supplements show no benefit for people with diabetes. Talk to your care team first.",
+          "url": "https://diabetes.org/food-nutrition/diabetes-vitamins-supplements"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 35,
+      "female": 25,
+      "basis": "ai",
+      "why": "Fills to the adequate intake for ages 19–50 (30 µg for men and 20 µg for women after 50). Higher doses are a diabetes treatment question for a doctor."
+    },
+    "timing": {
+      "withFood": null,
+      "fatSoluble": false,
+      "bestTime": "any",
+      "splitAbove": null,
+      "separateFrom": [
+        {
+          "what": "Levothyroxine (thyroid hormone tablets)",
+          "hours": null,
+          "why": "Taken together, chromium picolinate lowered levothyroxine absorption. Study authors advise several hours apart; no exact gap was tested."
+        }
+      ]
+    },
+    "forms": {
+      "better": [],
+      "notes": "Very little chromium is absorbed (about 0.4–2.5%). Picolinate is absorbed a bit better than chloride (about 1.2% vs 0.4%), but it is not marked as better here because of the safety questions below. UK experts left picolinate out of their safety guidance because of test-tube DNA findings, and Germany withdrew special permissions for it in supplements in 2001."
+    },
+    "interactions": [
+      {
+        "with": "Insulin",
+        "severity": "moderate",
+        "effect": "Chromium may make insulin work more strongly, raising the risk of low blood sugar.",
+        "action": "Talk to your doctor before taking chromium."
+      },
+      {
+        "with": "Metformin and other diabetes medicines",
+        "severity": "moderate",
+        "effect": "May add to their blood-sugar-lowering effect and cause low blood sugar.",
+        "action": "Talk to your doctor before taking chromium."
+      },
+      {
+        "with": "Levothyroxine",
+        "severity": "moderate",
+        "effect": "Chromium picolinate taken at the same time lowers levothyroxine absorption.",
+        "action": "Take them several hours apart."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "type_1_diabetes",
+        "action": "doctor_first",
+        "why": "Chromium may add to insulin's effect and cause low blood sugar."
+      },
+      {
+        "condition": "type_2_diabetes",
+        "action": "doctor_first",
+        "why": "Chromium may add to diabetes medicines and cause low blood sugar. Its benefit is unproven."
+      },
+      {
+        "condition": "prediabetes",
+        "action": "caution",
+        "why": "Trials found no effect on blood sugar in people without diabetes."
+      },
+      {
+        "condition": "kidney_disease",
+        "action": "doctor_first",
+        "why": "People with kidney disease may be more sensitive, and high doses have been linked to kidney damage."
+      },
+      {
+        "condition": "liver_disease",
+        "action": "doctor_first",
+        "why": "People with liver disease may be more sensitive to high chromium intakes."
+      },
+      {
+        "condition": "thyroid_disease",
+        "action": "caution",
+        "why": "Chromium can reduce absorption of thyroid hormone tablets. Take them hours apart."
+      },
+      {
+        "condition": "athlete",
+        "action": "caution",
+        "why": "High-dose chromium in workout products has been linked to rare muscle and kidney damage."
+      }
+    ],
+    "deficiencySigns": [
+      "Not seen in healthy people; no clear signs have been established"
+    ],
+    "excessSigns": [
+      "Kidney damage",
+      "Liver problems",
+      "Low blood counts (anemia, low platelets)",
+      "Muscle breakdown",
+      "Skin rash",
+      "Low blood sugar",
+      "Weight loss"
+    ],
+    "foodSources": [
+      {
+        "food": "Grape juice",
+        "serving": "1 cup",
+        "amount": 7.5
+      },
+      {
+        "food": "Ham",
+        "serving": "3 oz (85 g)",
+        "amount": 3.6
+      },
+      {
+        "food": "Whole wheat English muffin",
+        "serving": "1 muffin",
+        "amount": 3.6
+      },
+      {
+        "food": "Brewer's yeast",
+        "serving": "1 tbsp",
+        "amount": 3.3
+      },
+      {
+        "food": "Orange juice",
+        "serving": "1 cup",
+        "amount": 2.2
+      },
+      {
+        "food": "Beef",
+        "serving": "3 oz (85 g)",
+        "amount": 2.0
+      },
+      {
+        "food": "Lettuce",
+        "serving": "1 wedge (about 5 oz)",
+        "amount": 1.8
+      },
+      {
+        "food": "Turkey breast",
+        "serving": "3 oz (85 g)",
+        "amount": 1.7
+      },
+      {
+        "food": "Tomato juice",
+        "serving": "1 cup",
+        "amount": 1.5
+      },
+      {
+        "food": "Apple, with peel",
+        "serving": "1 medium",
+        "amount": 1.4
+      },
+      {
+        "food": "Green beans",
+        "serving": "1/2 cup",
+        "amount": 1.1
+      },
+      {
+        "food": "Banana",
+        "serving": "1 medium",
+        "amount": 1.0
+      },
+      {
+        "food": "Whole wheat bread",
+        "serving": "1 slice",
+        "amount": 1.0
+      }
+    ],
+    "lowText": "Chromium is a little low today; whole grains, meat, fruit and vegetables each add small amounts.",
+    "highText": "Your chromium from supplements is over 250 µg, so please don't add more and talk to your doctor if you take it for blood sugar.",
+    "notes": "Most multivitamins contain 35–120 µg. Single products often give 200–500 µg, and some up to 1,000 µg. A 2019 review of 8 earlier reviews (58 trials in total) found only slight drops in blood sugar, of unclear value. A weight-loss review (21 trials, 1,316 people) found about 0.75 kg extra loss, of doubtful value. Case reports: kidney and liver failure in a woman taking 1,200–2,400 µg a day for 4–5 months, and muscle breakdown in a bodybuilder after 1,200 µg over 2 days.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheets/Chromium-HealthProfessional/",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf",
+      "https://diabetes.org/food-nutrition/diabetes-vitamins-supplements",
+      "https://pubmed.ncbi.nlm.nih.gov/9356027/",
+      "https://pubmed.ncbi.nlm.nih.gov/12081828/",
+      "https://pubmed.ncbi.nlm.nih.gov/32730903/",
+      "https://pubmed.ncbi.nlm.nih.gov/27261273/",
+      "https://pubmed.ncbi.nlm.nih.gov/17725434/",
+      "https://pubmed.ncbi.nlm.nih.gov/9562138/",
+      "https://pubmed.ncbi.nlm.nih.gov/9692662/",
+      "https://pubmed.ncbi.nlm.nih.gov/16492795/",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/chromium%20picolinate/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/chromium%28III%29%20chloride%20hexahydrate/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/periodictable/JSON"
+    ]
+  },
+  {
+    "id": "molybdenum",
+    "name": "Molybdenum",
+    "group": "trace_mineral",
+    "unit": "µg",
+    "unitNotes": "Stored in micrograms (µg, also written mcg). Labels usually list elemental molybdenum.",
+    "conversions": [
+      {
+        "from": "mg molybdenum",
+        "to": "µg molybdenum",
+        "multiply": 1000,
+        "note": "1 mg = 1,000 µg."
+      },
+      {
+        "from": "µg sodium molybdate dihydrate",
+        "to": "µg molybdenum",
+        "multiply": 0.3966,
+        "note": "Use only if a label gives the compound weight. Worked out from molecular weights."
+      }
+    ],
+    "rda": {
+      "type": "RDA",
+      "male_19_50": 45,
+      "female_19_50": 45,
+      "male_51_plus": 45,
+      "female_51_plus": 45,
+      "pregnancy": 50,
+      "lactation": 50,
+      "source": "https://ods.od.nih.gov/factsheets/Molybdenum-HealthProfessional/"
+    },
+    "ul": {
+      "iom": 2000,
+      "efsa": 600,
+      "efsa_year": 2000,
+      "applies_to": "total",
+      "notes": "US limit: 2,000 µg a day. Europe: 600 µg a day, set in 2000, also for pregnancy and breastfeeding. Both come from the same rat study; Europe used a bigger safety margin to protect people with low copper. Ireland's food safety body recalculated Europe's figure as 700 µg for a 70 kg adult. UK experts (EVM, 2003) found too little data to set a level. The app should use 600 µg.",
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/Molybdenum-HealthProfessional/",
+        "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+        "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf",
+        "https://www.fsai.ie/getmedia/278afeef-0e80-492b-9aae-61ce44307cbd/9565_fsai_vitaminsandminerals_report_fa3(1).pdf?ext=.pdf",
+        "https://food.ec.europa.eu/system/files/2016-10/labelling_nutrition-supplements-responses-denmark_annex2_en.pdf"
+      ]
+    },
+    "studyRange": {
+      "low": null,
+      "high": null,
+      "goal": "No trials have tested molybdenum supplements for a health benefit. A small absorption study gave 22–1,490 µg a day (24 days at each level) with no side effects.",
+      "evidence": "C",
+      "evidenceWhy": "No benefit trials exist; only small absorption studies.",
+      "keyStudies": [
+        {
+          "title": "Molybdenum absorption, excretion, and retention studied with stable isotopes in young men at five intakes of dietary molybdenum",
+          "year": 1995,
+          "type": "pharmacokinetic study",
+          "finding": "4 young men ate 22–1,490 µg a day for 24 days at each level. 88–93% was absorbed, extra was cleared in urine, and no side effects were seen.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/7572711/"
+        },
+        {
+          "title": "Opinion of the Scientific Committee on Food on the Tolerable Upper Intake Level of Molybdenum",
+          "year": 2000,
+          "type": "guideline",
+          "finding": "Europe's limit of 600 µg a day is based on effects on reproduction in rats, with a 100-fold safety margin that also covers people with low copper.",
+          "url": "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 45,
+      "female": 45,
+      "basis": "rda",
+      "why": "Fills to the adult RDA. Deficiency is unknown in healthy people, and no study supports more."
+    },
+    "timing": {
+      "withFood": null,
+      "fatSoluble": false,
+      "bestTime": "any",
+      "splitAbove": null,
+      "separateFrom": []
+    },
+    "forms": {
+      "better": [],
+      "notes": "Molybdenum is well absorbed from food and supplements (40–100% from food; 88–93% in one study), so the form matters little."
+    },
+    "interactions": [
+      {
+        "with": "Copper",
+        "severity": "low",
+        "effect": "High molybdenum can lower copper levels.",
+        "action": "Keep molybdenum within the limit, especially if your copper is low."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "gout",
+        "action": "caution",
+        "why": "Very high molybdenum intakes have been linked to gout-like joint pain and high uric acid."
+      },
+      {
+        "condition": "kidney_disease",
+        "action": "doctor_first",
+        "why": "Your kidneys clear molybdenum, so ask your doctor before taking it."
+      }
+    ],
+    "deficiencySigns": [
+      "Not seen in healthy people",
+      "Only seen with a rare genetic disorder, or long-term drip (IV) feeding that lacked it"
+    ],
+    "excessSigns": [
+      "Gout-like joint pain and high uric acid (very high intakes)",
+      "One reported case of psychosis (hallucinations) and seizures after a short course of supplements"
+    ],
+    "foodSources": [
+      {
+        "food": "Black-eyed peas, boiled",
+        "serving": "1/2 cup",
+        "amount": 288
+      },
+      {
+        "food": "Beef liver, pan fried",
+        "serving": "3 oz (85 g)",
+        "amount": 104
+      },
+      {
+        "food": "Lima beans, boiled",
+        "serving": "1/2 cup",
+        "amount": 104
+      },
+      {
+        "food": "Yogurt, plain, low-fat",
+        "serving": "1 cup",
+        "amount": 26
+      },
+      {
+        "food": "Milk, 2% fat",
+        "serving": "1 cup",
+        "amount": 22
+      },
+      {
+        "food": "Potato, baked",
+        "serving": "1 medium",
+        "amount": 16
+      },
+      {
+        "food": "Banana",
+        "serving": "1 medium",
+        "amount": 15
+      },
+      {
+        "food": "White rice, cooked",
+        "serving": "1/2 cup",
+        "amount": 13
+      },
+      {
+        "food": "Whole wheat bread",
+        "serving": "1 slice",
+        "amount": 12
+      },
+      {
+        "food": "Peanuts, dry roasted",
+        "serving": "1 oz (28 g)",
+        "amount": 11
+      },
+      {
+        "food": "Egg",
+        "serving": "1 large",
+        "amount": 9
+      },
+      {
+        "food": "Chicken, light meat, roasted",
+        "serving": "3 oz (85 g)",
+        "amount": 9
+      },
+      {
+        "food": "Spinach, boiled",
+        "serving": "1/2 cup",
+        "amount": 8
+      }
+    ],
+    "lowText": "Molybdenum is a little low today; beans, dairy, whole grains and potatoes can help.",
+    "highText": "You're near or over the safe daily molybdenum limit (600 µg), so please don't add more today.",
+    "notes": "US adults got about 76–109 µg a day from food in older surveys, well above the RDA. Supplements contain about 50–500 µg. One man developed psychosis and seizures after taking 300–800 µg a day for 18 days. This is a single case, but it is under the US limit and partly over Europe's, which supports using Europe's lower limit. Gout-like symptoms were reported where people ate about 10–15 mg a day from very molybdenum-rich soil. Molybdenum compounds have been used medically to remove copper.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheets/Molybdenum-HealthProfessional/",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf",
+      "https://www.fsai.ie/getmedia/278afeef-0e80-492b-9aae-61ce44307cbd/9565_fsai_vitaminsandminerals_report_fa3(1).pdf?ext=.pdf",
+      "https://food.ec.europa.eu/system/files/2016-10/labelling_nutrition-supplements-responses-denmark_annex2_en.pdf",
+      "https://pubmed.ncbi.nlm.nih.gov/7572711/",
+      "https://pubmed.ncbi.nlm.nih.gov/10649845/",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/sodium%20molybdate%20dihydrate/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/periodictable/JSON"
+    ]
+  },
+  {
+    "id": "boron",
+    "name": "Boron",
+    "group": "trace_mineral",
+    "unit": "mg",
+    "unitNotes": "Stored in milligrams (mg) of elemental boron. Some products list the compound weight (such as calcium fructoborate or boric acid), which is much larger than the boron it contains.",
+    "conversions": [
+      {
+        "from": "µg boron",
+        "to": "mg boron",
+        "multiply": 0.001,
+        "note": "1,000 µg = 1 mg."
+      },
+      {
+        "from": "mg boric acid",
+        "to": "mg boron",
+        "multiply": 0.1748,
+        "note": "Compound weight to boron. Worked out from molecular weights."
+      },
+      {
+        "from": "mg sodium tetraborate decahydrate (borax)",
+        "to": "mg boron",
+        "multiply": 0.1134,
+        "note": "Compound weight to boron. Matches a trial that gave 11.6 mg boron as 102.6 mg of this compound."
+      },
+      {
+        "from": "mg calcium fructoborate",
+        "to": "mg boron",
+        "multiply": 0.027,
+        "note": "Approximate. Worked out from a trial dose of 220 mg calcium fructoborate a day, which the NIH describes as 6 mg boron."
+      }
+    ],
+    "rda": {
+      "type": "none",
+      "male_19_50": null,
+      "female_19_50": null,
+      "male_51_plus": null,
+      "female_51_plus": null,
+      "pregnancy": null,
+      "lactation": null,
+      "source": "https://ods.od.nih.gov/factsheets/boron-healthprofessional/"
+    },
+    "ul": {
+      "iom": 20,
+      "efsa": 10,
+      "efsa_year": 2004,
+      "applies_to": "total",
+      "notes": "US limit: 20 mg a day. Europe (EFSA, 2004): 10 mg a day, also in pregnancy and breastfeeding; it applies to boric acid and borates. UK experts (EVM, 2003): safe upper level of 9.6 mg a day. Ireland's food safety body uses 11 mg for a 70 kg adult. Both main limits come from harm to reproduction and unborn young in animal studies (Europe's from lower weight of unborn rat pups). The app should use 10 mg.",
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/boron-healthprofessional/",
+        "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+        "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf",
+        "https://food.ec.europa.eu/system/files/2016-10/labelling_nutrition-supplements-responses-denmark_annex2_en.pdf",
+        "https://www.fsai.ie/getmedia/278afeef-0e80-492b-9aae-61ce44307cbd/9565_fsai_vitaminsandminerals_report_fa3(1).pdf?ext=.pdf"
+      ]
+    },
+    "studyRange": {
+      "low": 3,
+      "high": 10,
+      "goal": "Joint discomfort (6 mg), bone and mineral markers (3 mg), sex hormones (2.5–10 mg) and period pain (10 mg).",
+      "evidence": "C",
+      "evidenceWhy": "Only small, short studies (8 to 113 people, 1 week to 10 months) with mixed results.",
+      "keyStudies": [
+        {
+          "title": "The effect of boron supplementation on lean body mass, plasma testosterone levels, and strength in male bodybuilders",
+          "year": 1993,
+          "type": "RCT",
+          "finding": "19 male bodybuilders, 2.5 mg a day for 7 weeks. No effect on testosterone, lean mass or strength compared with placebo.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/8508192/"
+        },
+        {
+          "title": "Comparative effects of daily and weekly boron supplementation on plasma steroid hormones and proinflammatory cytokines",
+          "year": 2011,
+          "type": "pharmacokinetic study",
+          "finding": "8 healthy men, 10 mg a day for 1 week, with no separate placebo group. Free testosterone rose and estrogen (estradiol) fell; inflammation markers dropped.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/21129941/"
+        },
+        {
+          "title": "The effect of boron supplementation on its urinary excretion and selected cardiovascular risk factors in healthy male subjects",
+          "year": 1997,
+          "type": "pharmacokinetic study",
+          "finding": "Healthy men, 10 mg a day for 4 weeks. 84% of the dose left in the urine. Estrogen (estradiol) rose; testosterone showed only a trend upward.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/9197924/"
+        },
+        {
+          "title": "Essentiality of boron for healthy bones and joints",
+          "year": 1994,
+          "type": "RCT",
+          "finding": "20 people with osteoarthritis. 50% improved on 6 mg a day vs 10% on placebo.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/7889887/"
+        },
+        {
+          "title": "Short-term efficacy of calcium fructoborate on subjects with knee discomfort: a comparative, double-blind, placebo-controlled clinical study",
+          "year": 2014,
+          "type": "RCT",
+          "finding": "60 adults with knee discomfort, calcium fructoborate (about 6 mg boron a day) for 2 weeks. Less discomfort than placebo.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/24940052/"
+        },
+        {
+          "title": "Effects of boron supplementation on bone mineral density and dietary, blood, and urinary calcium, phosphorus, magnesium, and boron in female athletes",
+          "year": 1994,
+          "type": "RCT",
+          "finding": "28 young women took 3 mg a day or placebo for 10 months. Small changes in blood minerals; no direct effect on bone density.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/7889886/"
+        },
+        {
+          "title": "Effects of boron supplementation on the severity and duration of pain in primary dysmenorrhea",
+          "year": 2015,
+          "type": "RCT",
+          "finding": "113 female students took 10 mg a day or placebo from 2 days before to day 3 of each period, for 2 cycles. Less and shorter period pain than placebo.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/25906949/"
+        },
+        {
+          "title": "Opinion of the EFSA NDA Panel related to the Tolerable Upper Intake Level of Boron (Sodium Borate and Boric Acid)",
+          "year": 2004,
+          "type": "guideline",
+          "finding": "Limit of 10 mg a day, based on lower weight of unborn rat pups. Boron is not proven to be essential.",
+          "url": "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 1.2,
+      "female": 1.0,
+      "basis": "ai",
+      "why": "No RDA or AI exists, so 'ai' here means typical US food intake (about 1.17 mg for men and 0.96 mg for women, rounded); no supplement is needed to reach it."
+    },
+    "timing": {
+      "withFood": null,
+      "fatSoluble": false,
+      "bestTime": "any",
+      "splitAbove": null,
+      "separateFrom": []
+    },
+    "forms": {
+      "better": [],
+      "notes": "About 85–90% of boron is absorbed from any form, and most turns into boric acid in the body. The joint studies used calcium fructoborate; its label weight is far larger than the boron it contains."
+    },
+    "interactions": [],
+    "conditionFlags": [
+      {
+        "condition": "pregnancy",
+        "action": "avoid",
+        "why": "The safety limit is based on harm to unborn young in animal studies, and there is no known benefit. Food amounts are fine."
+      },
+      {
+        "condition": "breastfeeding",
+        "action": "doctor_first",
+        "why": "There is no proven benefit. Ask your doctor before taking boron supplements."
+      },
+      {
+        "condition": "trying_to_conceive",
+        "action": "caution",
+        "why": "High doses harmed fertility in animal studies. Keep to food amounts unless your doctor advises otherwise."
+      },
+      {
+        "condition": "kidney_disease",
+        "action": "doctor_first",
+        "why": "Boron leaves the body through the kidneys."
+      },
+      {
+        "condition": "cancer_treatment",
+        "action": "doctor_first",
+        "why": "Small studies show boron can change estrogen and testosterone levels, so check with your cancer team first."
+      },
+      {
+        "condition": "menopause",
+        "action": "caution",
+        "why": "One small study found boron raised estrogen after menopause; another found no change. The effect on health is unclear."
+      }
+    ],
+    "deficiencySigns": [
+      "Not established; boron is not proven to be essential",
+      "In studies, very low-boron diets changed mineral and hormone markers and reduced alertness"
+    ],
+    "excessSigns": [
+      "Vomiting, diarrhea and stomach pain",
+      "Very large amounts (many grams) can be fatal"
+    ],
+    "foodSources": [
+      {
+        "food": "Prune juice",
+        "serving": "1 cup",
+        "amount": 1.43
+      },
+      {
+        "food": "Avocado",
+        "serving": "1/2 cup",
+        "amount": 1.07
+      },
+      {
+        "food": "Raisins",
+        "serving": "1.5 oz (43 g)",
+        "amount": 0.95
+      },
+      {
+        "food": "Peach",
+        "serving": "1 medium",
+        "amount": 0.8
+      },
+      {
+        "food": "Grape juice",
+        "serving": "1 cup",
+        "amount": 0.76
+      },
+      {
+        "food": "Apple",
+        "serving": "1 medium",
+        "amount": 0.66
+      },
+      {
+        "food": "Pear",
+        "serving": "1 medium",
+        "amount": 0.5
+      },
+      {
+        "food": "Peanuts, roasted",
+        "serving": "1 oz (28 g)",
+        "amount": 0.48
+      },
+      {
+        "food": "Refried beans",
+        "serving": "1/2 cup",
+        "amount": 0.48
+      },
+      {
+        "food": "Peanut butter",
+        "serving": "2 tbsp",
+        "amount": 0.46
+      },
+      {
+        "food": "Orange",
+        "serving": "1 medium",
+        "amount": 0.37
+      },
+      {
+        "food": "Broccoli, boiled",
+        "serving": "1/2 cup",
+        "amount": 0.2
+      },
+      {
+        "food": "Banana",
+        "serving": "1 medium",
+        "amount": 0.16
+      },
+      {
+        "food": "Coffee",
+        "serving": "1 cup",
+        "amount": 0.07
+      }
+    ],
+    "lowText": "Boron has no set daily need; fruit, nuts, beans and avocado give most people about 1 mg.",
+    "highText": "You're near or over the safe daily boron limit (10 mg), so please don't add more today.",
+    "notes": "What human studies show on hormones. In men, the one placebo-controlled trial on testosterone (19 bodybuilders, 2.5 mg a day for 7 weeks) showed no change in testosterone, muscle or strength. Two small studies without a placebo group gave 10 mg a day: one (8 men, 1 week) found free testosterone up and estrogen down; the other (healthy men, 4 weeks) found estrogen up and only a trend in testosterone, so the two disagree on estrogen. In women after menopause, adding 3 mg a day to a very low-boron diet raised estrogen and testosterone in one study of 12 women, but changed nothing in another 3-week study. A single 11.6 mg dose in 15 men did not change blood sugar, blood fats or clotting. Overall, there is no good evidence that boron raises testosterone in healthy men. A 10 mg supplement plus food (about 1–1.5 mg) passes Europe's 10 mg limit. Supplements usually contain 0.15–6 mg; some workout products 1.5–10 mg per dose. US adults typically get 0.9–1.4 mg a day from food.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheets/boron-healthprofessional/",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf",
+      "https://food.ec.europa.eu/system/files/2016-10/labelling_nutrition-supplements-responses-denmark_annex2_en.pdf",
+      "https://www.fsai.ie/getmedia/278afeef-0e80-492b-9aae-61ce44307cbd/9565_fsai_vitaminsandminerals_report_fa3(1).pdf?ext=.pdf",
+      "https://pubmed.ncbi.nlm.nih.gov/8508192/",
+      "https://pubmed.ncbi.nlm.nih.gov/7889885/",
+      "https://pubmed.ncbi.nlm.nih.gov/21129941/",
+      "https://pubmed.ncbi.nlm.nih.gov/9197924/",
+      "https://pubmed.ncbi.nlm.nih.gov/3678698/",
+      "https://pubmed.ncbi.nlm.nih.gov/8329361/",
+      "https://pubmed.ncbi.nlm.nih.gov/7889887/",
+      "https://pubmed.ncbi.nlm.nih.gov/24940052/",
+      "https://pubmed.ncbi.nlm.nih.gov/21607703/",
+      "https://pubmed.ncbi.nlm.nih.gov/7889886/",
+      "https://pubmed.ncbi.nlm.nih.gov/7840072/",
+      "https://pubmed.ncbi.nlm.nih.gov/25906949/",
+      "https://pubmed.ncbi.nlm.nih.gov/12428176/",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/boric%20acid/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/sodium%20tetraborate%20decahydrate/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/periodictable/JSON"
+    ]
+  },
+  {
+    "id": "silicon",
+    "name": "Silicon",
+    "group": "trace_mineral",
+    "unit": "mg",
+    "unitNotes": "Stored in milligrams (mg) of elemental silicon. Some labels list silica (silicon dioxide), which is about 47% silicon.",
+    "conversions": [
+      {
+        "from": "mg silicon dioxide (silica)",
+        "to": "mg silicon",
+        "multiply": 0.4674,
+        "note": "Compound weight to silicon. Matches EFSA's figure of 1,500 mg silicon dioxide = 700 mg silicon."
+      },
+      {
+        "from": "µg silicon",
+        "to": "mg silicon",
+        "multiply": 0.001,
+        "note": "1,000 µg = 1 mg."
+      }
+    ],
+    "rda": {
+      "type": "none",
+      "male_19_50": null,
+      "female_19_50": null,
+      "male_51_plus": null,
+      "female_51_plus": null,
+      "pregnancy": null,
+      "lactation": null,
+      "source": "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf"
+    },
+    "ul": {
+      "iom": null,
+      "efsa": null,
+      "efsa_year": null,
+      "applies_to": "supplemental_only",
+      "notes": "No official upper limit in the US or Europe. EFSA (2004) said normal food intakes of 20–50 mg a day are unlikely to cause harm. UK experts (EVM, 2003) set a safe upper level of 700 mg a day of silicon from supplements as silica (silicon dioxide), or 760 mg in total (often quoted as 1,500 mg, which is the weight of silicon dioxide, not silicon). Well-absorbed forms are different: EFSA has only checked choline-stabilised orthosilicic acid and monomethylsilanetriol at up to 10 mg a day (no concerns found at that level). Germany's risk assessment institute (BfR) suggests no more than 10 mg a day of these forms per product, 100 mg as silica gel and 350 mg as silicon dioxide. The app should cap by form: 10 mg for orthosilicic acid or monomethylsilanetriol.",
+      "sources": [
+        "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf",
+        "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+        "https://www.bfr.bund.de/cm/349/proposed-maximum-levels-for-the-addition-of-silicon-to-foods-including-food-supplements.pdf",
+        "https://food.ec.europa.eu/system/files/2016-10/labelling_nutrition-supplements-responses-denmark_annex2_en.pdf",
+        "https://www.fsai.ie/getmedia/278afeef-0e80-492b-9aae-61ce44307cbd/9565_fsai_vitaminsandminerals_report_fa3(1).pdf?ext=.pdf"
+      ]
+    },
+    "studyRange": {
+      "low": 3,
+      "high": 12,
+      "goal": "Bone markers in women with low bone density (3–12 mg as choline-stabilised orthosilicic acid, with calcium and vitamin D, for 12 months), and hair, nails and skin (10 mg, for 20 weeks to 9 months).",
+      "evidence": "C",
+      "evidenceWhy": "A few small trials. Bone density did not change, and the hair, nail and skin results each come from a single study.",
+      "keyStudies": [
+        {
+          "title": "Choline-stabilized orthosilicic acid supplementation as an adjunct to calcium/vitamin D3 stimulates markers of bone formation in osteopenic females: a randomized, placebo-controlled trial",
+          "year": 2008,
+          "type": "RCT",
+          "finding": "136 women with low bone density took 3, 6 or 12 mg a day or placebo, all with calcium and vitamin D, for 12 months. One bone-building marker rose at 6 and 12 mg; spine bone density did not change.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/18547426/"
+        },
+        {
+          "title": "Effect of oral intake of choline-stabilized orthosilicic acid on skin, nails and hair in women with photodamaged skin",
+          "year": 2005,
+          "type": "RCT",
+          "finding": "50 women with sun-damaged skin took 10 mg a day or placebo for 20 weeks. Smoother skin than placebo, and less brittle hair and nails than at the start.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/16205932/"
+        },
+        {
+          "title": "Effect of oral intake of choline-stabilized orthosilicic acid on hair tensile strength and morphology in women with fine hair",
+          "year": 2007,
+          "type": "RCT",
+          "finding": "48 women with fine hair took 10 mg a day or placebo for 9 months. Hair kept more of its strength than with placebo and got thicker.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/17960402/"
+        },
+        {
+          "title": "The silicon supplement 'Monomethylsilanetriol' is safe and increases the body pool of silicon in healthy Pre-menopausal women",
+          "year": 2013,
+          "type": "RCT",
+          "finding": "22 women, 10.5 mg a day for 4 weeks. Body silicon rose with no side effects.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/23622499/"
+        },
+        {
+          "title": "The comparative absorption of silicon from different foods and food supplements",
+          "year": 2009,
+          "type": "pharmacokinetic study",
+          "finding": "Absorption varies by form: monomethylsilanetriol and alcohol-free beer about 60–64%, green beans 44%, orthosilicic acid 43%, choline-stabilised orthosilicic acid 17%, bananas 4%, colloidal silica 1%.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/19356271/"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 30,
+      "female": 25,
+      "basis": "ai",
+      "why": "No RDA or AI exists, so 'ai' here means typical US food intake (about 30 mg for men and 25 mg for women); food covers this, so no supplement is needed."
+    },
+    "timing": {
+      "withFood": null,
+      "fatSoluble": false,
+      "bestTime": "any",
+      "splitAbove": null,
+      "separateFrom": []
+    },
+    "forms": {
+      "better": [
+        "monomethylsilanetriol",
+        "orthosilicic acid"
+      ],
+      "notes": "Small, simple forms are absorbed best. Choline-stabilised orthosilicic acid, used in most trials, was absorbed less well (about 17%). Colloidal silica is barely absorbed (about 1%). Safe amounts differ a lot by form, so the app should record the form."
+    },
+    "interactions": [
+      {
+        "with": "Antacids containing magnesium trisilicate",
+        "severity": "low",
+        "effect": "These add silicon. Long, heavy use has been linked to rare silica kidney stones.",
+        "action": "Count them in your total, and tell your doctor if you use them every day."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "kidney_disease",
+        "action": "doctor_first",
+        "why": "The kidneys clear silicon, and blood levels rise when they don't work well."
+      },
+      {
+        "condition": "kidney_stones",
+        "action": "caution",
+        "why": "Long-term high silicon from some antacids has been linked to rare silica stones."
+      }
+    ],
+    "deficiencySigns": [
+      "Not seen in people; silicon is not proven to be essential"
+    ],
+    "excessSigns": [
+      "Rare silica kidney stones with long-term high intake, mainly from some antacids",
+      "No harm known from silicon in food"
+    ],
+    "foodSources": [
+      {
+        "food": "Alcohol-free beer",
+        "serving": "660 ml",
+        "amount": 22.9
+      },
+      {
+        "food": "Bananas, peeled (poorly absorbed)",
+        "serving": "250 g",
+        "amount": 13.6
+      },
+      {
+        "food": "Green beans, cooked",
+        "serving": "250 g",
+        "amount": 6.1
+      },
+      {
+        "food": "Dried fruit (average)",
+        "serving": "33 g",
+        "amount": 3.51
+      },
+      {
+        "food": "Breakfast cereals (average)",
+        "serving": "37.5 g",
+        "amount": 2.92
+      },
+      {
+        "food": "Pasta (average)",
+        "serving": "230 g",
+        "amount": 2.55
+      },
+      {
+        "food": "Rice (average)",
+        "serving": "120 g",
+        "amount": 1.85
+      },
+      {
+        "food": "Mineral or spring water (average)",
+        "serving": "330 ml",
+        "amount": 1.82
+      },
+      {
+        "food": "Bread (average)",
+        "serving": "50 g",
+        "amount": 1.45
+      },
+      {
+        "food": "Tea or coffee (average)",
+        "serving": "260 ml",
+        "amount": 1.33
+      },
+      {
+        "food": "Vegetables (average)",
+        "serving": "70 g",
+        "amount": 1.25
+      }
+    ],
+    "lowText": "Silicon has no set daily need; whole grains, oats, beans, fruit and water give most people about 20–50 mg.",
+    "highText": "Your silicon from supplements is above the amount checked as safe for this form, so please don't add more today.",
+    "notes": "Silicon is not proven to be an essential nutrient, and the US Institute of Medicine noted there is no justification for adding it to supplements. In a large US study, men ate about 30–33 mg a day and women 24–25 mg. A large observational study linked higher intake (over 40 mg a day) with denser hip bones in men and younger women, but this does not prove cause. Silica and well-absorbed forms are not interchangeable for safety: 10 mg as orthosilicic acid reaches the body far more than 10 mg as silica. Silicon is cleared by the kidneys, and levels run higher in kidney failure.",
+    "sources": [
+      "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://www.bfr.bund.de/cm/349/proposed-maximum-levels-for-the-addition-of-silicon-to-foods-including-food-supplements.pdf",
+      "https://food.ec.europa.eu/system/files/2016-10/labelling_nutrition-supplements-responses-denmark_annex2_en.pdf",
+      "https://www.fsai.ie/getmedia/278afeef-0e80-492b-9aae-61ce44307cbd/9565_fsai_vitaminsandminerals_report_fa3(1).pdf?ext=.pdf",
+      "https://pmc.ncbi.nlm.nih.gov/articles/PMC2744664/",
+      "https://pubmed.ncbi.nlm.nih.gov/19356271/",
+      "https://pubmed.ncbi.nlm.nih.gov/16277785/",
+      "https://pubmed.ncbi.nlm.nih.gov/11976163/",
+      "https://pubmed.ncbi.nlm.nih.gov/14969400/",
+      "https://pubmed.ncbi.nlm.nih.gov/18547426/",
+      "https://pubmed.ncbi.nlm.nih.gov/16205932/",
+      "https://pubmed.ncbi.nlm.nih.gov/17960402/",
+      "https://pubmed.ncbi.nlm.nih.gov/23622499/",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/silicon%20dioxide/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/periodictable/JSON"
+    ]
+  }
+]

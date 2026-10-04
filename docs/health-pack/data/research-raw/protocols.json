@@ -1,0 +1,1923 @@
+[
+  {
+    "id": "daily-foundation",
+    "title": "Daily foundation",
+    "tagline": "A few simple, proven basics for most healthy adults.",
+    "for": "Healthy adults who want a simple, evidence-first daily routine.",
+    "notFor": [
+      "pregnancy",
+      "breastfeeding",
+      "trying_to_conceive",
+      "kidney_disease"
+    ],
+    "doctorFirst": false,
+    "evidence": "B",
+    "durationWeeks": null,
+    "reviewAfterWeeks": 12,
+    "items": [
+      {
+        "kind": "habit",
+        "title": "Get outdoor daylight",
+        "time": "07:30",
+        "anchor": "wake",
+        "offsetMin": 30,
+        "repeat": "daily",
+        "durationMin": 15,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Daylight is the best source of bright light by day. It helps your body clock and sleep.",
+        "evidence": "C",
+        "source": "https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001571"
+      },
+      {
+        "kind": "movement",
+        "title": "Brisk walk",
+        "time": "12:45",
+        "anchor": "lunch",
+        "offsetMin": 15,
+        "repeat": "weekdays",
+        "durationMin": 30,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Aim for 150 minutes a week that makes you a bit out of breath. Any amount is better than none.",
+        "evidence": "A",
+        "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7719906/"
+      },
+      {
+        "kind": "movement",
+        "title": "Strength session",
+        "time": "17:30",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "every_other_day",
+        "durationMin": 20,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Work all major muscles at least 2 days a week. Body weight or bands are fine. Skip a day if sore.",
+        "evidence": "A",
+        "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7719906/"
+      },
+      {
+        "kind": "supplement",
+        "title": "Vitamin D3 10 µg (400 IU)",
+        "time": "07:30",
+        "anchor": "breakfast",
+        "offsetMin": 0,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [
+          {
+            "id": "vitamin_d",
+            "amount": 10,
+            "unit": "µg"
+          }
+        ],
+        "withFood": true,
+        "notes": "Take if you get little sun on your skin: autumn and winter, or all year if you are rarely outdoors or have dark skin.",
+        "evidence": "B",
+        "source": "https://www.nhs.uk/conditions/vitamins-and-minerals/vitamin-d/"
+      },
+      {
+        "kind": "supplement",
+        "title": "Omega-3 250 mg (fish or algae oil)",
+        "time": "19:00",
+        "anchor": "dinner",
+        "offsetMin": 0,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [
+          {
+            "id": "omega_3",
+            "amount": 250,
+            "unit": "mg"
+          }
+        ],
+        "withFood": true,
+        "notes": "Only if you eat less than 1 portion of oily fish a week. Food first: 1 portion (140 g) of oily fish a week.",
+        "evidence": "C",
+        "source": "https://www.efsa.europa.eu/sites/default/files/2017_09_DRVs_summary_report.pdf"
+      },
+      {
+        "kind": "meal",
+        "title": "Protein at every meal",
+        "time": "12:30",
+        "anchor": "lunch",
+        "offsetMin": 0,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Aim for about 0.8 g of protein per kg body weight a day, spread over your meals.",
+        "evidence": "B",
+        "source": "https://www.efsa.europa.eu/sites/default/files/2017_09_DRVs_summary_report.pdf"
+      },
+      {
+        "kind": "meal",
+        "title": "Fibre: aim for 30 g a day",
+        "time": "07:30",
+        "anchor": "breakfast",
+        "offsetMin": 0,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Vegetables, fruit, beans, whole grains, nuts and seeds. Build up slowly over a few weeks.",
+        "evidence": "B",
+        "source": "https://www.nhs.uk/live-well/eat-well/digestive-health/how-to-get-more-fibre-into-your-diet/"
+      },
+      {
+        "kind": "habit",
+        "title": "Wind down for sleep",
+        "time": "22:00",
+        "anchor": "bed",
+        "offsetMin": -30,
+        "repeat": "daily",
+        "durationMin": 30,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Screens off 30 minutes before bed. Aim for 7 or more hours, at the same times each day.",
+        "evidence": "C",
+        "source": "https://www.cdc.gov/sleep/about/index.html"
+      }
+    ],
+    "safety": [
+      "Vitamin D: do not take more than 100 µg (4,000 IU) a day in total from all supplements.",
+      "Check other products (like multivitamins) so you don't double up on vitamin D.",
+      "Kidney disease or high calcium: ask your doctor before taking vitamin D.",
+      "On blood thinners? Tell your doctor before starting fish oil.",
+      "Heart rhythm problems such as atrial fibrillation? Ask your doctor first. Omega-3 supplements slightly raised this risk in trials, more so above 1 g a day.",
+      "Pregnant, planning a pregnancy or breastfeeding? Ask your midwife or doctor for the right plan.",
+      "New to exercise? Start small and build up slowly."
+    ],
+    "keyStudies": [
+      {
+        "title": "World Health Organization 2020 guidelines on physical activity and sedentary behaviour",
+        "year": 2020,
+        "type": "guideline",
+        "finding": "Adults should do 150-300 minutes of moderate activity a week plus strength work on 2 or more days.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/33239350/"
+      },
+      {
+        "title": "Daily steps and all-cause mortality: a meta-analysis of 15 international cohorts",
+        "year": 2022,
+        "type": "meta-analysis",
+        "finding": "More daily steps were linked to lower risk of death, levelling off at 6,000-8,000 (age 60+) and 8,000-10,000 (under 60).",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35247352/"
+      },
+      {
+        "title": "Carbohydrate quality and human health: a series of systematic reviews and meta-analyses",
+        "year": 2019,
+        "type": "meta-analysis",
+        "finding": "Eating 25-29 g of fibre a day was linked to the biggest drop in disease risk. Trials showed lower weight, blood pressure and cholesterol.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/30638909/"
+      },
+      {
+        "title": "Vitamin D for the Prevention of Disease: An Endocrine Society Clinical Practice Guideline",
+        "year": 2024,
+        "type": "guideline",
+        "finding": "Advises against vitamin D above daily needs for healthy adults under 75, and against routine testing.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/38828931/"
+      },
+      {
+        "title": "Omega-3 fatty acids for the primary and secondary prevention of cardiovascular disease",
+        "year": 2020,
+        "type": "Cochrane review",
+        "finding": "Omega-3 supplements had little or no effect on deaths, with a small drop in heart disease events (low certainty).",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/32114706/"
+      },
+      {
+        "title": "Effect of Long-Term Marine Omega-3 Fatty Acids Supplementation on the Risk of Atrial Fibrillation",
+        "year": 2021,
+        "type": "meta-analysis",
+        "finding": "Omega-3 supplements were linked to more atrial fibrillation, especially at doses above 1 g a day.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/34612056/"
+      }
+    ],
+    "sources": [
+      "https://pmc.ncbi.nlm.nih.gov/articles/PMC7719906/",
+      "https://www.who.int/news-room/fact-sheets/detail/physical-activity",
+      "https://pubmed.ncbi.nlm.nih.gov/35247352/",
+      "https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001571",
+      "https://www.nhs.uk/conditions/vitamins-and-minerals/vitamin-d/",
+      "https://ods.od.nih.gov/factsheets/VitaminD-HealthProfessional/",
+      "https://pubmed.ncbi.nlm.nih.gov/38828931/",
+      "https://www.efsa.europa.eu/sites/default/files/2017_09_DRVs_summary_report.pdf",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://pubmed.ncbi.nlm.nih.gov/30638909/",
+      "https://www.nhs.uk/live-well/eat-well/digestive-health/how-to-get-more-fibre-into-your-diet/",
+      "https://www.nhs.uk/live-well/eat-well/food-types/fish-and-shellfish-nutrition/",
+      "https://ods.od.nih.gov/factsheets/Omega3FattyAcids-HealthProfessional/",
+      "https://pubmed.ncbi.nlm.nih.gov/32114706/",
+      "https://pubmed.ncbi.nlm.nih.gov/34612056/",
+      "https://www.cdc.gov/sleep/about/index.html"
+    ]
+  },
+  {
+    "id": "desk-worker-day",
+    "title": "Desk worker day",
+    "tagline": "Short, regular movement breaks for long days at a desk.",
+    "for": "Office and remote staff who sit for long periods at work.",
+    "notFor": [
+      "anyone told by a doctor to limit their activity"
+    ],
+    "doctorFirst": false,
+    "evidence": "B",
+    "durationWeeks": null,
+    "reviewAfterWeeks": 8,
+    "items": [
+      {
+        "kind": "habit",
+        "title": "Morning daylight",
+        "time": "07:30",
+        "anchor": "wake",
+        "offsetMin": 30,
+        "repeat": "daily",
+        "durationMin": 10,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Step outside soon after waking. Daylight is the best source of bright light for your body clock.",
+        "evidence": "C",
+        "source": "https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001571"
+      },
+      {
+        "kind": "movement",
+        "title": "Sitting break: walk 2-3 minutes",
+        "time": "09:30",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "weekdays",
+        "durationMin": 3,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Every 20-30 minutes of sitting, get up and walk for 2-3 minutes. A timer helps.",
+        "evidence": "B",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/22374636/"
+      },
+      {
+        "kind": "movement",
+        "title": "Walk after meals",
+        "time": "13:00",
+        "anchor": "after_meals",
+        "offsetMin": 0,
+        "repeat": "daily",
+        "durationMin": 10,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "A 10-minute walk soon after eating helps keep blood sugar steadier after meals.",
+        "evidence": "B",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/27747394/"
+      },
+      {
+        "kind": "habit",
+        "title": "Stand for calls",
+        "time": "14:00",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "weekdays",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Stand for phone or video calls. If you have a sit-stand desk, switch position through the day.",
+        "evidence": "B",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/35977732/"
+      },
+      {
+        "kind": "habit",
+        "title": "Drink water through the day",
+        "time": "10:00",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Aim for 6-8 glasses of fluid a day. Water, tea and coffee all count. Drink more in hot weather.",
+        "evidence": "C",
+        "source": "https://www.nhs.uk/live-well/eat-well/food-guidelines-and-food-labels/water-drinks-nutrition/"
+      },
+      {
+        "kind": "habit",
+        "title": "Rest your eyes",
+        "time": "10:30",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "weekdays",
+        "durationMin": 1,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Every 20-30 minutes, look at something far away for a few seconds. Studies are small and mixed.",
+        "evidence": "C",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/40466853/"
+      },
+      {
+        "kind": "supplement",
+        "title": "Vitamin D3 10 µg (400 IU)",
+        "time": "07:30",
+        "anchor": "breakfast",
+        "offsetMin": 0,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [
+          {
+            "id": "vitamin_d",
+            "amount": 10,
+            "unit": "µg"
+          }
+        ],
+        "withFood": true,
+        "notes": "Only if you get little sun on your skin, for example if you work indoors and are rarely outside.",
+        "evidence": "B",
+        "source": "https://www.nhs.uk/conditions/vitamins-and-minerals/vitamin-d/"
+      },
+      {
+        "kind": "note",
+        "title": "Weekly activity target",
+        "time": "09:00",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "weekly",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Breaks and walks all count. Aim for 150 minutes a week of moderate activity, plus strength work twice a week.",
+        "evidence": "A",
+        "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7719906/"
+      }
+    ],
+    "safety": [
+      "Stop and get medical advice if walking brings on chest pain, dizziness or unusual breathlessness.",
+      "On insulin or tablets like gliclazide or glimepiride? Walking can lower blood sugar. Know the signs of a low.",
+      "Vitamin D: no more than 100 µg (4,000 IU) a day in total from all supplements.",
+      "Kidney disease or high calcium: ask your doctor before taking vitamin D.",
+      "Eye strain, headaches or blurry vision that keep coming back: get your eyes checked."
+    ],
+    "keyStudies": [
+      {
+        "title": "Breaking up prolonged sitting reduces postprandial glucose and insulin responses",
+        "year": 2012,
+        "type": "RCT",
+        "finding": "2-minute walks every 20 minutes lowered blood sugar and insulin after a drink compared with sitting still.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/22374636/"
+      },
+      {
+        "title": "The Acute Effects of Interrupting Prolonged Sitting Time in Adults with Standing and Light-Intensity Walking on Biomarkers of Cardiometabolic Health in Adults",
+        "year": 2022,
+        "type": "meta-analysis",
+        "finding": "Light walking breaks lowered blood sugar and insulin after meals. Standing breaks helped less.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35147898/"
+      },
+      {
+        "title": "Advice to walk after meals is more effective for lowering postprandial glycaemia in type 2 diabetes mellitus than advice that does not specify timing",
+        "year": 2016,
+        "type": "RCT",
+        "finding": "10-minute walks after each meal lowered post-meal blood sugar more than one 30-minute walk a day.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/27747394/"
+      },
+      {
+        "title": "Effectiveness of an intervention for reducing sitting time and improving health in office workers: three arm cluster randomised controlled trial",
+        "year": 2022,
+        "type": "RCT",
+        "finding": "A workplace programme plus a sit-stand desk cut sitting by about an hour a day after 12 months.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35977732/"
+      },
+      {
+        "title": "The impact of break schedules on digital eye strain symptoms and ocular accommodation during prolonged near work",
+        "year": 2025,
+        "type": "RCT",
+        "finding": "Regular or self-paced breaks eased eye strain compared with no breaks in a 40-minute reading task.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/40466853/"
+      }
+    ],
+    "sources": [
+      "https://pubmed.ncbi.nlm.nih.gov/22374636/",
+      "https://pubmed.ncbi.nlm.nih.gov/35147898/",
+      "https://pubmed.ncbi.nlm.nih.gov/27747394/",
+      "https://pubmed.ncbi.nlm.nih.gov/35977732/",
+      "https://pubmed.ncbi.nlm.nih.gov/40466853/",
+      "https://pubmed.ncbi.nlm.nih.gov/36473088/",
+      "https://pubmed.ncbi.nlm.nih.gov/35963776/",
+      "https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001571",
+      "https://www.nhs.uk/live-well/eat-well/food-guidelines-and-food-labels/water-drinks-nutrition/",
+      "https://www.nhs.uk/conditions/vitamins-and-minerals/vitamin-d/",
+      "https://pmc.ncbi.nlm.nih.gov/articles/PMC7719906/",
+      "https://www.nhs.uk/conditions/low-blood-sugar-hypoglycaemia/"
+    ]
+  },
+  {
+    "id": "iron-repletion",
+    "title": "Iron top-up (low iron confirmed)",
+    "tagline": "Every-other-day iron, timed well, with planned blood tests.",
+    "for": "Adults whose blood test shows low iron (low ferritin) and whose doctor has advised iron tablets.",
+    "notFor": [
+      "hemochromatosis",
+      "no blood test showing low iron",
+      "pregnancy",
+      "kidney_disease",
+      "inflammatory_bowel_disease",
+      "bariatric_surgery"
+    ],
+    "doctorFirst": true,
+    "evidence": "B",
+    "durationWeeks": 12,
+    "reviewAfterWeeks": 4,
+    "items": [
+      {
+        "kind": "supplement",
+        "title": "Iron 65 mg (one ferrous sulfate 200 mg tablet)",
+        "time": "07:00",
+        "anchor": "breakfast",
+        "offsetMin": -30,
+        "repeat": "every_other_day",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [
+          {
+            "id": "iron",
+            "amount": 65,
+            "unit": "mg"
+          }
+        ],
+        "withFood": false,
+        "notes": "Doctor-supervised dose for a confirmed deficiency, above the daily limit for healthy people. Every other morning on an empty stomach. Follow your doctor's dose.",
+        "evidence": "B",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/29032957/"
+      },
+      {
+        "kind": "habit",
+        "title": "2-hour gap: tea, coffee, dairy, eggs",
+        "time": "07:00",
+        "anchor": "breakfast",
+        "offsetMin": -30,
+        "repeat": "every_other_day",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "On iron days, keep tea, coffee, milk, eggs and calcium 2 hours away from your iron tablet.",
+        "evidence": "B",
+        "source": "https://www.nhs.uk/medicines/ferrous-sulfate/how-and-when-to-take-ferrous-sulfate/"
+      },
+      {
+        "kind": "note",
+        "title": "Vitamin C is optional",
+        "time": "07:00",
+        "anchor": "breakfast",
+        "offsetMin": -30,
+        "repeat": "once",
+        "durationMin": null,
+        "dayOffset": 0,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "A large trial found adding vitamin C did not help iron work better. A glass of orange juice is fine if your doctor suggests it.",
+        "evidence": "B",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/33136134/"
+      },
+      {
+        "kind": "meal",
+        "title": "Iron-rich foods",
+        "time": "12:30",
+        "anchor": "lunch",
+        "offsetMin": 0,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Meat, fish, beans, lentils, tofu and fortified cereals. Eat fruit or vegetables with plant sources to help absorption.",
+        "evidence": "C",
+        "source": "https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/"
+      },
+      {
+        "kind": "note",
+        "title": "Side effects check-in",
+        "time": "09:00",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "weekly",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Tell your doctor about stomach pain, sickness or constipation. Every-other-day dosing may be easier on the stomach.",
+        "evidence": "C",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/40841680/"
+      },
+      {
+        "kind": "test",
+        "title": "Blood test: is the iron working?",
+        "time": "09:00",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "once",
+        "durationMin": null,
+        "dayOffset": 28,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Your doctor checks haemoglobin within about 4 weeks of starting.",
+        "evidence": "B",
+        "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8515119/"
+      },
+      {
+        "kind": "test",
+        "title": "Blood test: ferritin and blood count",
+        "time": "09:00",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "once",
+        "durationMin": null,
+        "dayOffset": 84,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Iron is usually continued for about 3 months after haemoglobin is normal, to refill stores. Your doctor decides whether to continue and for how long.",
+        "evidence": "B",
+        "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8515119/"
+      }
+    ],
+    "safety": [
+      "Only take iron if a blood test shows low iron and your doctor agrees.",
+      "This dose is above the daily upper limit for healthy people (40-45 mg). Use it only for a confirmed deficiency, under a doctor's care.",
+      "Never take iron if you have haemochromatosis (iron overload).",
+      "Keep iron tablets out of reach of children. An iron overdose can kill a young child.",
+      "Take thyroid tablets (levothyroxine) at least 4 hours apart from iron.",
+      "Indigestion medicines can lower iron absorption. Ask your pharmacist about timing.",
+      "Low iron needs a cause found, especially in men and in women after menopause. Your doctor will advise on checks.",
+      "Pregnant? Your midwife or doctor will set your iron plan.",
+      "After the course, ask your doctor about a repeat blood count (often about 6 months later) to catch low iron coming back."
+    ],
+    "keyStudies": [
+      {
+        "title": "Iron absorption from oral iron supplements given on consecutive versus alternate days and as single morning doses versus twice-daily split dosing in iron-depleted women: two open-label, randomised controlled trials",
+        "year": 2017,
+        "type": "RCT",
+        "finding": "In women with low iron, 60 mg every other day was absorbed better than daily. Splitting into two doses a day did not help.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/29032957/"
+      },
+      {
+        "title": "Iron absorption from supplements is greater with alternate day than with consecutive day dosing in iron-deficient anemic women",
+        "year": 2020,
+        "type": "RCT",
+        "finding": "Small isotope crossover study in 19 women (only dose order randomised): absorption was 40-50% higher on an alternate day than on the second day in a row.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/31413088/"
+      },
+      {
+        "title": "Alternate day versus daily oral iron for treatment of iron deficiency anemia: a randomized controlled trial",
+        "year": 2023,
+        "type": "RCT",
+        "finding": "In 200 adults, alternate-day and daily iron raised haemoglobin by a similar amount over 8 weeks.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/36725875/"
+      },
+      {
+        "title": "Efficacy of daily versus alternate day oral iron supplementation for management of anaemia among general population: a systematic review and meta-analysis",
+        "year": 2025,
+        "type": "meta-analysis",
+        "finding": "11 trials: daily and alternate-day iron worked about the same. Alternate-day was better tolerated. Very low certainty.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/40841680/"
+      },
+      {
+        "title": "The Efficacy and Safety of Vitamin C for Iron Supplementation in Adult Patients With Iron Deficiency Anemia: A Randomized Clinical Trial",
+        "year": 2020,
+        "type": "RCT",
+        "finding": "In 440 adults, adding vitamin C to iron did not improve haemoglobin or ferritin.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/33136134/"
+      },
+      {
+        "title": "British Society of Gastroenterology guidelines for the management of iron deficiency anaemia in adults",
+        "year": 2021,
+        "type": "guideline",
+        "finding": "One iron tablet a day, or every other day if side effects. Check response within 4 weeks. Continue about 3 months after haemoglobin is normal.",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8515119/"
+      }
+    ],
+    "sources": [
+      "https://pubmed.ncbi.nlm.nih.gov/29032957/",
+      "https://pubmed.ncbi.nlm.nih.gov/31413088/",
+      "https://pubmed.ncbi.nlm.nih.gov/36725875/",
+      "https://pubmed.ncbi.nlm.nih.gov/40841680/",
+      "https://pubmed.ncbi.nlm.nih.gov/33136134/",
+      "https://pmc.ncbi.nlm.nih.gov/articles/PMC8515119/",
+      "https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/",
+      "https://ods.od.nih.gov/factsheets/Iron-Consumer/",
+      "https://www.nhs.uk/medicines/ferrous-sulfate/how-and-when-to-take-ferrous-sulfate/",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf"
+    ]
+  },
+  {
+    "id": "blood-sugar-support",
+    "title": "Blood sugar support",
+    "tagline": "Daily habits that help keep blood sugar steadier, alongside your care.",
+    "for": "Adults with prediabetes or type 2 diabetes, working with their doctor or diabetes team.",
+    "notFor": [
+      "type_1_diabetes",
+      "pregnancy",
+      "breastfeeding",
+      "bariatric_surgery",
+      "trouble swallowing or a narrowed bowel (for psyllium)"
+    ],
+    "doctorFirst": true,
+    "evidence": "B",
+    "durationWeeks": null,
+    "reviewAfterWeeks": 12,
+    "items": [
+      {
+        "kind": "movement",
+        "title": "Walk after meals",
+        "time": "13:00",
+        "anchor": "after_meals",
+        "offsetMin": 0,
+        "repeat": "daily",
+        "durationMin": 10,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "A 10-minute walk soon after each main meal lowers the rise in blood sugar after eating.",
+        "evidence": "A",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/27747394/"
+      },
+      {
+        "kind": "movement",
+        "title": "Movement break from sitting",
+        "time": "10:30",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "daily",
+        "durationMin": 3,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Every 20-30 minutes of sitting, get up and walk for 2-3 minutes.",
+        "evidence": "B",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/22374636/"
+      },
+      {
+        "kind": "movement",
+        "title": "Strength session",
+        "time": "17:30",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "every_other_day",
+        "durationMin": 20,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Strength work on at least 2 days a week, plus 150 minutes of moderate activity a week.",
+        "evidence": "A",
+        "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7719906/"
+      },
+      {
+        "kind": "meal",
+        "title": "Vegetables and protein first, carbs last",
+        "time": "12:30",
+        "anchor": "lunch",
+        "offsetMin": 0,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Eat the vegetables and protein on your plate before the bread, rice, pasta or potatoes. Use this at lunch and dinner.",
+        "evidence": "B",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/41081830/"
+      },
+      {
+        "kind": "supplement",
+        "title": "Psyllium husk 5 g before breakfast",
+        "time": "07:20",
+        "anchor": "breakfast",
+        "offsetMin": -10,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [
+          {
+            "id": "psyllium",
+            "amount": 5,
+            "unit": "g"
+          },
+          {
+            "id": "fiber",
+            "amount": 4,
+            "unit": "g"
+          }
+        ],
+        "withFood": null,
+        "notes": "Stir into a large glass of water (at least 150 ml) and drink straight away. Ask your pharmacist how to time it with your medicines.",
+        "evidence": "B",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/26561625/"
+      },
+      {
+        "kind": "supplement",
+        "title": "Psyllium husk 5 g before dinner",
+        "time": "18:50",
+        "anchor": "dinner",
+        "offsetMin": -10,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [
+          {
+            "id": "psyllium",
+            "amount": 5,
+            "unit": "g"
+          },
+          {
+            "id": "fiber",
+            "amount": 4,
+            "unit": "g"
+          }
+        ],
+        "withFood": null,
+        "notes": "Stir into a large glass of water (at least 150 ml). Not right before bed. Start with one dose a day for the first week if you feel bloated.",
+        "evidence": "B",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/10500014/"
+      },
+      {
+        "kind": "habit",
+        "title": "Sleep 7-8 hours",
+        "time": "22:30",
+        "anchor": "bed",
+        "offsetMin": 0,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "The lowest diabetes risk is seen with 7-8 hours of sleep. Keep regular sleep times.",
+        "evidence": "C",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/25715415/"
+      },
+      {
+        "kind": "test",
+        "title": "B12 blood test if you take metformin",
+        "time": "09:00",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "once",
+        "durationMin": null,
+        "dayOffset": 7,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Long-term metformin can lower vitamin B12. Ask your doctor about a test, and repeat checks if you have risk factors.",
+        "evidence": "B",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/26900641/"
+      },
+      {
+        "kind": "note",
+        "title": "Vitamin D and magnesium: ask first",
+        "time": "09:00",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "once",
+        "durationMin": null,
+        "dayOffset": 7,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Vitamin D trials in prediabetes found a small drop in diabetes risk. Ask your doctor before taking it. Take magnesium only if a test shows it is low.",
+        "evidence": "B",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/36745886/"
+      }
+    ],
+    "safety": [
+      "Keep taking your diabetes medicines. This routine adds to your care. It does not replace it.",
+      "Psyllium and these habits can lower blood sugar. Tell your doctor before starting, as your medicines may need adjusting.",
+      "On insulin, gliclazide or glimepiride? Know the signs of a low (shaky, sweaty, hungry, confused) and carry a sugary drink on walks.",
+      "Always take psyllium with plenty of water. Do not take it if you have trouble swallowing, a narrowed bowel or a sudden change in bowel habit.",
+      "Keep psyllium 30-60 minutes apart from other medicines, as it can slow their absorption. Ask your pharmacist about timing.",
+      "Berberine and chromium are doctor-only. They can push blood sugar too low with diabetes medicines.",
+      "Stop exercise and get help if you have chest pain, faintness or unusual breathlessness.",
+      "Vitamin D: no more than 100 µg (4,000 IU) a day in total unless your doctor advises it."
+    ],
+    "keyStudies": [
+      {
+        "title": "Advice to walk after meals is more effective for lowering postprandial glycaemia in type 2 diabetes mellitus than advice that does not specify timing",
+        "year": 2016,
+        "type": "RCT",
+        "finding": "In 41 adults with type 2 diabetes, 10-minute walks after meals lowered post-meal blood sugar more than one daily walk.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/27747394/"
+      },
+      {
+        "title": "Nutrient intake order on metabolic outcomes in type 2 diabetes: a systematic review and meta-analysis",
+        "year": 2026,
+        "type": "meta-analysis",
+        "finding": "Eating carbs last lowered blood sugar 1 hour after meals and HbA1c a little (0.16%).",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/41081830/"
+      },
+      {
+        "title": "The impact of food order on postprandial glycaemic excursions in prediabetes",
+        "year": 2019,
+        "type": "RCT",
+        "finding": "In prediabetes, eating protein and vegetables before carbs cut the blood sugar peak by over 40%.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/30101510/"
+      },
+      {
+        "title": "Psyllium fiber improves glycemic control proportional to loss of glycemic control: a meta-analysis",
+        "year": 2015,
+        "type": "meta-analysis",
+        "finding": "Psyllium before meals lowered fasting glucose and HbA1c in type 2 diabetes, less in prediabetes, and not in people with normal blood sugar.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/26561625/"
+      },
+      {
+        "title": "Long-term Metformin Use and Vitamin B12 Deficiency in the Diabetes Prevention Program Outcomes Study",
+        "year": 2016,
+        "type": "RCT",
+        "finding": "Long-term metformin was linked to low B12. Authors advise considering routine B12 tests.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/26900641/"
+      },
+      {
+        "title": "Vitamin D and Risk for Type 2 Diabetes in People With Prediabetes: A Systematic Review and Meta-analysis of Individual Participant Data From 3 Randomized Clinical Trials",
+        "year": 2023,
+        "type": "meta-analysis",
+        "finding": "Vitamin D lowered the risk of developing diabetes by 15% in people with prediabetes.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/36745886/"
+      },
+      {
+        "title": "Sleep duration and risk of type 2 diabetes: a meta-analysis of prospective studies",
+        "year": 2015,
+        "type": "meta-analysis",
+        "finding": "Observational: the lowest diabetes risk was seen with 7-8 hours of sleep a night.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/25715415/"
+      }
+    ],
+    "sources": [
+      "https://pubmed.ncbi.nlm.nih.gov/27747394/",
+      "https://pubmed.ncbi.nlm.nih.gov/35147898/",
+      "https://pubmed.ncbi.nlm.nih.gov/22374636/",
+      "https://pmc.ncbi.nlm.nih.gov/articles/PMC7719906/",
+      "https://pubmed.ncbi.nlm.nih.gov/41081830/",
+      "https://pubmed.ncbi.nlm.nih.gov/42748597/",
+      "https://pubmed.ncbi.nlm.nih.gov/30101510/",
+      "https://pubmed.ncbi.nlm.nih.gov/37892527/",
+      "https://pubmed.ncbi.nlm.nih.gov/26561625/",
+      "https://pubmed.ncbi.nlm.nih.gov/10500014/",
+      "https://www.ema.europa.eu/en/documents/herbal-monograph/final-community-herbal-monograph-plantago-ovata-forssk-seminis-tegumentum_en.pdf",
+      "https://pubmed.ncbi.nlm.nih.gov/25715415/",
+      "https://pubmed.ncbi.nlm.nih.gov/26900641/",
+      "https://diabetestimes.co.uk/?p=42241",
+      "https://pubmed.ncbi.nlm.nih.gov/36745886/",
+      "https://pubmed.ncbi.nlm.nih.gov/38828931/",
+      "https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/",
+      "https://ods.od.nih.gov/factsheets/Chromium-HealthProfessional/",
+      "https://www.nccih.nih.gov/health/diabetes-and-dietary-supplements",
+      "https://www.nhs.uk/conditions/low-blood-sugar-hypoglycaemia/"
+    ]
+  },
+  {
+    "id": "vein-health",
+    "title": "Vein health",
+    "tagline": "Calf-pump moves, leg rest and stockings, with doctor-guided vein supplements.",
+    "for": "Adults with varicose veins or chronic venous insufficiency, alongside their doctor's care.",
+    "notFor": [
+      "pregnancy",
+      "breastfeeding",
+      "kidney_disease",
+      "heart_disease",
+      "a hot, red, swollen or painful leg (see a doctor today)",
+      "a leg ulcer or a bleeding vein",
+      "poor blood flow in the legs (for stockings)"
+    ],
+    "doctorFirst": true,
+    "evidence": "B",
+    "durationWeeks": null,
+    "reviewAfterWeeks": 8,
+    "items": [
+      {
+        "kind": "movement",
+        "title": "Calf pumps: heel raises",
+        "time": "10:00",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "daily",
+        "durationMin": 3,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Rise onto your toes and lower slowly, 15-20 times. Hold a chair for balance. Repeat later in the day.",
+        "evidence": "C",
+        "source": "https://air.unimi.it/retrieve/0cc68602-46c3-41ba-82b6-0736b554796c/1-s2.0-S1078588421009795-main.pdf"
+      },
+      {
+        "kind": "movement",
+        "title": "Daily walk",
+        "time": "12:45",
+        "anchor": "lunch",
+        "offsetMin": 15,
+        "repeat": "daily",
+        "durationMin": 30,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Regular walking helps blood flow in the legs. Build up slowly.",
+        "evidence": "C",
+        "source": "https://www.nhs.uk/conditions/varicose-veins/"
+      },
+      {
+        "kind": "movement",
+        "title": "Break from sitting or standing",
+        "time": "15:00",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "weekdays",
+        "durationMin": 3,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Avoid long spells of sitting or standing. Every 30 minutes, walk or do ankle pumps.",
+        "evidence": "C",
+        "source": "https://www.nhs.uk/conditions/varicose-veins/"
+      },
+      {
+        "kind": "habit",
+        "title": "Legs up",
+        "time": "19:30",
+        "anchor": "dinner",
+        "offsetMin": 30,
+        "repeat": "daily",
+        "durationMin": 15,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Lie down with your legs raised on cushions.",
+        "evidence": "C",
+        "source": "https://www.nhs.uk/conditions/varicose-veins/treatment/"
+      },
+      {
+        "kind": "habit",
+        "title": "Put on compression stockings",
+        "time": "07:15",
+        "anchor": "wake",
+        "offsetMin": 15,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Only if a doctor or nurse has advised and fitted them. Stockings of at least 15 mmHg ease aching and swelling.",
+        "evidence": "B",
+        "source": "https://air.unimi.it/retrieve/0cc68602-46c3-41ba-82b6-0736b554796c/1-s2.0-S1078588421009795-main.pdf"
+      },
+      {
+        "kind": "supplement",
+        "title": "Diosmin + hesperidin (MPFF) 1000 mg",
+        "time": "08:00",
+        "anchor": "breakfast",
+        "offsetMin": 0,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [
+          {
+            "id": "mpff_diosmin_hesperidin",
+            "amount": 1000,
+            "unit": "mg"
+          }
+        ],
+        "withFood": null,
+        "notes": "Doctor-first. Micronised diosmin 900 mg + hesperidin 100 mg once a day. Allow at least 4 weeks to judge it.",
+        "evidence": "B",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/29385792/"
+      },
+      {
+        "kind": "note",
+        "title": "Alternative: horse chestnut extract",
+        "time": "08:00",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "once",
+        "durationMin": null,
+        "dayOffset": 0,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Only if your doctor prefers it to MPFF: standardised seed extract, 50 mg aescin twice a day. Never take both.",
+        "evidence": "B",
+        "source": "https://www.ema.europa.eu/en/documents/herbal-monograph/european-union-herbal-monograph-aesculus-hippocastanum-l-semen-final-revision-1_en.pdf"
+      }
+    ],
+    "safety": [
+      "Get medical help the same day for a hot, red, swollen or painful leg. It can be a blood clot (DVT).",
+      "Call emergency services if leg pain or swelling comes with breathlessness or chest pain.",
+      "If a varicose vein bleeds: lie down, raise the leg and press firmly on it. Then get urgent help.",
+      "See your GP for pain, itching or swelling, a sore that has not healed in 2 weeks, or veins that get worse.",
+      "Before stockings, have the blood flow in your legs checked, especially if you have diabetes or poor circulation.",
+      "Vein supplements may ease heaviness and swelling. They are not shown to make varicose veins go away.",
+      "Use only one vein supplement, chosen with your doctor. Stomach upset is the most common side effect.",
+      "Horse chestnut extract: older labels give 50 mg aescin a dose; newer EU labels give 21 mg as protoaescigenin. Ask your pharmacist.",
+      "Horse chestnut: only standardised seed extract. Raw seeds, bark, flowers and leaves are poisonous.",
+      "Horse chestnut is not advised in pregnancy, breastfeeding or under 18. With heart or kidney problems, ask your doctor.",
+      "On blood thinners or planning surgery? Ask your doctor first. Supplements are often stopped 2 weeks before surgery."
+    ],
+    "keyStudies": [
+      {
+        "title": "European Society for Vascular Surgery (ESVS) 2022 Clinical Practice Guidelines on the Management of Chronic Venous Disease of the Lower Limbs",
+        "year": 2022,
+        "type": "guideline",
+        "finding": "Recommends stockings (at least 15 mmHg) for symptoms, suggests exercise, and says venoactive drugs should be considered for symptoms and swelling.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35027279/"
+      },
+      {
+        "title": "Phlebotonics for venous insufficiency",
+        "year": 2020,
+        "type": "Cochrane review",
+        "finding": "Vein drugs probably reduce leg swelling slightly, with little effect on quality of life and slightly more side effects.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/33141449/"
+      },
+      {
+        "title": "Efficacy of micronized purified flavonoid fraction on improving individual symptoms, signs and quality of life in patients with chronic venous disease",
+        "year": 2018,
+        "type": "meta-analysis",
+        "finding": "7 placebo-controlled trials (1,692 people): MPFF eased leg pain, heaviness, cramps and swelling.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/29385792/"
+      },
+      {
+        "title": "The Effects of Different Dosages on Micronized Purified Flavonoid Fraction's Treatment of Lower Limb Chronic Venous Disease",
+        "year": 2026,
+        "type": "meta-analysis",
+        "finding": "1000 mg once a day worked as well as 500 mg twice a day.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/39066519/"
+      },
+      {
+        "title": "Horse chestnut seed extract for chronic venous insufficiency",
+        "year": 2012,
+        "type": "Cochrane review",
+        "finding": "Horse chestnut extract eased leg pain and swelling short term. Larger trials are still needed.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/23152216/"
+      },
+      {
+        "title": "Physical exercise for the treatment of non-ulcerated chronic venous insufficiency",
+        "year": 2023,
+        "type": "Cochrane review",
+        "finding": "5 small trials (146 people). Exercise may help calf pump and venous refilling, but certainty is very low.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/37314059/"
+      }
+    ],
+    "sources": [
+      "https://air.unimi.it/retrieve/0cc68602-46c3-41ba-82b6-0736b554796c/1-s2.0-S1078588421009795-main.pdf",
+      "https://pubmed.ncbi.nlm.nih.gov/35027279/",
+      "https://pubmed.ncbi.nlm.nih.gov/33141449/",
+      "https://pubmed.ncbi.nlm.nih.gov/29385792/",
+      "https://pubmed.ncbi.nlm.nih.gov/41324419/",
+      "https://pubmed.ncbi.nlm.nih.gov/39066519/",
+      "https://pubmed.ncbi.nlm.nih.gov/32206351/",
+      "https://pubmed.ncbi.nlm.nih.gov/23152216/",
+      "https://www.ema.europa.eu/en/documents/herbal-monograph/european-union-herbal-monograph-aesculus-hippocastanum-l-semen-final-revision-1_en.pdf",
+      "https://www.nccih.nih.gov/health/horse-chestnut",
+      "https://pubmed.ncbi.nlm.nih.gov/37314059/",
+      "https://www.nhs.uk/conditions/varicose-veins/",
+      "https://www.nhs.uk/conditions/varicose-veins/treatment/",
+      "https://www.nhs.uk/conditions/deep-vein-thrombosis-dvt/",
+      "https://pubmed.ncbi.nlm.nih.gov/42765078/",
+      "https://madeforthismoment.asahq.org/wp-content/uploads/2020/10/ASA_Supplements-Anesthesia_Updated-1.pdf"
+    ]
+  },
+  {
+    "id": "surgery-prep-and-recovery",
+    "title": "Surgery prep and recovery",
+    "tagline": "Simple steps before and after a planned operation, led by your surgical team.",
+    "for": "Adults with a planned (non-emergency) operation. Day 0 is the day of surgery: negative days are before, positive days after.",
+    "notFor": [
+      "bariatric_surgery",
+      "emergency or urgent surgery",
+      "a special diet or exercise plan set by your surgical team"
+    ],
+    "doctorFirst": true,
+    "evidence": "B",
+    "durationWeeks": 10,
+    "reviewAfterWeeks": 6,
+    "items": [
+      {
+        "kind": "note",
+        "title": "Before: list every supplement for your team",
+        "time": "09:00",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "once",
+        "durationMin": null,
+        "dayOffset": -28,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Write down every vitamin, herbal remedy and supplement, with doses. Bring the bottles to your pre-op visit.",
+        "evidence": "C",
+        "source": "https://madeforthismoment.asahq.org/wp-content/uploads/2020/10/ASA_Supplements-Anesthesia_Updated-1.pdf"
+      },
+      {
+        "kind": "note",
+        "title": "Before: pause supplements if told to",
+        "time": "09:00",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "once",
+        "durationMin": null,
+        "dayOffset": -14,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Your team may ask you to stop supplements at least 2 weeks before surgery. Follow their plan.",
+        "evidence": "C",
+        "source": "https://madeforthismoment.asahq.org/wp-content/uploads/2020/10/ASA_Supplements-Anesthesia_Updated-1.pdf"
+      },
+      {
+        "kind": "movement",
+        "title": "Before: daily walk",
+        "time": "10:00",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "daily",
+        "durationMin": 30,
+        "dayOffset": -28,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Stay active until surgery if your team agrees. Prehab programmes shortened hospital stays in trials.",
+        "evidence": "B",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/29750973/"
+      },
+      {
+        "kind": "habit",
+        "title": "Before: smoke-free day (if you smoke)",
+        "time": "08:00",
+        "anchor": "wake",
+        "offsetMin": 0,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": -28,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Stopping smoking before surgery lowers the risk of problems afterwards. Ask your GP or pharmacist for support.",
+        "evidence": "B",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/40954410/"
+      },
+      {
+        "kind": "habit",
+        "title": "Before: alcohol-free day (if you drink a lot)",
+        "time": "18:00",
+        "anchor": "dinner",
+        "offsetMin": -60,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": -28,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "More than 3 drinks a day? Get your doctor's help to stop. You may need medicine for withdrawal.",
+        "evidence": "B",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/30408162/"
+      },
+      {
+        "kind": "movement",
+        "title": "After: short walks as allowed",
+        "time": "11:00",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "daily",
+        "durationMin": 5,
+        "dayOffset": 1,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Get up and walk as soon as your team says it is safe. Add a little more each day.",
+        "evidence": "B",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/41956522/"
+      },
+      {
+        "kind": "habit",
+        "title": "After: breathing exercises from your team",
+        "time": "09:30",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "daily",
+        "durationMin": 5,
+        "dayOffset": 1,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "If you are shown breathing or physio exercises, do them as taught. They can cut chest problems after tummy surgery.",
+        "evidence": "B",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/41956522/"
+      },
+      {
+        "kind": "meal",
+        "title": "After: protein at every meal",
+        "time": "12:30",
+        "anchor": "lunch",
+        "offsetMin": 0,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": 1,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Eat as soon as your team allows. Aim for about 1.2-1.5 g protein per kg body weight a day unless told otherwise. Kidney disease: ask first.",
+        "evidence": "C",
+        "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9292321"
+      },
+      {
+        "kind": "note",
+        "title": "After: restart supplements only with an OK",
+        "time": "09:00",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "once",
+        "durationMin": null,
+        "dayOffset": 1,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Ask before restarting supplements. Don't add new 'healing' mixes: most have no proof of benefit.",
+        "evidence": "C",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/33741131/"
+      }
+    ],
+    "safety": [
+      "Your surgical team's advice comes first. This plan does not replace it.",
+      "Never stop prescribed medicines, including blood thinners, unless your team tells you to.",
+      "Often paused 1-2 weeks before surgery: ginkgo, garlic, ginseng, ginger, high-dose turmeric, feverfew, saw palmetto, horse chestnut, high-dose vitamin E.",
+      "Kava, valerian and St John's wort can affect anaesthesia. Tell your anaesthetist.",
+      "Fish oil: a large heart-surgery trial found no extra bleeding. Ask your team whether to continue.",
+      "Heavy drinker? Don't stop suddenly on your own. Ask your doctor for help.",
+      "After surgery, get urgent help for a hot, red, swollen or painful leg, chest pain or sudden breathlessness.",
+      "Kidney disease: ask before raising your protein.",
+      "Follow your team's advice on wound care, lifting and driving."
+    ],
+    "keyStudies": [
+      {
+        "title": "Preoperative Management of Surgical Patients Using Dietary Supplements: SPAQI Consensus Statement",
+        "year": 2021,
+        "type": "guideline",
+        "finding": "Ask every patient about supplements. Without proven benefit, there is little downside to pausing them before surgery.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/33741131/"
+      },
+      {
+        "title": "ESPEN guideline on clinical nutrition in surgery - Update 2025",
+        "year": 2025,
+        "type": "guideline",
+        "finding": "Avoid long fasting, eat again early after surgery, and get moving early to help protein use and muscle.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/40957230/"
+      },
+      {
+        "title": "Effects of Nutritional Prehabilitation, With and Without Exercise, on Outcomes of Patients Who Undergo Colorectal Surgery",
+        "year": 2018,
+        "type": "meta-analysis",
+        "finding": "Prehab before bowel surgery cut hospital stay by about 2 days.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/29750973/"
+      },
+      {
+        "title": "Preoperative smoking cessation interventions and their effects on smoking abstinence and postoperative outcomes",
+        "year": 2025,
+        "type": "meta-analysis",
+        "finding": "Help to stop smoking before surgery probably cut complications by about 27%.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/40954410/"
+      },
+      {
+        "title": "Perioperative alcohol cessation intervention for postoperative complications",
+        "year": 2018,
+        "type": "Cochrane review",
+        "finding": "Intensive help to stop drinking 4-8 weeks before surgery probably reduced complications (3 small trials).",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/30408162/"
+      },
+      {
+        "title": "Fish Oil and Perioperative Bleeding",
+        "year": 2018,
+        "type": "RCT",
+        "finding": "In 1,516 heart-surgery patients, fish oil did not increase bleeding and fewer transfusions were needed.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/30571332/"
+      },
+      {
+        "title": "Non-drug perioperative interventions to reduce postoperative pulmonary complications after abdominal surgery",
+        "year": 2026,
+        "type": "meta-analysis",
+        "finding": "255 trials: physiotherapy and early mobilisation were among measures that helped prevent chest complications.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/41956522/"
+      }
+    ],
+    "sources": [
+      "https://madeforthismoment.asahq.org/wp-content/uploads/2020/10/ASA_Supplements-Anesthesia_Updated-1.pdf",
+      "https://pubmed.ncbi.nlm.nih.gov/33741131/",
+      "https://pubmed.ncbi.nlm.nih.gov/11448284/",
+      "https://pubmed.ncbi.nlm.nih.gov/42765078/",
+      "https://pubmed.ncbi.nlm.nih.gov/30571332/",
+      "https://pubmed.ncbi.nlm.nih.gov/40954410/",
+      "https://pubmed.ncbi.nlm.nih.gov/30408162/",
+      "https://pubmed.ncbi.nlm.nih.gov/29750973/",
+      "https://pubmed.ncbi.nlm.nih.gov/40957230/",
+      "https://pmc.ncbi.nlm.nih.gov/articles/PMC9292321",
+      "https://pubmed.ncbi.nlm.nih.gov/23867520/",
+      "https://pubmed.ncbi.nlm.nih.gov/41956522/",
+      "https://www.nhs.uk/conditions/deep-vein-thrombosis-dvt/"
+    ]
+  },
+  {
+    "id": "gut-and-microbiome",
+    "title": "Gut and microbiome",
+    "tagline": "More fibre, fermented foods and plant variety, built up slowly.",
+    "for": "Adults who want to support gut health through food and daily habits.",
+    "notFor": [
+      "inflammatory_bowel_disease",
+      "immunocompromised",
+      "cancer_treatment",
+      "new or unexplained bowel symptoms (see your GP first)",
+      "a narrowed bowel or past bowel blockage"
+    ],
+    "doctorFirst": false,
+    "evidence": "B",
+    "durationWeeks": null,
+    "reviewAfterWeeks": 6,
+    "items": [
+      {
+        "kind": "meal",
+        "title": "Add one fibre food",
+        "time": "07:30",
+        "anchor": "breakfast",
+        "offsetMin": 0,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Oats, beans, lentils, vegetables, fruit, nuts or seeds. Build up over about 4 weeks towards 30 g a day.",
+        "evidence": "B",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/30638909/"
+      },
+      {
+        "kind": "meal",
+        "title": "One fermented food",
+        "time": "12:30",
+        "anchor": "lunch",
+        "offsetMin": 0,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Yogurt, kefir, kimchi, sauerkraut or kombucha. Start with 1 serving and add more slowly if you feel well.",
+        "evidence": "C",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/34256014/"
+      },
+      {
+        "kind": "habit",
+        "title": "Count your plants this week",
+        "time": "18:00",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "weekly",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Aim for variety: vegetables, fruit, beans, grains, nuts, seeds and herbs. Linked to a more varied gut in a large survey, not a trial.",
+        "evidence": "C",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/29795809/"
+      },
+      {
+        "kind": "habit",
+        "title": "Drink water through the day",
+        "time": "10:00",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Aim for 6-8 glasses of fluid a day. Water, tea and coffee all count.",
+        "evidence": "C",
+        "source": "https://www.nhs.uk/live-well/eat-well/food-guidelines-and-food-labels/water-drinks-nutrition/"
+      },
+      {
+        "kind": "supplement",
+        "title": "Probiotic during antibiotics only",
+        "time": "13:00",
+        "anchor": "lunch",
+        "offsetMin": 0,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [
+          {
+            "id": "probiotics",
+            "amount": 5,
+            "unit": "billion_cfu"
+          }
+        ],
+        "withFood": null,
+        "notes": "Only while on antibiotics. Start within 2 days of the first dose. Take at a different time from the antibiotic (a practical tip, not tested).",
+        "evidence": "B",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/40931979/"
+      },
+      {
+        "kind": "note",
+        "title": "Wind or bloating? Go slower",
+        "time": "18:00",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "weekly",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Some wind or bloating is common when you add fermented foods or fibre. In a trial it settled with time.",
+        "evidence": "C",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/34256014/"
+      },
+      {
+        "kind": "note",
+        "title": "What the app can and can't see",
+        "time": "09:00",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "once",
+        "durationMin": null,
+        "dayOffset": 0,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Ticks track what you eat and do. The app cannot measure your gut bacteria, and people respond differently.",
+        "evidence": "C",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/34256014/"
+      }
+    ],
+    "safety": [
+      "See your GP if you notice blood in your poo, a lasting change in bowel habit, tummy pain, a lump, or weight loss without trying.",
+      "Get urgent advice for bloody diarrhoea, diarrhoea lasting more than 7 days, or signs of dehydration.",
+      "Do not take probiotics if your immune system is weak or you are seriously ill, unless your doctor says so.",
+      "Probiotic effects depend on the exact strain. Choose one tested in trials, such as S. boulardii or L. rhamnosus GG.",
+      "Experts disagree: one US guideline supports some probiotics with antibiotics, another advises against them.",
+      "IBS, IBD or coeliac disease? Ask your doctor or dietitian before big changes to fibre or fermented foods.",
+      "If more fibre causes pain, not just mild wind, slow down and get advice."
+    ],
+    "keyStudies": [
+      {
+        "title": "Gut-microbiota-targeted diets modulate human immune status",
+        "year": 2021,
+        "type": "RCT",
+        "finding": "In 36 adults over 17 weeks, more fermented foods raised gut microbe variety and lowered inflammation markers. High fibre did not raise variety in that time.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/34256014/"
+      },
+      {
+        "title": "Carbohydrate quality and human health: a series of systematic reviews and meta-analyses",
+        "year": 2019,
+        "type": "meta-analysis",
+        "finding": "Fibre intakes of 25-29 g a day were linked to lower risk of heart disease, type 2 diabetes and bowel cancer.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/30638909/"
+      },
+      {
+        "title": "Probiotics for the prevention of Clostridioides difficile-associated diarrhea in adults and children",
+        "year": 2025,
+        "type": "Cochrane review",
+        "finding": "During antibiotics, probiotics may cut C. difficile diarrhoea by half and antibiotic-linked diarrhoea by a third. Low certainty.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/40931979/"
+      },
+      {
+        "title": "Probiotics for the Prevention of Antibiotic-Associated Diarrhea in Outpatients-A Systematic Review and Meta-Analysis",
+        "year": 2017,
+        "type": "meta-analysis",
+        "finding": "17 trials: diarrhoea in 8.0% with probiotics vs 17.7% without. No more side effects.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/29023420/"
+      },
+      {
+        "title": "AGA Clinical Practice Guidelines on the Role of Probiotics in the Management of Gastrointestinal Disorders",
+        "year": 2020,
+        "type": "guideline",
+        "finding": "Suggests specific strains to prevent C. difficile in people on antibiotics. Probiotics for IBS and IBD only within trials.",
+        "url": "https://guidelinecentral.com/guideline/41160"
+      }
+    ],
+    "sources": [
+      "https://pubmed.ncbi.nlm.nih.gov/34256014/",
+      "https://pubmed.ncbi.nlm.nih.gov/30638909/",
+      "https://www.nhs.uk/live-well/eat-well/digestive-health/how-to-get-more-fibre-into-your-diet/",
+      "https://pubmed.ncbi.nlm.nih.gov/29795809/",
+      "https://www.nhs.uk/live-well/eat-well/food-guidelines-and-food-labels/water-drinks-nutrition/",
+      "https://pubmed.ncbi.nlm.nih.gov/40931979/",
+      "https://pubmed.ncbi.nlm.nih.gov/29023420/",
+      "https://ods.od.nih.gov/factsheets/Probiotics-HealthProfessional/",
+      "https://www.nccih.nih.gov/health/probiotics-usefulness-and-safety",
+      "https://guidelinecentral.com/guideline/41160",
+      "https://isappscience.org/the-american-college-of-gastroenterology-recommends-against-use-of-probiotics-for-primary-or-secondary-prevention-of-c-difficile/",
+      "https://www.nhs.uk/conditions/bowel-cancer/symptoms/",
+      "https://www.nhs.uk/conditions/diarrhoea-and-vomiting/"
+    ]
+  },
+  {
+    "id": "fascia-and-tissue",
+    "title": "Fascia and tissue support",
+    "tagline": "Load your tissues well, eat enough protein, and time collagen before sessions.",
+    "for": "Active adults doing regular strength or movement sessions who want to support tendons and connective tissue.",
+    "notFor": [
+      "kidney_disease",
+      "kidney_stones",
+      "a new, hot, swollen or worsening injury (get it checked first)"
+    ],
+    "doctorFirst": false,
+    "evidence": "B",
+    "durationWeeks": 12,
+    "reviewAfterWeeks": 12,
+    "items": [
+      {
+        "kind": "supplement",
+        "title": "Collagen 15 g + vitamin C 50 mg",
+        "time": "17:00",
+        "anchor": "before_exercise",
+        "offsetMin": -60,
+        "repeat": "every_other_day",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [
+          {
+            "id": "collagen",
+            "amount": 15,
+            "unit": "g"
+          },
+          {
+            "id": "vitamin_c",
+            "amount": 50,
+            "unit": "mg"
+          }
+        ],
+        "withFood": null,
+        "notes": "About 1 hour before your session, on training days. Trials used 15-30 g with about 50 mg vitamin C. Tendon results are mixed.",
+        "evidence": "C",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/27852613/"
+      },
+      {
+        "kind": "movement",
+        "title": "Strength or loading session",
+        "time": "18:00",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "every_other_day",
+        "durationMin": 40,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Slow, controlled work for all major muscles, at least 2 days a week. Add load gradually.",
+        "evidence": "A",
+        "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7719906/"
+      },
+      {
+        "kind": "meal",
+        "title": "Protein through the day",
+        "time": "12:30",
+        "anchor": "lunch",
+        "offsetMin": 0,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "If you train, aim for about 1.2-1.6 g protein per kg body weight a day, over 3-4 meals. More gave no extra gain.",
+        "evidence": "A",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/28698222/"
+      },
+      {
+        "kind": "meal",
+        "title": "Vitamin C foods",
+        "time": "12:30",
+        "anchor": "lunch",
+        "offsetMin": 0,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Citrus, berries, kiwi, peppers or broccoli each day. Your body needs vitamin C to make collagen.",
+        "evidence": "B",
+        "source": "https://ods.od.nih.gov/factsheets/VitaminC-HealthProfessional/"
+      },
+      {
+        "kind": "supplement",
+        "title": "Vitamin D3 10 µg (400 IU)",
+        "time": "07:30",
+        "anchor": "breakfast",
+        "offsetMin": 0,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [
+          {
+            "id": "vitamin_d",
+            "amount": 10,
+            "unit": "µg"
+          }
+        ],
+        "withFood": true,
+        "notes": "Only if you get little sun on your skin, for example in winter or if you are mostly indoors.",
+        "evidence": "B",
+        "source": "https://www.nhs.uk/conditions/vitamins-and-minerals/vitamin-d/"
+      },
+      {
+        "kind": "movement",
+        "title": "Mobility or foam rolling",
+        "time": "21:00",
+        "anchor": "bed",
+        "offsetMin": -60,
+        "repeat": "daily",
+        "durationMin": 10,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Gentle mobility or foam rolling improves range of motion for a short time, about as much as stretching.",
+        "evidence": "B",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/31628662/"
+      }
+    ],
+    "safety": [
+      "Kidney disease? Ask your doctor before raising protein or taking collagen.",
+      "Had kidney stones? Ask first. Gelatin raised urine oxalate in a study, and high-dose vitamin C can too.",
+      "Collagen is not a complete protein. It does not replace protein from meals.",
+      "Collagen and gelatin come from animals. Check the label if you avoid some animal foods.",
+      "Sharp pain, swelling, or pain that gets worse with loading: stop and see a physio or doctor.",
+      "Vitamin C: stay well below 2,000 mg a day.",
+      "Vitamin D: no more than 100 µg (4,000 IU) a day in total from all supplements."
+    ],
+    "keyStudies": [
+      {
+        "title": "Vitamin C-enriched gelatin supplementation before intermittent activity augments collagen synthesis",
+        "year": 2017,
+        "type": "RCT",
+        "finding": "In 8 men, 15 g gelatin with vitamin C 1 hour before exercise doubled a blood marker of collagen building.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/27852613/"
+      },
+      {
+        "title": "The Collagen Synthesis Response to an Acute Bout of Resistance Exercise Is Greater when Ingesting 30 g Hydrolyzed Collagen Compared with 15 g and 0 g",
+        "year": 2024,
+        "type": "RCT",
+        "finding": "In 10 trained men, 30 g collagen with 50 mg vitamin C before squats raised collagen building more than 15 g or none.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/38007183/"
+      },
+      {
+        "title": "The Effect of Specific Bioactive Collagen Peptides on Tendon Remodeling during 15 wk of Lower Body Resistance Training",
+        "year": 2023,
+        "type": "RCT",
+        "finding": "In 39 young men, 15 g collagen a day did not improve tendon changes from training more than placebo.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/37436929/"
+      },
+      {
+        "title": "Hydrolysed Collagen Supplementation Enhances Patellar Tendon Adaptations to 12 Weeks' Resistance Training in Middle-Aged Men",
+        "year": 2025,
+        "type": "RCT",
+        "finding": "In 20 middle-aged men, 30 g collagen with vitamin C after training gave bigger gains in tendon size and stiffness.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/40100255/"
+      },
+      {
+        "title": "Impact of Collagen Peptide Supplementation in Combination with Long-Term Physical Training: A Systematic Review with Meta-analysis",
+        "year": 2024,
+        "type": "meta-analysis",
+        "finding": "19 trials: collagen plus training gave small gains in lean mass, tendon size and strength. Low to very low certainty.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/39060741/"
+      },
+      {
+        "title": "A systematic review, meta-analysis and meta-regression of the effect of protein supplementation on resistance training-induced gains",
+        "year": 2018,
+        "type": "meta-analysis",
+        "finding": "49 trials: extra protein boosted strength and muscle gains from training. No added gain above about 1.6 g/kg a day.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/28698222/"
+      },
+      {
+        "title": "Acute Effects of Foam Rolling on Range of Motion in Healthy Adults: A Systematic Review with Multilevel Meta-analysis",
+        "year": 2020,
+        "type": "meta-analysis",
+        "finding": "26 trials: foam rolling improved range of motion short term, about the same as stretching.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/31628662/"
+      }
+    ],
+    "sources": [
+      "https://pubmed.ncbi.nlm.nih.gov/27852613/",
+      "https://pubmed.ncbi.nlm.nih.gov/38007183/",
+      "https://pubmed.ncbi.nlm.nih.gov/34808597/",
+      "https://pubmed.ncbi.nlm.nih.gov/37436929/",
+      "https://pubmed.ncbi.nlm.nih.gov/40100255/",
+      "https://pubmed.ncbi.nlm.nih.gov/39060741/",
+      "https://pubmed.ncbi.nlm.nih.gov/28698222/",
+      "https://pubmed.ncbi.nlm.nih.gov/23867520/",
+      "https://pmc.ncbi.nlm.nih.gov/articles/PMC7719906/",
+      "https://ods.od.nih.gov/factsheets/VitaminC-HealthProfessional/",
+      "https://www.nhs.uk/conditions/vitamins-and-minerals/vitamin-d/",
+      "https://pubmed.ncbi.nlm.nih.gov/31628662/",
+      "https://pubmed.ncbi.nlm.nih.gov/17021603/",
+      "https://pubmed.ncbi.nlm.nih.gov/31096622/"
+    ]
+  },
+  {
+    "id": "plant-based-essentials",
+    "title": "Plant-based essentials",
+    "tagline": "The key nutrients to cover when you eat vegan or vegetarian.",
+    "for": "Adults who eat a vegan or vegetarian diet.",
+    "notFor": [
+      "thyroid_disease",
+      "pregnancy",
+      "breastfeeding",
+      "trying_to_conceive",
+      "kidney_disease"
+    ],
+    "doctorFirst": false,
+    "evidence": "B",
+    "durationWeeks": null,
+    "reviewAfterWeeks": 12,
+    "items": [
+      {
+        "kind": "supplement",
+        "title": "Vitamin B12 10 µg",
+        "time": "07:30",
+        "anchor": "breakfast",
+        "offsetMin": 0,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [
+          {
+            "id": "vitamin_b12",
+            "amount": 10,
+            "unit": "µg"
+          }
+        ],
+        "withFood": null,
+        "notes": "Essential if you are vegan. At least 10 µg a day, or 2,000 µg once a week instead.",
+        "evidence": "A",
+        "source": "https://www.vegansociety.com/resources/nutrition-and-health/nutrients/vitamin-b12/what-every-vegan-should-know-about-vitamin-b12"
+      },
+      {
+        "kind": "supplement",
+        "title": "Iodine 150 µg",
+        "time": "07:30",
+        "anchor": "breakfast",
+        "offsetMin": 0,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [
+          {
+            "id": "iodine",
+            "amount": 150,
+            "unit": "µg"
+          }
+        ],
+        "withFood": null,
+        "notes": "Use a potassium iodide or iodate supplement, not kelp or seaweed. Skip if you have thyroid disease, unless your doctor agrees.",
+        "evidence": "B",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/36912094/"
+      },
+      {
+        "kind": "supplement",
+        "title": "Algae omega-3 250 mg (EPA+DHA)",
+        "time": "19:00",
+        "anchor": "dinner",
+        "offsetMin": 0,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [
+          {
+            "id": "omega_3",
+            "amount": 250,
+            "unit": "mg"
+          }
+        ],
+        "withFood": true,
+        "notes": "Raises omega-3 levels in vegans. Not yet shown to prevent disease. Keep DHA under 1 g a day.",
+        "evidence": "B",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/42480243/"
+      },
+      {
+        "kind": "supplement",
+        "title": "Vitamin D 10 µg (400 IU)",
+        "time": "07:30",
+        "anchor": "breakfast",
+        "offsetMin": 0,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [
+          {
+            "id": "vitamin_d",
+            "amount": 10,
+            "unit": "µg"
+          }
+        ],
+        "withFood": true,
+        "notes": "Autumn and winter, or all year if you are rarely outdoors or have dark skin. Vegan D3 (from lichen) or D2.",
+        "evidence": "B",
+        "source": "https://www.nhs.uk/conditions/vitamins-and-minerals/vitamin-d/"
+      },
+      {
+        "kind": "meal",
+        "title": "2-3 calcium-rich foods",
+        "time": "12:30",
+        "anchor": "lunch",
+        "offsetMin": 0,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Calcium-set tofu, fortified plant milk or yogurt, kale, broccoli or tahini. If you can't, ask about a 500 mg supplement.",
+        "evidence": "B",
+        "source": "https://ods.od.nih.gov/factsheets/Calcium-HealthProfessional/"
+      },
+      {
+        "kind": "meal",
+        "title": "Iron and zinc foods at meals",
+        "time": "18:30",
+        "anchor": "dinner",
+        "offsetMin": 0,
+        "repeat": "daily",
+        "durationMin": null,
+        "dayOffset": null,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Beans, lentils, tofu, whole grains, nuts and seeds. Add vitamin C foods to meals. Keep tea and coffee between meals.",
+        "evidence": "B",
+        "source": "https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/"
+      },
+      {
+        "kind": "test",
+        "title": "Blood test: B12, iron and vitamin D",
+        "time": "09:00",
+        "anchor": null,
+        "offsetMin": null,
+        "repeat": "once",
+        "durationMin": null,
+        "dayOffset": 7,
+        "nutrients": [],
+        "withFood": null,
+        "notes": "Ask your doctor about a check and how often to repeat it. For B12 in vegans, MMA or homocysteine tests are more reliable.",
+        "evidence": "B",
+        "source": "https://www.vegansociety.com/resources/nutrition-and-health/nutrients/vitamin-b12/what-every-vegan-should-know-about-vitamin-b12"
+      }
+    ],
+    "safety": [
+      "Thyroid disease? Ask your doctor before taking iodine.",
+      "Don't use kelp or seaweed supplements for iodine. The amount varies a lot and can be far too high.",
+      "Iodine: stay under 600 µg a day in total.",
+      "Pregnant, planning a pregnancy or breastfeeding? Your needs change. Ask your midwife or doctor.",
+      "Only take iron or zinc supplements if a blood test or your doctor says you need them.",
+      "Vitamin D: no more than 100 µg (4,000 IU) a day in total.",
+      "Calcium supplements: 500 mg or less at a time. Had kidney stones? Ask first.",
+      "On blood thinners? Ask before taking omega-3.",
+      "A normal blood B12 result can be misleading in vegans. Keep taking B12 unless your doctor says otherwise."
+    ],
+    "keyStudies": [
+      {
+        "title": "A systematic review and meta-analysis of functional vitamin B12 status among adult vegans",
+        "year": 2024,
+        "type": "meta-analysis",
+        "finding": "Vegans had lower B12 and more signs of B12 shortage. Those taking B12 supplements had better results on every marker.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/39373282/"
+      },
+      {
+        "title": "Systematic review and meta-analysis of iodine nutrition in modern vegan and vegetarian diets",
+        "year": 2023,
+        "type": "meta-analysis",
+        "finding": "Vegans had the lowest iodine intake and status, especially where salt is not iodised.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/36912094/"
+      },
+      {
+        "title": "Vegan multinutrient supplementation significantly increases Omega-3 index and 25-OH-vitamin D status",
+        "year": 2026,
+        "type": "RCT",
+        "finding": "In 72 vegans, algae omega-3 plus vitamin D for 4 months raised omega-3 and vitamin D levels. A double dose added no clear benefit.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/42480243/"
+      },
+      {
+        "title": "Scientific Opinion on the tolerable upper intake level for supplemental docosahexaenoic acid",
+        "year": 2026,
+        "type": "guideline",
+        "finding": "EFSA kept the safe level for DHA from supplements at 1 g a day for all adults.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/41542352/"
+      },
+      {
+        "title": "Scientific Opinion on the Tolerable Upper Intake Level of EPA, DHA and DPA",
+        "year": 2012,
+        "type": "guideline",
+        "finding": "EFSA: EPA and DHA together up to about 5 g a day raise no safety concerns for adults.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/42016086/"
+      }
+    ],
+    "sources": [
+      "https://www.vegansociety.com/resources/nutrition-and-health/nutrients/vitamin-b12/what-every-vegan-should-know-about-vitamin-b12",
+      "https://ods.od.nih.gov/factsheets/VitaminB12-HealthProfessional/",
+      "https://pubmed.ncbi.nlm.nih.gov/39373282/",
+      "https://ods.od.nih.gov/factsheets/Iodine-HealthProfessional/",
+      "https://pubmed.ncbi.nlm.nih.gov/36912094/",
+      "https://pubmed.ncbi.nlm.nih.gov/42480243/",
+      "https://pubmed.ncbi.nlm.nih.gov/41542352/",
+      "https://pubmed.ncbi.nlm.nih.gov/42016086/",
+      "https://www.efsa.europa.eu/sites/default/files/2017_09_DRVs_summary_report.pdf",
+      "https://ods.od.nih.gov/factsheets/Omega3FattyAcids-HealthProfessional/",
+      "https://www.nhs.uk/conditions/vitamins-and-minerals/vitamin-d/",
+      "https://ods.od.nih.gov/factsheets/VitaminD-HealthProfessional/",
+      "https://www.nhs.uk/live-well/eat-well/how-to-eat-a-balanced-diet/the-vegan-diet/",
+      "https://ods.od.nih.gov/factsheets/Calcium-HealthProfessional/",
+      "https://pubmed.ncbi.nlm.nih.gov/33222682/",
+      "https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/",
+      "https://ods.od.nih.gov/factsheets/Zinc-HealthProfessional/",
+      "https://pubmed.ncbi.nlm.nih.gov/35010904/",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf"
+    ]
+  }
+]

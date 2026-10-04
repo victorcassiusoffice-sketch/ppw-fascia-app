@@ -9,6 +9,7 @@ import { useStore5, closeRepeat, setRepeat, setNoTime } from '../store5.js';
 
 const OPTS = [
   { key: 'daily', label: 'Every day', desc: 'Repeats daily' },
+  { key: 'weekdays', label: 'Weekdays', desc: 'Monday to Friday' },
   { key: 'weekly', label: 'Weekly', desc: 'Same day each week' },
   { key: 'custom', label: 'Every few days', desc: 'Choose the gap' },
   { key: 'once', label: 'Just once', desc: 'One time only' },
@@ -25,7 +26,7 @@ export default function RepeatSheet() {
   const custom = isCustomVal(cur);
   const n = custom ? parseInt(cur, 10) : 3;
 
-  const selectedKey = cur === 'daily' ? 'daily' : cur === 'weekly' ? 'weekly' : cur === 'once' ? 'once' : (custom ? 'custom' : 'daily');
+  const selectedKey = cur === 'daily' ? 'daily' : cur === 'weekdays' ? 'weekdays' : cur === 'weekly' ? 'weekly' : cur === 'once' ? 'once' : (custom ? 'custom' : 'daily');
   const pick = (key) => {
     if (key === 'custom') setRepeat(it.id, String(n));
     else setRepeat(it.id, key);

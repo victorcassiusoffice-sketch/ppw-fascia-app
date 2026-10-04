@@ -1,0 +1,595 @@
+{
+  "_schema": "ppw.ingredients",
+  "_version": 1,
+  "generatedAt": "2026-10-04",
+  "groups": {
+    "any_supplement": "Matches every supplement the person takes (used for \"tell your doctor about all supplements\" rules).",
+    "herbal": "Ingredients with \"herbal\": true in ingredients.json, plus ashwagandha and any \"other\" ingredient. Never vitamins, minerals, multivitamins, foods or medicines.",
+    "multivitamin_iron_c": "Any product that contains iron or vitamin C.",
+    "multivitamin_minerals": "Any product that contains calcium, magnesium, iron or zinc.",
+    "venoactive": "mpff_diosmin_hesperidin or horse_chestnut_aescin.",
+    "beta_carotene": "vitamin_a in beta-carotene form."
+  },
+  "ingredients": [
+    {
+      "id": "psyllium",
+      "name": "Psyllium husk",
+      "unit": "g",
+      "synonyms": [
+        "psyllium",
+        "psyllium husk",
+        "ispaghula",
+        "isabgol",
+        "isphagula"
+      ],
+      "contributes": [
+        {
+          "id": "fiber",
+          "factor": 0.8
+        }
+      ],
+      "notes": "Counts toward fibre (about 0.8 g fibre per 1 g husk). Take with a large glass of water, apart from medicines.",
+      "herbal": false
+    },
+    {
+      "id": "mpff_diosmin_hesperidin",
+      "name": "Diosmin + hesperidin (MPFF)",
+      "unit": "mg",
+      "synonyms": [
+        "mpff",
+        "micronised purified flavonoid fraction",
+        "diosmin",
+        "hesperidin",
+        "daflon"
+      ],
+      "contributes": [],
+      "notes": "1,000 mg a day = micronised diosmin 900 mg + hesperidin 100 mg. Doctor first.",
+      "herbal": true
+    },
+    {
+      "id": "horse_chestnut_aescin",
+      "name": "Horse chestnut seed extract (aescin)",
+      "unit": "mg",
+      "synonyms": [
+        "horse chestnut",
+        "horse chestnut seed extract",
+        "aescin",
+        "escin",
+        "hcse"
+      ],
+      "contributes": [],
+      "notes": "Standardised seed extract only; raw seeds, bark, flowers and leaves are unsafe. Not with blood thinners or in pregnancy.",
+      "herbal": true
+    },
+    {
+      "id": "horse_chestnut_raw",
+      "name": "Horse chestnut (raw seeds, bark, flowers or leaves)",
+      "unit": "mg",
+      "synonyms": [
+        "raw horse chestnut",
+        "conker"
+      ],
+      "contributes": [],
+      "notes": "Unsafe. Never take.",
+      "herbal": true
+    },
+    {
+      "id": "st_johns_wort",
+      "name": "St John's wort",
+      "unit": "mg",
+      "synonyms": [
+        "st john's wort",
+        "st johns wort",
+        "hypericum"
+      ],
+      "contributes": [],
+      "notes": "Interacts with many medicines.",
+      "herbal": true
+    },
+    {
+      "id": "berberine",
+      "name": "Berberine",
+      "unit": "mg",
+      "synonyms": [
+        "berberine"
+      ],
+      "contributes": [],
+      "notes": "Can push blood sugar too low with diabetes medicines.",
+      "herbal": true
+    },
+    {
+      "id": "caffeine",
+      "name": "Caffeine (incl. pre-workouts, energy drinks)",
+      "unit": "mg",
+      "synonyms": [
+        "caffeine",
+        "pre-workout",
+        "guarana",
+        "energy drink"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": false
+    },
+    {
+      "id": "ginkgo",
+      "name": "Ginkgo",
+      "unit": "mg",
+      "synonyms": [
+        "ginkgo",
+        "ginkgo biloba"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": true
+    },
+    {
+      "id": "garlic",
+      "name": "Garlic supplements",
+      "unit": "mg",
+      "synonyms": [
+        "garlic",
+        "aged garlic extract",
+        "allicin"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": true
+    },
+    {
+      "id": "turmeric",
+      "name": "Turmeric / curcumin",
+      "unit": "mg",
+      "synonyms": [
+        "turmeric",
+        "curcumin"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": true
+    },
+    {
+      "id": "ginseng",
+      "name": "Ginseng",
+      "unit": "mg",
+      "synonyms": [
+        "ginseng",
+        "panax ginseng",
+        "korean ginseng",
+        "siberian ginseng"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": true
+    },
+    {
+      "id": "kava",
+      "name": "Kava",
+      "unit": "mg",
+      "synonyms": [
+        "kava"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": true
+    },
+    {
+      "id": "valerian",
+      "name": "Valerian",
+      "unit": "mg",
+      "synonyms": [
+        "valerian"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": true
+    },
+    {
+      "id": "licorice_root",
+      "name": "Licorice root",
+      "unit": "mg",
+      "synonyms": [
+        "licorice",
+        "liquorice",
+        "licorice root",
+        "glycyrrhiza"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": true
+    },
+    {
+      "id": "fenugreek",
+      "name": "Fenugreek",
+      "unit": "mg",
+      "synonyms": [
+        "fenugreek"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": true
+    },
+    {
+      "id": "cinnamon",
+      "name": "Cinnamon supplements",
+      "unit": "mg",
+      "synonyms": [
+        "cinnamon",
+        "cinnamon extract"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": true
+    },
+    {
+      "id": "aloe_vera_oral",
+      "name": "Aloe vera (by mouth)",
+      "unit": "mg",
+      "synonyms": [
+        "aloe vera",
+        "aloe"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": true
+    },
+    {
+      "id": "goldenseal",
+      "name": "Goldenseal",
+      "unit": "mg",
+      "synonyms": [
+        "goldenseal"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": true
+    },
+    {
+      "id": "green_tea_extract",
+      "name": "Green tea extract",
+      "unit": "mg",
+      "synonyms": [
+        "green tea extract",
+        "egcg"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": true
+    },
+    {
+      "id": "black_cohosh",
+      "name": "Black cohosh",
+      "unit": "mg",
+      "synonyms": [
+        "black cohosh"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": true
+    },
+    {
+      "id": "red_yeast_rice",
+      "name": "Red yeast rice",
+      "unit": "mg",
+      "synonyms": [
+        "red yeast rice",
+        "monacolin k"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": true
+    },
+    {
+      "id": "plant_sterols",
+      "name": "Plant sterols / stanols",
+      "unit": "g",
+      "synonyms": [
+        "plant sterols",
+        "plant stanols",
+        "phytosterols"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": false
+    },
+    {
+      "id": "echinacea",
+      "name": "Echinacea",
+      "unit": "mg",
+      "synonyms": [
+        "echinacea"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": true
+    },
+    {
+      "id": "five_htp",
+      "name": "5-HTP",
+      "unit": "mg",
+      "synonyms": [
+        "5-htp",
+        "5 htp",
+        "griffonia"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": true
+    },
+    {
+      "id": "tryptophan",
+      "name": "Tryptophan",
+      "unit": "mg",
+      "synonyms": [
+        "tryptophan",
+        "l-tryptophan"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": false
+    },
+    {
+      "id": "melatonin",
+      "name": "Melatonin",
+      "unit": "mg",
+      "synonyms": [
+        "melatonin"
+      ],
+      "contributes": [],
+      "notes": "A prescription medicine in some countries (for example the UK).",
+      "herbal": true
+    },
+    {
+      "id": "saw_palmetto",
+      "name": "Saw palmetto",
+      "unit": "mg",
+      "synonyms": [
+        "saw palmetto"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": true
+    },
+    {
+      "id": "feverfew",
+      "name": "Feverfew",
+      "unit": "mg",
+      "synonyms": [
+        "feverfew"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": true
+    },
+    {
+      "id": "ginger",
+      "name": "Ginger supplements",
+      "unit": "mg",
+      "synonyms": [
+        "ginger",
+        "ginger extract"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": true
+    },
+    {
+      "id": "glucosamine_chondroitin",
+      "name": "Glucosamine / chondroitin",
+      "unit": "mg",
+      "synonyms": [
+        "glucosamine",
+        "chondroitin"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": false
+    },
+    {
+      "id": "cbd",
+      "name": "Cannabidiol (CBD)",
+      "unit": "mg",
+      "synonyms": [
+        "cbd",
+        "cannabidiol"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": true
+    },
+    {
+      "id": "isoflavones",
+      "name": "Isoflavones (soy or red clover)",
+      "unit": "mg",
+      "synonyms": [
+        "isoflavones",
+        "soy isoflavones",
+        "red clover"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": true
+    },
+    {
+      "id": "cranberry",
+      "name": "Cranberry products",
+      "unit": "mg",
+      "synonyms": [
+        "cranberry"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": false
+    },
+    {
+      "id": "grapefruit",
+      "name": "Grapefruit juice",
+      "unit": "ml",
+      "synonyms": [
+        "grapefruit"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": false
+    },
+    {
+      "id": "potassium_salt_substitute",
+      "name": "Potassium salt substitutes",
+      "unit": "g",
+      "synonyms": [
+        "lo salt",
+        "low salt",
+        "salt substitute",
+        "potassium salt"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": false
+    },
+    {
+      "id": "sodium_bicarbonate",
+      "name": "Sodium bicarbonate",
+      "unit": "g",
+      "synonyms": [
+        "sodium bicarbonate",
+        "bicarbonate of soda",
+        "baking soda"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": false
+    },
+    {
+      "id": "antacids",
+      "name": "Antacids (calcium, magnesium or aluminium)",
+      "unit": "mg",
+      "synonyms": [
+        "antacid",
+        "gaviscon",
+        "rennie",
+        "tums"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": false
+    },
+    {
+      "id": "alcohol",
+      "name": "Alcohol",
+      "unit": "units",
+      "synonyms": [
+        "alcohol"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": false
+    },
+    {
+      "id": "kidney_detox_products",
+      "name": "Herbal 'kidney detox' or 'cleanse' products",
+      "unit": "mg",
+      "synonyms": [
+        "kidney detox",
+        "cleanse"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": true
+    },
+    {
+      "id": "greens_seaweed_electrolytes",
+      "name": "Greens/'superfood' powders, seaweed, electrolyte products",
+      "unit": "g",
+      "synonyms": [
+        "greens powder",
+        "superfood powder",
+        "electrolytes",
+        "seaweed"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": true
+    },
+    {
+      "id": "sports_blends",
+      "name": "Multi-ingredient sports supplements",
+      "unit": "g",
+      "synonyms": [
+        "pre workout blend",
+        "fat burner",
+        "sports blend"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": true
+    },
+    {
+      "id": "gout_products",
+      "name": "Products sold for gout",
+      "unit": "mg",
+      "synonyms": [
+        "gout supplement"
+      ],
+      "contributes": [],
+      "notes": "",
+      "herbal": true
+    },
+    {
+      "id": "fortified_cereal",
+      "name": "Iron-fortified breakfast cereals",
+      "unit": "g",
+      "synonyms": [
+        "fortified cereal"
+      ],
+      "contributes": [],
+      "notes": "A food, listed for haemochromatosis.",
+      "herbal": false
+    },
+    {
+      "id": "multivitamin",
+      "name": "Multivitamin",
+      "unit": "tablet",
+      "synonyms": [
+        "multivitamin",
+        "multi",
+        "a-z"
+      ],
+      "contributes": [],
+      "notes": "A product made of many nutrients; log each nutrient from the label.",
+      "herbal": false
+    },
+    {
+      "id": "cod_liver_oil",
+      "name": "Cod liver oil",
+      "unit": "ml",
+      "synonyms": [
+        "cod liver oil",
+        "fish liver oil"
+      ],
+      "contributes": [],
+      "notes": "Holds vitamin A (as retinol), vitamin D and omega-3. The app asks for all three from the label before saving. Not in pregnancy.",
+      "requiresLines": [
+        {
+          "id": "vitamin_a",
+          "form": "retinol"
+        },
+        {
+          "id": "vitamin_d"
+        },
+        {
+          "id": "omega_3"
+        }
+      ],
+      "herbal": false
+    },
+    {
+      "id": "salt_and_fluids",
+      "name": "Salt and fluid intake",
+      "unit": "g",
+      "synonyms": [],
+      "contributes": [],
+      "notes": "Advice for lithium: keep salt and fluid intake steady. Not matched by name.",
+      "herbal": false
+    }
+  ]
+}

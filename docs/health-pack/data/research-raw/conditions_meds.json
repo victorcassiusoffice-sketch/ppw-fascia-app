@@ -1,0 +1,3965 @@
+{
+  "conditions": [
+    {
+      "id": "pregnancy",
+      "name": "Pregnancy",
+      "intakeQuestion": "Are you pregnant? If so, how many weeks?",
+      "flags": [
+        {
+          "nutrient": "vitamin_b9",
+          "action": "may_need_more",
+          "why": "Take 400 mcg folic acid daily until 12 weeks. A higher dose (5 mg) is prescribed if you have diabetes, take epilepsy or HIV medicines, or have a family history of neural tube defects.",
+          "source": "https://www.nhs.uk/pregnancy/keeping-well/pregnancy-vitamins-and-supplements/"
+        },
+        {
+          "nutrient": "vitamin_d",
+          "action": "may_need_more",
+          "why": "Take 10 mcg (400 IU) a day from October to March, or all year if you rarely get sun on your skin or have dark skin. Do not take more than 100 mcg a day.",
+          "source": "https://www.nhs.uk/pregnancy/keeping-well/pregnancy-vitamins-and-supplements/"
+        },
+        {
+          "nutrient": "vitamin_a",
+          "action": "avoid",
+          "why": "Do not take vitamin A (retinol) supplements, cod liver oil or liver products. Too much can harm the baby.",
+          "source": "https://www.nhs.uk/pregnancy/keeping-well/pregnancy-vitamins-and-supplements/"
+        },
+        {
+          "nutrient": "iron",
+          "action": "check_level",
+          "why": "Iron is checked with blood tests during pregnancy. Take iron if your midwife or doctor advises it.",
+          "source": "https://www.nhs.uk/pregnancy/keeping-well/pregnancy-vitamins-and-supplements/"
+        },
+        {
+          "nutrient": "iodine",
+          "action": "doctor_first",
+          "why": "US thyroid experts advise a 150 mcg iodine supplement a day for people planning pregnancy, pregnant or breastfeeding. Seaweed products vary a lot in iodine.",
+          "source": "https://ods.od.nih.gov/factsheets/Iodine-HealthProfessional/"
+        },
+        {
+          "nutrient": "choline",
+          "action": "may_need_more",
+          "why": "Needs rise in pregnancy and most prenatal vitamins contain little or none.",
+          "source": "https://ods.od.nih.gov/factsheets/Choline-HealthProfessional/"
+        },
+        {
+          "nutrient": "caffeine (including fitness supplements and energy drinks)",
+          "action": "caution",
+          "why": "Keep caffeine under 200 mg a day. Some fitness supplements contain caffeine.",
+          "source": "https://www.nhs.uk/pregnancy/keeping-well/foods-to-avoid/"
+        },
+        {
+          "nutrient": "herbal remedies",
+          "action": "doctor_first",
+          "why": "Not all natural remedies are safe in pregnancy. Check with your pharmacist, midwife or GP first.",
+          "source": "https://www.nhs.uk/pregnancy/keeping-well/medicines/"
+        },
+        {
+          "nutrient": "St John's wort",
+          "action": "avoid",
+          "why": "It may increase the risk of birth defects.",
+          "source": "https://www.nccih.nih.gov/health/st-johns-wort"
+        },
+        {
+          "nutrient": "berberine",
+          "action": "avoid",
+          "why": "Should not be used in pregnancy. It is linked to harm in newborns.",
+          "source": "https://www.nccih.nih.gov/health/diabetes-and-dietary-supplements-what-you-need-to-know"
+        },
+        {
+          "nutrient": "ashwagandha",
+          "action": "avoid",
+          "why": "Experts advise avoiding it in pregnancy.",
+          "source": "https://www.nccih.nih.gov/health/ashwagandha"
+        },
+        {
+          "nutrient": "ginkgo",
+          "action": "avoid",
+          "why": "May cause early labour or extra bleeding at delivery.",
+          "source": "https://www.nccih.nih.gov/health/ginkgo"
+        },
+        {
+          "nutrient": "turmeric",
+          "action": "avoid",
+          "why": "Turmeric supplements may be unsafe in pregnancy.",
+          "source": "https://www.nccih.nih.gov/health/turmeric"
+        },
+        {
+          "nutrient": "fenugreek",
+          "action": "avoid",
+          "why": "Not safe in pregnancy in more than food amounts; linked to birth defects.",
+          "source": "https://www.nccih.nih.gov/health/fenugreek"
+        },
+        {
+          "nutrient": "licorice root",
+          "action": "avoid",
+          "why": "Large amounts are linked to early delivery.",
+          "source": "https://www.nccih.nih.gov/health/licorice-root"
+        },
+        {
+          "nutrient": "horse chestnut seed extract",
+          "action": "avoid",
+          "why": "Not recommended in pregnancy because safety is not known.",
+          "source": "https://www.ema.europa.eu/en/documents/herbal-monograph/european-union-herbal-monograph-aesculus-hippocastanum-l-semen-final-revision-1_en.pdf"
+        },
+        {
+          "nutrient": "vitamin_b6",
+          "action": "doctor_first",
+          "why": "B6 can ease pregnancy sickness, but ask first. Long-term very high doses can damage nerves; the adult upper limit is 100 mg a day.",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminB6-HealthProfessional/"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Aim for 150 minutes of moderate activity a week, including 2 strength sessions",
+          "why": "Exercise is safe in pregnancy and can lower the risk of gestational diabetes and pre-eclampsia.",
+          "evidence": "B",
+          "source": "https://www.nhs.uk/pregnancy/keeping-well/exercise/"
+        },
+        {
+          "title": "Avoid alcohol",
+          "why": "There is no known safe level of alcohol in pregnancy.",
+          "evidence": "C",
+          "source": "https://www.nice.org.uk/guidance/ng201/chapter/Recommendations"
+        },
+        {
+          "title": "Try ginger for mild sickness",
+          "why": "Guidelines suggest ginger for mild to moderate pregnancy sickness if you prefer not to take medicine.",
+          "evidence": "B",
+          "source": "https://www.nice.org.uk/guidance/ng201/chapter/Recommendations"
+        },
+        {
+          "title": "Eat no more than 2 portions of oily fish a week",
+          "why": "Oily fish can contain pollutants, such as mercury, that can harm your baby in large amounts.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/pregnancy/keeping-well/foods-to-avoid/"
+        }
+      ],
+      "doctorQuestions": [
+        "Do I need the higher 5 mg dose of folic acid?",
+        "Should I take iron, iodine or a pregnancy multivitamin?",
+        "Are my regular medicines and supplements safe in pregnancy?",
+        "Is my vitamin D intake enough?"
+      ],
+      "sources": [
+        "https://www.nhs.uk/pregnancy/keeping-well/pregnancy-vitamins-and-supplements/",
+        "https://ods.od.nih.gov/factsheets/Iodine-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/Choline-HealthProfessional/",
+        "https://www.nhs.uk/pregnancy/keeping-well/foods-to-avoid/",
+        "https://www.nhs.uk/pregnancy/keeping-well/medicines/",
+        "https://www.nccih.nih.gov/health/st-johns-wort",
+        "https://www.nccih.nih.gov/health/diabetes-and-dietary-supplements-what-you-need-to-know",
+        "https://www.nccih.nih.gov/health/ashwagandha",
+        "https://www.nccih.nih.gov/health/ginkgo",
+        "https://www.nccih.nih.gov/health/turmeric",
+        "https://www.nccih.nih.gov/health/fenugreek",
+        "https://www.nccih.nih.gov/health/licorice-root",
+        "https://www.ema.europa.eu/en/documents/herbal-monograph/european-union-herbal-monograph-aesculus-hippocastanum-l-semen-final-revision-1_en.pdf",
+        "https://ods.od.nih.gov/factsheets/VitaminB6-HealthProfessional/",
+        "https://www.nhs.uk/pregnancy/keeping-well/exercise/",
+        "https://www.nice.org.uk/guidance/ng201/chapter/Recommendations",
+        "https://www.nice.org.uk/guidance/ng247/chapter/Recommendations",
+        "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/folic-acid-for-the-prevention-of-neural-tube-defects-preventive-medication",
+        "https://www.nccih.nih.gov/health/ginger",
+        "https://www.nhs.uk/best-start-in-life/pregnancy/vitamins-and-supplements-in-pregnancy/"
+      ]
+    },
+    {
+      "id": "breastfeeding",
+      "name": "Breastfeeding",
+      "intakeQuestion": "Are you breastfeeding at the moment?",
+      "flags": [
+        {
+          "nutrient": "vitamin_d",
+          "action": "may_need_more",
+          "why": "Consider 10 mcg (400 IU) vitamin D a day in autumn and winter.",
+          "source": "https://www.nhs.uk/baby/breastfeeding-and-bottle-feeding/breastfeeding-and-lifestyle/diet/"
+        },
+        {
+          "nutrient": "iodine",
+          "action": "doctor_first",
+          "why": "US thyroid experts advise a 150 mcg iodine supplement a day while breastfeeding.",
+          "source": "https://ods.od.nih.gov/factsheets/Iodine-HealthProfessional/"
+        },
+        {
+          "nutrient": "vitamin_b12",
+          "action": "may_need_more",
+          "why": "Breastfed babies of mothers who eat no animal foods may have very low B12 reserves. Make sure you get enough B12.",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminB12-HealthProfessional/"
+        },
+        {
+          "nutrient": "diosmin/hesperidin (MPFF)",
+          "action": "avoid",
+          "why": "The product information says to avoid it while breastfeeding, as there is no data on breast milk.",
+          "source": "https://fdaghana.gov.gh/img/smpc/Daflon%20500mg%20Film%20Coated%20Tablet%20(Diosmin).pdf"
+        },
+        {
+          "nutrient": "berberine",
+          "action": "avoid",
+          "why": "Should not be used while breastfeeding; it can harm newborns.",
+          "source": "https://www.nccih.nih.gov/health/diabetes-and-dietary-supplements-what-you-need-to-know"
+        },
+        {
+          "nutrient": "ashwagandha",
+          "action": "avoid",
+          "why": "Should not be used while breastfeeding.",
+          "source": "https://www.nccih.nih.gov/health/ashwagandha"
+        },
+        {
+          "nutrient": "St John's wort",
+          "action": "avoid",
+          "why": "Breastfed babies of mothers taking it can have colic, drowsiness and lack of energy.",
+          "source": "https://www.nccih.nih.gov/health/st-johns-wort"
+        },
+        {
+          "nutrient": "horse chestnut seed extract",
+          "action": "avoid",
+          "why": "Not recommended because safety while breastfeeding is not known.",
+          "source": "https://www.ema.europa.eu/en/documents/herbal-monograph/european-union-herbal-monograph-aesculus-hippocastanum-l-semen-final-revision-1_en.pdf"
+        },
+        {
+          "nutrient": "caffeine (including green tea extract)",
+          "action": "caution",
+          "why": "High caffeine intake can make breastfed babies fussy and sleep poorly.",
+          "source": "https://www.nccih.nih.gov/health/green-tea"
+        },
+        {
+          "nutrient": "ginkgo",
+          "action": "doctor_first",
+          "why": "Little is known about whether ginkgo is safe while breastfeeding.",
+          "source": "https://www.nccih.nih.gov/health/ginkgo"
+        },
+        {
+          "nutrient": "choline",
+          "action": "may_need_more",
+          "why": "Needs are higher while breastfeeding (550 mg a day).",
+          "source": "https://ods.od.nih.gov/factsheets/Choline-HealthProfessional/"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Eat at least 2 portions of fish a week, but no more than 2 portions of oily fish",
+          "why": "Fish is good for you and your baby.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/baby/breastfeeding-and-bottle-feeding/breastfeeding-and-lifestyle/diet/"
+        },
+        {
+          "title": "Eat plenty of fibre and drink plenty of fluids",
+          "why": "Fibre can help with bowel problems and constipation after birth.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/baby/breastfeeding-and-bottle-feeding/breastfeeding-and-lifestyle/diet/"
+        }
+      ],
+      "doctorQuestions": [
+        "Are my supplements and medicines safe while breastfeeding?",
+        "Do I need iodine, vitamin D or B12?",
+        "If I eat a vegan diet, what does my baby need?"
+      ],
+      "sources": [
+        "https://www.nhs.uk/baby/breastfeeding-and-bottle-feeding/breastfeeding-and-lifestyle/diet/",
+        "https://ods.od.nih.gov/factsheets/Iodine-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/VitaminB12-HealthProfessional/",
+        "https://fdaghana.gov.gh/img/smpc/Daflon%20500mg%20Film%20Coated%20Tablet%20(Diosmin).pdf",
+        "https://www.nccih.nih.gov/health/diabetes-and-dietary-supplements-what-you-need-to-know",
+        "https://www.nccih.nih.gov/health/ashwagandha",
+        "https://www.nccih.nih.gov/health/st-johns-wort",
+        "https://www.ema.europa.eu/en/documents/herbal-monograph/european-union-herbal-monograph-aesculus-hippocastanum-l-semen-final-revision-1_en.pdf",
+        "https://www.nccih.nih.gov/health/green-tea",
+        "https://www.nccih.nih.gov/health/ginkgo",
+        "https://ods.od.nih.gov/factsheets/Choline-HealthProfessional/"
+      ]
+    },
+    {
+      "id": "trying_to_conceive",
+      "name": "Trying to get pregnant",
+      "intakeQuestion": "Are you trying to get pregnant, or could you become pregnant in the next few months?",
+      "flags": [
+        {
+          "nutrient": "vitamin_b9",
+          "action": "may_need_more",
+          "why": "Take 400 mcg folic acid daily, ideally from 3 months before pregnancy. Some people need a higher 5 mg prescription dose.",
+          "source": "https://www.nice.org.uk/guidance/ng247/chapter/Recommendations"
+        },
+        {
+          "nutrient": "vitamin_a",
+          "action": "avoid",
+          "why": "Avoid high-dose vitamin A (above 3,000 mcg or 10,000 IU a day) if you could become pregnant; too much can cause birth defects.",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminA-HealthProfessional/"
+        },
+        {
+          "nutrient": "herbal remedies",
+          "action": "doctor_first",
+          "why": "National advice is not to take herbal remedies if you are trying to get pregnant.",
+          "source": "https://www.nhs.uk/pregnancy/keeping-well/medicines/"
+        },
+        {
+          "nutrient": "vitamin_d",
+          "action": "may_need_more",
+          "why": "Consider 10 mcg (400 IU) vitamin D a day, at least in autumn and winter.",
+          "source": "https://www.nhs.uk/conditions/vitamins-and-minerals/vitamin-d/"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Start folic acid at least a month before trying to conceive",
+          "why": "US experts advise 400 to 800 mcg folic acid a day for anyone who could become pregnant, starting at least 1 month before conception.",
+          "evidence": "A",
+          "source": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/folic-acid-for-the-prevention-of-neural-tube-defects-preventive-medication"
+        }
+      ],
+      "doctorQuestions": [
+        "Do I need the higher 5 mg dose of folic acid?",
+        "Are my medicines and supplements safe if I become pregnant?"
+      ],
+      "sources": [
+        "https://www.nice.org.uk/guidance/ng247/chapter/Recommendations",
+        "https://ods.od.nih.gov/factsheets/VitaminA-HealthProfessional/",
+        "https://www.nhs.uk/pregnancy/keeping-well/medicines/",
+        "https://www.nhs.uk/conditions/vitamins-and-minerals/vitamin-d/",
+        "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/folic-acid-for-the-prevention-of-neural-tube-defects-preventive-medication"
+      ]
+    },
+    {
+      "id": "type_1_diabetes",
+      "name": "Type 1 diabetes",
+      "intakeQuestion": "Do you have type 1 diabetes and use insulin?",
+      "flags": [
+        {
+          "nutrient": "chromium",
+          "action": "doctor_first",
+          "why": "It may increase the effect of insulin and raise the risk of low blood sugar.",
+          "source": "https://ods.od.nih.gov/factsheets/Chromium-HealthProfessional/"
+        },
+        {
+          "nutrient": "berberine",
+          "action": "doctor_first",
+          "why": "It can lower blood sugar and may add to the effect of insulin.",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/42653808/"
+        },
+        {
+          "nutrient": "fenugreek",
+          "action": "caution",
+          "why": "Large doses may cause a harmful drop in blood sugar.",
+          "source": "https://www.nccih.nih.gov/health/fenugreek"
+        },
+        {
+          "nutrient": "vitamin_b12",
+          "action": "check_level",
+          "why": "Type 1 diabetes is listed as a common risk factor for low B12. Ask if a test makes sense for you.",
+          "source": "https://www.nice.org.uk/guidance/ng239/chapter/Recommendations"
+        }
+      ],
+      "habits": [
+        {
+          "title": "If you drink alcohol, check your sugar afterwards",
+          "why": "Alcohol can cause a delayed low when you use insulin.",
+          "evidence": "C",
+          "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12690188/"
+        }
+      ],
+      "doctorQuestions": [
+        "Could any of my supplements change how much insulin I need?",
+        "Should I be tested for coeliac disease?",
+        "Should my B12 level be checked?"
+      ],
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/Chromium-HealthProfessional/",
+        "https://pubmed.ncbi.nlm.nih.gov/42653808/",
+        "https://www.nccih.nih.gov/health/fenugreek",
+        "https://www.nice.org.uk/guidance/ng239/chapter/Recommendations",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC12690188/",
+        "https://www.nice.org.uk/guidance/ng20/chapter/Recommendations",
+        "https://medlineplus.gov/druginfo/meds/a600027.html"
+      ]
+    },
+    {
+      "id": "type_2_diabetes",
+      "name": "Type 2 diabetes",
+      "intakeQuestion": "Have you been told you have type 2 diabetes? Which diabetes medicines do you take, for example metformin, insulin or a tablet that makes your body release more insulin?",
+      "flags": [
+        {
+          "nutrient": "vitamin_b12",
+          "action": "check_level",
+          "why": "Metformin can lower B12 over time. Ask about a blood test now and then, especially with tingling feet, tiredness or anaemia.",
+          "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12690185/"
+        },
+        {
+          "nutrient": "berberine",
+          "action": "doctor_first",
+          "why": "It can lower blood sugar. With diabetes medicines it may push sugar too low, and it changes how some medicines are handled.",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/42653808/"
+        },
+        {
+          "nutrient": "chromium",
+          "action": "doctor_first",
+          "why": "It may add to the sugar-lowering effect of diabetes medicines and cause lows. Any benefit is small and unclear.",
+          "source": "https://ods.od.nih.gov/factsheets/Chromium-HealthProfessional/"
+        },
+        {
+          "nutrient": "cinnamon",
+          "action": "caution",
+          "why": "Benefit for blood sugar is unclear. Using cinnamon supplements with diabetes medicines can cause unwanted side effects, and large amounts of cassia cinnamon may worsen liver disease.",
+          "source": "https://www.nccih.nih.gov/health/diabetes-and-dietary-supplements-what-you-need-to-know"
+        },
+        {
+          "nutrient": "aloe vera (taken by mouth)",
+          "action": "caution",
+          "why": "Using aloe with diabetes medicines can cause unwanted side effects.",
+          "source": "https://www.nccih.nih.gov/health/diabetes-and-dietary-supplements-what-you-need-to-know"
+        },
+        {
+          "nutrient": "magnesium",
+          "action": "caution",
+          "why": "Diabetes can lower magnesium, but supplements are not advised just to lower blood sugar. Keep supplements to 350 mg a day or less unless your doctor says otherwise.",
+          "source": "https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/"
+        },
+        {
+          "nutrient": "vitamin_d",
+          "action": "caution",
+          "why": "Trials show little effect on blood sugar in diabetes. Do not go above 4,000 IU (100 mcg) a day unless your doctor advises it.",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminD-HealthProfessional/"
+        },
+        {
+          "nutrient": "vitamin_b3",
+          "action": "caution",
+          "why": "High-dose niacin can raise blood sugar. The upper limit from supplements is 35 mg a day.",
+          "source": "https://ods.od.nih.gov/factsheets/Niacin-HealthProfessional/"
+        },
+        {
+          "nutrient": "fenugreek",
+          "action": "caution",
+          "why": "Large doses may cause a harmful drop in blood sugar.",
+          "source": "https://www.nccih.nih.gov/health/fenugreek"
+        },
+        {
+          "nutrient": "ginseng",
+          "action": "doctor_first",
+          "why": "It might lower blood sugar. Check with your doctor first if you have diabetes.",
+          "source": "https://www.nccih.nih.gov/health/asian-ginseng"
+        },
+        {
+          "nutrient": "goldenseal",
+          "action": "doctor_first",
+          "why": "In a study it lowered metformin levels by about a quarter, which could weaken sugar control.",
+          "source": "https://www.nccih.nih.gov/health/goldenseal"
+        },
+        {
+          "nutrient": "fiber",
+          "action": "may_need_more",
+          "why": "Psyllium fibre taken before meals lowered fasting sugar and HbA1c in trials of people with type 2 diabetes. If you use insulin or sugar-lowering tablets, watch for lows.",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/26561625/"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Walk for about 10 minutes after each main meal",
+          "why": "In a trial this lowered sugar after meals more than one daily 30-minute walk, most after the evening meal.",
+          "evidence": "B",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/27747394/"
+        },
+        {
+          "title": "Break up long sitting with short, light walks",
+          "why": "In short lab trials, light walking breaks lowered sugar and insulin after meals compared with sitting still.",
+          "evidence": "C",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/35147898/"
+        },
+        {
+          "title": "Do structured exercise: brisk activity, strength work or both",
+          "why": "Structured exercise lowered HbA1c in many trials; more than 150 minutes a week worked better.",
+          "evidence": "A",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/21540423/"
+        },
+        {
+          "title": "Eat more high-fibre foods (at least 14 g fibre per 1,000 calories)",
+          "why": "Diabetes guidelines advise high-fibre, minimally processed carbohydrate foods.",
+          "evidence": "B",
+          "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12690188/"
+        },
+        {
+          "title": "If you drink alcohol, check your sugar afterwards",
+          "why": "Alcohol can cause a delayed low, especially with insulin or tablets that boost insulin.",
+          "evidence": "C",
+          "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12690188/"
+        }
+      ],
+      "doctorQuestions": [
+        "I take metformin. Should my vitamin B12 be checked, and how often?",
+        "Could any of my supplements make my blood sugar go too low with my diabetes medicines?",
+        "Is my kidney function healthy enough for the supplements I take?",
+        "Do I need to change anything about my medicines on days I exercise or drink alcohol?",
+        "What should my blood sugar be after meals?"
+      ],
+      "sources": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC12690185/",
+        "https://pubmed.ncbi.nlm.nih.gov/42653808/",
+        "https://ods.od.nih.gov/factsheets/Chromium-HealthProfessional/",
+        "https://www.nccih.nih.gov/health/diabetes-and-dietary-supplements-what-you-need-to-know",
+        "https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/VitaminD-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/Niacin-HealthProfessional/",
+        "https://www.nccih.nih.gov/health/fenugreek",
+        "https://www.nccih.nih.gov/health/asian-ginseng",
+        "https://www.nccih.nih.gov/health/goldenseal",
+        "https://pubmed.ncbi.nlm.nih.gov/26561625/",
+        "https://pubmed.ncbi.nlm.nih.gov/27747394/",
+        "https://pubmed.ncbi.nlm.nih.gov/35147898/",
+        "https://pubmed.ncbi.nlm.nih.gov/21540423/",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC12690188/",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC12690170/",
+        "https://www.gov.uk/drug-safety-update/metformin-and-reduced-vitamin-b12-levels-new-advice-for-monitoring-patients-at-risk",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC11374140",
+        "https://www.nccih.nih.gov/health/cinnamon",
+        "https://pubmed.ncbi.nlm.nih.gov/34956436/",
+        "https://pubmed.ncbi.nlm.nih.gov/22972104/",
+        "https://pubmed.ncbi.nlm.nih.gov/37818728/"
+      ]
+    },
+    {
+      "id": "prediabetes",
+      "name": "Prediabetes (blood sugar higher than normal)",
+      "intakeQuestion": "Have you been told your blood sugar is higher than normal but not yet diabetes, sometimes called prediabetes or borderline diabetes?",
+      "flags": [
+        {
+          "nutrient": "vitamin_d",
+          "action": "doctor_first",
+          "why": "In 3 trials of people with prediabetes pooled together, vitamin D lowered the chance of getting diabetes by about 15%. Ask your doctor if it suits you.",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/36745886/"
+        },
+        {
+          "nutrient": "vitamin_d",
+          "action": "caution",
+          "why": "US diabetes guidelines do not advise vitamin D for everyone with prediabetes. They note that giving it to millions of people could raise the risk of side effects.",
+          "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12690170/"
+        },
+        {
+          "nutrient": "vitamin_b12",
+          "action": "check_level",
+          "why": "If you take metformin long term, ask about B12 checks, especially if you have anaemia or nerve symptoms.",
+          "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12690170/"
+        },
+        {
+          "nutrient": "berberine",
+          "action": "doctor_first",
+          "why": "It may lower blood sugar, but studies are limited and it can change how other medicines work.",
+          "source": "https://www.nccih.nih.gov/health/diabetes-and-dietary-supplements-what-you-need-to-know"
+        },
+        {
+          "nutrient": "chromium",
+          "action": "caution",
+          "why": "Any benefit for blood sugar is small and unclear. Rare cases of liver and kidney problems have been reported.",
+          "source": "https://ods.od.nih.gov/factsheets/Chromium-HealthProfessional/"
+        },
+        {
+          "nutrient": "cinnamon",
+          "action": "caution",
+          "why": "It is unclear if it helps. Cassia cinnamon contains coumarin, and long-term use may be a problem for people with liver disease.",
+          "source": "https://www.nccih.nih.gov/health/cinnamon"
+        },
+        {
+          "nutrient": "magnesium",
+          "action": "caution",
+          "why": "It may slightly improve how your body uses insulin. Keep supplements to 350 mg a day or less unless your doctor says otherwise.",
+          "source": "https://www.nccih.nih.gov/health/diabetes-and-dietary-supplements-what-you-need-to-know"
+        },
+        {
+          "nutrient": "fiber",
+          "action": "may_need_more",
+          "why": "Psyllium fibre gave a modest drop in blood sugar in people at risk of diabetes.",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/26561625/"
+        }
+      ],
+      "habits": [
+        {
+          "title": "If you are overweight, aim to lose about 7% of your body weight",
+          "why": "In a large trial, a lifestyle programme cut new diabetes by more than half, and worked better than metformin.",
+          "evidence": "A",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/11832527/"
+        },
+        {
+          "title": "Be active for at least 150 minutes a week, like brisk walking",
+          "why": "This was a core part of the lifestyle programme that prevented diabetes in trials.",
+          "evidence": "A",
+          "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12690170/"
+        },
+        {
+          "title": "Take short, light walks during long periods of sitting",
+          "why": "In short lab trials, light walking breaks lowered sugar and insulin after meals compared with sitting.",
+          "evidence": "C",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/35147898/"
+        }
+      ],
+      "doctorQuestions": [
+        "Is my risk high enough to talk about metformin or vitamin D?",
+        "How often should my blood sugar (HbA1c) be rechecked?",
+        "Is there a diabetes prevention or lifestyle programme I can join?",
+        "If I start metformin, should my B12 be checked?"
+      ],
+      "sources": [
+        "https://pubmed.ncbi.nlm.nih.gov/36745886/",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC12690170/",
+        "https://www.nccih.nih.gov/health/diabetes-and-dietary-supplements-what-you-need-to-know",
+        "https://ods.od.nih.gov/factsheets/Chromium-HealthProfessional/",
+        "https://www.nccih.nih.gov/health/cinnamon",
+        "https://pubmed.ncbi.nlm.nih.gov/26561625/",
+        "https://pubmed.ncbi.nlm.nih.gov/11832527/",
+        "https://pubmed.ncbi.nlm.nih.gov/35147898/",
+        "https://pubmed.ncbi.nlm.nih.gov/31173679/",
+        "https://pubmed.ncbi.nlm.nih.gov/38828931/"
+      ]
+    },
+    {
+      "id": "kidney_disease",
+      "name": "Kidney disease (reduced kidney function)",
+      "intakeQuestion": "Has a doctor told you that your kidneys are not working fully, for example chronic kidney disease, or that you need dialysis or have a kidney transplant?",
+      "flags": [
+        {
+          "nutrient": "potassium",
+          "action": "avoid",
+          "why": "Weak kidneys may not clear potassium, so even normal amounts can build up. Avoid potassium supplements and potassium salt substitutes unless your kidney team agrees.",
+          "source": "https://ods.od.nih.gov/factsheets/Potassium-HealthProfessional/"
+        },
+        {
+          "nutrient": "magnesium",
+          "action": "doctor_first",
+          "why": "Magnesium can build up to harmful levels when the kidneys are weak.",
+          "source": "https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/"
+        },
+        {
+          "nutrient": "vitamin_d",
+          "action": "doctor_first",
+          "why": "Kidney disease can upset the balance of minerals in bones and blood. Ask your health care team before using vitamin or mineral supplements.",
+          "source": "https://www.niddk.nih.gov/health-information/kidney-disease/mineral-bone-disorder"
+        },
+        {
+          "nutrient": "creatine",
+          "action": "avoid",
+          "why": "Kidney experts list creatine as high risk for people with kidney disease.",
+          "source": "https://www.kidney.org/kidney-topics/herbal-supplements-and-kidney-disease"
+        },
+        {
+          "nutrient": "protein",
+          "action": "doctor_first",
+          "why": "Some people with kidney disease need moderate protein so waste does not build up, but too little can cause poor nutrition. Ask a dietitian how much is right.",
+          "source": "https://www.niddk.nih.gov/health-information/kidney-disease/chronic-kidney-disease-ckd/healthy-eating-adults-chronic-kidney-disease"
+        },
+        {
+          "nutrient": "vitamin_c",
+          "action": "caution",
+          "why": "High intakes may raise oxalate in urine and could add to kidney stones, especially in people with kidney problems.",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminC-HealthProfessional/"
+        },
+        {
+          "nutrient": "chromium",
+          "action": "caution",
+          "why": "People with kidney disease may be more sensitive to harm from high chromium intakes.",
+          "source": "https://ods.od.nih.gov/factsheets/Chromium-HealthProfessional/"
+        },
+        {
+          "nutrient": "licorice root",
+          "action": "avoid",
+          "why": "Even small amounts have been linked to severe side effects, such as heart rhythm problems, in people with kidney conditions.",
+          "source": "https://www.nccih.nih.gov/health/licorice-root"
+        },
+        {
+          "nutrient": "herbal 'kidney detox' or 'cleanse' products",
+          "action": "avoid",
+          "why": "These are not proven and some ingredients can harm the kidneys or interact with medicines.",
+          "source": "https://www.kidney.org/kidney-topics/herbal-supplements-and-kidney-disease"
+        },
+        {
+          "nutrient": "green or 'superfood' powders, seaweed and electrolyte products",
+          "action": "caution",
+          "why": "These can be high in potassium or phosphorus.",
+          "source": "https://www.kidney.org/kidney-topics/herbal-supplements-and-kidney-disease"
+        },
+        {
+          "nutrient": "St John's wort",
+          "action": "avoid",
+          "why": "Kidney experts list it as high risk because it interacts with many other medicines.",
+          "source": "https://www.kidney.org/kidney-topics/herbal-supplements-and-kidney-disease"
+        },
+        {
+          "nutrient": "iron",
+          "action": "check_level",
+          "why": "In anaemia caused by kidney disease, iron is guided by regular blood tests from your kidney team.",
+          "source": "https://www.nice.org.uk/guidance/ng203/chapter/Recommendations"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Ask for advice on potassium, phosphate, salt and calories for your stage",
+          "why": "Guidelines advise diet advice matched to how severe the kidney disease is.",
+          "evidence": "C",
+          "source": "https://www.nice.org.uk/guidance/ng203/chapter/Recommendations"
+        },
+        {
+          "title": "Exercise, keep a healthy weight and do not smoke",
+          "why": "Advised for adults with kidney disease in national guidance.",
+          "evidence": "C",
+          "source": "https://www.nice.org.uk/guidance/ng203/chapter/Recommendations"
+        },
+        {
+          "title": "Cut down on processed foods with added phosphate",
+          "why": "Added phosphate in processed foods raises blood phosphorus more than natural sources.",
+          "evidence": "C",
+          "source": "https://www.niddk.nih.gov/health-information/kidney-disease/chronic-kidney-disease-ckd/healthy-eating-adults-chronic-kidney-disease"
+        },
+        {
+          "title": "Use herbs and spices instead of salt substitutes",
+          "why": "Many salt substitutes are high in potassium.",
+          "evidence": "C",
+          "source": "https://www.niddk.nih.gov/health-information/kidney-disease/chronic-kidney-disease-ckd/healthy-eating-adults-chronic-kidney-disease"
+        }
+      ],
+      "doctorQuestions": [
+        "What stage is my kidney disease, and how much protein, potassium and phosphate should I have?",
+        "Which of my vitamins or supplements are safe for my kidneys?",
+        "Should I take a prescribed form of vitamin D or calcium?",
+        "Do I need a referral to a kidney dietitian?"
+      ],
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/Potassium-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/",
+        "https://www.niddk.nih.gov/health-information/kidney-disease/mineral-bone-disorder",
+        "https://www.kidney.org/kidney-topics/herbal-supplements-and-kidney-disease",
+        "https://www.niddk.nih.gov/health-information/kidney-disease/chronic-kidney-disease-ckd/healthy-eating-adults-chronic-kidney-disease",
+        "https://ods.od.nih.gov/factsheets/VitaminC-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/Chromium-HealthProfessional/",
+        "https://www.nccih.nih.gov/health/licorice-root",
+        "https://www.nice.org.uk/guidance/ng203/chapter/Recommendations",
+        "https://www.nice.org.uk/guidance/ng136/chapter/Recommendations",
+        "https://pubmed.ncbi.nlm.nih.gov/23867520/"
+      ]
+    },
+    {
+      "id": "kidney_stones",
+      "name": "Kidney stones",
+      "intakeQuestion": "Have you ever had kidney stones?",
+      "flags": [
+        {
+          "nutrient": "vitamin_c",
+          "action": "caution",
+          "why": "High doses raise oxalate in urine, which may add to kidney stones.",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminC-HealthProfessional/"
+        },
+        {
+          "nutrient": "calcium",
+          "action": "caution",
+          "why": "One large study linked calcium supplements to more kidney stones, but later reviews did not. Keep calcium in your diet and ask your doctor about supplements.",
+          "source": "https://ods.od.nih.gov/factsheets/Calcium-HealthProfessional/"
+        },
+        {
+          "nutrient": "vitamin_d",
+          "action": "caution",
+          "why": "Too much vitamin D can raise calcium and cause kidney stones. Stay within 4,000 IU (100 mcg) a day unless your doctor advises more.",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminD-HealthProfessional/"
+        },
+        {
+          "nutrient": "turmeric",
+          "action": "caution",
+          "why": "Turmeric supplements may raise the risk of kidney stones. Ask first if stones run in your family.",
+          "source": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/turmeric"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Drink 2.5 to 3 litres of water a day, unless your doctor has told you to limit fluids",
+          "why": "Pale urine is a sign you are drinking enough.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/conditions/kidney-stones/"
+        },
+        {
+          "title": "Keep salt under 6 g a day, get enough calcium in your diet, and limit fizzy, caffeinated and alcoholic drinks",
+          "why": "Advised to help prevent kidney stones.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/conditions/kidney-stones/"
+        }
+      ],
+      "doctorQuestions": [
+        "What type of stone did I have, and does it change what I should eat or drink?",
+        "Are my calcium, vitamin C and vitamin D supplements safe for me?",
+        "How much fluid should I drink each day?"
+      ],
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/VitaminC-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/Calcium-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/VitaminD-HealthProfessional/",
+        "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/turmeric",
+        "https://www.nhs.uk/conditions/kidney-stones/"
+      ]
+    },
+    {
+      "id": "liver_disease",
+      "name": "Liver disease",
+      "intakeQuestion": "Have you been told you have a liver condition, such as fatty liver, hepatitis or cirrhosis?",
+      "flags": [
+        {
+          "nutrient": "turmeric",
+          "action": "doctor_first",
+          "why": "Liver damage has been reported in some people taking high-absorption curcumin products.",
+          "source": "https://www.nccih.nih.gov/health/turmeric"
+        },
+        {
+          "nutrient": "ashwagandha",
+          "action": "doctor_first",
+          "why": "A few reports link ashwagandha to liver problems.",
+          "source": "https://ods.od.nih.gov/factsheets/Ashwagandha-HealthProfessional/"
+        },
+        {
+          "nutrient": "green tea extract",
+          "action": "doctor_first",
+          "why": "Liver injury has been reported, mostly with green tea extract tablets or capsules.",
+          "source": "https://www.nccih.nih.gov/health/green-tea"
+        },
+        {
+          "nutrient": "kava",
+          "action": "avoid",
+          "why": "Kava has been linked to rare but serious liver injury.",
+          "source": "https://www.nccih.nih.gov/health/kava"
+        },
+        {
+          "nutrient": "black cohosh",
+          "action": "doctor_first",
+          "why": "Rare cases of liver damage, some very serious, have been reported with products labelled as black cohosh.",
+          "source": "https://www.nccih.nih.gov/health/black-cohosh"
+        },
+        {
+          "nutrient": "cinnamon",
+          "action": "caution",
+          "why": "Long-term use of cassia cinnamon, which contains coumarin, could be a problem for people with liver disease.",
+          "source": "https://www.nccih.nih.gov/health/cinnamon"
+        },
+        {
+          "nutrient": "manganese",
+          "action": "caution",
+          "why": "People with long-term liver disease clear manganese poorly and are more likely to be harmed by high intakes.",
+          "source": "https://ods.od.nih.gov/factsheets/Manganese-HealthProfessional/"
+        },
+        {
+          "nutrient": "vitamin_b3",
+          "action": "caution",
+          "why": "High doses of niacin taken for months or years can damage the liver.",
+          "source": "https://ods.od.nih.gov/factsheets/Niacin-HealthProfessional/"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Stop a supplement and see a doctor if you get dark urine, yellow skin or eyes, tiredness, nausea or poor appetite",
+          "why": "These can be signs of liver damage.",
+          "evidence": "C",
+          "source": "https://www.nccih.nih.gov/health/turmeric"
+        }
+      ],
+      "doctorQuestions": [
+        "Which supplements are safe for my liver?",
+        "How much alcohol, if any, is safe for me?",
+        "Should my liver blood tests be checked before I start a new supplement?"
+      ],
+      "sources": [
+        "https://www.nccih.nih.gov/health/turmeric",
+        "https://ods.od.nih.gov/factsheets/Ashwagandha-HealthProfessional/",
+        "https://www.nccih.nih.gov/health/green-tea",
+        "https://www.nccih.nih.gov/health/kava",
+        "https://www.nccih.nih.gov/health/black-cohosh",
+        "https://www.nccih.nih.gov/health/cinnamon",
+        "https://ods.od.nih.gov/factsheets/Manganese-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/Niacin-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/Chromium-HealthProfessional/"
+      ]
+    },
+    {
+      "id": "heart_disease",
+      "name": "Heart disease",
+      "intakeQuestion": "Do you have a heart condition, such as angina, a past heart attack, heart failure or an irregular heartbeat?",
+      "flags": [
+        {
+          "nutrient": "potassium",
+          "action": "doctor_first",
+          "why": "Some heart and blood pressure medicines raise potassium. Do not take potassium supplements or potassium salt substitutes unless your doctor agrees.",
+          "source": "https://ods.od.nih.gov/factsheets/Potassium-HealthProfessional/"
+        },
+        {
+          "nutrient": "omega_3",
+          "action": "caution",
+          "why": "In two large trials, 4 g a day of omega-3 for several years slightly raised the risk of an irregular heartbeat (atrial fibrillation) in people with or at high risk of heart disease.",
+          "source": "https://ods.od.nih.gov/factsheets/Omega3FattyAcids-HealthProfessional/"
+        },
+        {
+          "nutrient": "licorice root",
+          "action": "avoid",
+          "why": "Licorice can cause irregular heartbeat and even cardiac arrest. Even small amounts are linked to severe effects in people with heart conditions.",
+          "source": "https://www.nccih.nih.gov/health/licorice-root"
+        },
+        {
+          "nutrient": "calcium",
+          "action": "caution",
+          "why": "Some reviews linked calcium supplements to heart disease, but other studies found no link.",
+          "source": "https://ods.od.nih.gov/factsheets/Calcium-HealthProfessional/"
+        },
+        {
+          "nutrient": "vitamin_e",
+          "action": "caution",
+          "why": "Vitamin E supplements were linked to more bleeding strokes in two trials.",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminE-HealthProfessional/"
+        },
+        {
+          "nutrient": "St John's wort",
+          "action": "avoid",
+          "why": "It can weaken some heart medicines, such as digoxin and ivabradine.",
+          "source": "https://www.nccih.nih.gov/health/st-johns-wort"
+        },
+        {
+          "nutrient": "vitamin_b1",
+          "action": "check_level",
+          "why": "Furosemide can lower thiamin (vitamin B1), and low thiamin is common in heart failure.",
+          "source": "https://ods.od.nih.gov/factsheets/Thiamin-HealthProfessional/"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Do aerobic and muscle-strengthening activity at a level that is safe for you",
+          "why": "Advised for people with or at high risk of heart disease.",
+          "evidence": "B",
+          "source": "https://www.nice.org.uk/guidance/ng238/chapter/Recommendations"
+        },
+        {
+          "title": "Swap saturated fats for olive or rapeseed oil",
+          "why": "Advised for people at high risk of or with heart disease.",
+          "evidence": "B",
+          "source": "https://www.nice.org.uk/guidance/ng238/chapter/Recommendations"
+        }
+      ],
+      "doctorQuestions": [
+        "Which supplements are safe with my heart medicines?",
+        "Should my potassium or kidney function be checked?",
+        "How much exercise is safe for me, and should I join a rehab programme?"
+      ],
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/Potassium-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/Omega3FattyAcids-HealthProfessional/",
+        "https://www.nccih.nih.gov/health/licorice-root",
+        "https://ods.od.nih.gov/factsheets/Calcium-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/VitaminE-HealthProfessional/",
+        "https://www.nccih.nih.gov/health/st-johns-wort",
+        "https://ods.od.nih.gov/factsheets/Thiamin-HealthProfessional/",
+        "https://www.nice.org.uk/guidance/ng238/chapter/Recommendations"
+      ]
+    },
+    {
+      "id": "high_blood_pressure",
+      "name": "High blood pressure",
+      "intakeQuestion": "Have you been told you have high blood pressure? Do you take medicine for it?",
+      "flags": [
+        {
+          "nutrient": "potassium salt substitutes",
+          "action": "avoid",
+          "why": "Not advised for older people, people with diabetes or kidney disease, pregnant women, or people on ACE inhibitors or ARBs.",
+          "source": "https://www.nice.org.uk/guidance/ng136/chapter/Recommendations"
+        },
+        {
+          "nutrient": "magnesium",
+          "action": "caution",
+          "why": "Calcium, magnesium and potassium supplements are not advised as a way to lower blood pressure.",
+          "source": "https://www.nice.org.uk/guidance/ng136/chapter/Recommendations"
+        },
+        {
+          "nutrient": "licorice root",
+          "action": "avoid",
+          "why": "Even small amounts have been linked to severe side effects in people with high blood pressure.",
+          "source": "https://www.nccih.nih.gov/health/licorice-root"
+        },
+        {
+          "nutrient": "caffeine (coffee, energy drinks, pre-workout products)",
+          "action": "caution",
+          "why": "Too much coffee and other caffeine-rich products is discouraged for people with high blood pressure.",
+          "source": "https://www.nice.org.uk/guidance/ng136/chapter/Recommendations"
+        },
+        {
+          "nutrient": "green tea extract",
+          "action": "caution",
+          "why": "Side effects of green tea extract supplements include increased blood pressure.",
+          "source": "https://www.nccih.nih.gov/health/green-tea"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Keep salt low",
+          "why": "Less salt can lower blood pressure.",
+          "evidence": "B",
+          "source": "https://www.nice.org.uk/guidance/ng136/chapter/Recommendations"
+        },
+        {
+          "title": "Eat a healthy diet and exercise regularly",
+          "why": "Both can lower blood pressure.",
+          "evidence": "B",
+          "source": "https://www.nice.org.uk/guidance/ng136/chapter/Recommendations"
+        },
+        {
+          "title": "Cut down on alcohol if you drink a lot",
+          "why": "This can lower blood pressure and has other health benefits.",
+          "evidence": "B",
+          "source": "https://www.nice.org.uk/guidance/ng136/chapter/Recommendations"
+        }
+      ],
+      "doctorQuestions": [
+        "What should my blood pressure be?",
+        "Are my supplements or salt substitute safe with my blood pressure medicines?",
+        "Should my kidney function and potassium be checked?"
+      ],
+      "sources": [
+        "https://www.nice.org.uk/guidance/ng136/chapter/Recommendations",
+        "https://www.nccih.nih.gov/health/licorice-root",
+        "https://www.nccih.nih.gov/health/green-tea"
+      ]
+    },
+    {
+      "id": "high_cholesterol",
+      "name": "High cholesterol",
+      "intakeQuestion": "Have you been told you have high cholesterol? Do you take a statin or another cholesterol medicine?",
+      "flags": [
+        {
+          "nutrient": "red yeast rice",
+          "action": "doctor_first",
+          "why": "Some products contain a statin-like drug in unknown amounts, with the same possible side effects and interactions as statins.",
+          "source": "https://www.nccih.nih.gov/health/red-yeast-rice"
+        },
+        {
+          "nutrient": "plant stanols or sterols",
+          "action": "caution",
+          "why": "Not advised as a way to prevent heart disease.",
+          "source": "https://www.nice.org.uk/guidance/ng238/chapter/Recommendations"
+        },
+        {
+          "nutrient": "vitamin_b3",
+          "action": "caution",
+          "why": "Added to statins in large trials, high-dose niacin did not cut heart events, and one trial found more strokes.",
+          "source": "https://ods.od.nih.gov/factsheets/Niacin-HealthProfessional/"
+        },
+        {
+          "nutrient": "omega_3",
+          "action": "caution",
+          "why": "UK guidance says there is no evidence that omega-3 products help prevent heart disease, except one prescription form.",
+          "source": "https://www.nice.org.uk/guidance/ng238/chapter/Recommendations"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Keep saturated fat low and use olive or rapeseed oil",
+          "why": "Advised for people at high risk of heart disease.",
+          "evidence": "B",
+          "source": "https://www.nice.org.uk/guidance/ng238/chapter/Recommendations"
+        },
+        {
+          "title": "Do aerobic and muscle-strengthening activity",
+          "why": "Advised for people at high risk of heart disease.",
+          "evidence": "B",
+          "source": "https://www.nice.org.uk/guidance/ng238/chapter/Recommendations"
+        }
+      ],
+      "doctorQuestions": [
+        "What is my overall heart risk, and do I need a statin?",
+        "Are my supplements safe with my cholesterol medicine?",
+        "When should my cholesterol be rechecked?"
+      ],
+      "sources": [
+        "https://www.nccih.nih.gov/health/red-yeast-rice",
+        "https://www.nice.org.uk/guidance/ng238/chapter/Recommendations",
+        "https://ods.od.nih.gov/factsheets/Niacin-HealthProfessional/"
+      ]
+    },
+    {
+      "id": "varicose_veins",
+      "name": "Varicose veins or long-term vein problems in the legs",
+      "intakeQuestion": "Do you have varicose veins, or legs that often feel heavy, achy or swollen, with skin changes or sores around the ankles?",
+      "flags": [
+        {
+          "nutrient": "horse chestnut seed extract",
+          "action": "caution",
+          "why": "In short-term trials, horse chestnut seed extract eased leg pain and swelling. Larger trials are still needed.",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/23152216/"
+        },
+        {
+          "nutrient": "horse chestnut (raw seeds, bark, flowers or leaves)",
+          "action": "avoid",
+          "why": "These parts are unsafe to take by mouth. Only standardised seed extract has been used safely in studies, for up to 12 weeks.",
+          "source": "https://www.nccih.nih.gov/health/horse-chestnut"
+        },
+        {
+          "nutrient": "horse chestnut seed extract",
+          "action": "doctor_first",
+          "why": "See a doctor first if you have skin inflammation, a hard or painful vein, severe pain, ulcers, sudden swelling of one or both legs, or heart or kidney failure. Not recommended in pregnancy or breastfeeding.",
+          "source": "https://www.ema.europa.eu/en/documents/herbal-monograph/european-union-herbal-monograph-aesculus-hippocastanum-l-semen-final-revision-1_en.pdf"
+        },
+        {
+          "nutrient": "diosmin/hesperidin (MPFF)",
+          "action": "caution",
+          "why": "In placebo-controlled trials it eased leg pain, heaviness, cramps and swelling.",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/29385792/"
+        },
+        {
+          "nutrient": "diosmin/hesperidin (MPFF)",
+          "action": "caution",
+          "why": "Common side effects are stomach upsets such as diarrhoea and nausea. Avoid while breastfeeding.",
+          "source": "https://fdaghana.gov.gh/img/smpc/Daflon%20500mg%20Film%20Coated%20Tablet%20(Diosmin).pdf"
+        },
+        {
+          "nutrient": "vein medicines in general (venoactive products)",
+          "action": "doctor_first",
+          "why": "As a group, they ease swelling a little but do not clearly improve quality of life, and they slightly increase side effects.",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/33141449/"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Exercise regularly, for example walking",
+          "why": "A European vein guideline advises exercise to reduce vein symptoms.",
+          "evidence": "B",
+          "source": "https://www.sciencedirect.com/science/article/pii/S1078588421009795"
+        },
+        {
+          "title": "Do exercises that strengthen your calf muscles",
+          "why": "In a small trial in people with severe vein disease, 6 months of calf exercise improved calf pump function and strength, though symptom scores did not change.",
+          "evidence": "C",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/14718821/"
+        },
+        {
+          "title": "Try compression stockings for aching or swelling, if a professional says they suit you",
+          "why": "A European vein guideline recommends stockings of at least 15 mmHg at the ankle to ease symptoms.",
+          "evidence": "C",
+          "source": "https://www.sciencedirect.com/science/article/pii/S1078588421009795"
+        },
+        {
+          "title": "Ask whether vein treatment would suit you better than stockings",
+          "why": "UK guidance offers stockings mainly when vein treatment is not suitable.",
+          "evidence": "C",
+          "source": "https://www.nice.org.uk/guidance/cg168/chapter/Recommendations"
+        },
+        {
+          "title": "Ask a professional to check stockings are safe for you",
+          "why": "Stockings are usually safe when used correctly and after checking for reasons not to use them. Skin irritation, discomfort and pain are the most common problems; serious harm is very rare.",
+          "evidence": "C",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/32122269/"
+        },
+        {
+          "title": "Raise your legs when resting and avoid standing or sitting still for long periods",
+          "why": "Symptoms are often worse after standing and better with your legs up.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/conditions/varicose-veins/"
+        },
+        {
+          "title": "Keep to a healthy weight and do not smoke",
+          "why": "Advised for varicose veins; smoking damages your veins.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/conditions/varicose-veins/"
+        },
+        {
+          "title": "Know when to get help",
+          "why": "See a GP for painful, itchy or swollen legs or a sore that has not healed after 2 weeks. Get urgent help if a vein bleeds.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/conditions/varicose-veins/"
+        }
+      ],
+      "doctorQuestions": [
+        "Do I need a scan or a referral to a vein specialist?",
+        "Are compression stockings safe for me, and which pressure and length should I use?",
+        "Is a vein supplement safe with my other medicines?",
+        "What signs mean I should get help quickly, such as a painful, red or swollen leg?"
+      ],
+      "sources": [
+        "https://pubmed.ncbi.nlm.nih.gov/23152216/",
+        "https://www.nccih.nih.gov/health/horse-chestnut",
+        "https://www.ema.europa.eu/en/documents/herbal-monograph/european-union-herbal-monograph-aesculus-hippocastanum-l-semen-final-revision-1_en.pdf",
+        "https://pubmed.ncbi.nlm.nih.gov/29385792/",
+        "https://fdaghana.gov.gh/img/smpc/Daflon%20500mg%20Film%20Coated%20Tablet%20(Diosmin).pdf",
+        "https://pubmed.ncbi.nlm.nih.gov/33141449/",
+        "https://www.sciencedirect.com/science/article/pii/S1078588421009795",
+        "https://pubmed.ncbi.nlm.nih.gov/14718821/",
+        "https://www.nice.org.uk/guidance/cg168/chapter/Recommendations",
+        "https://pubmed.ncbi.nlm.nih.gov/32122269/",
+        "https://www.nhs.uk/conditions/varicose-veins/",
+        "https://pubmed.ncbi.nlm.nih.gov/35027279/",
+        "https://www.nhs.uk/conditions/deep-vein-thrombosis-dvt/",
+        "https://pubmed.ncbi.nlm.nih.gov/28873064/",
+        "https://pubmed.ncbi.nlm.nih.gov/34271595/",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC10993631",
+        "https://www.ema.europa.eu/en/medicines/herbal/hippocastani-semen",
+        "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/horse-chestnut"
+      ]
+    },
+    {
+      "id": "blood_thinners",
+      "name": "Taking a blood thinner",
+      "intakeQuestion": "Do you take a medicine to thin your blood or prevent clots, such as warfarin, apixaban, rivaroxaban, dabigatran, edoxaban, aspirin or clopidogrel?",
+      "flags": [
+        {
+          "nutrient": "vitamin_k",
+          "action": "doctor_first",
+          "why": "On warfarin, sudden changes in vitamin K from food or supplements can change how warfarin works. Keep intake steady and ask before any product with vitamin K.",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminK-HealthProfessional/"
+        },
+        {
+          "nutrient": "St John's wort",
+          "action": "avoid",
+          "why": "It can weaken warfarin and many other important medicines.",
+          "source": "https://www.nccih.nih.gov/health/st-johns-wort"
+        },
+        {
+          "nutrient": "vitamin_e",
+          "action": "caution",
+          "why": "Large doses of vitamin E with blood thinners can increase the risk of bleeding.",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminE-HealthProfessional/"
+        },
+        {
+          "nutrient": "ginkgo",
+          "action": "avoid",
+          "why": "May increase bleeding risk with blood thinners such as warfarin.",
+          "source": "https://www.nccih.nih.gov/health/ginkgo"
+        },
+        {
+          "nutrient": "garlic",
+          "action": "caution",
+          "why": "Garlic supplements may increase bleeding.",
+          "source": "https://www.nccih.nih.gov/health/garlic"
+        },
+        {
+          "nutrient": "turmeric",
+          "action": "caution",
+          "why": "Turmeric may increase bleeding with blood thinners.",
+          "source": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/turmeric"
+        },
+        {
+          "nutrient": "omega_3",
+          "action": "caution",
+          "why": "High-dose fish oil can affect platelets. On warfarin, your INR may need checking.",
+          "source": "https://ods.od.nih.gov/factsheets/Omega3FattyAcids-HealthProfessional/"
+        },
+        {
+          "nutrient": "coq10",
+          "action": "doctor_first",
+          "why": "CoQ10 may interact with warfarin.",
+          "source": "https://www.nccih.nih.gov/health/coenzyme-q10"
+        },
+        {
+          "nutrient": "ginseng",
+          "action": "doctor_first",
+          "why": "Ginseng may interfere with blood clotting.",
+          "source": "https://www.nccih.nih.gov/health/asian-ginseng"
+        },
+        {
+          "nutrient": "horse chestnut seed extract",
+          "action": "avoid",
+          "why": "Some horse chestnut products may increase bleeding with blood thinners.",
+          "source": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/horse-chestnut"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Eat steady amounts of vitamin K foods, like leafy greens, from week to week",
+          "why": "On warfarin, avoid sudden large changes in these foods.",
+          "evidence": "C",
+          "source": "https://medlineplus.gov/druginfo/meds/a682277.html"
+        },
+        {
+          "title": "Tell your clinic before you start or stop any supplement",
+          "why": "Many supplements change bleeding risk or how blood thinners work.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/medicines/warfarin/"
+        }
+      ],
+      "doctorQuestions": [
+        "Which supplements are safe with my blood thinner?",
+        "If I take warfarin, how much vitamin K food is OK and when should my INR be checked?",
+        "What signs of bleeding should make me get help?"
+      ],
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/VitaminK-HealthProfessional/",
+        "https://www.nccih.nih.gov/health/st-johns-wort",
+        "https://ods.od.nih.gov/factsheets/VitaminE-HealthProfessional/",
+        "https://www.nccih.nih.gov/health/ginkgo",
+        "https://www.nccih.nih.gov/health/garlic",
+        "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/turmeric",
+        "https://ods.od.nih.gov/factsheets/Omega3FattyAcids-HealthProfessional/",
+        "https://www.nccih.nih.gov/health/coenzyme-q10",
+        "https://www.nccih.nih.gov/health/asian-ginseng",
+        "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/horse-chestnut",
+        "https://medlineplus.gov/druginfo/meds/a682277.html",
+        "https://www.nhs.uk/medicines/warfarin/",
+        "https://www.nhs.uk/medicines/apixaban/",
+        "https://www.nhs.uk/medicines/rivaroxaban/",
+        "https://medlineplus.gov/druginfo/meds/a613032.html",
+        "https://www.ema.europa.eu/en/documents/product-information/pradaxa-epar-product-information_en.pdf",
+        "https://www.nhs.uk/medicines/clopidogrel/taking-clopidogrel-with-other-medicines-and-herbal-supplements/"
+      ]
+    },
+    {
+      "id": "upcoming_surgery",
+      "name": "Surgery or a procedure coming up",
+      "intakeQuestion": "Do you have an operation or procedure planned, including dental surgery? Roughly when?",
+      "flags": [
+        {
+          "nutrient": "all herbal and dietary supplements",
+          "action": "doctor_first",
+          "why": "Tell your team about every supplement. Anaesthetists may ask you to stop supplements at least 2 weeks before.",
+          "source": "https://madeforthismoment.asahq.org/wp-content/uploads/2020/10/ASA_Supplements-Anesthesia_Updated-1.pdf"
+        },
+        {
+          "nutrient": "garlic",
+          "action": "avoid",
+          "why": "Garlic supplements may increase bleeding. Tell your team, especially before surgery.",
+          "source": "https://www.nccih.nih.gov/health/garlic"
+        },
+        {
+          "nutrient": "ginkgo",
+          "action": "avoid",
+          "why": "Linked to bleeding. Stop before surgery as your team advises.",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/11448284/"
+        },
+        {
+          "nutrient": "ginseng",
+          "action": "avoid",
+          "why": "Linked to bleeding and low blood sugar.",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/11448284/"
+        },
+        {
+          "nutrient": "St John's wort",
+          "action": "avoid",
+          "why": "It speeds up how the body breaks down many medicines used around surgery.",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/11448284/"
+        },
+        {
+          "nutrient": "kava",
+          "action": "avoid",
+          "why": "Kava can increase the effect of anaesthesia.",
+          "source": "https://madeforthismoment.asahq.org/wp-content/uploads/2020/10/ASA_Supplements-Anesthesia_Updated-1.pdf"
+        },
+        {
+          "nutrient": "valerian",
+          "action": "doctor_first",
+          "why": "Ask how to taper it in the weeks before surgery. Do not stop suddenly after long use.",
+          "source": "https://www.aafp.org/pubs/afp/issues/2002/0501/p1927.html"
+        },
+        {
+          "nutrient": "vitamin_e",
+          "action": "avoid",
+          "why": "Guidance based on a 2021 expert consensus says to hold vitamin E for 2 weeks because of a theoretical bleeding risk.",
+          "source": "https://accurateclinic.com/wp-content/uploads/2025/12/Handout-Nutraceuticals-for-Peri-Operative-Period-.pdf"
+        },
+        {
+          "nutrient": "turmeric",
+          "action": "avoid",
+          "why": "Guidance based on a 2021 expert consensus says to hold turmeric for 2 weeks because of a theoretical bleeding risk.",
+          "source": "https://accurateclinic.com/wp-content/uploads/2025/12/Handout-Nutraceuticals-for-Peri-Operative-Period-.pdf"
+        },
+        {
+          "nutrient": "omega_3",
+          "action": "doctor_first",
+          "why": "Some professionals advise stopping fish oil, but a large heart-surgery trial found it did not increase bleeding. Follow your team's advice.",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/30571332/"
+        },
+        {
+          "nutrient": "ashwagandha",
+          "action": "avoid",
+          "why": "Experts do not recommend it for people about to have surgery.",
+          "source": "https://www.nccih.nih.gov/health/ashwagandha"
+        },
+        {
+          "nutrient": "iron",
+          "action": "check_level",
+          "why": "If you have iron-deficiency anaemia, guidelines advise iron tablets before and after surgery.",
+          "source": "https://www.nice.org.uk/guidance/ng24/chapter/Reducing-requirement-for-blood-transfusion-for-people-having-surgery"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Bring all your supplement bottles to your pre-surgery check",
+          "why": "Many people forget to mention supplements. Seeing the bottles helps the team plan safely.",
+          "evidence": "C",
+          "source": "https://madeforthismoment.asahq.org/wp-content/uploads/2020/10/ASA_Supplements-Anesthesia_Updated-1.pdf"
+        },
+        {
+          "title": "Ask what you can eat and drink before the operation",
+          "why": "Guidelines allow clear drinks up to 2 hours and food up to 6 hours before anaesthesia. Always follow your own team's instructions.",
+          "evidence": "A",
+          "source": "https://nottingham-repository.worktribe.com/OutputFile/5760673"
+        },
+        {
+          "title": "Ask if you are at risk of poor nutrition",
+          "why": "People who are poorly nourished may be given nutrition drinks before major surgery.",
+          "evidence": "A",
+          "source": "https://nottingham-repository.worktribe.com/OutputFile/5760673"
+        }
+      ],
+      "doctorQuestions": [
+        "Which of my supplements should I stop, and exactly when?",
+        "Should I keep taking my usual medicines, such as blood thinners, metformin or weight-loss injections, up to surgery?",
+        "Should I have a blood test for anaemia or low iron before surgery?",
+        "When can I restart my supplements afterwards?",
+        "What can I eat and drink before the operation?"
+      ],
+      "sources": [
+        "https://madeforthismoment.asahq.org/wp-content/uploads/2020/10/ASA_Supplements-Anesthesia_Updated-1.pdf",
+        "https://www.nccih.nih.gov/health/garlic",
+        "https://pubmed.ncbi.nlm.nih.gov/11448284/",
+        "https://www.aafp.org/pubs/afp/issues/2002/0501/p1927.html",
+        "https://accurateclinic.com/wp-content/uploads/2025/12/Handout-Nutraceuticals-for-Peri-Operative-Period-.pdf",
+        "https://pubmed.ncbi.nlm.nih.gov/30571332/",
+        "https://www.nccih.nih.gov/health/ashwagandha",
+        "https://www.nice.org.uk/guidance/ng24/chapter/Reducing-requirement-for-blood-transfusion-for-people-having-surgery",
+        "https://nottingham-repository.worktribe.com/OutputFile/5760673",
+        "https://pubmed.ncbi.nlm.nih.gov/33741131/",
+        "https://pubmed.ncbi.nlm.nih.gov/23128104/",
+        "https://pubmed.ncbi.nlm.nih.gov/21923430/",
+        "https://asahq.org/about-asa/newsroom/news-releases/2024/10/new-multi-society-glp-1-guidance",
+        "https://medlineplus.gov/druginfo/meds/a696005.html",
+        "https://www.honorhealth.com/sites/default/files/2023-07/vitamins-supplements-and-anesthesia.pdf",
+        "https://www.uchicagomedicine.org/forefront/news/new-recommendations-proposed-for-safe-use-of-herbal-medications-by-patients-having-surgery"
+      ]
+    },
+    {
+      "id": "recent_surgery",
+      "name": "Recent surgery (recovering)",
+      "intakeQuestion": "Have you had an operation in the last few weeks? What kind, and are you still healing?",
+      "flags": [
+        {
+          "nutrient": "protein",
+          "action": "may_need_more",
+          "why": "Not eating enough after major surgery raises the risk of problems. Ask your team how much food and protein you need.",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/34242915/"
+        },
+        {
+          "nutrient": "vitamin_c",
+          "action": "check_level",
+          "why": "High-dose vitamin C did not speed up healing of pressure sores in a trial.",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/8543959/"
+        },
+        {
+          "nutrient": "zinc",
+          "action": "check_level",
+          "why": "Low zinc can slow wound healing in older adults. Taking 50 mg or more a day for weeks can lower copper.",
+          "source": "https://ods.od.nih.gov/factsheets/Zinc-HealthProfessional/"
+        },
+        {
+          "nutrient": "iron",
+          "action": "check_level",
+          "why": "If you have iron-deficiency anaemia, guidelines advise iron after surgery too.",
+          "source": "https://www.nice.org.uk/guidance/ng24/chapter/Reducing-requirement-for-blood-transfusion-for-people-having-surgery"
+        },
+        {
+          "nutrient": "collagen",
+          "action": "caution",
+          "why": "One small trial found collagen helped pressure sores shrink. This evidence is from pressure sores, not surgical wounds.",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/38345088/"
+        },
+        {
+          "nutrient": "garlic, ginkgo, ginseng and high-dose vitamin E",
+          "action": "doctor_first",
+          "why": "These can increase bleeding. Ask before restarting while wounds heal.",
+          "source": "https://madeforthismoment.asahq.org/wp-content/uploads/2020/10/ASA_Supplements-Anesthesia_Updated-1.pdf"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Eat and drink as soon as your team allows",
+          "why": "Starting to eat within hours of most operations is advised.",
+          "evidence": "A",
+          "source": "https://nottingham-repository.worktribe.com/OutputFile/5760673"
+        },
+        {
+          "title": "Get up and move as early as your team advises",
+          "why": "Early movement helps the body use protein and keeps muscles working.",
+          "evidence": "C",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/34242915/"
+        },
+        {
+          "title": "Learn the signs of a blood clot",
+          "why": "Pain and swelling in one leg needs an urgent check. Chest pain or breathlessness needs emergency help.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/conditions/deep-vein-thrombosis-dvt/"
+        }
+      ],
+      "doctorQuestions": [
+        "Which supplements can I restart, and when?",
+        "Should I take extra protein or a nutrition drink while I recover?",
+        "Do I need a blood test for iron or anaemia?",
+        "What warning signs in my wound or legs should I watch for?"
+      ],
+      "sources": [
+        "https://pubmed.ncbi.nlm.nih.gov/34242915/",
+        "https://pubmed.ncbi.nlm.nih.gov/8543959/",
+        "https://ods.od.nih.gov/factsheets/Zinc-HealthProfessional/",
+        "https://www.nice.org.uk/guidance/ng24/chapter/Reducing-requirement-for-blood-transfusion-for-people-having-surgery",
+        "https://pubmed.ncbi.nlm.nih.gov/38345088/",
+        "https://madeforthismoment.asahq.org/wp-content/uploads/2020/10/ASA_Supplements-Anesthesia_Updated-1.pdf",
+        "https://nottingham-repository.worktribe.com/OutputFile/5760673",
+        "https://www.nhs.uk/conditions/deep-vein-thrombosis-dvt/"
+      ]
+    },
+    {
+      "id": "thyroid_disease",
+      "name": "Thyroid condition",
+      "intakeQuestion": "Do you have a thyroid condition, such as an underactive or overactive thyroid, Hashimoto's or Graves' disease? Do you take thyroid tablets such as levothyroxine?",
+      "flags": [
+        {
+          "nutrient": "calcium",
+          "action": "caution",
+          "why": "Calcium can block levothyroxine. Take them at least 4 hours apart.",
+          "source": "https://ods.od.nih.gov/factsheets/Calcium-HealthProfessional/"
+        },
+        {
+          "nutrient": "iron",
+          "action": "caution",
+          "why": "Iron can block levothyroxine. Take them at least 4 hours apart.",
+          "source": "https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/"
+        },
+        {
+          "nutrient": "vitamin_b7",
+          "action": "caution",
+          "why": "High-dose biotin can make thyroid blood tests look falsely high or low. Tell your doctor before a test.",
+          "source": "https://www.nice.org.uk/guidance/ng145/chapter/Recommendations"
+        },
+        {
+          "nutrient": "iodine",
+          "action": "doctor_first",
+          "why": "People with autoimmune thyroid disease may get side effects even at iodine amounts that are safe for others. Seaweed products vary a lot in iodine.",
+          "source": "https://ods.od.nih.gov/factsheets/Iodine-HealthProfessional/"
+        },
+        {
+          "nutrient": "selenium",
+          "action": "caution",
+          "why": "Trial results in autoimmune thyroid disease are mixed. Do not go above 400 mcg a day.",
+          "source": "https://ods.od.nih.gov/factsheets/Selenium-HealthProfessional/"
+        },
+        {
+          "nutrient": "ashwagandha",
+          "action": "avoid",
+          "why": "Experts do not recommend it for people with thyroid disorders, and it might interact with thyroid hormone medicine.",
+          "source": "https://www.nccih.nih.gov/health/ashwagandha"
+        },
+        {
+          "nutrient": "St John's wort",
+          "action": "doctor_first",
+          "why": "Listed as not mixing well with levothyroxine.",
+          "source": "https://www.nhs.uk/medicines/levothyroxine/"
+        },
+        {
+          "nutrient": "chromium",
+          "action": "caution",
+          "why": "A small study found it reduced levothyroxine absorption. Ask a pharmacist how to space them.",
+          "source": "https://ods.od.nih.gov/factsheets/Chromium-HealthProfessional/"
+        },
+        {
+          "nutrient": "fiber",
+          "action": "caution",
+          "why": "Foods with soy, walnuts and dietary fibre may affect how levothyroxine works. Keep your routine the same each day.",
+          "source": "https://medlineplus.gov/druginfo/meds/a682461.html"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Take levothyroxine on an empty stomach, 30 to 60 minutes before breakfast, coffee or other medicines",
+          "why": "Some foods can affect how it works.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/medicines/levothyroxine/"
+        },
+        {
+          "title": "Keep calcium and iron supplements at least 4 hours away from levothyroxine",
+          "why": "These minerals can stop the tablet being absorbed.",
+          "evidence": "C",
+          "source": "https://medlineplus.gov/druginfo/meds/a682461.html"
+        }
+      ],
+      "doctorQuestions": [
+        "Is my levothyroxine dose right, and when should my thyroid be rechecked?",
+        "Should I pause biotin before my next thyroid blood test?",
+        "Are iodine, selenium or herbal products safe for my thyroid condition?",
+        "How should I time my other supplements around my thyroid tablet?"
+      ],
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/Calcium-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/",
+        "https://www.nice.org.uk/guidance/ng145/chapter/Recommendations",
+        "https://ods.od.nih.gov/factsheets/Iodine-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/Selenium-HealthProfessional/",
+        "https://www.nccih.nih.gov/health/ashwagandha",
+        "https://www.nhs.uk/medicines/levothyroxine/",
+        "https://ods.od.nih.gov/factsheets/Chromium-HealthProfessional/",
+        "https://medlineplus.gov/druginfo/meds/a682461.html",
+        "https://ods.od.nih.gov/factsheets/Biotin-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/Ashwagandha-HealthProfessional/"
+      ]
+    },
+    {
+      "id": "hemochromatosis",
+      "name": "Haemochromatosis (iron overload)",
+      "intakeQuestion": "Have you been told you have haemochromatosis or too much iron in your body?",
+      "flags": [
+        {
+          "nutrient": "iron",
+          "action": "avoid",
+          "why": "Do not take iron supplements; they may be harmful when iron is already high.",
+          "source": "https://www.nhs.uk/conditions/haemochromatosis/treatment/"
+        },
+        {
+          "nutrient": "vitamin_c",
+          "action": "avoid",
+          "why": "High doses of vitamin C could make iron overload worse.",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminC-HealthProfessional/"
+        },
+        {
+          "nutrient": "multivitamins with iron or vitamin C",
+          "action": "avoid",
+          "why": "Treatment includes avoiding iron and vitamin C supplements, so check multivitamin labels.",
+          "source": "https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/"
+        },
+        {
+          "nutrient": "iron-fortified breakfast cereals",
+          "action": "avoid",
+          "why": "Avoid cereals with added iron.",
+          "source": "https://www.nhs.uk/conditions/haemochromatosis/treatment/"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Keep alcohol low",
+          "why": "Alcohol can increase iron in the body and strain the liver.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/conditions/haemochromatosis/treatment/"
+        },
+        {
+          "title": "Do not eat raw oysters or clams",
+          "why": "They can carry bacteria that cause serious infections in people with high iron.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/conditions/haemochromatosis/treatment/"
+        }
+      ],
+      "doctorQuestions": [
+        "How often do I need venesection (blood removal), and what are my iron targets?",
+        "Is my liver healthy?",
+        "Which supplements and multivitamins are safe for me?"
+      ],
+      "sources": [
+        "https://www.nhs.uk/conditions/haemochromatosis/treatment/",
+        "https://ods.od.nih.gov/factsheets/VitaminC-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/"
+      ]
+    },
+    {
+      "id": "iron_deficiency",
+      "name": "Low iron or iron-deficiency anaemia",
+      "intakeQuestion": "Have you been told your iron is low or that you have iron-deficiency anaemia? Are you taking iron tablets?",
+      "flags": [
+        {
+          "nutrient": "iron",
+          "action": "check_level",
+          "why": "Take iron tablets as your doctor advises, usually for about 6 months, with repeat blood tests to check progress.",
+          "source": "https://www.nhs.uk/conditions/iron-deficiency-anaemia/"
+        },
+        {
+          "nutrient": "iron",
+          "action": "caution",
+          "why": "In a small trial in women with low iron, one morning dose on alternate days was absorbed better than daily or split doses. Ask your doctor before changing how you take it.",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/29032957/"
+        },
+        {
+          "nutrient": "calcium",
+          "action": "caution",
+          "why": "Calcium may get in the way of iron absorption. Take calcium and iron supplements at different times.",
+          "source": "https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/"
+        },
+        {
+          "nutrient": "zinc",
+          "action": "caution",
+          "why": "High zinc doses over weeks can lower copper. Stay within 40 mg a day.",
+          "source": "https://ods.od.nih.gov/factsheets/Zinc-HealthProfessional/"
+        },
+        {
+          "nutrient": "manganese",
+          "action": "caution",
+          "why": "Low iron increases manganese absorption and can make manganese toxicity worse.",
+          "source": "https://ods.od.nih.gov/factsheets/Manganese-HealthProfessional/"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Take iron with or soon after food if it upsets your stomach",
+          "why": "This can reduce side effects such as feeling sick and constipation.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/conditions/iron-deficiency-anaemia/"
+        },
+        {
+          "title": "Drink a glass of orange juice after your iron tablet",
+          "why": "This may help your body absorb the iron.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/conditions/iron-deficiency-anaemia/"
+        },
+        {
+          "title": "Avoid tea, coffee and milk around the time you take iron",
+          "why": "These can stop your body absorbing iron.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/conditions/iron-deficiency-anaemia/"
+        },
+        {
+          "title": "Eat iron-rich foods such as meat, beans, lentils, dark green vegetables and fortified cereals",
+          "why": "Your GP may advise more iron-rich foods if diet is part of the cause.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/conditions/iron-deficiency-anaemia/"
+        }
+      ],
+      "doctorQuestions": [
+        "What is causing my low iron, and do I need more tests?",
+        "How long should I take iron, and when will you recheck my blood?",
+        "Should I take iron every day or every other day?",
+        "What should I do if the tablets upset my stomach?"
+      ],
+      "sources": [
+        "https://www.nhs.uk/conditions/iron-deficiency-anaemia/",
+        "https://pubmed.ncbi.nlm.nih.gov/29032957/",
+        "https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/Zinc-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/Manganese-HealthProfessional/",
+        "https://www.nice.org.uk/guidance/ng88/chapter/Recommendations"
+      ]
+    },
+    {
+      "id": "b12_deficiency",
+      "name": "Low vitamin B12",
+      "intakeQuestion": "Have you been told your vitamin B12 is low, or do you have B12 injections or tablets?",
+      "flags": [
+        {
+          "nutrient": "vitamin_b12",
+          "action": "check_level",
+          "why": "Follow your doctor's plan. Some people need injections for life, others tablets, depending on the cause.",
+          "source": "https://www.nhs.uk/conditions/vitamin-b12-or-folate-deficiency-anaemia/treatment/"
+        },
+        {
+          "nutrient": "vitamin_b9",
+          "action": "caution",
+          "why": "Large amounts of folic acid can correct the anaemia of B12 deficiency but not the nerve damage, so the problem can be missed. Stay within 1,000 mcg a day unless your doctor advises more.",
+          "source": "https://ods.od.nih.gov/factsheets/Folate-HealthProfessional/"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Eat B12 foods or fortified foods if your diet is low in animal foods",
+          "why": "Fortified cereals, yeast extracts and soy products can help.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/conditions/vitamin-b12-or-folate-deficiency-anaemia/treatment/"
+        }
+      ],
+      "doctorQuestions": [
+        "What is causing my low B12?",
+        "Do I need injections or tablets, and for how long?",
+        "Could any of my medicines, such as metformin or stomach acid tablets, be a cause?"
+      ],
+      "sources": [
+        "https://www.nhs.uk/conditions/vitamin-b12-or-folate-deficiency-anaemia/treatment/",
+        "https://ods.od.nih.gov/factsheets/Folate-HealthProfessional/",
+        "https://www.nice.org.uk/guidance/ng239/chapter/Recommendations",
+        "https://ods.od.nih.gov/factsheets/VitaminB12-HealthProfessional/"
+      ]
+    },
+    {
+      "id": "low_vitamin_d",
+      "name": "Low vitamin D",
+      "intakeQuestion": "Have you been told your vitamin D is low, or are you rarely outdoors in daylight?",
+      "flags": [
+        {
+          "nutrient": "vitamin_d",
+          "action": "may_need_more",
+          "why": "Adults need 10 mcg (400 IU) a day. Take it all year if you are rarely outdoors, live in a care home or cover most of your skin; consider it all year if you have dark skin.",
+          "source": "https://www.nhs.uk/conditions/vitamins-and-minerals/vitamin-d/"
+        },
+        {
+          "nutrient": "vitamin_d",
+          "action": "caution",
+          "why": "Do not take more than 100 mcg (4,000 IU) a day unless your doctor advises it. Too much over a long time can raise calcium and damage the kidneys and heart.",
+          "source": "https://www.nhs.uk/conditions/vitamins-and-minerals/vitamin-d/"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Get some daylight on your skin from late March to September",
+          "why": "Most people make enough vitamin D from summer sun.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/conditions/vitamins-and-minerals/vitamin-d/"
+        }
+      ],
+      "doctorQuestions": [
+        "What dose of vitamin D do I need, and for how long?",
+        "Do I need a repeat blood test?",
+        "Are any of my medicines affecting my vitamin D?"
+      ],
+      "sources": [
+        "https://www.nhs.uk/conditions/vitamins-and-minerals/vitamin-d/",
+        "https://ods.od.nih.gov/factsheets/VitaminD-HealthProfessional/"
+      ]
+    },
+    {
+      "id": "osteoporosis",
+      "name": "Osteoporosis or weak bones",
+      "intakeQuestion": "Have you been told you have osteoporosis or thin bones, or had a broken bone from a minor fall?",
+      "flags": [
+        {
+          "nutrient": "calcium",
+          "action": "caution",
+          "why": "Calcium supplements are absorbed best in doses of 500 mg or less. Bone tablets like alendronic acid must be taken apart from calcium.",
+          "source": "https://ods.od.nih.gov/factsheets/Calcium-HealthProfessional/"
+        },
+        {
+          "nutrient": "vitamin_d",
+          "action": "may_need_more",
+          "why": "Consider 10 mcg (400 IU) a day. Your doctor may advise more if you are low.",
+          "source": "https://www.nhs.uk/conditions/osteoporosis/prevention/"
+        },
+        {
+          "nutrient": "vitamin_a",
+          "action": "caution",
+          "why": "More than 1,500 mcg vitamin A a day over many years may make bones more likely to break.",
+          "source": "https://www.nhs.uk/conditions/vitamins-and-minerals/vitamin-a/"
+        },
+        {
+          "nutrient": "magnesium",
+          "action": "caution",
+          "why": "Magnesium supplements or antacids can stop bone tablets such as alendronate being absorbed. Take them at least 2 hours apart.",
+          "source": "https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Do weight-bearing and strength exercise",
+          "why": "These help bone strength. Check with your doctor first if you have osteoporosis.",
+          "evidence": "B",
+          "source": "https://www.nhs.uk/conditions/osteoporosis/prevention/"
+        },
+        {
+          "title": "Do strength and balance exercises to prevent falls",
+          "why": "US experts recommend exercise to prevent falls in adults 65 and over at higher risk.",
+          "evidence": "B",
+          "source": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/falls-prevention-community-dwelling-older-adults-interventions"
+        }
+      ],
+      "doctorQuestions": [
+        "Do I need bone medicine, and how should I take it?",
+        "Should I take calcium or vitamin D, and how much?",
+        "Is my exercise plan safe for my bones?"
+      ],
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/Calcium-HealthProfessional/",
+        "https://www.nhs.uk/conditions/osteoporosis/prevention/",
+        "https://www.nhs.uk/conditions/vitamins-and-minerals/vitamin-a/",
+        "https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/",
+        "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/falls-prevention-community-dwelling-older-adults-interventions",
+        "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/vitamin-d-calcium-or-combined-supplementation-for-the-primary-prevention-of-fractures-in-adults-preventive-medication"
+      ]
+    },
+    {
+      "id": "vegan_vegetarian",
+      "name": "Vegan or vegetarian diet",
+      "intakeQuestion": "Do you follow a vegan or vegetarian diet, or eat little or no meat, fish, eggs or dairy?",
+      "flags": [
+        {
+          "nutrient": "vitamin_b12",
+          "action": "may_need_more",
+          "why": "B12 comes naturally only from animal foods. Vegans need fortified foods or a supplement.",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminB12-HealthProfessional/"
+        },
+        {
+          "nutrient": "iodine",
+          "action": "may_need_more",
+          "why": "Vegans may not get enough iodine. Use fortified foods or a supplement, but avoid kelp and seaweed products.",
+          "source": "https://ods.od.nih.gov/factsheets/Iodine-HealthProfessional/"
+        },
+        {
+          "nutrient": "iron",
+          "action": "check_level",
+          "why": "People on vegetarian diets need about 1.8 times more iron.",
+          "source": "https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/"
+        },
+        {
+          "nutrient": "zinc",
+          "action": "may_need_more",
+          "why": "Plant foods contain phytates that reduce zinc absorption.",
+          "source": "https://ods.od.nih.gov/factsheets/Zinc-HealthProfessional/"
+        },
+        {
+          "nutrient": "calcium",
+          "action": "may_need_more",
+          "why": "Use calcium-fortified dairy alternatives or other good plant sources.",
+          "source": "https://www.nhs.uk/live-well/eat-well/how-to-eat-a-balanced-diet/the-vegan-diet/"
+        },
+        {
+          "nutrient": "vitamin_d",
+          "action": "may_need_more",
+          "why": "Consider a daily vitamin D supplement, at least in autumn and winter.",
+          "source": "https://www.nhs.uk/live-well/eat-well/how-to-eat-a-balanced-diet/the-vegan-diet/"
+        },
+        {
+          "nutrient": "selenium",
+          "action": "may_need_more",
+          "why": "Selenium can be harder to get on a vegan diet.",
+          "source": "https://www.nhs.uk/live-well/eat-well/how-to-eat-a-balanced-diet/the-vegan-diet/"
+        },
+        {
+          "nutrient": "vitamin_b2",
+          "action": "may_need_more",
+          "why": "Vegans who consume little milk may be low in riboflavin.",
+          "source": "https://ods.od.nih.gov/factsheets/Riboflavin-HealthProfessional/"
+        },
+        {
+          "nutrient": "omega_3",
+          "action": "may_need_more",
+          "why": "Eat omega-3 rich nuts and seeds, such as walnuts, every day.",
+          "source": "https://www.nhs.uk/live-well/eat-well/how-to-eat-a-balanced-diet/the-vegan-diet/"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Plan meals with fortified dairy alternatives, beans, pulses, nuts and seeds",
+          "why": "With good planning, a vegan diet can give the nutrients you need.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/live-well/eat-well/how-to-eat-a-balanced-diet/the-vegan-diet/"
+        },
+        {
+          "title": "Eat vitamin C foods with plant iron sources",
+          "why": "Vitamin C helps the body absorb iron from plant foods.",
+          "evidence": "C",
+          "source": "https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/"
+        }
+      ],
+      "doctorQuestions": [
+        "Should my B12, iron or vitamin D be checked?",
+        "Which fortified foods or supplements do I need?",
+        "If I am pregnant or breastfeeding, what extra does my baby need?"
+      ],
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/VitaminB12-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/Iodine-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/Zinc-HealthProfessional/",
+        "https://www.nhs.uk/live-well/eat-well/how-to-eat-a-balanced-diet/the-vegan-diet/",
+        "https://ods.od.nih.gov/factsheets/Riboflavin-HealthProfessional/",
+        "https://www.nice.org.uk/guidance/ng239/chapter/Recommendations"
+      ]
+    },
+    {
+      "id": "age_65_plus",
+      "name": "Aged 65 or over",
+      "intakeQuestion": "Are you aged 65 or over?",
+      "flags": [
+        {
+          "nutrient": "vitamin_b12",
+          "action": "check_level",
+          "why": "About 8 to 9% of adults aged 65 and over have a stomach condition that lowers B12 absorption. Ask about a B12 test, especially if you take metformin or stomach acid tablets.",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminB12-HealthProfessional/"
+        },
+        {
+          "nutrient": "vitamin_d",
+          "action": "may_need_more",
+          "why": "Consider 10 mcg (400 IU) a day in autumn and winter, or all year if you are frail, housebound or rarely outdoors.",
+          "source": "https://www.nhs.uk/conditions/vitamins-and-minerals/vitamin-d/"
+        },
+        {
+          "nutrient": "vitamin_d",
+          "action": "caution",
+          "why": "In a large trial, vitamin D did not lower fractures in healthy older adults who were not low.",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/35939577/"
+        },
+        {
+          "nutrient": "calcium",
+          "action": "caution",
+          "why": "US experts advise against low-dose calcium with vitamin D to prevent fractures in women after menopause who live at home.",
+          "source": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/vitamin-d-calcium-or-combined-supplementation-for-the-primary-prevention-of-fractures-in-adults-preventive-medication"
+        },
+        {
+          "nutrient": "vitamin_a",
+          "action": "caution",
+          "why": "Over many years, more than 1,500 mcg a day of vitamin A may make bones more likely to break. Check multivitamins and fish liver oils.",
+          "source": "https://www.nhs.uk/conditions/vitamins-and-minerals/vitamin-a/"
+        },
+        {
+          "nutrient": "protein",
+          "action": "may_need_more",
+          "why": "Older adults need more protein than younger adults, about 1.0 to 1.2 g per kg of body weight a day, unless they have severe kidney disease.",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/23867520/"
+        },
+        {
+          "nutrient": "magnesium",
+          "action": "caution",
+          "why": "Older adults are more likely to be low, but the risk of too much magnesium rises if kidneys are weak.",
+          "source": "https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/"
+        },
+        {
+          "nutrient": "potassium salt substitutes",
+          "action": "avoid",
+          "why": "Salt substitutes with potassium are not advised for older people.",
+          "source": "https://www.nice.org.uk/guidance/ng136/chapter/Recommendations"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Do strength, balance and flexibility exercises at least 2 days a week",
+          "why": "US experts recommend exercise to prevent falls in adults 65 and over at higher risk of falling.",
+          "evidence": "B",
+          "source": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/falls-prevention-community-dwelling-older-adults-interventions"
+        },
+        {
+          "title": "Aim for 150 minutes of moderate activity a week and be active every day",
+          "why": "This is the national advice for adults aged 65 and over.",
+          "evidence": "B",
+          "source": "https://www.nhs.uk/live-well/exercise/physical-activity-guidelines-older-adults/"
+        },
+        {
+          "title": "Eat enough protein and stay active together",
+          "why": "Experts advise both to help older people keep muscle and function.",
+          "evidence": "C",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/23867520/"
+        }
+      ],
+      "doctorQuestions": [
+        "Should my B12, vitamin D or kidney function be checked?",
+        "Are all my medicines and supplements still needed and safe together?",
+        "Am I at risk of falls or weak bones, and would a bone scan help?"
+      ],
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/VitaminB12-HealthProfessional/",
+        "https://www.nhs.uk/conditions/vitamins-and-minerals/vitamin-d/",
+        "https://pubmed.ncbi.nlm.nih.gov/35939577/",
+        "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/vitamin-d-calcium-or-combined-supplementation-for-the-primary-prevention-of-fractures-in-adults-preventive-medication",
+        "https://www.nhs.uk/conditions/vitamins-and-minerals/vitamin-a/",
+        "https://pubmed.ncbi.nlm.nih.gov/23867520/",
+        "https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/",
+        "https://www.nice.org.uk/guidance/ng136/chapter/Recommendations",
+        "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/falls-prevention-community-dwelling-older-adults-interventions",
+        "https://www.nhs.uk/live-well/exercise/physical-activity-guidelines-older-adults/",
+        "https://ods.od.nih.gov/factsheets/VitaminD-HealthProfessional/"
+      ]
+    },
+    {
+      "id": "smoker",
+      "name": "Smoking",
+      "intakeQuestion": "Do you smoke or use tobacco?",
+      "flags": [
+        {
+          "nutrient": "beta-carotene supplements",
+          "action": "avoid",
+          "why": "In two large trials, beta-carotene supplements increased lung cancer risk in smokers.",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminA-HealthProfessional/"
+        },
+        {
+          "nutrient": "vitamin_c",
+          "action": "may_need_more",
+          "why": "Smokers need 35 mg more vitamin C a day. Food is the best source.",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminC-HealthProfessional/"
+        },
+        {
+          "nutrient": "vitamin_e",
+          "action": "caution",
+          "why": "In a trial of male smokers, vitamin E was linked to more bleeding strokes.",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminE-HealthProfessional/"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Get support to stop smoking",
+          "why": "Free stop smoking services and tools can help you quit.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/better-health/quit-smoking/"
+        }
+      ],
+      "doctorQuestions": [
+        "What stop-smoking support or medicine could help me?",
+        "Should my lungs or heart be checked?"
+      ],
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/VitaminA-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/VitaminC-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/VitaminE-HealthProfessional/",
+        "https://www.nhs.uk/better-health/quit-smoking/"
+      ]
+    },
+    {
+      "id": "gout",
+      "name": "Gout",
+      "intakeQuestion": "Have you had gout, or been told your uric acid is high?",
+      "flags": [
+        {
+          "nutrient": "vitamin_b3",
+          "action": "avoid",
+          "why": "Doctors stop high-dose niacin if acute gout develops.",
+          "source": "https://ods.od.nih.gov/factsheets/Niacin-HealthProfessional/"
+        },
+        {
+          "nutrient": "diets or supplements sold for gout",
+          "action": "caution",
+          "why": "UK guidance says there is not enough evidence that any specific diet prevents gout flares or lowers uric acid.",
+          "source": "https://www.nice.org.uk/guidance/ng219/chapter/Recommendations"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Keep to a healthy weight and avoid heavy drinking",
+          "why": "Excess weight and alcohol may make gout flares worse.",
+          "evidence": "C",
+          "source": "https://www.nice.org.uk/guidance/ng219/chapter/Recommendations"
+        },
+        {
+          "title": "Drink enough fluids",
+          "why": "Being dehydrated can trigger a gout attack.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/conditions/gout/"
+        }
+      ],
+      "doctorQuestions": [
+        "Do I need medicine to lower my uric acid?",
+        "Are any of my medicines making gout worse?"
+      ],
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/Niacin-HealthProfessional/",
+        "https://www.nice.org.uk/guidance/ng219/chapter/Recommendations",
+        "https://www.nhs.uk/conditions/gout/"
+      ]
+    },
+    {
+      "id": "inflammatory_bowel_disease",
+      "name": "Inflammatory bowel disease (Crohn's disease or ulcerative colitis)",
+      "intakeQuestion": "Do you have Crohn's disease or ulcerative colitis?",
+      "flags": [
+        {
+          "nutrient": "vitamin_b12",
+          "action": "check_level",
+          "why": "Some bowel operations, such as removing the end of the small bowel, are a common risk factor for low B12.",
+          "source": "https://www.nice.org.uk/guidance/ng239/chapter/Recommendations"
+        },
+        {
+          "nutrient": "vitamin_d",
+          "action": "check_level",
+          "why": "Crohn's disease and ulcerative colitis can reduce vitamin D absorption.",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminD-HealthProfessional/"
+        },
+        {
+          "nutrient": "iron",
+          "action": "check_level",
+          "why": "Conditions such as ulcerative colitis can reduce iron absorption.",
+          "source": "https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/"
+        },
+        {
+          "nutrient": "zinc",
+          "action": "check_level",
+          "why": "15 to 40% of people with inflammatory bowel disease have low zinc.",
+          "source": "https://ods.od.nih.gov/factsheets/Zinc-HealthProfessional/"
+        },
+        {
+          "nutrient": "magnesium",
+          "action": "check_level",
+          "why": "Crohn's disease and bowel surgery can lower magnesium.",
+          "source": "https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/"
+        },
+        {
+          "nutrient": "probiotics",
+          "action": "doctor_first",
+          "why": "Probiotics can rarely cause serious infections in people with weak immune systems, for example on strong immune-suppressing medicines.",
+          "source": "https://ods.od.nih.gov/factsheets/Probiotics-HealthProfessional/"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Ask for diet and nutrition advice",
+          "why": "UK guidance says people with Crohn's disease should be given information on diet and nutrition.",
+          "evidence": "C",
+          "source": "https://www.nice.org.uk/guidance/ng129/chapter/Recommendations"
+        }
+      ],
+      "doctorQuestions": [
+        "Should my iron, B12, vitamin D and zinc be checked?",
+        "Are supplements safe with my immune-suppressing medicines?",
+        "Do I need a dietitian?"
+      ],
+      "sources": [
+        "https://www.nice.org.uk/guidance/ng239/chapter/Recommendations",
+        "https://ods.od.nih.gov/factsheets/VitaminD-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/Zinc-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/Probiotics-HealthProfessional/",
+        "https://www.nice.org.uk/guidance/ng129/chapter/Recommendations"
+      ]
+    },
+    {
+      "id": "coeliac",
+      "name": "Coeliac disease",
+      "intakeQuestion": "Do you have coeliac disease?",
+      "flags": [
+        {
+          "nutrient": "iron",
+          "action": "check_level",
+          "why": "Coeliac disease can cause low iron. A GP or dietitian may advise supplements if needed.",
+          "source": "https://www.nhs.uk/conditions/coeliac-disease/treatment/"
+        },
+        {
+          "nutrient": "vitamin_b12",
+          "action": "check_level",
+          "why": "Coeliac disease is a common risk factor for low B12.",
+          "source": "https://www.nice.org.uk/guidance/ng239/chapter/Recommendations"
+        },
+        {
+          "nutrient": "vitamin_b9",
+          "action": "check_level",
+          "why": "Coeliac disease can cause low folate.",
+          "source": "https://www.nice.org.uk/guidance/ng20/chapter/Recommendations"
+        },
+        {
+          "nutrient": "vitamin_d",
+          "action": "check_level",
+          "why": "Coeliac disease can reduce vitamin D absorption.",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminD-HealthProfessional/"
+        },
+        {
+          "nutrient": "calcium",
+          "action": "check_level",
+          "why": "Coeliac disease can be linked to weak bones; your doctor may check whether you need a bone scan.",
+          "source": "https://www.nice.org.uk/guidance/ng20/chapter/Recommendations"
+        },
+        {
+          "nutrient": "copper",
+          "action": "check_level",
+          "why": "In one study, 15% of people with coeliac disease had low copper.",
+          "source": "https://ods.od.nih.gov/factsheets/Copper-HealthProfessional/"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Follow a strict gluten-free diet, with help from a dietitian",
+          "why": "This is the main treatment. Symptoms usually improve within weeks.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/conditions/coeliac-disease/treatment/"
+        }
+      ],
+      "doctorQuestions": [
+        "Do I need blood tests for iron, B12, folate or vitamin D?",
+        "Do I need a bone density scan?",
+        "Can I see a dietitian?"
+      ],
+      "sources": [
+        "https://www.nhs.uk/conditions/coeliac-disease/treatment/",
+        "https://www.nice.org.uk/guidance/ng239/chapter/Recommendations",
+        "https://www.nice.org.uk/guidance/ng20/chapter/Recommendations",
+        "https://ods.od.nih.gov/factsheets/VitaminD-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/Copper-HealthProfessional/"
+      ]
+    },
+    {
+      "id": "bariatric_surgery",
+      "name": "Weight-loss surgery",
+      "intakeQuestion": "Have you had weight-loss surgery, such as a gastric bypass or sleeve gastrectomy?",
+      "flags": [
+        {
+          "nutrient": "vitamin_b12",
+          "action": "check_level",
+          "why": "Many weight-loss operations reduce B12 absorption.",
+          "source": "https://www.nice.org.uk/guidance/ng239/chapter/Recommendations"
+        },
+        {
+          "nutrient": "vitamin_b1",
+          "action": "check_level",
+          "why": "Severe thiamin deficiency can happen after weight-loss surgery and can damage the brain and nerves.",
+          "source": "https://ods.od.nih.gov/factsheets/Thiamin-HealthProfessional/"
+        },
+        {
+          "nutrient": "vitamin_d",
+          "action": "check_level",
+          "why": "Gastric bypass reduces vitamin D absorption.",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminD-HealthProfessional/"
+        },
+        {
+          "nutrient": "iron",
+          "action": "check_level",
+          "why": "After weight-loss surgery, nutrition needs special attention from your care team.",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/32202076/"
+        },
+        {
+          "nutrient": "zinc",
+          "action": "check_level",
+          "why": "Zinc can be poorly absorbed, or lost in urine, after weight-loss surgery.",
+          "source": "https://ods.od.nih.gov/factsheets/Zinc-HealthProfessional/"
+        },
+        {
+          "nutrient": "vitamin_b9",
+          "action": "doctor_first",
+          "why": "If you are planning a pregnancy, ask your surgery team for advice on folic acid and other nutrients.",
+          "source": "https://www.nice.org.uk/guidance/ng247/chapter/Recommendations"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Take the supplements your surgery team prescribes, and keep up follow-up checks",
+          "why": "Guidelines stress special attention to nutrition after weight-loss surgery.",
+          "evidence": "C",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/32202076/"
+        }
+      ],
+      "doctorQuestions": [
+        "Which supplements do I need for life, and at what doses?",
+        "How often should my blood levels be checked?",
+        "What signs of low vitamins should I watch for?"
+      ],
+      "sources": [
+        "https://www.nice.org.uk/guidance/ng239/chapter/Recommendations",
+        "https://ods.od.nih.gov/factsheets/Thiamin-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/VitaminD-HealthProfessional/",
+        "https://pubmed.ncbi.nlm.nih.gov/32202076/",
+        "https://ods.od.nih.gov/factsheets/Zinc-HealthProfessional/",
+        "https://www.nice.org.uk/guidance/ng247/chapter/Recommendations"
+      ]
+    },
+    {
+      "id": "cancer_treatment",
+      "name": "Having cancer treatment",
+      "intakeQuestion": "Are you having treatment for cancer now, such as chemotherapy, radiotherapy, hormone therapy or targeted drugs?",
+      "flags": [
+        {
+          "nutrient": "vitamin_c",
+          "action": "doctor_first",
+          "why": "Ask your cancer team before taking vitamin C or other antioxidants, especially in high doses, during chemotherapy or radiotherapy.",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminC-HealthProfessional/"
+        },
+        {
+          "nutrient": "vitamin_e",
+          "action": "doctor_first",
+          "why": "Cancer doctors often advise against antioxidant supplements during chemotherapy or radiotherapy, because they might make treatment work less well.",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminE-HealthProfessional/"
+        },
+        {
+          "nutrient": "St John's wort",
+          "action": "avoid",
+          "why": "It can weaken some cancer medicines.",
+          "source": "https://www.nccih.nih.gov/health/st-johns-wort"
+        },
+        {
+          "nutrient": "turmeric",
+          "action": "doctor_first",
+          "why": "Talk to your cancer team first. Curcumin may interact with some chemotherapy medicines.",
+          "source": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/turmeric"
+        },
+        {
+          "nutrient": "vitamin_b9",
+          "action": "doctor_first",
+          "why": "If you take methotrexate for cancer, ask your cancer doctor before taking folic acid, as it could interfere with treatment.",
+          "source": "https://ods.od.nih.gov/factsheets/Folate-HealthProfessional/"
+        },
+        {
+          "nutrient": "coq10",
+          "action": "doctor_first",
+          "why": "CoQ10 may not be compatible with some types of cancer treatment.",
+          "source": "https://www.nccih.nih.gov/health/coenzyme-q10"
+        },
+        {
+          "nutrient": "probiotics",
+          "action": "doctor_first",
+          "why": "In people with weak immune systems, probiotics have rarely caused serious blood infections.",
+          "source": "https://ods.od.nih.gov/factsheets/Probiotics-HealthProfessional/"
+        },
+        {
+          "nutrient": "selenium",
+          "action": "caution",
+          "why": "Cisplatin, a chemotherapy medicine, can lower selenium, but it is not clear whether this matters or whether supplements help.",
+          "source": "https://ods.od.nih.gov/factsheets/Selenium-HealthProfessional/"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Show your cancer team every supplement before you start it",
+          "why": "Some supplements, especially antioxidants, may change how cancer treatments work.",
+          "evidence": "C",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminC-HealthProfessional/"
+        }
+      ],
+      "doctorQuestions": [
+        "Which of my supplements are safe during my treatment?",
+        "Should I stop any supplements before or after each treatment?",
+        "Do I need help from a dietitian to eat enough?"
+      ],
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/VitaminC-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/VitaminE-HealthProfessional/",
+        "https://www.nccih.nih.gov/health/st-johns-wort",
+        "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/turmeric",
+        "https://ods.od.nih.gov/factsheets/Folate-HealthProfessional/",
+        "https://www.nccih.nih.gov/health/coenzyme-q10",
+        "https://ods.od.nih.gov/factsheets/Probiotics-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/Selenium-HealthProfessional/"
+      ]
+    },
+    {
+      "id": "immunocompromised",
+      "name": "Weakened immune system",
+      "intakeQuestion": "Is your immune system weakened by a condition or medicine, for example an organ transplant, chemotherapy, HIV, or strong steroid or immune-suppressing medicines?",
+      "flags": [
+        {
+          "nutrient": "probiotics",
+          "action": "doctor_first",
+          "why": "Probiotics have been linked to serious blood infections, mainly in people who are very ill or have weak immune systems.",
+          "source": "https://ods.od.nih.gov/factsheets/Probiotics-HealthProfessional/"
+        },
+        {
+          "nutrient": "St John's wort",
+          "action": "avoid",
+          "why": "It can weaken ciclosporin, a transplant medicine, and some HIV and cancer medicines.",
+          "source": "https://www.nccih.nih.gov/health/st-johns-wort"
+        },
+        {
+          "nutrient": "berberine",
+          "action": "doctor_first",
+          "why": "In kidney transplant patients it raised blood levels of ciclosporin.",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/16133554/"
+        },
+        {
+          "nutrient": "turmeric",
+          "action": "doctor_first",
+          "why": "Tell your doctor before taking turmeric if you take tacrolimus, a transplant medicine.",
+          "source": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/turmeric"
+        },
+        {
+          "nutrient": "ashwagandha",
+          "action": "doctor_first",
+          "why": "It might interact with medicines that suppress the immune system.",
+          "source": "https://www.nccih.nih.gov/health/ashwagandha"
+        },
+        {
+          "nutrient": "herbal supplements",
+          "action": "doctor_first",
+          "why": "After a kidney transplant, some herb interactions can make anti-rejection medicines work less well.",
+          "source": "https://www.kidney.org/kidney-topics/herbal-supplements-and-kidney-disease"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Bring your supplement bottles, or a photo of the labels, to appointments",
+          "why": "Your care team can look up each ingredient for safety.",
+          "evidence": "C",
+          "source": "https://www.kidney.org/kidney-topics/herbal-supplements-and-kidney-disease"
+        }
+      ],
+      "doctorQuestions": [
+        "Which supplements are safe with my medicines?",
+        "Are probiotics safe for me?",
+        "Do I need any vitamin levels checked?"
+      ],
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/Probiotics-HealthProfessional/",
+        "https://www.nccih.nih.gov/health/st-johns-wort",
+        "https://pubmed.ncbi.nlm.nih.gov/16133554/",
+        "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/turmeric",
+        "https://www.nccih.nih.gov/health/ashwagandha",
+        "https://www.kidney.org/kidney-topics/herbal-supplements-and-kidney-disease"
+      ]
+    },
+    {
+      "id": "epilepsy",
+      "name": "Epilepsy",
+      "intakeQuestion": "Do you have epilepsy or take medicine to prevent seizures?",
+      "flags": [
+        {
+          "nutrient": "vitamin_b9",
+          "action": "doctor_first",
+          "why": "Some seizure medicines lower folate, and folate supplements might lower the medicine level. Check with your doctor before taking it.",
+          "source": "https://ods.od.nih.gov/factsheets/Folate-HealthProfessional/"
+        },
+        {
+          "nutrient": "vitamin_b9",
+          "action": "may_need_more",
+          "why": "If you are planning a pregnancy or in early pregnancy, UK guidelines advise a higher prescribed dose (5 mg a day) for people taking anti-epileptic medicines.",
+          "source": "https://www.nice.org.uk/guidance/ng247/chapter/Recommendations"
+        },
+        {
+          "nutrient": "vitamin_b6",
+          "action": "caution",
+          "why": "High doses (200 mg a day) may lower blood levels of phenytoin and phenobarbital.",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminB6-HealthProfessional/"
+        },
+        {
+          "nutrient": "St John's wort",
+          "action": "avoid",
+          "why": "It can weaken seizure medicines such as phenytoin and carbamazepine.",
+          "source": "https://www.nccih.nih.gov/health/st-johns-wort"
+        },
+        {
+          "nutrient": "ashwagandha",
+          "action": "doctor_first",
+          "why": "It might interact with seizure medicines.",
+          "source": "https://www.nccih.nih.gov/health/ashwagandha"
+        },
+        {
+          "nutrient": "cannabidiol (CBD)",
+          "action": "doctor_first",
+          "why": "CBD is listed as possibly interacting with valproate.",
+          "source": "https://medlineplus.gov/druginfo/meds/a682412.html"
+        },
+        {
+          "nutrient": "antacids with calcium, magnesium or aluminium",
+          "action": "caution",
+          "why": "These are listed as possibly interacting with phenytoin.",
+          "source": "https://medlineplus.gov/druginfo/meds/a682022.html"
+        },
+        {
+          "nutrient": "vitamin_d",
+          "action": "doctor_first",
+          "why": "Vitamin D is listed as possibly interacting with phenytoin. Ask your doctor about the right amount.",
+          "source": "https://medlineplus.gov/druginfo/meds/a682022.html"
+        },
+        {
+          "nutrient": "vitamin_b7",
+          "action": "check_level",
+          "why": "Taking seizure medicine for at least a year is linked to lower biotin levels.",
+          "source": "https://ods.od.nih.gov/factsheets/Biotin-HealthProfessional/"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Take your seizure medicine every day and do not change it without advice",
+          "why": "Missing doses or changing treatment can lead to seizures.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/conditions/epilepsy/"
+        },
+        {
+          "title": "Do not drink too much alcohol",
+          "why": "Too much alcohol can increase the risk of seizures.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/conditions/epilepsy/"
+        }
+      ],
+      "doctorQuestions": [
+        "Are my supplements safe with my seizure medicine?",
+        "Do I need folic acid, and at what dose?",
+        "Should my vitamin D or bone health be checked?"
+      ],
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/Folate-HealthProfessional/",
+        "https://www.nice.org.uk/guidance/ng247/chapter/Recommendations",
+        "https://ods.od.nih.gov/factsheets/VitaminB6-HealthProfessional/",
+        "https://www.nccih.nih.gov/health/st-johns-wort",
+        "https://www.nccih.nih.gov/health/ashwagandha",
+        "https://medlineplus.gov/druginfo/meds/a682412.html",
+        "https://medlineplus.gov/druginfo/meds/a682022.html",
+        "https://ods.od.nih.gov/factsheets/Biotin-HealthProfessional/",
+        "https://www.nhs.uk/conditions/epilepsy/",
+        "https://www.nhs.uk/pregnancy/keeping-well/pregnancy-vitamins-and-supplements/"
+      ]
+    },
+    {
+      "id": "migraine",
+      "name": "Migraine",
+      "intakeQuestion": "Do you get migraines?",
+      "flags": [
+        {
+          "nutrient": "magnesium",
+          "action": "doctor_first",
+          "why": "Magnesium is probably effective for preventing migraines, with modest benefit in trials. Trial doses (up to 600 mg) are above the 350 mg upper limit, so ask your doctor first.",
+          "source": "https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/"
+        },
+        {
+          "nutrient": "vitamin_b2",
+          "action": "doctor_first",
+          "why": "Riboflavin is probably effective for preventing migraines. 400 mg a day cut attacks by about two a month in one trial.",
+          "source": "https://ods.od.nih.gov/factsheets/Riboflavin-HealthProfessional/"
+        },
+        {
+          "nutrient": "caffeine (including energy drinks and pre-workout products)",
+          "action": "caution",
+          "why": "Too much caffeine can trigger migraine attacks.",
+          "source": "https://www.nhs.uk/conditions/migraine/"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Keep a migraine diary",
+          "why": "It can help you find your triggers.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/conditions/migraine/"
+        },
+        {
+          "title": "Eat at regular times, sleep well and stay hydrated",
+          "why": "Skipping meals, tiredness and stress are common triggers.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/conditions/migraine/"
+        },
+        {
+          "title": "Exercise regularly and limit alcohol and caffeine",
+          "why": "These are advised to help manage migraine.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/conditions/migraine/"
+        }
+      ],
+      "doctorQuestions": [
+        "Should I try a preventive treatment?",
+        "Are magnesium or vitamin B2 suitable for me?",
+        "Could any of my medicines be making headaches worse?"
+      ],
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/Riboflavin-HealthProfessional/",
+        "https://www.nhs.uk/conditions/migraine/"
+      ]
+    },
+    {
+      "id": "menopause",
+      "name": "Menopause or perimenopause",
+      "intakeQuestion": "Are you going through the menopause or perimenopause, or have you been through it?",
+      "flags": [
+        {
+          "nutrient": "black cohosh",
+          "action": "caution",
+          "why": "There is some evidence it may ease hot flushes, but products vary, safety is uncertain and interactions have been reported.",
+          "source": "https://www.nice.org.uk/guidance/ng23/chapter/Recommendations"
+        },
+        {
+          "nutrient": "black cohosh",
+          "action": "caution",
+          "why": "Rare cases of liver damage have been reported. See a doctor if you get dark urine or tiredness.",
+          "source": "https://www.nccih.nih.gov/health/black-cohosh"
+        },
+        {
+          "nutrient": "isoflavones",
+          "action": "caution",
+          "why": "There is some evidence they may ease hot flushes, but products vary and safety is uncertain.",
+          "source": "https://www.nice.org.uk/guidance/ng23/chapter/Recommendations"
+        },
+        {
+          "nutrient": "St John's wort",
+          "action": "doctor_first",
+          "why": "If you have had breast cancer, it may interact with tamoxifen, blood thinners and seizure medicines.",
+          "source": "https://www.nice.org.uk/guidance/ng23/chapter/Recommendations"
+        },
+        {
+          "nutrient": "calcium",
+          "action": "may_need_more",
+          "why": "Eat calcium-rich foods such as milk, yoghurt and kale to protect your bones.",
+          "source": "https://www.nhs.uk/conditions/menopause-and-perimenopause/things-you-can-do/"
+        },
+        {
+          "nutrient": "vitamin_d",
+          "action": "may_need_more",
+          "why": "Vitamin D helps keep bones healthy. Taking a supplement is advised.",
+          "source": "https://www.nhs.uk/conditions/menopause-and-perimenopause/things-you-can-do/"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Do weight-bearing and resistance exercise",
+          "why": "Helps keep bones healthy after the menopause.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/conditions/menopause-and-perimenopause/things-you-can-do/"
+        },
+        {
+          "title": "Cut down on hot flush triggers like spicy food, caffeine, smoking and alcohol",
+          "why": "These can trigger hot flushes.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/conditions/menopause-and-perimenopause/things-you-can-do/"
+        }
+      ],
+      "doctorQuestions": [
+        "Is HRT an option for me?",
+        "Are herbal remedies safe with my medicines?",
+        "Should my bone health be checked?"
+      ],
+      "sources": [
+        "https://www.nice.org.uk/guidance/ng23/chapter/Recommendations",
+        "https://www.nccih.nih.gov/health/black-cohosh",
+        "https://www.nhs.uk/conditions/menopause-and-perimenopause/things-you-can-do/",
+        "https://www.nhs.uk/conditions/osteoporosis/prevention/"
+      ]
+    },
+    {
+      "id": "heavy_periods",
+      "name": "Heavy periods",
+      "intakeQuestion": "Do you have heavy periods, for example needing to change pads or tampons very often, or bleeding through to clothes?",
+      "flags": [
+        {
+          "nutrient": "iron",
+          "action": "check_level",
+          "why": "Heavy periods are a common cause of low iron. Guidelines advise a full blood count for everyone with heavy periods.",
+          "source": "https://www.nice.org.uk/guidance/ng88/chapter/Recommendations"
+        },
+        {
+          "nutrient": "iron",
+          "action": "caution",
+          "why": "Heavy periods may cause about a third of iron-deficiency anaemia in women.",
+          "source": "https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/"
+        }
+      ],
+      "habits": [
+        {
+          "title": "See a GP if heavy periods stop you doing daily activities, or you often feel tired or short of breath",
+          "why": "These can be signs of low iron or another cause that needs checking.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/conditions/heavy-periods/"
+        }
+      ],
+      "doctorQuestions": [
+        "Should my blood count and iron be checked?",
+        "What could be causing my heavy periods?",
+        "What treatments could make my periods lighter?"
+      ],
+      "sources": [
+        "https://www.nice.org.uk/guidance/ng88/chapter/Recommendations",
+        "https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/",
+        "https://www.nhs.uk/conditions/heavy-periods/"
+      ]
+    },
+    {
+      "id": "alcohol_use",
+      "name": "Regular or heavy drinking",
+      "intakeQuestion": "How many alcoholic drinks do you usually have in a week, and do you sometimes drink a lot in one go?",
+      "flags": [
+        {
+          "nutrient": "vitamin_b1",
+          "action": "check_level",
+          "why": "Up to 80% of people with long-term heavy drinking develop low thiamin, which can damage the brain. Ask your doctor about thiamin.",
+          "source": "https://ods.od.nih.gov/factsheets/Thiamin-HealthProfessional/"
+        },
+        {
+          "nutrient": "vitamin_b9",
+          "action": "check_level",
+          "why": "Alcohol reduces how well the body absorbs and uses folate.",
+          "source": "https://ods.od.nih.gov/factsheets/Folate-HealthProfessional/"
+        },
+        {
+          "nutrient": "magnesium",
+          "action": "check_level",
+          "why": "Alcohol dependence can lower magnesium.",
+          "source": "https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/"
+        },
+        {
+          "nutrient": "zinc",
+          "action": "check_level",
+          "why": "30 to 50% of people with alcohol use disorder have low zinc.",
+          "source": "https://ods.od.nih.gov/factsheets/Zinc-HealthProfessional/"
+        },
+        {
+          "nutrient": "vitamin_b6",
+          "action": "check_level",
+          "why": "B6 levels tend to be very low in people who depend on alcohol.",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminB6-HealthProfessional/"
+        },
+        {
+          "nutrient": "kava",
+          "action": "avoid",
+          "why": "Do not combine kava with alcohol. Kava has been linked to rare, serious liver injury.",
+          "source": "https://www.nccih.nih.gov/health/kava"
+        },
+        {
+          "nutrient": "valerian",
+          "action": "avoid",
+          "why": "Valerian should not be taken with alcohol or sedatives.",
+          "source": "https://www.nccih.nih.gov/health/valerian"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Keep to no more than 14 units a week, spread over 3 or more days",
+          "why": "This is the UK low-risk drinking advice for adults.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/live-well/alcohol-advice/calculating-alcohol-units/"
+        },
+        {
+          "title": "Have several drink-free days each week",
+          "why": "This helps if you want to cut down.",
+          "evidence": "C",
+          "source": "https://www.nhs.uk/live-well/alcohol-advice/calculating-alcohol-units/"
+        }
+      ],
+      "doctorQuestions": [
+        "Would thiamin or other vitamins help me?",
+        "Should my liver be checked?",
+        "Are my medicines safe with alcohol?"
+      ],
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/Thiamin-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/Folate-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/Zinc-HealthProfessional/",
+        "https://ods.od.nih.gov/factsheets/VitaminB6-HealthProfessional/",
+        "https://www.nccih.nih.gov/health/kava",
+        "https://www.nccih.nih.gov/health/valerian",
+        "https://www.nhs.uk/live-well/alcohol-advice/calculating-alcohol-units/",
+        "https://medlineplus.gov/druginfo/meds/a696005.html",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC12690188/"
+      ]
+    },
+    {
+      "id": "athlete",
+      "name": "Training hard or competing in sport",
+      "intakeQuestion": "Do you train hard or compete in sport most weeks?",
+      "flags": [
+        {
+          "nutrient": "protein",
+          "action": "may_need_more",
+          "why": "Athletes may need 1.2 to 2.0 g of protein per kg of body weight a day; up to about 2.0 g/kg is considered safe.",
+          "source": "https://ods.od.nih.gov/factsheets/ExerciseAndAthleticPerformance-HealthProfessional/"
+        },
+        {
+          "nutrient": "protein",
+          "action": "caution",
+          "why": "Protein supplements and high muscle mass can make a common kidney blood test less reliable. Tell your doctor if you take them.",
+          "source": "https://www.nice.org.uk/guidance/ng203/chapter/Recommendations"
+        },
+        {
+          "nutrient": "creatine",
+          "action": "caution",
+          "why": "May help strength and power in short, hard efforts, but often causes water weight gain. Few safety concerns at usual doses.",
+          "source": "https://ods.od.nih.gov/factsheets/ExerciseAndAthleticPerformance-HealthProfessional/"
+        },
+        {
+          "nutrient": "creatine",
+          "action": "doctor_first",
+          "why": "Kidney experts list creatine as high risk if you have kidney disease.",
+          "source": "https://www.kidney.org/kidney-topics/herbal-supplements-and-kidney-disease"
+        },
+        {
+          "nutrient": "caffeine (including pre-workout products)",
+          "action": "caution",
+          "why": "Up to 400 mg a day is not usually dangerous for healthy adults. Too much can cause a fast or irregular heartbeat and poor sleep.",
+          "source": "https://ods.od.nih.gov/factsheets/ExerciseAndAthleticPerformance-HealthProfessional/"
+        },
+        {
+          "nutrient": "iron",
+          "action": "check_level",
+          "why": "Athletes can lose extra iron through sweat and foot impact. Correcting iron-deficiency anaemia improves work capacity.",
+          "source": "https://ods.od.nih.gov/factsheets/ExerciseAndAthleticPerformance-HealthProfessional/"
+        },
+        {
+          "nutrient": "multi-ingredient sports supplements",
+          "action": "caution",
+          "why": "Ingredient amounts vary widely between products, and makers rarely fund good research on them.",
+          "source": "https://ods.od.nih.gov/factsheets/ExerciseAndAthleticPerformance-HealthProfessional/"
+        },
+        {
+          "nutrient": "vitamin_b2",
+          "action": "may_need_more",
+          "why": "Vegetarian athletes are at higher risk of low riboflavin.",
+          "source": "https://ods.od.nih.gov/factsheets/Riboflavin-HealthProfessional/"
+        }
+      ],
+      "habits": [
+        {
+          "title": "Aim for 1.2 to 2.0 g protein per kg of body weight a day",
+          "why": "This range is suggested for athletes and is considered safe for healthy people.",
+          "evidence": "C",
+          "source": "https://ods.od.nih.gov/factsheets/ExerciseAndAthleticPerformance-HealthProfessional/"
+        }
+      ],
+      "doctorQuestions": [
+        "Do I need my iron checked?",
+        "Is creatine or caffeine safe for me?",
+        "Are my sports supplements safe with my health and medicines?"
+      ],
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/ExerciseAndAthleticPerformance-HealthProfessional/",
+        "https://www.nice.org.uk/guidance/ng203/chapter/Recommendations",
+        "https://www.kidney.org/kidney-topics/herbal-supplements-and-kidney-disease",
+        "https://ods.od.nih.gov/factsheets/Riboflavin-HealthProfessional/"
+      ]
+    }
+  ],
+  "medications": [
+    {
+      "id": "metformin",
+      "name": "Metformin",
+      "interactions": [
+        {
+          "nutrient": "vitamin_b12",
+          "effect": "Long-term use can lower B12, more so at higher doses and over longer time. This can cause tiredness, a sore red tongue, pins and needles or anaemia.",
+          "action": "Ask your doctor about a B12 blood test now and then, and straight away if these symptoms appear. Do not stop metformin on your own.",
+          "severity": "moderate",
+          "source": "https://www.gov.uk/drug-safety-update/metformin-and-reduced-vitamin-b12-levels-new-advice-for-monitoring-patients-at-risk"
+        },
+        {
+          "nutrient": "goldenseal",
+          "effect": "In a study it lowered metformin levels by about a quarter, which could weaken blood sugar control.",
+          "action": "Avoid unless your doctor agrees.",
+          "severity": "moderate",
+          "source": "https://www.nccih.nih.gov/health/goldenseal"
+        },
+        {
+          "nutrient": "berberine",
+          "effect": "May add to the sugar-lowering effect, and it can change how the body handles some medicines.",
+          "action": "Ask your doctor before using it with metformin.",
+          "severity": "moderate",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/42653808/"
+        },
+        {
+          "nutrient": "chromium",
+          "effect": "May add to the sugar-lowering effect.",
+          "action": "Ask your doctor first; check your sugar more often.",
+          "severity": "low",
+          "source": "https://ods.od.nih.gov/factsheets/Chromium-HealthProfessional/"
+        },
+        {
+          "nutrient": "alcohol",
+          "effect": "Drinking alcohol raises the risk of a serious side effect called lactic acidosis and may lower blood sugar.",
+          "action": "Limit alcohol and ask your doctor how much is safe.",
+          "severity": "moderate",
+          "source": "https://medlineplus.gov/druginfo/meds/a696005.html"
+        }
+      ]
+    },
+    {
+      "id": "insulin_and_sulfonylureas",
+      "name": "Insulin and sulfonylureas (for example insulin, gliclazide, glimepiride, glipizide)",
+      "interactions": [
+        {
+          "nutrient": "chromium",
+          "effect": "May increase insulin sensitivity and raise the risk of low blood sugar.",
+          "action": "Ask your doctor first and check your sugar more often.",
+          "severity": "moderate",
+          "source": "https://ods.od.nih.gov/factsheets/Chromium-HealthProfessional/"
+        },
+        {
+          "nutrient": "berberine",
+          "effect": "May add to the sugar-lowering effect of these medicines, so blood sugar could drop too low.",
+          "action": "Ask your doctor before using it.",
+          "severity": "high",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/42653808/"
+        },
+        {
+          "nutrient": "fenugreek",
+          "effect": "Large doses may cause a harmful drop in blood sugar.",
+          "action": "Avoid supplement doses unless your doctor agrees.",
+          "severity": "moderate",
+          "source": "https://www.nccih.nih.gov/health/fenugreek"
+        },
+        {
+          "nutrient": "vitamin_b3",
+          "effect": "Large doses of niacin can raise blood sugar.",
+          "action": "Ask your doctor before high-dose niacin; your sugar may need closer checks.",
+          "severity": "moderate",
+          "source": "https://ods.od.nih.gov/factsheets/Niacin-HealthProfessional/"
+        },
+        {
+          "nutrient": "coq10",
+          "effect": "CoQ10 may interact with insulin.",
+          "action": "Ask your doctor first.",
+          "severity": "low",
+          "source": "https://www.nccih.nih.gov/health/coenzyme-q10"
+        },
+        {
+          "nutrient": "alcohol",
+          "effect": "Alcohol can cause low blood sugar, sometimes hours later.",
+          "action": "Check your sugar after drinking and ask your doctor what is safe.",
+          "severity": "high",
+          "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12690188/"
+        }
+      ]
+    },
+    {
+      "id": "warfarin",
+      "name": "Warfarin",
+      "interactions": [
+        {
+          "nutrient": "vitamin_k",
+          "effect": "Changes in vitamin K intake can make warfarin work more or less.",
+          "action": "Do not take vitamin K supplements. Keep vitamin K foods steady week to week.",
+          "severity": "high",
+          "source": "https://www.nhs.uk/medicines/warfarin/"
+        },
+        {
+          "nutrient": "St John's wort",
+          "effect": "It can weaken warfarin, so clots are more likely.",
+          "action": "Do not take it with warfarin.",
+          "severity": "high",
+          "source": "https://www.nhs.uk/medicines/warfarin/"
+        },
+        {
+          "nutrient": "vitamin_e",
+          "effect": "Can increase bleeding risk with warfarin, especially at high doses.",
+          "action": "Avoid high-dose vitamin E unless your doctor agrees.",
+          "severity": "moderate",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminE-HealthProfessional/"
+        },
+        {
+          "nutrient": "ginkgo",
+          "effect": "May increase bleeding risk.",
+          "action": "Avoid unless your doctor agrees.",
+          "severity": "moderate",
+          "source": "https://www.nccih.nih.gov/health/ginkgo"
+        },
+        {
+          "nutrient": "garlic",
+          "effect": "Garlic supplements may increase bleeding.",
+          "action": "Avoid supplement doses; food amounts are fine.",
+          "severity": "moderate",
+          "source": "https://www.nccih.nih.gov/health/garlic"
+        },
+        {
+          "nutrient": "coq10",
+          "effect": "Listed as interacting with warfarin.",
+          "action": "Ask your doctor first.",
+          "severity": "moderate",
+          "source": "https://medlineplus.gov/druginfo/meds/a682277.html"
+        },
+        {
+          "nutrient": "ginseng",
+          "effect": "Listed as interacting with warfarin and may affect clotting.",
+          "action": "Ask your doctor first.",
+          "severity": "moderate",
+          "source": "https://medlineplus.gov/druginfo/meds/a682277.html"
+        },
+        {
+          "nutrient": "omega_3",
+          "effect": "Fish oil at 3 to 6 g a day usually does not change warfarin much, but INR should be checked from time to time.",
+          "action": "Tell your anticoagulation clinic before starting.",
+          "severity": "low",
+          "source": "https://ods.od.nih.gov/factsheets/Omega3FattyAcids-HealthProfessional/"
+        },
+        {
+          "nutrient": "turmeric",
+          "effect": "May increase bleeding risk with warfarin and other blood thinners.",
+          "action": "Avoid supplement doses unless your doctor agrees.",
+          "severity": "moderate",
+          "source": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/turmeric"
+        },
+        {
+          "nutrient": "echinacea and goldenseal",
+          "effect": "Listed as possibly interacting with warfarin.",
+          "action": "Ask your doctor first.",
+          "severity": "moderate",
+          "source": "https://medlineplus.gov/druginfo/meds/a682277.html"
+        },
+        {
+          "nutrient": "cranberry juice and products",
+          "effect": "UK advice is to avoid them while taking warfarin.",
+          "action": "Do not have cranberry juice or cranberry products.",
+          "severity": "moderate",
+          "source": "https://www.nhs.uk/medicines/warfarin/"
+        }
+      ]
+    },
+    {
+      "id": "doacs",
+      "name": "DOACs, blood thinners (for example apixaban, rivaroxaban, dabigatran, edoxaban)",
+      "interactions": [
+        {
+          "nutrient": "St John's wort",
+          "effect": "Listed as not mixing well with apixaban and rivaroxaban.",
+          "action": "Do not take St John's wort without asking your doctor.",
+          "severity": "high",
+          "source": "https://www.nhs.uk/medicines/apixaban/"
+        },
+        {
+          "nutrient": "St John's wort",
+          "effect": "With dabigatran it is expected to lower drug levels, and taking them together should be avoided.",
+          "action": "Do not take it with dabigatran.",
+          "severity": "high",
+          "source": "https://www.ema.europa.eu/en/documents/product-information/pradaxa-epar-product-information_en.pdf"
+        },
+        {
+          "nutrient": "ginkgo",
+          "effect": "May increase bleeding risk with blood thinners.",
+          "action": "Avoid unless your doctor agrees.",
+          "severity": "moderate",
+          "source": "https://www.nccih.nih.gov/health/ginkgo"
+        },
+        {
+          "nutrient": "garlic",
+          "effect": "Garlic supplements may increase bleeding.",
+          "action": "Avoid supplement doses.",
+          "severity": "moderate",
+          "source": "https://www.nccih.nih.gov/health/garlic"
+        },
+        {
+          "nutrient": "turmeric",
+          "effect": "May increase bleeding risk with blood thinners.",
+          "action": "Avoid supplement doses unless your doctor agrees.",
+          "severity": "moderate",
+          "source": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/turmeric"
+        },
+        {
+          "nutrient": "vitamin_e",
+          "effect": "Can reduce platelet clumping and may raise bleeding risk with blood thinners.",
+          "action": "Avoid high doses unless your doctor agrees.",
+          "severity": "moderate",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminE-HealthProfessional/"
+        },
+        {
+          "nutrient": "all vitamins, supplements and herbal products",
+          "effect": "Your doctor may need to change doses or watch you closely for side effects.",
+          "action": "Tell your doctor or pharmacist about every supplement.",
+          "severity": "low",
+          "source": "https://medlineplus.gov/druginfo/meds/a610024.html"
+        }
+      ]
+    },
+    {
+      "id": "antiplatelets",
+      "name": "Antiplatelet medicines (for example aspirin, clopidogrel)",
+      "interactions": [
+        {
+          "nutrient": "St John's wort",
+          "effect": "With clopidogrel it can raise drug levels and bleeding risk.",
+          "action": "Do not take it with clopidogrel unless your doctor agrees.",
+          "severity": "moderate",
+          "source": "https://www.nhs.uk/medicines/clopidogrel/taking-clopidogrel-with-other-medicines-and-herbal-supplements/"
+        },
+        {
+          "nutrient": "ginkgo",
+          "effect": "Herbs that affect the blood, such as ginkgo, may cause problems with clopidogrel.",
+          "action": "Avoid unless your doctor agrees.",
+          "severity": "moderate",
+          "source": "https://www.nhs.uk/medicines/clopidogrel/taking-clopidogrel-with-other-medicines-and-herbal-supplements/"
+        },
+        {
+          "nutrient": "garlic",
+          "effect": "Garlic supplements may increase bleeding, especially with aspirin.",
+          "action": "Avoid supplement doses.",
+          "severity": "moderate",
+          "source": "https://www.nccih.nih.gov/health/garlic"
+        },
+        {
+          "nutrient": "vitamin_e",
+          "effect": "Can reduce platelet clumping and may add to bleeding risk.",
+          "action": "Avoid high doses unless your doctor agrees.",
+          "severity": "moderate",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminE-HealthProfessional/"
+        },
+        {
+          "nutrient": "omega_3",
+          "effect": "High-dose fish oil can have a mild antiplatelet effect, less strong than aspirin.",
+          "action": "Tell your doctor if you take high doses.",
+          "severity": "low",
+          "source": "https://ods.od.nih.gov/factsheets/Omega3FattyAcids-HealthProfessional/"
+        },
+        {
+          "nutrient": "horse chestnut seed extract",
+          "effect": "Products containing aesculin may add to bleeding risk with aspirin or other blood thinners.",
+          "action": "Avoid unless your doctor agrees.",
+          "severity": "moderate",
+          "source": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/horse-chestnut"
+        }
+      ]
+    },
+    {
+      "id": "levothyroxine",
+      "name": "Levothyroxine (thyroid hormone)",
+      "interactions": [
+        {
+          "nutrient": "calcium",
+          "effect": "Calcium carbonate can stop levothyroxine being absorbed.",
+          "action": "Take them at least 4 hours apart.",
+          "severity": "moderate",
+          "source": "https://ods.od.nih.gov/factsheets/Calcium-HealthProfessional/"
+        },
+        {
+          "nutrient": "iron",
+          "effect": "Taking iron at the same time can clearly reduce how well levothyroxine works.",
+          "action": "Take them at least 4 hours apart.",
+          "severity": "moderate",
+          "source": "https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/"
+        },
+        {
+          "nutrient": "vitamin_b7",
+          "effect": "Biotin can affect thyroid blood test results.",
+          "action": "Tell your doctor before blood tests.",
+          "severity": "moderate",
+          "source": "https://www.nhs.uk/medicines/levothyroxine/"
+        },
+        {
+          "nutrient": "St John's wort",
+          "effect": "Listed as not mixing well with levothyroxine.",
+          "action": "Ask your doctor first.",
+          "severity": "moderate",
+          "source": "https://www.nhs.uk/medicines/levothyroxine/"
+        },
+        {
+          "nutrient": "chromium",
+          "effect": "A small study found chromium reduced levothyroxine absorption.",
+          "action": "Ask your pharmacist how to space them.",
+          "severity": "low",
+          "source": "https://ods.od.nih.gov/factsheets/Chromium-HealthProfessional/"
+        },
+        {
+          "nutrient": "antacids",
+          "effect": "Antacids and other indigestion treatments are listed as not mixing well with levothyroxine.",
+          "action": "Take at a different time; ask your pharmacist.",
+          "severity": "moderate",
+          "source": "https://www.nhs.uk/medicines/levothyroxine/"
+        },
+        {
+          "nutrient": "fiber",
+          "effect": "Foods with soy, walnuts and dietary fibre may affect how levothyroxine works.",
+          "action": "Keep your routine the same each day.",
+          "severity": "low",
+          "source": "https://medlineplus.gov/druginfo/meds/a682461.html"
+        },
+        {
+          "nutrient": "ashwagandha",
+          "effect": "May raise thyroid hormone levels and might interact with thyroid medicines.",
+          "action": "Avoid unless your doctor agrees.",
+          "severity": "moderate",
+          "source": "https://www.nccih.nih.gov/health/ashwagandha"
+        }
+      ]
+    },
+    {
+      "id": "statins",
+      "name": "Statins (for example atorvastatin, simvastatin, rosuvastatin)",
+      "interactions": [
+        {
+          "nutrient": "red yeast rice",
+          "effect": "Some products contain a statin-like drug, with the same possible side effects (muscle, kidney and liver damage) and interactions.",
+          "action": "Do not take it with a statin unless your doctor agrees.",
+          "severity": "high",
+          "source": "https://www.nccih.nih.gov/health/red-yeast-rice"
+        },
+        {
+          "nutrient": "St John's wort",
+          "effect": "Can weaken some statins, such as simvastatin.",
+          "action": "Avoid unless your doctor agrees.",
+          "severity": "moderate",
+          "source": "https://www.nccih.nih.gov/health/st-johns-wort"
+        },
+        {
+          "nutrient": "vitamin_b3",
+          "effect": "Added to a statin in large trials, high-dose niacin did not lower heart events and caused more side effects.",
+          "action": "Do not add high-dose niacin unless a specialist advises it.",
+          "severity": "moderate",
+          "source": "https://ods.od.nih.gov/factsheets/Niacin-HealthProfessional/"
+        },
+        {
+          "nutrient": "vitamin_d",
+          "effect": "Statins might not work as well with high-dose vitamin D.",
+          "action": "Keep vitamin D within usual amounts unless your doctor advises more.",
+          "severity": "low",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminD-Consumer/"
+        },
+        {
+          "nutrient": "green tea extract",
+          "effect": "Can lower blood levels of atorvastatin.",
+          "action": "Ask your doctor before using it.",
+          "severity": "low",
+          "source": "https://www.nccih.nih.gov/health/green-tea"
+        },
+        {
+          "nutrient": "grapefruit juice",
+          "effect": "Too much grapefruit juice can raise the chance of side effects with atorvastatin.",
+          "action": "Have no more than 1 or 2 small glasses a day, and check your own statin leaflet.",
+          "severity": "moderate",
+          "source": "https://www.nhs.uk/medicines/atorvastatin/"
+        },
+        {
+          "nutrient": "coq10",
+          "effect": "Research does not show that CoQ10 reduces muscle pain caused by statins.",
+          "action": "Talk to your doctor about muscle pain.",
+          "severity": "low",
+          "source": "https://www.nccih.nih.gov/health/coenzyme-q10"
+        }
+      ]
+    },
+    {
+      "id": "acid_reducers",
+      "name": "Stomach acid reducers: PPIs and H2 blockers (for example omeprazole, lansoprazole, famotidine)",
+      "interactions": [
+        {
+          "nutrient": "vitamin_b12",
+          "effect": "These medicines can reduce B12 absorption from food.",
+          "action": "Ask about a B12 test if you take them long term.",
+          "severity": "moderate",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminB12-HealthProfessional/"
+        },
+        {
+          "nutrient": "magnesium",
+          "effect": "Long-term PPI use (usually over a year) can cause low magnesium.",
+          "action": "Ask your doctor about a magnesium blood test.",
+          "severity": "moderate",
+          "source": "https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/"
+        },
+        {
+          "nutrient": "iron",
+          "effect": "These medicines reduce iron absorption; iron tablets may work less well.",
+          "action": "Tell your doctor if you are being treated for low iron.",
+          "severity": "moderate",
+          "source": "https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/"
+        },
+        {
+          "nutrient": "calcium",
+          "effect": "Calcium carbonate is absorbed less well with low stomach acid unless taken with a meal.",
+          "action": "Take calcium carbonate with food, or ask about calcium citrate.",
+          "severity": "low",
+          "source": "https://ods.od.nih.gov/factsheets/Calcium-HealthProfessional/"
+        },
+        {
+          "nutrient": "St John's wort",
+          "effect": "May stop lansoprazole working as well as it should, and is listed as not mixing well with omeprazole.",
+          "action": "Do not take it with these medicines.",
+          "severity": "moderate",
+          "source": "https://www.nhs.uk/medicines/lansoprazole/taking-lansoprazole-with-other-medicines-and-herbal-supplements/"
+        }
+      ]
+    },
+    {
+      "id": "antacids",
+      "name": "Antacids (for example calcium carbonate, magnesium or aluminium indigestion remedies)",
+      "interactions": [
+        {
+          "nutrient": "iron",
+          "effect": "Calcium-based antacids may get in the way of iron absorption.",
+          "action": "Take iron and calcium products at different times.",
+          "severity": "low",
+          "source": "https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/"
+        },
+        {
+          "nutrient": "all medicines and supplements",
+          "effect": "Calcium carbonate can affect other medicines taken at the same time.",
+          "action": "Do not take calcium carbonate within 1 to 2 hours of other medicines.",
+          "severity": "low",
+          "source": "https://medlineplus.gov/druginfo/meds/a601032.html"
+        },
+        {
+          "nutrient": "calcium",
+          "effect": "Calcium-based antacids add to your daily calcium. The upper limit is 2,500 mg a day up to age 50 and 2,000 mg a day after that.",
+          "action": "Count antacids in your daily calcium total.",
+          "severity": "low",
+          "source": "https://ods.od.nih.gov/factsheets/Calcium-HealthProfessional/"
+        },
+        {
+          "nutrient": "magnesium",
+          "effect": "Magnesium in antacids counts toward the 350 mg a day upper limit from supplements and medicines. Too much is more likely if kidneys are weak.",
+          "action": "Ask your doctor if you have kidney disease.",
+          "severity": "moderate",
+          "source": "https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/"
+        },
+        {
+          "nutrient": "chromium",
+          "effect": "Antacids reduce chromium absorption.",
+          "action": "Take them at different times.",
+          "severity": "low",
+          "source": "https://ods.od.nih.gov/factsheets/Chromium-HealthProfessional/"
+        }
+      ]
+    },
+    {
+      "id": "tetracycline_and_quinolone_antibiotics",
+      "name": "Tetracycline and quinolone antibiotics (for example doxycycline, ciprofloxacin, levofloxacin)",
+      "interactions": [
+        {
+          "nutrient": "calcium",
+          "effect": "Calcium binds these antibiotics so less is absorbed.",
+          "action": "Take calcium products at least 6 hours before or 2 hours after ciprofloxacin. Timings differ by antibiotic, so check with your pharmacist.",
+          "severity": "moderate",
+          "source": "https://medlineplus.gov/druginfo/meds/a688016.html"
+        },
+        {
+          "nutrient": "iron",
+          "effect": "Iron binds these antibiotics so less is absorbed.",
+          "action": "Take iron 3 hours before or 2 hours after doxycycline. Check timing for other antibiotics with your pharmacist.",
+          "severity": "moderate",
+          "source": "https://medlineplus.gov/druginfo/meds/a682063.html"
+        },
+        {
+          "nutrient": "zinc",
+          "effect": "Zinc binds these antibiotics.",
+          "action": "Take the antibiotic at least 2 hours before or 4 to 6 hours after zinc.",
+          "severity": "moderate",
+          "source": "https://ods.od.nih.gov/factsheets/Zinc-HealthProfessional/"
+        },
+        {
+          "nutrient": "magnesium",
+          "effect": "Magnesium binds these antibiotics.",
+          "action": "Take the antibiotic at least 2 hours before or 4 to 6 hours after magnesium.",
+          "severity": "moderate",
+          "source": "https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/"
+        },
+        {
+          "nutrient": "multivitamins with minerals",
+          "effect": "Minerals in multivitamins can reduce antibiotic absorption.",
+          "action": "Space them as for the single minerals; ask your pharmacist.",
+          "severity": "moderate",
+          "source": "https://medlineplus.gov/druginfo/meds/a688016.html"
+        }
+      ]
+    },
+    {
+      "id": "ace_inhibitors_and_arbs",
+      "name": "ACE inhibitors and ARBs (for example ramipril, lisinopril, losartan, candesartan)",
+      "interactions": [
+        {
+          "nutrient": "potassium",
+          "effect": "These medicines reduce potassium loss in urine and can cause high potassium.",
+          "action": "Do not take potassium supplements unless your doctor prescribes them.",
+          "severity": "high",
+          "source": "https://ods.od.nih.gov/factsheets/Potassium-HealthProfessional/"
+        },
+        {
+          "nutrient": "potassium salt substitutes",
+          "effect": "Salt substitutes that contain potassium can raise potassium.",
+          "action": "Do not use them without talking to your doctor.",
+          "severity": "high",
+          "source": "https://medlineplus.gov/druginfo/meds/a695008.html"
+        },
+        {
+          "nutrient": "iodine",
+          "effect": "Potassium iodide with ACE inhibitors can raise the risk of high potassium.",
+          "action": "Ask your doctor before taking potassium iodide.",
+          "severity": "moderate",
+          "source": "https://ods.od.nih.gov/factsheets/Iodine-HealthProfessional/"
+        },
+        {
+          "nutrient": "licorice root",
+          "effect": "Even small amounts of licorice root products have been linked to severe side effects in people with high blood pressure.",
+          "action": "Avoid licorice supplements.",
+          "severity": "moderate",
+          "source": "https://www.nccih.nih.gov/health/licorice-root"
+        },
+        {
+          "nutrient": "ashwagandha",
+          "effect": "Might interact with blood pressure medicines.",
+          "action": "Ask your doctor first.",
+          "severity": "low",
+          "source": "https://www.nccih.nih.gov/health/ashwagandha"
+        }
+      ]
+    },
+    {
+      "id": "potassium_sparing_diuretics",
+      "name": "Potassium-sparing water tablets (for example spironolactone, eplerenone, amiloride)",
+      "interactions": [
+        {
+          "nutrient": "potassium",
+          "effect": "These medicines can raise potassium, and potassium supplements may not mix well with them.",
+          "action": "Do not take potassium supplements unless your doctor prescribes them.",
+          "severity": "high",
+          "source": "https://www.nhs.uk/medicines/spironolactone/"
+        },
+        {
+          "nutrient": "potassium salt substitutes",
+          "effect": "Potassium salt substitutes can raise potassium levels further.",
+          "action": "Avoid them; ask a doctor or dietitian.",
+          "severity": "high",
+          "source": "https://www.nhs.uk/medicines/spironolactone/"
+        },
+        {
+          "nutrient": "magnesium",
+          "effect": "These medicines reduce magnesium loss in urine.",
+          "action": "Ask your doctor before magnesium supplements.",
+          "severity": "low",
+          "source": "https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/"
+        },
+        {
+          "nutrient": "iodine",
+          "effect": "Potassium iodide can raise potassium with these medicines.",
+          "action": "Ask your doctor first.",
+          "severity": "moderate",
+          "source": "https://ods.od.nih.gov/factsheets/Iodine-HealthProfessional/"
+        }
+      ]
+    },
+    {
+      "id": "thiazide_diuretics",
+      "name": "Thiazide water tablets (for example bendroflumethiazide, indapamide, hydrochlorothiazide)",
+      "interactions": [
+        {
+          "nutrient": "vitamin_d",
+          "effect": "With vitamin D supplements, blood calcium could rise too high.",
+          "action": "Ask your doctor before vitamin D above usual amounts.",
+          "severity": "moderate",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminD-Consumer/"
+        },
+        {
+          "nutrient": "calcium",
+          "effect": "Calcium supplements are listed as not mixing well with indapamide.",
+          "action": "Ask your doctor before calcium supplements.",
+          "severity": "moderate",
+          "source": "https://www.nhs.uk/medicines/indapamide/"
+        },
+        {
+          "nutrient": "zinc",
+          "effect": "These medicines increase zinc loss in urine.",
+          "action": "Ask your doctor if a zinc check is needed.",
+          "severity": "low",
+          "source": "https://ods.od.nih.gov/factsheets/Zinc-HealthProfessional/"
+        },
+        {
+          "nutrient": "magnesium",
+          "effect": "These medicines increase magnesium loss in urine.",
+          "action": "Ask your doctor about magnesium checks.",
+          "severity": "low",
+          "source": "https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/"
+        },
+        {
+          "nutrient": "potassium",
+          "effect": "These medicines increase potassium loss in urine and can cause low potassium.",
+          "action": "Only take potassium if your doctor advises it.",
+          "severity": "moderate",
+          "source": "https://ods.od.nih.gov/factsheets/Potassium-HealthProfessional/"
+        },
+        {
+          "nutrient": "licorice root",
+          "effect": "Licorice can cause serious side effects, especially in people with high blood pressure.",
+          "action": "Avoid licorice supplements.",
+          "severity": "moderate",
+          "source": "https://www.nccih.nih.gov/health/licorice-root"
+        }
+      ]
+    },
+    {
+      "id": "loop_diuretics",
+      "name": "Loop water tablets (for example furosemide, bumetanide)",
+      "interactions": [
+        {
+          "nutrient": "potassium",
+          "effect": "Supplements that raise potassium may not mix well with furosemide.",
+          "action": "Only take potassium if your doctor advises it and checks your blood.",
+          "severity": "moderate",
+          "source": "https://www.nhs.uk/medicines/furosemide/"
+        },
+        {
+          "nutrient": "magnesium",
+          "effect": "These medicines increase magnesium loss in urine.",
+          "action": "Ask your doctor about magnesium checks.",
+          "severity": "low",
+          "source": "https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/"
+        },
+        {
+          "nutrient": "vitamin_b1",
+          "effect": "Furosemide can lower thiamin levels through urine.",
+          "action": "Ask your doctor whether thiamin is needed.",
+          "severity": "low",
+          "source": "https://ods.od.nih.gov/factsheets/Thiamin-HealthProfessional/"
+        },
+        {
+          "nutrient": "licorice root",
+          "effect": "Licorice can cause serious heart rhythm problems.",
+          "action": "Avoid licorice supplements.",
+          "severity": "moderate",
+          "source": "https://www.nccih.nih.gov/health/licorice-root"
+        }
+      ]
+    },
+    {
+      "id": "bisphosphonates",
+      "name": "Bone medicines: bisphosphonates (for example alendronic acid, risedronate)",
+      "interactions": [
+        {
+          "nutrient": "calcium",
+          "effect": "The bone tablet works best on an empty stomach, so calcium and food at the same time get in the way.",
+          "action": "Take the bone tablet first with plain tap water; wait at least 30 minutes before calcium, food or other medicines.",
+          "severity": "moderate",
+          "source": "https://www.nhs.uk/medicines/alendronic-acid/how-and-when-to-take-alendronic-acid/"
+        },
+        {
+          "nutrient": "magnesium",
+          "effect": "Magnesium supplements and antacids reduce absorption of these bone medicines.",
+          "action": "Keep magnesium at least 2 hours away.",
+          "severity": "moderate",
+          "source": "https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/"
+        },
+        {
+          "nutrient": "iron",
+          "effect": "Supplements with iron are listed as something to tell your doctor about.",
+          "action": "Tell your doctor; take iron at a different time of day.",
+          "severity": "moderate",
+          "source": "https://www.nhs.uk/medicines/alendronic-acid/taking-alendronic-acid-with-other-medicines-and-herbal-supplements/"
+        },
+        {
+          "nutrient": "zinc",
+          "effect": "Supplements with zinc are listed as something to tell your doctor about.",
+          "action": "Tell your doctor; take zinc at a different time of day.",
+          "severity": "low",
+          "source": "https://www.nhs.uk/medicines/alendronic-acid/taking-alendronic-acid-with-other-medicines-and-herbal-supplements/"
+        },
+        {
+          "nutrient": "all vitamins and supplements",
+          "effect": "Vitamins, supplements and antacids taken at the same time can stop the medicine working.",
+          "action": "Take them at least 30 minutes after the bone tablet.",
+          "severity": "moderate",
+          "source": "https://medlineplus.gov/druginfo/meds/a601011.html"
+        }
+      ]
+    },
+    {
+      "id": "ssris_snris",
+      "name": "SSRI and SNRI antidepressants (for example sertraline, citalopram, fluoxetine, venlafaxine)",
+      "interactions": [
+        {
+          "nutrient": "St John's wort",
+          "effect": "With some antidepressants it can cause serotonin-related side effects, which can be serious.",
+          "action": "Do not take St John's wort with these medicines.",
+          "severity": "high",
+          "source": "https://www.nccih.nih.gov/health/st-johns-wort"
+        },
+        {
+          "nutrient": "5-HTP",
+          "effect": "Raises serotonin. With these medicines there is a possible risk of serotonin syndrome, a serious reaction.",
+          "action": "Do not take 5-HTP unless your doctor supervises it.",
+          "severity": "high",
+          "source": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/5-htp-01"
+        },
+        {
+          "nutrient": "tryptophan",
+          "effect": "Listed as possibly interacting with sertraline, fluoxetine and venlafaxine.",
+          "action": "Do not take tryptophan unless your doctor agrees.",
+          "severity": "moderate",
+          "source": "https://medlineplus.gov/druginfo/meds/a697048.html"
+        },
+        {
+          "nutrient": "St John's wort",
+          "effect": "National medicine advice says not to use it with sertraline, citalopram, fluoxetine or venlafaxine.",
+          "action": "Avoid it completely while on these medicines.",
+          "severity": "high",
+          "source": "https://www.nhs.uk/medicines/sertraline/"
+        }
+      ]
+    },
+    {
+      "id": "oral_contraceptives",
+      "name": "Hormonal contraceptive pills (for example the combined pill)",
+      "interactions": [
+        {
+          "nutrient": "St John's wort",
+          "effect": "Can weaken birth control pills, so pregnancy could happen.",
+          "action": "Do not take it with the pill without advice; ask about other contraception.",
+          "severity": "high",
+          "source": "https://www.nccih.nih.gov/health/st-johns-wort"
+        },
+        {
+          "nutrient": "vitamin_b12",
+          "effect": "The combined pill can lower B12 blood test results without a real deficiency.",
+          "action": "Tell your doctor you take the pill if your B12 is tested.",
+          "severity": "low",
+          "source": "https://www.nice.org.uk/guidance/ng239/chapter/Recommendations"
+        }
+      ]
+    },
+    {
+      "id": "corticosteroids",
+      "name": "Steroid tablets (for example prednisolone, prednisone)",
+      "interactions": [
+        {
+          "nutrient": "vitamin_d",
+          "effect": "Steroids such as prednisone can lower vitamin D levels.",
+          "action": "Ask your doctor if you need vitamin D, especially on long courses.",
+          "severity": "moderate",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminD-Consumer/"
+        },
+        {
+          "nutrient": "calcium",
+          "effect": "Your doctor may advise a high-calcium diet or a calcium supplement.",
+          "action": "Follow your doctor's advice on calcium.",
+          "severity": "low",
+          "source": "https://medlineplus.gov/druginfo/meds/a601102.html"
+        },
+        {
+          "nutrient": "potassium",
+          "effect": "Your doctor may advise a high-potassium diet or a supplement.",
+          "action": "Only take potassium if your doctor advises it.",
+          "severity": "low",
+          "source": "https://medlineplus.gov/druginfo/meds/a601102.html"
+        },
+        {
+          "nutrient": "St John's wort",
+          "effect": "Listed as possibly interacting with prednisone.",
+          "action": "Avoid unless your doctor agrees.",
+          "severity": "moderate",
+          "source": "https://medlineplus.gov/druginfo/meds/a601102.html"
+        },
+        {
+          "nutrient": "licorice root",
+          "effect": "Interactions between licorice and corticosteroids have been reported.",
+          "action": "Avoid licorice supplements.",
+          "severity": "moderate",
+          "source": "https://www.nccih.nih.gov/health/licorice-root"
+        }
+      ]
+    },
+    {
+      "id": "methotrexate",
+      "name": "Methotrexate",
+      "interactions": [
+        {
+          "nutrient": "vitamin_b9",
+          "effect": "Your doctor may prescribe folic acid with methotrexate. Do not take extra folic acid or folate from other products on top.",
+          "action": "Do not take folic acid or folate-containing vitamins unless your doctor says so.",
+          "severity": "high",
+          "source": "https://www.nhs.uk/medicines/methotrexate/taking-methotrexate-with-other-medicines-and-herbal-supplements/"
+        },
+        {
+          "nutrient": "vitamin_b9 (cancer treatment)",
+          "effect": "If you take methotrexate for cancer, folate supplements could interfere with how it works.",
+          "action": "Ask your cancer doctor before any folate supplement.",
+          "severity": "high",
+          "source": "https://ods.od.nih.gov/factsheets/Folate-HealthProfessional/"
+        },
+        {
+          "nutrient": "alcohol",
+          "effect": "Heavy drinking and liver disease matter with methotrexate.",
+          "action": "Ask your doctor about the safe use of alcohol.",
+          "severity": "moderate",
+          "source": "https://medlineplus.gov/druginfo/meds/a682019.html"
+        }
+      ]
+    },
+    {
+      "id": "anti_seizure_medicines",
+      "name": "Anti-seizure medicines (for example carbamazepine, phenytoin, sodium valproate, lamotrigine)",
+      "interactions": [
+        {
+          "nutrient": "vitamin_b9",
+          "effect": "Some of these medicines lower folate, and folate supplements might lower the medicine level.",
+          "action": "Ask your doctor before folic acid. If you are planning a pregnancy, a higher prescribed dose may be advised.",
+          "severity": "moderate",
+          "source": "https://ods.od.nih.gov/factsheets/Folate-HealthProfessional/"
+        },
+        {
+          "nutrient": "St John's wort",
+          "effect": "Can weaken phenytoin and carbamazepine.",
+          "action": "Do not take it with these medicines.",
+          "severity": "high",
+          "source": "https://www.nccih.nih.gov/health/st-johns-wort"
+        },
+        {
+          "nutrient": "vitamin_b6",
+          "effect": "High doses (200 mg a day) may lower phenytoin and phenobarbital levels.",
+          "action": "Avoid high-dose B6 unless your doctor agrees.",
+          "severity": "moderate",
+          "source": "https://ods.od.nih.gov/factsheets/VitaminB6-HealthProfessional/"
+        },
+        {
+          "nutrient": "vitamin_d",
+          "effect": "Listed as possibly interacting with phenytoin.",
+          "action": "Ask your doctor about vitamin D.",
+          "severity": "moderate",
+          "source": "https://medlineplus.gov/druginfo/meds/a682022.html"
+        },
+        {
+          "nutrient": "antacids",
+          "effect": "Antacids with calcium, magnesium or aluminium are listed as possibly interacting with phenytoin.",
+          "action": "Ask your pharmacist how to space them.",
+          "severity": "moderate",
+          "source": "https://medlineplus.gov/druginfo/meds/a682022.html"
+        },
+        {
+          "nutrient": "vitamin_b7",
+          "effect": "Using these medicines for a year or more is linked to lower biotin levels.",
+          "action": "Ask your doctor if this matters for you.",
+          "severity": "low",
+          "source": "https://ods.od.nih.gov/factsheets/Biotin-HealthProfessional/"
+        },
+        {
+          "nutrient": "cannabidiol (CBD)",
+          "effect": "Listed as possibly interacting with valproate.",
+          "action": "Ask your doctor first.",
+          "severity": "moderate",
+          "source": "https://medlineplus.gov/druginfo/meds/a682412.html"
+        },
+        {
+          "nutrient": "ashwagandha",
+          "effect": "Might interact with anti-seizure medicines.",
+          "action": "Ask your doctor first.",
+          "severity": "low",
+          "source": "https://www.nccih.nih.gov/health/ashwagandha"
+        }
+      ]
+    },
+    {
+      "id": "lithium",
+      "name": "Lithium",
+      "interactions": [
+        {
+          "nutrient": "calcium",
+          "effect": "Long-term lithium can raise blood calcium, and calcium supplements could add to this.",
+          "action": "Ask your doctor before calcium supplements.",
+          "severity": "moderate",
+          "source": "https://ods.od.nih.gov/factsheets/Calcium-HealthProfessional/"
+        },
+        {
+          "nutrient": "sodium bicarbonate",
+          "effect": "Listed as possibly interacting with lithium.",
+          "action": "Ask your doctor first.",
+          "severity": "moderate",
+          "source": "https://medlineplus.gov/druginfo/meds/a681039.html"
+        },
+        {
+          "nutrient": "herbal remedies and supplements",
+          "effect": "There is not enough information to say they are safe with lithium.",
+          "action": "Ask your doctor or pharmacist before any supplement.",
+          "severity": "moderate",
+          "source": "https://www.nhs.uk/medicines/lithium/taking-lithium-with-other-medicines-and-herbal-supplements/"
+        },
+        {
+          "nutrient": "caffeine",
+          "effect": "Your doctor may want to know how much tea, coffee or cola you drink.",
+          "action": "Talk to your doctor about caffeine drinks.",
+          "severity": "low",
+          "source": "https://medlineplus.gov/druginfo/meds/a681039.html"
+        },
+        {
+          "nutrient": "salt and fluids",
+          "effect": "It is important to get the right amounts of fluid and salt while taking lithium.",
+          "action": "Follow your doctor's advice on salt and fluids.",
+          "severity": "moderate",
+          "source": "https://medlineplus.gov/druginfo/meds/a681039.html"
+        }
+      ]
+    }
+  ],
+  "pauseBeforeSurgery": [
+    {
+      "supplement": "all herbal and dietary supplements (default if no specific advice)",
+      "stopDaysBefore": 14,
+      "why": "Anaesthetists may ask you to stop supplements at least 2 weeks before. This is caution, not proof of harm. Always follow your own surgical team.",
+      "evidence": "C",
+      "source": "https://madeforthismoment.asahq.org/wp-content/uploads/2020/10/ASA_Supplements-Anesthesia_Updated-1.pdf"
+    },
+    {
+      "supplement": "garlic",
+      "stopDaysBefore": 7,
+      "why": "Garlic supplements may increase bleeding. A 2001 review advised stopping at least 7 days before; some teams ask for 2 weeks.",
+      "evidence": "C",
+      "source": "https://www.uchicagomedicine.org/forefront/news/new-recommendations-proposed-for-safe-use-of-herbal-medications-by-patients-having-surgery"
+    },
+    {
+      "supplement": "ginkgo",
+      "stopDaysBefore": 2,
+      "why": "A 2001 review advised stopping at least 36 hours before surgery because of possible bleeding. Some teams ask for 2 weeks.",
+      "evidence": "C",
+      "source": "https://www.uchicagomedicine.org/forefront/news/new-recommendations-proposed-for-safe-use-of-herbal-medications-by-patients-having-surgery"
+    },
+    {
+      "supplement": "ginseng",
+      "stopDaysBefore": 7,
+      "why": "May increase bleeding and lower blood sugar. A 2001 review advised stopping at least 7 days before.",
+      "evidence": "C",
+      "source": "https://www.uchicagomedicine.org/forefront/news/new-recommendations-proposed-for-safe-use-of-herbal-medications-by-patients-having-surgery"
+    },
+    {
+      "supplement": "St John's wort",
+      "stopDaysBefore": 5,
+      "why": "Speeds up how the body clears many medicines used around surgery. A 2001 review advised stopping at least 5 days before.",
+      "evidence": "C",
+      "source": "https://www.uchicagomedicine.org/forefront/news/new-recommendations-proposed-for-safe-use-of-herbal-medications-by-patients-having-surgery"
+    },
+    {
+      "supplement": "kava",
+      "stopDaysBefore": 1,
+      "why": "May make anaesthetic drugs stronger. A 2001 review advised stopping at least 24 hours before; some teams ask for 2 weeks.",
+      "evidence": "C",
+      "source": "https://www.aafp.org/pubs/afp/issues/2002/0501/p1927.html"
+    },
+    {
+      "supplement": "valerian",
+      "stopDaysBefore": 0,
+      "why": "May prolong anaesthesia. If possible taper it over the weeks before surgery; if not, a review advised continuing until surgery. Do not stop suddenly after long use.",
+      "evidence": "C",
+      "source": "https://www.uchicagomedicine.org/forefront/news/new-recommendations-proposed-for-safe-use-of-herbal-medications-by-patients-having-surgery"
+    },
+    {
+      "supplement": "vitamin_e",
+      "stopDaysBefore": 14,
+      "why": "Often stopped before surgery because of a possible bleeding risk, but the evidence is weak: a small study found 800 IU a day for 2 weeks did not change bleeding time or platelet function.",
+      "evidence": "C",
+      "source": "https://pubmed.ncbi.nlm.nih.gov/16337968/"
+    },
+    {
+      "supplement": "omega_3",
+      "stopDaysBefore": 0,
+      "why": "Evidence does not support stopping. In a large heart-surgery trial (OPERA), high-dose fish oil did not increase bleeding and fewer blood transfusions were needed. Follow your team's advice.",
+      "evidence": "B",
+      "source": "https://pubmed.ncbi.nlm.nih.gov/30571332/"
+    },
+    {
+      "supplement": "turmeric",
+      "stopDaysBefore": 14,
+      "why": "Listed in guidance based on a 2021 expert consensus among supplements to hold 2 weeks before surgery, because of a theoretical bleeding risk.",
+      "evidence": "C",
+      "source": "https://accurateclinic.com/wp-content/uploads/2025/12/Handout-Nutraceuticals-for-Peri-Operative-Period-.pdf"
+    },
+    {
+      "supplement": "feverfew",
+      "stopDaysBefore": 14,
+      "why": "Listed in guidance based on a 2021 expert consensus among supplements to hold 2 weeks before surgery, because of a theoretical bleeding risk.",
+      "evidence": "C",
+      "source": "https://accurateclinic.com/wp-content/uploads/2025/12/Handout-Nutraceuticals-for-Peri-Operative-Period-.pdf"
+    },
+    {
+      "supplement": "saw palmetto",
+      "stopDaysBefore": 14,
+      "why": "Listed in guidance based on a 2021 expert consensus among supplements to hold 2 weeks before surgery, because of a theoretical bleeding risk.",
+      "evidence": "C",
+      "source": "https://accurateclinic.com/wp-content/uploads/2025/12/Handout-Nutraceuticals-for-Peri-Operative-Period-.pdf"
+    },
+    {
+      "supplement": "ginger (supplements)",
+      "stopDaysBefore": 14,
+      "why": "Some surgical centres list ginger among supplements to stop 2 weeks before surgery.",
+      "evidence": "C",
+      "source": "https://www.honorhealth.com/sites/default/files/2023-07/vitamins-supplements-and-anesthesia.pdf"
+    },
+    {
+      "supplement": "echinacea",
+      "stopDaysBefore": 14,
+      "why": "A 2001 review advised stopping as far ahead as possible, especially for people with liver problems or a transplant. 14 days is a practical default.",
+      "evidence": "C",
+      "source": "https://www.uchicagomedicine.org/forefront/news/new-recommendations-proposed-for-safe-use-of-herbal-medications-by-patients-having-surgery"
+    },
+    {
+      "supplement": "ashwagandha",
+      "stopDaysBefore": 14,
+      "why": "Experts do not recommend ashwagandha for people about to have surgery. No exact stop time is given, so use the usual 2-week default unless told otherwise.",
+      "evidence": "C",
+      "source": "https://www.nccih.nih.gov/health/ashwagandha"
+    },
+    {
+      "supplement": "melatonin",
+      "stopDaysBefore": 14,
+      "why": "Some surgical centres list it among supplements to stop 2 weeks before. Evidence of harm is lacking; ask your team.",
+      "evidence": "C",
+      "source": "https://www.honorhealth.com/sites/default/files/2023-07/vitamins-supplements-and-anesthesia.pdf"
+    },
+    {
+      "supplement": "multivitamins",
+      "stopDaysBefore": 14,
+      "why": "Some surgical centres ask you to stop multivitamins 2 weeks before. Ask your own team.",
+      "evidence": "C",
+      "source": "https://www.honorhealth.com/sites/default/files/2023-07/vitamins-supplements-and-anesthesia.pdf"
+    },
+    {
+      "supplement": "glucosamine and chondroitin",
+      "stopDaysBefore": 14,
+      "why": "Some surgical centres list them among supplements to stop 2 weeks before.",
+      "evidence": "C",
+      "source": "https://www.honorhealth.com/sites/default/files/2023-07/vitamins-supplements-and-anesthesia.pdf"
+    },
+    {
+      "supplement": "iron",
+      "stopDaysBefore": 0,
+      "why": "Usually continued. If you have iron-deficiency anaemia, iron is advised before and after surgery.",
+      "evidence": "B",
+      "source": "https://www.nice.org.uk/guidance/ng24/chapter/Reducing-requirement-for-blood-transfusion-for-people-having-surgery"
+    },
+    {
+      "supplement": "vitamin_d",
+      "stopDaysBefore": 0,
+      "why": "Some surgical centres list it as fine to continue before surgery.",
+      "evidence": "C",
+      "source": "https://www.honorhealth.com/sites/default/files/2023-07/vitamins-supplements-and-anesthesia.pdf"
+    },
+    {
+      "supplement": "vitamin_c",
+      "stopDaysBefore": 0,
+      "why": "Some surgical centres list it as fine to continue before surgery.",
+      "evidence": "C",
+      "source": "https://www.honorhealth.com/sites/default/files/2023-07/vitamins-supplements-and-anesthesia.pdf"
+    },
+    {
+      "supplement": "zinc",
+      "stopDaysBefore": 0,
+      "why": "Some surgical centres list it as fine to continue before surgery.",
+      "evidence": "C",
+      "source": "https://www.honorhealth.com/sites/default/files/2023-07/vitamins-supplements-and-anesthesia.pdf"
+    },
+    {
+      "supplement": "magnesium",
+      "stopDaysBefore": 0,
+      "why": "Some surgical centres list it as fine to continue before surgery.",
+      "evidence": "C",
+      "source": "https://www.honorhealth.com/sites/default/files/2023-07/vitamins-supplements-and-anesthesia.pdf"
+    }
+  ]
+}

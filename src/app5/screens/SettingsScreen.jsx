@@ -11,6 +11,7 @@ import { useStore5, setTheme, setState, openTerms, setSounds, setReminders, setA
 import { QUEST_IDS, doneCountOf } from '../coach/quests5.js';
 import MembershipCard from './MembershipCard.jsx';
 import { InstallAppCard } from './InstallAppCard.jsx';
+import HealthCard from './HealthCard.jsx';
 
 // glass pill toggle (the prototype's 60×34 switch)
 function Switch({ on, onTap, label }) {
@@ -248,6 +249,12 @@ export default function SettingsScreen() {
         <Eyebrow>Get the app</Eyebrow>
         <InstallAppCard />
       </div>
+
+      {/* Health — supplements, nutrient meters and the data behind them. The
+          age gate and "delete my health data" live here because both must be
+          findable without hunting. */}
+      <Eyebrow>Health</Eyebrow>
+      <HealthCard />
 
       {/* About */}
       <Eyebrow>About</Eyebrow>

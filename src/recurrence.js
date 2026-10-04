@@ -42,6 +42,7 @@ export function ruleInterval(rule) {
   if (!rule) return 1;
   switch (rule.freq) {
     case 'everyday': return 1;
+    case 'weekdays': return 1;   // every day is a candidate; ruleOccursOn filters to Mon-Fri
     case 'weekly':   return 7;
     case 'everyN':   return clampInt(rule.interval, 1, MAX_INTERVAL);
     default:         return 1;
@@ -64,6 +65,11 @@ export function ruleOccursOn(rule, dateISO) {
   const delta = diffDaysISO(rule.anchorDate, dateISO);
   if (delta < 0) return false;
   if (delta > ruleHorizon(rule)) return false;
+  // Mon-Fri is answered from the weekday, not from a day count.
+  if (rule.freq === 'weekdays') {
+    const wd = new Date(`${String(dateISO).slice(0, 10)}T00:00:00`).getDay();
+    return wd >= 1 && wd <= 5;
+  }
   const step = ruleInterval(rule);
   return delta % step === 0;
 }

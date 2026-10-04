@@ -275,6 +275,9 @@ export function itemOnDate(it, key) {
   if (r === 'once') return d === 0;
   if (d < 0) return false;
   if (r === 'daily') return true;
+  // weekdays is the one repeat that depends on WHICH day it is, not how many
+  // days since the anchor — so it is answered from the date itself.
+  if (r === 'weekdays') { const wd = keyToDate(key).getDay(); return wd >= 1 && wd <= 5; }
   if (r === 'weekly') return d % 7 === 0;
   const n = parseInt(r, 10);
   return n > 1 ? d % n === 0 : true;
@@ -569,6 +572,9 @@ export function normRepeat(v) {
   if (/^(daily|every ?day|everyday|each ?day|every single day)$/.test(s)) return 'daily';
   if (/^(weekly|every ?week|each ?week|once a week|same day each week)$/.test(s)) return 'weekly';
   if (/^(once|just once|one ?off|one time|single|today only)$/.test(s)) return 'once';
+  // Mon-Fri. Supplements and work-shaped routines are the reason this exists:
+  // "with breakfast on work days" had no way to be said before.
+  if (/^(weekdays|week ?days|mon ?-? ?fri|monday to friday|working days|work days|weekdays only)$/.test(s)) return 'weekdays';
   if (/^every other day$/.test(s)) return '2';
   const m = /^(?:every )?(\d{1,2})(?: ?days?)?$/.exec(s);
   if (m) { const n = +m[1]; if (n === 1) return 'daily'; if (n >= 2 && n <= 14) return String(n); }

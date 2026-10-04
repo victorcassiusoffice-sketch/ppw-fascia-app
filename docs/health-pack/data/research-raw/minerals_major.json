@@ -1,0 +1,1744 @@
+[
+  {
+    "id": "calcium",
+    "name": "Calcium",
+    "group": "mineral",
+    "unit": "mg",
+    "unitNotes": "Amounts are elemental calcium in mg, as labels show. Calcium carbonate is 40% calcium and calcium citrate is 21%, so 1,250 mg carbonate gives 500 mg calcium.",
+    "conversions": [
+      {
+        "from": "mg calcium carbonate",
+        "to": "mg elemental calcium",
+        "multiply": 0.4,
+        "note": "NIH ODS: carbonate is 40% calcium by weight (PubChem molecular weight gives 0.400)."
+      },
+      {
+        "from": "mg calcium citrate (tetrahydrate)",
+        "to": "mg elemental calcium",
+        "multiply": 0.21,
+        "note": "NIH ODS: citrate is 21% calcium (PubChem tetrahydrate gives 0.211; anhydrous citrate is about 0.24). Use the label's elemental figure when given."
+      },
+      {
+        "from": "mg calcium gluconate (monohydrate)",
+        "to": "mg elemental calcium",
+        "multiply": 0.089,
+        "note": "Calculated from PubChem molecular weight (448.39); not stated by ODS."
+      }
+    ],
+    "rda": {
+      "type": "RDA",
+      "male_19_50": 1000,
+      "female_19_50": 1000,
+      "male_51_plus": 1000,
+      "female_51_plus": 1200,
+      "pregnancy": 1000,
+      "lactation": 1000,
+      "source": "https://ods.od.nih.gov/factsheets/Calcium-HealthProfessional/"
+    },
+    "ul": {
+      "iom": 2000,
+      "efsa": 2500,
+      "efsa_year": 2012,
+      "applies_to": "total",
+      "notes": "The limit counts food and supplements together. The US limit (IOM) is 2,500 mg for ages 19 to 50 and 2,000 mg from age 51. We store 2,000 mg so one number is safe for every adult. EFSA's limit is 2,500 mg for all adults, including pregnancy and breastfeeding. The UK NHS says 1,500 mg a day or less of calcium supplements is unlikely to cause harm.",
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/Calcium-HealthProfessional/",
+        "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+        "https://doi.org/10.2903/j.efsa.2012.2814",
+        "https://api.crossref.org/works/10.2903/j.efsa.2012.2814",
+        "https://www.nhs.uk/conditions/vitamins-and-minerals/calcium/"
+      ]
+    },
+    "studyRange": {
+      "low": 500,
+      "high": 1200,
+      "goal": "Slowing bone loss and preventing fractures in adults aged 50 and over, usually with vitamin D",
+      "evidence": "C",
+      "evidenceWhy": "Trials disagree: the best-quality trials found no fracture benefit, and some found more heart attacks and kidney stones.",
+      "keyStudies": [
+        {
+          "title": "Use of calcium or calcium in combination with vitamin D supplementation to prevent fractures and bone loss in people aged 50 years and older: a meta-analysis (Tang et al., Lancet)",
+          "year": 2007,
+          "type": "meta-analysis",
+          "finding": "Across 17 trials, fractures fell by 12%; results were better at 1,200 mg or more and when people took their tablets.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/17720017/"
+        },
+        {
+          "title": "Calcium plus vitamin D supplementation and the risk of fractures (Jackson et al., NEJM, Women's Health Initiative)",
+          "year": 2006,
+          "type": "RCT",
+          "finding": "In 36,282 women, 1,000 mg calcium plus 400 IU vitamin D for 7 years did not clearly cut hip fractures and raised kidney stones.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/16481635/"
+        },
+        {
+          "title": "Calcium intake and risk of fracture: systematic review (Bolland et al., BMJ)",
+          "year": 2015,
+          "type": "meta-analysis",
+          "finding": "Evidence that calcium pills prevent fractures was weak; the least biased trials showed no effect, and food calcium was not linked to fractures.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/26420387/"
+        },
+        {
+          "title": "Effect of calcium supplements on risk of myocardial infarction and cardiovascular events: meta-analysis (Bolland et al., BMJ)",
+          "year": 2010,
+          "type": "meta-analysis",
+          "finding": "Calcium pills of 500 mg a day or more, without vitamin D, were linked to about 30% more heart attacks.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/20671013/"
+        },
+        {
+          "title": "Calcium Supplements and Risk of Cardiovascular Disease: A Meta-Analysis of Clinical Trials (Myung et al., Nutrients)",
+          "year": 2021,
+          "type": "meta-analysis",
+          "finding": "In 13 double-blind trials, calcium pills raised heart disease risk by about 15% in healthy women after menopause.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/33530332/"
+        },
+        {
+          "title": "Lack of Evidence Linking Calcium With or Without Vitamin D Supplementation to Cardiovascular Disease in Generally Healthy Adults (Kopecky et al., Ann Intern Med; NOF and ASPC guideline)",
+          "year": 2016,
+          "type": "guideline",
+          "finding": "Calcium from food and pills was judged safe for the heart in healthy adults when kept under the upper limit.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/27776362/"
+        },
+        {
+          "title": "Calcium supplementation during pregnancy for preventing hypertensive disorders and related problems (Cluver et al., Cochrane)",
+          "year": 2025,
+          "type": "Cochrane review",
+          "finding": "In large trials, calcium in pregnancy made little or no difference to pre-eclampsia or early birth.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/41330480/"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 1000,
+      "female": 1000,
+      "basis": "rda",
+      "why": "RDA for ages 19 to 50; women over 50 and everyone over 70 need 1,200 mg, mostly from food."
+    },
+    "timing": {
+      "withFood": true,
+      "fatSoluble": false,
+      "bestTime": "with_meal",
+      "splitAbove": 500,
+      "separateFrom": [
+        {
+          "what": "Thyroid medicine (levothyroxine)",
+          "hours": 4,
+          "why": "Calcium can stop the medicine being absorbed. Keep them at least 4 hours apart."
+        },
+        {
+          "what": "Quinolone antibiotics (for example ciprofloxacin)",
+          "hours": 2,
+          "why": "Calcium lowers how much antibiotic gets in. Take the antibiotic 2 hours before or 2 hours after calcium."
+        },
+        {
+          "what": "Tetracycline antibiotics (for example doxycycline)",
+          "hours": 2,
+          "why": "Calcium lowers how much antibiotic gets in. Keep them 1 to 2 hours apart, or follow the medicine leaflet."
+        },
+        {
+          "what": "HIV medicine dolutegravir",
+          "hours": 6,
+          "why": "Calcium can greatly lower the medicine's level. Take it 2 hours before or 6 hours after calcium."
+        },
+        {
+          "what": "Bone medicine (bisphosphonates such as alendronate)",
+          "hours": 0.5,
+          "why": "Calcium blocks the medicine. Take the medicine first on an empty stomach, then wait at least 30 minutes before calcium."
+        },
+        {
+          "what": "Iron supplements",
+          "hours": 2,
+          "why": "Calcium may lower iron absorption. Take them at different times of day; the NHS advises a 2-hour gap between iron and dairy."
+        }
+      ]
+    },
+    "forms": {
+      "better": [
+        "calcium citrate",
+        "calcium carbonate taken with food"
+      ],
+      "notes": "Carbonate holds more calcium per tablet but needs food and stomach acid. Citrate works with or without food and may suit people with low stomach acid. Gas, bloating and constipation are common; smaller doses with meals, or a different form, can help."
+    },
+    "interactions": [
+      {
+        "with": "Dolutegravir (HIV medicine)",
+        "severity": "high",
+        "effect": "Calcium can greatly lower the amount of medicine in the blood.",
+        "action": "Take it 2 hours before or 6 hours after calcium."
+      },
+      {
+        "with": "Levothyroxine (thyroid medicine)",
+        "severity": "moderate",
+        "effect": "Calcium carbonate can stop the medicine being absorbed.",
+        "action": "Keep them at least 4 hours apart."
+      },
+      {
+        "with": "Quinolone antibiotics (for example ciprofloxacin)",
+        "severity": "moderate",
+        "effect": "Less antibiotic gets absorbed, so it may not work as well.",
+        "action": "Take the antibiotic 2 hours before or 2 hours after calcium."
+      },
+      {
+        "with": "Tetracycline antibiotics (for example doxycycline)",
+        "severity": "moderate",
+        "effect": "Calcium lowers absorption of the antibiotic.",
+        "action": "Keep them 1 to 2 hours apart, or follow the leaflet."
+      },
+      {
+        "with": "Bisphosphonates (for example alendronate)",
+        "severity": "moderate",
+        "effect": "Calcium stops the bone medicine being absorbed.",
+        "action": "Take the medicine first, then wait at least 30 minutes before calcium."
+      },
+      {
+        "with": "Thiazide water pills (for example bendroflumethiazide)",
+        "severity": "moderate",
+        "effect": "These pills make the body keep calcium, so supplements can push blood calcium too high.",
+        "action": "Ask your doctor before taking calcium supplements."
+      },
+      {
+        "with": "Lithium",
+        "severity": "moderate",
+        "effect": "Long-term lithium can raise blood calcium, and calcium supplements may add to this.",
+        "action": "Ask your doctor before taking calcium supplements."
+      },
+      {
+        "with": "Iron supplements",
+        "severity": "low",
+        "effect": "Calcium may lower iron absorption.",
+        "action": "Take them at different times of day."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "kidney_stones",
+        "action": "doctor_first",
+        "why": "Calcium pills, but not calcium from food, have been linked to more kidney stones."
+      },
+      {
+        "condition": "kidney_disease",
+        "action": "doctor_first",
+        "why": "Your kidneys help control calcium, so your care team should set your calcium amount."
+      },
+      {
+        "condition": "heart_disease",
+        "action": "caution",
+        "why": "Some trials linked calcium pills to more heart attacks; get calcium from food where you can and ask your doctor."
+      },
+      {
+        "condition": "high_blood_pressure",
+        "action": "caution",
+        "why": "If you take a thiazide water pill, ask your doctor before calcium supplements."
+      },
+      {
+        "condition": "thyroid_disease",
+        "action": "caution",
+        "why": "Calcium can block thyroid medicine; keep them at least 4 hours apart."
+      },
+      {
+        "condition": "osteoporosis",
+        "action": "may_need_more",
+        "why": "Bone medicines need enough calcium; your doctor will say if you need a supplement and when to take it."
+      },
+      {
+        "condition": "menopause",
+        "action": "may_need_more",
+        "why": "Needs rise to 1,200 mg a day after age 50; food first."
+      },
+      {
+        "condition": "age_65_plus",
+        "action": "may_need_more",
+        "why": "Needs rise to 1,200 mg for women over 50 and men over 70, and the safe limit drops to 2,000 mg."
+      },
+      {
+        "condition": "vegan_vegetarian",
+        "action": "may_need_more",
+        "why": "People who avoid dairy are more likely to be low; use fortified foods or tofu set with calcium."
+      },
+      {
+        "condition": "iron_deficiency",
+        "action": "caution",
+        "why": "Calcium can lower iron absorption; take iron and calcium at different times."
+      },
+      {
+        "condition": "pregnancy",
+        "action": "caution",
+        "why": "Needs are the same as other adults (1,000 mg); ask your midwife or doctor before high doses."
+      }
+    ],
+    "deficiencySigns": [
+      "Numbness or tingling around the mouth, hands or feet",
+      "Muscle cramps or spasms",
+      "Weak bones over time that break more easily"
+    ],
+    "excessSigns": [
+      "Constipation, gas or bloating",
+      "Feeling sick, tired or off your food",
+      "Passing a lot of urine",
+      "Kidney stones",
+      "Irregular heartbeat when blood calcium is very high"
+    ],
+    "foodSources": [
+      {
+        "food": "Plain low-fat yogurt",
+        "serving": "8 oz (227 g)",
+        "amount": 415
+      },
+      {
+        "food": "Orange juice, calcium-fortified",
+        "serving": "1 cup (240 ml)",
+        "amount": 349
+      },
+      {
+        "food": "Mozzarella, part skim",
+        "serving": "1.5 oz (42 g)",
+        "amount": 333
+      },
+      {
+        "food": "Sardines, canned with bones",
+        "serving": "3 oz (85 g)",
+        "amount": 325
+      },
+      {
+        "food": "Milk, skimmed",
+        "serving": "1 cup (240 ml)",
+        "amount": 299
+      },
+      {
+        "food": "Soy milk, calcium-fortified",
+        "serving": "1 cup (240 ml)",
+        "amount": 299
+      },
+      {
+        "food": "Milk, whole",
+        "serving": "1 cup (240 ml)",
+        "amount": 276
+      },
+      {
+        "food": "Tofu, firm, made with calcium sulfate",
+        "serving": "1/2 cup",
+        "amount": 253
+      },
+      {
+        "food": "Pink salmon, canned with bones",
+        "serving": "3 oz (85 g)",
+        "amount": 181
+      },
+      {
+        "food": "Cottage cheese, 1% fat",
+        "serving": "1 cup",
+        "amount": 138
+      }
+    ],
+    "lowText": "Your calcium is low today, so try food first, like yogurt, milk, fortified plant milk, tofu or canned fish with bones.",
+    "highText": "You're close to the safe daily limit for calcium (2,000 mg from food and supplements), so please don't take any more today.",
+    "notes": "Food first. The meter should count calcium from food as well as pills, or many users will look low and take more pills than they need. Never suggest more than 500 mg in one dose. Women over 50 and everyone over 70 need 1,200 mg; the US limit drops to 2,000 mg from age 51. The heart-risk question is not settled: some meta-analyses found more heart attacks with calcium pills, while a 2016 US guideline found no link below the upper limit. Calcium pills, but not food calcium, are linked to kidney stones (WHI trial; in the Nurses' Health Study pills were linked to 20% more stones and food calcium to fewer). A US task force (summarised by ODS) found daily doses under 1,000 mg calcium with under 400 IU vitamin D do not prevent fractures after menopause. A 2025 Cochrane update found calcium in pregnancy made little or no difference to pre-eclampsia, unlike its 2018 version. UK guidance is lower: the NHS says adults need 700 mg a day.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheets/Calcium-HealthProfessional/",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://doi.org/10.2903/j.efsa.2012.2814",
+      "https://api.crossref.org/works/10.2903/j.efsa.2012.2814",
+      "https://www.nhs.uk/conditions/vitamins-and-minerals/calcium/",
+      "https://pubmed.ncbi.nlm.nih.gov/17720017/",
+      "https://pubmed.ncbi.nlm.nih.gov/16481635/",
+      "https://pubmed.ncbi.nlm.nih.gov/26420387/",
+      "https://pubmed.ncbi.nlm.nih.gov/20671013/",
+      "https://pubmed.ncbi.nlm.nih.gov/33530332/",
+      "https://pubmed.ncbi.nlm.nih.gov/27776362/",
+      "https://pubmed.ncbi.nlm.nih.gov/41330480/",
+      "https://pubmed.ncbi.nlm.nih.gov/30277579/",
+      "https://pubmed.ncbi.nlm.nih.gov/9092314/",
+      "https://pubmed.ncbi.nlm.nih.gov/36282253/",
+      "https://pubmed.ncbi.nlm.nih.gov/34774245/",
+      "https://pubmed.ncbi.nlm.nih.gov/28646995/",
+      "https://api.fda.gov/drug/label.json?search=openfda.generic_name:%22alendronate%20sodium%22&limit=1",
+      "https://api.fda.gov/drug/label.json?search=openfda.generic_name:%22levothyroxine%20sodium%22&limit=1",
+      "https://www.nhs.uk/medicines/alendronic-acid/taking-alendronic-acid-with-other-medicines-and-herbal-supplements/",
+      "https://www.nhs.uk/medicines/ciprofloxacin/taking-or-using-ciprofloxacin-with-other-medicines-and-herbal-supplements/",
+      "https://www.nhs.uk/medicines/ferrous-sulfate/how-and-when-to-take-ferrous-sulfate/",
+      "https://medlineplus.gov/druginfo/meds/a601032.html",
+      "https://medlineplus.gov/druginfo/meds/a682063.html",
+      "https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/calcium%20carbonate/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/calcium%20citrate%20tetrahydrate/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/calcium%20citrate/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/calcium%20gluconate%20monohydrate/property/MolecularFormula,MolecularWeight/JSON"
+    ]
+  },
+  {
+    "id": "magnesium",
+    "name": "Magnesium",
+    "group": "mineral",
+    "unit": "mg",
+    "unitNotes": "Amounts are elemental magnesium in mg, as labels show. For example, 500 mg magnesium oxide gives about 300 mg magnesium.",
+    "conversions": [
+      {
+        "from": "mg magnesium oxide",
+        "to": "mg elemental magnesium",
+        "multiply": 0.6,
+        "note": "NIH ODS example: 500 mg oxide gives 300 mg magnesium (PubChem gives 0.603)."
+      },
+      {
+        "from": "mg magnesium citrate (trimagnesium dicitrate, anhydrous)",
+        "to": "mg elemental magnesium",
+        "multiply": 0.16,
+        "note": "Calculated from PubChem molecular weight (451.12). Products vary; use the label's elemental figure."
+      },
+      {
+        "from": "mg magnesium glycinate (bisglycinate)",
+        "to": "mg elemental magnesium",
+        "multiply": 0.14,
+        "note": "Calculated from PubChem molecular weight (172.42). Many products are blends; use the label's elemental figure."
+      },
+      {
+        "from": "mg magnesium chloride (hexahydrate)",
+        "to": "mg elemental magnesium",
+        "multiply": 0.12,
+        "note": "Calculated from PubChem molecular weight (203.30)."
+      }
+    ],
+    "rda": {
+      "type": "RDA",
+      "male_19_50": 420,
+      "female_19_50": 320,
+      "male_51_plus": 420,
+      "female_51_plus": 320,
+      "pregnancy": 360,
+      "lactation": 320,
+      "source": "https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/"
+    },
+    "ul": {
+      "iom": 350,
+      "efsa": 250,
+      "efsa_year": 2001,
+      "applies_to": "supplements_only",
+      "notes": "Only magnesium from supplements and medicines (such as antacids and laxatives) counts, not magnesium in food. The US limit is 350 mg. EFSA's limit is 250 mg: no laxative effect was seen up to 250 mg, and mild diarrhoea appeared in a few people at about 360 mg. EFSA's limit includes magnesium added to water and foods and also covers pregnancy. The app should warn at 250 mg. The UK NHS says 400 mg or less a day from supplements is unlikely to cause harm.",
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/",
+        "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+        "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf",
+        "https://www.nhs.uk/conditions/vitamins-and-minerals/others/"
+      ]
+    },
+    "studyRange": {
+      "low": 300,
+      "high": 600,
+      "goal": "Lowering blood pressure, improving blood sugar in type 2 diabetes, and preventing migraine",
+      "evidence": "B",
+      "evidenceWhy": "Meta-analyses show small benefits for blood pressure and blood sugar, but many trials are small and mixed; sleep evidence is weak.",
+      "keyStudies": [
+        {
+          "title": "Effects of Magnesium Supplementation on Blood Pressure: A Meta-Analysis of Randomized Double-Blind Placebo-Controlled Trials (Zhang et al., Hypertension)",
+          "year": 2016,
+          "type": "meta-analysis",
+          "finding": "In 34 trials, about 368 mg a day for 3 months lowered blood pressure by about 2 mmHg; 300 mg a day seemed enough.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/27402922/"
+        },
+        {
+          "title": "Magnesium supplementation for the management of essential hypertension in adults (Dickinson et al., Cochrane)",
+          "year": 2006,
+          "type": "Cochrane review",
+          "finding": "In 12 small trials only the lower blood pressure number fell (2.2 mmHg), and the evidence was judged weak.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/16856052/"
+        },
+        {
+          "title": "Oral Magnesium Supplementation for Treating Glucose Metabolism Parameters in People with or at Risk of Diabetes (Veronese et al., Nutrients)",
+          "year": 2021,
+          "type": "meta-analysis",
+          "finding": "Magnesium lowered fasting blood sugar in people with diabetes and improved insulin response in people at risk.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/34836329/"
+        },
+        {
+          "title": "Prophylaxis of migraine with oral magnesium: a placebo-controlled, double-blind randomized study (Peikert et al., Cephalalgia)",
+          "year": 1996,
+          "type": "RCT",
+          "finding": "600 mg a day for 12 weeks cut migraine attacks by 42% versus 16% on placebo; about 1 in 5 had diarrhoea.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/8792038/"
+        },
+        {
+          "title": "Evidence-based guideline update: NSAIDs and other complementary treatments for episodic migraine prevention in adults (AAN and AHS)",
+          "year": 2012,
+          "type": "guideline",
+          "finding": "Magnesium was rated probably effective (Level B) for preventing migraine.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/22529203/"
+        },
+        {
+          "title": "Oral magnesium supplementation for insomnia in older adults: a Systematic Review and Meta-Analysis (Mah and Pitre, BMC Complement Med Ther)",
+          "year": 2021,
+          "type": "meta-analysis",
+          "finding": "In 3 small trials, older adults fell asleep about 17 minutes faster, but the evidence was low quality.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/33865376/"
+        },
+        {
+          "title": "Opinion of the Scientific Committee on Food on the Tolerable Upper Intake Level of Magnesium (EFSA compendium)",
+          "year": 2001,
+          "type": "guideline",
+          "finding": "No laxative effect up to 250 mg a day from supplements, so the limit was set at 250 mg.",
+          "url": "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 420,
+      "female": 320,
+      "basis": "rda",
+      "why": "RDA from food and supplements together; supplements alone should stay at 250 mg or less."
+    },
+    "timing": {
+      "withFood": null,
+      "fatSoluble": false,
+      "bestTime": "any",
+      "splitAbove": null,
+      "separateFrom": [
+        {
+          "what": "Bone medicine (bisphosphonates such as alendronate)",
+          "hours": 2,
+          "why": "Magnesium can block the medicine. Keep them at least 2 hours apart."
+        },
+        {
+          "what": "Tetracycline and quinolone antibiotics (for example doxycycline, ciprofloxacin)",
+          "hours": 6,
+          "why": "Magnesium lowers how much antibiotic gets in. Take the antibiotic at least 2 hours before, or 4 to 6 hours after, magnesium."
+        }
+      ]
+    },
+    "forms": {
+      "better": [
+        "magnesium citrate",
+        "magnesium chloride",
+        "magnesium lactate",
+        "magnesium aspartate"
+      ],
+      "notes": "Forms that dissolve well (citrate, chloride, lactate, aspartate) are absorbed better than oxide or sulfate. Glycinate is popular, but we found no good absorption data for it; one small company-funded 2024 study saw no rise in blood levels over 6 hours. Splitting the daily amount into smaller doses is better tolerated."
+    },
+    "interactions": [
+      {
+        "with": "Bisphosphonates (for example alendronate)",
+        "severity": "moderate",
+        "effect": "Magnesium can stop the bone medicine being absorbed.",
+        "action": "Keep them at least 2 hours apart."
+      },
+      {
+        "with": "Tetracycline and quinolone antibiotics",
+        "severity": "moderate",
+        "effect": "Magnesium lowers how much antibiotic gets absorbed.",
+        "action": "Take the antibiotic 2 hours before or 4 to 6 hours after magnesium."
+      },
+      {
+        "with": "Magnesium-containing laxatives and antacids",
+        "severity": "moderate",
+        "effect": "They add to your daily magnesium; very large doses (over 5,000 mg a day) have caused poisoning.",
+        "action": "Count them toward your supplement limit."
+      },
+      {
+        "with": "Loop and thiazide water pills (for example furosemide)",
+        "severity": "low",
+        "effect": "Long-term use can increase magnesium loss in urine.",
+        "action": "Your doctor may check your level."
+      },
+      {
+        "with": "Acid-reducing medicine (proton pump inhibitors such as omeprazole)",
+        "severity": "low",
+        "effect": "Use for more than a year can cause low magnesium.",
+        "action": "Ask your doctor about checking your level."
+      },
+      {
+        "with": "Very high-dose zinc",
+        "severity": "low",
+        "effect": "Zinc at about 142 mg a day can reduce magnesium absorption.",
+        "action": "Keep zinc within its own limit."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "kidney_disease",
+        "action": "doctor_first",
+        "why": "Weak kidneys cannot clear extra magnesium, so it can build up to harmful levels."
+      },
+      {
+        "condition": "type_2_diabetes",
+        "action": "may_need_more",
+        "why": "Diabetes can increase magnesium loss; trial doses are above the supplement limit, so ask your doctor first."
+      },
+      {
+        "condition": "migraine",
+        "action": "doctor_first",
+        "why": "Migraine trials used up to 600 mg a day, which is above the supplement limit."
+      },
+      {
+        "condition": "high_blood_pressure",
+        "action": "doctor_first",
+        "why": "Blood pressure trials used about 300 to 400 mg a day, above the supplement limit; keep taking your medicine."
+      },
+      {
+        "condition": "inflammatory_bowel_disease",
+        "action": "may_need_more",
+        "why": "Long-term diarrhoea and poor absorption can lower magnesium over time."
+      },
+      {
+        "condition": "coeliac",
+        "action": "may_need_more",
+        "why": "Poor absorption in coeliac disease can lower magnesium over time."
+      },
+      {
+        "condition": "alcohol_use",
+        "action": "may_need_more",
+        "why": "Low magnesium is common in people who drink heavily."
+      },
+      {
+        "condition": "age_65_plus",
+        "action": "may_need_more",
+        "why": "Older adults often eat less magnesium, absorb less and lose more in urine."
+      },
+      {
+        "condition": "osteoporosis",
+        "action": "caution",
+        "why": "If you take a bone medicine, keep magnesium at least 2 hours away from it."
+      },
+      {
+        "condition": "pregnancy",
+        "action": "caution",
+        "why": "Needs are 350 to 360 mg a day from food and supplements; the supplement limit still applies."
+      }
+    ],
+    "deficiencySigns": [
+      "Loss of appetite",
+      "Feeling sick or being sick",
+      "Tiredness and weakness",
+      "Numbness, tingling or muscle cramps",
+      "Irregular heartbeat or seizures in severe cases"
+    ],
+    "excessSigns": [
+      "Diarrhoea",
+      "Feeling sick and stomach cramps",
+      "Low blood pressure, breathing problems or irregular heartbeat with very large doses or weak kidneys"
+    ],
+    "foodSources": [
+      {
+        "food": "Pumpkin seeds",
+        "serving": "1 oz (28 g)",
+        "amount": 156
+      },
+      {
+        "food": "Chia seeds",
+        "serving": "1 oz (28 g)",
+        "amount": 111
+      },
+      {
+        "food": "Almonds",
+        "serving": "1 oz (28 g)",
+        "amount": 80
+      },
+      {
+        "food": "Spinach, boiled",
+        "serving": "1/2 cup",
+        "amount": 78
+      },
+      {
+        "food": "Cashews",
+        "serving": "1 oz (28 g)",
+        "amount": 74
+      },
+      {
+        "food": "Peanuts",
+        "serving": "1/4 cup",
+        "amount": 63
+      },
+      {
+        "food": "Shredded wheat cereal",
+        "serving": "2 biscuits",
+        "amount": 61
+      },
+      {
+        "food": "Soy milk",
+        "serving": "1 cup (240 ml)",
+        "amount": 61
+      },
+      {
+        "food": "Black beans, cooked",
+        "serving": "1/2 cup",
+        "amount": 60
+      },
+      {
+        "food": "Edamame",
+        "serving": "1/2 cup",
+        "amount": 50
+      },
+      {
+        "food": "Peanut butter",
+        "serving": "2 tbsp",
+        "amount": 49
+      },
+      {
+        "food": "Potato, baked with skin",
+        "serving": "3.5 oz (100 g)",
+        "amount": 43
+      }
+    ],
+    "lowText": "Your magnesium is low today, so try nuts, seeds, beans, spinach or wholegrain foods before adding a supplement.",
+    "highText": "You're near the daily limit for magnesium from supplements (250 mg), so skip any more today, as extra can cause diarrhoea.",
+    "notes": "The upper limit counts supplements and medicines only, not food. The RDA is for food plus supplements and is higher than both supplement limits, so the meter must count food too; supplements alone should never be used to fill it. Trial doses for blood pressure, blood sugar and migraine (300 to 600 mg) are above the 250 mg supplement limit the app uses, so they need a doctor. Sleep evidence is weak. The American Diabetes Association says there is not enough evidence for routine magnesium to control blood sugar. Values for ages 19 to 30: men 400 mg, women 310 mg, pregnancy 350 mg, breastfeeding 310 mg. UK NHS figures: men 300 mg, women 270 mg.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf",
+      "https://www.nhs.uk/conditions/vitamins-and-minerals/others/",
+      "https://pubmed.ncbi.nlm.nih.gov/27402922/",
+      "https://pubmed.ncbi.nlm.nih.gov/16856052/",
+      "https://pubmed.ncbi.nlm.nih.gov/34836329/",
+      "https://pubmed.ncbi.nlm.nih.gov/8792038/",
+      "https://pubmed.ncbi.nlm.nih.gov/22529203/",
+      "https://pubmed.ncbi.nlm.nih.gov/33865376/",
+      "https://pubmed.ncbi.nlm.nih.gov/39770988/",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/magnesium%20oxide/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/magnesium%20citrate/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/magnesium%20glycinate/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/magnesium%20chloride%20hexahydrate/property/MolecularFormula,MolecularWeight/JSON"
+    ]
+  },
+  {
+    "id": "potassium",
+    "name": "Potassium",
+    "group": "mineral",
+    "unit": "mg",
+    "unitNotes": "Amounts are elemental potassium in mg. 1 mmol (or 1 mEq) is about 39 mg, so 90 mmol is 3,510 mg. Most supplements hold 99 mg or less per serving.",
+    "conversions": [
+      {
+        "from": "mmol potassium",
+        "to": "mg potassium",
+        "multiply": 39.1,
+        "note": "WHO: 90 mmol = 3,510 mg; PubChem atomic weight 39.10."
+      },
+      {
+        "from": "mEq potassium",
+        "to": "mg potassium",
+        "multiply": 39.1,
+        "note": "Potassium carries a single charge, so 1 mEq equals 1 mmol."
+      },
+      {
+        "from": "mg potassium chloride",
+        "to": "mg potassium",
+        "multiply": 0.52,
+        "note": "Calculated from PubChem molecular weight (74.55)."
+      },
+      {
+        "from": "mg potassium citrate (monohydrate)",
+        "to": "mg potassium",
+        "multiply": 0.36,
+        "note": "Calculated from PubChem molecular weight (324.41)."
+      },
+      {
+        "from": "mg potassium gluconate",
+        "to": "mg potassium",
+        "multiply": 0.17,
+        "note": "Calculated from PubChem molecular weight (234.25)."
+      }
+    ],
+    "rda": {
+      "type": "AI",
+      "male_19_50": 3400,
+      "female_19_50": 2600,
+      "male_51_plus": 3400,
+      "female_51_plus": 2600,
+      "pregnancy": 2900,
+      "lactation": 2800,
+      "source": "https://ods.od.nih.gov/factsheets/Potassium-HealthProfessional/"
+    },
+    "ul": {
+      "iom": null,
+      "efsa": null,
+      "efsa_year": 2005,
+      "applies_to": "supplements_only",
+      "notes": "No upper limit has been set by the US (2019) or EFSA (2005). Food potassium is not a risk for healthy kidneys; supplements are. About 3,000 mg a day as potassium chloride did not harm healthy adults over long periods, but 5,000 to 7,000 mg a day harmed the heart in a few case reports, and about 1,000 mg a day extra caused problems when kidneys were weak. The UK NHS says 3,700 mg or less a day from supplements is unlikely to cause obvious harm, and older people should not take potassium supplements unless a doctor advises.",
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/Potassium-HealthProfessional/",
+        "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+        "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf",
+        "https://www.nhs.uk/conditions/vitamins-and-minerals/others/"
+      ]
+    },
+    "studyRange": {
+      "low": 3510,
+      "high": 4680,
+      "goal": "Lowering blood pressure and stroke risk, mainly by eating more potassium-rich food",
+      "evidence": "A",
+      "evidenceWhy": "Several meta-analyses agree that more potassium lowers blood pressure in people with high blood pressure; there is little effect in people with normal pressure.",
+      "keyStudies": [
+        {
+          "title": "Effect of increased potassium intake on cardiovascular risk factors and disease: systematic review and meta-analyses (Aburto et al., BMJ)",
+          "year": 2013,
+          "type": "meta-analysis",
+          "finding": "More potassium lowered blood pressure in people with high blood pressure, most at 90 to 120 mmol (3,500 to 4,700 mg) a day, and was linked to 24% less stroke.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/23558164/"
+        },
+        {
+          "title": "The effect of potassium supplementation on blood pressure in hypertensive subjects (Filippini et al., Int J Cardiol)",
+          "year": 2017,
+          "type": "meta-analysis",
+          "finding": "Supplements lowered blood pressure by about 4.5/3 mmHg in people with high blood pressure, more so with a salty diet.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/28024910/"
+        },
+        {
+          "title": "Potassium Intake and Blood Pressure: A Dose-Response Meta-Analysis of Randomized Controlled Trials (Filippini et al., JAHA)",
+          "year": 2020,
+          "type": "meta-analysis",
+          "finding": "Benefit levelled off above about 30 mmol extra a day, and blood pressure rose above about 80 mmol extra, mainly in people on blood pressure medicine.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/32500831/"
+        },
+        {
+          "title": "Effect of Salt Substitution on Cardiovascular Events and Death (Neal et al., NEJM)",
+          "year": 2021,
+          "type": "RCT",
+          "finding": "In 20,995 older or post-stroke adults with high blood pressure, a salt substitute with 25% potassium chloride cut strokes by 14% with no clear rise in serious high-potassium events.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/34459569/"
+        },
+        {
+          "title": "Guideline: potassium intake for adults and children (WHO)",
+          "year": 2012,
+          "type": "guideline",
+          "finding": "Eat more potassium from food, at least 3,510 mg (90 mmol) a day; not for people whose kidneys or medicines limit potassium removal.",
+          "url": "https://www.who.int/publications/i/item/9789241504829"
+        },
+        {
+          "title": "Opinion of the Scientific Panel on Dietetic Products, Nutrition and Allergies on the Tolerable Upper Intake Level of Potassium (EFSA compendium)",
+          "year": 2005,
+          "type": "guideline",
+          "finding": "No upper limit could be set; about 3,000 mg a day as supplements was harmless in healthy adults, but weak kidneys raise the risk.",
+          "url": "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 3400,
+      "female": 2600,
+      "basis": "ai",
+      "why": "Adequate intake from food; never use pills to reach it."
+    },
+    "timing": {
+      "withFood": true,
+      "fatSoluble": false,
+      "bestTime": "with_meal",
+      "splitAbove": null,
+      "separateFrom": []
+    },
+    "forms": {
+      "better": [
+        "food sources (fruit, vegetables, beans, dairy)"
+      ],
+      "notes": "Food is the preferred source. Most supplements hold 99 mg or less because higher-dose potassium chloride pills have been linked to gut damage. Slow-release wax tablets have caused stomach and gut irritation; prescribed potassium should be taken with meals and a full glass of water."
+    },
+    "interactions": [
+      {
+        "with": "ACE inhibitor blood pressure medicines (for example lisinopril)",
+        "severity": "high",
+        "effect": "These raise blood potassium, and extra potassium can push it to a dangerous level.",
+        "action": "Do not take potassium pills or potassium salt substitutes unless your doctor says so."
+      },
+      {
+        "with": "ARB blood pressure medicines (for example losartan)",
+        "severity": "high",
+        "effect": "These raise blood potassium, and extra potassium can push it to a dangerous level.",
+        "action": "Do not take potassium pills or potassium salt substitutes unless your doctor says so."
+      },
+      {
+        "with": "Potassium-sparing water pills (spironolactone, eplerenone, amiloride, triamterene)",
+        "severity": "high",
+        "effect": "Together with potassium they can cause severe high potassium.",
+        "action": "Avoid potassium pills and salt substitutes unless your doctor says so."
+      },
+      {
+        "with": "Anti-inflammatory painkillers (NSAIDs such as ibuprofen)",
+        "severity": "moderate",
+        "effect": "They can make the body hold on to potassium.",
+        "action": "Ask a pharmacist before using them with potassium pills."
+      },
+      {
+        "with": "Potassium salt substitutes",
+        "severity": "moderate",
+        "effect": "They add a lot of potassium.",
+        "action": "Avoid them if you have kidney disease or take the medicines above, unless your doctor agrees."
+      },
+      {
+        "with": "Loop and thiazide water pills (for example furosemide)",
+        "severity": "low",
+        "effect": "They can lower potassium.",
+        "action": "Your doctor will check your level; don't self-treat with pills."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "kidney_disease",
+        "action": "avoid",
+        "why": "Weak kidneys cannot remove potassium, so pills or salt substitutes can cause a dangerous heart rhythm; your kidney team may also limit potassium foods."
+      },
+      {
+        "condition": "high_blood_pressure",
+        "action": "doctor_first",
+        "why": "Many blood pressure medicines raise potassium; eat potassium-rich food unless your doctor has told you to limit it."
+      },
+      {
+        "condition": "heart_disease",
+        "action": "doctor_first",
+        "why": "Many heart medicines change potassium levels, so ask before any potassium pills."
+      },
+      {
+        "condition": "type_1_diabetes",
+        "action": "doctor_first",
+        "why": "Diabetes can affect how the body handles potassium; ask before potassium pills."
+      },
+      {
+        "condition": "type_2_diabetes",
+        "action": "doctor_first",
+        "why": "Diabetes can affect how the body handles potassium; ask before potassium pills."
+      },
+      {
+        "condition": "age_65_plus",
+        "action": "doctor_first",
+        "why": "Kidneys clear potassium less well with age; only take potassium pills if a doctor advises."
+      },
+      {
+        "condition": "athlete",
+        "action": "caution",
+        "why": "Heavy sweating and dehydration make potassium pills riskier; get potassium from food and drinks instead."
+      },
+      {
+        "condition": "inflammatory_bowel_disease",
+        "action": "check_level",
+        "why": "Bowel disease can cause potassium loss; ask your doctor to check rather than self-treating."
+      }
+    ],
+    "deficiencySigns": [
+      "Constipation",
+      "Tiredness",
+      "Muscle weakness",
+      "Feeling generally unwell",
+      "Passing a lot of urine or an irregular heartbeat in severe cases"
+    ],
+    "excessSigns": [
+      "Stomach pain, feeling sick or diarrhoea from supplements",
+      "Muscle weakness",
+      "Burning or prickling in hands and feet",
+      "Palpitations or an irregular heartbeat, which can be life-threatening"
+    ],
+    "foodSources": [
+      {
+        "food": "Dried apricots",
+        "serving": "1/2 cup",
+        "amount": 755
+      },
+      {
+        "food": "Lentils, cooked",
+        "serving": "1 cup",
+        "amount": 731
+      },
+      {
+        "food": "Acorn squash, mashed",
+        "serving": "1 cup",
+        "amount": 644
+      },
+      {
+        "food": "Prunes",
+        "serving": "1/2 cup",
+        "amount": 635
+      },
+      {
+        "food": "Raisins",
+        "serving": "1/2 cup",
+        "amount": 618
+      },
+      {
+        "food": "Potato, baked",
+        "serving": "1 medium",
+        "amount": 610
+      },
+      {
+        "food": "Kidney beans, canned",
+        "serving": "1 cup",
+        "amount": 607
+      },
+      {
+        "food": "Orange juice",
+        "serving": "1 cup (240 ml)",
+        "amount": 496
+      },
+      {
+        "food": "Soybeans, boiled",
+        "serving": "1/2 cup",
+        "amount": 443
+      },
+      {
+        "food": "Banana",
+        "serving": "1 medium",
+        "amount": 422
+      },
+      {
+        "food": "Milk, 1% fat",
+        "serving": "1 cup (240 ml)",
+        "amount": 366
+      },
+      {
+        "food": "Spinach, raw",
+        "serving": "2 cups",
+        "amount": 334
+      }
+    ],
+    "lowText": "Your potassium from food looks low today, so add fruit, vegetables, beans or lentils rather than pills.",
+    "highText": "Potassium pills can be risky for some people, so please check with your doctor before taking them, especially if you have kidney problems or take blood pressure medicine.",
+    "notes": "Recommendation: track potassium from food only, and never suggest potassium pills or salt substitutes. If a user logs a potassium supplement, show a caution and ask about kidney disease and blood pressure, heart or water-pill medicines. There is no upper limit, so the 'near the limit' warning cannot be based on a number. The AI does not apply to people whose kidneys or medicines limit potassium removal; for them even food below the AI can be too much. UK NHS: adults need 3,500 mg a day. WHO advises at least 3,510 mg a day from food. The meter uses the US AI, not WHO's 3,510 mg, because the blood pressure benefit was seen mainly in people with high blood pressure and a higher target could push people toward pills. Hide the low-potassium message for users with kidney disease or on the medicines listed above.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheets/Potassium-HealthProfessional/",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf",
+      "https://www.nhs.uk/conditions/vitamins-and-minerals/others/",
+      "https://www.who.int/publications/i/item/9789241504829",
+      "https://iris.who.int/server/api/core/bitstreams/8516dcd5-49a9-486e-890b-48471468a5bb/content",
+      "https://pubmed.ncbi.nlm.nih.gov/23558164/",
+      "https://pubmed.ncbi.nlm.nih.gov/28024910/",
+      "https://pubmed.ncbi.nlm.nih.gov/32500831/",
+      "https://pubmed.ncbi.nlm.nih.gov/34459569/",
+      "https://api.fda.gov/drug/label.json?search=openfda.generic_name:%22spironolactone%22&limit=1",
+      "https://api.fda.gov/drug/label.json?search=openfda.generic_name:%22lisinopril%22&limit=1",
+      "https://api.fda.gov/drug/label.json?search=openfda.generic_name:%22losartan%20potassium%22&limit=1",
+      "https://api.fda.gov/drug/label.json?search=openfda.generic_name:%22potassium%20chloride%22&limit=1",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/potassium/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/potassium%20chloride/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/potassium%20citrate/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/potassium%20gluconate/property/MolecularFormula,MolecularWeight/JSON"
+    ]
+  },
+  {
+    "id": "iron",
+    "name": "Iron",
+    "group": "trace_mineral",
+    "unit": "mg",
+    "unitNotes": "Amounts are elemental iron in mg, as labels show. A 325 mg ferrous sulfate tablet (US) and a 200 mg dried ferrous sulfate tablet (UK) each give about 65 mg iron.",
+    "conversions": [
+      {
+        "from": "mg ferrous sulfate (heptahydrate, e.g. 325 mg tablet)",
+        "to": "mg elemental iron",
+        "multiply": 0.2,
+        "note": "NIH ODS: 20% elemental iron (PubChem gives 0.201)."
+      },
+      {
+        "from": "mg dried ferrous sulfate (e.g. UK 200 mg tablet)",
+        "to": "mg elemental iron",
+        "multiply": 0.325,
+        "note": "BSG 2021 table: 200 mg tablet = 65 mg iron."
+      },
+      {
+        "from": "mg ferrous fumarate",
+        "to": "mg elemental iron",
+        "multiply": 0.33,
+        "note": "NIH ODS: 33% elemental iron. BSG table: 210 mg tablet = 69 mg; 305 mg capsule = 100 mg."
+      },
+      {
+        "from": "mg ferrous gluconate",
+        "to": "mg elemental iron",
+        "multiply": 0.12,
+        "note": "NIH ODS: 12% elemental iron. BSG table: 300 mg tablet = 37 mg."
+      },
+      {
+        "from": "mg ferrous bisglycinate",
+        "to": "mg elemental iron",
+        "multiply": 0.27,
+        "note": "Calculated from PubChem molecular weight (203.96); labels usually give elemental iron, so use that."
+      }
+    ],
+    "rda": {
+      "type": "RDA",
+      "male_19_50": 8,
+      "female_19_50": 18,
+      "male_51_plus": 8,
+      "female_51_plus": 8,
+      "pregnancy": 27,
+      "lactation": 9,
+      "source": "https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/"
+    },
+    "ul": {
+      "iom": 45,
+      "efsa": 40,
+      "efsa_year": 2024,
+      "applies_to": "total",
+      "notes": "Both figures count food and supplements together. The US limit is 45 mg a day, set to avoid stomach and gut side effects. EFSA (2024) could not set a true upper limit and instead gave a 'safe level of intake' of 40 mg a day for adults, including pregnancy and breastfeeding. It is based on no black stools at 20 to 25 mg a day of iron pills on top of about 15 mg from food. Going over 40 mg is not proven harmful, but the app should warn at 40 mg. Doctors sometimes prescribe more to treat iron deficiency; that must stay under medical care. The UK NHS says 17 mg or less a day of iron supplements is unlikely to cause harm.",
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/",
+        "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+        "https://doi.org/10.2903/j.efsa.2024.8819",
+        "https://api.crossref.org/works/10.2903/j.efsa.2024.8819",
+        "https://www.nhs.uk/conditions/vitamins-and-minerals/iron/"
+      ]
+    },
+    "studyRange": {
+      "low": 30,
+      "high": 120,
+      "goal": "Restoring low iron stores or treating iron-deficiency anaemia confirmed by a blood test, under medical care",
+      "evidence": "B",
+      "evidenceWhy": "Iron pills work well for proven low iron; the best schedule (daily or every other day) is still being studied.",
+      "keyStudies": [
+        {
+          "title": "Iron absorption from oral iron supplements given on consecutive versus alternate days and as single morning doses versus twice-daily split dosing in iron-depleted women (Stoffel et al., Lancet Haematology)",
+          "year": 2017,
+          "type": "pharmacokinetic study",
+          "finding": "In iron-depleted young women, 60 mg every other day was absorbed better than 60 mg daily, and splitting 120 mg into two doses gave no extra iron.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/29032957/"
+        },
+        {
+          "title": "Iron absorption from supplements is greater with alternate day than with consecutive day dosing in iron-deficient anemic women (Stoffel et al., Haematologica)",
+          "year": 2020,
+          "type": "pharmacokinetic study",
+          "finding": "In women with anaemia, 100 or 200 mg every other day was absorbed 40 to 50% better per dose than on back-to-back days.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/31413088/"
+        },
+        {
+          "title": "Alternate day versus consecutive day oral iron supplementation in iron-depleted women: a randomized double-blind placebo-controlled study (von Siebenthal et al., EClinicalMedicine)",
+          "year": 2023,
+          "type": "RCT",
+          "finding": "With the same total iron (100 mg doses), every-other-day dosing gave the same iron stores, fewer stomach side effects and less iron deficiency at 6 months.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/38021373/"
+        },
+        {
+          "title": "Ferritin-guided iron supplementation as an alternative or complement to prolonged blood donation intervals (FORTE) (Karregat et al., Lancet Haematology)",
+          "year": 2025,
+          "type": "RCT",
+          "finding": "In 830 blood donors with low ferritin, 30 or 60 mg daily or every other day for 8 weeks cut iron deficiency from about half to 1 to 10%.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/40819648/"
+        },
+        {
+          "title": "British Society of Gastroenterology guidelines for the management of iron deficiency anaemia in adults (Snook et al., Gut)",
+          "year": 2021,
+          "type": "guideline",
+          "finding": "Start with one tablet a day, or every other day if side effects; take it on an empty stomach; adding vitamin C is not recommended; look for a cause in men and women after menopause.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/34497146/"
+        },
+        {
+          "title": "The Efficacy and Safety of Vitamin C for Iron Supplementation in Adult Patients With Iron Deficiency Anemia: A Randomized Clinical Trial (Li et al., JAMA Netw Open)",
+          "year": 2020,
+          "type": "RCT",
+          "finding": "Adding 200 mg vitamin C to iron did not improve recovery in 440 adults with anaemia.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/33136134/"
+        },
+        {
+          "title": "Scientific opinion on the tolerable upper intake level for iron (EFSA NDA Panel, EFSA Journal)",
+          "year": 2024,
+          "type": "guideline",
+          "finding": "No upper limit could be set; a safe level of 40 mg a day was given for adults.",
+          "url": "https://doi.org/10.2903/j.efsa.2024.8819"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 8,
+      "female": 18,
+      "basis": "rda",
+      "why": "RDA; only go above this with a blood test (ferritin) and a doctor's advice; women over 50 need 8 mg."
+    },
+    "timing": {
+      "withFood": false,
+      "fatSoluble": false,
+      "bestTime": "morning",
+      "splitAbove": null,
+      "separateFrom": [
+        {
+          "what": "Tea and coffee",
+          "hours": 2,
+          "why": "They block iron absorption. The NHS advises a 2-hour gap; tea's effect fades within about an hour."
+        },
+        {
+          "what": "Dairy, eggs and calcium supplements",
+          "hours": 2,
+          "why": "They can lower iron absorption. The NHS advises a 2-hour gap."
+        },
+        {
+          "what": "Thyroid medicine (levothyroxine)",
+          "hours": 4,
+          "why": "Iron can stop the medicine being absorbed. Keep them at least 4 hours apart."
+        },
+        {
+          "what": "Tetracycline antibiotics (for example doxycycline)",
+          "hours": 3,
+          "why": "Iron blocks the antibiotic. Take iron 3 hours before or 2 hours after it."
+        },
+        {
+          "what": "Quinolone antibiotics (for example ciprofloxacin)",
+          "hours": 2,
+          "why": "Iron blocks the antibiotic. Leave 2 hours between them."
+        }
+      ]
+    },
+    "forms": {
+      "better": [
+        "ferrous sulfate",
+        "ferrous fumarate",
+        "ferrous gluconate"
+      ],
+      "notes": "Plain iron salts work and are cheap; at standard doses they work about the same. Slow-release iron does not improve absorption or side effects. One morning dose is best; do not split it through the day. Every other day can mean fewer side effects. Iron from meat and fish is absorbed better than iron from plants. Dark stools are common and usually harmless."
+    },
+    "interactions": [
+      {
+        "with": "Levothyroxine (thyroid medicine)",
+        "severity": "moderate",
+        "effect": "Iron can stop the medicine being absorbed.",
+        "action": "Keep them at least 4 hours apart."
+      },
+      {
+        "with": "Levodopa (Parkinson's medicine)",
+        "severity": "moderate",
+        "effect": "Iron lowers absorption of levodopa.",
+        "action": "Ask your doctor or pharmacist how to space them."
+      },
+      {
+        "with": "Tetracycline antibiotics (for example doxycycline)",
+        "severity": "moderate",
+        "effect": "Iron blocks absorption of the antibiotic.",
+        "action": "Take iron 3 hours before or 2 hours after the antibiotic."
+      },
+      {
+        "with": "Quinolone antibiotics (for example ciprofloxacin)",
+        "severity": "moderate",
+        "effect": "Iron blocks absorption of the antibiotic.",
+        "action": "Leave 2 hours between them."
+      },
+      {
+        "with": "Bisphosphonates (for example alendronate)",
+        "severity": "moderate",
+        "effect": "Iron can stop the bone medicine being absorbed.",
+        "action": "Take the bone medicine first, then wait at least 30 minutes."
+      },
+      {
+        "with": "HIV medicines (dolutegravir, bictegravir)",
+        "severity": "moderate",
+        "effect": "Iron can affect how these medicines work.",
+        "action": "Ask your pharmacist how to space them."
+      },
+      {
+        "with": "Other medicines (methyldopa, penicillamine, mycophenolate, trientine, eltrombopag)",
+        "severity": "moderate",
+        "effect": "Iron can change how these medicines work.",
+        "action": "Ask your pharmacist how to space them."
+      },
+      {
+        "with": "Acid-reducing medicine (proton pump inhibitors such as omeprazole)",
+        "severity": "low",
+        "effect": "Less stomach acid means less iron is absorbed.",
+        "action": "Tell your doctor if your iron level is not improving."
+      },
+      {
+        "with": "Calcium supplements and dairy",
+        "severity": "low",
+        "effect": "They can lower iron absorption.",
+        "action": "Take them at different times of day."
+      },
+      {
+        "with": "Zinc supplements",
+        "severity": "low",
+        "effect": "Iron at 25 mg or more can lower zinc absorption.",
+        "action": "Take them at different times of day."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "hemochromatosis",
+        "action": "avoid",
+        "why": "Your body already stores too much iron; avoid iron and vitamin C supplements."
+      },
+      {
+        "condition": "iron_deficiency",
+        "action": "doctor_first",
+        "why": "Treat it only after a blood test, with a doctor who sets the dose and looks for the cause."
+      },
+      {
+        "condition": "heavy_periods",
+        "action": "check_level",
+        "why": "Heavy periods are a common cause of low iron; ask for a blood test before taking iron."
+      },
+      {
+        "condition": "pregnancy",
+        "action": "may_need_more",
+        "why": "Needs rise to 27 mg a day; your midwife or doctor will check your blood and advise on iron."
+      },
+      {
+        "condition": "vegan_vegetarian",
+        "action": "may_need_more",
+        "why": "Plant iron is absorbed less well, so needs are 1.8 times higher; check your level before taking pills."
+      },
+      {
+        "condition": "menopause",
+        "action": "caution",
+        "why": "After menopause needs drop to 8 mg; take iron only if a blood test shows you need it."
+      },
+      {
+        "condition": "age_65_plus",
+        "action": "caution",
+        "why": "Older adults rarely need iron pills; low iron at this age needs a doctor to find the cause."
+      },
+      {
+        "condition": "inflammatory_bowel_disease",
+        "action": "doctor_first",
+        "why": "Bowel disease can cause low iron, but iron pills can upset the gut; your doctor should choose the type and dose."
+      },
+      {
+        "condition": "coeliac",
+        "action": "check_level",
+        "why": "Coeliac disease can stop iron being absorbed; ask your doctor to check your level."
+      },
+      {
+        "condition": "bariatric_surgery",
+        "action": "check_level",
+        "why": "Stomach surgery can reduce iron absorption; your care team should check your level."
+      },
+      {
+        "condition": "heart_disease",
+        "action": "check_level",
+        "why": "People with heart failure are more likely to have low iron; ask your doctor to check."
+      },
+      {
+        "condition": "kidney_disease",
+        "action": "doctor_first",
+        "why": "Kidney disease often needs a different iron plan set by your kidney team."
+      },
+      {
+        "condition": "cancer_treatment",
+        "action": "doctor_first",
+        "why": "Cancer can cause low iron, but your treatment team should decide on any iron."
+      },
+      {
+        "condition": "thyroid_disease",
+        "action": "caution",
+        "why": "Iron can block thyroid medicine; keep them at least 4 hours apart."
+      }
+    ],
+    "deficiencySigns": [
+      "Tiredness and weakness",
+      "Trouble concentrating",
+      "Feeling cold",
+      "Stomach upsets",
+      "Catching infections more easily",
+      "Lower exercise performance"
+    ],
+    "excessSigns": [
+      "Stomach upset or pain",
+      "Constipation",
+      "Feeling sick or being sick",
+      "Diarrhoea",
+      "Dark or black stools, which are common and usually harmless",
+      "Overdose can be fatal, especially for children"
+    ],
+    "foodSources": [
+      {
+        "food": "Breakfast cereal fortified with 100% of daily iron",
+        "serving": "1 serving",
+        "amount": 18
+      },
+      {
+        "food": "Oysters, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 8
+      },
+      {
+        "food": "White beans, canned",
+        "serving": "1 cup",
+        "amount": 8
+      },
+      {
+        "food": "Beef liver, pan fried",
+        "serving": "3 oz (85 g)",
+        "amount": 5
+      },
+      {
+        "food": "Lentils, boiled",
+        "serving": "1/2 cup",
+        "amount": 3
+      },
+      {
+        "food": "Spinach, boiled",
+        "serving": "1/2 cup",
+        "amount": 3
+      },
+      {
+        "food": "Tofu, firm",
+        "serving": "1/2 cup",
+        "amount": 3
+      },
+      {
+        "food": "Dark chocolate",
+        "serving": "1 oz (28 g)",
+        "amount": 2
+      },
+      {
+        "food": "Kidney beans, canned",
+        "serving": "1/2 cup",
+        "amount": 2
+      },
+      {
+        "food": "Sardines, canned",
+        "serving": "3 oz (85 g)",
+        "amount": 2
+      },
+      {
+        "food": "Chickpeas, boiled",
+        "serving": "1/2 cup",
+        "amount": 2
+      }
+    ],
+    "lowText": "Your iron looks low today, so try beans, lentils, tofu, red meat or fortified cereal, and only take iron pills if a blood test shows you need them.",
+    "highText": "You're near the safe daily level for iron (40 mg), so please don't take more today unless your doctor has told you to.",
+    "notes": "Iron is the nutrient where unneeded pills most often cause harm. The app should never suggest iron pills unless the user confirms a blood test (ferritin) and a doctor's advice; the meter should count food so users do not chase the target with pills. Men and women after menopause rarely need iron, and about a third of them with iron-deficiency anaemia have an underlying gut problem, so they need a doctor. A ferritin under 30 µg/L suggests low iron (ODS). About 1 in 10 white people carry the main haemochromatosis gene change. 25 to 35% of regular blood donors become iron deficient. Keep iron away from children. Empty stomach is best (food can cut absorption by up to 75%), but taking it with food is fine if it upsets the stomach. Vitamin C: ODS says it boosts plant-iron absorption, but a 2020 trial found no extra benefit with iron pills and the BSG 2021 guideline does not recommend adding it. The 2017 alternate-day study is in Lancet Haematology; the 2020 one is in Haematologica. Treatment usually continues about 3 months after blood counts recover. UK NHS: men 8.7 mg, women 19 to 49 14.8 mg, women 50+ 8.7 mg.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://doi.org/10.2903/j.efsa.2024.8819",
+      "https://api.crossref.org/works/10.2903/j.efsa.2024.8819",
+      "https://www.nhs.uk/conditions/vitamins-and-minerals/iron/",
+      "https://www.nhs.uk/medicines/ferrous-sulfate/how-and-when-to-take-ferrous-sulfate/",
+      "https://www.nhs.uk/medicines/ferrous-sulfate/taking-ferrous-sulfate-with-other-medicines-and-herbal-supplements/",
+      "https://www.nhs.uk/medicines/ferrous-sulfate/who-can-and-cannot-take-ferrous-sulfate/",
+      "https://www.nhs.uk/medicines/ferrous-sulfate/side-effects-of-ferrous-sulfate/",
+      "https://www.nhs.uk/medicines/ciprofloxacin/taking-or-using-ciprofloxacin-with-other-medicines-and-herbal-supplements/",
+      "https://www.nhs.uk/medicines/alendronic-acid/taking-alendronic-acid-with-other-medicines-and-herbal-supplements/",
+      "https://www.nhs.uk/medicines/levothyroxine/",
+      "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8515119/fullTextXML",
+      "https://pubmed.ncbi.nlm.nih.gov/29032957/",
+      "https://pubmed.ncbi.nlm.nih.gov/31413088/",
+      "https://pubmed.ncbi.nlm.nih.gov/38021373/",
+      "https://pubmed.ncbi.nlm.nih.gov/40819648/",
+      "https://pubmed.ncbi.nlm.nih.gov/34497146/",
+      "https://pubmed.ncbi.nlm.nih.gov/33136134/",
+      "https://pubmed.ncbi.nlm.nih.gov/32650997/",
+      "https://api.fda.gov/drug/label.json?search=openfda.generic_name:%22levothyroxine%20sodium%22&limit=1",
+      "https://api.fda.gov/drug/label.json?search=openfda.generic_name:%22alendronate%20sodium%22&limit=1",
+      "https://api.fda.gov/drug/label.json?search=openfda.generic_name:%22doxycycline%20hyclate%22&limit=1",
+      "https://medlineplus.gov/druginfo/meds/a682063.html",
+      "https://medlineplus.gov/druginfo/meds/a682778.html",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/iron/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/ferrous%20sulfate%20heptahydrate/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/ferrous%20fumarate/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/ferrous%20gluconate/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/ferrous%20bisglycinate/property/MolecularFormula,MolecularWeight/JSON"
+    ]
+  },
+  {
+    "id": "zinc",
+    "name": "Zinc",
+    "group": "trace_mineral",
+    "unit": "mg",
+    "unitNotes": "Amounts are elemental zinc in mg, as labels show. For example, 220 mg zinc sulfate (heptahydrate) gives about 50 mg zinc.",
+    "conversions": [
+      {
+        "from": "mg zinc sulfate (heptahydrate)",
+        "to": "mg elemental zinc",
+        "multiply": 0.23,
+        "note": "Calculated from PubChem molecular weight (287.6)."
+      },
+      {
+        "from": "mg zinc sulfate (monohydrate)",
+        "to": "mg elemental zinc",
+        "multiply": 0.36,
+        "note": "Calculated from PubChem molecular weight (179.5)."
+      },
+      {
+        "from": "mg zinc gluconate",
+        "to": "mg elemental zinc",
+        "multiply": 0.14,
+        "note": "Calculated from PubChem molecular weight (455.7)."
+      },
+      {
+        "from": "mg zinc acetate (dihydrate)",
+        "to": "mg elemental zinc",
+        "multiply": 0.3,
+        "note": "Calculated from PubChem molecular weight (219.5)."
+      },
+      {
+        "from": "mg zinc citrate (trihydrate)",
+        "to": "mg elemental zinc",
+        "multiply": 0.31,
+        "note": "Calculated from PubChem molecular weight (628.4)."
+      },
+      {
+        "from": "mg zinc oxide",
+        "to": "mg elemental zinc",
+        "multiply": 0.8,
+        "note": "Calculated from PubChem molecular weight (81.4)."
+      },
+      {
+        "from": "mg zinc picolinate",
+        "to": "mg elemental zinc",
+        "multiply": 0.21,
+        "note": "Calculated from PubChem molecular weight (309.6); use the label's elemental figure when given."
+      }
+    ],
+    "rda": {
+      "type": "RDA",
+      "male_19_50": 11,
+      "female_19_50": 8,
+      "male_51_plus": 11,
+      "female_51_plus": 8,
+      "pregnancy": 11,
+      "lactation": 12,
+      "source": "https://ods.od.nih.gov/factsheets/Zinc-HealthProfessional/"
+    },
+    "ul": {
+      "iom": 40,
+      "efsa": 25,
+      "efsa_year": 2002,
+      "applies_to": "total",
+      "notes": "Both limits count food and supplements together and are set to protect copper levels. The US limit is 40 mg. EFSA's is 25 mg: no harm to copper was seen at about 50 mg a day in small 3-month studies, and that figure was halved for safety. It also covers pregnancy and breastfeeding. The UK NHS says not to take more than 25 mg a day of zinc supplements unless a doctor advises. The app should warn at 25 mg. Limits do not apply to zinc prescribed by a doctor.",
+      "sources": [
+        "https://ods.od.nih.gov/factsheets/Zinc-HealthProfessional/",
+        "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+        "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf",
+        "https://www.nhs.uk/conditions/vitamins-and-minerals/others/"
+      ]
+    },
+    "studyRange": {
+      "low": 75,
+      "high": 100,
+      "goal": "Shortening a common cold with lozenges started within 24 hours of symptoms, for a few days only",
+      "evidence": "B",
+      "evidenceWhy": "Several meta-analyses found colds were 2 to 3 days shorter, but the 2024 Cochrane review rated this low certainty and found no prevention benefit.",
+      "keyStudies": [
+        {
+          "title": "Zinc lozenges may shorten the duration of colds: a systematic review (Hemilä, Open Respir Med J)",
+          "year": 2011,
+          "type": "meta-analysis",
+          "finding": "Below 75 mg a day there was no effect; above 75 mg a day colds were 20 to 42% shorter.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/21769305/"
+        },
+        {
+          "title": "Zinc lozenges and the common cold: a meta-analysis comparing zinc acetate and zinc gluconate, and the role of zinc dosage (Hemilä, JRSM Open)",
+          "year": 2017,
+          "type": "meta-analysis",
+          "finding": "In 7 trials over 75 mg a day, colds were 33% shorter; doses over 100 mg a day gave no extra benefit.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/28515951/"
+        },
+        {
+          "title": "Zinc acetate lozenges for treating the common cold: an individual patient data meta-analysis (Hemilä et al., Br J Clin Pharmacol)",
+          "year": 2016,
+          "type": "meta-analysis",
+          "finding": "Zinc acetate lozenges shortened colds by about 2.7 days, against an average cold of 7 days.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/27378206/"
+        },
+        {
+          "title": "Zinc for prevention and treatment of the common cold (Nault et al., Cochrane)",
+          "year": 2024,
+          "type": "Cochrane review",
+          "finding": "Zinc did not prevent colds; as treatment, colds may be about 2.4 days shorter (low certainty), with more mild side effects.",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/38719213/"
+        },
+        {
+          "title": "Opinion of the Scientific Committee on Food on the Tolerable Upper Intake Level of Zinc (EFSA compendium)",
+          "year": 2002,
+          "type": "guideline",
+          "finding": "No harm to copper status at about 50 mg a day in small studies, so the limit was set at 25 mg.",
+          "url": "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf"
+        }
+      ]
+    },
+    "appTarget": {
+      "male": 11,
+      "female": 8,
+      "basis": "rda",
+      "why": "RDA; staying at or under 25 mg a day protects copper levels."
+    },
+    "timing": {
+      "withFood": null,
+      "fatSoluble": false,
+      "bestTime": "any",
+      "splitAbove": null,
+      "separateFrom": [
+        {
+          "what": "Quinolone and tetracycline antibiotics (for example ciprofloxacin, doxycycline)",
+          "hours": 6,
+          "why": "Zinc lowers how much antibiotic gets in. Take the antibiotic at least 2 hours before, or 4 to 6 hours after, zinc."
+        },
+        {
+          "what": "Penicillamine",
+          "hours": 1,
+          "why": "Zinc reduces how well it works. Keep them at least 1 hour apart."
+        }
+      ]
+    },
+    "forms": {
+      "better": [
+        "zinc citrate",
+        "zinc gluconate"
+      ],
+      "notes": "Citrate and gluconate are absorbed a little better than oxide (about 61% versus 50% in young adults). For colds, acetate and gluconate lozenges both worked in trials. Never use zinc nasal sprays or gels: they have been linked to lasting or permanent loss of smell. Some denture creams hold 17 to 34 mg zinc per gram, and heavy use has caused copper deficiency."
+    },
+    "interactions": [
+      {
+        "with": "Copper (long-term high zinc)",
+        "severity": "high",
+        "effect": "50 mg or more a day for weeks can block copper and cause anaemia, low white blood cells and nerve damage.",
+        "action": "Keep zinc at or under 25 mg a day unless a doctor advises; if prescribed high-dose zinc, ask about copper."
+      },
+      {
+        "with": "Quinolone and tetracycline antibiotics",
+        "severity": "moderate",
+        "effect": "Zinc lowers how much antibiotic gets absorbed.",
+        "action": "Take the antibiotic 2 hours before or 4 to 6 hours after zinc."
+      },
+      {
+        "with": "Penicillamine",
+        "severity": "moderate",
+        "effect": "Zinc reduces absorption and action of the medicine.",
+        "action": "Keep them at least 1 hour apart."
+      },
+      {
+        "with": "Thiazide water pills",
+        "severity": "low",
+        "effect": "They increase zinc loss in urine.",
+        "action": "Your doctor may check your level."
+      },
+      {
+        "with": "Iron supplements",
+        "severity": "low",
+        "effect": "Iron at 25 mg or more can lower zinc absorption.",
+        "action": "Take them at different times of day."
+      }
+    ],
+    "conditionFlags": [
+      {
+        "condition": "vegan_vegetarian",
+        "action": "may_need_more",
+        "why": "Phytates in grains and beans lower zinc absorption."
+      },
+      {
+        "condition": "pregnancy",
+        "action": "may_need_more",
+        "why": "Needs rise to 11 mg a day; stay under 25 mg a day."
+      },
+      {
+        "condition": "breastfeeding",
+        "action": "may_need_more",
+        "why": "Needs rise to 12 mg a day; stay under 25 mg a day."
+      },
+      {
+        "condition": "alcohol_use",
+        "action": "may_need_more",
+        "why": "30 to 50% of people with alcohol use disorder have low zinc."
+      },
+      {
+        "condition": "inflammatory_bowel_disease",
+        "action": "check_level",
+        "why": "Bowel disease can lower zinc; ask your doctor to check before taking more than the RDA."
+      },
+      {
+        "condition": "coeliac",
+        "action": "check_level",
+        "why": "Coeliac disease can lower zinc absorption; ask your doctor to check."
+      },
+      {
+        "condition": "bariatric_surgery",
+        "action": "check_level",
+        "why": "Weight-loss surgery can lower zinc; your care team should check your level."
+      },
+      {
+        "condition": "iron_deficiency",
+        "action": "caution",
+        "why": "Iron pills can lower zinc absorption; take them at different times."
+      }
+    ],
+    "deficiencySigns": [
+      "Changes in taste or smell",
+      "Slow wound healing",
+      "Catching infections more often",
+      "Changes in thinking or mood in older adults"
+    ],
+    "excessSigns": [
+      "Feeling sick, being sick or stomach upset",
+      "Dizziness or headache",
+      "Loss of appetite",
+      "Over weeks: low copper, which can cause anaemia, weak bones, and numbness or unsteady walking",
+      "Lower 'good' HDL cholesterol"
+    ],
+    "foodSources": [
+      {
+        "food": "Oysters, Eastern, raw",
+        "serving": "3 oz (85 g)",
+        "amount": 32
+      },
+      {
+        "food": "Oysters, Pacific, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 28.2
+      },
+      {
+        "food": "Beef sirloin, roasted",
+        "serving": "3 oz (85 g)",
+        "amount": 3.8
+      },
+      {
+        "food": "Blue crab, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 3.2
+      },
+      {
+        "food": "Fortified breakfast cereal",
+        "serving": "1 serving",
+        "amount": 2.8
+      },
+      {
+        "food": "Oats, cooked",
+        "serving": "1 cup",
+        "amount": 2.3
+      },
+      {
+        "food": "Pumpkin seeds, roasted",
+        "serving": "1 oz (28 g)",
+        "amount": 2.2
+      },
+      {
+        "food": "Pork chop",
+        "serving": "3 oz (85 g)",
+        "amount": 1.9
+      },
+      {
+        "food": "Turkey breast, roasted",
+        "serving": "3 oz (85 g)",
+        "amount": 1.5
+      },
+      {
+        "food": "Cheddar cheese",
+        "serving": "1.5 oz (42 g)",
+        "amount": 1.5
+      },
+      {
+        "food": "Shrimp, cooked",
+        "serving": "3 oz (85 g)",
+        "amount": 1.4
+      },
+      {
+        "food": "Lentils, boiled",
+        "serving": "1/2 cup",
+        "amount": 1.3
+      }
+    ],
+    "lowText": "Your zinc is low today, so try meat, shellfish, dairy, oats, pumpkin seeds or lentils.",
+    "highText": "You're near the safe daily limit for zinc (25 mg), so please stop for today, as too much for weeks can lower your copper.",
+    "notes": "Zinc lozenges for colds (over 75 mg a day, one every 2 to 3 waking hours, started within 24 hours of symptoms) go well above both limits, so the app should offer this only as a short 'ask your pharmacist or doctor' protocol, never as daily use. The 2024 Cochrane review found zinc does not prevent colds and its effect on cold length is low certainty. Never use zinc nasal sprays or gels; the US FDA warned against several in 2009 because of lasting loss of smell. Long-term intakes of about 50 mg a day or more can cause copper deficiency with anaemia and nerve damage, and nerve damage may not fully recover. EFSA's 2002 review found the most common zinc-only supplement on the European market then held 30 mg, already above its 25 mg limit. The AREDS eye formula (80 mg zinc plus 2 mg copper, as summarised by ODS) is a doctor-led treatment for macular degeneration, not general use. UK NHS: men 9.5 mg, women 7 mg.",
+    "sources": [
+      "https://ods.od.nih.gov/factsheets/Zinc-HealthProfessional/",
+      "https://www.efsa.europa.eu/sites/default/files/2024-05/ul-summary-report.pdf",
+      "https://www.efsa.europa.eu/sites/default/files/efsa_rep/blobserver_assets/ndatolerableuil.pdf",
+      "https://www.nhs.uk/conditions/vitamins-and-minerals/others/",
+      "https://www.nccih.nih.gov/health/colds-flu-and-complementary-health-approaches",
+      "https://www.nhs.uk/medicines/ciprofloxacin/taking-or-using-ciprofloxacin-with-other-medicines-and-herbal-supplements/",
+      "https://medlineplus.gov/druginfo/meds/a682063.html",
+      "https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/",
+      "https://pubmed.ncbi.nlm.nih.gov/21769305/",
+      "https://pubmed.ncbi.nlm.nih.gov/28515951/",
+      "https://pubmed.ncbi.nlm.nih.gov/27378206/",
+      "https://pubmed.ncbi.nlm.nih.gov/38719213/",
+      "https://pubmed.ncbi.nlm.nih.gov/20644061/",
+      "https://pubmed.ncbi.nlm.nih.gov/42087025/",
+      "https://pubmed.ncbi.nlm.nih.gov/38846187/",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/zinc/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/zinc%20sulfate%20heptahydrate/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/zinc%20sulfate%20monohydrate/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/zinc%20gluconate/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/zinc;diacetate;dihydrate/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/zinc%20citrate%20trihydrate/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/zinc%20oxide/property/MolecularFormula,MolecularWeight/JSON",
+      "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/zinc%20picolinate/property/MolecularFormula,MolecularWeight/JSON"
+    ]
+  }
+]
