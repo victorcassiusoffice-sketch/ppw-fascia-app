@@ -2,18 +2,19 @@
 
 ## STATUS
 
-**Phase 1 (health engine + data) — complete and reviewed, on branch `feat/health-meters-2026-10`. Not merged, not deployed.**
+**Phases 1 and 2 complete, on branch `feat/health-meters-2026-10`. Not merged, not deployed.**
 
 | | |
 |---|---|
 | Branch | `feat/health-meters-2026-10` (off `origin/main` @ `19413ab`) |
-| Commits | `42f416b` Phase 1 · `cce5c39` review fixes |
+| Commits | `42f416b` Phase 1 · `cce5c39` review fixes · `e8f235b` Phase 1 status · _this_ Phase 2 |
 | Worktree | `C:\Users\Victor\Documents\PPW-Code\ppw-fascia-app-health` |
-| Tests | **676 passing** (was 528 before this phase — 148 new) |
+| Tests | **716 passing** (676 after Phase 1 — 40 new) |
 | Build | clean |
+| Rendered | real Chromium at 390 px, **both themes**, 14 frames, zero console errors |
 | Live | **nothing deployed.** `app.ppwellness.co` is untouched |
 
-Next: Phase 2 — My supplements (cabinet) + supplement slots.
+Next: Phase 3 — the dashboard (meters).
 
 ### The review, and why it mattered
 
@@ -36,6 +37,79 @@ dates, so every surgery window and lab-freshness check would have failed
 silently the first time real app data reached it.
 
 Full list in the `cce5c39` commit message.
+
+---
+
+## What Phase 2 built
+
+**My supplements** — what a person actually takes, above the shop on Library → Supps.
+
+| Module | Does |
+|---|---|
+| `cabinet.js` | Products into slots. Products sharing a time AND a repeat collapse into one card, because the Stack wants "Morning supplements · 3", not three rows — and one slot costs **one** stack against the free cap however many bottles are in it. Also ticking (whole slot or one product), `syncDeck` to keep the Stack in step, and `overMaxProducts`. |
+| `parseSpec.js` | A shop listing's `brand_spec` into draft ingredient lines. Ranges resolve to the **high** end, everything is marked `needsCheck`, and an ingredient it cannot name is kept rather than dropped. |
+| `useHealthData.js` | Loads the ~0.85 MB of data on the first health surface that needs it, and hands the index to the store. |
+
+**Screens** — `SuppsCabinet.jsx` (slot cards, timing tips, the cap note, the `avoid` list) and `AddSupplementSheet.jsx` (add/edit, searchable ingredient picker, live conversion, the two questions below).
+
+### Decisions taken in Phase 2
+
+**Slots are derived, never stored.** The cabinet owns the schedule; `syncDeck` rebuilds the
+Stack's supplement cards from it on every change. This is why the Stack card's edit button
+opens the cabinet instead of the card — editing a derived card would be editing a shadow,
+and the next sync would overwrite it. It is also why deleting a supplement genuinely stops
+its reminder.
+
+**An `avoid` product is kept, listed, and never scheduled.** It gets no slot, costs nothing
+against the cap, and its reason is written to "Questions for my doctor". Someone who takes
+it anyway can log it with "I still take this" — so the limits still see it, which is the
+whole point: a product the app refuses to schedule is exactly the one it most needs to count.
+
+**Slot titles carry no product names.** §5.9 — a deck item's title is what a notification
+would use, so "Morning supplements" is the whole point. The shoot asserts that no product
+name reaches the Stack card.
+
+**Over a safe maximum is said in the cabinet, not only in the edit sheet.** Judged across
+the planned day, so two ordinary bottles that are over the line together are both named —
+a per-product check cannot see that case.
+
+**The sheet warns before saving, against the real day.** `wouldExceed` runs against
+everything else in the cabinet, so the warning reads "with everything else you take, this
+comes to…", not "this product is large".
+
+### The two questions the engine refuses to answer
+
+Both exist because Phase 1's review made the engine stop guessing — and a refusal with no
+question attached is just a silent failure.
+
+1. **"Which does the label say?"** — only when knowing the form could *relax* the verdict
+   (`formMatters`). The sheet offers one button per distinct form, labelled by the synonym a
+   bottle is most likely to print, plus "Not sure". Offering raw synonyms instead would ask
+   the same question three times for vitamin A, and could truncate away the only answer that
+   helps.
+2. **"Which one did your doctor prescribe?"** — when a product holds more than one nutrient
+   with a limit. A doctor prescribing 65 mg of iron has not blessed the 50 mg of zinc in the
+   same tablet; until the person says which, **nothing** in that product is treated as
+   supervised.
+
+### Found by looking at the rendered screen, not by a test
+
+- **The sheet was see-through.** `--surface-strong` is a translucent gradient that is only
+  legible over a blurred backdrop — every other sheet in this app pairs it with
+  `--blur-heavy`. Without that pair the Library read straight through the form. 716 green
+  tests had nothing to say about it.
+- **Niacin 500 mg sat in the cabinet looking ordinary** at fifty times its 10 mg maximum,
+  because the list showed condition and medicine flags but nothing about dose. That is now
+  `overMaxProducts`, pinned by 6 tests.
+- **The over-max detail line washed out** in accent-on-light-glass. The badge shouts; the
+  line is the evidence and has to be readable, so it is `--ink`.
+
+### A test that was lying
+
+The shoot drove the app with `element.click()`, which never fires `pointerdown` — so hint
+bubbles that a real tap dismisses stayed stranded on top of the sheet, and a "successful"
+tap on an off-screen element left the next assertion looking at an unchanged page. It now
+moves a real mouse, after scrolling the target into view, and asserts nothing is stranded.
 
 ---
 
@@ -110,9 +184,14 @@ not by a test.** Both are now pinned by tests.
 1. **Four shop products are over a safe maximum** (`review/CATALOG-REVIEW.md`). Per §7.5
    they stay `publishable: false` until swapped. No action needed in Phase 1 — flagging so
    it is not forgotten when the cabinet lands in Phase 2.
-2. **Dark theme is not yet visually verified.** The shoot script sets `colorScheme`, but
-   the app drives its own theme from the store, so both sets of frames are the light theme.
-   Phase 2 will drive the real theme toggle.
+2. ~~**Dark theme is not yet visually verified.**~~ **Closed in Phase 2.** The cause was as
+   suspected: the app paints from `themeVars(S)` and ignores the OS preference, so
+   `colorScheme` did nothing. `tools/shoot-health-phase2.mjs` drives the store's own
+   `ppw5.bg` key instead, and **asserts the two themes render a different `--ink`**, so the
+   frames cannot quietly go back to being two light sets.
+3. **"Morning supple…" truncates on the Stack card.** The row's generic width behaviour,
+   which clips every long title equally — not a Phase 2 regression. The full title is kept
+   because it is what a notification reads, and the card already shows the time beside it.
 
 ---
 
@@ -120,10 +199,11 @@ not by a test.** Both are now pinned by tests.
 
 ```
 cd C:\Users\Victor\Documents\PPW-Code\ppw-fascia-app-health
-npm run test                       # 637 passing
+npm run test                       # 716 passing
 npm run build                      # clean
-npx vite --port 5234 --strictPort  # then Settings -> Health
-node tools/shoot-health-phase1.mjs # phone-width frames into .shots/
+npx vite --port 5235 --strictPort  # then Library -> Supps, and Settings -> Health
+node tools/shoot-health-phase1.mjs # Settings -> Health frames
+node tools/shoot-health-phase2.mjs # cabinet + add/edit sheet, both themes
 ```
 
-Screenshots: `.shots/health-phase1/`
+Screenshots: `.shots/health-phase1/` and `.shots/health-phase2/`

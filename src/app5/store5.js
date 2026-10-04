@@ -10,6 +10,10 @@
 // subscribes with useStore5(). Grows one slice at a time as screens are ported.
 // ─────────────────────────────────────────────────────────────────────────
 import { deleteFile } from './files5.js';
+import { loadHealth, saveHealth } from './health5/store.js';
+import {
+  syncDeck, slotsAgainstCap, slotsFrom, setSlotTaken, SUPPS_KIND,
+} from './health5/cabinet.js';
 
 import { useSyncExternalStore } from 'react';
 import { cachedPremium, fetchEntitlement, isSignedIn, signOut as membershipSignOut } from './membership.js';
@@ -118,6 +122,13 @@ function initialState() {
     sounds: true,
     // repeat picker (repeatId = item being edited, null = closed)
     repeatId: null,
+    // ── HEALTH (Phase 1/2) ────────────────────────────────────────────────
+    // The whole ppw5.health slice, mirrored here so the UI re-renders when it
+    // changes. It persists to its OWN key, never into ppw5.stacks, so "Delete
+    // my health data" stays one complete act.
+    health: loadHealth(),
+    // The supplement add/edit sheet: null closed, 'new', or a product id.
+    suppEditId: null,
     // edit-stack sheet (editId = the item whose settings are open, null = closed).
     // The one place a stack's every setting can be changed after it was added —
     // a note's message + Still/Pulse/Scroll/Flash style especially, which had no
@@ -303,17 +314,39 @@ export const FREE_STACK_CAP = 10;
 export const FREE_CAP_UPSELL = `You have reached the free limit of ${FREE_STACK_CAP} stacks. Go Premium for unlimited stacks.`;
 export function overLimit() { return !state.premium && state.deckItems.length >= FREE_STACK_CAP; }
 
+/**
+ * A supplement slot ticked on the Stack must also be ticked in the health
+ * record — otherwise someone taps "Done" on "Morning supplements", believes
+ * they have logged it, and their meters stay at zero all day.
+ *
+ * Lives here rather than in the card so every path agrees: the Done button, an
+ * Undo from the Completed sheet, and later a notification action.
+ */
+function syncSlotTaken(deckItem, key, taken) {
+  if (!deckItem || deckItem.kind !== SUPPS_KIND) return;
+  const health = state.health;
+  if (!_healthData || !health?.cabinet?.length) return;
+  const slot = slotsFrom(health.cabinet, { data: _healthData, profile: health.profile || {}, todayISO: key })
+    .find((s) => s.id === deckItem.id);
+  if (!slot) return;
+  // resyncDeck:false — ticking is not a cabinet change, and rebuilding the deck
+  // in the middle of marking one of its items done is asking for a race.
+  setHealth((h) => ({ ...h, doneSupps: setSlotTaken(h.doneSupps || {}, key, slot, taken) }), { resyncDeck: false });
+}
+
 export function markDone(id, key = todayKey()) {
   const it = state.deckItems.find((x) => x.id === id);
   if (!it) return;
   const prev = state.doneByDate[key] || [];
   if (prev.some((x) => x.id === id)) return;
   setState({ doneByDate: { ...state.doneByDate, [key]: [...prev, { id, at: Date.now() }] } });
+  syncSlotTaken(it, key, true);
   saveStacks();
 }
 export function undoDone(id, key = todayKey()) {
   const prev = state.doneByDate[key] || [];
   setState({ doneByDate: { ...state.doneByDate, [key]: prev.filter((x) => x.id !== id) } });
+  syncSlotTaken(state.deckItems.find((x) => x.id === id), key, false);
   saveStacks();
 }
 export function setItemTime(id, time) {
@@ -336,6 +369,52 @@ export function deleteItem(id) {
 // meant deleting it and starting again. `updateItem` is the generic in-place
 // patch the EditStackSheet writes through; openEditItem/closeEditItem drive the
 // sheet. One-layer-at-a-time (F2): opening it closes the add + account sheets.
+// ── health ───────────────────────────────────────────────────────────────────
+
+// The loaded nutrient/rules data, handed in once by whoever loads it. Kept here
+// so slot syncing can decide what is schedulable without every caller passing it.
+let _healthData = null;
+
+/**
+ * Write the health slice and persist it.
+ *
+ * Supplement slots are DERIVED from the cabinet, so any cabinet change re-syncs
+ * the deck in the same breath — otherwise someone could delete a supplement and
+ * carry on being reminded to take it.
+ */
+export function setHealth(next, { resyncDeck = true } = {}) {
+  const health = typeof next === 'function' ? next(state.health) : next;
+  saveHealth(health);
+  if (!resyncDeck) { setState({ health }); return health; }
+  const ctx = { data: _healthData, profile: health.profile, todayISO: todayKey() };
+  const deckItems = syncDeck(state.deckItems, health.cabinet || [], ctx, todayKey());
+  setState({ health, deckItems });
+  saveStacks();
+  return health;
+}
+
+export function setHealthEngineData(d) {
+  _healthData = d;
+  // A late load must not leave stale slots behind.
+  if (d && state.health?.cabinet?.length) setHealth(state.health);
+  return d;
+}
+export function healthEngineData() { return _healthData; }
+
+/** Slots count against the free cap; individual bottles do not. */
+export function suppSlotCount() {
+  return slotsAgainstCap(state.health?.cabinet || [], {
+    data: _healthData, profile: state.health?.profile || {}, todayISO: todayKey(),
+  });
+}
+
+// A live hint bubble sits at zIndex 44, ABOVE this sheet, so it would cover the
+// form. In practice the tap that opens the sheet also dismisses the hint
+// (HintBubble listens on pointerdown) — but any path that opens the sheet
+// without a pointer would leave the bubble stranded on top of it.
+export function openSuppEdit(id) { setState({ suppEditId: id, addOpen: false, accountOpen: false, hint: null }); }
+export function closeSuppEdit() { setState({ suppEditId: null }); }
+
 export function openEditItem(id) { setState({ editId: id, addOpen: false, accountOpen: false }); }
 export function closeEditItem() { setState({ editId: null }); }
 export function updateItem(id, patch) {
@@ -1325,7 +1404,8 @@ export function tomorrowKey() {
  */
 export function anySheetOpen(s = state) {
   return !!(s.aiOpen || s.addOpen || s.termsOpen || s.accountOpen || s.completedOpen ||
-            s.playerItem || s.scheduleTarget || s.repeatId || s.editId || s.premiumUpsell || !s.onboarded);
+            s.playerItem || s.scheduleTarget || s.repeatId || s.editId || s.suppEditId ||
+            s.premiumUpsell || !s.onboarded);
 }
 
 /** Which day the Calendar's panel is showing (unpadded `YYYY-M-D`, or null). */

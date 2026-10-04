@@ -12,6 +12,10 @@
 import React from 'react';
 import { useStore5, openSchedule } from '../store5.js';
 import { suppsGroupedByProtocol, buyUrl, affiliateLive, suppToStackItem } from '../../lib/suppsAffiliates.js';
+import SuppsCabinet from './SuppsCabinet.jsx';
+import { openSuppEdit, setHealth, healthEngineData } from '../store5.js';
+import { productFromShopItem } from '../health5/parseSpec.js';
+import { newProductId, upsertProduct } from '../health5/cabinet.js';
 
 const PROTOCOL_LABEL = {
   'testosterone-optimisation-v1': 'Testosterone Optimisation',
@@ -43,7 +47,7 @@ function Disclaimer() {
   );
 }
 
-function SuppRow({ s, checked, onToggle, protocolId }) {
+function SuppRow({ s, checked, onToggle, protocolId, takeThis }) {
   const disabled = s.in_stock === false;
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 18, border: `1px solid ${checked && !disabled ? 'var(--acc-rim)' : 'var(--rim)'}`, background: 'var(--surface)', boxShadow: 'var(--elev)', opacity: disabled ? 0.5 : 1 }}>
@@ -59,6 +63,13 @@ function SuppRow({ s, checked, onToggle, protocolId }) {
           {disabled ? 'Currently unavailable on iHerb' : [s.brand, s.brand_spec].filter(Boolean).join(' · ')}
         </div>
       </div>
+      {/* "I take this" opens the add sheet pre-filled from the listing — which
+          the person then has to confirm against their own bottle, because a
+          listing is marketing copy, not a label. */}
+      <button onClick={() => takeThis(s)} aria-label={`I take ${s.name}`} title="Add to my supplements"
+        style={{ width: 38, height: 38, flex: 'none', borderRadius: 11, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--ink)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="2.5" y="8.5" width="19" height="7" rx="3.5" transform="rotate(-45 12 12)" /><path d="M9.5 9.5l5 5" /></svg>
+      </button>
       <button onClick={() => openSchedule({ type: 'item', item: suppToStackItem(s, protocolId) })} aria-label={`Add ${s.name} to a day`} title="Add to Stack on a day"
         style={{ width: 38, height: 38, flex: 'none', borderRadius: 11, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="2.5" /><path d="M3.5 9.5h17M8 3.5v3M16 3.5v3M12 13v4M10 15h4" /></svg>
@@ -77,16 +88,36 @@ export default function SuppsSection({ query = '' }) {
   const [shopList, setShopList] = React.useState(null); // the "add these too" reveal
 
   if (!groups.length) {
+    // No shop list yet is no reason to hide the person's own supplements.
     return (
-      <div style={{ marginTop: 18, borderRadius: 24, padding: '24px 20px', textAlign: 'center', background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)' }}>
-        <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink)', textShadow: 'var(--emboss)' }}>Supplements</div>
-        <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.5, color: 'var(--dim)' }}>Protocol supplements will appear here as they’re approved.</div>
+      <div style={{ marginTop: 18 }}>
+        <SuppsCabinet />
+        <div style={{ marginTop: 18, borderRadius: 24, padding: '24px 20px', textAlign: 'center', background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)' }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink)', textShadow: 'var(--emboss)' }}>Supplements</div>
+          <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.5, color: 'var(--dim)' }}>Protocol supplements will appear here as they’re approved.</div>
+        </div>
       </div>
     );
   }
 
   const toggle = (id) => setSelected((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
   const q = query.trim().toLowerCase();
+
+  /**
+   * "I take this" — draft a cabinet entry from the listing and open it for the
+   * person to confirm. It is saved first so the sheet has something to edit,
+   * and marked needsCheck so every screen keeps saying "check your own bottle"
+   * until they have.
+   */
+  const takeThis = (s) => {
+    const data = healthEngineData();
+    const id = newProductId();
+    const draft = data
+      ? productFromShopItem(s, data, { id })
+      : { id, name: [s.brand, s.name].filter(Boolean).join(' '), servings: 1, time: '08:00', repeat: 'daily', perServing: [], scheduled: true, source: 'shop', needsCheck: true, specText: s.brand_spec || null, supervisedFor: null };
+    setHealth((h) => ({ ...h, cabinet: upsertProduct(h.cabinet || [], draft) }));
+    openSuppEdit(id);
+  };
 
   // selected supplements in list order across all groups (in-stock only)
   const orderedSelected = [];
@@ -101,6 +132,9 @@ export default function SuppsSection({ query = '' }) {
 
   return (
     <div data-tour="supps-top" style={{ marginTop: 18 }}>
+      {/* What the person actually takes comes FIRST. The shop is a shop; their
+          own cabinet is the thing they opened this tab to look at. */}
+      <SuppsCabinet />
       <Disclaimer />
 
       {groups.map((g) => {
@@ -110,7 +144,7 @@ export default function SuppsSection({ query = '' }) {
           <div key={g.protocolId} style={{ marginTop: 16 }}>
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--dim)', textShadow: 'var(--emboss)' }}>{labelFor(g.protocolId)}</div>
             <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {rows.map((s) => <SuppRow key={s.id} s={s} protocolId={g.protocolId} checked={selected.has(s.id)} onToggle={toggle} />)}
+              {rows.map((s) => <SuppRow key={s.id} s={s} protocolId={g.protocolId} checked={selected.has(s.id)} onToggle={toggle} takeThis={takeThis} />)}
             </div>
           </div>
         );

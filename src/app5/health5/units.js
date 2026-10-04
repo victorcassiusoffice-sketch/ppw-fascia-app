@@ -232,3 +232,25 @@ export function formatAmount(value, unit) {
   const s = String(rounded).replace(/\.0+$/, '');
   return unit ? `${s} ${unit}` : s;
 }
+
+/**
+ * The form choices to offer when we have to ask which form a label says.
+ *
+ * Returns one option per DISTINCT form, labelled by the first synonym that
+ * names it — which in nutrients.json is the one a bottle is most likely to
+ * print. `unknown` is never offered as a choice: it is what we already assume,
+ * and the UI clears the form instead.
+ *
+ * Offering synonyms rather than forms would be wrong twice over: the same form
+ * would appear three times for vitamin A, and truncating the list could hide
+ * the only option that relaxes the verdict.
+ */
+export function formOptions(nutrient) {
+  const map = nutrient?.synonymForms || {};
+  const byForm = new Map();
+  for (const [syn, form] of Object.entries(map)) {
+    if (!form || form === 'unknown') continue;
+    if (!byForm.has(form)) byForm.set(form, syn);
+  }
+  return [...byForm].map(([key, label]) => ({ key, label }));
+}

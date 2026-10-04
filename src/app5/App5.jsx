@@ -29,6 +29,7 @@ import SchedulePicker from './screens/SchedulePicker.jsx';
 import AiBridgeSheet from './assistant/AiBridgeSheet.jsx';
 import CoachMarks, { hasSeenTour } from './coach/CoachMarks.jsx';
 import EditStackSheet from './screens/EditStackSheet.jsx';
+import AddSupplementSheet from './screens/AddSupplementSheet.jsx';
 import {
   useStore5, getState, setState, save,
   stackFor, todayKey, markDone, setItemTime, deleteItem, overLimit,
@@ -39,7 +40,7 @@ import {
   syncEntitlement, applyServerEntitlement, syncProfile,
   openAiBridge, recordUseDay, guideWelcomed, markGuideWelcomed, anySheetOpen, stashCoachPosition,
   guideFocusItem, isInEatWindow,
-  noteAnimCss,
+  noteAnimCss, goLibrary,
 } from './store5.js';
 import GuideDisc from './screens/GuideDisc.jsx';
 import CompletedRing from './screens/CompletedRing.jsx';
@@ -236,6 +237,7 @@ function StackScreen() {
   const cardIcon = (it) => {
     if (it.kind === 'doc') return <div style={{ width: 46, height: 46, flex: 'none', borderRadius: 14, background: THUMBS.doc, border: '1px solid var(--rim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,.9)' }}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h8l4 4v14H6z" /><path d="M14 3v4h4M9.5 12h5M9.5 15.5h5" /></svg></div>;
     if (it.kind === 'note') return <div style={{ width: 46, height: 46, flex: 'none', borderRadius: 14, background: 'var(--disc)', border: '1px solid var(--rim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)' }}>{INote}</div>;
+    if (it.kind === 'supps') return <div style={{ width: 46, height: 46, flex: 'none', borderRadius: 14, background: 'var(--disc)', border: '1px solid var(--rim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)' }}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="2.5" y="8.5" width="19" height="7" rx="3.5" transform="rotate(-45 12 12)" /><path d="M9.5 9.5l5 5" /></svg></div>;
     if (it.thumb) {
       const bg = it.thumbUrl ? `url(${it.thumbUrl})` : (THUMBS[it.thumb] || THUMBS.yt);
       return <div style={{ width: 46, height: 46, flex: 'none', borderRadius: 14, background: bg, backgroundSize: 'cover', backgroundPosition: 'center', border: '1px solid var(--rim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,.9)' }}>{!it.thumbUrl && IPlay}</div>;
@@ -377,7 +379,7 @@ function StackScreen() {
               data-dragidx={i}
               data-tour={it.id === focusId ? 'latest-item' : undefined}
               onPointerDown={rowPointerDown(i)}
-              onClick={() => { if (suppressClick.current) return; if (S.selectedIds.length) { toggleSelect(it.id); return; } if (it.embed || it.url || it.kind === 'doc') openPlayer(it); else if (it.kind === 'note') openEditItem(it.id); }}
+              onClick={() => { if (suppressClick.current) return; if (S.selectedIds.length) { toggleSelect(it.id); return; } if (it.embed || it.url || it.kind === 'doc') openPlayer(it); else if (it.kind === 'note') openEditItem(it.id); else if (it.kind === 'supps') goLibrary('supps'); }}
               style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', minHeight: 68, borderRadius: 26, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: `1px solid ${isOver ? 'var(--acc-rim)' : 'var(--rim)'}`, boxShadow: isDragged ? 'var(--elev-hi)' : 'var(--elev)', cursor: (it.embed || it.url) ? 'pointer' : 'grab', touchAction: 'pan-y', userSelect: 'none', WebkitUserSelect: 'none', transform: isDragged ? `translateY(${drag.dy}px) scale(1.03)` : 'none', zIndex: isDragged ? 5 : 1, transition: isDragged ? 'none' : 'transform .2s, border-color .2s' }}
             >
               {/* Vic 4 — small selection tick, top-left of every stack card */}
@@ -431,12 +433,17 @@ function StackScreen() {
                   {/* Vic 2026-08-31 — edit icon on every stack: opens its full
                       settings (a note's message + Scroll/Flash style especially,
                       which had no re-edit path before). */}
-                  <button onClick={(e) => { e.stopPropagation(); openEditItem(it.id); }} aria-label="Edit this stack" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 44, minHeight: 44, background: 'none', border: 'none', padding: '14px 12px', color: 'var(--dim)' }}>
+                  {/* A supplement slot is DERIVED from the cabinet, so editing
+                      the card would be editing a shadow: the next sync would
+                      overwrite it. Both controls go to the list that owns it. */}
+                  <button onClick={(e) => { e.stopPropagation(); if (it.kind === 'supps') goLibrary('supps'); else openEditItem(it.id); }} aria-label={it.kind === 'supps' ? 'Edit your supplements' : 'Edit this stack'} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 44, minHeight: 44, background: 'none', border: 'none', padding: '14px 12px', color: 'var(--dim)' }}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" /></svg>
                   </button>
+                  {it.kind !== 'supps' && (
                   <button onClick={(e) => { e.stopPropagation(); openRepeat(it.id); }} aria-label="Repeat and time options" data-tour={it.id === focusId ? 'item-repeat' : undefined} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 44, minHeight: 44, background: 'none', border: 'none', padding: '14px 12px', color: 'var(--dim)' }}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 2l4 4-4 4" /><path d="M3 11v-1a4 4 0 0 1 4-4h14" /><path d="M7 22l-4-4 4-4" /><path d="M21 13v1a4 4 0 0 1-4 4H3" /></svg>
                   </button>
+                  )}
                   {/* Vic #1 — AUTO tickbox: at slot time the item opens/plays itself. */}
                   {(it.url || it.embed) && (
                     <button onClick={(e) => { e.stopPropagation(); toggleAuto(it.id); }} aria-label={it.auto ? 'Autoplay on — tap to turn off' : 'Autoplay off — tap to turn on'} aria-pressed={!!it.auto} data-tour={i === 0 ? 'auto-box' : undefined} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, minHeight: 44, background: 'none', border: 'none', padding: '14px 10px', color: 'var(--dim)', fontSize: 10.5, fontWeight: 600, letterSpacing: '.04em' }}>
@@ -794,6 +801,7 @@ export default function App5() {
         <AccountSheet />
         <RepeatSheet />
         <EditStackSheet />
+        <AddSupplementSheet />
         <SlotReminder />
         <NotePopup />
         <OnboardingScreen />

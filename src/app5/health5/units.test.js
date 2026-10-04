@@ -10,7 +10,9 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { setHealthData } from './data.js';
-import { convertLine, normaliseUnit, resolveForm, needsFormQuestion } from './units.js';
+import {
+  convertLine, normaliseUnit, resolveForm, needsFormQuestion, formOptions, formMatters,
+} from './units.js';
 
 const read = (f) => JSON.parse(readFileSync(join(process.cwd(), 'docs/health-pack/data', f), 'utf8'));
 const data = setHealthData({
@@ -151,5 +153,47 @@ describe('asking instead of guessing', () => {
 
   it('vitamin A needs one, because the limit depends on it', () => {
     expect(needsFormQuestion(N('vitamin_a'), { amount: 1000, unit: 'µg', name: 'Vitamin A' })).toBe(true);
+  });
+});
+
+describe('the form question offers forms, not synonyms', () => {
+  it('offers retinol and beta-carotene once each for vitamin A', () => {
+    const opts = formOptions(data.nutrientsById.get('vitamin_a'));
+    expect(opts.map((o) => o.key)).toEqual(['retinol', 'beta_carotene']);
+    // Three synonyms map to retinol; offering all three would be the same
+    // question asked three times.
+    expect(opts.map((o) => o.label)).toEqual(['retinol', 'beta-carotene']);
+  });
+
+  it('never offers "unknown" as a choice', () => {
+    // vitamin_b3 maps the bare word "niacin" to unknown — that is the state we
+    // are already in, not an answer.
+    const opts = formOptions(data.nutrientsById.get('vitamin_b3'));
+    expect(opts.map((o) => o.key)).toEqual(['nicotinic_acid', 'nicotinamide']);
+    expect(opts.some((o) => o.key === 'unknown')).toBe(false);
+  });
+
+  it('offers nothing for a nutrient with no forms', () => {
+    expect(formOptions(data.nutrientsById.get('zinc'))).toEqual([]);
+    expect(formOptions(undefined)).toEqual([]);
+  });
+
+  it('every option it offers actually resolves back to that form', () => {
+    // If a label could not be resolved by resolveForm, the button would do
+    // nothing when tapped.
+    for (const n of data.nutrientList) {
+      for (const o of formOptions(n)) {
+        expect(resolveForm(n, { form: o.label })).toBe(o.key);
+      }
+    }
+  });
+
+  it('wherever we ask, at least one offered form relaxes the verdict', () => {
+    // formMatters is the gate on asking at all; this checks the two agree, so
+    // we never show a question whose answers cannot change anything.
+    for (const n of data.nutrientList) {
+      if (!formMatters(n)) continue;
+      expect(formOptions(n).length).toBeGreaterThan(0);
+    }
   });
 });
