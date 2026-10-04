@@ -2,17 +2,40 @@
 
 ## STATUS
 
-**Phase 1 (health engine + data) — complete, on branch `feat/health-meters-2026-10`. Not merged, not deployed.**
+**Phase 1 (health engine + data) — complete and reviewed, on branch `feat/health-meters-2026-10`. Not merged, not deployed.**
 
 | | |
 |---|---|
 | Branch | `feat/health-meters-2026-10` (off `origin/main` @ `19413ab`) |
+| Commits | `42f416b` Phase 1 · `cce5c39` review fixes |
 | Worktree | `C:\Users\Victor\Documents\PPW-Code\ppw-fascia-app-health` |
-| Tests | **637 passing** (was 528 before this phase — 109 new) |
+| Tests | **676 passing** (was 528 before this phase — 148 new) |
 | Build | clean |
 | Live | **nothing deployed.** `app.ppwellness.co` is untouched |
 
 Next: Phase 2 — My supplements (cabinet) + supplement slots.
+
+### The review, and why it mattered
+
+The first cut passed 637 tests. An adversarial review that re-derived every
+number from `data/` independently still found **five P0s and three material
+P1s** — because the tests and the code came from the same hand and shared the
+same blind spots. All eight are fixed in `cce5c39` and pinned by 39 new tests
+written as *what a person experiences*, not as assertions about internals.
+
+The sharpest one: `resolveForm` picked the longest matching synonym, so
+`"Vitamin A (as retinyl palmitate and beta-carotene)"` — ordinary multivitamin
+wording — resolved to beta-carotene, counted **zero** toward the preformed-
+retinol limit, and showed a pregnant user nothing. A bare `"Vitamin A"`
+correctly asked a question. **The engine got less safe the more honest the
+label was.**
+
+The most far-reaching: `store5.todayKey()` writes `2026-10-4`, and
+`new Date("2026-10-4T00:00:00")` is an `Invalid Date`. Every test fed padded
+dates, so every surgery window and lab-freshness check would have failed
+silently the first time real app data reached it.
+
+Full list in the `cce5c39` commit message.
 
 ---
 
