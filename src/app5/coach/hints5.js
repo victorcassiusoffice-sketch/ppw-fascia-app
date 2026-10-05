@@ -22,7 +22,7 @@
 //  7. Settings can mute the lot.
 
 import {
-  getState, setHint, clearHint, hintCount, burnHint, anySheetOpen, questDone,
+  getState, setHint, clearHint, hintCount, burnHint, anySheetOpen, shareSheetUp, questDone,
 } from '../store5.js';
 import { isLocked } from '../passcode.js';
 
@@ -162,8 +162,11 @@ function screenIsClear(h, S) {
   // hint — the most important one in the set — where nobody could read it.
   try { if (isLocked()) return false; } catch { /* passcode off */ }
   if (h.inSheet) {
-    // Its own sheet may be up — but nothing else may be.
-    return !(S.aiOpen || S.termsOpen || S.accountOpen || S.completedOpen || S.premiumUpsell || !S.onboarded);
+    // Its own sheet may be up — but nothing else may be. The shared-routine
+    // sheet is named explicitly because this branch does NOT go through
+    // anySheetOpen: an add-sheet hint would otherwise still be spent behind the
+    // z45 share sheet, which is the same bug one layer along.
+    return !(S.aiOpen || S.termsOpen || S.accountOpen || S.completedOpen || S.premiumUpsell || shareSheetUp(S) || !S.onboarded);
   }
   return !anySheetOpen(S);
 }

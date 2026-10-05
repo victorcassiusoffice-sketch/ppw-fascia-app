@@ -9,7 +9,7 @@
 // it had no builder behind it in either tier. See the note at its old site.
 
 import React from 'react';
-import { useStore5, closeAdd, setCustomUrl, addCustomUrl, goLibrary, openNoteComposer, setNoteField, addNote, parseRoutineMd, addItemsToToday, createRoutine, getState, addDocToToday, openAiBridge } from '../store5.js';
+import { useStore5, closeAdd, setCustomUrl, addCustomUrl, goLibrary, openNoteComposer, setNoteField, addNote, parseRoutineMd, addItemsToToday, createRoutine, routineItemsForSave, repeatLabel, getState, addDocToToday, openAiBridge } from '../store5.js';
 import { saveFile } from '../files5.js';
 // The failed-paste sentence is registry copy (hints5.js `link-failed`), not
 // this screen's own words. It is marked `inline: true` there precisely because
@@ -177,18 +177,41 @@ export default function AddSheet() {
                 </div>
                 <div style={{ marginTop: 8, fontSize: 16, fontWeight: 700, textShadow: 'var(--emboss)' }}>{draft.name}</div>
                 <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 5 }}>
-                  {draft.items.map((it, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5, color: 'var(--dim)' }}>
-                      <span style={{ width: 5, height: 5, borderRadius: 999, background: 'var(--accent)', flex: 'none' }} />
-                      <span style={{ flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--ink)' }}>{it.title}</span>
-                      {it.time && <span>{it.time}</span>}
-                    </div>
-                  ))}
+                  {/* The SCHEDULE, not just the titles. This preview printed
+                      title and time only, so someone importing a six-week
+                      programme could not see that a stack was weekly or that it
+                      starts on day 7 — the same disclosure the shared-link sheet
+                      makes (screens/SharedRoutineSheet.jsx). `repeat` undefined
+                      becomes 'once' in addItemsToToday, so the label says so. */}
+                  {draft.items.map((it, i) => {
+                    const day = Number(it.dayOffset ?? it._day ?? 0) || 0;
+                    return (
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5, color: 'var(--dim)' }}>
+                        <span style={{ width: 5, height: 5, borderRadius: 999, background: 'var(--accent)', flex: 'none' }} />
+                        <span style={{ flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--ink)' }}>{it.title}</span>
+                        <span style={{ flex: 'none' }}>{it.time ? it.time + ' · ' : ''}{repeatLabel(it.repeat || 'once')}{day > 0 ? ' · day ' + day : ''}</span>
+                      </div>
+                    );
+                  })}
                 </div>
                 <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
-                  <button onClick={() => { const r = addItemsToToday(draft.items); if (r.ok) { setDraftMsg(`${r.count} stack${r.count === 1 ? '' : 's'} added to today`); setDraft(null); } }} style={{ flex: 1, height: 44, borderRadius: 14, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 600, fontSize: 13.5, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)' }}>Add all to today</button>
+                  <button onClick={() => {
+                    const r = addItemsToToday(draft.items);
+                    if (r.ok) { setDraftMsg(`${r.count} stack${r.count === 1 ? '' : 's'} added to today`); setDraft(null); return; }
+                    // { upsell: true } — the free cap counts the WHOLE batch and
+                    // imported nothing. This branch used to fall off the end of
+                    // an `if (r.ok)`, so the draft just sat there saying nothing;
+                    // keep it on screen (the programme is still wanted once the
+                    // paywall is dismissed) but say what happened, and drop any
+                    // stale "3 stacks added" line so it cannot read as success.
+                    setDraftMsg('That’s more stacks than the free plan holds, so nothing was added.');
+                  }} style={{ flex: 1, height: 44, borderRadius: 14, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 600, fontSize: 13.5, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)' }}>Add all to today</button>
+                  {/* routineItemsForSave: the draft items are PARSED items, so they
+                      carry the internal `_day`. Writing that straight into
+                      ppw5.routines is how a day-21 stack came back as day 0 the next
+                      time the routine was shared (naming law in store5.js). */}
                   {S.premium && (
-                    <button onClick={() => { createRoutine(draft.name, draft.items); setDraftMsg(`Saved “${draft.name}” to your Routines`); setDraft(null); }} style={{ height: 44, padding: '0 14px', borderRadius: 14, border: '1px solid var(--rim)', background: 'transparent', color: 'var(--accent)', fontWeight: 600, fontSize: 13 }}>Save as routine</button>
+                    <button onClick={() => { createRoutine(draft.name, routineItemsForSave(draft.items)); setDraftMsg(`Saved “${draft.name}” to your Routines`); setDraft(null); }} style={{ height: 44, padding: '0 14px', borderRadius: 14, border: '1px solid var(--rim)', background: 'transparent', color: 'var(--accent)', fontWeight: 600, fontSize: 13 }}>Save as routine</button>
                   )}
                   <button onClick={() => setDraft(null)} style={{ height: 44, padding: '0 12px', borderRadius: 14, border: 'none', background: 'none', color: 'var(--dim)', fontWeight: 600, fontSize: 13 }}>✕</button>
                 </div>
@@ -221,20 +244,25 @@ export default function AddSheet() {
         {/* A free-cap refusal returns { upsell: true } and already raises the
             upsell modal, so it must never also read as a broken link.
 
-            The colour is --ink, the theme's own body text. There is no error
-            colour anywhere in this design system: the line used to ride
-            var(--bad, #c05), and --bad is defined in no stylesheet and by no
-            branch of theme5.js, so every skin was really showing that #c05
-            literal — pink text on dark glass, and too weak to read. --ink is
-            the one colour guaranteed legible in all six skins. The field's own
-            border turns accent while the error stands, so the message is not
-            carrying the whole signal on its own.
+            The colour is --bad (2026-10-05). This line was the first half of the
+            fix: it used to reference --bad with a hot-pink hex as its CSS
+            fallback, and the token was defined in no stylesheet and by no branch
+            of theme5.js, so every skin really showed that fallback — 1.05:1 on
+            Indigo's ground, invisible. The fix here was to switch to --ink, which
+            was legible but left the app
+            with no error colour at all and left eleven other sites on the dead
+            token. --bad is now a real per-colourway token emitted by every
+            branch of themeVars and held to a measured floor
+            (error-colour.test.jsx), so this line is back in the error register
+            with the other eleven instead of being the one that opted out. The
+            field's own border still turns accent while the error stands, so the
+            message is not carrying the whole signal on its own.
 
             The id is what aria-describedby on the field points at; the key is
             the nonce, so re-tapping Add on the same bad text remounts this node
             and the alert speaks again. */}
         {linkErr > 0 && (
-          <div key={linkErr} id="add-link-error" role="alert" style={{ marginTop: 8, fontSize: 12.5, lineHeight: 1.45, fontWeight: 600, color: 'var(--ink)', animation: 'ppwRise .3s ease both' }}>{HINTS['link-failed'].copy}</div>
+          <div key={linkErr} id="add-link-error" role="alert" style={{ marginTop: 8, fontSize: 12.5, lineHeight: 1.45, fontWeight: 600, color: 'var(--bad)', animation: 'ppwRise .3s ease both' }}>{HINTS['link-failed'].copy}</div>
         )}
         {S.addedCustom && (
           <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 18, border: '1px solid var(--rim)', background: 'var(--surface)', animation: 'ppwRise .3s ease both' }}>

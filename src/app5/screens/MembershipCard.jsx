@@ -83,7 +83,7 @@ function FieldError({ children }) {
   if (!children) return null;
   return (
     <div ref={ref} role="alert" aria-live="assertive"
-      style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginTop: 2, padding: '10px 12px', borderRadius: 14, background: 'var(--track)', border: '1px solid var(--bad, #c05)', color: 'var(--bad, #c05)', fontSize: 12.5, lineHeight: 1.5, fontWeight: 600 }}>
+      style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginTop: 2, padding: '10px 12px', borderRadius: 14, background: 'var(--track)', border: '1px solid var(--bad)', color: 'var(--bad)', fontSize: 12.5, lineHeight: 1.5, fontWeight: 600 }}>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ flex: 'none', marginTop: 1 }}>
         <circle cx="12" cy="12" r="9" /><path d="M12 7.5v5.5M12 16.2v.5" />
       </svg>
@@ -351,7 +351,7 @@ export default function MembershipCard() {
         {/* This card never rendered `msg`, which is why "Check membership"
             looked dead on a Premium account. */}
         {msg && <div style={note()}>{msg}</div>}
-        {err && <div style={{ ...note(), color: 'var(--bad, #c05)' }}>{err}</div>}
+        {err && <div style={{ ...note(), color: 'var(--bad)' }}>{err}</div>}
       </div>
     );
   }
@@ -385,7 +385,7 @@ export default function MembershipCard() {
         <button onClick={onRefresh} disabled={busy} style={quietBtn}>{busy ? 'Checking…' : 'Check membership'}</button>
         <button onClick={onSignOut} style={quietBtn}>Sign out</button>
         {msg && <div style={note(false)}>{msg}</div>}
-        {err && <div style={{ ...note(false), color: 'var(--bad, #c05)' }}>{err}</div>}
+        {err && <div style={{ ...note(false), color: 'var(--bad)' }}>{err}</div>}
         <DevUnlock />
       </div>
     );
@@ -413,7 +413,7 @@ export default function MembershipCard() {
         <button onClick={() => { setPhase('out'); setMsg(null); setErr(null); }} style={quietBtn}>
           Change the address
         </button>
-        {err && <div style={{ ...note(false), color: 'var(--bad, #c05)' }}>{err}</div>}
+        {err && <div style={{ ...note(false), color: 'var(--bad)' }}>{err}</div>}
       </div>
     );
   }
@@ -462,7 +462,7 @@ export default function MembershipCard() {
               type="password" autoComplete="current-password" placeholder="Password"
               value={pw} onChange={(e) => setPw(e.target.value)} aria-label="Password"
               onKeyDown={(e) => { if (e.key === 'Enter' && pw && email) onPasswordSignIn(); }}
-              style={{ ...input, ...(err ? { borderColor: 'var(--bad, #c05)' } : null) }}
+              style={{ ...input, ...(err ? { borderColor: 'var(--bad)' } : null) }}
             />
             {/* Directly under the field it is about — not at the foot of a
                 scrolling card, where Vic never saw it. In the 'sent' phase the
@@ -590,7 +590,13 @@ function SetPasswordBlock({ accent, defaultOpen = false }) {
         {busy ? 'Saving…' : 'Save password'}
       </button>
       <button onClick={() => { setOpen(false); setPw(''); setErr(null); }} style={quiet}>Cancel</button>
-      {err && <div style={{ ...note(accent), color: accent ? '#ffd9d9' : 'var(--bad, #c05)' }}>{err}</div>}
+      {/* The `accent ? '#ffd9d9'` branch this used to carry was a leftover of the
+          retired white-on-orange card: no caller passes `accent` (both are
+          <SetPasswordBlock defaultOpen={…} />) and note() ignores it anyway, so
+          that pale pink never painted — and had it painted, it sits on --surface,
+          where on Ivory it would have measured under 1.3:1. One error colour,
+          per colourway, like everywhere else. */}
+      {err && <div style={{ ...note(), color: 'var(--bad)' }}>{err}</div>}
     </div>
   );
 }

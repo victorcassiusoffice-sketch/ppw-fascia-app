@@ -123,7 +123,7 @@ function PasscodeRow() {
             {busy ? 'Saving…' : 'Save passcode'}
           </button>
         </div>
-        {err && <div role="alert" style={{ ...rowNote, color: 'var(--bad, #c05)' }}>{err}</div>}
+        {err && <div role="alert" style={{ ...rowNote, color: 'var(--bad)' }}>{err}</div>}
         <div style={rowNote}>
           {MAX_ATTEMPT_NOTE} If you forget it, signing in again clears it — there is no way to recover it,
           because nothing anywhere stores it.
@@ -210,7 +210,7 @@ export default function AccountSheet() {
             <PasscodeRow />
 
             {!confirmDelete ? (
-              <button onClick={() => { setConfirmDelete(true); setErr(null); }} style={{ ...row, color: 'var(--bad, #c05)' }}>
+              <button onClick={() => { setConfirmDelete(true); setErr(null); }} style={{ ...row, color: 'var(--bad)' }}>
                 <span style={{ flex: 1, minWidth: 0 }}>
                   <span style={{ display: 'block', ...rowTitle }}>Delete my account</span>
                   <span style={{ display: 'block', ...rowNote }}>Removes your account from our server for good.</span>
@@ -228,11 +228,21 @@ export default function AccountSheet() {
                   <button onClick={() => setConfirmDelete(false)} disabled={busy} style={{ flex: 1, height: 44, borderRadius: 14, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--ink)', fontWeight: 600, fontSize: 13.5 }}>
                     Keep it
                   </button>
-                  <button onClick={onDelete} disabled={busy} style={{ flex: 1, height: 44, borderRadius: 14, border: '1px solid var(--bad, #c05)', background: 'var(--bad, #c05)', color: '#fff', fontWeight: 700, fontSize: 13.5, opacity: busy ? .6 : 1 }}>
+                  {/* The ONE place the error colour is paint rather than text, so
+                      the one place that takes --bad-surf. On a dark skin --bad is
+                      a pale rose: right for a text run on navy, unreadable as a
+                      fill under white. --bad-ink is the matching text colour
+                      (8.35:1 on the dark skins' fill, 12.30:1 on the light
+                      skins') — measured in error-colour.test.jsx, not assumed.
+                      Until 2026-10-05 this filled with the dead token's hot-pink
+                      fallback and put a hardcoded '#fff' on top — the only pairing
+                      of that literal in the whole app that was legible, which is
+                      why this button was never what gave the bug away. */}
+                  <button onClick={onDelete} disabled={busy} style={{ flex: 1, height: 44, borderRadius: 14, border: '1px solid var(--bad-surf)', background: 'var(--bad-surf)', color: 'var(--bad-ink)', fontWeight: 700, fontSize: 13.5, opacity: busy ? .6 : 1 }}>
                     {busy ? 'Deleting…' : 'Delete for good'}
                   </button>
                 </div>
-                {err && <div style={{ ...rowNote, color: 'var(--bad, #c05)' }}>{err}</div>}
+                {err && <div style={{ ...rowNote, color: 'var(--bad)' }}>{err}</div>}
               </div>
             )}
           </div>

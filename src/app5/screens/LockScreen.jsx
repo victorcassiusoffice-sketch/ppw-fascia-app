@@ -91,7 +91,7 @@ export default function LockScreen() {
         </div>
 
         <div style={{ minHeight: 42, marginTop: 12, maxWidth: 300, textAlign: 'center' }}>
-          {err && <div role="alert" style={{ fontSize: 12.5, lineHeight: 1.45, fontWeight: 600, color: 'var(--bad, #c05)' }}>{err}</div>}
+          {err && <div role="alert" style={{ fontSize: 12.5, lineHeight: 1.45, fontWeight: 600, color: 'var(--bad)' }}>{err}</div>}
         </div>
 
         <div style={{ marginTop: 4, display: 'grid', gridTemplateColumns: 'repeat(3, 74px)', gap: 12 }}>

@@ -37,6 +37,7 @@ import {
   toggleSelect, selectAll, clearSelection, deleteSelected, safeUrl,
   onlyExamplesLeft, clearExamples,
   syncEntitlement, applyServerEntitlement, syncProfile,
+  parseRoutineLink, setPendingShare, setShareError, shareSheetUp,
   openAiBridge, recordUseDay, guideWelcomed, markGuideWelcomed, anySheetOpen, stashCoachPosition,
   guideFocusItem, isInEatWindow,
   noteAnimCss,
@@ -54,6 +55,7 @@ import AccountSheet from './screens/AccountSheet.jsx';
 import UpdateBar from './screens/UpdateBar.jsx';
 import FirstRunChoice from './screens/FirstRunChoice.jsx';
 import LockScreen from './screens/LockScreen.jsx';
+import SharedRoutineSheet from './screens/SharedRoutineSheet.jsx';
 import { isEnabled as passcodeEnabled, isLocked as passcodeLocked, lockNow, LOCK_AFTER_MS } from './passcode.js';
 import { installPressSound } from './sfx5.js';
 
@@ -565,11 +567,18 @@ function DesktopStage({ S }) {
         <span style={{ color: 'var(--accent)', textShadow: 'var(--emboss)' }}>Your Ideal Lifestyle.</span>{' '}
         <span style={{ color: 'var(--ink)', textShadow: 'var(--emboss)' }}>Planned. Organised. Brought to you.</span>
       </p>
-      {/* three of the clay lifestyle images, quiet, as texture not argument */}
+      {/* three of the clay lifestyle images, quiet, as texture not argument.
+          filter: --art-tone (2026-10-05) — "texture not argument" is exactly
+          what they stopped being once the default colourway went dark: three
+          cream-gold tiles (measured L 0.70-0.76, R−B +20..+27) at 64px in a
+          room painted with Indigo's own ground (L 0.022-0.126). Same six files
+          as the first-run poster and the build show, so they get the same
+          per-colourway token, which is `none` for the light skins the art was
+          drawn for. theme5.js artTone. */}
       <div style={{ marginTop: 22, display: 'flex', gap: 12 }}>
         {['meditation', 'stretch', 'course'].map((n, i) => (
           <img key={n} src={deskImg(n)} alt="" decoding="async" onError={(e) => { e.currentTarget.style.display = 'none'; }}
-            style={{ width: 64, height: 64, borderRadius: 18, objectFit: 'cover', border: '1px solid var(--rim)', background: 'var(--surface)', boxShadow: 'var(--elev)', transform: `rotate(${i === 1 ? 3 : i === 0 ? -4 : 2}deg)` }} />
+            style={{ width: 64, height: 64, borderRadius: 18, objectFit: 'cover', border: '1px solid var(--rim)', background: 'var(--surface)', boxShadow: 'var(--elev)', filter: 'var(--art-tone)', transform: `rotate(${i === 1 ? 3 : i === 0 ? -4 : 2}deg)` }} />
         ))}
       </div>
       {/* the handoff — same URL, in a pocket */}
@@ -607,10 +616,17 @@ export default function App5() {
     // F2 (2026-08-11): accountOpen added. The tour used to start ON TOP of an
     // account sheet that was still open from sign-up, which is how a new customer
     // ended up five layers deep and landed back on that panel afterwards.
-    if (S.aiOpen || S.addOpen || S.termsOpen || S.accountOpen) return;
+    //
+    // shareSheetUp (2026-10-05, review pass): the SAME fault, for the one user
+    // this whole link feature exists for. A client who has never opened the app
+    // arrives on a practitioner's link, walks the first-run door and the wizard,
+    // and the instant `onboarded` flips the share sheet mounts at z45 — then 700ms
+    // later this tour mounted at z60 with step 0's target null, i.e. one
+    // full-frame 58%-opacity dim across the programme they came for.
+    if (S.aiOpen || S.addOpen || S.termsOpen || S.accountOpen || shareSheetUp(S)) return;
     const t = setTimeout(() => setTourOpen(true), 700);     // let the screen settle
     return () => clearTimeout(t);
-  }, [S.onboarded, S.aiOpen, S.addOpen, S.termsOpen, S.accountOpen]);
+  }, [S.onboarded, S.aiOpen, S.addOpen, S.termsOpen, S.accountOpen, S.pendingShare, S.shareError, S.shareHidden, S.firstRunChoice]);
 
   // THE FINALE — the eighth quest lands and the guide says goodbye, once.
   //
@@ -631,7 +647,10 @@ export default function App5() {
       startFinale();        // the finale's own [Done] is what retires the disc
     }, 1000);
     return () => clearTimeout(t);
-  }, [S.guide, S.coach, S.journalOpen, S.onboarded, S.addOpen, S.aiOpen, S.accountOpen, S.completedOpen, S.termsOpen, S.playerItem]);
+    // pendingShare/shareError/shareHidden: anySheetOpen now counts the share
+    // sheet, so this has to re-run when that layer comes and goes — otherwise
+    // the finale could be scheduled in the beat before a share lands.
+  }, [S.guide, S.coach, S.journalOpen, S.onboarded, S.addOpen, S.aiOpen, S.accountOpen, S.completedOpen, S.termsOpen, S.playerItem, S.pendingShare, S.shareError, S.shareHidden]);
 
   // One place watches the store and asks for hints; the engine decides whether
   // to answer. See useHintWatcher for why the triggers live together.
@@ -686,15 +705,51 @@ export default function App5() {
   // may have landed while it was backgrounded). Signed-out users make no request.
   // A magic-link lands back here as ?login_token=… — consume it, then strip it
   // from the URL so a one-time code never sits in history or gets shared.
+  //
+  // A SHARED ROUTINE lands here too, as `#r=<payload>` on the site root — the
+  // only shape that works, since every other path on this host is a 404 and a
+  // fragment is never sent to the server, so a practitioner's client programme
+  // stays off GitHub's logs. Both arrive in the same URL, so both are consumed
+  // in ONE pass with ONE replaceState: the login branch used to re-append
+  // `url.hash` verbatim, which would have put the routine fragment straight
+  // back and imported it again on the next refresh. The strip is also what
+  // makes this safe under StrictMode's double-invoked effect (src/main.jsx) —
+  // the second pass finds no fragment left to read.
   React.useEffect(() => {
     let alive = true;
+    // Decode and HOLD. Nothing is written to the deck or to routines here: the
+    // recipient of a stranger's link answers for it in the sheet.
+    //
+    // Named, because the fragment has to be read from TWO places — see the
+    // hashchange listener at the bottom of this effect.
+    const applySharedFragment = (raw) => {
+      const res = parseRoutineLink(raw);
+      // `dropped` travels with it: the decoder's item ceiling used to be
+      // invisible, so a link carrying more stacks than the app accepts was
+      // held — and printed — as if it were the whole programme.
+      if (res.ok) setPendingShare({ name: res.name, items: res.items, dropped: res.dropped });
+      // setShareError, NOT setState({ pendingShare: null, … }). This branch used
+      // to null the held programme in state while leaving it in localStorage,
+      // and the error panel's OK then deleted that orphan — so one mangled link
+      // plus one honest "OK" destroyed a good programme that was still waiting.
+      else setShareError('That routine link did not come through. Ask whoever sent it for a fresh one.');
+    };
     (async () => {
       try {
         const url = new URL(window.location.href);
         const lt = url.searchParams.get('login_token');
+        // `.+` not `.*`: a bare `#r=` carries nothing to decode and is not ours
+        // to consume.
+        const shared = /^#r=(.+)$/.exec(url.hash);
+        if (lt) url.searchParams.delete('login_token');
+        if (lt || shared) {
+          // The hash is re-appended only when it is NOT the routine payload —
+          // some other fragment (a deep link someone bookmarked) is none of our
+          // business and must survive the token strip.
+          window.history.replaceState({}, '', url.pathname + url.search + (shared ? '' : url.hash));
+        }
+        if (shared) applySharedFragment(shared[1]);
         if (lt) {
-          url.searchParams.delete('login_token');
-          window.history.replaceState({}, '', url.pathname + url.search + url.hash);
           try {
             applyServerEntitlement(await completeSignIn(lt));
             // The link lands on the Stack screen, nowhere near the account. If
@@ -719,6 +774,26 @@ export default function App5() {
       } catch {}
       if (alive) { await ensureFreshSession(); await syncEntitlement(); await syncProfile(); }
     })();
+    // A LINK TAPPED WHILE THE APP IS ALREADY OPEN (2026-10-05, review pass).
+    //
+    // The read above runs on mount only, and a fragment-only navigation into a
+    // document that is already loaded does not remount anything — so a client
+    // who tapped their practitioner's link with the app already on screen (or
+    // tapped the same link twice) got nothing at all: no sheet, no error, the
+    // payload just sitting in the address bar until some unrelated later reload
+    // imported it out of context. A silent no-op is the exact failure the whole
+    // receive path is written to eliminate.
+    //
+    // Re-entry is safe because the read STRIPS: `#r=` is gone from the URL
+    // before anything is held, so a second hashchange finds nothing to consume.
+    const onHashChange = () => {
+      const url = new URL(window.location.href);
+      const shared = /^#r=(.+)$/.exec(url.hash);
+      if (!shared) return;      // somebody else's fragment — leave it alone
+      window.history.replaceState({}, '', url.pathname + url.search);
+      applySharedFragment(shared[1]);
+    };
+    window.addEventListener('hashchange', onHashChange);
     // STAYING SIGNED IN — the session the backend issues lasts 60 minutes, and
     // the app never renewed it, so anyone who kept the app open long enough was
     // silently signed out and met the paywall again. Renew on resume, and on a
@@ -732,6 +807,7 @@ export default function App5() {
     return () => {
       alive = false;
       clearInterval(keepAlive);
+      window.removeEventListener('hashchange', onHashChange);
       document.removeEventListener('visibilitychange', onVisible);
     };
   }, []);
@@ -745,10 +821,18 @@ export default function App5() {
 
   const isDesktop = useDesktop();
   return (
-    // On desktop the room is themed with the app's own tokens — change the
-    // colourway inside the phone and the whole desktop changes with it. On
-    // mobile the frame covers the viewport, so the flat grey stays as-is.
-    <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative', ...(isDesktop ? { ...vars, gap: 'clamp(40px, 5vw, 84px)', background: 'var(--ground)', padding: '0 4vw' } : { background: '#83878B' }) }}>
+    // The room the phone stands in, themed with the app's own tokens at EVERY
+    // width — change the colourway inside the frame and the room changes with it.
+    //
+    // It used to be one hardcoded mid-grey below 980px, on the reasoning that
+    // "on mobile the frame covers the viewport". That holds at ≤430px, where the
+    // frame is 100vw and the surround is invisible. It does not hold across
+    // 431–979px — tablet portrait, split-screen, a narrowed desktop window —
+    // where the frame is capped at 430px wide and 40px-rounded, so the surround
+    // is plainly on screen. With the 2026-10 indigo flip the app went dark and
+    // that fixed mid-grey became a box around it. One ground for all eight
+    // colourways instead, which is also the only version that cannot drift.
+    <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative', ...vars, ...(isDesktop ? { gap: 'clamp(40px, 5vw, 84px)', padding: '0 4vw' } : {}), background: 'var(--ground)' }}>
       {isDesktop && (
         <>
           {/* the same luminous ground the frame has inside, at room scale */}
@@ -801,6 +885,12 @@ export default function App5() {
             brand-new visitor sees, because until now the only account words on
             this screen were "Sign in" and "Already have an account?". */}
         <FirstRunChoice />
+        {/* A routine someone sent by link (45). Above the wizard, the first-run
+            doors and the account sheet, because it is the reason this person
+            opened the app at all — but BELOW the upsell modal (47), so a free
+            user's paywall lands on top of it rather than behind it, and below
+            terms (50), which blocks everything. */}
+        <SharedRoutineSheet />
         <TermsScreen />
         {/* Above everything, including the coach marks — while it is up there is
             genuinely no session to reach underneath. */}

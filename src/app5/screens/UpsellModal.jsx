@@ -5,7 +5,7 @@
 // uses — this is the button a real Gumroad checkout replaces later.
 
 import React from 'react';
-import { useStore5, clearUpsell, openAccount, FREE_STACK_CAP, FREE_CAP_UPSELL, onlyExamplesLeft, clearExamples } from '../store5.js';
+import { useStore5, clearUpsell, openAccount, FREE_STACK_CAP, freeSlotAdviceApplies, onlyExamplesLeft, clearExamples } from '../store5.js';
 import { GUMROAD_URL, PREM_PRICE, PREM_PRICE_NOTE, checkoutUrl, isSignedIn } from '../membership.js';
 
 // GUMROAD_URL + pricing now live in membership.js (one seam for the paywall, the
@@ -44,8 +44,16 @@ export default function UpsellModal() {
             user gets were filled by us before they arrived, and being told
             "you have reached the free limit" without being told that reads as
             a much smaller free tier than it is. Said here because THIS is the
-            refusal point — the moment the add was turned down. */}
-        {S.premiumUpsell === FREE_CAP_UPSELL && (
+            refusal point — the moment the add was turned down.
+
+            The gate is freeSlotAdviceApplies(), not `=== FREE_CAP_UPSELL`
+            (2026-10-05, review pass): a 20-stack programme against a 10-stack
+            cap was shown this advice and the button under it, and clearing four
+            example cards cannot make room for twenty. The tap emptied the
+            starter deck, read as the problem being solved, and the retry failed
+            the same way with the remedy now gone. The store answers whether
+            freeing slots can actually help. */}
+        {freeSlotAdviceApplies(S) && (
           <>
             <p style={{ margin: '10px 0 0', fontSize: 13.5, lineHeight: 1.55, color: 'var(--dim)' }}>
               Free keeps up to {FREE_STACK_CAP} things, and the example cards count. Clearing them frees their slots.

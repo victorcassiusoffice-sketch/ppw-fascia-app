@@ -133,9 +133,17 @@ export default function FirstRunChoice() {
                   ppwDrift — later in the comma list — takes the transform over at
                   its delay. That is why the layers are split. */}
               <span data-ob-anim style={{ display: 'block', animation: `ppwMontageIn .7s cubic-bezier(.26,1,.4,1) ${m.d}s both, ppwDrift ${m.drift}s ease-in-out ${(1.6 + m.d).toFixed(2)}s infinite` }}>
+                {/* filter: --art-tone (2026-10-05). This poster is the FIRST
+                    screen of the app, and these six clay webps were rendered
+                    for Gloft — light and warm — while the default is now
+                    Indigo, dark and cold. Untreated they were six cream-gold
+                    tiles at 5-6x the luminance of the ground they drift over,
+                    haloed around an Indigo wordmark. The token is `none` on
+                    every colourway the art was actually drawn for, so this
+                    costs Gloft/Ivory/Silver/Crimson nothing. theme5.js artTone. */}
                 <img src={obImg(m.n)} alt="" decoding="async"
                   onError={(e) => { const s = e.currentTarget.closest('span[aria-hidden]'); if (s) s.style.display = 'none'; }}
-                  style={{ display: 'block', width: `min(${m.s}px, 18vw)`, aspectRatio: '1 / 1', objectFit: 'cover', borderRadius: 20, border: '1px solid var(--rim)', background: 'var(--surface)', boxShadow: 'var(--elev)' }} />
+                  style={{ display: 'block', width: `min(${m.s}px, 18vw)`, aspectRatio: '1 / 1', objectFit: 'cover', borderRadius: 20, border: '1px solid var(--rim)', background: 'var(--surface)', boxShadow: 'var(--elev)', filter: 'var(--art-tone)' }} />
               </span>
             </span>
           ))}

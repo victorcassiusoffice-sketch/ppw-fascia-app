@@ -7,8 +7,9 @@
 
 import React from 'react';
 import { THUMBS } from '../theme5.js';
-import { useStore5, getState, setTab, addToStack, setUpsell, openPlayer, createRoutine, deleteRoutine, updateRoutine, routineToMd, itemFromUrl, openSchedule, loadProtocols, markLibSeen, PREMIUM_PROTOCOL_UPSELL } from '../store5.js';
+import { useStore5, getState, setTab, addToStack, setUpsell, openPlayer, createRoutine, deleteRoutine, updateRoutine, routineItemsForSave, routineToMd, routineToLink, itemFromUrl, openSchedule, loadProtocols, markLibSeen, repeatLabel, normOffset, SHARE_MAX_OFFSET, PREMIUM_PROTOCOL_UPSELL } from '../store5.js';
 import { TILE_ICONS, DOC_ACCEPT } from './AddSheet.jsx';
+import { RepeatChoices } from './RepeatSheet.jsx';
 import { saveFile } from '../files5.js';
 import { protocolToItem } from '../protocols5.js';
 import SuppsSection from './SuppsSection.jsx';
@@ -39,9 +40,22 @@ function reducedMotion() {
   try { return !!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches; } catch { return false; }
 }
 
+// ── sharing a routine (link-first since 2026-10-05) ──
+// A .md attachment tapped in WhatsApp cannot open this app on any phone: the
+// manifest declares no `file_handlers` and no `share_target`, iOS gives a web
+// app no way to claim a document type at all, and Chromium's file handling is
+// desktop-and-installed-only. So the thing a client taps is now a LINK whose
+// whole payload is the programme (routineToLink → `/#r=…`), and the file rail
+// below is kept for the two cases a link cannot serve: a programme too long for
+// one URL, and a device with no navigator.share at all.
+const LINK_COPIED_TOAST = 'Link copied — paste it into WhatsApp.';
+const TOO_LONG_TOAST = 'This programme is too long for a link — sharing it as a file instead.';
+
 // share a routine as a .md file — native share sheet when the device supports
-// sharing files (phones), else a plain download.
-async function shareRoutine(r) {
+// sharing files (phones), else a plain download. The oversize fallback and the
+// desktop path; unchanged behaviour, lifted into its own function so the link
+// path can fall into it.
+async function shareRoutineAsFile(r) {
   const md = routineToMd(r);
   const slug = r.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'routine';
   const file = new File([md], `${slug}.ppw-routine.md`, { type: 'text/markdown' });
@@ -55,12 +69,39 @@ async function shareRoutine(r) {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 }
 
+/**
+ * Send a routine. A link by default, a file only when the programme will not
+ * fit in one.
+ * → null when it is on its way (shared, or on the clipboard, or handed over as
+ *   a file), or the url itself when every delivery route failed, so the caller
+ *   can put it on screen rather than leave a tap with no outcome.
+ */
+async function shareRoutine(r, flash = () => {}) {
+  const url = routineToLink(r);
+  // null means over LINK_MAX_URL. Never a truncated link: half a payload
+  // decodes to nothing on the far end, and the recipient has no way to tell
+  // that from a broken app.
+  if (!url) { flash(TOO_LONG_TOAST); await shareRoutineAsFile(r); return null; }
+  if (navigator.share) {
+    // Web Share Level 1 (title/text/url), not the Level 2 `{files}` call this
+    // used to make: a url is the thing a messenger renders as a tappable link.
+    try { await navigator.share({ title: r.name, text: `PPW routine: ${r.name}`, url }); return null; }
+    catch { /* cancelled, or the sheet refused — the clipboard is still a whole path */ }
+  }
+  try { await navigator.clipboard.writeText(url); flash(LINK_COPIED_TOAST); return null; }
+  catch { return url; }
+}
+
 // Routine builder (Vic #5 + rework 2026-07-06, premium): name a routine, then
 // ADD STACKS THE SAME WAY THE MAIN ＋ ADD WORKS — paste a share link, write an
 // affirmation, or pull from your library — accumulating inside the named
 // routine. Saved routines are applied to any day from the Calendar. Unlimited.
 function RoutineBuilder({ query = '' }) {
   const S = useStore5();
+  const flash = React.useContext(ToastCtx);
+  // The last resort of the send path: a link that could not be shared and could
+  // not be copied is shown here, selectable, so the tap still ends somewhere.
+  const [shareFallback, setShareFallback] = React.useState(null); // { id, url } | null
   const [open, setOpen] = React.useState(false);
   const [editingId, setEditingId] = React.useState(null); // Vic 1c — open + edit a saved routine
   const [name, setName] = React.useState('');
@@ -68,9 +109,22 @@ function RoutineBuilder({ query = '' }) {
   const [panel, setPanel] = React.useState(null); // 'media' | 'protocol' | 'text' | null
   const [link, setLink] = React.useState('');
   const [noteText, setNoteText] = React.useState('');
+  // WHICH STAGED ROW HAS ITS SCHEDULE OPEN (2026-10-05, review pass) — index, or
+  // null for none. Progressive disclosure: the two schedule controls live behind
+  // a tap on the row rather than always-on, because this list already carries a
+  // title, a meta line and a remove control per row and has to stay legible at
+  // 390px. One row at a time, so the day field and the repeat options on screen
+  // are never ambiguous.
+  const [schedFor, setSchedFor] = React.useState(null);
   const count = items.length;
-  const reset = () => { setOpen(false); setEditingId(null); setName(''); setItems([]); setPanel(null); setLink(''); setNoteText(''); };
-  const openEdit = (r) => { setEditingId(r.id); setName(r.name); setItems(r.items.map((x) => ({ ...x }))); setPanel(null); setOpen(true); };
+  const reset = () => { setOpen(false); setEditingId(null); setName(''); setItems([]); setPanel(null); setLink(''); setNoteText(''); setSchedFor(null); };
+  const openEdit = (r) => { setEditingId(r.id); setName(r.name); setItems(r.items.map((x) => ({ ...x }))); setPanel(null); setSchedFor(null); setOpen(true); };
+  // One staged item, patched in place. `dayOffset` is the public key and `_day`
+  // the in-flight parsed one (store5's naming law): openEdit can load a routine
+  // saved before that law, so setting a day clears `_day` rather than leaving
+  // two numbers on the item for a later reader to choose between.
+  const patchItem = (i, patch) => setItems((xs) => xs.map((x, j) => (j === i ? { ...x, ...patch } : x)));
+  const setDay = (i, v) => patchItem(i, { dayOffset: normOffset(v, SHARE_MAX_OFFSET), _day: undefined });
   const addLink = () => {
     const snap = itemFromUrl(link);
     if (!snap) return;
@@ -92,8 +146,11 @@ function RoutineBuilder({ query = '' }) {
   };
   const saveIt = () => {
     if (!name.trim() || !count) return;
-    if (editingId) updateRoutine(editingId, { name: name.trim(), items });
-    else createRoutine(name, items);
+    // routineItemsForSave: openEdit copies a SAVED routine's items into the
+    // builder, so an older routine written before the naming law can still be
+    // carrying `_day`. Normalising on every save is what retires it from disk.
+    if (editingId) updateRoutine(editingId, { name: name.trim(), items: routineItemsForSave(items) });
+    else createRoutine(name, routineItemsForSave(items));
     reset();
   };
   const IN = { height: 44, padding: '0 12px', borderRadius: 12, border: '1px solid var(--hairline)', background: 'var(--track)', boxShadow: 'var(--inset)', color: 'var(--ink)', outline: 'none', fontSize: 14 };
@@ -105,8 +162,9 @@ function RoutineBuilder({ query = '' }) {
       {S.routines.length > 0 && (
         <div style={{ marginTop: 18, display: 'flex', flexDirection: 'column', gap: 12 }}>
           {S.routines.filter((r) => !query || r.name.toLowerCase().includes(query)).map((r) => (
-            // Vic 1c — tap the routine to open + edit it
-            <div key={r.id} onClick={() => openEdit(r)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderRadius: 24, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)', cursor: 'pointer' }}>
+            <React.Fragment key={r.id}>
+            {/* Vic 1c — tap the routine to open + edit it */}
+            <div onClick={() => openEdit(r)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderRadius: 24, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)', cursor: 'pointer' }}>
               <span style={{ width: 44, height: 44, flex: 'none', borderRadius: 14, background: 'var(--acc-surf)', border: '1px solid var(--acc-rim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--acc-ink)' }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M4 6h16M4 12h16M4 18h10" /></svg>
               </span>
@@ -118,14 +176,31 @@ function RoutineBuilder({ query = '' }) {
               <button onClick={(e) => { e.stopPropagation(); openSchedule({ type: 'routine', id: r.id, name: r.name }); }} aria-label="Add routine to a day" title="Add to a day" style={{ width: 34, height: 34, flex: 'none', borderRadius: 10, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {ICal}
               </button>
-              {/* Vic 2026-07-06 — share as a .md file others can import via ＋ Add */}
-              <button onClick={(e) => { e.stopPropagation(); shareRoutine(r); }} aria-label="Share routine" style={{ width: 34, height: 34, flex: 'none', borderRadius: 10, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {/* Vic 2026-07-06, link-first 2026-10-05 — send it as a link that
+                  opens straight in the recipient's app; a file only when the
+                  programme is too long for one URL. */}
+              <button onClick={async (e) => {
+                e.stopPropagation();
+                setShareFallback(null);
+                const undelivered = await shareRoutine(r, flash);
+                if (undelivered) setShareFallback({ id: r.id, url: undelivered });
+              }} aria-label="Share routine" style={{ width: 34, height: 34, flex: 'none', borderRadius: 10, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v7a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 19v-7" /><path d="M12 15V3M8 7l4-4 4 4" /></svg>
               </button>
               <button onClick={(e) => { e.stopPropagation(); deleteRoutine(r.id); }} aria-label="Delete routine" style={{ width: 34, height: 34, flex: 'none', borderRadius: 10, border: '1px solid var(--hairline)', background: 'transparent', color: 'var(--dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16M10 4h4M6.5 7l1 13h9l1-13" /></svg>
               </button>
             </div>
+            {/* Share sheet refused AND the clipboard refused — the link itself,
+                selectable, so the tap is never a dead end. stopPropagation
+                because the row above opens the editor on click. */}
+            {shareFallback && shareFallback.id === r.id && (
+              <div onClick={(e) => e.stopPropagation()} style={{ padding: '0 4px' }}>
+                <div style={{ fontSize: 12, color: 'var(--dim)' }}>Copy this link and paste it into your message.</div>
+                <input readOnly value={shareFallback.url} aria-label="Routine share link" onFocus={(e) => e.target.select()} style={{ marginTop: 6, width: '100%', ...IN, fontSize: 12 }} />
+              </div>
+            )}
+            </React.Fragment>
           ))}
         </div>
       )}
@@ -141,15 +216,68 @@ function RoutineBuilder({ query = '' }) {
             <>
               <div style={LABEL}>In this routine ({count})</div>
               <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {items.map((it, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 12, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)' }}>
-                    <span style={{ fontSize: 11, fontWeight: 800, opacity: .8 }}>{i + 1}</span>
-                    <span style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{it.title}</span>
-                    <button onClick={() => setItems((xs) => xs.filter((_, j) => j !== i))} aria-label="Remove from routine" style={{ width: 24, height: 24, flex: 'none', borderRadius: 999, border: 'none', background: 'rgba(0,0,0,.18)', color: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}>
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
-                    </button>
-                  </div>
-                ))}
+                {items.map((it, i) => {
+                  // Either name in, one number out — a staged item can be fresh
+                  // from a tile (`dayOffset`) or copied out of a saved routine
+                  // written before the naming law (`_day`).
+                  const day = normOffset(it.dayOffset ?? it._day ?? 0, SHARE_MAX_OFFSET);
+                  const openSched = schedFor === i;
+                  return (
+                    <React.Fragment key={i}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 12, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)' }}>
+                        <span style={{ fontSize: 11, fontWeight: 800, opacity: .8 }}>{i + 1}</span>
+                        {/* The row IS the disclosure control — tap it for the day
+                            and the repeat. */}
+                        <button onClick={() => setSchedFor(openSched ? null : i)} aria-label={'Schedule for ' + it.title} aria-expanded={openSched}
+                          style={{ flex: 1, minWidth: 0, display: 'block', textAlign: 'left', minHeight: 36, padding: '2px 0', background: 'none', border: 'none', color: 'inherit' }}>
+                          <span style={{ display: 'block', fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{it.title}</span>
+                          {/* SAID THE WAY THE RECIPIENT WILL BE SHOWN IT: the
+                              receive sheet prints `repeatLabel(repeat || 'once')`
+                              and " · from day N", because an absent repeat is
+                              read as 'once' by both import paths. Defaulting to
+                              'daily' here — which is the STACK screen's rule —
+                              would promise the practitioner a recurrence the
+                              client never gets. */}
+                          <span style={{ display: 'block', marginTop: 1, fontSize: 11, fontWeight: 600, opacity: .82, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            Day {day} · {repeatLabel(it.repeat || 'once')}
+                          </span>
+                        </button>
+                        <button onClick={() => { setItems((xs) => xs.filter((_, j) => j !== i)); setSchedFor(null); }} aria-label="Remove from routine" style={{ width: 24, height: 24, flex: 'none', borderRadius: 999, border: 'none', background: 'rgba(0,0,0,.18)', color: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}>
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                        </button>
+                      </div>
+                      {/* THE TWO THINGS THE WIRE FORMAT CARRIES AND THE BUILDER
+                          COULD NOT SET (2026-10-05, review pass). `repeat` and
+                          `dayOffset` are transmitted by linkItem, written by
+                          mdItem and printed on the recipient's sheet — but there
+                          was no control for either here, so every routine built
+                          in the app went out as a flat list of day-0 one-offs
+                          and a six-week prescription could only be authored by
+                          hand-writing a ```ppw-routine``` block. Both flow
+                          straight through routineItemsForSave → linkItem with no
+                          codec change. */}
+                      {openSched && (
+                        <div style={{ padding: '12px 14px', borderRadius: 14, border: '1px solid var(--rim)', background: 'var(--surface)', color: 'var(--ink)', animation: 'ppwRise .25s ease both' }}>
+                          <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--dim)' }}>Starts on day</div>
+                          <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <button onClick={() => setDay(i, day - 1)} disabled={day <= 0} aria-label="Earlier day" style={{ width: 44, height: 44, flex: 'none', borderRadius: 999, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--ink)', fontSize: 19, opacity: day <= 0 ? .4 : 1 }}>−</button>
+                            {/* A number field as well as the steppers: week 6 is
+                                day 35, and nobody taps + thirty-five times. */}
+                            <input type="number" inputMode="numeric" min={0} max={SHARE_MAX_OFFSET} value={day} onChange={(e) => setDay(i, e.target.value)} aria-label="Starts on day"
+                              style={{ flex: 1, minWidth: 0, ...IN, textAlign: 'center', fontSize: 15, fontWeight: 600 }} />
+                            <button onClick={() => setDay(i, day + 1)} disabled={day >= SHARE_MAX_OFFSET} aria-label="Later day" style={{ width: 44, height: 44, flex: 'none', borderRadius: 999, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--ink)', fontSize: 19, opacity: day >= SHARE_MAX_OFFSET ? .4 : 1 }}>+</button>
+                          </div>
+                          <div style={{ marginTop: 6, fontSize: 11, lineHeight: 1.45, color: 'var(--dim)' }}>
+                            Day 0 is the day they start. A shared programme reaches day {SHARE_MAX_OFFSET}.
+                          </div>
+                          {/* RepeatSheet's own chooser, not a second one — see
+                              the note on RepeatChoices. */}
+                          <RepeatChoices value={it.repeat || 'once'} onChange={(v) => patchItem(i, { repeat: v })} />
+                        </div>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
               </div>
             </>
           )}

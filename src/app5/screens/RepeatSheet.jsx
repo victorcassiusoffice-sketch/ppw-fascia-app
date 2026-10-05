@@ -16,21 +16,62 @@ const OPTS = [
 
 const isCustomVal = (r) => { const n = parseInt(r, 10); return String(n) === String(r) && n > 1; };
 
+/**
+ * RepeatChoices — the repeat chooser on its own: the four options plus the
+ * "every N days" gap stepper, controlled by `value` / `onChange`.
+ *
+ * Lifted out of this sheet 2026-10-05 so the Routine builder can offer the SAME
+ * control instead of growing a second one. The defect that needed it: the share
+ * format carries `repeat`, the codec transmits it and the recipient's sheet
+ * prints it — but the builder, the only place a practitioner creates a routine
+ * by hand, had no way to set it, so every programme authored in the app left
+ * the phone as a flat list of one-offs. Two repeat UIs with their own
+ * vocabularies is how the two ends drift apart, so there is one.
+ *
+ * `value` is a repeat in the app's own vocabulary ('daily' | 'weekly' | 'once'
+ * | 'N'), and the CALLER decides what absent means: the deck reads undefined as
+ * 'daily', a shared programme as 'once'. That rule does not belong in here.
+ */
+export function RepeatChoices({ value, onChange }) {
+  const custom = isCustomVal(value);
+  const n = custom ? parseInt(value, 10) : 3;
+  const selectedKey = value === 'daily' ? 'daily' : value === 'weekly' ? 'weekly' : value === 'once' ? 'once' : (custom ? 'custom' : 'daily');
+  const pick = (key) => onChange(key === 'custom' ? String(n) : key);
+  const bump = (d) => onChange(String(Math.min(14, Math.max(2, n + d))));
+
+  return (
+    <>
+      <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 9 }}>
+        {OPTS.map((o) => {
+          const active = selectedKey === o.key;
+          return (
+            <button key={o.key} onClick={() => pick(o.key)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, minHeight: 52, padding: '0 16px', borderRadius: 16, border: `1px solid ${active ? 'var(--acc-rim)' : 'var(--rim)'}`, background: active ? 'var(--acc-surf)' : 'var(--surface)', color: active ? 'var(--acc-ink)' : 'var(--ink)', fontSize: 14.5, fontWeight: 600, textShadow: 'var(--label-shadow)', transition: 'all .2s' }}>
+              {o.label}
+              <span style={{ fontSize: 12, fontWeight: 500, opacity: .75 }}>{o.desc}</span>
+            </button>
+          );
+        })}
+      </div>
+      {selectedKey === 'custom' && (
+        <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px' }}>
+          <div style={{ fontSize: 13.5, fontWeight: 600 }}>Repeat every</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <button onClick={() => bump(-1)} aria-label="Fewer days" style={{ width: 42, height: 42, borderRadius: 999, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--ink)', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+            <div style={{ fontSize: 21, fontWeight: 600, minWidth: 74, textAlign: 'center', textShadow: 'var(--emboss)' }}>{n} days</div>
+            <button onClick={() => bump(1)} aria-label="More days" style={{ width: 42, height: 42, borderRadius: 999, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--ink)', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 export default function RepeatSheet() {
   const S = useStore5();
   if (!S.repeatId) return null;
   const it = S.deckItems.find((x) => x.id === S.repeatId);
   if (!it) return null;
   const cur = it.repeat === undefined ? 'daily' : it.repeat;
-  const custom = isCustomVal(cur);
-  const n = custom ? parseInt(cur, 10) : 3;
-
-  const selectedKey = cur === 'daily' ? 'daily' : cur === 'weekly' ? 'weekly' : cur === 'once' ? 'once' : (custom ? 'custom' : 'daily');
-  const pick = (key) => {
-    if (key === 'custom') setRepeat(it.id, String(n));
-    else setRepeat(it.id, key);
-  };
-  const bump = (d) => { const nn = Math.min(14, Math.max(2, n + d)); setRepeat(it.id, String(nn)); };
 
   return (
     <div style={{ position: 'absolute', inset: 0, zIndex: 34 }}>
@@ -38,27 +79,7 @@ export default function RepeatSheet() {
       <div style={{ position: 'absolute', left: 14, right: 14, bottom: 'calc(96px + env(safe-area-inset-bottom, 0px))', borderRadius: 30, padding: '22px 20px 20px', background: 'var(--surface-strong)', backdropFilter: 'var(--blur-heavy)', WebkitBackdropFilter: 'var(--blur-heavy)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', transformOrigin: '50% 105%', animation: 'ppwSheetIn .5s cubic-bezier(.3,1.36,.4,1) both' }}>
         <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--dim)', textShadow: 'var(--emboss)' }}>Repeat</div>
         <div style={{ marginTop: 4, fontSize: 19, fontWeight: 600, letterSpacing: '-.01em', textShadow: 'var(--emboss)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{it.title}</div>
-        <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 9 }}>
-          {OPTS.map((o) => {
-            const active = selectedKey === o.key;
-            return (
-              <button key={o.key} onClick={() => pick(o.key)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, minHeight: 52, padding: '0 16px', borderRadius: 16, border: `1px solid ${active ? 'var(--acc-rim)' : 'var(--rim)'}`, background: active ? 'var(--acc-surf)' : 'var(--surface)', color: active ? 'var(--acc-ink)' : 'var(--ink)', fontSize: 14.5, fontWeight: 600, textShadow: 'var(--label-shadow)', transition: 'all .2s' }}>
-                {o.label}
-                <span style={{ fontSize: 12, fontWeight: 500, opacity: .75 }}>{o.desc}</span>
-              </button>
-            );
-          })}
-        </div>
-        {selectedKey === 'custom' && (
-          <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px' }}>
-            <div style={{ fontSize: 13.5, fontWeight: 600 }}>Repeat every</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <button onClick={() => bump(-1)} aria-label="Fewer days" style={{ width: 42, height: 42, borderRadius: 999, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--ink)', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
-              <div style={{ fontSize: 21, fontWeight: 600, minWidth: 74, textAlign: 'center', textShadow: 'var(--emboss)' }}>{n} days</div>
-              <button onClick={() => bump(1)} aria-label="More days" style={{ width: 42, height: 42, borderRadius: 999, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--ink)', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
-            </div>
-          </div>
-        )}
+        <RepeatChoices value={cur} onChange={(v) => setRepeat(it.id, v)} />
         {/* Vic #3 — no fixed time: the stack queues at the top as Next Up. */}
         <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '0 4px' }}>
           <div>

@@ -51,8 +51,19 @@ function DemoCard({ time, title, meta, accent, img }) {
         {ticked
           ? <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'ppwRise .32s cubic-bezier(.3,1.4,.4,1) both' }}><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
           : img
+            // filter: --art-tone (2026-10-05) — closes "one screen, two apps".
+            // These six clay webps were rendered when Gloft, a light warm
+            // colourway, was the default; their channel means are L 0.70-0.76
+            // and R−B +20..+27. The default is now Indigo (ground L
+            // 0.022-0.126) and the payoff frame below them was re-shot from the
+            // running app in Indigo at L 0.087, R−B −56 — so six cream-gold
+            // discs sat at 5-6x the luminance of their own backdrop, inches
+            // above a cold navy screenshot. The treatment is a per-colourway
+            // token rather than re-toned bytes because the same files serve all
+            // eight skins: Gloft, Ivory, Silver and Crimson get `none` and keep
+            // the art as drawn. See theme5.js artTone.
             ? <img src={img} alt="" decoding="async" onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 999 }} />
+                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 999, filter: 'var(--art-tone)' }} />
             : <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3s6 6.3 6 10.3a6 6 0 0 1-12 0C6 9.3 12 3 12 3z" /></svg>}
       </span>
       <span style={{ flex: 1, minWidth: 0 }}>
@@ -78,16 +89,26 @@ const SHOW_CARDS = [
   { n: 'course',      time: '18:00', title: 'Online course',      meta: 'The one you’re studying' },
 ];
 
-// The mandatory facts, one bite each. `img` uses a clay asset (the reserved
-// stack-hero finally earns its place); `icon` draws an accent glyph disc.
+// The mandatory facts, one bite each. `img` uses an asset from
+// public/assets/onboarding; `icon` draws an accent glyph disc.
 // Honesty: the AUTO line is anchored to "in the app" — autoplay is the slot
 // engine, which only runs while the app is open, and the copy must never
 // suggest otherwise.
 const INFO_CHIPS = [
-  { k: 'stack', img: 'stack-hero', title: 'This is a Stack.', body: 'Your day, in order — do it, tick it, done.' },
+  // stack-real, not the clay stack-hero (2026-10-05): the sentence is "This is a
+  // Stack", and what sat next to it was an abstract clay render of something
+  // that is not a Stack. stack-real is a shot of the app's own LATER TODAY list,
+  // in Indigo, by tools/shoot-intro-assets.mjs — so the one fact the app asserts
+  // about itself is illustrated by itself. stack-hero.webp is left on disk
+  // rather than deleted; nothing references it now.
+  { k: 'stack', img: 'stack-real', title: 'This is a Stack.', body: 'Your day, in order — do it, tick it, done.' },
   { k: 'link',  icon: 'link',  title: 'Anything a link or file can carry.', body: 'Videos, audio, PDFs, courses — organised, at the times you choose.' },
   { k: 'auto',  icon: 'play',  title: 'It can even play itself.', body: 'Turn AUTO on and a card starts on its own when its time arrives in the app.' },
-  { k: 'share', icon: 'share', title: 'Not just for you.', body: 'Build routines for others — any routine shares as a small file, imported from ＋.' },
+  // SHARE (reworded 2026-10-05): this chip taught the mechanism verbatim, and
+  // the mechanism has changed — a routine now travels as a link, because a file
+  // tapped inside a messenger cannot open this app on any phone. Leaving the old
+  // words would have sent recipients hunting for an import they no longer need.
+  { k: 'share', icon: 'share', title: 'Not just for you.', body: 'Build routines for others — send anyone a link, and it opens straight in their app.' },
 ];
 
 // Accent glyphs for the chips that have no clay image. Same 24-box stroke
@@ -111,9 +132,38 @@ export default function OnboardingScreen() {
   // It is not yet a full skip: the server records ENTITLEMENT only, so nothing on
   // the account says "this person already agreed". That is the server-side profile
   // (onboarded / termsAcceptedAt), which is a backend change, not this file.
+  //
+  // NARROWED TO A GENUINELY RETURNING ACCOUNT (2026-10-05, review pass). This
+  // fired on `S.signedIn` alone — and account CREATION sets the same flag as a
+  // returning sign-in (applyServerEntitlement -> signedIn: isSignedIn()). So the
+  // accent CTA on the very first screen the app shows, FirstRunChoice's "Create
+  // an account", sent a brand-new person straight to the consent tick, past the
+  // whole second pitch screen: the six cards landing, the payoff shot of the real
+  // Stack screen, and the four info chips that are the only place the app ever
+  // explains what a Stack, a link-card, AUTO and sharing are. The welcome tour
+  // then opened with "the screen beneath them was a picture of this one" — about
+  // a screen they had never been shown. A new account is exactly who the pitch is
+  // written for; the skip is for someone who has already read it on another phone.
+  //
+  // Two signals, because neither is enough alone:
+  //   accountMode === 'create' — the DOOR. openAccount('create') writes it before
+  //     the sign-in starts, so it is already in the store on whichever render
+  //     brings `signedIn`, in any ordering of the two writes.
+  //   justCreated — the SERVER's own isNewAccount verdict, which is all there is
+  //     for a magic link tapped in an email with no door pressed on this device.
+  //
+  // Sampled once per session and then HELD: a new-account holder who later opens
+  // the sign-in sheet out of curiosity flips accountMode, and that must not
+  // retroactively yank them off the pitch they are in the middle of reading.
+  const doorRef = React.useRef(null);
   React.useEffect(() => {
-    if (S.signedIn && (S.obStep || 0) < CONSENT) setState({ obStep: CONSENT });
-  }, [S.signedIn]);
+    if (!S.signedIn) { doorRef.current = null; return; }
+    if (doorRef.current === null) {
+      doorRef.current = (S.justCreated || S.accountMode === 'create') ? 'new' : 'returning';
+    }
+    if (doorRef.current === 'new') return;            // a new account keeps the pitch
+    if ((S.obStep || 0) < CONSENT) setState({ obStep: CONSENT });
+  }, [S.signedIn, S.justCreated, S.accountMode]);
 
   // A dimmed CTA that does nothing when tapped reads as a broken app, not as a
   // locked door — people tapped it repeatedly and never looked up at the tick.
@@ -135,14 +185,24 @@ export default function OnboardingScreen() {
   );
   const [landed, setLanded] = React.useState(reduceMotion ? 6 : 0);
   const [assembled, setAssembled] = React.useState(reduceMotion);
+  const [payoffFailed, setPayoffFailed] = React.useState(false);
 
   // StrictMode-safe: cleanup clears the interval; dev double-mount cannot leak.
   // S.onboarded is in the guard because these hooks sit ABOVE the onboarded bail (the React #300 law above) — an onboarded user's obStep is 0, so without it the interval would spin forever.
+  //
+  // !S.firstRunChoice JOINED THE GUARD 2026-10-05, and it is the fix, not a
+  // tidy-up. FirstRunChoice sits at z-41 over this screen's z-40 until the
+  // visitor picks one of its three doors — but the interval started at MOUNT,
+  // so the whole show (6 × 420ms + a 450ms settle = 2.97s) played out behind
+  // that screen and was already finished by the time anyone could see it. The
+  // pitch the app opens with was being shown to nobody. The repo's own shoot
+  // script had written the symptom down as if it were the design: "the show has
+  // been running behind the first-run choice since mount".
   React.useEffect(() => {
-    if (S.onboarded || (S.obStep || 0) !== 0 || assembled) return undefined;
+    if (S.onboarded || !S.firstRunChoice || (S.obStep || 0) !== 0 || assembled) return undefined;
     const iv = setInterval(() => setLanded((n) => (n >= 6 ? n : n + 1)), 420);
     return () => clearInterval(iv);
-  }, [S.onboarded, S.obStep, assembled]);
+  }, [S.onboarded, S.firstRunChoice, S.obStep, assembled]);
 
   React.useEffect(() => {
     if (landed === 6 && !assembled) {
@@ -164,14 +224,17 @@ export default function OnboardingScreen() {
   const [chip, setChip] = React.useState(0);
   const chipRowRef = React.useRef(null);
   const chipTouched = React.useRef(false);
+  // Same `!S.firstRunChoice` clause as the show above, for the same reason: a
+  // reduced-motion visitor starts `assembled`, so without it this carousel
+  // would walk its four facts past a screen the user cannot see yet.
   React.useEffect(() => {
-    if (S.onboarded || (S.obStep || 0) !== 0 || !assembled || reduceMotion) return undefined;
+    if (S.onboarded || !S.firstRunChoice || (S.obStep || 0) !== 0 || !assembled || reduceMotion) return undefined;
     const iv = setInterval(() => {
       if (chipTouched.current) return;
       setChip((c) => (c + 1) % INFO_CHIPS.length);
     }, 2800);
     return () => clearInterval(iv);
-  }, [S.onboarded, S.obStep, assembled, reduceMotion]);
+  }, [S.onboarded, S.firstRunChoice, S.obStep, assembled, reduceMotion]);
   React.useEffect(() => {
     const row = chipRowRef.current;
     if (!row || !row.children[chip]) return;
@@ -266,6 +329,73 @@ export default function OnboardingScreen() {
 
             {assembled && (
               <div data-ob-anim style={{ animation: 'ppwRise .32s cubic-bezier(.3,1.4,.4,1) both' }}>
+
+                {/* THE PAYOFF (2026-10-05). Six demo cards tick, and then the
+                    pitch ended — it showed what the app DOES and never once
+                    showed the app. This is the real Stack screen, shot in Indigo
+                    at phone size by tools/shoot-intro-assets.mjs, so the promise
+                    and the product are the same picture.
+
+                    A peek, not a full screen: cropped to the live card and the
+                    top of the day's list. A full-height 390x844 render would add
+                    about 450px to a column that already scrolls, pushing the
+                    four info chips — which carry the facts this screen exists to
+                    make — that much further from the thumb. Hiding the whole
+                    FRAME on error, not just the <img>, so a missing file leaves
+                    no empty box.
+
+                    THE FRAME NO LONGER STARTS AT THE TOP OF THE SCREEN
+                    (2026-10-05, review pass). It used to, and the header band it
+                    caught carried two things a static picture must never carry:
+                    the date — the shipped file read "MONDAY 5 OCTOBER", the day
+                    of the shoot, wrong from the next morning on and unable ever
+                    to correct itself — and the signed-out accent "Sign in" pill,
+                    a control that cannot be pressed because it is pixels, shown
+                    to viewers who are signed in (reachable: Back from the consent
+                    screen). The crop now starts below the band and the shoot
+                    script PROVES both are outside every frame. */}
+                {!payoffFailed && (
+                  <figure style={{ margin: '14px 0 0' }}>
+                    {/* Narrower than the column on purpose. Full-bleed it reads
+                        as another card in the stack above it — a screenshot of
+                        the app, inside the app, at the same width as the app's
+                        own cards. Inset and centred, it reads as what it is: a
+                        picture of a different screen. It also keeps the cost of
+                        the payoff to about 215px in a column that already has to
+                        scroll, so the four info chips below are no further out
+                        of reach than they already were. */}
+                    <div style={{ width: 210, maxWidth: '62%', margin: '0 auto', borderRadius: 18, overflow: 'hidden', ...CARD }}>
+                      {/* 210 wide and 195/232, not 240 and 13/10. Dropping the
+                          header made the window start lower, so it had to reach
+                          further down to hold anything but the one hero card —
+                          the caption is a claim about a DAY — and the frame is
+                          drawn narrower to pay back some of that height: 247px
+                          of column against the old 185.
+
+                          MEASURED, because the comment above this one asserts a
+                          fold that was already lost: on a 390x844 phone with the
+                          six cards landed, this frame sits at y 716-963 and the
+                          first info chip at 1036-1139. The chips are BELOW the
+                          fold and were before this change too (the old frame put
+                          them at about 974) — the six-card show alone is taller
+                          than the viewport. This pass costs 62px more scrolling;
+                          it does not newly push the chips under. Shrinking the
+                          whole step-0 column is a real problem and a separate
+                          one.
+
+                          The ratio must equal the file's own pixel ratio or
+                          objectFit:cover silently crops the art;
+                          intro-assets.test.js fails if the two ever disagree. */}
+                      <img src={obImg('stack-done')} alt="The Stack screen: the first routine of the day on a card, with the rest of the day listed below" decoding="async"
+                        onError={() => setPayoffFailed(true)}
+                        style={{ display: 'block', width: '100%', aspectRatio: '195 / 232', objectFit: 'cover', objectPosition: 'center top' }} />
+                    </div>
+                    <figcaption style={{ margin: '8px 0 0', fontSize: 12.5, lineHeight: 1.45, color: 'var(--dim)', textAlign: 'center' }}>
+                      And this is yours, by tonight.
+                    </figcaption>
+                  </figure>
+                )}
+
                 <p style={{ margin: '12px 0 0', fontSize: 13.5, fontWeight: 700, color: 'var(--accent)', textAlign: 'center', textShadow: 'var(--emboss)' }}>
                   Your turn — tap a card to tick it off!
                 </p>

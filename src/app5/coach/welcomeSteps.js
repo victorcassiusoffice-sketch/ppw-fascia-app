@@ -19,7 +19,13 @@ export const WELCOME_STEPS = [
   {
     target: null,
     title: 'Your Stack — the real one.',
-    body: 'The one you watched build in the pitch was a demo. This one is yours: everything you mean to do today, in one list, in order — the top card is always the next thing. We put four examples in so it is not empty; tick them off or clear them.',
+    // Reworded 2026-10-05. It used to open "The one you watched build in the
+    // pitch was a demo", which stopped being the whole truth when the pitch
+    // gained a real screenshot of this screen: the six cards are still
+    // illustrative, but the screen beneath them is the app. Calling both of them
+    // a demo would now read as the app disowning a picture of itself.
+    // "Four examples" is checked against starterDeck(), which returns exactly four.
+    body: 'The six cards in the pitch were examples, and the screen beneath them was a picture of this one. This is the live version: everything you mean to do today, in one list, in order — the top card is always the next thing. We put four examples in so it is not empty; tick them off or clear them.',
   },
   {
     target: 'guide',

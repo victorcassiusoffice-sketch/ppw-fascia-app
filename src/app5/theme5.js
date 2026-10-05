@@ -7,13 +7,20 @@
 // applied inline on the app shell (style={{ ...parseVars(themeVars(state)) }}).
 //
 // Three registers (New Design overrules — this is the authoritative look):
-//   • soft-neumorphism  (DEFAULT: skin:'soft', bg:'grey', soft:'graphite')
+//   • soft-neumorphism  (DEFAULT: skin:'soft', bg:'grey', soft:'indigo')
 //   • glass             (translucent + blur)
 //   • gel / glass-over-scene (clear skin over photographic scenes)
 //
+// The default colourway moved graphite → gloft (2026-08-07) → indigo (2026-10);
+// the live value is store5.js's initialState, not this comment, which has been
+// wrong before. The soft branch below never reads `theme`, `bg` or the glow
+// vars — each colourway's own `ink` + `ground` ARE the light/dark mode, which is
+// why the indigo default is a whole-app light→dark flip rather than a hue tweak.
+//
 // Scene/photo backgrounds reference bundled assets (assets/glass/*.png etc.);
 // until those are copied in, unknown backgrounds degrade to their base colour.
-// The default graphite skin needs NO image assets and renders fully.
+// Every soft colourway, indigo included, grounds on a CSS gradient and needs NO
+// image assets, so the default renders fully on a cold first paint.
 // ─────────────────────────────────────────────────────────────────────────
 
 /* Graphite — sampled from the embossed PPW logo. Further colourways arrive
@@ -34,18 +41,53 @@
 //
 // `gel` (shown as "Glass") had no logo at all while ppw-logo-glass.png sat unused
 // on disk — the one genuine gap, now closed.
+//
+// `bad` / `badSurf` ARE NEW (2026-10-05) AND THEY CLOSE A P1.
+//
+// Every error message in this app was painted through a `--bad` reference that
+// carried a hot-pink hex as its CSS fallback. `--bad` was defined by no
+// stylesheet and by no branch of themeVars, so what actually painted, in every
+// skin, always, was that fallback. (The hex is deliberately not written anywhere
+// in src/ now — error-colour.test.jsx names it in order to forbid it, and is the
+// one file allowed to.) On the Indigo default it measures 1.05:1 against the top
+// stop of --ground — not faint, INVISIBLE. The worst case was the passcode lock:
+// a mistyped PIN said nothing at all, so a wrong code looked exactly like a
+// frozen app. The same token carried the "Delete my account" row label at 1.25:1
+// on --surface — the one destructive row in the app, blank while every row
+// beside it read fine.
+//
+// So the token now exists, per colourway, and every call site is a bare
+// `var(--bad)` with no fallback behind it. Two bars, measured in
+// error-colour.test.jsx from the real emitted vars:
+//   • Indigo clears WCAG 4.5:1 on all three --ground stops and all three
+//     --surface stops. Worst case 4.85:1 (on #4E6584).
+//   • Every colourway's `bad` is at least as legible as that colourway's own
+//     `ink` on the same stops. Graphite's ink is 2.76:1 and Crimson's 1.78:1 —
+//     those palettes cannot reach 4.5:1 for ANY text, so ink parity is the
+//     honest bar there rather than inventing a colour out of register.
+// Polarity follows the skin: a light-ink colourway gets a pale rose, a dark-ink
+// one gets a deep red. Indigo's is lighter than it looks like it needs to be
+// because the bar is its ground's TOP stop (#4E6584, L=0.126): the mid-weight
+// rose the review proposed measures 3.27:1 there and would have shipped a
+// second, quieter failure in place of the first.
+//
+// `badSurf` is the error colour as PAINT rather than text — the one place that
+// happens is the "Delete for good" confirm button, which fills with it and puts
+// white on top. A pale rose that is correct for text on a dark skin is unusable
+// as a fill under white, which is why these are two tokens. It defaults to
+// `bad`, which is right for every dark-red (light-skin) colourway.
 export const SOFT = {
   // 2026-07-07 (Vic item 3): embossed secondary text was too light on graphite —
   // dim lifted 65%→84% (dimA) and the white emboss highlight calmed .48→.32 so
   // thin text reads dark instead of washed. Emboss STYLE kept.
-  graphite: { base: '#7E8286', light: 'rgba(255,255,255,.40)', dark: 'rgba(34,38,42,.60)', accent: '#3E434A', ink: '#24282C', dimA: 'D6', rim: '#8E9296', well: '#6F7377', accInk: '#FFFFFF', name: 'Graphite', deep: '#33373B', accDeep: '#17191C', ground: 'radial-gradient(135% 110% at 25% 8%, #97999C 0%, #82868A 46%, #676B6E 100%)', glossA: '.16', rimGlowA: '.14', emboss: 'rgba(255,255,255,.32)', labelSh: 'rgba(0,0,0,.32)', logo: 'assets/ppw-logo-graphite.webp' },
-  silver: { base: '#C8CCCE', light: 'rgba(255,255,255,.78)', dark: 'rgba(96,102,108,.52)', accent: '#5C6268', ink: '#33383C', rim: '#B4B8BB', well: '#B9BDBF', accInk: '#FFFFFF', name: 'Silver', deep: '#7E8489', accDeep: '#33373B', ground: 'radial-gradient(135% 110% at 25% 8%, #D6DADB 0%, #C9CDCF 46%, #B9BCBE 100%)', glossA: '.30', rimGlowA: '.35', emboss: 'rgba(255,255,255,.8)', labelSh: 'rgba(0,0,0,.22)', logo: 'assets/ppw-logo-silver.webp' },
-  ivory: { base: '#E0DFDA', light: 'rgba(255,255,255,.92)', dark: 'rgba(150,148,138,.56)', accent: '#6E6A61', ink: '#3A372F', rim: '#CFCEC8', well: '#D2D1CB', accInk: '#FFFFFF', name: 'Ivory', deep: '#96948A', accDeep: '#3A372F', ground: 'radial-gradient(135% 110% at 25% 8%, #EDECE9 0%, #E0E0DA 46%, #CDCDC5 100%)', glossA: '.45', rimGlowA: '.55', emboss: 'rgba(255,255,255,.95)', labelSh: 'rgba(0,0,0,.2)', logo: 'assets/ppw-logo-ivory.webp' },
-  black: { base: '#1C1E20', lite: '#4A4E53', light: 'rgba(255,255,255,.08)', dark: 'rgba(0,0,0,.78)', accent: '#3C4147', ink: '#E6E8EA', rim: '#33373B', well: '#0C0D0F', accInk: '#FFFFFF', name: 'Black', deep: '#000000', accDeep: '#0A0B0C', ground: 'radial-gradient(135% 110% at 25% 8%, #2B2D2F 0%, #1B1D1F 46%, #0E0F10 100%)', glossA: '.05', rimGlowA: '.06', emboss: 'rgba(0,0,0,.6)', labelSh: 'rgba(0,0,0,.5)', thumb: 'linear-gradient(145deg, #6E747B 0%, #43484E 100%)', logo: 'assets/ppw-logo-black.webp' },
-  gloft: { base: '#C9C8C3', light: 'rgba(255,255,255,.85)', dark: 'rgba(120,112,100,.55)', accent: '#A5814F', ink: '#453F36', rim: '#B7B6B1', well: '#B5B4AF', accInk: '#FFFFFF', name: 'Gloft', deep: '#7A7468', accDeep: '#4A3A22', ground: 'radial-gradient(135% 110% at 25% 8%, #D8D9D4 0%, #C6C5C0 46%, #A4A3A0 100%)', glossA: '.34', rimGlowA: '.4', emboss: 'rgba(255,255,255,.88)', labelSh: 'rgba(70,50,30,.3)', halo: '0 0 22px rgba(232,168,120,.38)', logo: 'assets/ppw-logo-gloft.webp' },
-  indigo: { base: '#2C4164', lite: '#5F7DA6', light: 'rgba(160,190,235,.24)', dark: 'rgba(4,10,24,.7)', accent: '#6B89B8', ink: '#DFE7F2', rim: '#3E567C', well: '#1A2A47', accInk: '#FFFFFF', name: 'Indigo', deep: '#0A1428', accDeep: '#101B30', ground: 'radial-gradient(135% 110% at 25% 8%, #4E6584 0%, #31476B 46%, #12294A 100%)', glossA: '.10', rimGlowA: '.10', emboss: 'rgba(0,10,30,.5)', labelSh: 'rgba(0,0,0,.35)', thumb: 'linear-gradient(145deg, #8FA6C8 0%, #5F7699 100%)', halo: '0 0 20px rgba(120,160,220,.22)', logo: 'assets/ppw-logo-indigo.webp' },
+  graphite: { base: '#7E8286', light: 'rgba(255,255,255,.40)', dark: 'rgba(34,38,42,.60)', accent: '#3E434A', ink: '#24282C', dimA: 'D6', rim: '#8E9296', well: '#6F7377', accInk: '#FFFFFF', bad: '#520016', name: 'Graphite', deep: '#33373B', accDeep: '#17191C', ground: 'radial-gradient(135% 110% at 25% 8%, #97999C 0%, #82868A 46%, #676B6E 100%)', glossA: '.16', rimGlowA: '.14', emboss: 'rgba(255,255,255,.32)', labelSh: 'rgba(0,0,0,.32)', logo: 'assets/ppw-logo-graphite.webp' },
+  silver: { base: '#C8CCCE', light: 'rgba(255,255,255,.78)', dark: 'rgba(96,102,108,.52)', accent: '#5C6268', ink: '#33383C', rim: '#B4B8BB', well: '#B9BDBF', accInk: '#FFFFFF', bad: '#70001E', name: 'Silver', deep: '#7E8489', accDeep: '#33373B', ground: 'radial-gradient(135% 110% at 25% 8%, #D6DADB 0%, #C9CDCF 46%, #B9BCBE 100%)', glossA: '.30', rimGlowA: '.35', emboss: 'rgba(255,255,255,.8)', labelSh: 'rgba(0,0,0,.22)', logo: 'assets/ppw-logo-silver.webp' },
+  ivory: { base: '#E0DFDA', light: 'rgba(255,255,255,.92)', dark: 'rgba(150,148,138,.56)', accent: '#6E6A61', ink: '#3A372F', rim: '#CFCEC8', well: '#D2D1CB', accInk: '#FFFFFF', bad: '#70001E', name: 'Ivory', deep: '#96948A', accDeep: '#3A372F', ground: 'radial-gradient(135% 110% at 25% 8%, #EDECE9 0%, #E0E0DA 46%, #CDCDC5 100%)', glossA: '.45', rimGlowA: '.55', emboss: 'rgba(255,255,255,.95)', labelSh: 'rgba(0,0,0,.2)', logo: 'assets/ppw-logo-ivory.webp' },
+  black: { base: '#1C1E20', lite: '#4A4E53', light: 'rgba(255,255,255,.08)', dark: 'rgba(0,0,0,.78)', accent: '#3C4147', ink: '#E6E8EA', rim: '#33373B', well: '#0C0D0F', accInk: '#FFFFFF', bad: '#FDE2E7', badSurf: '#C03E58', name: 'Black', deep: '#000000', accDeep: '#0A0B0C', ground: 'radial-gradient(135% 110% at 25% 8%, #2B2D2F 0%, #1B1D1F 46%, #0E0F10 100%)', glossA: '.05', rimGlowA: '.06', emboss: 'rgba(0,0,0,.6)', labelSh: 'rgba(0,0,0,.5)', thumb: 'linear-gradient(145deg, #6E747B 0%, #43484E 100%)', logo: 'assets/ppw-logo-black.webp' },
+  gloft: { base: '#C9C8C3', light: 'rgba(255,255,255,.85)', dark: 'rgba(120,112,100,.55)', accent: '#A5814F', ink: '#453F36', rim: '#B7B6B1', well: '#B5B4AF', accInk: '#FFFFFF', bad: '#800022', name: 'Gloft', deep: '#7A7468', accDeep: '#4A3A22', ground: 'radial-gradient(135% 110% at 25% 8%, #D8D9D4 0%, #C6C5C0 46%, #A4A3A0 100%)', glossA: '.34', rimGlowA: '.4', emboss: 'rgba(255,255,255,.88)', labelSh: 'rgba(70,50,30,.3)', halo: '0 0 22px rgba(232,168,120,.38)', logo: 'assets/ppw-logo-gloft.webp' },
+  indigo: { base: '#2C4164', lite: '#5F7DA6', light: 'rgba(160,190,235,.24)', dark: 'rgba(4,10,24,.7)', accent: '#6B89B8', ink: '#DFE7F2', rim: '#3E567C', well: '#1A2A47', accInk: '#FFFFFF', bad: '#FFE0E7', badSurf: '#C03E58', name: 'Indigo', deep: '#0A1428', accDeep: '#101B30', ground: 'radial-gradient(135% 110% at 25% 8%, #4E6584 0%, #31476B 46%, #12294A 100%)', glossA: '.10', rimGlowA: '.10', emboss: 'rgba(0,10,30,.5)', labelSh: 'rgba(0,0,0,.35)', thumb: 'linear-gradient(145deg, #8FA6C8 0%, #5F7699 100%)', halo: '0 0 20px rgba(120,160,220,.22)', logo: 'assets/ppw-logo-indigo.webp' },
   /* Crimson — matched to the red neumorphic logo Vic supplied 2026-07-06. */
-  crimson: { base: '#A94745', lite: '#D07A76', light: 'rgba(255,190,185,.30)', dark: 'rgba(70,15,14,.62)', accent: '#6E211F', ink: '#3B1210', rim: '#B85955', well: '#933B39', accInk: '#FFFFFF', name: 'Crimson', deep: '#5F1F1E', accDeep: '#3A1010', ground: 'radial-gradient(135% 110% at 25% 8%, #C05C58 0%, #A94745 46%, #7E2C2A 100%)', glossA: '.14', rimGlowA: '.16', emboss: 'rgba(255,255,255,.28)', labelSh: 'rgba(0,0,0,.32)', logo: 'assets/ppw-logo-crimson.webp' },
+  crimson: { base: '#A94745', lite: '#D07A76', light: 'rgba(255,190,185,.30)', dark: 'rgba(70,15,14,.62)', accent: '#6E211F', ink: '#3B1210', rim: '#B85955', well: '#933B39', accInk: '#FFFFFF', bad: '#2E000D', name: 'Crimson', deep: '#5F1F1E', accDeep: '#3A1010', ground: 'radial-gradient(135% 110% at 25% 8%, #C05C58 0%, #A94745 46%, #7E2C2A 100%)', glossA: '.14', rimGlowA: '.16', emboss: 'rgba(255,255,255,.28)', labelSh: 'rgba(0,0,0,.32)', logo: 'assets/ppw-logo-crimson.webp' },
   gel: { name: 'Glass', gel: true, base: 'linear-gradient(145deg, #FAFBFC 0%, #D9DDE0 45%, #AFB5B9 100%)', accent: 'rgba(255,255,255,.95)', rim: '#C6CBCF', dark: 'rgba(120,128,136,.4)', logo: 'assets/ppw-logo-glass.webp' },
 };
 
@@ -83,6 +125,88 @@ const GROUNDS = {
   slate: 'radial-gradient(130% 100% at 25% 10%, #3A3F48 0%, #22252B 45%, #121419 100%)',
   nature: 'radial-gradient(90% 60% at 72% 18%, rgba(98,142,86,.55) 0%, rgba(0,0,0,0) 60%), radial-gradient(70% 55% at 15% 40%, rgba(54,98,68,.5) 0%, rgba(0,0,0,0) 65%), radial-gradient(60% 40% at 55% 62%, rgba(70,116,74,.28) 0%, rgba(0,0,0,0) 70%), radial-gradient(120% 80% at 50% 110%, rgba(14,34,22,.95) 0%, rgba(0,0,0,0) 72%), linear-gradient(178deg, #16211A 0%, #0C130D 55%, #070B08 100%)',
 };
+
+/**
+ * The error family, for the two registers theme5 has no colourway table for.
+ *
+ * Glass and gel ground on photographs and translucent surfaces, so there is no
+ * fixed backdrop to measure against — an exact contrast number for them would
+ * be a number about one of Vic's wallpapers, not about the theme. What CAN be
+ * guaranteed is POLARITY: a skin with light ink gets the pale rose, a skin with
+ * dark ink gets the deep red, so the error never fights the direction of every
+ * other text run on the same screen. Values deliberately match the soft
+ * colourways of the same polarity (indigo/black, and silver/ivory) so the app
+ * has one error colour per register rather than five near-misses.
+ */
+const BAD_ON_LIGHT_INK = { bad: '#FFE0E7', surf: '#C03E58' };   // dark skins
+const BAD_ON_DARK_INK = { bad: '#70001E', surf: '#70001E' };    // light skins
+/** White is the ink in both cases: 5.16:1 on #C03E58, 12.30:1 on #70001E —
+ *  both clear the 4.5:1 body-text floor, and error-colour.test.jsx measures them
+ *  from the emitted vars rather than trusting this line. (It said 8.35:1 for the
+ *  rose until 2026-10-05; that number was never right, which is the argument for
+ *  having the test compute it.) */
+const badVars = (b) => '--bad:' + b.bad + ';--bad-surf:' + (b.surf || b.bad) + ';--bad-ink:#FFFFFF;';
+
+/**
+ * --art-tone — the colourway's treatment for the SHIPPED CLAY ART (2026-10-05).
+ *
+ * The six lifestyle thumbnails in public/assets/onboarding were rendered when
+ * Gloft, a light warm colourway, was the default. Their measured channel means
+ * are L 0.70-0.76 and R−B +20..+27 — cream-gold. The default is now Indigo,
+ * whose ground measures L 0.022-0.126, and the two intro frames beside them were
+ * re-shot from the running app in Indigo at L 0.073/0.087 and R−B −56. So the
+ * first screen a new customer sees carried six cream discs at 5-6x the luminance
+ * of their own backdrop, directly above a cold navy screenshot: one screen, two
+ * apps.
+ *
+ * This is a TOKEN and not a re-render of the files because the same six files
+ * serve all eight colourways. Baking Indigo's temperature into the bytes would
+ * fix Indigo by breaking Gloft — the colourway the art was drawn for — along
+ * with Ivory, Silver and Crimson. So the light skins get `none` and keep their
+ * native art, and only the skins where warm cream IS the defect are treated.
+ *
+ * INDIGO's chain maps the clay mean (230,221,206) to (80,105,149): L 0.139,
+ * R−B −70. That sits inside Indigo's own palette (ground top #4E6584 is
+ * (78,101,132), lite is #5F7DA6) and no channel clips at any point in the range,
+ * so the art keeps its modelling — highlight L 0.179 down to shadow L 0.048.
+ * Order matters: brightness() must come BEFORE sepia(), or sepia pushes the
+ * whole upper range past 1.0, clamps, and the image flattens to one disc of
+ * colour. Arithmetic proved in intro-art-tone.test.jsx.
+ *
+ * BLACK and the PHOTOGRAPHIC registers (glass, gel-with-light-ink) get a neutral
+ * darken instead of the blue duotone: black's palette is neutral grey, glass's
+ * accent is orange, and gel grounds on whichever photograph the user chose — a
+ * blue cast would fight all three, while losing the warmth and the brightness
+ * is the part that matters.
+ */
+const ART_TONE_INDIGO = 'grayscale(1) brightness(.38) sepia(1) hue-rotate(180deg) saturate(2)';
+const ART_TONE_DIM = 'grayscale(1) brightness(.34)';
+const artTone = (S, isGlass, theme) => {
+  if (isGlass) return theme === 'dark' ? ART_TONE_DIM : 'none';
+  const c = SOFT[S.soft] || SOFT.graphite;
+  if (c.gel) return S.inkMode === 'dark' ? 'none' : ART_TONE_DIM;
+  if (S.soft === 'indigo') return ART_TONE_INDIGO;
+  if (S.soft === 'black') return ART_TONE_DIM;
+  return 'none';
+};
+
+/**
+ * Which error family a given state is in — ONE decision point, deliberately
+ * outside the five-branch if/else below.
+ *
+ * The branch chain is 70 lines of string concatenation and the previous attempt
+ * at this fix (AddSheet, same changeset) fixed one call site out of twelve
+ * precisely because "every branch" is easy to say and easy to miss. Appending
+ * the family once, after the chain, makes "no branch forgets it" structural
+ * rather than a thing to remember.
+ */
+function badFamily(S, isGlass, theme) {
+  if (isGlass) return theme === 'dark' ? BAD_ON_LIGHT_INK : BAD_ON_DARK_INK;
+  const c = SOFT[S.soft] || SOFT.graphite;
+  // gel is glass-over-scene: its ink is the user's inkMode toggle, not a field.
+  if (c.gel) return S.inkMode === 'dark' ? BAD_ON_DARK_INK : BAD_ON_LIGHT_INK;
+  return { bad: c.bad || BAD_ON_DARK_INK.bad, surf: c.badSurf || c.bad || BAD_ON_DARK_INK.surf };
+}
 
 // themeVars(state, glassIntensityProp?) → CSS custom-property string.
 // Faithful port of the prototype's vars computation.
@@ -244,6 +368,12 @@ export function themeVars(S, glassIntensityProp) {
         '--intro-bevel:inset 0 2px 3px rgba(255,255,255,' + (c.rimGlowA || '.2') + '), inset 0 -5px 14px ' + c.dark + ';';
     }
   }
+
+  // Appended for EVERY branch above — see badFamily. --bad is the error text
+  // colour, --bad-surf the destructive-button fill, --bad-ink the text on it.
+  vars += badVars(badFamily(S, isGlass, theme));
+  // Likewise once, for the same reason — see artTone.
+  vars += '--art-tone:' + artTone(S, isGlass, theme) + ';';
 
   if (S.a11y && S.a11y.on) vars += '--dim:var(--ink);';
   return vars;

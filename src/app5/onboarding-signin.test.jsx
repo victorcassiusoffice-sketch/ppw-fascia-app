@@ -22,7 +22,16 @@ function Shell() {
 
 beforeEach(() => {
   localStorage.clear(); sessionStorage.clear();
-  setState({ onboarded: false, obStep: 0, termsOk: false, signedIn: false, accountOpen: false });
+  // accountMode + justCreated joined the reset 2026-10-05, and they are not
+  // tidying-up: the store is module-level, the create-door test below leaves
+  // accountMode on 'create', and the skip-to-consent test now reads it (a NEW
+  // account keeps the pitch — see intro-new-account.test.jsx). Without the
+  // reset, that test was asserting the returning-user path while the store
+  // still said the person had just pressed "Create an account".
+  setState({
+    onboarded: false, obStep: 0, termsOk: false, signedIn: false,
+    accountOpen: false, accountMode: 'signin', justCreated: false,
+  });
 });
 afterEach(cleanup);
 

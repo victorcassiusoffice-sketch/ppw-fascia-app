@@ -1,0 +1,75 @@
+{
+  "generatedBy": "tools/shoot-intro-assets.mjs",
+  "shotAt": "2026-06-15T02:40:00.000Z",
+  "clock": "pinned",
+  "locale": "en-GB",
+  "timezone": "Indian/Mauritius",
+  "headerDateRendered": "MONDAY 15 JUNE",
+  "skin": "soft/indigo",
+  "viewport": {
+    "width": 390,
+    "height": 844,
+    "deviceScaleFactor": 2
+  },
+  "frames": [
+    {
+      "file": "stack-real.webp",
+      "clip": {
+        "x": 20,
+        "y": 428,
+        "width": 350,
+        "height": 350
+      },
+      "width": 280,
+      "height": 280,
+      "bytes": 4958,
+      "sha256": "20799d5db4294595cb27df2db7f0507144d6d47f3c0799be797bfa4fedc720bf",
+      "budget": 10240
+    },
+    {
+      "file": "stack-done.webp",
+      "clip": {
+        "x": 0,
+        "y": 122,
+        "width": 390,
+        "height": 464
+      },
+      "width": 780,
+      "height": 928,
+      "bytes": 17316,
+      "sha256": "4ccc0eda17e8ef3b327bd2a48815dffc72c3a4dbe6400a84b25eb67515c9a969",
+      "budget": 36864
+    }
+  ],
+  "payoffIncludes": {
+    "heroCard": true,
+    "laterTodayLabel": true,
+    "firstRowWhole": true
+  },
+  "excludedFromFrames": [
+    {
+      "what": "dated-header-line",
+      "present": true,
+      "text": "MONDAY 15 JUNE",
+      "bottom": 61,
+      "payoffCropTop": 122,
+      "outside": {
+        "stack-real": true,
+        "stack-done": true
+      }
+    },
+    {
+      "what": "signed-out-sign-in-pill",
+      "present": true,
+      "text": "Sign in",
+      "bottom": 74,
+      "payoffCropTop": 122,
+      "outside": {
+        "stack-real": true,
+        "stack-done": true
+      }
+    }
+  ],
+  "dirBytes": 52186,
+  "passes": true
+}
