@@ -10,6 +10,7 @@
 
 import React from 'react';
 import { isStandalone, isIOS, canPromptInstall, promptInstall, subscribeInstall } from '../../lib/installPrompt.js';
+import { isDemo } from '../demo.js';
 
 function useInstallState() {
   const [tick, setTick] = React.useState(0);
@@ -83,6 +84,12 @@ export function InstallBanner() {
   const { standalone, canInstall, ios } = useInstallState();
   const [dismissed, setDismissed] = React.useState(() => { try { return localStorage.getItem(DISMISS_KEY) === '1'; } catch { return false; } });
   const [busy, setBusy] = React.useState(false);
+  // NOT IN THE DEMO (2026-10-05). The embed on ppwellness.co is an iframe, and
+  // "Share → Add to Home Screen" from inside one adds the PAGE, not the app —
+  // so on an iPhone this invitation is simply wrong, and it is the last thing in
+  // the app that would write to a prospect's device (its dismissal flag). The
+  // real invitation still lives in Settings for anyone who opens the app itself.
+  if (isDemo()) return null;
   if (standalone || dismissed) return null;
   if (!ios && !canInstall) return null; // nothing actionable yet — stay quiet on the landing screen
 

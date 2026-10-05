@@ -14,6 +14,16 @@
 // recipient ends up holding — never how the parse is wired.
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+
+// ── THE PAID BUILD, ON DEMAND (2026-10-05) ──────────────────────────────────
+// The shipped build is OPEN: PREMIUM_OPEN in membership.js is true, so the B2B
+// pivot leaves nothing gated and no refusal can happen. Any test below that
+// describes a REFUSAL is therefore describing the PAID build, and calls
+// paidBuild() first — which flips the switch back through this getter and proves
+// that gate still bites. Every other test in this file runs the app as it ships.
+/** Put the paywall back, for one test. Cleared before every test. */
+const paidBuild = () => { globalThis.__ppwPaidBuild = true; };
+
 import { render, cleanup, screen, act, fireEvent } from '@testing-library/react';
 
 // Only the one network call a magic link makes is faked; the rest of membership
@@ -21,7 +31,14 @@ import { render, cleanup, screen, act, fireEvent } from '@testing-library/react'
 const completeSignIn = vi.fn(async () => ({ premium: false }));
 vi.mock('./membership.js', async (importOriginal) => {
   const actual = await importOriginal();
-  return { ...actual, completeSignIn: (...a) => completeSignIn(...a) };
+  return {
+    ...actual,
+    completeSignIn: (...a) => completeSignIn(...a),
+    // ONE mock per module path: a second vi.mock('./membership.js') replaces this
+    // one wholesale and the completeSignIn fake above vanishes with it, so the
+    // paid-build switch has to live in here too.
+    get PREMIUM_OPEN() { return globalThis.__ppwPaidBuild !== true; },
+  };
 });
 
 import { setState, getState, clearPendingShare, setPendingShare, applyServerEntitlement, FREE_STACK_CAP } from './store5.js';
@@ -50,6 +67,7 @@ const PROGRAMME = {
 
 // jsdom has no layout, and the stack screen scrolls itself into view on mount.
 beforeEach(() => {
+  delete globalThis.__ppwPaidBuild;
   localStorage.clear(); sessionStorage.clear(); vi.clearAllMocks();
   if (!Element.prototype.scrollTo) Element.prototype.scrollTo = () => {};
   if (!window.scrollTo) window.scrollTo = () => {};
@@ -274,6 +292,7 @@ describe('the sheet that asks what to do with a shared routine', () => {
   // (the G1/W11 reasoning in store5.js). The store refuses, and the refusal is
   // what they see — never a button that does nothing.
   it('shows a free user the paywall rather than hiding the button', () => {
+    paidBuild(); // there is no paywall to show on the shipped build
     applyServerEntitlement({ premium: false });
     setPendingShare(HELD);
     render(<><SharedRoutineSheet /><UpsellModal /></>);
@@ -292,6 +311,7 @@ describe('the sheet that asks what to do with a shared routine', () => {
   });
 
   it('refuses "Add all to today" over the free cap, and says nothing was added', () => {
+    paidBuild(); // the free cap only exists on the paid build
     applyServerEntitlement({ premium: false });
     const own = Array.from({ length: FREE_STACK_CAP - 1 }, (_, i) => ({ id: 'x' + i, title: 'own ' + i, time: '07:00' }));
     setState({ deckItems: own });

@@ -21,6 +21,20 @@
 // using it flattened it. src/lib/ics.js then exported one alarm that never
 // repeated, because rruleFor() returns null for 'once'.
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+// ── THE PAID BUILD, ON DEMAND (2026-10-05) ──────────────────────────────────
+// The shipped build is OPEN: PREMIUM_OPEN in membership.js is true, so the B2B
+// pivot leaves nothing gated and no refusal can happen. Any test below that
+// describes a REFUSAL is therefore describing the PAID build, and calls
+// paidBuild() first — which flips the switch back through this getter and proves
+// that gate still bites. Every other test in this file runs the app as it ships.
+vi.mock('./membership.js', async (importOriginal) => ({
+  ...(await importOriginal()),
+  get PREMIUM_OPEN() { return globalThis.__ppwPaidBuild !== true; },
+}));
+/** Put the paywall back, for one test. Cleared before every test. */
+const paidBuild = () => { globalThis.__ppwPaidBuild = true; };
+
 import { rruleFor } from '../lib/ics.js';
 
 async function freshStore() {
@@ -28,7 +42,7 @@ async function freshStore() {
   return await import('./store5.js');
 }
 
-beforeEach(() => { localStorage.clear(); });
+beforeEach(() => { delete globalThis.__ppwPaidBuild; localStorage.clear(); });
 
 const PROGRAMME = {
   name: 'Shoulder rehab — weeks 1-6',
@@ -299,6 +313,7 @@ describe('using a saved programme puts it on the calendar as prescribed', () => 
   });
 
   it('a free user is still sent to the upsell, not given the routine', async () => {
+    paidBuild(); // "a free user" only exists on the paid build
     const s = await withRoutine();
     s.setState({ premium: false });
     expect(s.applyRoutineToDate('r1', '2026-11-3').upsell).toBe(true);

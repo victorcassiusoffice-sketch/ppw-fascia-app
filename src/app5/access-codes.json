@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "kdf": {
+    "name": "PBKDF2",
+    "hash": "SHA-256",
+    "iterations": 310000
+  },
+  "codes": [
+    {
+      "id": "co5gSIP",
+      "label": "Guest - B2B demo access",
+      "salt": "zGDEU0qZ47eFAQf9PZcU+Q==",
+      "hash": "Lm5xPTgQKW3HSxYZ+2RQwKdUJpv7hvrJ3ecNHqVMn+o=",
+      "issued": "2026-10-05",
+      "revoked": false
+    }
+  ]
+}

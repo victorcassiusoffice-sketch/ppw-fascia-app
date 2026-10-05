@@ -145,7 +145,12 @@ describe('deleting the account', () => {
     expect(String(del[0])).toMatch(/\/api\/me\/data$/);
     expect(del[1].headers.Authorization).toBe('Bearer jwt');
     expect(getState().signedIn).toBe(false);
-    expect(getState().premium).toBe(false);
+    // The PURCHASE is gone, the app is not (2026-10-05, PREMIUM_OPEN): deleting
+    // an account must not also lock someone out of a product that is open to
+    // everyone — "delete my account" does not say "lock me out". With the switch
+    // off these two are both false again, exactly as this line used to assert.
+    expect(getState().premiumPaid).toBe(false);
+    expect(getState().premium).toBe(true);
   });
 
   it('a failed delete keeps the user signed in and says so', async () => {

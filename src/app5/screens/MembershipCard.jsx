@@ -15,7 +15,7 @@ import {
   checkoutUrl, pollForPremium, readEntitlementCache,
   setDevPremium, devPremiumAvailable,
   passwordSignIn, setPassword, PASSWORD_MIN, staySignedIn, setStaySignedIn,
-  consumeNewAccount, isAdminGrant, passwordSetHere,
+  consumeNewAccount, isAdminGrant, passwordSetHere, PREMIUM_OPEN,
 } from '../membership.js';
 
 /**
@@ -242,6 +242,10 @@ export default function MembershipCard() {
     if (ent.signedOut) { setPhase('out'); setErr('Your session has ended — please sign in again.'); return; }
     const until = fmtDate(readEntitlementCache()?.currentPeriodEnd);
     if (ent.premium) setMsg(until ? `Checked — Premium, active until ${until}.` : 'Checked — Premium is active.');
+    // On an open build "you are on the Free plan" reads as a downgrade notice to
+    // someone who has every feature. Report the account truthfully, then say what
+    // it means for them, which is nothing.
+    else if (PREMIUM_OPEN) setMsg('Checked — no payment on this account. Everything is unlocked anyway, so there is nothing missing.');
     else setMsg('Checked — you are on the Free plan. No payment has been picked up on this account.');
   });
 
@@ -330,7 +334,13 @@ export default function MembershipCard() {
   ) : null;
 
   // ── signed in + Premium ────────────────────────────────────────────────────
-  if (phase === 'in' && S.premium) {
+  // `premiumPaid`, not `premium` (2026-10-05): with PREMIUM_OPEN on, `premium` is
+  // true for everybody, and this card would have told every guest they had a
+  // membership — with a renewal date and a "manage it on Gumroad" line pointing at
+  // a subscription that does not exist. Only the server's own verdict earns this
+  // card. With the switch off the two values are identical, so the paid build is
+  // unchanged.
+  if (phase === 'in' && S.premiumPaid) {
     return (
       <div style={card(true)}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
@@ -356,7 +366,46 @@ export default function MembershipCard() {
     );
   }
 
+  // ── signed in, nothing bought, and nothing to buy ──────────────────────────
+  /**
+   * The B2B card (PREMIUM_OPEN, membership.js — Vic, 2026-10-05).
+   *
+   * Stands in front of the checkout branch below, which is now unreachable. Two
+   * lies had to be avoided here, in opposite directions: calling this account
+   * "Premium · active" when nobody paid, and calling it the "Free plan" when it
+   * is missing nothing. So it claims no tier at all — it says the account is in
+   * and the app is open, and offers no way to pay for what is already given.
+   */
+  if (phase === 'in' && PREMIUM_OPEN) {
+    return (
+      <div style={card(false)}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+          <span style={{ width: 44, height: 44, flex: 'none', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,.2)', border: '1px solid var(--rim)', color: 'var(--ink)' }}>{crown}</span>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 16, fontWeight: 700, textShadow: 'var(--emboss)' }}>Your account</div>
+            <div style={{ marginTop: 2, fontSize: 12.5, color: 'var(--dim)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{readEmail() || 'Signed in'}</div>
+          </div>
+        </div>
+        {adminNote}
+        <div style={note()}>
+          You are signed in and everything is unlocked — routines, unlimited stacks and the full
+          protocol library. There is nothing to buy.
+        </div>
+        {createdNote}
+        <SetPasswordBlock defaultOpen={S.justCreated} />
+        {/* Kept: this is how a pre-pivot subscriber's purchase is picked up on a
+            new device, which is the one thing on this card that still matters. */}
+        <button onClick={onRefresh} disabled={busy} style={quietBtn}>{busy ? 'Checking…' : 'Check membership'}</button>
+        <button onClick={onSignOut} style={quietBtn}>Sign out</button>
+        {msg && <div style={note()}>{msg}</div>}
+        {err && <div style={{ ...note(), color: 'var(--bad)' }}>{err}</div>}
+      </div>
+    );
+  }
+
   // ── signed in, not Premium → buy ───────────────────────────────────────────
+  // Unreachable while PREMIUM_OPEN is true (the card above catches this case).
+  // Left exactly as it shipped so flipping the switch restores the money path.
   if (phase === 'in') {
     const url = checkoutUrl(GUMROAD_URL);
     return (
@@ -426,7 +475,12 @@ export default function MembershipCard() {
         <div style={{ minWidth: 0 }}>
           <div style={{ fontSize: 16, fontWeight: 700, textShadow: 'var(--emboss)' }}>{creating ? 'Create your account' : 'Sign in'}</div>
           <div style={{ marginTop: 2, fontSize: 12.5, color: 'var(--dim)' }}>
-            {creating ? 'No password to invent — we email you a link' : 'Sign in to restore or buy Premium'}
+            {/* "…or buy Premium" was an offer on a build where nothing is for
+                sale. The replacement is the honest reason to bother: there
+                isn't a strong one, and saying so beats inventing one. */}
+            {creating ? 'No password to invent — we email you a link'
+              : PREMIUM_OPEN ? 'Optional — the whole app works signed out'
+              : 'Sign in to restore or buy Premium'}
           </div>
         </div>
       </div>

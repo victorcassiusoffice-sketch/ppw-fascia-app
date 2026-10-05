@@ -49,3 +49,6 @@ scripts/_evidence/
 .shots/
 .claude/worktrees/
 dist-lifestyle/
+
+# Access codes (PUBLIC repo - plaintext codes must never be committed)
+ACCESS-CODES.md

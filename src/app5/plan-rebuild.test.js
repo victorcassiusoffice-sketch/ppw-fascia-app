@@ -14,6 +14,20 @@
 //   • A rebuild may only replace what the AI was actually shown. Private stacks
 //     were never offered, so a rebuild can never delete them.
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+// ── THE PAID BUILD, ON DEMAND (2026-10-05) ──────────────────────────────────
+// The shipped build is OPEN: PREMIUM_OPEN in membership.js is true, so the B2B
+// pivot leaves nothing gated and no refusal can happen. Any test below that
+// describes a REFUSAL is therefore describing the PAID build, and calls
+// paidBuild() first — which flips the switch back through this getter and proves
+// that gate still bites. Every other test in this file runs the app as it ships.
+vi.mock('./membership.js', async (importOriginal) => ({
+  ...(await importOriginal()),
+  get PREMIUM_OPEN() { return globalThis.__ppwPaidBuild !== true; },
+}));
+/** Put the paywall back, for one test. Cleared before every test. */
+const paidBuild = () => { globalThis.__ppwPaidBuild = true; };
+
 import { buildPrompt, planEcho, replaceableItems, isPrivateKind, PLAN_MODE } from './assistant/aiPrompt.js';
 
 async function freshStore() {
@@ -28,7 +42,7 @@ const DECK = [
   { id: 'g', title: 'Heavy lift', time: '18:00', repeat: 'weekly' },
 ];
 
-beforeEach(() => { localStorage.clear(); });
+beforeEach(() => { delete globalThis.__ppwPaidBuild; localStorage.clear(); });
 
 describe('what the AI is shown', () => {
   it('sends nothing about the plan unless the user asked', () => {
@@ -146,6 +160,7 @@ describe('the free cap counts what survives, not what was there', () => {
   });
 
   it('still refuses a rebuild that would overflow, and says what fits', async () => {
+    paidBuild();
     const s = await freshStore();
     s.setState({ deckItems: full(), premium: false, doneByDate: {} });
 
@@ -161,6 +176,7 @@ describe('the free cap counts what survives, not what was there', () => {
   });
 
   it('appending still uses the plain count', async () => {
+    paidBuild();
     const s = await freshStore();
     s.setState({ deckItems: full(), premium: false, doneByDate: {} });
     const res = s.addItemsToPlan([{ title: 'one more', time: '11:00' }]);

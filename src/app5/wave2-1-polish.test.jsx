@@ -4,6 +4,19 @@
 // argument for guarding them: they are the failures that survive a green test suite.
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+// ── THE PAID BUILD, ON DEMAND (2026-10-05) ──────────────────────────────────
+// The shipped build is OPEN: PREMIUM_OPEN in membership.js is true, so the B2B
+// pivot leaves nothing gated, nothing for sale and no paywall to raise. Any test
+// below about a PURCHASE or a PAYWALL is therefore describing the paid build, and
+// calls paidBuild() first — which flips the switch back through this getter and
+// proves that surface still works. Everything else runs the app as it ships.
+vi.mock('./membership.js', async (importOriginal) => ({
+  ...(await importOriginal()),
+  get PREMIUM_OPEN() { return globalThis.__ppwPaidBuild !== true; },
+}));
+/** Put the paywall back, for one test. Cleared before every test. */
+const paidBuild = () => { globalThis.__ppwPaidBuild = true; };
+
 import { render, cleanup, screen, fireEvent, waitFor } from '@testing-library/react';
 import { setState, getState, finishOnboarding } from './store5.js';
 import MembershipCard from './screens/MembershipCard.jsx';
@@ -19,7 +32,12 @@ function seedSession({ role = 'member', entitlement = 'paid', premium = true, pe
     premium, entitlement, role, currentPeriodEnd: periodEnd,
     userId: 'usr_1', checkedAt: Date.now(), verified: true,
   }));
-  setState({ signedIn: true, premium });
+  // `premiumPaid` as well as `premium` (2026-10-05): this helper claims to seed
+  // "the exact cache a verified server read leaves behind", and since the B2B
+  // switch that verdict is its own field — the one the Premium card now reads.
+  // Without it these tests only passed because an earlier test in the file had
+  // left premiumPaid true behind it.
+  setState({ signedIn: true, premium, premiumPaid: premium });
 }
 
 function stubEntitlement(body) {
@@ -30,7 +48,8 @@ function stubEntitlement(body) {
 
 beforeEach(() => {
   localStorage.clear(); sessionStorage.clear(); vi.unstubAllGlobals();
-  setState({ signedIn: false, premium: false, justCreated: false, accountOpen: false, accountMode: 'signin', premiumUpsell: null, onboarded: true, termsOk: true });
+  delete globalThis.__ppwPaidBuild;
+  setState({ signedIn: false, premium: false, premiumPaid: false, justCreated: false, accountOpen: false, accountMode: 'signin', premiumUpsell: null, onboarded: true, termsOk: true });
 });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
@@ -48,11 +67,24 @@ describe('"Check membership" always answers', () => {
   });
 
   it('says so out loud on a Free account too', async () => {
+    paidBuild(); // "the Free plan" is only a thing that exists on the paid build
     seedSession({ role: 'member', entitlement: 'none', premium: false });
     stubEntitlement({ premium: false, entitlement: 'none', role: 'member', userId: 'usr_1' });
     render(<MembershipCard />);
     fireEvent.click(screen.getByText(/check membership/i));
     await waitFor(() => expect(screen.getByText(/checked — you are on the free plan/i)).toBeTruthy());
+  });
+
+  // The same button on the build we actually ship. Telling someone who has every
+  // feature that they are "on the Free plan" reads as a downgrade notice, so the
+  // open build reports the account truthfully and then says it costs them nothing.
+  it('does not call an unlocked account the Free plan', async () => {
+    seedSession({ role: 'member', entitlement: 'none', premium: false });
+    stubEntitlement({ premium: false, entitlement: 'none', role: 'member', userId: 'usr_1' });
+    render(<MembershipCard />);
+    fireEvent.click(screen.getByText(/check membership/i));
+    await waitFor(() => expect(screen.getByText(/everything is unlocked anyway/i)).toBeTruthy());
+    expect(screen.queryByText(/free plan/i)).toBeNull();
   });
 
   it('shows it is working while it works', async () => {
@@ -165,6 +197,7 @@ describe('one thing at a time after signing in', () => {
   });
 
   it('does not DROP it — it arrives on the next beat', () => {
+    paidBuild(); // the upsell it comes back to only renders on the paid build
     setState({ onboarded: true, accountOpen: true, premiumUpsell: 'Routines are Premium.' });
     const { rerender } = render(<UpsellModal />);
     expect(screen.queryByText(/premium feature/i)).toBeNull();

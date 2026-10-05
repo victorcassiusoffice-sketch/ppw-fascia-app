@@ -3,6 +3,8 @@
 // prototype's promise). A shared routine .md carries the document's NAME
 // only — the file itself never leaves the device.
 
+import { isDemo } from './demo.js';
+
 const DB = 'ppw5-files';
 
 function openDb() {
@@ -14,8 +16,22 @@ function openDb() {
   });
 }
 
+// Declared above its first reader: saveFile seeds it directly in demo mode.
+const urlCache = {};
+
 export async function saveFile(file) {
   const id = 'f' + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36);
+  // THE DEMO keeps the blob in memory instead (2026-10-05). The one thing a
+  // prospect can do inside the embed that would otherwise outlive their visit is
+  // attach a document: the stack referencing it is never written down, so the
+  // blob would be left in the visitor's IndexedDB with nothing pointing at it.
+  // The object URL goes straight into the cache fileUrl() already reads first,
+  // so a Document stack still opens for the rest of the page's life, and dies
+  // with the tab. See demo.js.
+  if (isDemo()) {
+    try { urlCache[id] = URL.createObjectURL(file); } catch { /* no blob URLs — the stack renders without a preview */ }
+    return id;
+  }
   const d = await openDb();
   await new Promise((res, rej) => {
     const tx = d.transaction('files', 'readwrite');
@@ -25,8 +41,6 @@ export async function saveFile(file) {
   });
   return id;
 }
-
-const urlCache = {};
 
 // Nothing ever deleted a file. Removing a Document stack left its blob in
 // IndexedDB for good: dead weight, and no way for a user to actually erase a

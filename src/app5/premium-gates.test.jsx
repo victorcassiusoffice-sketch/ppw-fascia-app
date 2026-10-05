@@ -6,6 +6,18 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
+// ── THIS FILE IS THE PAID BUILD (2026-10-05) ────────────────────────────────
+// The shipped build has PREMIUM_OPEN true (membership.js): the B2B pivot unlocked
+// everything, so none of the gates below refuse anyone and every test here would
+// pass vacuously. Forcing the switch false is what makes this file worth keeping —
+// it is the proof that the paywall machinery is intact and that flipping one
+// constant brings the whole paid tier back exactly as it was. Its twin,
+// premium-open.test.jsx, covers the build we actually ship.
+vi.mock('./membership.js', async (importOriginal) => ({
+  ...(await importOriginal()),
+  PREMIUM_OPEN: false,
+}));
+
 async function freshStore() {
   vi.resetModules();
   return await import('./store5.js');

@@ -24,12 +24,29 @@
 // wired.
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+
+// ── THE PAID BUILD, ON DEMAND (2026-10-05) ──────────────────────────────────
+// The shipped build is OPEN: PREMIUM_OPEN in membership.js is true, so the B2B
+// pivot leaves nothing gated and no refusal can happen. Any test below that
+// describes a REFUSAL is therefore describing the PAID build, and calls
+// paidBuild() first — which flips the switch back through this getter and proves
+// that gate still bites. Every other test in this file runs the app as it ships.
+/** Put the paywall back, for one test. Cleared before every test. */
+const paidBuild = () => { globalThis.__ppwPaidBuild = true; };
+
 import { render, cleanup, screen, act, fireEvent } from '@testing-library/react';
 
 const completeSignIn = vi.fn(async () => ({ premium: false }));
 vi.mock('./membership.js', async (importOriginal) => {
   const actual = await importOriginal();
-  return { ...actual, completeSignIn: (...a) => completeSignIn(...a) };
+  return {
+    ...actual,
+    completeSignIn: (...a) => completeSignIn(...a),
+    // ONE mock per module path: a second vi.mock('./membership.js') replaces this
+    // one wholesale and the completeSignIn fake above vanishes with it, so the
+    // paid-build switch has to live in here too.
+    get PREMIUM_OPEN() { return globalThis.__ppwPaidBuild !== true; },
+  };
 });
 
 import {
@@ -70,6 +87,7 @@ const HELD = {
 };
 
 beforeEach(() => {
+  delete globalThis.__ppwPaidBuild;
   localStorage.clear(); sessionStorage.clear(); vi.clearAllMocks();
   resetHintEngine();
   if (!Element.prototype.scrollTo) Element.prototype.scrollTo = () => {};
@@ -132,6 +150,7 @@ describe('adding a shared programme to today', () => {
   });
 
   it('comes back when the free cap refused it — a refusal is not an answer', () => {
+    paidBuild(); // only the paid build can refuse it
     applyServerEntitlement({ premium: false });
     setState({ deckItems: Array.from({ length: FREE_STACK_CAP - 1 }, (_, i) => ({ id: 'x' + i, title: 'own ' + i, time: '07:00' })) });
     setPendingShare(HELD);
@@ -168,6 +187,9 @@ describe('the sign-in door underneath the share sheet', () => {
   // recipient taps the primary action, meets the paywall, and the only sign-in
   // offer it makes opens the account sheet UNDER this sheet.
   it('lets a signed-out recipient actually reach the sign-in field', () => {
+    // Reaches the field THROUGH the paywall's "Sign in to go Premium", so this
+    // one needs the paid build to have a paywall to tap at all.
+    paidBuild();
     applyServerEntitlement({ premium: false });
     setPendingShare(HELD);
     render(<><SharedRoutineSheet /><UpsellModal /><AccountSheet /></>);

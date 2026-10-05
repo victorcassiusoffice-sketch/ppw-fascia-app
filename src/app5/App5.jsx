@@ -56,6 +56,8 @@ import UpdateBar from './screens/UpdateBar.jsx';
 import FirstRunChoice from './screens/FirstRunChoice.jsx';
 import LockScreen from './screens/LockScreen.jsx';
 import SharedRoutineSheet from './screens/SharedRoutineSheet.jsx';
+import AccessGate from './screens/AccessGate.jsx';
+import { isDemo } from './demo.js';
 import { isEnabled as passcodeEnabled, isLocked as passcodeLocked, lockNow, LOCK_AFTER_MS } from './passcode.js';
 import { installPressSound } from './sfx5.js';
 
@@ -140,6 +142,18 @@ function AccountControl() {
   const S = useStore5();
   const signedIn = S.signedIn;   // store state, so the header flips the instant sign-in lands
   const email = readEmail();
+  // NOT IN THE DEMO (2026-10-05). Two reasons, and the second is the serious one.
+  //
+  // It leads nowhere: since the B2B pivot the way INTO this app is a partner
+  // code, not an account, so a prospect who signed up from the embed would get
+  // an account that opens nothing and still meet the code door afterwards.
+  //
+  // And it would let an iframe on a marketing page send real email — the sheet's
+  // magic-link flow posts to the membership API — on behalf of whoever is
+  // reading ppwellness.co. A shop window must not be able to do that. The sheet
+  // itself is untouched and still reachable the moment the app is opened
+  // properly; only the door into it is closed here. See demo.js.
+  if (isDemo()) return null;
   if (!signedIn) {
     return (
       <button onClick={openAccount} data-tour="signin" style={{ height: 46, flex: 'none', padding: '0 14px', borderRadius: 999, display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap', background: 'var(--acc-surf)', border: '1px solid var(--acc-rim)', boxShadow: 'var(--acc-glow)', color: 'var(--acc-ink)', fontSize: 13.5, fontWeight: 700, letterSpacing: '-.01em' }}>
@@ -507,6 +521,44 @@ function FastingBadge() {
   );
 }
 
+// ── the Demo marker ─────────────────────────────────────────────────────────
+// Honesty, in the one place that cannot be missed or scrolled away from.
+//
+// The embed on ppwellness.co is a WORKING app: a prospect can tick things off,
+// add a stack, drop a routine on a day. Nothing they do is kept, and nothing
+// they see is theirs — so the frame has to say which app this is before they
+// assume otherwise. Three deliberate choices:
+//
+//   WHERE: pinned to the frame, in the 28px of padding every screen leaves
+//     above its first line (stack / library / calendar / settings all open
+//     `padding: '28px 20px 140px'`), so it overlaps no content on any screen and
+//     needs no per-screen allowance. Centred, so it never collides with the
+//     fasting badge in the top-right corner.
+//   NOT A BUTTON: `pointerEvents: 'none'`, because a marker that can eat a tap
+//     on a touch screen is a bug, and there is nothing to tap it for.
+//   SAID TWICE: visible text for everyone, and `role="note"` with a full
+//     sentence for a screen reader, which gets no help from a 9px pill.
+function DemoBadge() {
+  if (!isDemo()) return null;
+  return (
+    <div
+      role="note"
+      aria-label="Demo mode. This is a sample day for trying the app out — nothing here is saved to your device."
+      style={{
+        position: 'absolute', top: 6, left: '50%', transform: 'translateX(-50%)',
+        zIndex: 32, pointerEvents: 'none',
+        padding: '2px 9px', borderRadius: 999,
+        border: '1px solid var(--rim)', background: 'var(--surface-strong)',
+        backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)',
+        color: 'var(--dim)', fontSize: 9.5, fontWeight: 700,
+        letterSpacing: '.14em', textTransform: 'uppercase', whiteSpace: 'nowrap',
+      }}
+    >
+      Demo
+    </div>
+  );
+}
+
 // ── placeholder for not-yet-ported screens (keeps nav working) ──
 function Placeholder({ name }) {
   return (
@@ -772,7 +824,15 @@ export default function App5() {
           }
         }
       } catch {}
-      if (alive) { await ensureFreshSession(); await syncEntitlement(); await syncProfile(); }
+      // A DEMO TALKS TO NOBODY (2026-10-05). These three act AS the person whose
+      // browser this is: they renew their session, re-read their entitlement and
+      // pull their profile — and the first two write the answer back to
+      // `ppw5.*` through membership.js's own storage, which store5's lsWrite
+      // guard does not cover. A prospect opening an iframe on a marketing page
+      // is not that person, and a demo must not make a single request on their
+      // behalf. Skipped entirely, which also means the embed makes no API calls
+      // at all from a third-party page.
+      if (alive && !isDemo()) { await ensureFreshSession(); await syncEntitlement(); await syncProfile(); }
     })();
     // A LINK TAPPED WHILE THE APP IS ALREADY OPEN (2026-10-05, review pass).
     //
@@ -799,11 +859,11 @@ export default function App5() {
     // silently signed out and met the paywall again. Renew on resume, and on a
     // slow tick for the case where the app is simply left open.
     const onVisible = () => {
-      if (document.visibilityState !== 'visible') return;
+      if (document.visibilityState !== 'visible' || isDemo()) return;
       ensureFreshSession().then(syncEntitlement);
     };
     document.addEventListener('visibilitychange', onVisible);
-    const keepAlive = setInterval(() => { ensureFreshSession(); }, 10 * 60 * 1000);
+    const keepAlive = setInterval(() => { if (!isDemo()) ensureFreshSession(); }, 10 * 60 * 1000);
     return () => {
       alive = false;
       clearInterval(keepAlive);
@@ -857,6 +917,8 @@ export default function App5() {
         <NavDock screen={S.screen} onNav={nav} onAdd={openAdd} />
         {/* fasting corner badge */}
         <FastingBadge />
+        {/* "Demo" — only ever on a ?demo=1 load. See DemoBadge. */}
+        <DemoBadge />
         {/* overlays */}
         <AddSheet />
         <MediaViewer />
@@ -896,6 +958,13 @@ export default function App5() {
             genuinely no session to reach underneath. */}
         <LockScreen />
         <UpsellModal />
+        {/* THE FRONT DOOR (80) — above everything, including the passcode lock
+            (70), because "are you allowed in at all" is asked before any of the
+            app's own questions. It COVERS the app rather than replacing it, so
+            the boot pass underneath still reads a `#r=` routine link that
+            arrived before the code did — the one thing the stacking order here
+            is load-bearing for. See screens/AccessGate.jsx. */}
+        <AccessGate />
       </div>
     </div>
   );

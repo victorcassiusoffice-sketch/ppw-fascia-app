@@ -50,6 +50,31 @@ export const APP_ID = 'lifestyle';
 // NEVER put a seller token or licence key here — this bundle ships to every user.
 export const GUMROAD_URL = 'https://ppwellness.gumroad.com/l/ppw-premium';
 
+// ── THE B2B SWITCH ───────────────────────────────────────────────────────────
+/**
+ * PREMIUM_OPEN — everything in the app is unlocked, for everyone (Vic, 2026-10-05).
+ *
+ * WHY: the Lifestyle App has pivoted to B2B, the same move Atlas Bod made on
+ * 2026-09-03. It is no longer sold to the public a seat at a time; it is licensed
+ * to businesses who embed it or run it as a platform, and the door is a partner
+ * code rather than a card. There is therefore no paid tier to enforce, and a
+ * visitor has to be able to meet the whole product.
+ *
+ * NOTHING WAS DELETED. Every gate still exists and still reads as it did — each
+ * one now asks this constant first and declines to bite, and store5.js keeps the
+ * server's own verdict in `premiumPaid` where this switch cannot touch it. Set
+ * this to `false` and the paid build returns exactly as it was: the free stack
+ * cap, the routines paywall, the monetised-protocol lock and the checkout CTAs
+ * all come back, and anyone whose verified entitlement is still on disk is still
+ * Premium on the next boot. `premium-gates.test.jsx` runs the whole store with it
+ * forced false and proves that, so this is a switch and not a tombstone.
+ *
+ * ⚠ IT DOES NOT UNSELL ANYTHING. A live Gumroad subscription keeps billing until
+ * it is cancelled on Gumroad — same caveat as deleteAccount() below. Unlocking in
+ * the app is a code change; stopping a charge is an account action only Vic can do.
+ */
+export const PREMIUM_OPEN = true;
+
 // Pricing shown in the paywall. Must match the Gumroad product exactly (plans spec
 // §3.1): $9.99/mo · $47.94/6mo · $59.88/yr.
 export const PREM_PRICE = '$9.99';

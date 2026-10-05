@@ -12,10 +12,24 @@
 import { deleteFile } from './files5.js';
 
 import { useSyncExternalStore } from 'react';
-import { cachedPremium, fetchEntitlement, isSignedIn, signOut as membershipSignOut } from './membership.js';
+import { cachedPremium, fetchEntitlement, isSignedIn, signOut as membershipSignOut, PREMIUM_OPEN } from './membership.js';
 import { fetchProfile, saveProfile } from './profile.js';
+import { isDemo } from './demo.js';
 
 const LS = (k) => 'ppw5.' + k;
+
+// ── the two write primitives ────────────────────────────────────────────────
+// EVERY localStorage write in this file goes through these, so the demo's "touch
+// nothing on this device" promise is one check in one place rather than a flag
+// remembered at a dozen call sites. A demo runs entirely in memory: a prospect
+// tapping around an embed on ppwellness.co must not be able to leave a mark on
+// the browser of someone who later uses the app properly — and must certainly
+// not overwrite a day they had already built. See demo.js.
+//
+// isDemo() is read per write, not captured once, because this module is imported
+// before anything has had a chance to read a URL.
+function lsWrite(k, v) { if (isDemo()) return; try { localStorage.setItem(LS(k), v); } catch {} }
+function lsDrop(k) { if (isDemo()) return; try { localStorage.removeItem(LS(k)); } catch {} }
 
 // ── curated starter deck (verbatim from the prototype) ──
 /**
@@ -91,7 +105,12 @@ function initialState() {
     a11y: { on: false, zoom: 1 },
     // membership. `signedIn` is state, not a localStorage read at render time, so
     // every surface (header, onboarding, settings) flips the moment sign-in lands.
-    premium: false, premiumUpsell: null, orbTipSeen: false, signedIn: isSignedIn(),
+    // `premium` is the EFFECTIVE unlock the app runs on. `premiumPaid` is the
+    // server's own verdict and nothing else — see PREMIUM_OPEN in membership.js.
+    // Keeping them apart is what lets the B2B switch unlock the app without
+    // telling a non-payer they have a membership, and what lets a real
+    // subscriber survive the switch going back to false.
+    premium: false, premiumPaid: false, premiumUpsell: null, orbTipSeen: false, signedIn: isSignedIn(),
     // What a batch add asked for when the free cap refused it — see
     // raiseFreeCapUpsell. Null for every other paywall.
     capRefusal: null,
@@ -205,6 +224,16 @@ function initialState() {
     // completed
     completed: [], completedDate: null,
   };
+  // THE DEMO (?demo=1) — before the device is read, not after. See demo.js.
+  //
+  // Returning here is the whole of "it must not pollute a real user's data" on
+  // the READ side: the entire hydration pass below is skipped, so the demo
+  // cannot show one visitor's own day back to them inside a marketing page,
+  // cannot inherit a half-finished wizard, and cannot be thrown by whatever
+  // state the browser was already in. (The one device read that happens ABOVE
+  // this line — `signedIn: isSignedIn()` in the literal — is discarded in
+  // demoState.) The write side is lsWrite/lsDrop at the top of this file.
+  if (isDemo()) return demoState(def);
   try {
     const g = (k) => localStorage.getItem(LS(k));
     const gj = (k) => { try { return JSON.parse(g(k) || 'null'); } catch { return null; } };
@@ -219,7 +248,11 @@ function initialState() {
     // server answer; cachedPremium() re-checks that the user is still signed in,
     // that the value came from a verified /api/me/entitlement read, that it isn't
     // stale, and that the paid period hasn't lapsed. Only the server grants Premium.
-    def.premium = cachedPremium();
+    // PREMIUM_OPEN (2026-10-05): the paid answer is recorded as it always was,
+    // then the switch decides what the app actually runs on. With the switch off
+    // these two are the same value and boot behaves exactly as it did.
+    def.premiumPaid = cachedPremium();
+    def.premium = PREMIUM_OPEN || def.premiumPaid;
     if (g('orbTip') === '1') def.orbTipSeen = true;
     if (g('onboarded') === '1') def.onboarded = true;
     if (g('terms') === '1') def.termsOk = true;
@@ -258,7 +291,7 @@ function initialState() {
     // of this, so silencing the guide for them would be a downgrade.
     if (!def.guide.welcomed && (g('tourSeen') === '1' || g('onboarded') === '1')) {
       def.guide = { ...def.guide, welcomed: 1 };
-      try { localStorage.setItem(LS('guide'), JSON.stringify(def.guide)); } catch {}
+      lsWrite('guide', JSON.stringify(def.guide));
     }
     const cs = gj('courses'); if (Array.isArray(cs)) def.courseLinks = cs;
     const ig = gj('integrations'); if (ig && typeof ig === 'object') def.integrations = ig;
@@ -288,6 +321,60 @@ function initialState() {
   return def;
 }
 
+/**
+ * The store a demo visitor boots into — the embed on ppwellness.co.
+ *
+ * NO NEW CONTENT. The day is already furnished: `def.deckItems` is
+ * `starterDeck()`, the four slots marked `example: true` that every brand-new
+ * install gets, and `mediaItems` already carries three library starters. A demo
+ * is a brand-new install that is never written down, so it needs no seed of its
+ * own — it needs the first-run QUESTIONS answered, which is what this does.
+ *
+ * Those four cards still say "Example" on their own faces and the day still
+ * carries its "these are examples" note, which is the right thing to show a
+ * prospect: they are looking at a furnished demo and the app says so in its own
+ * words, above and beyond the Demo marker in the frame.
+ *
+ * The one addition is a routine, bundled from those same starter stacks, because
+ * Library opens on the routines tab and that tab is the only screen in the app
+ * that would otherwise be empty — an empty screen is exactly what a demo must
+ * not open on. Reuse, not invention: the items are the starter deck's own.
+ */
+function demoState(def) {
+  // The three timed media slots, without the affirmation — a routine is a block
+  // of things to do, and a note sitting at 21:00 is not that. Copied, so the
+  // routine's snapshots can never alias the live deck items.
+  const bundle = def.deckItems.filter((it) => it.kind !== 'note').map((it) => ({ ...it }));
+  return {
+    ...def,
+    // Every first-run door answered. A prospect in an iframe is not a first run
+    // — they cannot be asked to accept terms on behalf of a licence they have
+    // not been sold, and a wizard is not a demo of an app. `onboarded` also
+    // keeps FirstRunChoice down (it bails on `firstRunChoice || onboarded`), and
+    // `termsOk` is what the wizard's consent gate waits for.
+    onboarded: true, firstRunChoice: true, termsOk: true,
+    // `welcomed` stands the two-step coach-mark welcome down, which would
+    // otherwise mount 700ms after load and dim the whole frame. The eight
+    // quests and the guide disc are left armed — those are the product.
+    guide: { q: {}, welcomed: 1 },
+    // One-shot teaching bubbles are for someone learning their own app. In a
+    // shop window they are clutter that arrives unprompted.
+    hintsOff: true,
+    // Whatever session is on this device belongs to a real person using the app
+    // properly; a demo must not wear their account. Discarded, not read again.
+    signedIn: false,
+    // What a visitor actually gets today. PREMIUM_OPEN is the B2B switch in
+    // membership.js: while it is on, this is `true` and the demo shows the whole
+    // product. If the paid tier is ever switched back on, the demo shows exactly
+    // what an unpaid visitor would meet — which is the honest default, because a
+    // demo that unlocks more than the thing being demoed is a lie.
+    premium: PREMIUM_OPEN, premiumPaid: false,
+    routines: bundle.length
+      ? [{ id: 'rtDemoExample', name: 'Example routine', items: bundle }]
+      : [],
+  };
+}
+
 // ── external store plumbing ──
 let state = initialState();
 const listeners = new Set();
@@ -303,7 +390,7 @@ export function setState(patch) {
 }
 export function getState() { return state; }
 
-export function save(k, v) { try { localStorage.setItem(LS(k), String(v)); } catch {} }
+export function save(k, v) { lsWrite(k, String(v)); }
 
 // consolidated, debounced stacks write; completed-history pruned to 60 days
 let _saveT = null;
@@ -315,10 +402,10 @@ function writeStacks() {
       const d = dayDiff(today, k);
       if (d <= 60 && d > -400) db[k] = state.doneByDate[k];
     });
-    localStorage.setItem(LS('stacks'), JSON.stringify({
+    lsWrite('stacks', JSON.stringify({
       d: state.deckItems.filter((x) => !x.local), db, ss: state.suppSel, ip: state.importedProtos,
     }));
-    ['deckItems', 'doneByDate', 'suppSel', 'importedProtos'].forEach((k) => localStorage.removeItem(LS(k)));
+    ['deckItems', 'doneByDate', 'suppSel', 'importedProtos'].forEach((k) => lsDrop(k));
   } catch {}
 }
 export function saveStacks() {
@@ -358,9 +445,24 @@ export function stackFor(key) {
 // user has 6 slots for the life of the app. The copy below deliberately still
 // reads as it shipped; whether that limit and that wording are right is a
 // product decision for Vic, not a refactor.
+/**
+ * premiumGated() — "does the paid tier apply to this user, right now?"
+ *
+ * THE ONE QUESTION every gate in this file asks. It exists so the B2B switch is
+ * answered in a single place instead of being sprinkled through a dozen `if`s:
+ * while PREMIUM_OPEN is true this is always false, so each gate below runs its
+ * normal test, finds nothing to refuse, and falls through. Flip the constant and
+ * every one of them reads and behaves exactly as it did before.
+ *
+ * Deliberately NOT `!state.premium` on its own: a caller that forces
+ * `state.premium = false` (an old view, a test, a console poke) must not be able
+ * to resurrect a paywall the business has switched off.
+ */
+export function premiumGated(S = state) { return !PREMIUM_OPEN && !S.premium; }
+
 export const FREE_STACK_CAP = 10;
 export const FREE_CAP_UPSELL = `You have reached the free limit of ${FREE_STACK_CAP} stacks. Go Premium for unlimited stacks.`;
-export function overLimit() { return !state.premium && state.deckItems.length >= FREE_STACK_CAP; }
+export function overLimit() { return premiumGated() && state.deckItems.length >= FREE_STACK_CAP; }
 
 /**
  * The refusal a BATCH add gets (2026-10-05, review pass).
@@ -480,14 +582,14 @@ export function reorderTimed(key, orderedTimedIds) {
 // ── routines (Vic #5, premium): named bundles of stacks, applied to a day ──
 export function saveRoutines(list) {
   setState({ routines: list });
-  try { localStorage.setItem(LS('routines'), JSON.stringify(list)); } catch {}
+  lsWrite('routines', JSON.stringify(list));
 }
 export function createRoutine(name, items) {
   // G1 (2026-07-28): the store enforces this, not just the UI. LibraryScreen hides
   // the builder from free users, but hiding a button is not a paywall — anything
   // that can reach this function (a stale view, a future caller, the console) was
   // able to create routines for free until this guard existed.
-  if (!state.premium) {
+  if (premiumGated()) {
     setState({ premiumUpsell: 'Routines are part of Premium — bundle stacks and drop them onto any day in one tap.' });
     return null;
   }
@@ -503,7 +605,7 @@ export function updateRoutine(id, patch) {
   // its only caller renders behind `S.premium` — but "the UI hides it" is the
   // exact reasoning the G1 guard above was added to stop relying on. A lapsed
   // subscriber whose routines are still on disk could otherwise keep editing them.
-  if (!state.premium) {
+  if (premiumGated()) {
     setState({ premiumUpsell: 'Routines are part of Premium — bundle stacks and drop them onto any day in one tap.' });
     return null;
   }
@@ -565,7 +667,7 @@ export function closeSchedule() { setState({ scheduleTarget: null }); }
 // Batch adds record the LAST id: the row nearest the bottom, where the eye lands.
 // schedule one item snapshot onto an arbitrary date (repeat once, anchored)
 export function addItemToDate(snapshot, dateKey, time = '09:00') {
-  if (!state.premium && state.deckItems.length + 1 > FREE_STACK_CAP) {
+  if (premiumGated() && state.deckItems.length + 1 > FREE_STACK_CAP) {
     setState({ premiumUpsell: FREE_CAP_UPSELL });
     return { upsell: true };
   }
@@ -833,7 +935,7 @@ function stageItems(list) {
 export function addItemsToPlan(items) {
   const list = Array.isArray(items) ? items : [];
   if (!list.length) return { ok: false, reason: 'empty' };
-  if (!state.premium && state.deckItems.length + list.length > FREE_STACK_CAP) {
+  if (premiumGated() && state.deckItems.length + list.length > FREE_STACK_CAP) {
     // Same batch-vs-at-the-cap falsehood as addItemsToToday had — see
     // raiseFreeCapUpsell.
     raiseFreeCapUpsell(list.length);
@@ -864,7 +966,7 @@ export function applyPlanRebuild(items, replaceIds) {
   const kept = state.deckItems.filter((it) => !kill.has(it.id));
   // The cap counts what SURVIVES, not what was there before. A rebuild that
   // shrinks the day must never trip the upsell.
-  if (!state.premium && kept.length + list.length > FREE_STACK_CAP) {
+  if (premiumGated() && kept.length + list.length > FREE_STACK_CAP) {
     // `kept.length`, not the whole deck: what is in use after the rebuild is
     // what the client has to reason about.
     raiseFreeCapUpsell(list.length, kept.length);
@@ -1144,14 +1246,14 @@ export function setPendingShare(p) {
   // record that the link carried more stacks than arrived — see parseRoutineLink.
   const dropped = Math.max(0, Math.floor(Number(p.dropped)) || 0);
   const pending = { name: String(p.name || 'Shared routine').slice(0, 60), items: p.items, dropped };
-  try { localStorage.setItem(LS('pendingShare'), JSON.stringify(pending)); } catch {}
+  lsWrite('pendingShare', JSON.stringify(pending));
   // shareHidden is reset: a NEW programme arriving is not something the person
   // has tapped away. Without this, a recipient who dismissed yesterday's share
   // would get today's as a chip they had no reason to suspect was new.
   setState({ pendingShare: pending, shareError: null, shareHidden: false });
 }
 export function clearPendingShare() {
-  try { localStorage.removeItem(LS('pendingShare')); } catch {}
+  lsDrop('pendingShare');
   setState({ pendingShare: null, shareError: null, shareHidden: false });
 }
 
@@ -1214,7 +1316,7 @@ export function shareSheetUp(s = state) {
 // caller is unaffected. Untimed items stagger from 09:00.
 // Free tier: respects the 10-stack cap → upsell.
 export function addItemsToToday(items) {
-  if (!state.premium && state.deckItems.length + items.length > FREE_STACK_CAP) {
+  if (premiumGated() && state.deckItems.length + items.length > FREE_STACK_CAP) {
     raiseFreeCapUpsell(items.length);
     return { upsell: true };
   }
@@ -1261,7 +1363,7 @@ export function addItemsToToday(items) {
 export function applyRoutineToDate(routineId, dateKey) {
   const r = state.routines.find((x) => x.id === routineId);
   if (!r) return { ok: false };
-  if (!state.premium) { setState({ premiumUpsell: 'Routines are part of Premium — bundle stacks and drop them onto any day in one tap.' }); return { upsell: true }; }
+  if (premiumGated()) { setState({ premiumUpsell: 'Routines are part of Premium — bundle stacks and drop them onto any day in one tap.' }); return { upsell: true }; }
   const base = 9 * 60;
   // Offsets count from the chosen day, so the offsets need a real Date to count
   // from. A key the app did not build would make dateKeyFromOffset emit
@@ -1541,10 +1643,23 @@ export function setTheme(patch) {
 // There is no setPremium(true) any more. Premium is whatever the backend last
 // said it was; the only way into that state is a real, verified purchase.
 
-/** Apply a verified answer from /api/me/entitlement. */
+/**
+ * Apply a verified answer from /api/me/entitlement.
+ *
+ * UNCHANGED BY THE B2B SWITCH, on purpose (PREMIUM_OPEN, membership.js). The
+ * server's verdict is recorded verbatim in `premiumPaid` whatever the switch
+ * says, so the day it goes back to false an existing subscriber is still a
+ * subscriber — nothing here has to be remembered or undone. The switch only
+ * widens `premium`, the effective unlock the gates read.
+ *
+ * Still returns the SERVER's answer, not the effective one: its callers report
+ * what the account is entitled to, and saying "yes, paid" because the app is
+ * open to everyone would make that report a lie.
+ */
 export function applyServerEntitlement(ent) {
-  setState({ premium: !!(ent && ent.premium), signedIn: isSignedIn() });
-  return !!(ent && ent.premium);
+  const paid = !!(ent && ent.premium);
+  setState({ premium: PREMIUM_OPEN || paid, premiumPaid: paid, signedIn: isSignedIn() });
+  return paid;
 }
 
 /** Re-read whether there is a session, for surfaces that must show it. */
@@ -1583,18 +1698,29 @@ export async function syncProfile() {
  * cached value stands — we never lock a paying member out over a dropped request.
  */
 export async function syncEntitlement() {
-  if (!isSignedIn()) { setState({ premium: cachedPremium(), signedIn: false }); return false; }
+  // Both no-network paths fall back to the cached paid answer exactly as before,
+  // then let the switch widen it — so an open build never locks a signed-out or
+  // offline visitor out of the app it just let them into.
+  if (!isSignedIn()) {
+    const paid = cachedPremium();
+    setState({ premium: PREMIUM_OPEN || paid, premiumPaid: paid, signedIn: false });
+    return false;
+  }
   try {
     return applyServerEntitlement(await fetchEntitlement());
   } catch {
-    setState({ premium: cachedPremium(), signedIn: isSignedIn() });
-    return state.premium;
+    const paid = cachedPremium();
+    setState({ premium: PREMIUM_OPEN || paid, premiumPaid: paid, signedIn: isSignedIn() });
+    return paid;
   }
 }
 
 export function signOutMembership() {
   membershipSignOut();
-  setState({ premium: false, signedIn: false });
+  // Signing out drops the PURCHASE, not the app. On an open build the person is
+  // still entitled to everything, so locking the screen behind them here would
+  // make "Sign out" read as "lock me out" — which is not what it says.
+  setState({ premium: PREMIUM_OPEN, premiumPaid: false, signedIn: false });
 }
 // general prefs (prototype key encodings)
 export function setSounds(on) { save('sounds', on ? '1' : '0'); setState({ sounds: !!on }); }
@@ -1771,7 +1897,7 @@ export function readResume() {
   } catch {}
   return null;
 }
-export function clearResume() { try { localStorage.removeItem(LS('guideResume')); } catch {} }
+export function clearResume() { lsDrop('guideResume'); }
 
 export function openJournal() { setState({ journalOpen: true, coach: null, hint: null }); }
 export function closeJournal() { setState({ journalOpen: false }); }

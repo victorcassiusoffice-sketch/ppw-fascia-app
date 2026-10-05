@@ -10,6 +10,20 @@
 // whether or not anyone ever opens the guide.
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+
+// ── THE PAID BUILD, ON DEMAND (2026-10-05) ──────────────────────────────────
+// The shipped build is OPEN: PREMIUM_OPEN in membership.js is true, so the B2B
+// pivot leaves nothing gated and no refusal can happen. Any test below that
+// describes a REFUSAL is therefore describing the PAID build, and calls
+// paidBuild() first — which flips the switch back through this getter and proves
+// that gate still bites. Every other test in this file runs the app as it ships.
+vi.mock('./membership.js', async (importOriginal) => ({
+  ...(await importOriginal()),
+  get PREMIUM_OPEN() { return globalThis.__ppwPaidBuild !== true; },
+}));
+/** Put the paywall back, for one test. Cleared before every test. */
+const paidBuild = () => { globalThis.__ppwPaidBuild = true; };
+
 import { render, cleanup, screen, fireEvent, act } from '@testing-library/react';
 
 import {
@@ -39,7 +53,7 @@ function reset(patch = {}) {
   });
 }
 
-beforeEach(() => reset());
+beforeEach(() => { delete globalThis.__ppwPaidBuild; reset(); });
 afterEach(cleanup);
 
 // ── P1: every add path names the thing it just made ──────────────────────
@@ -276,6 +290,7 @@ describe('the spotlight anchors exist on the screens that carry them', () => {
 
 describe('the free cap counts the cards we put there ourselves', () => {
   it('refuses at the cap, and clearing the examples makes room', () => {
+    paidBuild(); // a cap only exists on the paid build
     const mine = Array.from({ length: FREE_STACK_CAP - 4 }, (_, i) => ({ id: 'x' + i, title: 'mine ' + i, time: '09:00', repeat: 'daily' }));
     const examples = Array.from({ length: 4 }, (_, i) => ({ id: 'e' + i, title: 'ours ' + i, time: '08:00', repeat: 'daily', example: true }));
     reset({ deckItems: [...examples, ...mine] });

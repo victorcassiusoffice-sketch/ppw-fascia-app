@@ -9,7 +9,7 @@
 // Graphite neumorphic: opaque surfaces, dual-shadow, no blur.
 
 import React from 'react';
-import { useStore5, setState, closeAiBridge, addItemsToPlan, applyPlanRebuild, removeItemsByIds, restoreItems, parsePlanDoc, dateKeyFromOffset, finishOnboarding, setAiStep, recordQuest, FREE_STACK_CAP } from '../store5.js';
+import { useStore5, setState, closeAiBridge, addItemsToPlan, applyPlanRebuild, removeItemsByIds, restoreItems, parsePlanDoc, dateKeyFromOffset, finishOnboarding, setAiStep, recordQuest, FREE_STACK_CAP, premiumGated } from '../store5.js';
 import { buildPrompt, PLAN_MODE, replaceableItems } from './aiPrompt.js';
 import { verifyAll, mediaFor } from './verifyVideo.js';
 import { extractPlanCandidates, PARSE_HELP } from './parsePlan.js';
@@ -163,7 +163,9 @@ export default function AiBridgeSheet() {
   const vidFound = vids ? vids.filter((v) => v && v.state === 'ok').length : 0;
   const vidChecking = vidClaimed > 0 && !vids;
   const used = Array.isArray(S.deckItems) ? S.deckItems.length : 0;
-  const headroom = S.premium ? Infinity : Math.max(0, FREE_STACK_CAP - used);
+  // Infinity while the app is open, so the "Stack is full" banner and its
+  // "go Premium" line below can never reach a client who has no cap.
+  const headroom = premiumGated(S) ? Math.max(0, FREE_STACK_CAP - used) : Infinity;
   const stackFull = headroom === 0;
 
   const apply = () => {

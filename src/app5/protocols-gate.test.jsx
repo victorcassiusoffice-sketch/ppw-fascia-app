@@ -3,6 +3,20 @@
 // the existing S.premium system while `free` protocols stay open for everyone.
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+
+// ── THE PAID BUILD, ON DEMAND (2026-10-05) ──────────────────────────────────
+// The shipped build is OPEN: PREMIUM_OPEN in membership.js is true, so the B2B
+// pivot leaves nothing gated and no refusal can happen. Any test below that
+// describes a REFUSAL is therefore describing the PAID build, and calls
+// paidBuild() first — which flips the switch back through this getter and proves
+// that gate still bites. Every other test in this file runs the app as it ships.
+vi.mock('./membership.js', async (importOriginal) => ({
+  ...(await importOriginal()),
+  get PREMIUM_OPEN() { return globalThis.__ppwPaidBuild !== true; },
+}));
+/** Put the paywall back, for one test. Cleared before every test. */
+const paidBuild = () => { globalThis.__ppwPaidBuild = true; };
+
 import { render, cleanup, screen, waitFor, act } from '@testing-library/react';
 import { LazyMotion, domAnimation } from 'motion/react';
 import { fetchProtocols } from './protocols5.js';
@@ -50,8 +64,9 @@ describe('protocols5.fetchProtocols — register pass-through', () => {
 });
 
 describe('LibraryScreen Protocols tab — premium gate', () => {
-  beforeEach(() => { localStorage.clear(); applyServerEntitlement({ premium: false }); setTab('protocols'); stubFetch(manifest); });
-  afterEach(() => { vi.unstubAllGlobals(); cleanup(); });
+  // A monetised protocol can only be locked on the paid build — see paidBuild().
+  beforeEach(() => { paidBuild(); localStorage.clear(); applyServerEntitlement({ premium: false }); setTab('protocols'); stubFetch(manifest); });
+  afterEach(() => { delete globalThis.__ppwPaidBuild; vi.unstubAllGlobals(); cleanup(); });
 
   it('opens free protocols for everyone but locks monetised ones for non-Premium users', async () => {
     render(<LazyMotion features={domAnimation}><LibraryScreen /></LazyMotion>);

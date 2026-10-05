@@ -17,6 +17,20 @@
 //      while "Open" went to the attacker's host.
 import React from 'react';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+
+// ── THE PAID BUILD, ON DEMAND (2026-10-05) ──────────────────────────────────
+// The shipped build is OPEN: PREMIUM_OPEN in membership.js is true, so the B2B
+// pivot leaves nothing gated and no refusal can happen. Any test below that
+// describes a REFUSAL is therefore describing the PAID build, and calls
+// paidBuild() first — which flips the switch back through this getter and proves
+// that gate still bites. Every other test in this file runs the app as it ships.
+vi.mock('./membership.js', async (importOriginal) => ({
+  ...(await importOriginal()),
+  get PREMIUM_OPEN() { return globalThis.__ppwPaidBuild !== true; },
+}));
+/** Put the paywall back, for one test. Cleared before every test. */
+const paidBuild = () => { globalThis.__ppwPaidBuild = true; };
+
 import { render, cleanup, screen, fireEvent } from '@testing-library/react';
 
 async function freshStore() {
@@ -41,7 +55,7 @@ const cues = (n) => ({
   items: Array.from({ length: n }, (_, i) => ({ title: 'Day ' + (i + 1) + ' cue' })),
 });
 
-beforeEach(() => { localStorage.clear(); vi.useRealTimers(); });
+beforeEach(() => { delete globalThis.__ppwPaidBuild; localStorage.clear(); vi.useRealTimers(); });
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
 describe('1. a programme past the stack ceiling is refused, never quietly shortened', () => {
@@ -266,7 +280,10 @@ describe('4. two applies never mint the same stack id', () => {
   });
 });
 
+// Every test in this block is about a REFUSAL, so the whole block runs the paid
+// build — on the shipped build there is no cap to refuse anything (paidBuild()).
 describe('5. the free-cap refusal says something true', () => {
+  beforeEach(() => paidBuild());
   const batch = (n) => Array.from({ length: n }, (_, i) => ({ title: 'Prescribed stack ' + (i + 1) }));
   const examples = () => Array.from({ length: 4 }, (_, i) => ({ id: 'ex' + i, title: 'Example ' + i, time: '08:00', example: true }));
 

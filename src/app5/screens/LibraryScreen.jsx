@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { THUMBS } from '../theme5.js';
-import { useStore5, getState, setTab, addToStack, setUpsell, openPlayer, createRoutine, deleteRoutine, updateRoutine, routineItemsForSave, routineToMd, routineToLink, itemFromUrl, openSchedule, loadProtocols, markLibSeen, repeatLabel, normOffset, SHARE_MAX_OFFSET, PREMIUM_PROTOCOL_UPSELL } from '../store5.js';
+import { useStore5, getState, setTab, addToStack, setUpsell, openPlayer, createRoutine, deleteRoutine, updateRoutine, routineItemsForSave, routineToMd, routineToLink, itemFromUrl, openSchedule, loadProtocols, markLibSeen, repeatLabel, normOffset, SHARE_MAX_OFFSET, PREMIUM_PROTOCOL_UPSELL, premiumGated } from '../store5.js';
 import { TILE_ICONS, DOC_ACCEPT } from './AddSheet.jsx';
 import { RepeatChoices } from './RepeatSheet.jsx';
 import { saveFile } from '../files5.js';
@@ -395,7 +395,7 @@ function MediaRow({ it }) {
 // members (and every free protocol) behave exactly as before.
 function ProtocolRow({ p }) {
   const S = useStore5();
-  const locked = p.register === 'monetised' && !S.premium;
+  const locked = p.register === 'monetised' && premiumGated(S);
   const [added, setAdded] = React.useState(false);
   const flash = React.useContext(ToastCtx);
   // Protocols now get the same one-tap add as media. Until this, the only way to
@@ -465,7 +465,9 @@ function ProtocolRow({ p }) {
 // member whose cache is cold lands on Media for one launch and taps back.
 {
   const boot = getState();
-  if (boot.stackTab === 'routines' && !boot.premium) setTab('media');
+  // premiumGated(), not !premium (2026-10-05): with the B2B switch on there is no
+  // paywall shelf to steer anyone away from, so nobody is bounced off Routines.
+  if (boot.stackTab === 'routines' && premiumGated(boot)) setTab('media');
 }
 
 export default function LibraryScreen() {
@@ -530,8 +532,12 @@ export default function LibraryScreen() {
       </div>
 
       {/* Routines — premium gated */}
+      {/* premiumGated(S) everywhere below, not !S.premium: this card prints a
+          PRICE and an Unlock button, so it is a sell surface and has to answer to
+          the B2B switch directly rather than to a flag a stale render could get
+          wrong. While PREMIUM_OPEN is true the builder shows and this never does. */}
       {S.stackTab === 'routines' && (
-        !S.premium ? (
+        premiumGated(S) ? (
           <div style={{ position: 'relative', marginTop: 18, borderRadius: 24, overflow: 'hidden', padding: '24px 20px', textAlign: 'center', background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)' }}>
             <div style={{ opacity: .5, pointerEvents: 'none' }}>
               <span style={{ display: 'inline-flex', width: 52, height: 52, borderRadius: 16, alignItems: 'center', justifyContent: 'center', background: 'var(--disc)', border: '1px solid var(--rim)', color: 'var(--ink)' }}>
@@ -555,7 +561,7 @@ export default function LibraryScreen() {
           </div>
         )
       )}
-      {S.stackTab === 'routines' && S.premium && <RoutineBuilder query={query} />}
+      {S.stackTab === 'routines' && !premiumGated(S) && <RoutineBuilder query={query} />}
 
       {/* Media — list + add to stack */}
       {S.stackTab === 'media' && (

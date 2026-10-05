@@ -8,6 +8,20 @@
 // anywhere, and no way forward.
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+
+// ── THE PAID BUILD, ON DEMAND (2026-10-05) ──────────────────────────────────
+// The shipped build is OPEN: PREMIUM_OPEN in membership.js is true, so the B2B
+// pivot leaves nothing gated and no refusal can happen. Any test below that
+// describes a REFUSAL is therefore describing the PAID build, and calls
+// paidBuild() first — which flips the switch back through this getter and proves
+// that gate still bites. Every other test in this file runs the app as it ships.
+vi.mock('./membership.js', async (importOriginal) => ({
+  ...(await importOriginal()),
+  get PREMIUM_OPEN() { return globalThis.__ppwPaidBuild !== true; },
+}));
+/** Put the paywall back, for one test. Cleared before every test. */
+const paidBuild = () => { globalThis.__ppwPaidBuild = true; };
+
 import { render, cleanup, screen, fireEvent, waitFor } from '@testing-library/react';
 import { setState, getState, onlyExamplesLeft, clearExamples } from './store5.js';
 import { GUMROAD_URL, passwordSetHere, signOut } from './membership.js';
@@ -23,13 +37,18 @@ function signedInFree() {
 }
 
 beforeEach(() => {
+  delete globalThis.__ppwPaidBuild;
   localStorage.clear(); sessionStorage.clear(); vi.unstubAllGlobals();
   setState({ signedIn: false, premium: false, accountOpen: false, aiOpen: false, onboarded: false, obStep: 0, termsOk: false });
   vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ premium: false, entitlement: 'none' }), { status: 200 })));
 });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
+// F1 is the CHECKOUT, and the shipped build has no checkout (PREMIUM_OPEN). The
+// whole block therefore runs the paid build — it is the guard that the money path
+// still works the day Vic switches selling back on.
 describe('F1 — a blocked popup can no longer strand a buyer', () => {
+  beforeEach(() => paidBuild());
   it('offers the checkout as a real link when the browser blocks the window', async () => {
     signedInFree();
     vi.stubGlobal('open', vi.fn(() => null));      // exactly what Safari does

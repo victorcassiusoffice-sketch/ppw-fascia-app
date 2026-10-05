@@ -10,7 +10,7 @@
 // on the bell) — those call maybeHint() from the control itself.
 
 import React from 'react';
-import { useStore5, getState, useDayCount, todayKey, rearmHint, questDone } from '../store5.js';
+import { useStore5, getState, useDayCount, todayKey, rearmHint, questDone, premiumGated } from '../store5.js';
 import { maybeHint, installSnoozed } from './hints5.js';
 import { isStandalone } from '../../lib/installPrompt.js';
 
@@ -52,7 +52,9 @@ export default function useHintWatcher() {
     if (S.viewDate && S.viewDate !== p.viewDate && S.viewDate !== todayKey()) { maybeHint('today-chip'); return; }
 
     if (S.screen === 'library' && S.stackTab !== p.tab) {
-      if (S.stackTab === 'routines' && !S.premium) { maybeHint('routines-paywall'); return; }
+      // The 'routines-paywall' bubble quotes $9.99 a month, so it follows the
+      // switch and not the flag — nobody is quoted a price for what they have.
+      if (S.stackTab === 'routines' && premiumGated(S)) { maybeHint('routines-paywall'); return; }
       if (S.stackTab === 'supps') { maybeHint('supps-intro'); return; }
     }
 

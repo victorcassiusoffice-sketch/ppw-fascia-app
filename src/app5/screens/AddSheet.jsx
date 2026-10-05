@@ -9,7 +9,7 @@
 // it had no builder behind it in either tier. See the note at its old site.
 
 import React from 'react';
-import { useStore5, closeAdd, setCustomUrl, addCustomUrl, goLibrary, openNoteComposer, setNoteField, addNote, parseRoutineMd, addItemsToToday, createRoutine, routineItemsForSave, repeatLabel, getState, addDocToToday, openAiBridge } from '../store5.js';
+import { useStore5, closeAdd, setCustomUrl, addCustomUrl, goLibrary, openNoteComposer, setNoteField, addNote, parseRoutineMd, addItemsToToday, createRoutine, routineItemsForSave, repeatLabel, getState, addDocToToday, openAiBridge, premiumGated } from '../store5.js';
 import { saveFile } from '../files5.js';
 // The failed-paste sentence is registry copy (hints5.js `link-failed`), not
 // this screen's own words. It is marked `inline: true` there precisely because
@@ -210,7 +210,7 @@ export default function AddSheet() {
                       carry the internal `_day`. Writing that straight into
                       ppw5.routines is how a day-21 stack came back as day 0 the next
                       time the routine was shared (naming law in store5.js). */}
-                  {S.premium && (
+                  {!premiumGated(S) && (
                     <button onClick={() => { createRoutine(draft.name, routineItemsForSave(draft.items)); setDraftMsg(`Saved “${draft.name}” to your Routines`); setDraft(null); }} style={{ height: 44, padding: '0 14px', borderRadius: 14, border: '1px solid var(--rim)', background: 'transparent', color: 'var(--accent)', fontWeight: 600, fontSize: 13 }}>Save as routine</button>
                   )}
                   <button onClick={() => setDraft(null)} style={{ height: 44, padding: '0 12px', borderRadius: 14, border: 'none', background: 'none', color: 'var(--dim)', fontWeight: 600, fontSize: 13 }}>✕</button>

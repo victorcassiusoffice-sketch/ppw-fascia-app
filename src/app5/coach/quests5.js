@@ -29,6 +29,7 @@ import {
 // helpers this quest needs. A second listener would have been a second, quietly
 // diverging opinion about whether the app can be installed.
 import { canPromptInstall, promptInstall, isStandalone } from '../../lib/installPrompt.js';
+import { PREMIUM_OPEN } from '../membership.js';
 
 // ── small helpers ────────────────────────────────────────────────────────
 const doneCount = (S) => ((S.doneByDate || {})[todayKey()] || []).length;
@@ -257,7 +258,11 @@ export const QUESTS = [
           // Never land a first-time visitor on the paywall shelf.
           before: () => goLibrary('media'),
           title: 'Everything lives in the Library.',
-          body: 'Media is links you have saved. Protocols are step-by-step plans. Supps is a supplement shopping list. Routines are whole saved days — that shelf is part of Premium; everything in this guide is free.',
+          // The last clause followed the paywall, so it had to follow the switch
+          // too: a guide that tells a B2B client's staff the Routines shelf costs
+          // $9.99 is selling them something they already have (PREMIUM_OPEN).
+          body: 'Media is links you have saved. Protocols are step-by-step plans. Supps is a supplement shopping list. Routines are whole saved days — '
+            + (PREMIUM_OPEN ? 'and that shelf is open too, like everything else here.' : 'that shelf is part of Premium; everything in this guide is free.'),
           buttons: [{ label: 'Next' }],
         },
         {

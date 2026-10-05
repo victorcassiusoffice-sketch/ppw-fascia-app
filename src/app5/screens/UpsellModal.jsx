@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { useStore5, clearUpsell, openAccount, FREE_STACK_CAP, freeSlotAdviceApplies, onlyExamplesLeft, clearExamples } from '../store5.js';
-import { GUMROAD_URL, PREM_PRICE, PREM_PRICE_NOTE, checkoutUrl, isSignedIn } from '../membership.js';
+import { GUMROAD_URL, PREM_PRICE, PREM_PRICE_NOTE, checkoutUrl, isSignedIn, PREMIUM_OPEN } from '../membership.js';
 
 // GUMROAD_URL + pricing now live in membership.js (one seam for the paywall, the
 // Library card and the Settings membership panel). Re-exported so anything still
@@ -19,6 +19,21 @@ const tick = (
 
 export default function UpsellModal() {
   const S = useStore5();
+
+  /**
+   * NOTHING TO SELL (PREMIUM_OPEN, membership.js — Vic, 2026-10-05).
+   *
+   * The whole app is unlocked, and the Gumroad product is still live with a real
+   * subscriber on it. So this card would walk a person who already has every
+   * feature to a checkout and take their money for it. It renders nothing.
+   *
+   * Checked before `premiumUpsell`, not after: no gate should be able to set that
+   * reason any more (they all route through premiumGated()), and if one ever does
+   * — a stale view, a future caller — a paywall must not be what the user meets.
+   * Flip the constant and this whole card comes back untouched.
+   */
+  if (PREMIUM_OPEN) return null;
+
   if (!S.premiumUpsell) return null;
 
   // ONE THING AT A TIME (Vic, 2026-08-06: account sheet + terms + this, all in the
