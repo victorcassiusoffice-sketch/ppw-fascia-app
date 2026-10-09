@@ -13,7 +13,8 @@ import { RepeatChoices } from './RepeatSheet.jsx';
 import { saveFile } from '../files5.js';
 import { protocolToItem } from '../protocols5.js';
 import SuppsSection from './SuppsSection.jsx';
-import { PREM_PRICE } from '../membership.js';
+// No membership import left here on purpose: this screen priced the Routines shelf
+// until 2026-10-08, and nothing on it names a product or a price now.
 
 // small calendar "Add to Stack" disc — opens SchedulePicker to pick the day
 const ICal = <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="2.5" /><path d="M3.5 9.5h17M8 3.5v3M16 3.5v3M12 13v4M10 15h4" /></svg>;
@@ -390,9 +391,13 @@ function MediaRow({ it }) {
 
 // Protocol row — cleared PDF from the build-time bundle. Free protocols open for
 // everyone (View → PDF, calendar disc → schedule onto a day). A `monetised`
-// protocol (catalog register) is Premium-gated: for a non-Premium user the row
-// shows a lock and both actions route to the upsell instead of opening. Premium
-// members (and every free protocol) behave exactly as before.
+// protocol (catalog register) is gated: the row shows a padlock and its actions
+// explain the refusal instead of opening. On the shipped build nothing is gated,
+// so every protocol behaves like a free one.
+//
+// 2026-10-08: the padlock used to be an "Unlock <title>" BUTTON — a sell control
+// in the position the View link normally occupies. It is now a padlock that states
+// the limit and does not pretend a purchase is one tap away.
 function ProtocolRow({ p }) {
   const S = useStore5();
   const locked = p.register === 'monetised' && premiumGated(S);
@@ -418,10 +423,13 @@ function ProtocolRow({ p }) {
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 16, fontWeight: 600, letterSpacing: '-.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textShadow: 'var(--emboss)' }}>{p.title}</div>
-        <div style={{ marginTop: 3, fontSize: 13, color: 'var(--dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{locked ? 'Premium · ' : 'Protocol · '}{p.category || 'PPW'}</div>
+        {/* 'Premium · ' here was the price tag's quiet cousin — it labelled the
+            row with the tier it belonged to. The honest word for a protocol that
+            is not on this account is "Locked", and it names no product. */}
+        <div style={{ marginTop: 3, fontSize: 13, color: 'var(--dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{locked ? 'Locked · ' : 'Protocol · '}{p.category || 'PPW'}</div>
       </div>
       {locked ? (
-        <button onClick={() => setUpsell(PREMIUM_PROTOCOL_UPSELL)} aria-label={`Unlock ${p.title}`} title="Premium — unlock to open" style={{ width: 40, height: 40, flex: 'none', borderRadius: 12, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <button onClick={() => setUpsell(PREMIUM_PROTOCOL_UPSELL)} aria-label={`Why ${p.title} is locked`} title="Not on your plan" style={{ width: 40, height: 40, flex: 'none', borderRadius: 12, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2.5" /><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5" /></svg>
         </button>
       ) : (
@@ -433,11 +441,10 @@ function ProtocolRow({ p }) {
         {/* calendar Add-to-Stack — schedule onto a chosen day */}
         <AddToStackBtn onClick={() => locked ? setUpsell(PREMIUM_PROTOCOL_UPSELL) : openSchedule({ type: 'item', item: protocolToItem(p) })} />
         {/* quick add to today — same tick, same meaning, as a media row. On a
-            monetised protocol a free user's tap can only ever reach the upsell,
-            so the control has to say that before it is tapped, not after: a
-            padlock where the tick would be, and the same words the View button
-            already uses. The paywall itself is unchanged. */}
-        <button data-tour="protocol-add" onClick={quickAdd} aria-label={locked ? `Unlock ${p.title} to add it to today` : "Add to today's stack"} title={locked ? 'Premium — unlock to add it' : 'Quick add to today'} style={{ width: 24, height: 24, flex: 'none', borderRadius: 8, border: `1.5px solid ${added ? 'var(--acc-rim)' : 'var(--rim)'}`, background: added ? 'var(--acc-surf)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: locked ? 'var(--dim)' : 'var(--acc-ink)', padding: 0, transition: 'all .2s' }}>
+            locked protocol the tap can only ever reach the refusal, so the
+            control says so before it is tapped, not after: a padlock where the
+            tick would be, and the same words the View position now uses. */}
+        <button data-tour="protocol-add" onClick={quickAdd} aria-label={locked ? `${p.title} is locked` : "Add to today's stack"} title={locked ? 'Not on your plan' : 'Quick add to today'} style={{ width: 24, height: 24, flex: 'none', borderRadius: 8, border: `1.5px solid ${added ? 'var(--acc-rim)' : 'var(--rim)'}`, background: added ? 'var(--acc-surf)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: locked ? 'var(--dim)' : 'var(--acc-ink)', padding: 0, transition: 'all .2s' }}>
           {locked
             ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2.5" /><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5" /></svg>
             : added && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>}
@@ -531,36 +538,30 @@ export default function LibraryScreen() {
         )}
       </div>
 
-      {/* Routines — premium gated */}
-      {/* premiumGated(S) everywhere below, not !S.premium: this card prints a
-          PRICE and an Unlock button, so it is a sell surface and has to answer to
-          the B2B switch directly rather than to a flag a stale render could get
-          wrong. While PREMIUM_OPEN is true the builder shows and this never does. */}
+      {/* Routines — ONE header card now.
+          It used to be two: this one, and a greyed-out "preview" of the shelf
+          wearing a `Premium · $9.99/mo` pill and an "Unlock Routines" button. That
+          second card was the shop window on this screen, and it came out on
+          2026-10-08 (Vic: "We need to remove the go premium"). The paragraph is
+          the only thing that still varies, because on a build with the paid tier
+          switched back on (PREMIUM_OPEN false) describing a feature the account
+          does not have would be a tease. */}
       {S.stackTab === 'routines' && (
-        premiumGated(S) ? (
-          <div style={{ position: 'relative', marginTop: 18, borderRadius: 24, overflow: 'hidden', padding: '24px 20px', textAlign: 'center', background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)' }}>
-            <div style={{ opacity: .5, pointerEvents: 'none' }}>
-              <span style={{ display: 'inline-flex', width: 52, height: 52, borderRadius: 16, alignItems: 'center', justifyContent: 'center', background: 'var(--disc)', border: '1px solid var(--rim)', color: 'var(--ink)' }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2.5" /><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5" /></svg>
-              </span>
-              <div style={{ marginTop: 12, fontSize: 18, fontWeight: 700, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>Routines</div>
-              <p style={{ margin: '8px auto 0', maxWidth: 270, fontSize: 13, lineHeight: 1.55, color: 'var(--dim)', textShadow: 'var(--emboss)' }}>Chain videos, audio and affirmations into one named stack.</p>
-            </div>
-            <div style={{ marginTop: 16, display: 'inline-flex', alignItems: 'center', gap: 7, padding: '6px 13px', borderRadius: 999, background: 'var(--acc-surf)', border: '1px solid var(--acc-rim)', color: 'var(--acc-ink)', fontSize: 12, fontWeight: 700, boxShadow: 'var(--acc-glow)' }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-1.8 10H4.8L3 8z" /></svg>Premium · {PREM_PRICE}/mo
-            </div>
-            <button data-tour="routines-lock" onClick={() => setUpsell('Routines let you chain many videos, audios and affirmations into one named stack that plays in order — with your own cover image.')} style={{ marginTop: 16, width: '100%', height: 50, borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 700, fontSize: 14.5, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)' }}>Unlock Routines</button>
-          </div>
-        ) : (
-          <div style={{ position: 'relative', marginTop: 18, borderRadius: 24, overflow: 'hidden', padding: '22px 20px', textAlign: 'center', background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)' }}>
-            <span style={{ display: 'inline-flex', width: 52, height: 52, borderRadius: 16, alignItems: 'center', justifyContent: 'center', background: 'var(--acc-surf)', border: '1px solid var(--acc-rim)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)' }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M4 6h16M4 12h16M4 18h10" /></svg>
-            </span>
-            <div style={{ marginTop: 12, fontSize: 18, fontWeight: 700, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>Routines</div>
-            <p style={{ margin: '8px auto 0', maxWidth: 280, fontSize: 13, lineHeight: 1.55, color: 'var(--dim)', textShadow: 'var(--emboss)' }}>Bundle stacks into a named routine, then drop the whole thing onto any day from the Calendar.</p>
-          </div>
-        )
+        <div style={{ position: 'relative', marginTop: 18, borderRadius: 24, overflow: 'hidden', padding: '22px 20px', textAlign: 'center', background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)' }}>
+          <span style={{ display: 'inline-flex', width: 52, height: 52, borderRadius: 16, alignItems: 'center', justifyContent: 'center', background: 'var(--acc-surf)', border: '1px solid var(--acc-rim)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M4 6h16M4 12h16M4 18h10" /></svg>
+          </span>
+          <div style={{ marginTop: 12, fontSize: 18, fontWeight: 700, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>Routines</div>
+          <p style={{ margin: '8px auto 0', maxWidth: 280, fontSize: 13, lineHeight: 1.55, color: 'var(--dim)', textShadow: 'var(--emboss)' }}>
+            {premiumGated(S)
+              ? 'Saved routines are not on this account.'
+              : 'Bundle stacks into a named routine, then drop the whole thing onto any day from the Calendar.'}
+          </p>
+        </div>
       )}
+      {/* premiumGated(S), not !S.premium: the builder WRITES routines, and the
+          store refuses that write for a gated user anyway (createRoutine, G1), so
+          both have to answer the same question or the button would be a trap. */}
       {S.stackTab === 'routines' && !premiumGated(S) && <RoutineBuilder query={query} />}
 
       {/* Media — list + add to stack */}

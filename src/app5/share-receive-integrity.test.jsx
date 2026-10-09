@@ -56,7 +56,7 @@ import {
 import { maybeHint, resetHintEngine } from './coach/hints5.js';
 import App5 from './App5.jsx';
 import SharedRoutineSheet from './screens/SharedRoutineSheet.jsx';
-import UpsellModal from './screens/UpsellModal.jsx';
+import GateNotice from './screens/GateNotice.jsx';
 import AccountSheet from './screens/AccountSheet.jsx';
 
 const LS = (k) => 'ppw5.' + k;
@@ -154,7 +154,7 @@ describe('adding a shared programme to today', () => {
     applyServerEntitlement({ premium: false });
     setState({ deckItems: Array.from({ length: FREE_STACK_CAP - 1 }, (_, i) => ({ id: 'x' + i, title: 'own ' + i, time: '07:00' })) });
     setPendingShare(HELD);
-    render(<><SharedRoutineSheet /><UpsellModal /></>);
+    render(<><SharedRoutineSheet /><GateNotice /></>);
 
     fireEvent.click(screen.getByText('Add all to today'));
 
@@ -183,23 +183,36 @@ describe('the sign-in door underneath the share sheet', () => {
     expect(screen.getByText('Pendulum swings')).toBeTruthy();
   });
 
-  // The one-session route that needs no expired link: a signed-out free
-  // recipient taps the primary action, meets the paywall, and the only sign-in
-  // offer it makes opens the account sheet UNDER this sheet.
-  it('lets a signed-out recipient actually reach the sign-in field', () => {
-    // Reaches the field THROUGH the paywall's "Sign in to go Premium", so this
-    // one needs the paid build to have a paywall to tap at all.
-    paidBuild();
+  /**
+   * REWRITTEN 2026-10-08. This used to walk the route a signed-out recipient
+   * actually took: tap Save → meet the paywall → tap its "Sign in to go Premium"
+   * → land in the sign-in field. That middle step was a sell, and it is gone, so
+   * the route it tested cannot be walked any more.
+   *
+   * The guarantee underneath it is still worth holding, and splits in two:
+   *   · the refusal is a DEAD END ON PURPOSE now — it states the limit and offers
+   *     no purchase and no sign-in, because signing in would not help;
+   *   · and reaching the sign-in field still costs nothing once the refusal is
+   *     dismissed, with the shared programme untouched the whole way.
+   */
+  it('refuses a signed-out recipient without selling, and still lets them reach the sign-in field', () => {
+    paidBuild(); // nothing can be refused on the shipped build
     applyServerEntitlement({ premium: false });
     setPendingShare(HELD);
-    render(<><SharedRoutineSheet /><UpsellModal /><AccountSheet /></>);
+    render(<><SharedRoutineSheet /><GateNotice /><AccountSheet /></>);
 
     fireEvent.click(screen.getByText('Save to my Routines'));
-    fireEvent.click(screen.getByText(/Sign in to go Premium/i));
 
-    expect(getState().accountOpen).toBeTruthy();
+    // The refusal is what they meet, and it is the end of the conversation.
+    expect(screen.getByText('Not on your plan')).toBeTruthy();
+    expect(screen.queryByText(/sign in to go premium/i)).toBeNull();
+    expect(screen.queryByText(/\$/)).toBeNull();
+    expect(getState().accountOpen).toBeFalsy();
+
+    // The door is still one tap away from anywhere that opens it, and this layer
+    // stands down rather than painting over it.
+    act(() => { openAccount('signin'); });
     expect(screen.getByLabelText('Email address')).toBeTruthy();
-    // No backdrop of ours over it, so reaching that field costs nothing.
     expect(screen.queryByText('Pendulum swings')).toBeNull();
     expect(getState().pendingShare).toBeTruthy();
   });

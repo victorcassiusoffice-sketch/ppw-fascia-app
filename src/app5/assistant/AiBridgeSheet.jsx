@@ -163,8 +163,9 @@ export default function AiBridgeSheet() {
   const vidFound = vids ? vids.filter((v) => v && v.state === 'ok').length : 0;
   const vidChecking = vidClaimed > 0 && !vids;
   const used = Array.isArray(S.deckItems) ? S.deckItems.length : 0;
-  // Infinity while the app is open, so the "Stack is full" banner and its
-  // "go Premium" line below can never reach a client who has no cap.
+  // Infinity while the app is open, so the "Stack is full" banner below can never
+  // reach a client who has no cap. (It used to end "or go Premium"; that half of
+  // the advice came out with the storefront on 2026-10-08.)
   const headroom = premiumGated(S) ? Math.max(0, FREE_STACK_CAP - used) : Infinity;
   const stackFull = headroom === 0;
 
@@ -178,13 +179,13 @@ export default function AiBridgeSheet() {
     // The cap refusal used to close() — throwing away the parsed plan AND the
     // pasted reply, after the user had already been out to their AI and back,
     // with no message at all. Stay on the preview so they can untick down to what
-    // fits. The global UpsellModal still fires (addItemsToPlan sets premiumUpsell);
+    // fits. The global GateNotice still fires (addItemsToPlan sets premiumUpsell);
     // this is what they see the moment they dismiss it.
     if (res.upsell) {
       const room = rebuilding ? (res.fits ?? 0) : headroom;
       setConfirmReplace(false);
       setCapErr(room === 0
-        ? `Your Stack is full — ${used} of ${FREE_STACK_CAP}. Delete something on your Stack, or go Premium, then come back. Your plan is still here.`
+        ? `Your Stack is full — ${used} of ${FREE_STACK_CAP}. Delete something on your Stack, then come back. Your plan is still here.`
         : `That's ${chosen.length} items but you have room for ${room}. Untick ${chosen.length - room} and try again — nothing is lost.`);
       return;
     }
@@ -282,7 +283,7 @@ export default function AiBridgeSheet() {
             )}
             {stackFull && !rebuilding && (
               <div role="alert" style={{ marginTop: 18, padding: '12px 14px', borderRadius: 14, border: '1px solid var(--accent)', background: 'var(--track)', boxShadow: 'var(--inset)', fontSize: 12.5, lineHeight: 1.55, color: 'var(--accent)', fontWeight: 600 }}>
-                Your Stack is full — {used} of {FREE_STACK_CAP}. Make room first, go Premium, or choose “Redo my whole day” above.
+                Your Stack is full — {used} of {FREE_STACK_CAP}. Make room first, or choose “Redo my whole day” above.
               </div>
             )}
             <button onClick={send} disabled={stackFull && !rebuilding} data-tour="ai-copy" style={{ ...BTN_PRIMARY, marginTop: 20, opacity: (stackFull && !rebuilding) ? .45 : 1 }}>

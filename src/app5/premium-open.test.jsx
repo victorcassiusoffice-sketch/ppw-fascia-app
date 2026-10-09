@@ -16,7 +16,7 @@ import { render, cleanup, screen } from '@testing-library/react';
 import { LazyMotion, domAnimation } from 'motion/react';
 import { setState, getState } from './store5.js';
 import MembershipCard from './screens/MembershipCard.jsx';
-import UpsellModal from './screens/UpsellModal.jsx';
+import GateNotice from './screens/GateNotice.jsx';
 // Statically imported ON PURPOSE: these screens must share the same store5
 // instance as the `setState` above. A dynamic import after vi.resetModules()
 // binds its own copy of the store, and a screen reading state nobody wrote
@@ -126,7 +126,7 @@ describe('a stranger with no account gets the whole app', () => {
 describe('nothing offers to sell what is already free', () => {
   it('the paywall renders nothing, even when something sets a reason on it', () => {
     setState({ premiumUpsell: 'Routines are part of Premium.' });
-    render(<UpsellModal />);
+    render(<GateNotice />);
     expect(screen.queryByText(/Go Premium/i)).toBeNull();
     expect(screen.queryByText(/Premium feature/i)).toBeNull();
     expect(document.body.textContent.trim()).toBe('');

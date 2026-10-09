@@ -19,9 +19,22 @@
 //   into the source in plaintext is a code published to the world, and every
 //   partner code Vic ever issued would be readable in one file. Only PBKDF2
 //   hashes with per-code salts are committed; the plaintext lives in the
-//   gitignored ACCESS-CODES.md and never leaves Vic's machine. The hash being
-//   public is also why the iteration count is high: an offline guess has to
-//   cost real time, because an attacker can make those guesses at their leisure.
+//   gitignored ACCESS-CODES.md and never leaves Vic's machine.
+//
+//   AND THAT PROTECTION IS ONLY AS GOOD AS THE CODE IS LONG. Since 2026-10-08
+//   the live code is FOUR DIGITS, at Vic's instruction, and four digits is a
+//   doorbell rather than a lock. Measured on Vic's laptop: ~46ms per PBKDF2 guess
+//   at the count below, so the whole 10,000-code space falls in about 7.7 minutes
+//   on one core and roughly a minute across eight. The hashes are public, so
+//   publishing hash("a four-digit code") is in practice publishing the code. The
+//   high iteration count still earns its keep for the long minted codes in the
+//   same registry — it does nothing for a four-digit one.
+//
+//   This is a deliberate trade, not an oversight: the code is there to keep
+//   passers-by out and to make a licence revocable, and the real control on what
+//   a visitor does with what they see is the confidentiality agreement beside it
+//   (see nda.js). The throttle at the bottom of this file is the same kind of
+//   thing — it makes walking the keypad through the UI tedious, and that is all.
 //
 // Paired with tools/mint-access-code.mjs, which is the only thing that writes
 // access-codes.json. The two must agree exactly on normalisation and KDF or no
@@ -31,8 +44,18 @@ import registry from './access-codes.json';
 
 const LS_KEY = 'ppw5.access';
 
-/** The shape a code is minted in, for the UI to show as a hint. */
-export const CODE_HINT = 'PPW-XXXXX-XXXXX';
+/**
+ * The placeholder in the code field.
+ *
+ * Deliberately NOT a shape. It used to read 'PPW-XXXXX-XXXXX', which was true
+ * only of the long minted codes; the moment a short code was issued (2026-10-08)
+ * that placeholder started telling every visitor the wrong format, and someone
+ * holding a four-digit code would reasonably think they had the wrong thing.
+ * Codes now come in more than one shape, so the field asks for the code rather
+ * than describing it -- and it must never show a REAL one, since this string
+ * ships in a public bundle.
+ */
+export const CODE_HINT = 'Type your code';
 
 /** What a browser with no WebCrypto is told. Failing closed, in words. */
 export const NO_CRYPTO_MESSAGE =
@@ -196,4 +219,107 @@ export function grantAccess(id) {
 /** Hand the device back to the door — used by "this isn't my code" and by tests. */
 export function revokeLocalAccess() {
   try { localStorage.removeItem(LS_KEY); } catch { /* noop */ }
+}
+
+// ── the throttle on wrong codes ─────────────────────────────────────────────
+//
+// WHAT THIS IS AND IS NOT. The live code is four digits, so the door is a
+// 10,000-guess keypad. This makes a run of wrong guesses cost a growing wait.
+//
+// It is NOT a security control, and it would be dishonest to call it one: all of
+// it runs in the visitor's own browser, so anyone willing to open devtools can
+// call grantAccess() and skip the door entirely, or clear this counter, or just
+// hash the registry offline (see the header — that costs minutes). What it stops
+// is the realistic case: a bored person typing guesses, or a three-line script
+// pumping the form. Those give up; this is enough for those.
+//
+// A WAIT, NOT A LOCKOUT. It always ends, and a correct code arriving after it has
+// ended gets in — `attemptWaitMs()` is recomputed from the clock on every call
+// and the counter is only ever extended by a FAILURE, never by an attempt. The
+// person who mistyped their code four times must not be the one who gets punished.
+
+const LS_TRIES = 'ppw5.access.tries';
+
+/** Wrong codes that cost nothing. Enough for a genuine mistyping, not enough to sweep. */
+const FREE_TRIES = 4;
+
+/** The wait after each further wrong code. The last step repeats for ever. */
+const WAIT_STEPS_MS = [15000, 30000, 60000, 120000, 300000];
+const MAX_WAIT_MS = WAIT_STEPS_MS[WAIT_STEPS_MS.length - 1];
+
+/**
+ * The in-memory mirror, and the reason it exists: localStorage is the visitor's
+ * to clear. Clearing site data halfway through a run of guesses must not hand
+ * back a fresh allowance, so whichever of memory and disk has seen MORE failures
+ * is the one that counts. Memory dies with the page life, disk survives a reload,
+ * and between them a guesser has to do both to get anywhere — which, again, is
+ * trivial for anyone technical and tedious for everyone else.
+ */
+let _tries = null;
+
+function diskTries() {
+  try {
+    const v = JSON.parse(localStorage.getItem(LS_TRIES) || 'null');
+    return v && Number.isFinite(v.n) ? v : null;
+  } catch { return null; }
+}
+
+function currentTries() {
+  const mem = _tries;
+  const disk = diskTries();
+  if (!mem) return disk;
+  if (!disk) return mem;
+  if (disk.n !== mem.n) return disk.n > mem.n ? disk : mem;
+  return (disk.until || 0) > (mem.until || 0) ? disk : mem;
+}
+
+/**
+ * How much longer the door is holding, in ms. 0 when it is not.
+ *
+ * Capped at the longest step however far away `until` is, so a device whose clock
+ * jumps backwards — or a tampered-with record — cannot shut someone out of their
+ * own app for a week.
+ */
+export function attemptWaitMs() {
+  const t = currentTries();
+  if (!t || !t.until) return 0;
+  const left = t.until - Date.now();
+  if (left <= 0) return 0;
+  return Math.min(left, MAX_WAIT_MS);
+}
+
+/**
+ * Count one wrong code and return the wait it just bought (0 for the early ones).
+ *
+ * Called ONLY on a refusal. A correct code never passes through here, so the
+ * counter cannot grow underneath someone who is getting it right.
+ */
+export function recordWrongCode() {
+  const prev = currentTries();
+  const n = (prev && Number.isFinite(prev.n) ? prev.n : 0) + 1;
+  const over = n - FREE_TRIES;
+  const wait = over > 0 ? WAIT_STEPS_MS[Math.min(over - 1, WAIT_STEPS_MS.length - 1)] : 0;
+  const rec = { v: 1, n, until: wait > 0 ? Date.now() + wait : 0 };
+  _tries = rec;
+  try { localStorage.setItem(LS_TRIES, JSON.stringify(rec)); } catch { /* private mode */ }
+  return wait;
+}
+
+/** Forget the run. Called when a code is accepted — the door opened, so it is over. */
+export function clearWrongCodes() {
+  _tries = null;
+  try { localStorage.removeItem(LS_TRIES); } catch { /* noop */ }
+}
+
+/**
+ * For tests only.
+ *
+ * `keepStorage` simulates a RELOAD rather than a reset: memory goes, the disk
+ * record stays, which is exactly the state a new page life starts in.
+ */
+export function _resetAttemptsForTest(opts) {
+  _tries = null;
+  if (!(opts && opts.keepStorage)) {
+    try { localStorage.removeItem(LS_TRIES); } catch { /* noop */ }
+  }
 }

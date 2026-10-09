@@ -44,7 +44,7 @@ vi.mock('./membership.js', async (importOriginal) => {
 import { setState, getState, clearPendingShare, setPendingShare, applyServerEntitlement, FREE_STACK_CAP } from './store5.js';
 import App5 from './App5.jsx';
 import SharedRoutineSheet from './screens/SharedRoutineSheet.jsx';
-import UpsellModal from './screens/UpsellModal.jsx';
+import GateNotice from './screens/GateNotice.jsx';
 
 const LS = (k) => 'ppw5.' + k;
 
@@ -288,14 +288,17 @@ describe('the sheet that asks what to do with a shared routine', () => {
     expect(screen.getByText(/Saved .* to your Routines/)).toBeTruthy();
   });
 
-  // The button is SHOWN to a free user on purpose: hiding it is not a paywall
+  // The button is SHOWN to a gated user on purpose: hiding it is not a gate
   // (the G1/W11 reasoning in store5.js). The store refuses, and the refusal is
   // what they see — never a button that does nothing.
-  it('shows a free user the paywall rather than hiding the button', () => {
-    paidBuild(); // there is no paywall to show on the shipped build
+  // The card that says so was called the paywall and headed "Premium feature"
+  // until 2026-10-08; it is GateNotice now, it is headed "Not on your plan", and
+  // it no longer offers to sell the thing it just refused.
+  it('shows a gated user the refusal rather than hiding the button', () => {
+    paidBuild(); // nothing can be refused on the shipped build
     applyServerEntitlement({ premium: false });
     setPendingShare(HELD);
-    render(<><SharedRoutineSheet /><UpsellModal /></>);
+    render(<><SharedRoutineSheet /><GateNotice /></>);
 
     const save = screen.getByText('Save to my Routines');
     expect(save).toBeTruthy();
@@ -303,7 +306,7 @@ describe('the sheet that asks what to do with a shared routine', () => {
 
     expect(getState().routines.length).toBe(0);
     expect(localStorage.getItem(LS('routines'))).toBeNull();
-    expect(screen.getByText('Premium feature')).toBeTruthy();
+    expect(screen.getByText('Not on your plan')).toBeTruthy();
     expect(getState().premiumUpsell).toMatch(/Premium/);
     // and the programme is still here for when they come back to it
     expect(screen.getByText('Pendulum swings')).toBeTruthy();
@@ -316,7 +319,7 @@ describe('the sheet that asks what to do with a shared routine', () => {
     const own = Array.from({ length: FREE_STACK_CAP - 1 }, (_, i) => ({ id: 'x' + i, title: 'own ' + i, time: '07:00' }));
     setState({ deckItems: own });
     setPendingShare(HELD);
-    render(<><SharedRoutineSheet /><UpsellModal /></>);
+    render(<><SharedRoutineSheet /><GateNotice /></>);
 
     fireEvent.click(screen.getByText('Add all to today'));
 

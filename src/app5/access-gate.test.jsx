@@ -40,7 +40,8 @@ const { REGISTRY } = vi.hoisted(() => ({
 }));
 vi.mock('./access-codes.json', () => ({ default: REGISTRY }));
 
-import { verifyCode, hasAccess, grantAccess, revokeLocalAccess } from './access.js';
+import { verifyCode, hasAccess, grantAccess, revokeLocalAccess, _resetAttemptsForTest } from './access.js';
+import { NDA_TICK_LABEL } from './nda.js';
 import AccessGate from './screens/AccessGate.jsx';
 import App5 from './App5.jsx';
 import { setState, getState } from './store5.js';
@@ -93,6 +94,11 @@ beforeAll(async () => {
 
 beforeEach(() => {
   localStorage.clear(); sessionStorage.clear();
+  // The wrong-code throttle keeps an in-memory mirror that localStorage.clear()
+  // deliberately cannot wipe, so wrong guesses would otherwise ACCUMULATE across
+  // the tests in this file and eventually trip a wait in whichever test happened
+  // to be running when the count crossed the line.
+  _resetAttemptsForTest();
   REGISTRY.kdf.iterations = 1000;      // one test below changes it
   if (!Element.prototype.scrollTo) Element.prototype.scrollTo = () => {};
   if (!window.scrollTo) window.scrollTo = () => {};
@@ -218,6 +224,11 @@ const field = () => screen.getByLabelText(/access code/i);
 const type = (v) => fireEvent.change(field(), { target: { value: v } });
 const openTheApp = () => screen.getByRole('button', { name: /open the app/i });
 const checking = () => screen.queryByText(/checking the code/i);
+// Since 2026-10-08 the door asks for a confidentiality agreement as well as a
+// code, and the button does not work without it — so every test below that
+// expects to reach the VERIFIER has to tick the box first. The agreement is
+// tested on its own terms in access-nda.test.jsx.
+const tick = () => fireEvent.click(screen.getByRole('checkbox', { name: new RegExp(NDA_TICK_LABEL, 'i') }));
 
 /**
  * Tap the button and wait for the check to genuinely finish.
@@ -249,6 +260,7 @@ describe('the gate on screen', () => {
 
   it('opens the app on the right code', async () => {
     render(<AccessGate />);
+    tick();
     type(LIVE);
     await tapAndSettle();
     expect(screen.queryByLabelText(/access code/i)).toBeNull();
@@ -257,6 +269,7 @@ describe('the gate on screen', () => {
 
   it('stays open on a wrong code, and stays shut', async () => {
     render(<AccessGate />);
+    tick();
     type(STRANGER);
     await tapAndSettle();
     expect(field()).toBeTruthy();
@@ -267,12 +280,14 @@ describe('the gate on screen', () => {
   // A refusal must not tell a stranger which of their guesses was once real.
   it('refuses a revoked code in exactly the same words as an unknown one', async () => {
     render(<AccessGate />);
+    tick();
     type(STRANGER);
     await tapAndSettle();
     const unknown = screen.getByRole('alert').textContent;
     cleanup();
 
     render(<AccessGate />);
+    tick();
     type(DEAD);
     await tapAndSettle();
     expect(screen.getByRole('alert').textContent).toBe(unknown);
@@ -281,6 +296,7 @@ describe('the gate on screen', () => {
 
   it('survives a reload once accepted', async () => {
     render(<AccessGate />);
+    tick();
     type(LIVE);
     await tapAndSettle();
     cleanup();
@@ -304,6 +320,7 @@ describe('the gate on screen', () => {
       .mockImplementation(async (...a) => { await held; return real(...a); });
 
     render(<AccessGate />);
+    tick();
     const form = field().closest('form');
     type(LIVE);
 
@@ -328,6 +345,7 @@ describe('the gate on screen', () => {
   it('says nothing happened when the field is empty', async () => {
     const derive = vi.spyOn(crypto.subtle, 'deriveBits');
     render(<AccessGate />);
+    tick();
     await tapAndSettle();
     expect(screen.getByRole('alert')).toBeTruthy();
     expect(derive).not.toHaveBeenCalled();
@@ -379,6 +397,7 @@ describe('a shared programme arriving before the code does', () => {
     expect(getState().pendingShare.items.length).toBe(2);
     expect(window.location.hash).toBe('');   // already stripped — nothing to retry
 
+    tick();
     type(LIVE);
     await tapAndSettle();
 

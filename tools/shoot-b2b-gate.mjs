@@ -1,11 +1,14 @@
 // The B2B front door, proven in a real browser.
 //
-// Three things that unit tests cannot settle:
+// Four things that unit tests cannot settle:
 //   1. Does the access gate actually stand in front of the app, and does a real
 //      code get a real person in and keep them in?
-//   2. Does `?demo=1` open the app for Vic's website embed WITHOUT handing out
+//   2. Is the CONFIDENTIALITY AGREEMENT really a gate (2026-10-08)? jsdom can
+//      prove the handler refuses; only a browser can prove the button a person
+//      actually taps does nothing until the box is ticked.
+//   3. Does `?demo=1` open the app for Vic's website embed WITHOUT handing out
 //      lasting access?
-//   3. Does it survive being put in an IFRAME ON ANOTHER ORIGIN -- which is the
+//   4. Does it survive being put in an IFRAME ON ANOTHER ORIGIN -- which is the
 //      entire point of the embed, and the one thing no same-origin test can show.
 //
 // The plaintext code is read from the gitignored ACCESS-CODES.md at runtime. It
@@ -35,12 +38,26 @@ mkdirSync(OUT, { recursive: true });
 
 // The code, read not hardcoded. If this file is missing the run stops rather
 // than quietly testing nothing.
-let CODE;
+//
+// ANCHORED TO THE REGISTRY, not to the code's shape and not to the Status column
+// in the notes file. Two reasons this had to change on 2026-10-08:
+//   - the live code is now four digits, so a `PPW-XXXXX-XXXXX` pattern match
+//     would reach past it and grab a code that no longer works;
+//   - `access-codes.json` is the only thing the app actually consults, and the
+//     hand-maintained Status column in ACCESS-CODES.md had already drifted out of
+//     step with it. The id is the join, and `revoked` is the truth.
+const REPO = 'C:/Users/Victor/Documents/PPW-Code/ppw-fascia-app-share';
+let CODE, CODE_ID;
 try {
-  CODE = (readFileSync('C:/Users/Victor/Documents/PPW-Code/ppw-fascia-app-share/ACCESS-CODES.md', 'utf8')
-    .match(/PPW-[A-Z0-9]{5}-[A-Z0-9]{5}/) || [])[0];
+  const reg = JSON.parse(readFileSync(`${REPO}/src/app5/access-codes.json`, 'utf8'));
+  const live = new Set((reg.codes || []).filter((c) => c && !c.revoked && c.id).map((c) => c.id));
+  for (const line of readFileSync(`${REPO}/ACCESS-CODES.md`, 'utf8').split('\n')) {
+    // | `<code>` | issued to | id | date | status |
+    const m = line.match(/^\|\s*`([^`]+)`\s*\|[^|]*\|\s*([A-Za-z0-9_-]+)\s*\|/);
+    if (m && live.has(m[2])) { CODE = m[1].trim(); CODE_ID = m[2]; break; }
+  }
 } catch { /* reported below */ }
-if (!CODE) { console.log('FAIL: no access code found in ACCESS-CODES.md'); process.exit(1); }
+if (!CODE) { console.log('FAIL: no live access code found (no un-revoked registry id with a row in ACCESS-CODES.md)'); process.exit(1); }
 
 // A SEPARATE ORIGIN to host the iframe, standing in for ppwellness.co. Same-origin
 // framing would prove nothing: the question is whether another site can embed this
@@ -72,8 +89,16 @@ const phone = async (label) => {
   page.on('pageerror', (e) => errors.push(`[${label}] pageerror: ${e.message}`));
   return { ctx, page };
 };
-const shoot = async (page, name) => {
-  await page.evaluate(() => { window.scrollTo(0, 0); for (const el of document.querySelectorAll('*')) if (el.scrollTop) el.scrollTop = 0; });
+// keepScroll: capture WHERE THE PERSON ACTUALLY IS, not the top of the document.
+// The access door auto-scrolls to the code field on load, so resetting scroll
+// before the shot produces a frame of the agreement's first paragraph -- a true
+// picture of a position no visitor is ever in. Everywhere else the reset is right,
+// because walking the doors scrolls things and a mid-scroll frame reads as a
+// layout bug that is not there.
+const shoot = async (page, name, keepScroll = false) => {
+  if (!keepScroll) {
+    await page.evaluate(() => { window.scrollTo(0, 0); for (const el of document.querySelectorAll('*')) if (el.scrollTop) el.scrollTop = 0; });
+  }
   await page.waitForTimeout(200);
   await page.screenshot({ path: `${OUT}/${name}.png` });
   notes.push(name);
@@ -86,11 +111,17 @@ const shoot = async (page, name) => {
 //     inferred from the absence of app words.
 //   - the first <input> in DOM order belongs to the app underneath (a stack
 //     card's time field), so typing must be scoped to the gate as well.
+// ANCHORED ON THE CONFIDENTIALITY BOX, not on the heading. The heading is
+// "Enter your access code" for a stranger but "One quick thing" for a device
+// whose licence is fine and whose only problem is that the wording changed — and
+// that second door has no <input> at all, so the old anchor found nothing and
+// `inApp()` would have cheerfully reported that a gated device was inside.
+// The box is the one thing on both doors.
 const gateRoot = () => `(() => {
-  const h = [...document.querySelectorAll('*')].find((e) => e.children.length === 0 && /Enter your access code/i.test(e.textContent || ''));
-  if (!h) return null;
-  let n = h;
-  for (let i = 0; i < 8 && n.parentElement; i++) { n = n.parentElement; if (n.querySelector('input')) break; }
+  const box = document.querySelector('[role="checkbox"][aria-label*="confidential" i]');
+  if (!box) return null;
+  let n = box;
+  for (let i = 0; i < 10 && n.parentElement; i++) { n = n.parentElement; if (n.querySelector('h1')) break; }
   return n;
 })()`;
 
@@ -112,10 +143,18 @@ const type = async (page, value) => {
   await page.keyboard.type(value, { delay: 8 });
   return true;
 };
+// The way IN is the submit button -- found by text, which since 2026-10-08 is
+// either "Open the app" or (on a device whose licence is fine and whose only
+// problem is that the wording changed) "Continue".
+const goButton = () => `(() => {
+  const g = ${gateRoot()};
+  return g && [...g.querySelectorAll('button[type="submit"]')]
+    .find((e) => /open the app|checking the code|continue/i.test(e.textContent)) || null;
+})()`;
+
 const submit = async (page) => {
   const at = await page.evaluate(`(() => {
-    const g = ${gateRoot()};
-    const b = g && [...g.querySelectorAll('button')].find((e) => /open the app|enter|unlock|continue/i.test(e.textContent));
+    const b = ${goButton()};
     if (!b) return null;
     b.scrollIntoView({ block: 'center' });
     const r = b.getBoundingClientRect();
@@ -126,6 +165,34 @@ const submit = async (page) => {
   // The KDF is 310k iterations on purpose; give it room on a cold JIT.
   await page.waitForTimeout(3000);
   return true;
+};
+
+/** Is the way in actually tappable right now? */
+const goDisabled = (page) => page.evaluate(`(() => { const b = ${goButton()}; return !b || b.disabled; })()`);
+
+/**
+ * Tick the confidentiality box, and confirm it took.
+ *
+ * Found by role rather than by its words, so re-wording the agreement does not
+ * silently turn this harness into a no-op that reports success.
+ */
+const agree = async (page) => {
+  const at = await page.evaluate(`(() => {
+    const g = ${gateRoot()};
+    const b = g && g.querySelector('[role="checkbox"]');
+    if (!b) return null;
+    b.scrollIntoView({ block: 'center' });
+    const r = b.getBoundingClientRect();
+    return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+  })()`);
+  if (!at) return false;
+  await page.mouse.click(at.x, at.y);
+  await page.waitForTimeout(150);
+  return page.evaluate(`(() => {
+    const g = ${gateRoot()};
+    const b = g && g.querySelector('[role="checkbox"]');
+    return !!b && b.getAttribute('aria-checked') === 'true';
+  })()`);
 };
 // In the app == the gate is gone AND the app is genuinely there.
 const inApp = async (page) => !(await gateUp(page))
@@ -164,9 +231,58 @@ const inApp = async (page) => !(await gateUp(page))
   })()`);
   const solid = !!covered && covered.coversAllCorners === true && covered.op === '1';
   ok('the gate covers the whole screen opaquely', solid, JSON.stringify(covered));
-  await shoot(page, '1-access-gate');
+  await shoot(page, '1-access-gate', true);
+
+  // ── the confidentiality agreement is a GATE, not a notice ─────────────────
+  // Asked of the real rendered button, because that is what a person taps. The
+  // handler guard is proved in jsdom (access-nda.test.jsx); this proves the thing
+  // on screen.
+  const ask = await page.evaluate(`(() => {
+    const g = ${gateRoot()};
+    if (!g) return null;
+    const box = g.querySelector('[role="checkbox"]');
+    return {
+      text: g.innerText,
+      hasBox: !!box,
+      checked: box && box.getAttribute('aria-checked'),
+      // What a screen reader announces -- this is a legal gate, so it must say
+      // something, not be an unlabelled square.
+      label: box && box.getAttribute('aria-label'),
+    };
+  })()`);
+  ok('the door asks for confidentiality in plain words', !!ask && /confidential/i.test(ask.text), (ask && ask.text || '').slice(0, 140).replace(/\n/g, ' | '));
+  // THE TOP OF THE DOOR IS REACHABLE. The agreement made this screen taller than
+  // a phone, and a scroll container centred with `justify-content: center` pushes
+  // its overflow out of BOTH ends -- the heading scrolls away and nothing brings
+  // it back. It did exactly that before this check existed. Asked by scrolling to
+  // the top and measuring where the heading actually sits.
+  const topOfDoor = await page.evaluate(`(() => {
+    const g = ${gateRoot()};
+    if (!g) return null;
+    const sc = g.closest('[style*="overflow"]') || g.parentElement;
+    if (sc) sc.scrollTop = 0;
+    const h = [...g.querySelectorAll('h1')][0];
+    if (!h) return { noHeading: true };
+    const r = h.getBoundingClientRect();
+    return { text: h.textContent, top: Math.round(r.top), bottom: Math.round(r.bottom), vh: innerHeight };
+  })()`);
+  ok('the heading can be scrolled to, not cut off above the screen',
+    !!topOfDoor && topOfDoor.top >= 0 && topOfDoor.bottom <= topOfDoor.vh, JSON.stringify(topOfDoor));
+  ok('there is a box to tick, and it starts unticked', !!ask && ask.hasBox && ask.checked === 'false', JSON.stringify(ask && { hasBox: ask.hasBox, checked: ask.checked }));
+  ok('a screen reader is told what the box means', !!ask && !!ask.label && /confidential/i.test(ask.label), String(ask && ask.label));
+  ok('the way in is dead until the box is ticked', await goDisabled(page), 'the submit button was tappable with nothing agreed');
+  // The door is tall now -- the agreement sits above the code field -- so prove
+  // the bottom of it looks right too, not just the part above the fold.
+  await page.evaluate(`(() => { const b = ${goButton()}; if (b) b.scrollIntoView({ block: 'center' }); })()`);
+  await page.waitForTimeout(250);
+  await page.screenshot({ path: `${OUT}/1b-access-gate-agreement.png` });
+  notes.push('1b-access-gate-agreement');
 
   // A wrong code must not get in, and must not say whether the code exists.
+  // Ticked FIRST, so this check still means "the code was refused" rather than
+  // the weaker "nothing happened because the box was empty".
+  ok('the box can be ticked', await agree(page), 'clicking the confidentiality box did not tick it');
+  ok('ticking the box arms the way in', !(await goDisabled(page)), 'the submit button is still disabled after agreeing');
   await type(page, 'PPW-AAAAA-BBBBB');
   await submit(page);
   const after = await page.evaluate(() => document.body.innerText);
@@ -181,14 +297,32 @@ const inApp = async (page) => !(await gateUp(page))
   const { ctx, page } = await phone('real-code');
   await page.goto(APP, { waitUntil: 'networkidle' });
   await page.waitForTimeout(1000);
+
+  // THE RIGHT CODE IS NOT ENOUGH. The one journey that matters most for the
+  // agreement: a visitor who has the real code and has not agreed stays outside.
   await type(page, CODE);
   await submit(page);
-  ok('the issued code opens the app', await inApp(page), 'still gated after entering the real code');
+  ok('the right code alone does not open the app', !(await inApp(page)), 'got in with the code but no agreement');
+  const refusedText = await page.evaluate(`(() => { const g = ${gateRoot()}; return g ? g.innerText : ''; })()`);
+  ok('and it says why, rather than looking broken', /tick/i.test(refusedText), refusedText.slice(0, 160).replace(/\n/g, ' | '));
+
+  ok('agreeing then lets the code through', await agree(page));
+  await submit(page);
+  ok('the issued code opens the app', await inApp(page), 'still gated after agreeing and entering the real code');
   await shoot(page, '3-unlocked');
 
   // Lowercase and dash-free, because someone will read it down a phone.
   const stored = await page.evaluate(() => localStorage.getItem('ppw5.access'));
   ok('access is remembered by id, never by the code itself', !!stored && !/^PPW-/i.test(stored), `ppw5.access = ${stored}`);
+
+  // What was agreed is written down beside the licence: which wording, when, and
+  // under which code. The code itself must never be in it -- same rule as above.
+  const agreed = await page.evaluate(() => {
+    try { return JSON.parse(localStorage.getItem('ppw5.nda') || 'null'); } catch { return 'UNPARSEABLE'; }
+  });
+  ok('the agreement is recorded with its wording version', !!agreed && typeof agreed.version === 'string' && !!agreed.version, JSON.stringify(agreed));
+  ok('...and the date it was agreed', !!agreed && Number.isFinite(Date.parse(agreed.at)), JSON.stringify(agreed && agreed.at));
+  ok('...and the code id, never the code', !!agreed && agreed.codeId === CODE_ID && !JSON.stringify(agreed).includes(CODE), 'the record is wrong or carries the code itself');
 
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(1200);
@@ -213,6 +347,37 @@ const inApp = async (page) => !(await gateUp(page))
   ok('no stack cap', !unlocked.addedUpsell, JSON.stringify(unlocked.addedUpsell));
   ok('routines save with no paywall', !unlocked.routineUpsell && unlocked.routines > 0, JSON.stringify(unlocked));
   ok('nothing tries to sell Premium', !unlocked.upsellOnScreen, 'a price or Premium wording is on screen');
+
+  // ── the wording changes under a device that is already inside ─────────────
+  // Simulated by ageing the stored version rather than editing nda.js, which is
+  // exactly what a real NDA_VERSION bump looks like from the device's side.
+  await page.evaluate(() => {
+    const rec = JSON.parse(localStorage.getItem('ppw5.nda') || '{}');
+    rec.version = 'an-older-wording';
+    localStorage.setItem('ppw5.nda', JSON.stringify(rec));
+  });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(1200);
+
+  const reAsk = await page.evaluate(`(() => {
+    const g = ${gateRoot()};
+    if (!g) return null;
+    return { text: g.innerText, hasInput: !!g.querySelector('input'), h1: (g.querySelector('h1') || {}).textContent };
+  })()`);
+  ok('a changed agreement puts the door back up', !!reAsk, 'the device stayed inside on wording it never agreed to');
+  // The licence has not changed, only the words — so do not send a gym owner
+  // hunting for a code they already used.
+  ok('...without asking for the code again', !!reAsk && !reAsk.hasInput, JSON.stringify(reAsk && { hasInput: reAsk.hasInput, h1: reAsk.h1 }));
+  ok('...and the way in is dead until the new wording is agreed to', await goDisabled(page), 'the button was live before re-agreeing');
+  await shoot(page, '3b-wording-changed');
+
+  ok('re-agreeing gets straight back in', await agree(page));
+  await submit(page);
+  ok('one tap is all it costs', await inApp(page), 'still gated after re-agreeing');
+  const reRec = await page.evaluate(() => { try { return JSON.parse(localStorage.getItem('ppw5.nda')); } catch { return null; } });
+  ok('the record now names the new wording and keeps the licence it holds',
+    !!reRec && reRec.version !== 'an-older-wording' && reRec.codeId === CODE_ID, JSON.stringify(reRec));
+
   await ctx.close();
 }
 
@@ -264,7 +429,9 @@ const inApp = async (page) => !(await gateUp(page))
 await browser.close();
 site.close();
 
-writeFileSync(`${OUT}/gate.json`, JSON.stringify({ checks, notes, errors, codeLength: CODE.length }, null, 2));
+// The receipt records WHICH code was exercised, by its public id -- never the
+// code, and not its length either, which is a hint nobody needs written down.
+writeFileSync(`${OUT}/gate.json`, JSON.stringify({ checks, notes, errors, codeId: CODE_ID }, null, 2));
 
 console.log(`\nshots -> ${OUT}`);
 for (const n of notes) console.log('  ' + n + '.png');

@@ -29,7 +29,9 @@ import {
 // helpers this quest needs. A second listener would have been a second, quietly
 // diverging opinion about whether the app can be installed.
 import { canPromptInstall, promptInstall, isStandalone } from '../../lib/installPrompt.js';
-import { PREMIUM_OPEN } from '../membership.js';
+// PREMIUM_OPEN was imported here to fork one tour sentence between "that shelf is
+// open" and "that shelf costs $9.99". Neither build quotes a price now (2026-10-08),
+// so the guide no longer has an opinion about the paid tier at all.
 
 // ── small helpers ────────────────────────────────────────────────────────
 const doneCount = (S) => ((S.doneByDate || {})[todayKey()] || []).length;
@@ -255,14 +257,15 @@ export const QUESTS = [
       return [
         {
           target: 'lib-tabs',
-          // Never land a first-time visitor on the paywall shelf.
+          // Media first — it is the shelf that explains the others.
           before: () => goLibrary('media'),
           title: 'Everything lives in the Library.',
-          // The last clause followed the paywall, so it had to follow the switch
-          // too: a guide that tells a B2B client's staff the Routines shelf costs
-          // $9.99 is selling them something they already have (PREMIUM_OPEN).
-          body: 'Media is links you have saved. Protocols are step-by-step plans. Supps is a supplement shopping list. Routines are whole saved days — '
-            + (PREMIUM_OPEN ? 'and that shelf is open too, like everything else here.' : 'that shelf is part of Premium; everything in this guide is free.'),
+          // This sentence used to fork on PREMIUM_OPEN, because on the paid build
+          // it told people the Routines shelf cost $9.99 a month. With the
+          // storefront gone (2026-10-08) there is no price to quote on either
+          // build, so it is one sentence again — and a tour is a bad place to
+          // discuss billing regardless.
+          body: 'Media is links you have saved. Protocols are step-by-step plans. Supps is a supplement shopping list. Routines are whole saved days.',
           buttons: [{ label: 'Next' }],
         },
         {

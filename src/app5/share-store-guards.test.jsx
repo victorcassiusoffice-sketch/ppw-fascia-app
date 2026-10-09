@@ -333,11 +333,11 @@ describe('5. the free-cap refusal says something true', () => {
 
   it('shows the paywall the true sentence and no dead remedy', async () => {
     const s = await freshStore();
-    const UpsellModal = (await import('./screens/UpsellModal.jsx')).default;
+    const GateNotice = (await import('./screens/GateNotice.jsx')).default;
     s.setState({ premium: false, onboarded: true, accountOpen: false, deckItems: examples(), doneByDate: {} });
     s.addItemsToToday(batch(20));
 
-    render(<UpsellModal />);
+    render(<GateNotice />);
 
     expect(screen.getByText(/20 stacks/i)).toBeTruthy();
     expect(screen.queryByText('Clear the examples')).toBeNull();
@@ -346,11 +346,11 @@ describe('5. the free-cap refusal says something true', () => {
 
   it('keeps the clear-the-examples remedy on the paywall when it would work', async () => {
     const s = await freshStore();
-    const UpsellModal = (await import('./screens/UpsellModal.jsx')).default;
+    const GateNotice = (await import('./screens/GateNotice.jsx')).default;
     s.setState({ premium: false, onboarded: true, accountOpen: false, deckItems: examples(), doneByDate: {} });
     s.addItemsToToday(batch(7));
 
-    render(<UpsellModal />);
+    render(<GateNotice />);
 
     expect(screen.getByText('Clear the examples')).toBeTruthy();
     fireEvent.click(screen.getByText('Clear the examples'));

@@ -461,7 +461,11 @@ export function stackFor(key) {
 export function premiumGated(S = state) { return !PREMIUM_OPEN && !S.premium; }
 
 export const FREE_STACK_CAP = 10;
-export const FREE_CAP_UPSELL = `You have reached the free limit of ${FREE_STACK_CAP} stacks. Go Premium for unlimited stacks.`;
+// This used to end "Go Premium for unlimited stacks." — a call to action for a
+// checkout that no longer exists (2026-10-08). A refusal's job is to say what
+// happened and what the person can do themselves; selling the way out of it was
+// never part of that, and now there is nothing to sell.
+export const FREE_CAP_UPSELL = `You have reached the limit of ${FREE_STACK_CAP} stacks on this plan.`;
 export function overLimit() { return premiumGated() && state.deckItems.length >= FREE_STACK_CAP; }
 
 /**
@@ -483,9 +487,12 @@ export function raiseFreeCapUpsell(wanted, used = state.deckItems.length) {
   // Nothing to count — fall back to the plain sentence rather than describing a
   // "0-stack programme".
   if (!(wanted > 0)) { setState({ premiumUpsell: FREE_CAP_UPSELL, capRefusal: null }); return FREE_CAP_UPSELL; }
+  // Both sentences used to end in "go Premium for unlimited stacks" (removed
+  // 2026-10-08). The numbers are the useful part and they stay; the only remedy
+  // offered now is one the person can act on without paying anyone.
   const msg = wanted > FREE_STACK_CAP
-    ? `This programme has ${wanted} stacks and free keeps ${FREE_STACK_CAP} in total, so none of it fits. Go Premium for unlimited stacks.`
-    : `Free keeps ${FREE_STACK_CAP} stacks in total, with ${used} in use, so this ${wanted}-stack programme does not fit. Clear what you no longer need, or go Premium for unlimited stacks.`;
+    ? `This programme has ${wanted} stacks and this plan keeps ${FREE_STACK_CAP} in total, so none of it fits.`
+    : `This plan keeps ${FREE_STACK_CAP} stacks in total, with ${used} in use, so this ${wanted}-stack programme does not fit. Clear what you no longer need and try again.`;
   setState({ premiumUpsell: msg, capRefusal: { wanted, used, msg } });
   return msg;
 }
@@ -627,9 +634,12 @@ export function deleteSelected() {
   saveStacks();
 }
 // ── Protocols from the build-time bundled manifest (Vic item 1) ──
-// Upsell copy shown when a non-Premium user taps a `monetised` protocol. Free
-// protocols never hit this — they open for everyone as a lead magnet.
-export const PREMIUM_PROTOCOL_UPSELL = 'This protocol is part of Premium. Unlock to open the full PDF and add it to any day.';
+// The refusal shown when a gated user taps a `monetised` protocol. Free protocols
+// never reach this — they open for everyone as a lead magnet. "Unlock to open the
+// full PDF and add it to any day" came off the end on 2026-10-08: there is nothing
+// to unlock it with any more, and an instruction nobody can follow is worse than
+// no instruction.
+export const PREMIUM_PROTOCOL_UPSELL = 'This protocol is part of Premium, which is not on this account.';
 let _protocolsLoaded = false;
 export async function loadProtocols() {
   if (_protocolsLoaded) return;

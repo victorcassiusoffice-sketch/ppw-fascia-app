@@ -204,7 +204,7 @@ export default function AddSheet() {
                     // keep it on screen (the programme is still wanted once the
                     // paywall is dismissed) but say what happened, and drop any
                     // stale "3 stacks added" line so it cannot read as success.
-                    setDraftMsg('That’s more stacks than the free plan holds, so nothing was added.');
+                    setDraftMsg('That’s more stacks than this plan holds, so nothing was added.');
                   }} style={{ flex: 1, height: 44, borderRadius: 14, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 600, fontSize: 13.5, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)' }}>Add all to today</button>
                   {/* routineItemsForSave: the draft items are PARSED items, so they
                       carry the internal `_day`. Writing that straight into
@@ -241,8 +241,8 @@ export default function AddSheet() {
             setLinkErr(r.ok || r.upsell ? 0 : (n) => n + 1);
           }} style={{ height: 48, padding: '0 20px', borderRadius: 15, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 600, fontSize: 14, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)' }}>Add</button>
         </div>
-        {/* A free-cap refusal returns { upsell: true } and already raises the
-            upsell modal, so it must never also read as a broken link.
+        {/* A cap refusal returns { upsell: true } and already raises the gate
+            notice, so it must never also read as a broken link.
 
             The colour is --bad (2026-10-05). This line was the first half of the
             fix: it used to reference --bad with a hot-pink hex as its CSS

@@ -91,24 +91,21 @@ export const HINTS = {
     title: 'About reminders — the honest version.',
     copy: 'The app can only nudge you while it is open on screen. Closed or locked, it stays quiet. For the few things that must not slip, set your phone’s own alarm as well.',
   },
-  'routines-paywall': {
-    anchor: 'routines-lock', cap: 1,
-    title: 'Routines are the one paid thing here.',
-    copy: 'A routine is a whole saved day you can reuse — Premium, $9.99 a month. The rest of the app is free. Nothing to decide now.',
-  },
+  // ── REMOVED 2026-10-08, both of them ──────────────────────────────────────
+  // 'routines-paywall' — "Routines are the one paid thing here … Premium, $9.99 a
+  //   month." Anchored to `routines-lock`, which was the Unlock Routines button.
+  //   The button is gone, so the bubble had nothing left to point at even if the
+  //   price had been acceptable; and routines are open to everyone who gets
+  //   through the access gate, so there is nothing to warn anybody about.
+  // 'free-cap' — "Free keeps up to 10 things … Premium removes the limit." It was
+  //   never fired by any watcher (no maybeHint('free-cap') has ever existed), and
+  //   its live twin is the cap copy inside GateNotice, which says the same thing
+  //   at the moment of the refusal and offers [Clear the examples]. A dead hint
+  //   carrying a sell line is pure liability.
   'supps-intro': {
     anchor: 'supps-top', cap: 1,
     title: 'A shopping list, not a commitment.',
     copy: 'These are supplement sets grouped by protocol. Tick what you want. Buying happens on iHerb, not here — the first item opens the basket there, and the rest follow it in.',
-  },
-  'free-cap': {
-    // NOT a bubble. The refusal already puts a modal on the screen, and a
-    // guidance layer cannot open over one (nor should it — two panels arguing
-    // about the same refusal). This copy lives in UpsellModal, at the exact
-    // point the add was turned down, with its own [Clear the examples].
-    anchor: null, cap: Infinity, inline: true,
-    title: 'You have hit the free limit.',
-    copy: 'Free keeps up to 10 things, and the example cards count. Clearing them frees their slots. Premium removes the limit.',
   },
   'install-nudge': {
     anchor: null, cap: 3,

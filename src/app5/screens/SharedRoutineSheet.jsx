@@ -11,31 +11,33 @@
 //      way of seeing that stack four is weekly and starts on day 7. Every row
 //      here carries title · time · repeat · "from day N".
 //   2. NO BUTTON IS A SILENT NO-OP. "Save to my Routines" is shown to EVERYONE,
-//      because hiding it is not a paywall (the G1/W11 reasoning in store5.js) —
-//      createRoutine refuses for a free user and raises `premiumUpsell`, and
-//      that upsell is the outcome they see. "Add all to today" is refused the
-//      same way by the free stack cap. Either way the sheet stays up, so the
-//      programme is still here afterwards.
+//      because hiding it is not a gate (the G1/W11 reasoning in store5.js) —
+//      createRoutine refuses a gated user and raises `premiumUpsell`, and the
+//      GateNotice explaining that is the outcome they see. "Add all to today" is
+//      refused the same way by the stack cap. Either way the sheet stays up, so
+//      the programme is still here afterwards.
 //   3. THE iOS ESCAPE HATCH. WhatsApp's in-app browser on iOS is a separate
 //      storage partition: a save made in there is written to a throwaway
 //      profile and is invisible in the installed app. When we are not running
 //      standalone we say so and hand the link back, so it can be opened where
 //      it will actually stick. This is the single most likely field failure.
 //
-// z-45: above the wizard (40) and the first-run doors (41), below the upsell
-// modal (47) so a free user's paywall lands ON TOP of this rather than behind
-// it, and below terms (50) and the lock screen (70).
+// z-45: above the wizard (40) and the first-run doors (41), below the gate notice
+// (47) so a refusal lands ON TOP of this rather than behind it, and below terms
+// (50) and the lock screen (70).
 //
 // NOT above the account sheet (42) any more, however high this layer sits
-// (2026-10-05, review pass). The account sheet is the app's only sign-in door,
-// and the boot pass opens it to say things that cannot wait — "that sign-in link
-// is dead", "your account is set up, set a password" — while the recipient's own
-// "Save to my Routines → Sign in to go Premium" is what opens it most often of
-// all. Painting over it left the sign-in field in the DOM and unreachable, with
-// the only visible affordance a backdrop that deleted the programme. So this
-// sheet STANDS DOWN while accountOpen is set, exactly as UpsellModal already
-// does, and comes back when the account layer closes — the held programme is in
-// state and mirrored to localStorage, so standing down costs nothing.
+// (2026-10-05, review pass). The account sheet is the app's only sign-in door, and
+// the boot pass opens it to say things that cannot wait — "that sign-in link is
+// dead", "your account is set up, set a password". Painting over it left the
+// sign-in field in the DOM and unreachable, with the only visible affordance a
+// backdrop that deleted the programme. So this sheet STANDS DOWN while accountOpen
+// is set, exactly as GateNotice already does, and comes back when the account
+// layer closes — the held programme is in state and mirrored to localStorage, so
+// standing down costs nothing.
+// (A clause here used to name "Save to my Routines → Sign in to go Premium" as the
+// commonest way that door opened. Untrue since 2026-10-08: the refusal offers no
+// sign-in, because there is nothing behind it to buy.)
 //
 // DISMISSAL IS NOT A DECISION, either. The backdrop and "Not now" used to call
 // clearPendingShare, which wipes state AND the localStorage mirror — and `#r=`
@@ -89,9 +91,8 @@ export default function SharedRoutineSheet() {
   if (!S.firstRunChoice || !S.onboarded) return null;
 
   // RIGHT OF WAY. See the header: the account sheet is z42 and this is z45, and
-  // burying the app's only sign-in door — which the paywall on this very sheet
-  // is what sends people to — left them with no reachable control but a
-  // destructive backdrop. Mirror of UpsellModal.jsx's own `S.accountOpen` guard.
+  // burying the app's only sign-in door left people with no reachable control but
+  // a destructive backdrop. Mirror of GateNotice.jsx's own `S.accountOpen` guard.
   // Nothing is lost: the programme is held in state and on disk, and this comes
   // straight back when the account layer closes.
   if (S.accountOpen) return null;
@@ -173,9 +174,14 @@ export default function SharedRoutineSheet() {
     // came back as day 0 the next time it was shared (naming law in store5.js).
     const r = createRoutine(pending.name, routineItemsForSave(items));
     if (r) { setAck({ kind: 'routine', name: r.name || pending.name }); clearPendingShare(); return; }
-    // null = the store refused it (free tier) and has already raised the
-    // upsell, which renders above this sheet. Keep the programme on screen so
-    // it is still here when the paywall is dismissed.
+    // null = the store refused it and has already raised the reason, which the
+    // GateNotice renders above this sheet. Keep the programme on screen so it is
+    // still here once that card is dismissed.
+    //
+    // This sentence names the tier, and that is deliberate: it can only ever be
+    // reached with PREMIUM_OPEN false (createRoutine returns null nowhere else),
+    // so it is paid-build copy, where "part of Premium" is the true reason. It
+    // quotes no price and offers no purchase — that half went on 2026-10-08.
     setMsg('Saving a routine is part of Premium — the programme stays here until you decide.');
   };
 
@@ -192,7 +198,7 @@ export default function SharedRoutineSheet() {
     // { upsell: true } — the free cap counts the WHOLE batch and imported
     // nothing, so saying nothing here would read as a broken button. The
     // programme is deliberately NOT cleared: a refusal is not an answer.
-    setMsg('That’s more stacks than the free plan holds, so nothing was added.');
+    setMsg('That’s more stacks than this plan holds, so nothing was added.');
   };
 
   const onCopy = async () => {

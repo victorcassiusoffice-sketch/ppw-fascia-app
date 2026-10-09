@@ -10,7 +10,9 @@
 // on the bell) — those call maybeHint() from the control itself.
 
 import React from 'react';
-import { useStore5, getState, useDayCount, todayKey, rearmHint, questDone, premiumGated } from '../store5.js';
+// `premiumGated` was imported here for the retired 'routines-paywall' trigger
+// (2026-10-08). No hint asks about the paid tier any more.
+import { useStore5, getState, useDayCount, todayKey, rearmHint, questDone } from '../store5.js';
 import { maybeHint, installSnoozed } from './hints5.js';
 import { isStandalone } from '../../lib/installPrompt.js';
 
@@ -52,9 +54,9 @@ export default function useHintWatcher() {
     if (S.viewDate && S.viewDate !== p.viewDate && S.viewDate !== todayKey()) { maybeHint('today-chip'); return; }
 
     if (S.screen === 'library' && S.stackTab !== p.tab) {
-      // The 'routines-paywall' bubble quotes $9.99 a month, so it follows the
-      // switch and not the flag — nobody is quoted a price for what they have.
-      if (S.stackTab === 'routines' && premiumGated(S)) { maybeHint('routines-paywall'); return; }
+      // The 'routines-paywall' trigger stood here until 2026-10-08. Its bubble
+      // quoted $9.99 a month and pointed at the Unlock Routines button; both went
+      // with the storefront, so there is nothing to fire and nothing to say.
       if (S.stackTab === 'supps') { maybeHint('supps-intro'); return; }
     }
 

@@ -17,7 +17,7 @@ import SettingsScreen from './screens/SettingsScreen.jsx';
 import LibraryScreen from './screens/LibraryScreen.jsx';
 import { InstallBanner } from './screens/InstallAppCard.jsx';
 import AddSheet from './screens/AddSheet.jsx';
-import UpsellModal from './screens/UpsellModal.jsx';
+import GateNotice from './screens/GateNotice.jsx';
 import CalendarScreen from './screens/CalendarScreen.jsx';
 import MediaViewer from './screens/MediaViewer.jsx';
 import CompletedSheet from './screens/CompletedSheet.jsx';
@@ -949,15 +949,15 @@ export default function App5() {
         <FirstRunChoice />
         {/* A routine someone sent by link (45). Above the wizard, the first-run
             doors and the account sheet, because it is the reason this person
-            opened the app at all — but BELOW the upsell modal (47), so a free
-            user's paywall lands on top of it rather than behind it, and below
+            opened the app at all — but BELOW the gate notice (47), so a
+            refusal lands on top of it rather than behind it, and below
             terms (50), which blocks everything. */}
         <SharedRoutineSheet />
         <TermsScreen />
         {/* Above everything, including the coach marks — while it is up there is
             genuinely no session to reach underneath. */}
         <LockScreen />
-        <UpsellModal />
+        <GateNotice />
         {/* THE FRONT DOOR (80) — above everything, including the passcode lock
             (70), because "are you allowed in at all" is asked before any of the
             app's own questions. It COVERS the app rather than replacing it, so

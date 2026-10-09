@@ -58,6 +58,12 @@ export async function hashCode(code, saltB64, iterations = ITERATIONS) {
 
 const label = process.argv[2] || 'Guest';
 const revoke = (process.argv.find((a) => a.startsWith('--revoke=')) || '').split('=')[1];
+// --code=XXXX sets an EXPLICIT code instead of minting a random one, for when a
+// human has to read it down a phone. Short codes are a doorbell, not a lock: the
+// hash is committed to a PUBLIC repo, so a 4-digit code is recoverable from it in
+// minutes. That is a deliberate trade when the real control is the confidentiality
+// acknowledgement at the door, and the tool says so out loud rather than pretending.
+const explicit = (process.argv.find((a) => a.startsWith('--code=')) || '').split('=')[1];
 
 const registry = existsSync(REGISTRY)
   ? JSON.parse(readFileSync(REGISTRY, 'utf8'))
@@ -73,7 +79,17 @@ if (revoke) {
   process.exit(0);
 }
 
-const code = mintCode();
+const code = explicit ? explicit.trim().toUpperCase() : mintCode();
+if (explicit) {
+  const space = /^[0-9]+$/.test(code) ? Math.pow(10, code.length) : Math.pow(ALPHABET.length, code.length);
+  if (space < 1e9) {
+    console.log(`
+  NOTE: "${'*'.repeat(code.length)}" has ~${space.toLocaleString()} possibilities.`);
+    console.log('  The hash is committed to a PUBLIC repo, so this code is recoverable');
+    console.log('  from it by brute force. Treat it as a doorbell that keeps out passers-by,');
+    console.log('  not as a secret. The confidentiality notice at the door is the real control.');
+  }
+}
 const salt = b64(crypto.getRandomValues(new Uint8Array(16)));
 const hash = await hashCode(code, salt);
 const id = 'c' + b64(crypto.getRandomValues(new Uint8Array(6))).replace(/[^a-zA-Z0-9]/g, '').slice(0, 6);

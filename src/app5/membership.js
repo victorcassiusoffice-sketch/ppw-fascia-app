@@ -29,25 +29,26 @@ const LS = (k) => 'ppw5.' + k;
 // magic-link email's branding and where that link lands.
 export const APP_ID = 'lifestyle';
 
-// ── GUMROAD PRODUCT SEAM ─────────────────────────────────────────────────────
-// The live permalink for "PPWellness Lifestyle App — Premium". Held at null until
-// Vic published, because an invented URL would send buyers to a 404 with their
-// card out; while null the paywall shows an honest "not on sale yet" note instead
-// of a dead button.
-// 2026-07-31: Vic published and a real sale went through.
-//
-// ⚠ 2026-08-22 — THE HANDLE MOVED, AND GUMROAD DOES NOT FORWARD. The profile was
-// renamed victorix08 → ppwellness, and the old subdomain simply 404s: verified
-// this run, https://victorix08.gumroad.com/l/ppw-premium → 404 (no redirect to
-// follow). Every second this constant was stale, "Go Premium" sent a buyer with
-// their card out to a dead page. A store rename is therefore a CODE change here,
-// not just an account change — there is no forwarding to save us.
-//
-// Verified this run on the new host: anonymous GET → 200, page titled
-// "PPWellness Lifestyle App — Premium", all three prices present
-// (9.99 / 47.94 / 59.88).
-//
-// NEVER put a seller token or licence key here — this bundle ships to every user.
+// ── GUMROAD PRODUCT — A RECORD, NOT A LINK ───────────────────────────────────
+/**
+ * Where the live product sits: "PPWellness Lifestyle App — Premium" on Gumroad.
+ *
+ * ⚠ NOTHING RENDERS THIS ANY MORE (2026-10-08). The storefront was removed — no
+ * price, no checkout button, no purchase polling — because the app is now behind
+ * an access code with a confidentiality agreement, and nobody who gets through
+ * that door is a shopper.
+ *
+ * The constant stays because the PRODUCT stays. One subscription has been billing
+ * since 2026-07-31; the entitlement path below still honours it, and whoever
+ * reads this next needs to know which Gumroad product that is.
+ * `storefront-removed.test.jsx` fails if any screen imports it again.
+ *
+ * Two facts worth keeping beside it:
+ *  · The handle MOVED (victorix08 → ppwellness, 2026-08-22) and Gumroad does not
+ *    forward — the old subdomain 404s. A store rename is a code change here.
+ *  · NEVER put a seller token or licence key in this file. The bundle ships to
+ *    every user.
+ */
 export const GUMROAD_URL = 'https://ppwellness.gumroad.com/l/ppw-premium';
 
 // ── THE B2B SWITCH ───────────────────────────────────────────────────────────
@@ -60,26 +61,26 @@ export const GUMROAD_URL = 'https://ppwellness.gumroad.com/l/ppw-premium';
  * code rather than a card. There is therefore no paid tier to enforce, and a
  * visitor has to be able to meet the whole product.
  *
- * NOTHING WAS DELETED. Every gate still exists and still reads as it did — each
- * one now asks this constant first and declines to bite, and store5.js keeps the
- * server's own verdict in `premiumPaid` where this switch cannot touch it. Set
- * this to `false` and the paid build returns exactly as it was: the free stack
- * cap, the routines paywall, the monetised-protocol lock and the checkout CTAs
- * all come back, and anyone whose verified entitlement is still on disk is still
- * Premium on the next boot. `premium-gates.test.jsx` runs the whole store with it
- * forced false and proves that, so this is a switch and not a tombstone.
+ * EVERY GATE STILL EXISTS. Each one asks this constant first and declines to
+ * bite, and store5.js keeps the server's own verdict in `premiumPaid` where this
+ * switch cannot touch it. Set this to `false` and the paid tier returns: the free
+ * stack cap, the routines gate and the monetised-protocol lock all come back, and
+ * anyone whose verified entitlement is still on disk is still Premium on the next
+ * boot. `premium-gates.test.jsx` runs the whole store with it forced false and
+ * proves that, so this is a switch and not a tombstone.
+ *
+ * ⚠ WHAT THE SWITCH NO LONGER BRINGS BACK (2026-10-08): the SHOP. Vic asked for
+ * the Go Premium surfaces to be removed, so the price, the checkout button and
+ * the purchase poller are gone from the tree rather than hidden behind this
+ * constant. Flipping it false gives a build that gates features and explains the
+ * refusal, with no way to pay inside the app — selling again means building a
+ * checkout again, deliberately. That is the trade Vic asked for.
  *
  * ⚠ IT DOES NOT UNSELL ANYTHING. A live Gumroad subscription keeps billing until
  * it is cancelled on Gumroad — same caveat as deleteAccount() below. Unlocking in
  * the app is a code change; stopping a charge is an account action only Vic can do.
  */
 export const PREMIUM_OPEN = true;
-
-// Pricing shown in the paywall. Must match the Gumroad product exactly (plans spec
-// §3.1): $9.99/mo · $47.94/6mo · $59.88/yr.
-export const PREM_PRICE = '$9.99';
-export const PREM_PRICE_NOTE = 'from $4.99/mo billed yearly';
-export const PREM_PRICE_FULL = '$9.99/mo · $47.94/6 mo · $59.88/yr';
 
 // Build-time override so a future custom domain doesn't need a code edit.
 export const API_BASE = String(
@@ -181,6 +182,11 @@ function writeEntitlementCache(c) {
   write('premium', c.premium ? '1' : '0');
 }
 
+/**
+ * This account's id on the backend. Its only caller was the removed checkout link
+ * (2026-10-08) — kept because "which account is this" is part of the account
+ * machinery, not the storefront, and it is a one-line read of the cache.
+ */
 export function userId() { return readEntitlementCache()?.userId ?? null; }
 
 /**
@@ -534,45 +540,19 @@ export function signOut() {
 }
 
 /**
- * The checkout link. `app_user_id` rides along as a URL parameter; Gumroad passes
- * unknown params straight through to its ping as url_params[app_user_id], which is
- * how the backend matches a purchase to this account even when the buyer pays with
- * a different email. Verified against the Gumroad source (Purchase#payload_for_ping_notification).
+ * ── REMOVED 2026-10-08: checkoutUrl() and pollForPremium() ───────────────────
+ *
+ * Both existed only to run a purchase: one built the Gumroad link with
+ * `app_user_id` attached so the webhook could match the sale to this account, the
+ * other polled `/api/me/entitlement` every 5s for two minutes while the payment
+ * settled. With the Go Premium surfaces gone there is no caller for either, and a
+ * URL builder for a shop that no longer exists is an invitation to reopen it.
+ *
+ * Nothing about the EXISTING subscription went with them. The webhook still lands
+ * on the backend, `fetchEntitlement()` above still reads the result, and
+ * `cachedPremium()` still unlocks from it offline. What is gone is the ability to
+ * start a new purchase from inside the app.
  */
-export function checkoutUrl(gumroadUrl, uid = userId()) {
-  if (!gumroadUrl) return null;
-  try {
-    const u = new URL(gumroadUrl);
-    if (u.protocol !== 'https:') return null; // never hand a non-https URL to window.open
-    if (uid) u.searchParams.set('app_user_id', uid);
-    return u.toString();
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Poll while a purchase settles. Gumroad pings the backend within seconds, but the
- * user is staring at the app, so we check every 5s for 2 minutes and stop the
- * moment Premium lands. Returns the entitlement that unlocked, or null on timeout.
- */
-export async function pollForPremium({ intervalMs = 5000, timeoutMs = 120000, onTick, shouldStop } = {}) {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    // The buyer can back out (they closed the checkout, or it never opened), and
-    // a poll that ignores that leaves the UI stuck on a spinner they cannot dismiss.
-    if (shouldStop?.()) return null;
-    try {
-      const ent = await fetchEntitlement();
-      if (ent.premium) return ent;
-      onTick?.(ent);
-    } catch {
-      // transient — keep waiting rather than failing the purchase flow
-    }
-    await new Promise((r) => setTimeout(r, intervalMs));
-  }
-  return null;
-}
 
 /** Local-dev unlock so the app can be worked on without a deployed backend. */
 export function setDevPremium(on) {

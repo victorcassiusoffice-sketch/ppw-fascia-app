@@ -20,7 +20,7 @@ const paidBuild = () => { globalThis.__ppwPaidBuild = true; };
 import { render, cleanup, screen, fireEvent, waitFor } from '@testing-library/react';
 import { setState, getState, finishOnboarding } from './store5.js';
 import MembershipCard from './screens/MembershipCard.jsx';
-import UpsellModal from './screens/UpsellModal.jsx';
+import GateNotice from './screens/GateNotice.jsx';
 
 const LS = (k) => 'ppw5.' + k;
 
@@ -66,13 +66,17 @@ describe('"Check membership" always answers', () => {
     await waitFor(() => expect(screen.getByText(/checked — premium, active until/i)).toBeTruthy());
   });
 
-  it('says so out loud on a Free account too', async () => {
-    paidBuild(); // "the Free plan" is only a thing that exists on the paid build
+  // "Checked — you are on the Free plan." was the old wording, and "the Free plan"
+  // named a tier in a shop that was removed on 2026-10-08. The FACT is unchanged
+  // and still has to be said out loud: nothing was found to pick up.
+  it('says so out loud on an account with no payment behind it', async () => {
+    paidBuild(); // the open build has its own, warmer wording — the next test
     seedSession({ role: 'member', entitlement: 'none', premium: false });
     stubEntitlement({ premium: false, entitlement: 'none', role: 'member', userId: 'usr_1' });
     render(<MembershipCard />);
     fireEvent.click(screen.getByText(/check membership/i));
-    await waitFor(() => expect(screen.getByText(/checked — you are on the free plan/i)).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/checked — no payment has been picked up/i)).toBeTruthy());
+    expect(screen.queryByText(/free plan/i)).toBeNull();
   });
 
   // The same button on the build we actually ship. Telling someone who has every
@@ -182,28 +186,30 @@ describe('the Premium panel is readable', () => {
 
 // ── 6 ────────────────────────────────────────────────────────────────────────
 describe('one thing at a time after signing in', () => {
-  // Vic met the account sheet, the terms screen and the Premium upsell in the
-  // same few seconds.
-  it('holds the upsell back while setup is unfinished', () => {
+  // Vic met the account sheet, the terms screen and the refusal card in the same
+  // few seconds. The card was headed "Premium feature" then; since 2026-10-08 it
+  // is GateNotice, headed "Not on your plan", and it sells nothing — but it still
+  // has to wait its turn.
+  it('holds the refusal back while setup is unfinished', () => {
     setState({ onboarded: false, premiumUpsell: 'Routines are Premium.' });
-    render(<UpsellModal />);
-    expect(screen.queryByText(/premium feature/i)).toBeNull();
+    render(<GateNotice />);
+    expect(screen.queryByText(/not on your plan/i)).toBeNull();
   });
 
-  it('holds the upsell back while the account screen is open', () => {
+  it('holds the refusal back while the account screen is open', () => {
     setState({ onboarded: true, accountOpen: true, premiumUpsell: 'Routines are Premium.' });
-    render(<UpsellModal />);
-    expect(screen.queryByText(/premium feature/i)).toBeNull();
+    render(<GateNotice />);
+    expect(screen.queryByText(/not on your plan/i)).toBeNull();
   });
 
   it('does not DROP it — it arrives on the next beat', () => {
-    paidBuild(); // the upsell it comes back to only renders on the paid build
+    paidBuild(); // the card it comes back to only renders on the paid build
     setState({ onboarded: true, accountOpen: true, premiumUpsell: 'Routines are Premium.' });
-    const { rerender } = render(<UpsellModal />);
-    expect(screen.queryByText(/premium feature/i)).toBeNull();
+    const { rerender } = render(<GateNotice />);
+    expect(screen.queryByText(/not on your plan/i)).toBeNull();
     setState({ accountOpen: false });
-    rerender(<UpsellModal />);
-    expect(screen.getByText(/premium feature/i)).toBeTruthy();
+    rerender(<GateNotice />);
+    expect(screen.getByText(/not on your plan/i)).toBeTruthy();
     expect(getState().premiumUpsell).toBeTruthy();
   });
 

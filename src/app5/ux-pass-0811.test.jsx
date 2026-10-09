@@ -11,20 +11,19 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // ── THE PAID BUILD, ON DEMAND (2026-10-05) ──────────────────────────────────
 // The shipped build is OPEN: PREMIUM_OPEN in membership.js is true, so the B2B
-// pivot leaves nothing gated and no refusal can happen. Any test below that
-// describes a REFUSAL is therefore describing the PAID build, and calls
-// paidBuild() first — which flips the switch back through this getter and proves
-// that gate still bites. Every other test in this file runs the app as it ships.
+// pivot leaves nothing gated and no refusal can happen. The mock stays because
+// every test here renders MembershipCard, which reads that constant — and the
+// `__ppwPaidBuild` escape hatch is how a test here would describe the paid build
+// if one needed to again. Nothing in this file needs it today: the five tests
+// that did were the F1 checkout block, removed with the storefront on 2026-10-08.
 vi.mock('./membership.js', async (importOriginal) => ({
   ...(await importOriginal()),
   get PREMIUM_OPEN() { return globalThis.__ppwPaidBuild !== true; },
 }));
-/** Put the paywall back, for one test. Cleared before every test. */
-const paidBuild = () => { globalThis.__ppwPaidBuild = true; };
 
-import { render, cleanup, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, cleanup, screen, fireEvent } from '@testing-library/react';
 import { setState, getState, onlyExamplesLeft, clearExamples } from './store5.js';
-import { GUMROAD_URL, passwordSetHere, signOut } from './membership.js';
+import { passwordSetHere, signOut } from './membership.js';
 import MembershipCard from './screens/MembershipCard.jsx';
 import OnboardingScreen from './screens/OnboardingScreen.jsx';
 
@@ -44,64 +43,19 @@ beforeEach(() => {
 });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
-// F1 is the CHECKOUT, and the shipped build has no checkout (PREMIUM_OPEN). The
-// whole block therefore runs the paid build — it is the guard that the money path
-// still works the day Vic switches selling back on.
-describe('F1 — a blocked popup can no longer strand a buyer', () => {
-  beforeEach(() => paidBuild());
-  it('offers the checkout as a real link when the browser blocks the window', async () => {
-    signedInFree();
-    vi.stubGlobal('open', vi.fn(() => null));      // exactly what Safari does
-    render(<MembershipCard />);
-    fireEvent.click(screen.getByText(/go premium/i));
-
-    const link = await screen.findByRole('link', { name: /open the checkout page/i });
-    expect(link.tagName).toBe('A');
-    expect(link.getAttribute('href')).toContain(GUMROAD_URL);
-    expect(link.getAttribute('target')).toBe('_blank');
-    expect(screen.getByText(/blocked the checkout window/i)).toBeTruthy();
-  });
-
-  it('offers the link even when the popup DID open — windows get lost too', async () => {
-    signedInFree();
-    vi.stubGlobal('open', vi.fn(() => ({ closed: false })));
-    render(<MembershipCard />);
-    fireEvent.click(screen.getByText(/go premium/i));
-
-    const link = await screen.findByRole('link', { name: /open the checkout page/i });
-    expect(link.getAttribute('href')).toContain(GUMROAD_URL);
-    expect(screen.getByText(/waiting for your purchase/i)).toBeTruthy();
-    expect(screen.queryByText(/blocked the checkout window/i)).toBeNull();
-  });
-
-  it('blames the browser, not the card', async () => {
-    signedInFree();
-    vi.stubGlobal('open', vi.fn(() => null));
-    render(<MembershipCard />);
-    fireEvent.click(screen.getByText(/go premium/i));
-    expect(await screen.findByText(/browser setting, not a problem with your card/i)).toBeTruthy();
-  });
-
-  it('can be cancelled, and the buy button comes back', async () => {
-    signedInFree();
-    vi.stubGlobal('open', vi.fn(() => null));
-    render(<MembershipCard />);
-    fireEvent.click(screen.getByText(/go premium/i));
-    await screen.findByRole('link', { name: /open the checkout page/i });
-
-    fireEvent.click(screen.getByText(/^cancel$/i));
-    await waitFor(() => expect(screen.queryByText(/open the checkout page/i)).toBeNull());
-    expect(screen.getByText(/go premium/i)).toBeTruthy();   // not a dead end
-  });
-
-  it('says the unlock is automatic, so nobody sits waiting on this screen', async () => {
-    signedInFree();
-    vi.stubGlobal('open', vi.fn(() => null));
-    render(<MembershipCard />);
-    fireEvent.click(screen.getByText(/go premium/i));
-    expect(await screen.findByText(/unlocks by itself/i)).toBeTruthy();
-  });
-});
+// ── REMOVED 2026-10-08: the F1 block ───────────────────────────────────────
+// Five tests about the CHECKOUT, and there is no checkout. They proved that a
+// blocked popup could no longer strand a buyer: the link was always rendered as
+// a real <a>, the copy blamed the browser rather than the card, Cancel brought
+// the buy button back, and the card said the unlock was automatic so nobody sat
+// waiting on that screen. Good work on a money path Vic removed.
+//
+// The rule is recorded in MembershipCard.jsx beside the deleted panel, because it
+// generalises: never show a wait for a page the customer might not be looking at,
+// and always render the destination as a real anchor — a tap is a user gesture, so
+// no popup blocker applies to it.
+//
+// The rest of this file still runs unchanged.
 
 describe('F2 — one layer at a time', () => {
   it('opening the AI flow closes the account sheet underneath it', async () => {

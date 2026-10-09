@@ -1,18 +1,24 @@
 // MembershipCard — Settings → Membership.
 //
-// Replaces the old manual "Premium" toggle, which was a switch anyone could flip
-// to unlock the paid features for free. Membership is now an account: sign in,
-// and the server says whether you're Premium.
+// An ACCOUNT, not a till. It signs people in, lets them set a password, reports
+// what the server says about their entitlement, and signs them out. It replaced a
+// manual "Premium" toggle anyone could flip to unlock the paid features for free.
 //
-// Free users never need this screen — the app works signed-out exactly as before.
-// Signing in only matters for Premium.
+// ⚠ 2026-10-08 — THE SHOP CAME OUT OF THIS FILE. The "Free plan" card, the
+// "Go Premium · $9.99/mo" button, the in-flight CheckoutWaiting panel and the
+// purchase poller are gone (Vic: "We need to remove the go premium"). What stays
+// is everything that serves the ONE real subscriber from 2026-07-31: their
+// "Premium · active" card, the Gumroad cancellation note on it, and "Check
+// membership", which is how their purchase reaches a new device.
+//
+// Nobody NEEDS this screen — the app works signed out, and on the shipped build it
+// unlocks nothing extra. It is here for the account, not for the sale.
 
 import React from 'react';
 import { useStore5, setState, syncEntitlement, signOutMembership, applyServerEntitlement, syncProfile } from '../store5.js';
 import {
-  GUMROAD_URL, PREM_PRICE, PREM_PRICE_FULL,
   requestSignIn, completeSignIn, fetchEntitlement, readEmail, isSignedIn,
-  checkoutUrl, pollForPremium, readEntitlementCache,
+  readEntitlementCache,
   setDevPremium, devPremiumAvailable,
   passwordSignIn, setPassword, PASSWORD_MIN, staySignedIn, setStaySignedIn,
   consumeNewAccount, isAdminGrant, passwordSetHere, PREMIUM_OPEN,
@@ -93,36 +99,20 @@ function FieldError({ children }) {
 }
 
 /**
- * What the buyer sees while a purchase is in flight (F1, UX pass 2026-08-11).
+ * ── REMOVED 2026-10-08: CheckoutWaiting ──────────────────────────────────────
  *
- * The rule this encodes: NEVER show a wait for a page the customer might not be
- * looking at. The checkout link is rendered every time — not only when the popup
- * was blocked — because a window can also be swallowed by a tab-switch, closed by
- * accident, or lost behind the app. A plain <a> works where window.open does not:
- * the tap is the user gesture, so no popup blocker applies.
+ * This was the in-flight purchase panel — "Waiting for your purchase to
+ * confirm…", an always-rendered checkout link (because iPhone Safari blocks
+ * popups by default and a swallowed window used to strand a buyer holding a
+ * card), and a Cancel that stopped the poll. It was good work on a money path
+ * that no longer exists: Vic removed the Go Premium surfaces, so there is no
+ * purchase to wait for.
+ *
+ * Its lesson is worth carrying forward if a checkout is ever built again: NEVER
+ * show a wait for a page the customer might not be looking at, and always render
+ * the destination as a real <a> — a tap is a user gesture, so no popup blocker
+ * applies to it.
  */
-function CheckoutWaiting({ href, blocked, onCancel }) {
-  return (
-    <div style={{ marginTop: 14, padding: 16, borderRadius: 18, border: `1px solid ${blocked ? 'var(--acc-rim)' : 'var(--rim)'}`, background: 'var(--track)', boxShadow: 'var(--inset)' }}>
-      <div style={{ fontSize: 14, fontWeight: 700, textShadow: 'var(--emboss)' }}>
-        {blocked ? 'Your browser blocked the checkout window' : 'Waiting for your purchase to confirm…'}
-      </div>
-      <div style={{ marginTop: 6, fontSize: 12.5, lineHeight: 1.5, color: 'var(--dim)' }}>
-        {blocked
-          ? 'That is a browser setting, not a problem with your card — use the link below.'
-          : 'It opened in another tab. If you cannot see it, use the link below.'}
-      </div>
-      <a href={href} target="_blank" rel="noopener noreferrer"
-        style={{ ...primaryBtn, marginTop: 12, textDecoration: 'none' }}>
-        Open the checkout page
-      </a>
-      <button onClick={onCancel} style={{ ...quietBtn, marginTop: 4 }}>Cancel</button>
-      <div style={{ fontSize: 11.5, lineHeight: 1.5, color: 'var(--dim)' }}>
-        Premium unlocks by itself the moment your payment goes through — you do not need to come back here.
-      </div>
-    </div>
-  );
-}
 
 const crown = (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-1.8 10H4.8L3 8z" /></svg>
@@ -148,11 +138,8 @@ export default function MembershipCard() {
   const [busy, setBusy] = React.useState(false);
   const [msg, setMsg] = React.useState(null);
   const [err, setErr] = React.useState(null);
-  const [waiting, setWaiting] = React.useState(false);
-  // F1: the live checkout URL while a purchase is in flight, so it can always be
-  // offered as a link, and whether the browser refused to open the window for us.
-  const [checkoutHref, setCheckoutHref] = React.useState(null);
-  const [popupBlocked, setPopupBlocked] = React.useState(false);
+  // The `waiting` / `checkoutHref` / `popupBlocked` trio that used to live here
+  // belonged to the purchase flow, removed 2026-10-08 with CheckoutWaiting.
 
   // A sign-in can fail far from this card — a dead magic link lands on the Stack
   // screen. App5 parks the reason here so the account screen can show it.
@@ -246,54 +233,20 @@ export default function MembershipCard() {
     // someone who has every feature. Report the account truthfully, then say what
     // it means for them, which is nothing.
     else if (PREMIUM_OPEN) setMsg('Checked — no payment on this account. Everything is unlocked anyway, so there is nothing missing.');
-    else setMsg('Checked — you are on the Free plan. No payment has been picked up on this account.');
+    // "the Free plan" named a tier in a shop that has been removed (2026-10-08).
+    // The fact is the same and still worth reporting: nothing was found to pick up.
+    else setMsg('Checked — no payment has been picked up on this account.');
   });
 
   const onSignOut = () => { signOutMembership(); setPhase('out'); setCode(''); setMsg(null); setErr(null); };
 
-  /**
-   * Buy: open Gumroad with our user id attached, then watch for the webhook so
-   * Premium flips without the user doing anything else.
-   *
-   * F1 (UX pass 2026-08-11) — THE MONEY PATH WAS A DEAD END. This threw away
-   * window.open's return value, so the app could not tell whether the checkout
-   * had actually opened. It flipped to "Waiting for your purchase to confirm…"
-   * either way, the Go Premium button disappeared, and there was no link, no
-   * cancel and no retry. On iPhone Safari — which blocks popups by default — a
-   * customer holding a card sat on a spinner with no checkout anywhere and no way
-   * forward. That is money lost at the last step, to a browser default.
-   *
-   * Now: the return value decides the copy, the checkout URL is ALWAYS rendered
-   * as a real tappable link (a plain <a> navigates even when popups are blocked,
-   * because the tap is the user gesture), and Cancel genuinely stops the poll.
-   */
-  const buyCancelled = React.useRef(false);
-
-  const onBuy = () => {
-    const url = checkoutUrl(GUMROAD_URL);
-    if (!url) return;
-    buyCancelled.current = false;
-
-    let win = null;
-    try { win = window.open(url, '_blank', 'noopener,noreferrer'); } catch { win = null; }
-    const blocked = !win;
-
-    setCheckoutHref(url);
-    setPopupBlocked(blocked);
-    setWaiting(true); setErr(null); setMsg(null);
-
-    pollForPremium({ shouldStop: () => buyCancelled.current }).then((ent) => {
-      if (buyCancelled.current) return;
-      setWaiting(false); setCheckoutHref(null); setPopupBlocked(false);
-      if (ent) { applyServerEntitlement(ent); setMsg('Premium unlocked. Enjoy.'); }
-      else setMsg('Still waiting on confirmation. It can take a minute — tap “Check membership” once you’ve paid.');
-    });
-  };
-
-  const onCancelBuy = () => {
-    buyCancelled.current = true;
-    setWaiting(false); setCheckoutHref(null); setPopupBlocked(false); setMsg(null);
-  };
+  // ── REMOVED 2026-10-08: onBuy / onCancelBuy ────────────────────────────────
+  // The purchase path — open Gumroad with `app_user_id` attached, poll
+  // /api/me/entitlement until the webhook landed, unlock without the user doing
+  // anything else. Gone with the Go Premium button it belonged to, along with
+  // membership.js's checkoutUrl() and pollForPremium(). "Check membership" below
+  // is what remains, and it is the part that still matters: it is how the one
+  // real subscriber's purchase is picked up on a new device.
 
   /**
    * Wave 2 item 4 — say an account was made.
@@ -315,12 +268,19 @@ export default function MembershipCard() {
    * own account shows Premium with no purchase behind it, which reads exactly like
    * a billing bug when you are the person testing the billing. Naming it costs one
    * line and stops the founder's own view being misleading. Customers never see it.
+   *
+   * ⚠ 2026-10-08: the last sentence used to be "A customer with the same account
+   * state would see the Free plan." Two things wrong with it — it named a tier in a
+   * shop that has been removed, and on the open build it was simply FALSE: a
+   * customer in that state now sees "Your account", everything unlocked. Vic is
+   * the one person who reads this note, so it is the last place that should be
+   * telling him something untrue about what his customers see.
    */
   const adminNote = isAdminGrant() ? (
     <div style={{ marginTop: 10, padding: '10px 12px', borderRadius: 14, background: 'var(--track)', border: '1px solid var(--hairline)', boxShadow: 'var(--inset)', fontSize: 11.5, lineHeight: 1.5, color: 'var(--dim)' }}>
       <strong style={{ color: 'var(--ink)' }}>Premium (admin account).</strong> This is on because your
-      address is on the staff list, not because a payment was found. A customer with the same account
-      state would see the Free plan.
+      address is on the staff list, not because a payment was found. A customer in the same state
+      would not count as Premium.
     </div>
   ) : null;
 
@@ -366,17 +326,22 @@ export default function MembershipCard() {
     );
   }
 
-  // ── signed in, nothing bought, and nothing to buy ──────────────────────────
+  // ── signed in, nothing bought ──────────────────────────────────────────────
   /**
-   * The B2B card (PREMIUM_OPEN, membership.js — Vic, 2026-10-05).
+   * ONE card for everyone who is signed in without a purchase behind them.
    *
-   * Stands in front of the checkout branch below, which is now unreachable. Two
-   * lies had to be avoided here, in opposite directions: calling this account
-   * "Premium · active" when nobody paid, and calling it the "Free plan" when it
-   * is missing nothing. So it claims no tier at all — it says the account is in
-   * and the app is open, and offers no way to pay for what is already given.
+   * It used to be two: this one, and a "Free plan" card carrying the price and
+   * the Go Premium button. That second card was the storefront, and Vic removed
+   * it on 2026-10-08 — so there is no longer a branch to choose between, only a
+   * sentence to choose.
+   *
+   * Two lies have to be avoided here, in opposite directions: calling the account
+   * "Premium · active" when nobody paid, and calling the person a "Free plan" when
+   * they are missing nothing. So it claims no tier at all. It says the account is
+   * in, says plainly what that account does and does not carry, and offers no way
+   * to pay for either.
    */
-  if (phase === 'in' && PREMIUM_OPEN) {
+  if (phase === 'in') {
     return (
       <div style={card(false)}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
@@ -388,8 +353,9 @@ export default function MembershipCard() {
         </div>
         {adminNote}
         <div style={note()}>
-          You are signed in and everything is unlocked — routines, unlimited stacks and the full
-          protocol library. There is nothing to buy.
+          {PREMIUM_OPEN
+            ? 'You are signed in and everything is unlocked — routines, unlimited stacks and the full protocol library. There is nothing to buy.'
+            : 'You are signed in. Saved routines, unlimited stacks and the paid protocols are not on this account.'}
         </div>
         {createdNote}
         <SetPasswordBlock defaultOpen={S.justCreated} />
@@ -399,42 +365,6 @@ export default function MembershipCard() {
         <button onClick={onSignOut} style={quietBtn}>Sign out</button>
         {msg && <div style={note()}>{msg}</div>}
         {err && <div style={{ ...note(), color: 'var(--bad)' }}>{err}</div>}
-      </div>
-    );
-  }
-
-  // ── signed in, not Premium → buy ───────────────────────────────────────────
-  // Unreachable while PREMIUM_OPEN is true (the card above catches this case).
-  // Left exactly as it shipped so flipping the switch restores the money path.
-  if (phase === 'in') {
-    const url = checkoutUrl(GUMROAD_URL);
-    return (
-      <div style={card(false)}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
-          <span style={{ width: 44, height: 44, flex: 'none', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,.2)', border: '1px solid var(--rim)', color: 'var(--ink)' }}>{crown}</span>
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 16, fontWeight: 700, textShadow: 'var(--emboss)' }}>Free plan</div>
-            <div style={{ marginTop: 2, fontSize: 12.5, color: 'var(--dim)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{readEmail() || 'Signed in'}</div>
-          </div>
-        </div>
-        <div style={note(false)}>Premium adds unlimited stacks, saved routines and the full protocol library. {PREM_PRICE_FULL}.</div>
-        {url && waiting ? (
-          <CheckoutWaiting href={checkoutHref || url} blocked={popupBlocked} onCancel={onCancelBuy} />
-        ) : url ? (
-          <button onClick={onBuy} style={{ ...primaryBtn, marginTop: 14 }}>
-            {`Go Premium · ${PREM_PRICE}/mo`}
-          </button>
-        ) : (
-          <div style={{ marginTop: 14, minHeight: 50, borderRadius: 16, border: '1px dashed var(--hairline)', color: 'var(--dim)', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px 14px', textAlign: 'center', lineHeight: 1.45 }}>
-            Premium isn’t on sale yet — it’s coming soon.
-          </div>
-        )}
-        {createdNote}
-        <SetPasswordBlock defaultOpen={S.justCreated} />
-        <button onClick={onRefresh} disabled={busy} style={quietBtn}>{busy ? 'Checking…' : 'Check membership'}</button>
-        <button onClick={onSignOut} style={quietBtn}>Sign out</button>
-        {msg && <div style={note(false)}>{msg}</div>}
-        {err && <div style={{ ...note(false), color: 'var(--bad)' }}>{err}</div>}
         <DevUnlock />
       </div>
     );
@@ -475,12 +405,15 @@ export default function MembershipCard() {
         <div style={{ minWidth: 0 }}>
           <div style={{ fontSize: 16, fontWeight: 700, textShadow: 'var(--emboss)' }}>{creating ? 'Create your account' : 'Sign in'}</div>
           <div style={{ marginTop: 2, fontSize: 12.5, color: 'var(--dim)' }}>
-            {/* "…or buy Premium" was an offer on a build where nothing is for
-                sale. The replacement is the honest reason to bother: there
-                isn't a strong one, and saying so beats inventing one. */}
+            {/* "Sign in to restore or buy Premium" was half an offer, and the
+                buying half is gone (2026-10-08). RESTORING is still a real reason
+                — it is how the existing subscriber gets their purchase onto a new
+                phone — so the paid-build line keeps that half and drops the sale.
+                On the open build there is no strong reason to sign in at all, and
+                saying so beats inventing one. */}
             {creating ? 'No password to invent — we email you a link'
               : PREMIUM_OPEN ? 'Optional — the whole app works signed out'
-              : 'Sign in to restore or buy Premium'}
+              : 'Sign in to restore your membership'}
           </div>
         </div>
       </div>

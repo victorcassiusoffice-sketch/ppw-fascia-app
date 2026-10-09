@@ -68,6 +68,11 @@ describe('LibraryScreen Protocols tab — premium gate', () => {
   beforeEach(() => { paidBuild(); localStorage.clear(); applyServerEntitlement({ premium: false }); setTab('protocols'); stubFetch(manifest); });
   afterEach(() => { delete globalThis.__ppwPaidBuild; vi.unstubAllGlobals(); cleanup(); });
 
+  // The lock AFFORDANCE changed on 2026-10-08. It used to be an "Unlock <title>"
+  // button in accent paint, which promised a purchase was one tap away; with the
+  // storefront gone it is a quiet padlock that states the limit instead. The GATE
+  // is unchanged, and that is what this test is really about: a monetised protocol
+  // does not open, and the moment the server says paid, it does.
   it('opens free protocols for everyone but locks monetised ones for non-Premium users', async () => {
     render(<LazyMotion features={domAnimation}><LibraryScreen /></LazyMotion>);
 
@@ -77,13 +82,16 @@ describe('LibraryScreen Protocols tab — premium gate', () => {
 
     // free → a real "View protocol" link that opens the PDF
     expect(screen.getByLabelText('View protocol')).toBeTruthy();
-    // monetised (not premium) → a lock/unlock control, NOT an open link
-    expect(screen.getByLabelText('Unlock Premium Testosterone Protocol')).toBeTruthy();
-    expect(screen.queryByText(/^Premium ·/)).toBeTruthy(); // subtitle flips to "Premium ·"
+    // monetised (not premium) → a padlock that explains, NOT an open link...
+    expect(screen.getByLabelText('Why Premium Testosterone Protocol is locked')).toBeTruthy();
+    // ...and nothing anywhere on the row offering to sell it
+    expect(screen.queryByLabelText(/^Unlock /)).toBeNull();
+    expect(screen.getByText(/^Locked ·/)).toBeTruthy(); // subtitle flips to "Locked ·"
+    expect(screen.queryByText(/^Premium ·/)).toBeNull();
 
     // server says paid → the monetised protocol now opens like any other
     act(() => applyServerEntitlement({ premium: true }));
     await waitFor(() => expect(screen.getAllByLabelText('View protocol').length).toBe(2));
-    expect(screen.queryByLabelText('Unlock Premium Testosterone Protocol')).toBeNull();
+    expect(screen.queryByLabelText('Why Premium Testosterone Protocol is locked')).toBeNull();
   });
 });

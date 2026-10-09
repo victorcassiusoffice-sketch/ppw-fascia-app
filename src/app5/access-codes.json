@@ -12,6 +12,15 @@
       "salt": "zGDEU0qZ47eFAQf9PZcU+Q==",
       "hash": "Lm5xPTgQKW3HSxYZ+2RQwKdUJpv7hvrJ3ecNHqVMn+o=",
       "issued": "2026-10-05",
+      "revoked": true,
+      "revokedAt": "2026-10-08"
+    },
+    {
+      "id": "cQ1WrGS",
+      "label": "Vic - the code handed out on calls",
+      "salt": "hrbgHuoZnIoUa2Q0qK+wzw==",
+      "hash": "YbSmthoKHRRdAnQ2Rns1El62CNC4qbOCRhfUoBilKTE=",
+      "issued": "2026-10-08",
       "revoked": false
     }
   ]

@@ -9,7 +9,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
-  cachedPremium, checkoutUrl, readEntitlementCache, signOut, GUMROAD_URL,
+  cachedPremium, readEntitlementCache, signOut, GUMROAD_URL,
   fetchEntitlement, completeSignIn, requestSignIn, isSignedIn, OFFLINE_GRACE_MS,
 } from './membership.js';
 
@@ -150,11 +150,15 @@ describe('sign-in', () => {
 });
 
 // THE 22 AUG P0. The Gumroad profile was renamed victorix08 → ppwellness and the
-// old subdomain 404s with no forwarding, so the live "Go Premium" button pointed at
-// a dead page while the app looked perfectly healthy. Nothing failed: no test, no
-// build, no console error — the only symptom was a customer landing on a 404 with
-// their card out. This asserts the seam still points at the store that exists.
-describe('the checkout URL points at a real store', () => {
+// old subdomain 404s with no forwarding, so the live buy button pointed at a dead
+// page while the app looked perfectly healthy. Nothing failed: no test, no build,
+// no console error — the only symptom was a customer landing on a 404 with their
+// card out.
+//
+// Nothing renders this constant any more (the storefront came out on 2026-10-08),
+// but it is still the record of WHICH product the live subscription belongs to, so
+// it still has to name a store that exists.
+describe('the Gumroad product record points at a real store', () => {
   it('uses the current Gumroad handle, over https', () => {
     expect(GUMROAD_URL).toMatch(/^https:\/\/ppwellness\.gumroad\.com\//);
   });
@@ -164,24 +168,14 @@ describe('the checkout URL points at a real store', () => {
   });
 });
 
-describe('checkout link', () => {
-  it('carries app_user_id so the webhook can match the purchase to this account', () => {
-    seedVerified();
-    const url = checkoutUrl('https://ppwellness.gumroad.com/l/ppw-premium');
-    expect(url).toBe('https://ppwellness.gumroad.com/l/ppw-premium?app_user_id=usr_1');
-  });
-
-  it('still returns a usable link when the user id is unknown', () => {
-    expect(checkoutUrl('https://ppwellness.gumroad.com/l/ppw-premium', null))
-      .toBe('https://ppwellness.gumroad.com/l/ppw-premium');
-  });
-
-  it('returns null while GUMROAD_URL is unset, so no dead button ships', () => {
-    expect(checkoutUrl(null)).toBeNull();
-  });
-
-  it('refuses a non-https URL', () => {
-    expect(checkoutUrl('javascript:alert(1)')).toBeNull();
-    expect(checkoutUrl('http://ppwellness.gumroad.com/l/x')).toBeNull();
-  });
-});
+// ── REMOVED 2026-10-08: the `checkout link` block ───────────────────────────
+// Four tests covering membership.js's checkoutUrl(): that it carried app_user_id
+// so the webhook could match a sale to this account, that it still worked with no
+// user id, that it returned null rather than shipping a dead button, and that it
+// refused a non-https URL. The function went with the storefront, so there is
+// nothing left for them to assert.
+//
+// The security rule they encoded is worth remembering if a checkout is ever built
+// again: NEVER hand a URL to window.open without checking the protocol first —
+// `javascript:` and plain `http:` both have to be refused at the builder, not at
+// the button. `storefront-removed.test.jsx` now asserts the function is absent.
