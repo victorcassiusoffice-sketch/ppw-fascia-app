@@ -15,6 +15,18 @@ import { useSyncExternalStore } from 'react';
 import { cachedPremium, fetchEntitlement, isSignedIn, signOut as membershipSignOut, PREMIUM_OPEN } from './membership.js';
 import { fetchProfile, saveProfile } from './profile.js';
 import { isDemo } from './demo.js';
+// Imported as well as re-exported below: a bare `export ... from` does not put
+// the names in this module's scope, and this file calls all four itself.
+import { todayKey, keyToDate, dayDiff, dateKeyFromOffset } from './daykey.js';
+// The quit taper. Arithmetic and wording only — no React, no storage, no clock
+// but its own default — so the numbers are provable without booting this file
+// (quit5/plan.test.js). `logSmoked` is aliased because this module's own quit
+// action is the one screens call, and two functions of the same name one import
+// apart is how the wrong one gets used.
+import {
+  DISCLAIMER, HELP_LINE, METHOD_NOTE,
+  logSmoked as planLogSmoked, planFrom, readPlan, smokedOn, statusFor, dayNumberFor,
+} from './quit5/plan.js';
 
 const LS = (k) => 'ppw5.' + k;
 
@@ -31,7 +43,41 @@ const LS = (k) => 'ppw5.' + k;
 function lsWrite(k, v) { if (isDemo()) return; try { localStorage.setItem(LS(k), v); } catch {} }
 function lsDrop(k) { if (isDemo()) return; try { localStorage.removeItem(LS(k)); } catch {} }
 
-// ── curated starter deck (verbatim from the prototype) ──
+// ── quit-taper constants ────────────────────────────────────────────────────
+// UP HERE, not down with the rest of the quit slice, for one mechanical reason:
+// `initialState()` names QUIT_DEFAULT_AT and is CALLED at module scope a few
+// hundred lines below. `const` is not hoisted the way `function` is, so a
+// declaration further down the file would throw a temporal-dead-zone
+// ReferenceError on import. The actions that use these live together in the
+// "QUIT TAPER" section near setFasting.
+/** The id of the derived reminder. Stable, because the slot engine remembers
+ *  per-minute which ids it has already fired. */
+export const QUIT_ITEM_ID = 'quitDaily';
+/**
+ * The title of the daily reminder — and the whole of the privacy decision.
+ *
+ * This string is the ONLY field the slot engine hands to the reminder banner
+ * (`slotPop` below, rendered by screens/Popups.jsx), and that banner is this
+ * app's stand-in for a lock-screen notification. "6 left today" on a phone face
+ * up on a kitchen table tells everyone in the room that this person smokes —
+ * which is not the app's news to break, least of all to a partner, a parent or
+ * a colleague. So the title names no number and no subject, and says the same
+ * thing on a good day and a bad one: a title that changes when the day goes
+ * badly IS the disclosure. Every count lives on the item's `status`, which only
+ * the card on the screen in your hand reads. Pinned by surface.test.js.
+ */
+export const QUIT_SLOT_TITLE = 'Your plan';
+/** The generic second line, for the same reason as the title. */
+export const QUIT_SLOT_META = 'Daily check-in';
+/** When the reminder arrives. Early, and clear of the starter deck's own slots. */
+export const QUIT_DEFAULT_AT = '07:00';
+
+// ── curated starter deck ──
+// Named once, used by the starter deck AND by the Library's own stretch entry,
+// so the two can never drift into citing different videos for the same thing.
+const STARTER_STRETCH_ID = 'yLDAHd_C7G0';
+const STARTER_HIIT_ID = 'zr08J6wB53Y';
+
 /**
  * F6 (UX pass 2026-08-11) — these four are OURS, not the user's.
  *
@@ -40,6 +86,21 @@ function lsDrop(k) { if (isDemo()) return; try { localStorage.removeItem(LS(k));
  * YouTube videos and an affirmation that they never chose and could not tell
  * apart from their own. `example: true` lets the card say so, and lets the user
  * clear the lot in one tap.
+ *
+ * WHAT THE FOUR ARE (Vic, 2026-10-12): stretching, supplements, a HIIT workout
+ * and the affirmation. The word "yoga" is out of the app entirely — it was the
+ * first thing a new customer read, on the 07:30 card, and it set the wrong
+ * expectation for what PPW does. See also `mediaItems` below and ReorderGhost.
+ *
+ * THE VIDEO IDS WERE CHECKED, NOT COMPOSED. src/app5/assistant/verifyVideo.js
+ * records why at length: an 11-character id that looks real can be invented, and
+ * the worst case is an id that plays something other than its title. Both ids
+ * below were asked of YouTube's own oEmbed endpoint on 2026-10-12 — 200 each —
+ * and the channel in each meta line is YouTube's `author_name`, copied:
+ *   yLDAHd_C7G0  "10 MIN DAILY STRETCH (full body) ..."   MadFit
+ *   zr08J6wB53Y  "10 MIN HIGH INTENSITY WORKOUT ..."      Pamela Reif
+ * The displayed titles are shortened to fit a card but say what the video is.
+ * Changing an id here means going and asking YouTube again.
  */
 function starterDeck() {
   const yt = (xid, time, id, title, meta) => ({
@@ -49,9 +110,15 @@ function starterDeck() {
     thumbUrl: 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg',
   });
   return [
-    yt('d1', '07:30', 'v7AYKMP6rOE', 'Yoga For Complete Beginners', 'YouTube · Basic Yoga · 20 min'),
-    yt('d2', '12:30', 'O-6f5wQXSu8', 'Guided Meditation for Calm', 'YouTube · Meditation · 10 min'),
-    yt('d3', '17:00', 'UBMk30rjy0o', 'Full Body Workout, No Equipment', 'YouTube · Fitness · 20 min'),
+    yt('d1', '07:30', STARTER_STRETCH_ID, 'Full-body stretch · 10 min', 'YouTube · MadFit · 10 min'),
+    // NOT a video and NOT a note — a plain slot that arrives at a time of day
+    // and says take them. It carries no `url` and no `thumb` on purpose: the
+    // Stack card renders the generic reminder dot for that shape, and the tap
+    // handler opens nothing, which is right because we have not picked anybody's
+    // product. `kind: 'supp'` is the same kind the Library's Supps shelf puts in
+    // a day (lib/suppsAffiliates.js suppToStackItem), minus the affiliate link.
+    { id: 'd2', title: 'Take your supplements', meta: 'Supplement · With food', time: '08:00', kind: 'supp', repeat: 'daily', example: true },
+    yt('d3', '17:00', STARTER_HIIT_ID, 'HIIT workout · 10 min, no kit', 'YouTube · Pamela Reif · 10 min'),
     { id: 'd4', title: 'I did enough today. I am consistent.', meta: 'Text · Still', time: '21:00', kind: 'note', noteAnim: 'still', noteSpeed: 'med', noteDur: '5', repeat: 'daily', example: true },
   ];
 }
@@ -122,7 +189,10 @@ function initialState() {
     // media library (verbatim starters from the prototype)
     mediaItems: [
       { id: 'm1', title: 'Deep Tissue Soundscape', meta: 'Spotify · 20 min', thumb: 'sp', note: true, url: 'https://open.spotify.com' },
-      { id: 'm2', title: 'Yoga For Complete Beginners', meta: 'YouTube · Basic Yoga · 20 min', thumb: 'yt', url: 'https://www.youtube.com/watch?v=v7AYKMP6rOE', embed: 'https://www.youtube.com/embed/v7AYKMP6rOE?autoplay=1&playsinline=1&rel=0', thumbUrl: 'https://i.ytimg.com/vi/v7AYKMP6rOE/hqdefault.jpg' },
+      // Was the same beginners' yoga video as the old 07:30 starter card. Taking
+      // yoga off the Stack and leaving it on this shelf would have been half a
+      // change: the Library is two taps away and it is where someone browses.
+      { id: 'm2', title: 'Full-body stretch · 10 min', meta: 'YouTube · MadFit · 10 min', thumb: 'yt', url: 'https://www.youtube.com/watch?v=' + STARTER_STRETCH_ID, embed: 'https://www.youtube.com/embed/' + STARTER_STRETCH_ID + '?autoplay=1&playsinline=1&rel=0', thumbUrl: 'https://i.ytimg.com/vi/' + STARTER_STRETCH_ID + '/hqdefault.jpg' },
       { id: 'm3', title: 'Wim Hof Guided Breathing', meta: 'YouTube · Breathwork · 11 min', thumb: 'yt', url: 'https://www.youtube.com/watch?v=tybOi4hjZFQ', embed: 'https://www.youtube.com/embed/tybOi4hjZFQ?autoplay=1&playsinline=1&rel=0', thumbUrl: 'https://i.ytimg.com/vi/tybOi4hjZFQ/hqdefault.jpg' },
     ],
     // library tab
@@ -193,11 +263,25 @@ function initialState() {
     // onboarding (first run: onboarded=false → wizard over the app)
     onboarded: false, obStep: 0, termsOk: false,
     obLifestyle: ['Office & desk-bound'], obAnchors: [], obInterests: ['Meditation'],
-    obLevels: { Yoga: 5, Fitness: 5, Meditation: 5, Breathwork: 5, 'Cold exposure': 5 },
+    // 'Yoga' was the first key here. Nothing renders obLevels today, but it is
+    // written into `ppw5.prefs` and read back on every boot, so the word would
+    // have survived on disk and in anything that later shows these levels.
+    // An existing user's saved `lv.Yoga` still merges in harmlessly — this
+    // changes the DEFAULT set, not whatever a device already recorded.
+    obLevels: { Stretching: 5, Fitness: 5, Meditation: 5, Breathwork: 5, 'Cold exposure': 5 },
     obCustom: '', obBody: ['Stress'],
     obModules: { Routines: true, Media: true, Protocols: true, Supplements: false },
     discreet: true, dayT: { wake: '07:00', bed: '22:30', ws: '09:00', we: '17:00' },
     fastOn: false, eatOpen: '12:00', eatClose: '20:00',
+    // ── the quit taper (Vic 2026-10-12) ──
+    // quitPlan: the plan itself, or null when there is none. The shape is
+    //   quit5/plan.js's, versioned and hydrated through readPlan.
+    // quitAt:   what time of day the reminder arrives. Deliberately NOT inside
+    //   the plan: the plan's schema is v1 and readPlan refuses any other
+    //   version, so adding a field there would mean a migration for a value
+    //   that is a notification preference rather than taper arithmetic.
+    // quitOpen: the setup sheet.
+    quitPlan: null, quitAt: QUIT_DEFAULT_AT, quitOpen: false,
     reminders: true,
     integrations: { spotify: false, youtube: true },
     courseLinks: [], courseLabel: '', courseUrl: '',
@@ -281,6 +365,13 @@ function initialState() {
         dropped: Math.max(0, Math.floor(Number(ps.dropped)) || 0),
       };
     }
+    // THE QUIT PLAN. Read through readPlan rather than trusted: a truncated or
+    // foreign-version blob answers null, which opens an empty quit screen
+    // instead of putting a half-plan on the Stack and reminding somebody about
+    // an allowance nobody agreed to. `quitAt` is a separate flat key — see the
+    // note on quitAt in the state literal above.
+    const qp = readPlan(gj('quit')); if (qp) def.quitPlan = qp;
+    const qa = normTime(g('quitAt')); if (qa) def.quitAt = qa;
     const ay = gj('a11y'); if (ay && typeof ay === 'object') def.a11y = { on: !!ay.on, zoom: (+ay.zoom >= .85 && +ay.zoom <= 1.4) ? +ay.zoom : 1 };
     const gd = gj('guide'); if (gd && typeof gd === 'object') def.guide = { q: (gd.q && typeof gd.q === 'object') ? gd.q : {}, ...(gd.done ? { done: gd.done } : {}), ...(gd.welcomed ? { welcomed: gd.welcomed } : {}) };
     const hn = gj('hints'); if (hn && typeof hn === 'object') def.hints = hn;
@@ -414,9 +505,12 @@ export function saveStacks() {
 }
 
 // ── date math + recurrence (verbatim from the prototype) ──
-export function todayKey() { const d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
-export function keyToDate(k) { const p = String(k).split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
-export function dayDiff(aKey, bKey) { return Math.round((keyToDate(aKey) - keyToDate(bKey)) / 86400000); }
+// The day-key primitives now live in ./daykey.js — a module with no React and
+// no localStorage, so a pure module (the quit taper's plan.js) can do day
+// arithmetic without booting the store, and without the temptation to invent a
+// second date format. Re-exported here, so every existing importer of
+// todayKey / keyToDate / dayDiff / dateKeyFromOffset is unchanged.
+export { todayKey, keyToDate, dayDiff, dateKeyFromOffset } from './daykey.js';
 export function itemOnDate(it, key) {
   if (!it.anchor) return true; // legacy items — every day
   const d = dayDiff(key, it.anchor);
@@ -824,12 +918,8 @@ let _uidSeq = 0;
 // duplicate ids make deleteItem remove two rows and markDone tick two.
 export function uid(prefix) { return prefix + Date.now().toString(36) + (_uidSeq++).toString(36); }
 
-// "YYYY-M-D" — MUST match todayKey()'s UNPADDED format or the item files on a
-// day the app never renders.
-export function dateKeyFromOffset(n, from = new Date()) {
-  const d = new Date(from.getFullYear(), from.getMonth(), from.getDate() + (Number(n) || 0));
-  return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
-}
+// dateKeyFromOffset moved to ./daykey.js with the rest of the date system; it is
+// imported at the top of this file and re-exported beside todayKey.
 
 // The slot engine and <input type="time"> both need zero-padded 24h. AIs emit
 // "7am", "7:30", "07:30:00", "1300", "noon" — accept them all, or the time is
@@ -1512,7 +1602,14 @@ export function startSlotEngine() {
     // Never stomp something the user has not dealt with yet. The queue drains on
     // the next tick once they dismiss it (the engine ticks every 20s).
     if (S.slotPop || S.notePop || S.playerItem) return;
-    const due = stackFor(key).filter((x) => x.time === hm);
+    // The quit reminder rides THIS engine rather than a path of its own — one
+    // mechanism that knows what time it is, as the engine brief required. It is
+    // appended here instead of inside stackFor() because stackFor's other
+    // callers reorder and mutate `deckItems` by position, and a derived item in
+    // that list hands a real stack the wrong time (see the QUIT TAPER header).
+    // quitItem() answers null when there is no plan, so this is a no-op then.
+    const quit = quitItem(key);
+    const due = [...stackFor(key), ...(quit ? [quit] : [])].filter((x) => x.time === hm);
     if (!due.length) return;
     const item = due.find((x) => !_fired.has(x.id));
     if (!item) return;
@@ -1787,6 +1884,151 @@ export function setFasting(patch) {
   setState(patch);
   savePrefs2();
 }
+// ─────────────────────────────────────────────────────────────────────────
+// THE QUIT TAPER (Vic 2026-10-12) — the plan as the app carries it.
+//
+// Vic, verbatim: "intergrate a quit smoking app JSON you put how many they
+// smoke and how many they need to get down to, then it reminds them there
+// allowance per, day."
+//
+// The arithmetic and every word the person reads are in quit5/plan.js, which
+// has no React and no storage so it can be proven on its own. This slice is the
+// three things that file deliberately does not know:
+//
+//   WHERE IT LIVES. One key, `ppw5.quit`, holding the plan's own JSON. It goes
+//   through lsWrite like everything else here, so the demo's "touch nothing on
+//   this device" promise needs no special case — see the primitives at the top.
+//
+//   HOW THE STACK SEES IT. quitItem() DERIVES the reminder from the plan every
+//   time it is asked. It is not a row in `deckItems`, so there is no second
+//   copy to drift, and deleting the plan deletes the reminder in the same
+//   breath rather than leaving an orphan reminding somebody about a plan they
+//   ended.
+//
+//   WHY IT IS NOT IN stackFor(). The tempting version appends the derived item
+//   to stackFor(), which would hand it the slot engine for free. It also hands
+//   it four things nobody wants: reorderTimed() assigns times by POSITION out
+//   of stackFor(), so dragging rows would hand a real stack the quit slot's
+//   time; reorderDeck() maps ids back onto `deckItems` and would map a real
+//   item onto an id that is not in there; and markDone()/deleteItem() both
+//   begin `state.deckItems.find(...)`, so the hero card's Done and Delete
+//   buttons would be silent no-ops — which this app has a standing rule
+//   against. The two places that need the item ask quitItem() instead: the
+//   slot engine (one line, in `due`) and QuitCard. One source, no collateral.
+// ─────────────────────────────────────────────────────────────────────────
+
+/** Open / close the setup sheet. One layer at a time (F2), like openEditItem. */
+export function openQuitSetup() { setState({ quitOpen: true, addOpen: false, accountOpen: false }); }
+export function closeQuitSetup() { setState({ quitOpen: false }); }
+
+/** Persist the live plan, or clear the key when there is none. */
+function writeQuit() {
+  if (state.quitPlan) lsWrite('quit', JSON.stringify(state.quitPlan));
+  else lsDrop('quit');
+}
+
+/**
+ * Start (or replace) the plan.
+ *
+ * Returns null when it worked, or ONE PLAIN SENTENCE when the numbers do not
+ * make a plan — the same sentence checkPlanInput returns, so the sheet can
+ * print it without catching an exception. A refused plan leaves nothing behind:
+ * no half-plan on disk, and no reminder on the Stack for a plan that does not
+ * exist.
+ */
+export function startQuitPlan({ from, to, days, at } = {}) {
+  let plan;
+  try {
+    plan = planFrom({ from, to, days });
+  } catch (e) {
+    return e?.message || 'Check those numbers and try again.';
+  }
+  const t = normTime(at);
+  setState({ quitPlan: plan, ...(t ? { quitAt: t } : {}) });
+  writeQuit();
+  if (t) save('quitAt', t);
+  return null;
+}
+
+/**
+ * End the plan, and everything derived from it.
+ *
+ * This is the one control that destroys the log as well as the plan, so nothing
+ * unlabelled may call it (the 2026-10-05 shared-routine lesson: dismissal must
+ * never be a delete). `quitAt` goes too — leaving a reminder time behind for a
+ * plan that no longer exists is a setting that means nothing.
+ */
+export function clearQuitPlan() {
+  setState({ quitPlan: null, quitAt: QUIT_DEFAULT_AT, quitOpen: false });
+  lsDrop('quit');
+  lsDrop('quitAt');
+}
+
+/** Move the daily reminder. */
+export function setQuitAt(hm) {
+  const t = normTime(hm);
+  if (!t) return;
+  setState({ quitAt: t });
+  save('quitAt', t);
+}
+
+/** What the day says, or null when there is no plan. Defaults to today. */
+export function quitStatus(key = todayKey()) { return statusFor(state.quitPlan, key); }
+
+/**
+ * Record one more, for a day.
+ *
+ * ONE TAP, because of where this gets used: outdoors, one-handed, in the middle
+ * of the thing it is recording. Anything that asked for a number first would be
+ * filled in later or not at all, and a log nobody keeps is worse than none —
+ * the allowance would read as untouched all day.
+ */
+export function logOneSmoked(key = todayKey()) {
+  const plan = state.quitPlan;
+  if (!plan) return;
+  setState({ quitPlan: planLogSmoked(plan, key, smokedOn(plan, key) + 1) });
+  writeQuit();
+}
+
+/** Take one back — the tap that was an accident. Never below none. */
+export function undoOneSmoked(key = todayKey()) {
+  const plan = state.quitPlan;
+  if (!plan) return;
+  setState({ quitPlan: planLogSmoked(plan, key, Math.max(0, smokedOn(plan, key) - 1)) });
+  writeQuit();
+}
+
+/**
+ * The reminder, as a deck item — a `kind` of its own alongside 'note', 'doc'
+ * and 'supp'. DERIVED, never stored: see the section header.
+ *
+ * null when there is no plan, and null for any day BEFORE the plan began. The
+ * engine answers `from` for an earlier day on purpose (it must not invent a
+ * limit for a day it did not cover), but putting that on a past day's Stack
+ * would read as an allowance the person had and overspent, which is a lie about
+ * a day they never agreed to.
+ *
+ * The counts are on `status`, and `notes` carries the three honesty lines, so
+ * the card cannot render the plan without carrying them too.
+ */
+export function quitItem(key = todayKey(), S = state) {
+  const plan = S.quitPlan;
+  if (!plan) return null;
+  if (dayNumberFor(plan, key) < 1) return null;
+  return {
+    id: QUIT_ITEM_ID,
+    kind: 'quit',
+    title: QUIT_SLOT_TITLE,
+    meta: QUIT_SLOT_META,
+    time: S.quitAt,
+    repeat: 'daily',
+    // Marks it as not-a-row-in-deckItems for anything that walks a day's items.
+    derived: true,
+    status: statusFor(plan, key),
+    notes: [DISCLAIMER, METHOD_NOTE, HELP_LINE],
+  };
+}
+
 // vision / a11y — easy-read (bold + full-strength dim) and zoom (.85–1.4)
 export function setA11y(patch) {
   const a = { on: !!(patch.on !== undefined ? patch.on : state.a11y.on), zoom: patch.zoom !== undefined ? patch.zoom : state.a11y.zoom };
@@ -1973,10 +2215,9 @@ export function useDayCount() {
 }
 
 /** Tomorrow's date key, in the store's unpadded `YYYY-M-D` form. */
-export function tomorrowKey() {
-  const d = new Date(); d.setDate(d.getDate() + 1);
-  return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
-}
+// Built on dateKeyFromOffset rather than formatting a Date again here: a second
+// hand-rolled formatter is exactly how the two halves of a date system drift.
+export function tomorrowKey() { return dateKeyFromOffset(1); }
 
 /**
  * Is any layer that owns the screen currently up? Guidance never stacks on
@@ -1989,9 +2230,12 @@ export function anySheetOpen(s = state) {
   // BEHIND it) all fired on top of a programme a client had just been sent — a
   // hint's single lifetime use burned where nobody could read it, and a quest
   // spotlight routing the user's tap into the sheet's backdrop.
+  // quitOpen (2026-10-12): the quit setup sheet is a full-width layer at z43
+  // like the others here, so a hint bubble or a quest spotlight must not fire
+  // on top of somebody deciding to stop smoking.
   return !!(s.aiOpen || s.addOpen || s.termsOpen || s.accountOpen || s.completedOpen ||
             s.playerItem || s.scheduleTarget || s.repeatId || s.editId || s.premiumUpsell ||
-            shareSheetUp(s) || !s.onboarded);
+            s.quitOpen || shareSheetUp(s) || !s.onboarded);
 }
 
 /** Which day the Calendar's panel is showing (unpadded `YYYY-M-D`, or null). */

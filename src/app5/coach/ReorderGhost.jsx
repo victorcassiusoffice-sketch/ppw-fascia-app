@@ -38,7 +38,10 @@ export default function ReorderGhost() {
 
       <div style={{ ...CARD, top: swapped ? 38 : 0, transition: move }}>
         <span style={{ width: 14, height: 14, borderRadius: 5, background: 'var(--acc-surf)', border: '1px solid var(--acc-rim)', flex: 'none' }} />
-        Yoga
+        {/* Named after the 07:30 starter card, so the demo shows the user's own
+            day back to them. That card is a stretch now, not yoga (store5.js
+            starterDeck, Vic 2026-10-12) — this label follows it. */}
+        Stretch
       </div>
       <div style={{ ...CARD, top: swapped ? 0 : 38, transition: move }}>
         <span style={{ width: 14, height: 14, borderRadius: 5, background: 'var(--track)', border: '1px solid var(--rim)', flex: 'none' }} />

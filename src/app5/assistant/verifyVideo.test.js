@@ -10,16 +10,22 @@
 import { describe, it, expect, vi } from 'vitest';
 import { verifyId, verifyAll, mediaFor, watchUrl, embedUrl, searchUrl, YT_ID } from './verifyVideo.js';
 
-const REAL = 'v7AYKMP6rOE';   // Yoga With Adriene — the id the app already ships
+// A real id, and the title/channel YouTube actually answers with for it — the
+// stretch video the app now ships on the 07:30 starter card (store5.js). Kept
+// honest on purpose: this file's whole claim is that the title comes from the
+// source, so its fixture should not be a title nobody could check.
+const REAL = 'yLDAHd_C7G0';
+const REAL_TITLE = '10 MIN DAILY STRETCH (full body) - for tight muscles, mobility & flexibility';
+const REAL_CHANNEL = 'MadFit';
 const res = (status, body) => ({ status, json: async () => body });
 
 describe('asking YouTube whether an id is real', () => {
   it('accepts a real id and takes the title from YouTube', async () => {
-    const f = vi.fn(async () => res(200, { title: 'Yoga For Complete Beginners', author_name: 'Yoga With Adriene' }));
+    const f = vi.fn(async () => res(200, { title: REAL_TITLE, author_name: REAL_CHANNEL }));
     const v = await verifyId(REAL, f);
     expect(v.state).toBe('ok');
-    expect(v.title).toBe('Yoga For Complete Beginners');
-    expect(v.author).toBe('Yoga With Adriene');
+    expect(v.title).toBe(REAL_TITLE);
+    expect(v.author).toBe(REAL_CHANNEL);
     expect(f.mock.calls[0][0]).toContain('youtube.com/oembed');
   });
 
@@ -97,7 +103,7 @@ describe('checking a whole plan', () => {
 
 describe('what the user actually ends up with', () => {
   it('a verified video plays, titled by YouTube and never autoplaying', () => {
-    const m = mediaFor({ state: 'ok', id: REAL, title: 'Real Title', author: 'Real Channel' }, 'yoga', 'What the AI called it');
+    const m = mediaFor({ state: 'ok', id: REAL, title: 'Real Title', author: 'Real Channel' }, 'stretch', 'What the AI called it');
     expect(m.title).toBe('Real Title');            // YouTube's, not the model's
     expect(m.meta).toBe('YouTube · Real Channel');
     expect(m.url).toBe(watchUrl(REAL));

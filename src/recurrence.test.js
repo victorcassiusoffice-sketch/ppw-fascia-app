@@ -117,7 +117,7 @@ describe('ruleOccursOn', () => {
 describe('recurringStacksForDate — OVERRIDE ISOLATION (GATE-1 c)', () => {
   const rule = makeRule({
     id: 'rule::abc',
-    stack: { id: 's1', type: 'link', title: 'Yoga', time: '08:00' },
+    stack: { id: 's1', type: 'link', title: 'Stretch', time: '08:00' },
     anchorDate: ANCHOR,
     freq: 'everyday',
   });
@@ -127,7 +127,7 @@ describe('recurringStacksForDate — OVERRIDE ISOLATION (GATE-1 c)', () => {
     const out = recurringStacksForDate(rules, {}, ANCHOR);
     expect(out).toHaveLength(1);
     expect(out[0].ruleId).toBe('rule::abc');
-    expect(out[0].stack.title).toBe('Yoga');
+    expect(out[0].stack.title).toBe('Stretch');
   });
 
   it('"this day only" delete (override.deleted) skips ONLY that date', () => {

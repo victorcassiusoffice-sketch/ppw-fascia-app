@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { SOFT, BGS, bgUrl } from '../theme5.js';
-import { useStore5, setTheme, setState, openTerms, setSounds, setReminders, setAutoplay, setA11y, openJournal, setHintsOff, setFasting, FAST_PRESETS, addHoursHM, fastWindowHours } from '../store5.js';
+import { useStore5, setTheme, setState, openTerms, setSounds, setReminders, setAutoplay, setA11y, openJournal, setHintsOff, setFasting, FAST_PRESETS, addHoursHM, fastWindowHours, openQuitSetup } from '../store5.js';
 import { QUEST_IDS, doneCountOf } from '../coach/quests5.js';
 import MembershipCard from './MembershipCard.jsx';
 import { InstallAppCard } from './InstallAppCard.jsx';
@@ -208,6 +208,28 @@ export default function SettingsScreen() {
             </>
           );
         })()}
+      </div>
+
+      {/* CUTTING DOWN (Vic 2026-10-12) — the quit taper's front door.
+          Next to Fasting on purpose: both are a daily rhythm the app carries
+          rather than a thing to tick off, and both put their own reminder on
+          the day. The numbers and the taper length are set in the sheet, which
+          is also the only place the plan can be ended. */}
+      <Eyebrow>Cutting down</Eyebrow>
+      <div style={{ marginTop: 12, borderRadius: 24, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev)', overflow: 'hidden' }}>
+        <button onClick={openQuitSetup} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '16px 18px', minHeight: 60, background: 'none', border: 'none', color: 'var(--ink)', textAlign: 'left' }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 15, fontWeight: 500 }}>Cutting down</div>
+            <div style={{ marginTop: 2, fontSize: 12.5, color: 'var(--dim)' }}>
+              {S.quitPlan
+                ? `From ${S.quitPlan.from} a day to ${S.quitPlan.to}, over ${S.quitPlan.days} days. Your Stack shows the day's number.`
+                : 'Set what you smoke now and what you are heading for. Your Stack then shows the day’s number, and one tap logs one.'}
+            </div>
+          </div>
+          <span style={{ flex: 'none', color: 'var(--dim)' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
+          </span>
+        </button>
       </div>
 
       {/* THE GUIDE — its permanent home.

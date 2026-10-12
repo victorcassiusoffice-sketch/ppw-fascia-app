@@ -734,7 +734,7 @@ describe('9 · every Library tab, with nothing withheld on any of them', () => {
     throughTheDoor();
     store.setState({
       protocolsStatus: 'ready',
-      mediaItems: [{ id: 'm1', title: 'Yoga For Complete Beginners', meta: 'YouTube · 20 min', thumb: 'yt' }],
+      mediaItems: [{ id: 'm1', title: '10 min daily full-body stretch', meta: 'YouTube · 20 min', thumb: 'yt' }],
       protocols: [{ id: 'p1', title: 'Myofascial Recovery', category: 'recovery', version: '1', register: 'monetised', url: 'protocols/pdf/p1.pdf' }],
     });
 

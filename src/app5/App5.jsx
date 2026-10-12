@@ -56,6 +56,11 @@ import UpdateBar from './screens/UpdateBar.jsx';
 import FirstRunChoice from './screens/FirstRunChoice.jsx';
 import LockScreen from './screens/LockScreen.jsx';
 import SharedRoutineSheet from './screens/SharedRoutineSheet.jsx';
+// The quit taper's two surfaces (Vic 2026-10-12). Both live with the engine in
+// quit5/, so the folder is the whole feature — delete it and nothing is left
+// behind but these two import lines.
+import QuitCard from './quit5/QuitCard.jsx';
+import QuitSetupSheet from './quit5/QuitSetupSheet.jsx';
 import AccessGate from './screens/AccessGate.jsx';
 import { isDemo } from './demo.js';
 import { isEnabled as passcodeEnabled, isLocked as passcodeLocked, lockNow, LOCK_AFTER_MS } from './passcode.js';
@@ -368,6 +373,17 @@ function StackScreen() {
           )}
         </div>
       )}
+
+      {/* TODAY'S ALLOWANCE (Vic 2026-10-12) — the quit taper's daily reminder.
+          Renders nothing at all until a plan exists, and goes the moment the
+          plan is deleted, because it is DERIVED from the plan rather than
+          stored as a row in `deckItems`. It sits here, between the hero and
+          "Later today", so it is the first thing after what is next and is read
+          without scrolling. Deliberately NOT inside the deck list: it is not a
+          reorderable, selectable, deletable stack, and giving it that chrome
+          would mean a Done button that does nothing and a drag that reassigns
+          another stack's time. store5.js's QUIT TAPER header has the detail. */}
+      <QuitCard />
 
       {/* deck (rest of today) — selection actions live inline with this header (Vic 4b) */}
       <div style={{ marginTop: 30, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, minHeight: 40 }}>
@@ -940,6 +956,9 @@ export default function App5() {
         <AccountSheet />
         <RepeatSheet />
         <EditStackSheet />
+        {/* z35, with the other config sheets and below the slot reminder (37) —
+            the sheet's own header says why that order is load-bearing. */}
+        <QuitSetupSheet />
         <SlotReminder />
         <NotePopup />
         <OnboardingScreen />

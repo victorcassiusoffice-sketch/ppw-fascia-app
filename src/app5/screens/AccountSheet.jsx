@@ -11,7 +11,7 @@
 // still exactly one auth flow in the app, and adds the account rows around it.
 
 import React from 'react';
-import { useStore5, closeAccount, signOutMembership } from '../store5.js';
+import { useStore5, closeAccount, signOutMembership, clearQuitPlan } from '../store5.js';
 import {
   readEmail, staySignedIn, setStaySignedIn, deleteAccount, sessionExpiresAt,
   setSessionPasscode, clearSessionPasscode,
@@ -153,6 +153,20 @@ export default function AccountSheet() {
     try {
       await deleteAccount();
       signOutMembership();
+      // THE QUIT PLAN GOES WITH THE ACCOUNT (2026-10-12).
+      //
+      // Everything else under `ppw5.` is device-local and stays, which the
+      // confirm step below has always said. The quit plan is the exception, and
+      // it is an exception on purpose: of everything this app holds, a record
+      // of how much somebody smokes is the one entry that could embarrass or
+      // harm its owner if the next person to pick up the phone found it.
+      // Leaving that behind after they had asked to be deleted keeps the wrong
+      // half of the promise.
+      //
+      // AFTER the server call, never before: a delete that the server refuses
+      // must leave the person's own record exactly where it was, or a 500 costs
+      // them their history with no deletion to show for it.
+      clearQuitPlan();
       setConfirmDelete(false);
       closeAccount();
     } catch (e) {
@@ -223,6 +237,9 @@ export default function AccountSheet() {
                   This permanently removes your account and your membership record from our server. It cannot be undone.
                   {' '}<strong style={{ color: 'var(--ink)' }}>It does not cancel your subscription</strong> — cancel that on
                   Gumroad first, or you will keep being charged. The stacks saved on this device stay on this device.
+                  {/* The one exception, named rather than left to be found. See
+                      the clearQuitPlan() note in onDelete above. */}
+                  {S.quitPlan ? ' Your cutting-down plan is deleted with it, including every day you logged.' : ''}
                 </div>
                 <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
                   <button onClick={() => setConfirmDelete(false)} disabled={busy} style={{ flex: 1, height: 44, borderRadius: 14, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--ink)', fontWeight: 600, fontSize: 13.5 }}>
