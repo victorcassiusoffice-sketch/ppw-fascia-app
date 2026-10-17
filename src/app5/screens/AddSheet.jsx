@@ -9,8 +9,9 @@
 // it had no builder behind it in either tier. See the note at its old site.
 
 import React from 'react';
-import { useStore5, closeAdd, setCustomUrl, addCustomUrl, goLibrary, goStackItem, openNoteComposer, setNoteField, addNote, parseRoutineMd, addItemsToToday, createRoutine, routineItemsForSave, repeatLabel, getState, addDocToToday, openAiBridge, premiumGated } from '../store5.js';
+import { useStore5, closeAdd, setCustomUrl, addCustomUrl, goLibrary, goStackItem, openNoteComposer, setNoteField, addNote, parseRoutineMd, addItemsToToday, createRoutine, routineItemsForSave, repeatLabel, getState, addDocToToday, openAiBridge, premiumGated, parseYouTubeId, titleFromYouTube } from '../store5.js';
 import { saveFile } from '../files5.js';
+import { verifyId } from '../assistant/verifyVideo.js';
 // The failed-paste sentence is registry copy (hints5.js `link-failed`), not
 // this screen's own words. It is marked `inline: true` there precisely because
 // this sheet renders it instead of the bubble engine — so read it from the
@@ -266,6 +267,12 @@ export default function AddSheet() {
             if (!String(S.customUrl || '').trim()) { setLinkErr(0); return; }
             const r = addCustomUrl(S.customUrl);
             setLinkErr(r.ok || r.upsell ? 0 : (n) => n + 1);
+            // A pasted YouTube link used to land as "YouTube video". Ask
+            // YouTube for its real title and channel (verifyVideo.js — no key,
+            // no cost); if YouTube cannot be reached the card keeps the plain
+            // name, which is what it had before.
+            const ytId = r.ok && r.item ? parseYouTubeId(r.item.url) : null;
+            if (ytId) verifyId(ytId).then((v) => { if (v.state === 'ok') titleFromYouTube(r.item.id, v.title, v.author); });
           }} style={{ height: 48, padding: '0 20px', borderRadius: 15, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 600, fontSize: 14, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)' }}>Add</button>
         </div>
         {/* A cap refusal returns { upsell: true } and already raises the gate

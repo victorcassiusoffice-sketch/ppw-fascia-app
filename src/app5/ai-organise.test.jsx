@@ -181,6 +181,23 @@ describe('Talk to your AI — organise, end to end', () => {
   });
 });
 
+describe('a YouTube link pasted in the Add sheet', () => {
+  it('takes YouTube\'s own title and channel, and never overwrites a rename', async () => {
+    const { addCustomUrl, titleFromYouTube } = await import('./store5.js');
+    const r = addCustomUrl('https://youtu.be/yLDAHd_C7G0');
+    expect(r.item.title).toBe('YouTube video');
+    titleFromYouTube(r.item.id, '10 MIN DAILY STRETCH', 'MadFit');
+    let it = getState().deckItems.find((x) => x.id === r.item.id);
+    expect(it.title).toBe('10 MIN DAILY STRETCH');
+    expect(it.meta).toBe('YouTube · MadFit');
+    const r2 = addCustomUrl('https://youtu.be/tybOi4hjZFQ');
+    setState({ deckItems: getState().deckItems.map((x) => (x.id === r2.item.id ? { ...x, title: 'My breathing' } : x)) });
+    titleFromYouTube(r2.item.id, 'Guided Wim Hof Method Breathing', 'Wim Hof');
+    it = getState().deckItems.find((x) => x.id === r2.item.id);
+    expect(it.title).toBe('My breathing');
+  });
+});
+
 describe('the video picker on its own', () => {
   it('searches YouTube for the stack and checks a pasted link with YouTube', async () => {
     stubYouTube();

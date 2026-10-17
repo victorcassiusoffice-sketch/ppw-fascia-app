@@ -1270,6 +1270,20 @@ export function attachMedia(id, media) {
 export function detachMedia(id) {
   updateItem(id, { url: undefined, embed: undefined, thumb: undefined, thumbUrl: undefined, mediaTitle: undefined, mediaBy: undefined, auto: false });
 }
+/**
+ * A pasted YouTube link's card takes YouTube's own title and channel — but only
+ * while it still has the placeholder name it was added with, so a stack the
+ * user has already renamed is never overwritten by a late answer.
+ */
+export function titleFromYouTube(id, title, author) {
+  const it = state.deckItems.find((x) => x.id === id);
+  if (!it || !title || it.title !== 'YouTube video') return;
+  const t = String(title).slice(0, 120);
+  const meta = author ? `YouTube · ${String(author).slice(0, 80)}` : 'YouTube';
+  updateItem(id, { title: t, meta, mediaTitle: t, mediaBy: author ? String(author).slice(0, 80) : undefined });
+  if (state.addedCustom && state.addedCustom.id === id) setState({ addedCustom: { ...state.addedCustom, title: t, meta } });
+}
+
 /** Can this stack take a video at all? Notes, documents, protocols and supplement slots cannot. */
 export function videoable(it) {
   return !!(it && it.id !== QUIT_ITEM_ID && !['note', 'doc', 'pdf', 'supp', 'med'].includes(it.kind));
