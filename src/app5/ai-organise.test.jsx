@@ -181,6 +181,32 @@ describe('Talk to your AI — organise, end to end', () => {
   });
 });
 
+describe('Talk to your AI — keep what I have, add new things', () => {
+  it('adds the new stacks with their checked videos as suggestions, then offers to add one', async () => {
+    stubYouTube();
+    act(() => setState({ aiOpen: true }));
+    render(<><AiBridgeSheet /><VideoPicker /></>);
+    act(() => { fireEvent.click(screen.getByText('Keep them, add new things')); });
+    act(() => { fireEvent.click(screen.getByText('I’ve already got a reply →')); });
+    const text = '```ppw-routine\n' + JSON.stringify({ ppw: 'routine', v: 3, name: 'Extras', items: [
+      { title: 'Lunch breathing', time: '12:30', repeat: 'daily', videos: [{ q: 'wim hof breathing', yt: 'tybOi4hjZFQ' }] },
+      { title: 'Walk after dinner', time: '19:30', repeat: 'daily' },
+    ] }) + '\n```';
+    fireEvent.change(screen.getByLabelText('Paste your AI\'s reply'), { target: { value: text } });
+    act(() => { fireEvent.click(screen.getByText('See my plan')); });
+    await waitFor(() => expect(screen.getByText(/1 of 1 video found/)).toBeTruthy());
+    act(() => { fireEvent.click(screen.getByText('Add 2 to my day')); });
+    const S = getState();
+    const lunch = S.deckItems.find((x) => x.title === 'Lunch breathing');
+    expect(lunch.recs).toEqual([{ yt: 'tybOi4hjZFQ', title: 'Guided Wim Hof Method Breathing', author: 'Wim Hof' }]);
+    expect(lunch.url).toBeUndefined();
+    expect(S.deckItems.find((x) => x.id === 'c')).toBeTruthy();          // nothing removed in this mode
+    expect(screen.getByText('Added to your day')).toBeTruthy();
+    expect(screen.getByText('Would you like to add a video or link to these?')).toBeTruthy();
+    expect(screen.getByText('1 suggested by your AI')).toBeTruthy();
+  });
+});
+
 describe('a YouTube link pasted in the Add sheet', () => {
   it('takes YouTube\'s own title and channel, and never overwrites a rename', async () => {
     const { addCustomUrl, titleFromYouTube } = await import('./store5.js');
