@@ -44,6 +44,16 @@ const isCustomVal = (r) => { const n = parseInt(r, 10); return String(n) === Str
 export default function EditStackSheet() {
   const S = useStore5();
   const it = S.editId ? S.deckItems.find((x) => x.id === S.editId) : null;
+  // EVERY hook sits above the early return below (2026-10-17, P0). This sheet is
+  // always mounted and renders null while closed, so the first time ANY stack was
+  // opened for editing React counted one more hook than on the closed render and
+  // threw #310 ("Rendered more hooks than during the previous render"). With no
+  // error boundary above it, that blanked the whole app: tapping a Text item, or
+  // the pencil on any card, left an empty screen until a reload. The calendar
+  // line belongs to the stack it was written for, so it clears when the sheet
+  // moves to another stack or closes.
+  const [icsMsg, setIcsMsg] = React.useState(null);
+  React.useEffect(() => { setIcsMsg(null); }, [S.editId]);
   if (!it) return null;
 
   const isNote = it.kind === 'note';
@@ -72,7 +82,7 @@ export default function EditStackSheet() {
   // (push-config.PUSH_SYNC_ENDPOINT is ''), so it cannot fire either. The phone's
   // own Calendar can, needs no server, no account and no permission prompt — so
   // that is what we offer, and we describe it exactly as what it is.
-  const [icsMsg, setIcsMsg] = React.useState(null);
+  // (icsMsg is declared at the top of the component — see the P0 note there.)
   const toCalendar = () => {
     const ok = downloadSlotIcs({
       itemId: it.id,
