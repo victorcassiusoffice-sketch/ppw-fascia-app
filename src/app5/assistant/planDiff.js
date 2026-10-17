@@ -27,7 +27,7 @@ import { todayKey, dayDiff, dateKeyFromOffset, keyToDate } from '../daykey.js';
 
 /** Titles compared as words: case, accents and punctuation ignored. */
 export const normTitle = (s) => String(s || '')
-  .toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '')
+  .toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
   .replace(/[^a-z0-9]+/g, ' ').trim();
 
 /**

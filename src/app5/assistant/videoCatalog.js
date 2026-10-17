@@ -62,7 +62,7 @@ export const TOPIC_WORDS = {
   core: ['core', 'abs', 'plank', 'abdominal'],
 };
 
-const words = (s) => String(s || '').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '')
+const words = (s) => String(s || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
   .replace(/[^a-z0-9]+/g, ' ').trim();
 
 /** The topics a stack is about, best match first. */
