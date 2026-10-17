@@ -314,6 +314,9 @@ function initialState() {
     // flashId: the Stack card to scroll to and light up for a moment — set by
     // "View" after an add (goStackItem), cleared by StackScreen. Never saved.
     flashId: null,
+    // videoFor: the stack the "Add a video or link" sheet is open for (null =
+    // closed). aiRefs: the refs the last organise prompt handed out (setAiRefs).
+    videoFor: null, aiRefs: null,
     guide: { q: {} }, hints: {}, hintsOff: false,
     // selection / interaction
     selectedIds: [],
@@ -387,6 +390,7 @@ function initialState() {
     const ay = gj('a11y'); if (ay && typeof ay === 'object') def.a11y = { on: !!ay.on, zoom: (+ay.zoom >= .85 && +ay.zoom <= 1.4) ? +ay.zoom : 1 };
     const gd = gj('guide'); if (gd && typeof gd === 'object') def.guide = { q: (gd.q && typeof gd.q === 'object') ? gd.q : {}, ...(gd.done ? { done: gd.done } : {}), ...(gd.welcomed ? { welcomed: gd.welcomed } : {}) };
     const hn = gj('hints'); if (hn && typeof hn === 'object') def.hints = hn;
+    const ar = gj('aiRefs'); if (ar && typeof ar === 'object' && ar.map && typeof ar.map === 'object') def.aiRefs = { at: +ar.at || 0, map: ar.map };
     if (g('hintsOff') === '1') def.hintsOff = true;
     // MIGRATION (2026-08-24): anyone who already met the old 5-step tour, or is
     // already onboarded, skips the new 2-step WELCOME only. Every quest and
@@ -1021,6 +1025,24 @@ function videoClaim(v) {
   const yt = YT_ID_RE.test(String(v.yt || '')) ? String(v.yt) : undefined;
   return (q || yt) ? { q, yt } : undefined;
 }
+// v3 sends `videos: [...]` (up to 3); v2 sent one `video`. Both are read, the
+// list first, duplicates (same id, or same search with no id) dropped.
+const PLAN_MAX_VIDEOS = 3;
+function videoClaims(it) {
+  const raw = [...(Array.isArray(it.videos) ? it.videos : []), ...(it.video ? [it.video] : [])];
+  const out = [], seen = new Set();
+  for (const v of raw) {
+    const c = videoClaim(v);
+    if (!c) continue;
+    const k = c.yt || ('q:' + (c.q || '').toLowerCase());
+    if (seen.has(k)) continue;
+    seen.add(k); out.push(c);
+    if (out.length >= PLAN_MAX_VIDEOS) break;
+  }
+  return out;
+}
+// A ref is only ever one the app handed out: s1 … s999.
+const PLAN_REF_RE = /^s\d{1,3}$/;
 
 export function parsePlanDoc(data) {
   if (!data || data.ppw !== 'routine' || !Array.isArray(data.items) || !data.items.length) {
@@ -1030,9 +1052,22 @@ export function parsePlanDoc(data) {
     if (!it || typeof it !== 'object') return null;
     const title = String(it.title || '').trim().slice(0, 120);
     if (!title) return null; // a bare string in the list is not an item
+    const videos = videoClaims(it);
+    const ref = String(it.ref == null ? '' : it.ref).trim().toLowerCase();
     return {
       title,
       meta: it.meta ? String(it.meta).slice(0, 120) : undefined,
+      // ORGANISE (v6): which of the user's stacks this is, and which fields the
+      // model actually SENT. An organise pass must tell "keep it daily" apart from
+      // "said nothing about how often", or every untouched stack would quietly
+      // become a one-off through the defaults below. planDiff.js reads these;
+      // stageItems strips every `_` key before anything is stored.
+      _ref: PLAN_REF_RE.test(ref) ? ref : undefined,
+      _metaGiven: it.meta !== undefined && it.meta !== null,
+      _timeGiven: normTime(it.time) != null,
+      _repeatGiven: normRepeat(it.repeat) !== undefined,
+      _dayGiven: it.dayOffset !== undefined && it.dayOffset !== null && isFinite(Math.floor(Number(it.dayOffset))),
+      _videos: videos.length ? videos : undefined,
       // The prompt promises the model "any link you write is deleted on import"
       // (aiPrompt.js). That was not true: safeUrl only validates the SCHEME, so a
       // fabricated https://www.youtube.com/embed/<madeup> passed straight through
@@ -1043,7 +1078,9 @@ export function parsePlanDoc(data) {
       url: undefined,
       embed: undefined,
       thumbUrl: undefined,
-      _video: videoClaim(it.video),
+      // The first claim, under the name the v5 preview read. Kept so nothing that
+      // still reads `_video` breaks; `_videos` is the whole list.
+      _video: videos[0],
       kind: it.kind === 'note' ? 'note' : undefined,
       time: normTime(it.time) || undefined,
       _day: normOffset(it.dayOffset),
@@ -1064,6 +1101,9 @@ function stageItems(list) {
   let untimed = 0;
   return list.map((it) => {
     const { _day, _repeat, ...rest } = it;
+    // Every other in-flight `_` key (_ref, _videos, _timeGiven …) belongs to the
+    // preview, never to a stored stack.
+    for (const k of Object.keys(rest)) if (k.charAt(0) === '_') delete rest[k];
     let time = it.time;
     if (!time) {
       const mins = base + (untimed++ * 30);
@@ -1120,6 +1160,119 @@ export function applyPlanRebuild(items, replaceIds) {
   });
   saveStacks();
   return { ok: true, count: added.length, ids: added.map((a) => a.id), removed };
+}
+
+// ── ORGANISE (v6, Vic 2026-10-17) ───────────────────────────────────────────
+// What an organise pass may change on a stack it keeps. Nothing else is ever
+// written from an AI reply: not the id, not the media, not the done history.
+const ORGANISE_FIELDS = ['title', 'meta', 'time', 'repeat', 'anchor', 'recs', 'recQ'];
+
+/**
+ * applyPlanDiff({ updates, adds, removeIds }) — apply an approved organise pass.
+ *
+ *   updates   [{ id, patch }] — stacks the AI kept and changed. Patched IN PLACE,
+ *             so each keeps its id, its video, its AUTO and its ticks. An updated
+ *             starter stack stops being an "example": it is the user's now.
+ *   adds      plan items, staged exactly as addItemsToPlan stages them.
+ *   removeIds stacks the AI left out and the user agreed to drop.
+ *
+ * The free cap counts what SURVIVES plus what arrives, like applyPlanRebuild.
+ * Returns what Undo needs: the ids added, every updated stack as it WAS, and
+ * every removed stack whole.
+ */
+export function applyPlanDiff({ updates = [], adds = [], removeIds = [] } = {}) {
+  const kill = new Set(removeIds || []);
+  const patches = new Map();
+  const quiet = new Set();   // updates that only carry video suggestions
+  for (const u of updates || []) {
+    if (!u || !u.id || kill.has(u.id)) continue;
+    const p = {};
+    for (const k of ORGANISE_FIELDS) if (u.patch && Object.prototype.hasOwnProperty.call(u.patch, k)) p[k] = u.patch[k];
+    if (Object.keys(p).length) patches.set(u.id, p);
+    if (u.keepExample) quiet.add(u.id);
+  }
+  const removed = state.deckItems.filter((it) => kill.has(it.id));
+  const kept = state.deckItems.filter((it) => !kill.has(it.id));
+  const list = Array.isArray(adds) ? adds : [];
+  if (!patches.size && !list.length && !removed.length) return { ok: false, reason: 'empty' };
+  if (premiumGated() && kept.length + list.length > FREE_STACK_CAP) {
+    raiseFreeCapUpsell(list.length, kept.length);
+    return { upsell: true, fits: Math.max(0, FREE_STACK_CAP - kept.length) };
+  }
+  const updated = [];
+  const next = kept.map((it) => {
+    const p = patches.get(it.id);
+    if (!p) return it;
+    updated.push(it);
+    // A stack the user really changed is theirs now; one that only gained
+    // video suggestions is exactly what it was, example badge included.
+    if (quiet.has(it.id)) return { ...it, ...p };
+    const { example, ...rest } = it;
+    return { ...rest, ...p };
+  });
+  const added = stageItems(list);
+  setState({
+    deckItems: [...next, ...added],
+    selectedIds: state.selectedIds.filter((id) => !kill.has(id)),
+    lastAddedId: added.length ? added[added.length - 1].id : state.lastAddedId,
+  });
+  saveStacks();
+  return { ok: true, count: added.length, ids: added.map((a) => a.id), updated, removed };
+}
+
+/** Undo an applyPlanDiff whole: take the adds away, put the old versions and the removed stacks back. */
+export function undoPlanDiff(applied) {
+  if (!applied) return;
+  const addIds = new Set(applied.ids || []);
+  const before = new Map((applied.updated || []).map((it) => [it.id, it]));
+  const deck = state.deckItems.filter((it) => !addIds.has(it.id)).map((it) => before.get(it.id) || it);
+  const have = new Set(deck.map((it) => it.id));
+  const back = (applied.removed || []).filter((it) => it && !have.has(it.id));
+  setState({ deckItems: [...deck, ...back] });
+  saveStacks();
+}
+
+/**
+ * The refs the last organise prompt handed out (s1 → stack id), remembered when
+ * the prompt leaves the app. The user goes to their AI and back — often after
+ * the page has been reloaded — and the reply's refs must still mean the stacks
+ * they meant when the prompt was copied. Kept on the device like the stacks
+ * (nothing is written in a demo).
+ */
+export function setAiRefs(map) {
+  const v = map && typeof map === 'object' ? { at: Date.now(), map } : null;
+  setState({ aiRefs: v });
+  if (v) lsWrite('aiRefs', JSON.stringify(v)); else lsDrop('aiRefs');
+}
+
+// ── a video (or any link) on a stack ────────────────────────────────────────
+// The "Add a video or link" sheet (screens/VideoPicker.jsx). `videoFor` is the
+// id of the stack it is open for. Only https links reach a stack, the same
+// allow-list as everywhere else (safeUrl); a YouTube video's title and channel
+// are YouTube's own (verifyVideo.js), kept as mediaTitle / mediaBy so the stack
+// keeps the name the user gave it.
+export function openVideoPicker(id) { if (id) setState({ videoFor: id, playerItem: null }); }
+export function closeVideoPicker() { if (state.videoFor) setState({ videoFor: null }); }
+export function attachMedia(id, media) {
+  const it = state.deckItems.find((x) => x.id === id);
+  const url = media && safeUrl(media.url);
+  if (!it || !url) return { ok: false };
+  updateItem(id, {
+    url,
+    embed: safeUrl(media.embed),
+    thumb: media.thumb || 'au',
+    thumbUrl: safeUrl(media.thumbUrl),
+    mediaTitle: media.title ? String(media.title).slice(0, 120) : undefined,
+    mediaBy: media.author ? String(media.author).slice(0, 80) : undefined,
+  });
+  return { ok: true };
+}
+export function detachMedia(id) {
+  updateItem(id, { url: undefined, embed: undefined, thumb: undefined, thumbUrl: undefined, mediaTitle: undefined, mediaBy: undefined, auto: false });
+}
+/** Can this stack take a video at all? Notes, documents, protocols and supplement slots cannot. */
+export function videoable(it) {
+  return !!(it && it.id !== QUIT_ITEM_ID && !['note', 'doc', 'pdf', 'supp', 'med'].includes(it.kind));
 }
 
 /** Put back stacks a rebuild removed. Undo, for the half that deletes. */
@@ -2286,9 +2439,10 @@ export function anySheetOpen(s = state) {
   // quitOpen (2026-10-12): the quit setup sheet is a full-width layer at z43
   // like the others here, so a hint bubble or a quest spotlight must not fire
   // on top of somebody deciding to stop smoking.
+  // videoFor (2026-10-17): the "Add a video or link" sheet, same rule.
   return !!(s.aiOpen || s.addOpen || s.termsOpen || s.accountOpen || s.completedOpen ||
             s.playerItem || s.scheduleTarget || s.repeatId || s.editId || s.premiumUpsell ||
-            s.quitOpen || shareSheetUp(s) || !s.onboarded);
+            s.quitOpen || s.videoFor || shareSheetUp(s) || !s.onboarded);
 }
 
 /** Which day the Calendar's panel is showing (unpadded `YYYY-M-D`, or null). */

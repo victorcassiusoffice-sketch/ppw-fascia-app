@@ -91,10 +91,13 @@ describe('buildPrompt — the strict output half survives', () => {
   // v6: the blanket URL ban is lifted for ONE field, and only because every id
   // is now checked against YouTube before it is shown (assistant/verifyVideo.js).
   // Everything else stays banned — the ban existed because models fabricate ids.
+  // v6 (2026-10-17): the one field is `videos`, a list of up to three
+  // suggestions the user picks from — still the only place a link may appear.
   it('bans every link except the one video field it can verify', () => {
     const p = buildPrompt({ deckItems: [], premium: false });
     expect(p).toContain('NEVER write any other link, URL, image address or embed');
-    expect(p).toContain('Only the video field');
+    expect(p).toContain('Only the videos field');
+    expect(p).toContain('up to 3 per stack');
   });
 
   it('tells the model an unverified id is worse than none', () => {

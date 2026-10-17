@@ -15,7 +15,7 @@
 import React from 'react';
 import {
   useStore5, closeEditItem, updateItem, setItemTime, setRepeat, setNoTime,
-  toggleAuto, deleteItem, noteAnimCss, todayKey,
+  toggleAuto, deleteItem, noteAnimCss, todayKey, openVideoPicker, videoable,
 } from '../store5.js';
 import { downloadSlotIcs } from '../../lib/ics.js';
 
@@ -163,6 +163,26 @@ export default function EditStackSheet() {
               </div>
             </div>
           </>
+        )}
+
+        {/* ── video or link (Vic, 2026-10-17) ── the same "Add a video or
+            link" sheet the Stack's ▶ Video opens, reached from the place a
+            user goes to change a stack. Closing this sheet first keeps one
+            sheet on screen at a time. */}
+        {videoable(it) && (
+          <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 13.5, fontWeight: 600 }}>Video or link</div>
+              <div style={{ marginTop: 2, fontSize: 11.5, color: 'var(--dim)', overflowWrap: 'anywhere' }}>
+                {hasUrl ? (it.mediaTitle || 'A link is on this stack')
+                  : (Array.isArray(it.recs) && it.recs.length) ? `${it.recs.length} suggested by your AI`
+                  : 'Add a YouTube video, Spotify or any link'}
+              </div>
+            </div>
+            <button onClick={() => { closeEditItem(); openVideoPicker(it.id); }} style={{ flex: 'none', minHeight: 44, padding: '0 14px', borderRadius: 14, border: '1px solid var(--acc-rim)', background: hasUrl ? 'transparent' : 'var(--acc-surf)', color: hasUrl ? 'var(--ink)' : 'var(--acc-ink)', fontSize: 13, fontWeight: 700 }}>
+              {hasUrl ? 'Change' : 'Add'}
+            </button>
+          </div>
         )}
 
         {/* ── autoplay (media / link items only) ── */}

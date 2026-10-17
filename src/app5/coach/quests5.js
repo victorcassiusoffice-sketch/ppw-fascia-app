@@ -338,8 +338,11 @@ export const QUESTS = [
           noDim: true,
           before: (S) => { if (!S.aiOpen) openAiBridge(); },
           title: 'You approve everything.',
-          body: 'Untick anything you do not want, then apply. One tap of Undo removes the lot if it went wrong. Quest complete.',
-          advanceOn: (S) => (S.deckItems || []).length > baseCount,
+          body: 'Untick anything you do not want, then apply. One tap of Undo puts it all back if it went wrong. Quest complete.',
+          // aiStep 4 = applied. Organising (2026-10-17) can change stacks
+          // without adding any, so "more stacks than before" is no longer the
+          // only sign the user did it.
+          advanceOn: (S) => (S.deckItems || []).length > baseCount || S.aiStep >= 4,
           complete: true,
         },
       ];

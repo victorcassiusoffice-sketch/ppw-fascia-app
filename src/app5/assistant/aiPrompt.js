@@ -16,6 +16,18 @@
 // feel survives. (store5.js:133 declares dayT.ws/we for work hours; no screen has
 // ever written them, so asking is the only way to learn them today.)
 //
+// v6 (Vic, 2026-10-17): "take the feedback on ALL the stacks and organise them,
+// and find videos that go with each stack." Two changes, both in the contract:
+//   • ORGANISE. The "redo my day" mode no longer throws the day away and
+//     starts again. Every stack the AI is shown carries a short ref (s1, s2 …);
+//     the AI opens by asking how each one is going, and sends the WHOLE list
+//     back with the ref kept on everything it keeps or changes. The app diffs
+//     that against the real stacks (planDiff.js) and shows each change for the
+//     user to approve — a stack keeps its id, its video, its history.
+//   • VIDEOS. Each stack may carry up to three video SUGGESTIONS. They are
+//     checked against YouTube (verifyVideo.js) and offered to the user to pick
+//     from; nothing is attached on its own any more.
+//
 // Two rules drive that output wording, both learned from testing the parser
 // against real AI output:
 //   • The four repeat tokens are shown as a copy-me list — "every day" was
@@ -33,7 +45,10 @@ import { FREE_STACK_CAP } from '../store5.js';
 // is echoed unless they asked for it.
 //   FRESH   nothing echoed. The day is empty, or they never asked.
 //   AROUND  echoed as fixed. "Keep all of it, fit new things around it."
-//   REBUILD echoed as a draft. "Send the whole day back." Replaceable only.
+//   REBUILD echoed WITH REFS, for organising. "Here is how each one is going —
+//           change, move, drop and add." (The key keeps its old name so stored
+//           state and tests that name it stay valid; the behaviour is the
+//           organise flow described in the header.)
 export const PLAN_MODE = { FRESH: 'fresh', AROUND: 'around', REBUILD: 'rebuild' };
 
 // Redaction is by KIND, never by wording. A note's title IS the user's private
@@ -43,13 +58,31 @@ export const PLAN_MODE = { FRESH: 'fresh', AROUND: 'around', REBUILD: 'rebuild' 
 // to update a sentence.
 const PRIVATE_KINDS = { note: 'a note to myself', doc: 'a document', med: 'something I take' };
 export const isPrivateKind = (it) => !!(it && PRIVATE_KINDS[it.kind]);
-/** The stacks a REBUILD is allowed to replace. Private ones are pinned. */
+/** The stacks an organise pass is allowed to change. Private ones are pinned. */
 export const replaceableItems = (items) => (Array.isArray(items) ? items : []).filter((it) => !isPrivateKind(it));
 
 const REPEAT_WORD = { daily: 'every day', weekly: 'weekly', once: 'once' };
 const repeatWord = (r) => REPEAT_WORD[r] || (r ? `every ${r} days` : 'once');
-const byTime = (a, b) => String(a.time || '99:99').localeCompare(String(b.time || '99:99'));
-const planLine = (it) => `  ${it.time || 'anytime'}  ${PRIVATE_KINDS[it.kind] || String(it.title || '').slice(0, 80)}  ·  ${repeatWord(it.repeat)}`;
+const byTime = (a, b) => String(a.time || '99:99').localeCompare(String(b.time || '99:99'))
+  || String(a.title || '').localeCompare(String(b.title || ''));
+const titleOf = (it) => String(it.title || '').replace(/\s+/g, ' ').trim().slice(0, 80);
+const planLine = (it) => `  ${it.time || 'anytime'}  ${PRIVATE_KINDS[it.kind] || titleOf(it)}  ·  ${repeatWord(it.repeat)}`;
+const hasMedia = (it) => !!(it && (it.url || it.embed));
+
+/**
+ * The refs an organise prompt hands out: s1, s2 … in the order the AI sees the
+ * stacks (by time). The same function builds the prompt and reads the reply, so
+ * the two can only disagree if the Stack itself changed in between — which is
+ * why the sheet also REMEMBERS the map it sent (store5 setAiRefs) and prefers
+ * that over a recomputation.
+ * → { map: { s1: id, … }, list: [{ ref, it }] }
+ */
+export function refMapFor(items) {
+  const list = replaceableItems(items).slice(0, 40).sort(byTime).map((it, i) => ({ ref: 's' + (i + 1), it }));
+  const map = {};
+  for (const { ref, it } of list) map[ref] = it.id;
+  return { map, list };
+}
 
 // Mirrors the shipped defaults in store5.js (:129-133). Kept here so buildPrompt
 // can tell "the user chose this" apart from "nobody has ever set it".
@@ -59,11 +92,10 @@ const DEFAULT_BODY = ['Stress'];
 const DEFAULT_INTERESTS = ['Meditation'];
 const isDefaultList = (a, d) => a.length === d.length && a.every((v, i) => v === d[i]);
 
-export const PROMPT_VERSION = 5;
+export const PROMPT_VERSION = 6;
 
-const BASE_PROMPT = `You are my warm, easy-going day-planning assistant for an app called PPWellness Lifestyle App.
-
-STEP 1 — Open the conversation, then STOP and wait for my reply. In ONE short,
+// STEP 1 when there is nothing to organise: an open door.
+const STEP1_OPEN = `STEP 1 — Open the conversation, then STOP and wait for my reply. In ONE short,
 friendly message, invite me to tell you anything at all — something like:
 
 "Tell me whatever's on your mind about your days — what you'd like to change, what
@@ -72,9 +104,18 @@ little as you like, and it's completely fine to be vague or all over the place.
 I'll make sense of it and turn it into a simple plan."
 
 Do NOT ask a numbered questionnaire. Do NOT write any plan yet. Just open the door
-and let me talk.
+and let me talk.`;
 
-STEP 2 — Take whatever I give you — however scattered, vague, or out of order — and
+// STEP 1 when organising: the user's feedback on each stack IS the intake.
+const STEP1_ORGANISE = `STEP 1 — Start by showing me my stacks from the list above as a short, friendly
+list, in plain words (not the refs), and ask how each one is going: what I enjoy,
+what I keep skipping, what I would change, and anything I would like to add. Then
+STOP and wait for my reply.
+
+Do NOT ask a numbered questionnaire. Do NOT write any plan yet. Let me talk about
+them in any order, as much or as little as I like.`;
+
+const STEP2_AND_FORMAT = `STEP 2 — Take whatever I give you — however scattered, vague, or out of order — and
 quietly turn it into a realistic plan. Read between the lines: pull out the
 activities I mention, put sensible times on them, and decide how often each should
 repeat. Fill small gaps yourself with reasonable defaults instead of interrogating
@@ -97,9 +138,9 @@ block, and NOTHING after it. Do not repeat this example back to me. Do not add
 a second block.
 
 \`\`\`ppw-routine
-{"ppw":"routine","v":2,"name":"My week","items":[
+{"ppw":"routine","v":3,"name":"My week","items":[
 {"title":"Morning walk","meta":"20 min, outside","time":"07:30","dayOffset":0,"repeat":"daily"},
-{"title":"Box breathing","meta":"5 min","time":"13:00","dayOffset":0,"repeat":"daily"},
+{"title":"Box breathing","meta":"5 min","time":"13:00","dayOffset":0,"repeat":"daily","videos":[{"q":"box breathing 5 minutes guided"}]},
 {"title":"Long session","meta":"45 min","time":"18:00","dayOffset":1,"repeat":"weekly"},
 {"title":"I did enough today.","kind":"note","time":"21:30","dayOffset":0,"repeat":"daily"}
 ]}
@@ -108,8 +149,11 @@ a second block.
 FORMAT RULES — the app reads this block literally.
 - Valid JSON. Straight quotes only ("). No smart quotes, no trailing commas,
   no comments, no line breaks inside a value.
-- Allowed keys per item, nothing else: title, meta, time, dayOffset, repeat, kind, video.
+- Allowed keys per item, nothing else: ref, title, meta, time, dayOffset, repeat, kind, videos.
 - Every item MUST have a title. Never send a bare string in the list.
+- ref: ONLY when I gave you a list of my stacks with refs (s1, s2 …). Copy the ref
+  exactly onto every stack from that list that you keep or change. Never invent a
+  ref, and never give a new stack one.
 - title: under 120 characters. meta: optional one-line detail.
 - time: exactly five characters, "HH:MM", 24-hour, leading zero.
   Write "07:30" — never "7:30", "7am", "7:30 am" or "07:30:00".
@@ -121,15 +165,18 @@ FORMAT RULES — the app reads this block literally.
   If you are unsure, use "daily".
 - kind: only for a short written reminder that should appear on screen —
   set "kind":"note" and put the words in title.
-- video: OPTIONAL, and only where watching something genuinely helps — a stretch,
-  a breathing drill, a technique. Send it as
-      "video": {"q":"a youtube search I should run","yt":"11-char-id"}
-  Give "q" ALWAYS. Give "yt" ONLY if you are genuinely confident the id is real;
-  if you are not certain, send "q" on its own. A wrong id is worse than no id.
+- videos: OPTIONAL, up to 3 per stack, and only where watching something genuinely
+  helps — a stretch, a breathing drill, a technique, a workout. Send each as
+      {"q":"a youtube search I should run","yt":"11-char-id"}
+  Give "q" ALWAYS. Give "yt" ONLY if you are genuinely confident the id is real
+  (for example you have just found it with a web search); if you are not certain,
+  send "q" on its own. A wrong id is worse than no id.
   I check every id against YouTube before it is shown, I take the title and the
   channel from YouTube rather than from you, and anything that fails the check
-  becomes a search instead.
-- NEVER write any other link, URL, image address or embed. Only the video field.
+  becomes a search instead. They are suggestions: I choose which one, if any,
+  goes with the stack.
+- Leave videos off a stack that already has one (marked "has a video" above).
+- NEVER write any other link, URL, image address or embed. Only the videos field.
 - Send the block whole, in one piece, as the last thing in your reply.
 
 SAFETY: this is general wellbeing organisation, not medical advice. If I mention
@@ -138,6 +185,18 @@ should check with a qualified professional, and keep the plan gentle.
 Only suggest a video for ordinary movement, stretching, breathing, meditation or
 sleep routine. Never suggest one for treating a condition, for a named diagnosis,
 for medication, or for a diet meant to manage an illness.`;
+
+const BASE_PROMPT = `You are my warm, easy-going day-planning assistant for an app called PPWellness Lifestyle App.
+
+${STEP1_OPEN}
+
+${STEP2_AND_FORMAT}`;
+
+const ORGANISE_PROMPT = `You are my warm, easy-going day-planning assistant for an app called PPWellness Lifestyle App.
+
+${STEP1_ORGANISE}
+
+${STEP2_AND_FORMAT}`;
 
 /**
  * buildPrompt(state) — prepends the user's real context + REAL headroom.
@@ -150,9 +209,10 @@ for medication, or for a diet meant to manage an illness.`;
 export function buildPrompt(S, mode = PLAN_MODE.FRESH) {
   const all = (S && Array.isArray(S.deckItems)) ? S.deckItems : [];
   const premium = !!(S && S.premium);
-  // A rebuild replaces the stacks it was shown, so those slots are about to be
-  // free — only the pinned private ones still count against the cap. Charging
-  // the user for stacks the AI is about to delete made "redo my whole day" ask
+  const organising = mode === PLAN_MODE.REBUILD && replaceableItems(all).length > 0;
+  // An organise pass can drop any stack it was shown, so those slots may come
+  // free — only the pinned private ones certainly still count against the cap.
+  // Charging the user for stacks the AI may remove made "redo my whole day" ask
   // for a SMALLER plan than the day it was replacing.
   const used = mode === PLAN_MODE.REBUILD ? all.length - replaceableItems(all).length : all.length;
   // Floor at 0, not 1. Math.max(1, …) told a user sitting at the cap there was
@@ -192,7 +252,7 @@ export function buildPrompt(S, mode = PLAN_MODE.FRESH) {
     );
   }
 
-  return `Some context about me: ${bits.join(' ')}\n\n${planEcho(S, mode)}${BASE_PROMPT}`;
+  return `Some context about me: ${bits.join(' ')}\n\n${planEcho(S, mode)}${organising ? ORGANISE_PROMPT : BASE_PROMPT}`;
 }
 
 /**
@@ -222,27 +282,31 @@ export function planEcho(S, mode) {
     ].join('\n');
   }
 
-  // REBUILD
+  // REBUILD = organise. Every stack the AI may touch gets a ref.
+  const { list } = refMapFor(all);
   const out = [
-    'MY DAY AS IT STANDS — you are rebuilding this, so treat it as a draft:',
-    ...open.map(planLine),
+    'MY STACKS RIGHT NOW — each one has a ref (s1, s2 …) so you can tell me what happens to it:',
+    ...list.map(({ ref, it }) => `  ${ref}  ${it.time || 'anytime'}  ${titleOf(it)}  ·  ${repeatWord(it.repeat)}${hasMedia(it) ? '  ·  has a video' : ''}`),
   ];
   if (shut.length) {
     out.push(
       '',
       'These are private and they stay exactly where they are. Plan around them,',
-      'do not repeat them, and do not try to guess what they say:',
+      'do not send them back, and do not try to guess what they say:',
       ...shut.map(planLine),
     );
   }
   out.push(
     '',
-    'Send me the WHOLE day back in one block: keep what still works (same wording),',
-    'move what belongs at a different time, drop what is not earning its place, and',
-    'add what is missing. Anything from the draft you leave out is removed.',
+    'You are organising my stacks with me. When you send the plan, send the WHOLE list',
+    'back in one block: keep the ref on every stack you keep or change (same wording',
+    'if it still works), move what belongs at a different time, change what needs',
+    'changing, add what is missing (no ref), and leave out what is not earning its',
+    'place. A stack from my list that you leave out is removed. I will see every',
+    'change and approve it before anything happens.',
     '', '',
   );
   return out.join('\n');
 }
 
-export { BASE_PROMPT };
+export { BASE_PROMPT, ORGANISE_PROMPT };

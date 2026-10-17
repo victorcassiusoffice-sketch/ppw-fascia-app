@@ -27,6 +27,7 @@ import OnboardingScreen from './screens/OnboardingScreen.jsx';
 import { NotePopup, SlotReminder } from './screens/Popups.jsx';
 import SchedulePicker from './screens/SchedulePicker.jsx';
 import AiBridgeSheet from './assistant/AiBridgeSheet.jsx';
+import VideoPicker from './screens/VideoPicker.jsx';
 import CoachMarks, { hasSeenTour } from './coach/CoachMarks.jsx';
 import EditStackSheet from './screens/EditStackSheet.jsx';
 import {
@@ -39,7 +40,7 @@ import {
   syncEntitlement, applyServerEntitlement, syncProfile,
   parseRoutineLink, setPendingShare, setShareError, shareSheetUp,
   openAiBridge, recordUseDay, guideWelcomed, markGuideWelcomed, anySheetOpen, stashCoachPosition,
-  guideFocusItem, isInEatWindow, clearFlash,
+  guideFocusItem, isInEatWindow, clearFlash, openVideoPicker, videoable,
   noteAnimCss,
 } from './store5.js';
 import GuideDisc from './screens/GuideDisc.jsx';
@@ -119,6 +120,24 @@ function NavDock({ screen, onNav, onAdd }) {
         </button>
       ))}
     </div>
+  );
+}
+
+// ── "▶ Video" on a stack (Vic, 2026-10-17) ──
+// The recommended button: opens the "Add a video or link" sheet for the stack.
+// Lit, with a count, when the user's AI already suggested videos that YouTube
+// confirmed (`recs`) — that is the moment there is something waiting to add.
+function VideoButton({ it, inline }) {
+  const n = Array.isArray(it.recs) ? it.recs.length : 0;
+  const lit = n > 0;
+  return (
+    <button onClick={(e) => { e.stopPropagation(); openVideoPicker(it.id); }}
+      aria-label={lit ? `Add a video — ${n} suggested` : 'Add a video or link'}
+      data-video-btn=""
+      style={{ display: 'inline-flex', alignItems: 'center', gap: 5, minHeight: 44, background: 'none', border: 'none', padding: inline ? '10px 8px' : '14px 10px', color: lit ? 'var(--accent)' : 'var(--dim)', fontSize: inline ? 11 : 10.5, fontWeight: lit ? 700 : 600, letterSpacing: '.04em' }}>
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 6.2v11.6l9.4-5.8L9 6.2z" /></svg>
+      {lit ? `Video · ${n}` : 'Video'}
+    </button>
   );
 }
 
@@ -369,6 +388,12 @@ function StackScreen() {
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" /></svg>
               Edit
             </button>
+            {/* "Add a video or link" (Vic, 2026-10-17) — only on a stack that
+                can take one and has none yet; lit when the user's AI already
+                suggested some. */}
+            {videoable(next) && !(next.url || next.embed) && (
+              <VideoButton it={next} inline />
+            )}
           </div>
           {/* ppwHeroActions is a size container (app5.css): on a narrow card —
               a small phone, or Settings → Bigger text — Snooze drops its word
@@ -448,7 +473,9 @@ function StackScreen() {
               data-dragidx={i}
               data-tour={it.id === focusId ? 'latest-item' : undefined}
               onPointerDown={rowPointerDown(i)}
-              onClick={() => { if (suppressClick.current) return; if (S.selectedIds.length) { toggleSelect(it.id); return; } if (it.embed || it.url || it.kind === 'doc') openPlayer(it); else if (it.kind === 'note') openEditItem(it.id); }}
+              // A plain stack used to do nothing at all when tapped. It now opens
+              // "Add a video or link" — the one thing it can usefully offer.
+              onClick={() => { if (suppressClick.current) return; if (S.selectedIds.length) { toggleSelect(it.id); return; } if (it.embed || it.url || it.kind === 'doc') openPlayer(it); else if (it.kind === 'note') openEditItem(it.id); else if (videoable(it)) openVideoPicker(it.id); }}
               style={{ position: 'relative', display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 14px 4px 16px', minHeight: 68, borderRadius: 26, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: `1px solid ${(isOver || S.flashId === it.id) ? 'var(--acc-rim)' : 'var(--rim)'}`, boxShadow: isDragged ? 'var(--elev-hi)' : (S.flashId === it.id ? 'var(--acc-glow), var(--elev)' : 'var(--elev)'), cursor: (it.embed || it.url) ? 'pointer' : 'grab', touchAction: 'pan-y', userSelect: 'none', WebkitUserSelect: 'none', transform: isDragged ? `translateY(${drag.dy}px) scale(1.03)` : 'none', zIndex: isDragged ? 5 : 1, transition: isDragged ? 'none' : 'transform .2s, border-color .2s' }}
             >
               {/* Vic 4 — small selection tick, top-left of every stack card */}
@@ -532,6 +559,9 @@ function StackScreen() {
                       AUTO
                     </button>
                   )}
+                  {/* The recommended button (Vic, 2026-10-17), on any stack that
+                      can take a video and has none yet. */}
+                  {videoable(it) && !(it.url || it.embed) && <VideoButton it={it} />}
                 </div>
               </div>
             </div>
@@ -1022,6 +1052,9 @@ export default function App5() {
         <MediaViewer />
         <SchedulePicker />
         <AiBridgeSheet />
+        {/* z46: above the AI sheet (45), so step 4's "add a video" opens on top
+            of it and closes back to it; below the gate notice (47). */}
+        <VideoPicker />
         <CoachMarks
           open={tourOpen}
           steps={WELCOME_STEPS}

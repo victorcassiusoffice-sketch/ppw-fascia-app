@@ -64,11 +64,15 @@ describe('what the AI is shown', () => {
     expect(e).toContain('ONLY the new things');
   });
 
-  it('offers the day as a draft when the user redoes it', () => {
+  // v6 (2026-10-17): the "redo" mode is now ORGANISE. The day is still sent
+  // whole and anything left out is still removed — but each stack carries a ref
+  // so the reply changes stacks in place instead of replacing them.
+  it('offers the day for organising when the user asks for it', () => {
     const e = planEcho({ deckItems: DECK }, PLAN_MODE.REBUILD);
-    expect(e).toContain('you are rebuilding this');
-    expect(e).toContain('Send me the WHOLE day back');
-    expect(e).toContain('Anything from the draft you leave out is removed');
+    expect(e).toContain('each one has a ref');
+    expect(e).toMatch(/s1\s+07:30\s+Sunrise loop/);
+    expect(e).toContain('send the WHOLE list');
+    expect(e).toContain('A stack from my list that you leave out is removed');
   });
 });
 
