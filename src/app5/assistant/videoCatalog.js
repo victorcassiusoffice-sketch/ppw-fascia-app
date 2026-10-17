@@ -20,7 +20,28 @@
 // Content rules, the same as the starter deck's: no yoga (out of the app since
 // 2026-10-12), nothing that treats a named condition, credible sources first.
 
-export const PPW_PICKS = [];
+export const PPW_PICKS = [
+  { yt: "COO2S7lPBzA", topic: "stretch", title: "10 Minute Total Body Stretch! [Daily Flexibility Routine for Beginners]", author: "Tone and Tighten" },
+  { yt: "t_YEUWe6Yn8", topic: "stretch", title: "10 Min Full Body Stretch Routine for Beginners", author: "Jeffrey Peng MD" },
+  { yt: "vDt6ZKuMDwE", topic: "back", title: "12-Minute Low Back Pain Exercise Routine [Real-Time]", author: "Veritas Health" },
+  { yt: "WQ6p2ZDhCS8", topic: "back", title: "Back Stretches for Lower Back Pain (15-Minute Daily Morning Routine)", author: "Doctor O'Donovan" },
+  { yt: "u3Ocw5UIpYs", topic: "neck", title: "Real Time Neck Pain Stretches - Ask Doctor Jo", author: "AskDoctorJo" },
+  { yt: "FRNtLrMf-1A", topic: "neck", title: "Relieve Neck Pain & Tension at Your Desk - Daily Physio Routine", author: "Michelle Kenway" },
+  { yt: "qHzJavfNAO0", topic: "hips", title: "9 Hip Stretches for Tight Hips | Doctor and Physio led guide", author: "Doctor O'Donovan" },
+  { yt: "GIuiGVYr7ho", topic: "hips", title: "How To Stretch Tight Hips - 7-Minute Hip Opener Routine For Beginners", author: "Tone and Tighten" },
+  { yt: "TvTNfKMreMM", topic: "foam", title: "How to Foam Roll (Massage) Entire Body with Good Form & Technique.", author: "Bob & Brad" },
+  { yt: "c0JRlrKJXPg", topic: "foam", title: "The 8 BEST Foam Rolling Exercises (10-Minute Full Body Foam Roll Routine)", author: "nourishmovelove" },
+  { yt: "G25IR0c-Hj8", topic: "breath", title: "Box Breathing for Stress - CHI Health", author: "CHI Health" },
+  { yt: "J7JKQA-F2dg", topic: "breath", title: "Breathwork for Beginners | Melissa Young, MD", author: "Cleveland Clinic" },
+  { yt: "QHkXvPq2pQE", topic: "meditation", title: "Reset: Decompress Your Body and Mind", author: "Headspace" },
+  { yt: "G7oWBw-79MI", topic: "meditation", title: "10-Minute Breath & Sound Mindfulness Meditation with Dr. Elise Bialylew", author: "Mindful in May" },
+  { yt: "Nosw9iGaTY4", topic: "sleep", title: "A Body Scan Meditation to Prepare Mind and Body for Sleep", author: "Mindful" },
+  { yt: "MZOp8jlkshQ", topic: "sleep", title: "Wind Down in 5 Minutes: Noting Meditation with Kessonga for Deep Sleep & Mental Calm", author: "Headspace" },
+  { yt: "X3q5e1pV4pc", topic: "walk", title: "1.0 Mile Happy Walk | Walk at Home | Walking Workout | over 100M Views", author: "Walk at Home" },
+  { yt: "C7-xW9mRNiI", topic: "strength", title: "20-Minute Bodyweight Workout for Beginners (No Repeats)", author: "nourishmovelove" },
+  { yt: "uhpo1amlLZo", topic: "hiit", title: "10-Minute Low Impact HIIT Workout (No Equipment, All Standing)", author: "nourishmovelove" },
+  { yt: "b_TTLmmQmXU", topic: "core", title: "Core Workout For Beginners - 10-Minute Follow Along", author: "Tone and Tighten" },
+];
 
 // Topic words. A stack matches a topic when its title or detail line uses one of
 // these words (or phrases); the picks for the matched topics are offered.
@@ -34,7 +55,9 @@ export const TOPIC_WORDS = {
   meditation: ['meditate', 'meditation', 'mindfulness', 'mindful', 'calm', 'relax', 'relaxation', 'focus', 'stress'],
   sleep: ['sleep', 'bedtime', 'bed', 'wind down', 'body scan', 'night', 'evening routine'],
   walk: ['walk', 'walking', 'steps', 'stroll'],
-  strength: ['strength', 'bodyweight', 'squat', 'squats', 'push up', 'pushup', 'push ups', 'lunge', 'lunges', 'muscle', 'workout', 'toning'],
+  // Not 'workout': it is in half the titles there are ("HIIT workout"), and
+  // matched there it put strength videos ahead of the HIIT ones.
+  strength: ['strength', 'bodyweight', 'squat', 'squats', 'push up', 'pushup', 'push ups', 'lunge', 'lunges', 'muscle', 'toning'],
   hiit: ['hiit', 'interval', 'intervals', 'tabata', 'cardio', 'sweat', 'fat burn'],
   core: ['core', 'abs', 'plank', 'abdominal'],
 };

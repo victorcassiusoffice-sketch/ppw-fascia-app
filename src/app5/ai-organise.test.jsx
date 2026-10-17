@@ -6,7 +6,7 @@
 // a real id answers 200 with a title, anything else 400 — the two answers the
 // app has to tell apart.
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { render, cleanup, screen, act, fireEvent, waitFor } from '@testing-library/react';
+import { render, cleanup, screen, act, fireEvent, waitFor, within } from '@testing-library/react';
 import {
   setState, getState, applyPlanDiff, undoPlanDiff, attachMedia, detachMedia, videoable,
   openVideoPicker, dateKeyFromOffset,
@@ -235,8 +235,21 @@ describe('the video picker on its own', () => {
     await waitFor(() => expect(screen.getByText(/YouTube says that video is not available/)).toBeTruthy());
     fireEvent.change(screen.getByLabelText('Paste a video or link'), { target: { value: 'https://youtu.be/yLDAHd_C7G0' } });
     await waitFor(() => expect(screen.getByText('10 MIN DAILY STRETCH')).toBeTruthy());
-    act(() => { fireEvent.click(screen.getByText('Add')); });
+    // "Morning stretch" also matches the PPW stretch picks, so there is more than
+    // one Add on screen: take the one in the pasted video's own row.
+    const row = screen.getByText('10 MIN DAILY STRETCH').parentElement.parentElement;
+    act(() => { fireEvent.click(within(row).getByText('Add')); });
     expect(getState().deckItems.find((x) => x.id === 'a').mediaTitle).toBe('10 MIN DAILY STRETCH');
+  });
+  it('offers PPW picks that match the stack, and adds one', () => {
+    act(() => openVideoPicker('a'));   // "Morning stretch"
+    render(<VideoPicker />);
+    expect(screen.getByText('PPW picks')).toBeTruthy();
+    const pick = screen.getByText('10 Minute Total Body Stretch! [Daily Flexibility Routine for Beginners]').parentElement.parentElement;
+    act(() => { fireEvent.click(within(pick).getByText('Add')); });
+    const a = getState().deckItems.find((x) => x.id === 'a');
+    expect(a.url).toBe('https://www.youtube.com/watch?v=COO2S7lPBzA');
+    expect(a.mediaBy).toBe('Tone and Tighten');
   });
   it('a Spotify link is added as a link', () => {
     act(() => openVideoPicker('c'));
