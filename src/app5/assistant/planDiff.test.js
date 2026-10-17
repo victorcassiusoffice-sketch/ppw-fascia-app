@@ -27,6 +27,10 @@ describe('refs', () => {
     expect(e).toMatch(/s4\s+18:00\s+Long run\s+·\s+weekly/);
     expect(e).toContain('A stack from my list that you leave out is removed');
   });
+  it('tells the AI what day today is, in English', () => {
+    const p = buildPrompt({ deckItems: DECK, now: new Date(2026, 9, 17) }, PLAN_MODE.REBUILD);
+    expect(p).toContain('Today is Saturday 17 October.');
+  });
   it('the organise prompt opens by asking how each stack is going', () => {
     const p = buildPrompt({ deckItems: DECK }, PLAN_MODE.REBUILD);
     expect(p).toContain('ask how each one is going');

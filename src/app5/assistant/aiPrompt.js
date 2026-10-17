@@ -94,6 +94,14 @@ const isDefaultList = (a, d) => a.length === d.length && a.every((v, i) => v ===
 
 export const PROMPT_VERSION = 6;
 
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+/** "Saturday 17 October" — built by hand so it is English on every phone. */
+export function todayWords(now) {
+  const d = now instanceof Date ? now : new Date();
+  return `${DAY_NAMES[d.getDay()]} ${d.getDate()} ${MONTH_NAMES[d.getMonth()]}`;
+}
+
 // STEP 1 when there is nothing to organise: an open door.
 const STEP1_OPEN = `STEP 1 — Open the conversation, then STOP and wait for my reply. In ONE short,
 friendly message, invite me to tell you anything at all — something like:
@@ -222,6 +230,11 @@ export function buildPrompt(S, mode = PLAN_MODE.FRESH) {
   const days = premium ? 7 : (headroom >= 6 ? 2 : 1);
 
   const bits = [];
+  // TODAY, by name (2026-10-17). dayOffset counts days from today, and nothing
+  // ever told the AI what today IS — so "move my HIIT to Mondays" could only be
+  // a guess at how many days away Monday is. In English, like the rest of the
+  // prompt, whatever the phone's own language.
+  bits.push(`Today is ${todayWords(S && S.now)}.`);
   // Only facts the user actually gave us. dayT/obBody/obInterests ship with
   // defaults (store5.js:129-133) and NO app5 screen sets them, so sending them
   // unconditionally told every user's AI, in the user's own voice, that they wake
