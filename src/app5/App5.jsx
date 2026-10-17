@@ -34,12 +34,12 @@ import {
   stackFor, todayKey, markDone, setItemTime, deleteItem, overLimit,
   openAdd, backToToday, openPlayer, openCompleted, openAccount, openRepeat, openEditItem, repeatLabel,
   startSlotEngine, orderedStackFor, reorderTimed, reorderDeck, toggleAuto,
-  toggleSelect, selectAll, clearSelection, deleteSelected, safeUrl,
+  toggleSelect, selectAll, clearSelection, deleteSelected, itemHref,
   onlyExamplesLeft, clearExamples,
   syncEntitlement, applyServerEntitlement, syncProfile,
   parseRoutineLink, setPendingShare, setShareError, shareSheetUp,
   openAiBridge, recordUseDay, guideWelcomed, markGuideWelcomed, anySheetOpen, stashCoachPosition,
-  guideFocusItem, isInEatWindow,
+  guideFocusItem, isInEatWindow, clearFlash,
   noteAnimCss,
 } from './store5.js';
 import GuideDisc from './screens/GuideDisc.jsx';
@@ -80,6 +80,7 @@ const IBell = svg(<><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2.5H4.5L6 16z" /><pat
 const IDrop = svg(<path d="M12 3s6 6.3 6 10.3a6 6 0 0 1-12 0C6 9.3 12 3 12 3z" />);
 const INote = svg(<><path d="M5 4h14v11l-4 5H5z" /><path d="M15 20v-5h4M8.5 9h7M8.5 12.5h4" /></>);
 const IPlay = <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="M9 6.2v11.6l9.4-5.8L9 6.2z" /></svg>;
+const IDoc = svg(<><path d="M6 3h8l4 4v14H6z" /><path d="M14 3v4h4M9.5 12h5M9.5 15.5h5" /></>, { sw: 1.7, w: 19, h: 19 });
 const ITrash = svg(<path d="M4 7h16M10 4h4M6.5 7l1 13h9l1-13M10 11v6M14 11v6" />, { sw: 1.7 });
 const ISnooze = svg(<><circle cx="12" cy="13" r="8" /><path d="M12 9v4l2.5 2M9 2h6" /></>, { sw: 1.7, w: 16, h: 16 });
 const IEdit = svg(<><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" /></>, { sw: 1.7, w: 16, h: 16 });
@@ -251,11 +252,32 @@ function StackScreen() {
     window.addEventListener('pointercancel', up);
   };
 
+  // "View" after an add lands here with flashId set: scroll that card into view
+  // and light it for a moment, then let it go. The id is read back through a
+  // data attribute, so nothing has to hold a ref to every row.
+  // Scrolls THIS SCREEN only — scrollIntoView would also scroll the phone frame
+  // and the room around it, which can move and must never move.
+  const screenRef = React.useRef(null);
+  React.useEffect(() => {
+    if (!S.flashId) return undefined;
+    const id = String(S.flashId).replace(/["\\]/g, '');
+    const t1 = setTimeout(() => {
+      const sc = screenRef.current;
+      const el = sc && sc.querySelector(`[data-item-id="${id}"]`);
+      if (!el) return;
+      const a = el.getBoundingClientRect(), b = sc.getBoundingClientRect();
+      const delta = (a.top - b.top) - (b.height - a.height) / 2;
+      try { sc.scrollBy({ top: delta, behavior: 'smooth' }); } catch { sc.scrollTop += delta; }
+    }, 60);
+    const t2 = setTimeout(clearFlash, 2400);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [S.flashId]);
+
   const labelDate = notToday ? keyToDateLocal(key) : new Date();
   const dateLabel = labelDate.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }).toUpperCase();
 
   const cardIcon = (it) => {
-    if (it.kind === 'doc') return <div style={{ width: 46, height: 46, flex: 'none', borderRadius: 14, background: THUMBS.doc, border: '1px solid var(--rim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,.9)' }}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h8l4 4v14H6z" /><path d="M14 3v4h4M9.5 12h5M9.5 15.5h5" /></svg></div>;
+    if (it.kind === 'doc' || it.kind === 'pdf') return <div style={{ width: 46, height: 46, flex: 'none', borderRadius: 14, background: THUMBS.doc, border: '1px solid var(--rim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,.9)' }}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h8l4 4v14H6z" /><path d="M14 3v4h4M9.5 12h5M9.5 15.5h5" /></svg></div>;
     if (it.kind === 'note') return <div style={{ width: 46, height: 46, flex: 'none', borderRadius: 14, background: 'var(--disc)', border: '1px solid var(--rim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)' }}>{INote}</div>;
     if (it.thumb) {
       const bg = it.thumbUrl ? `url(${it.thumbUrl})` : (THUMBS[it.thumb] || THUMBS.yt);
@@ -265,10 +287,19 @@ function StackScreen() {
   };
 
   return (
-    <div style={{ position: 'absolute', inset: 0, overflowY: 'auto', padding: '28px 20px 140px', animation: 'ppwScreenIn .38s cubic-bezier(.26,1,.4,1)' }}>
-      {/* header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0, flex: 1 }}>
+    <div ref={screenRef} style={{ position: 'absolute', inset: 0, overflowY: 'auto', padding: '28px 20px 140px', animation: 'ppwScreenIn .38s cubic-bezier(.26,1,.4,1)' }}>
+      {/* header — WRAPS INSTEAD OF COLLIDING (2026-10-17, Vic's screenshot).
+          The date and "Stack" shared one row with the controls, and the title
+          side had whatever width the controls left over: signed out (Sign in
+          pill + three discs, ~268px) on a 360px phone that was ~40px, so
+          "SATURDAY 17 OCTOBER" broke a word per line and ran under the Sign in
+          pill. `wrap-reverse` keeps the old one-row header wherever the title
+          gets at least 110px, and otherwise lifts the controls onto their own
+          row ABOVE the date (reverse: the line that wraps goes up, not down).
+          `alignItems: flex-end` is the TOP under wrap-reverse — the one-row
+          case lines the discs up with the date exactly as before. */}
+      <div style={{ display: 'flex', flexWrap: 'wrap-reverse', alignItems: 'flex-end', justifyContent: 'space-between', columnGap: 12, rowGap: 16 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0, flex: '1 1 110px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--dim)', textShadow: 'var(--emboss)' }}>{dateLabel}</div>
             {notToday && (
@@ -277,7 +308,7 @@ function StackScreen() {
           </div>
           <h1 style={{ margin: 0, fontSize: 30, fontWeight: 600, letterSpacing: '-.02em', textShadow: 'var(--emboss)' }}>Stack</h1>
         </div>
-        <div style={{ display: 'flex', gap: 10, flex: 'none' }}>
+        <div data-header-controls="" style={{ display: 'flex', gap: 10, flex: 'none', marginLeft: 'auto' }}>
           <AccountControl />
           {/* The guide's home. It fills a segment per quest, and retires from
               the header for good once all eight are done — a finished tutorial
@@ -301,7 +332,7 @@ function StackScreen() {
 
       {/* NEXT UP hero */}
       {next ? (
-        <div data-tour="next-up" style={{ position: 'relative', marginTop: 24, borderRadius: 28, padding: '22px 22px 20px', background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', animation: 'ppwRise .45s cubic-bezier(.3,1.2,.4,1) both' }}>
+        <div data-tour="next-up" data-item-id={next.id} style={{ position: 'relative', marginTop: 24, borderRadius: 28, padding: '22px 22px 20px', background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: `1px solid ${S.flashId === next.id ? 'var(--acc-rim)' : 'var(--rim)'}`, boxShadow: S.flashId === next.id ? 'var(--acc-glow), var(--elev-hi)' : 'var(--elev-hi)', transition: 'border-color .4s, box-shadow .4s', animation: 'ppwRise .45s cubic-bezier(.3,1.2,.4,1) both' }}>
           {/* slow accent border-trace (prototype ppwTrace) */}
           <svg aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} preserveAspectRatio="none" viewBox="0 0 100 100">
             <rect x="0.6" y="1.2" width="98.8" height="97.6" rx="7.5" fill="none" vectorEffect="non-scaling-stroke" stroke="var(--accent)" strokeWidth="1.5" pathLength="100" strokeDasharray="100" style={{ animation: 'ppwTrace 2.6s ease-out .4s both' }} />
@@ -339,16 +370,23 @@ function StackScreen() {
               Edit
             </button>
           </div>
-          <div style={{ marginTop: 18, display: 'flex', alignItems: 'center', gap: 10 }}>
-            {safeUrl(next.url) && (
-              <a href={safeUrl(next.url)} target="_blank" rel="noopener noreferrer" aria-label="Play now" style={{ height: 48, width: 52, flex: 'none', borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{IPlay}</a>
+          {/* ppwHeroActions is a size container (app5.css): on a narrow card —
+              a small phone, or Settings → Bigger text — Snooze drops its word
+              and keeps its clock, so Done is never crushed to a sliver and
+              Delete never hangs off the card. */}
+          <div className="ppwHeroActions" style={{ marginTop: 18, display: 'flex', alignItems: 'center', gap: 10 }}>
+            {/* itemHref: a protocol's PDF is a path on this site, which the old
+                safeUrl check refused, so a protocol in Next Up had no way in.
+                A protocol is read, not played — page glyph, honest label. */}
+            {itemHref(next) && (
+              <a href={itemHref(next)} target="_blank" rel="noopener noreferrer" aria-label={next.kind === 'pdf' ? 'Open protocol' : 'Play now'} style={{ height: 48, width: 52, flex: 'none', borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{next.kind === 'pdf' ? IDoc : IPlay}</a>
             )}
             {/* 2026-07-06 (Vic): icon-only tick — the "Done" text sat flush to the button edge. */}
             <button onClick={() => markDone(next.id, key)} aria-label="Done" title="Done" data-tour="done" style={{ flex: 1, height: 48, borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', boxShadow: 'var(--acc-glow)', color: 'var(--acc-ink)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
             </button>
             {next.time && (
-              <button onClick={() => setItemTime(next.id, addMinutes(next.time, 15))} aria-label="Snooze" style={{ height: 48, padding: '0 16px', borderRadius: 16, border: '1px solid var(--rim)', background: 'transparent', color: 'var(--dim)', fontWeight: 600, fontSize: 13.5, display: 'flex', alignItems: 'center', gap: 7 }}>{ISnooze} Snooze</button>
+              <button className="ppwSnoozeBtn" onClick={() => setItemTime(next.id, addMinutes(next.time, 15))} aria-label="Snooze" title="Snooze 15 minutes" style={{ height: 48, minWidth: 48, flex: 'none', padding: '0 16px', borderRadius: 16, border: '1px solid var(--rim)', background: 'transparent', color: 'var(--dim)', fontWeight: 600, fontSize: 13.5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>{ISnooze}<span className="ppwSnoozeWord">Snooze</span></button>
             )}
             <button onClick={() => deleteItem(next.id)} aria-label="Delete this slot" style={{ height: 48, width: 48, flex: 'none', borderRadius: 16, border: '1px solid var(--rim)', background: 'transparent', color: 'var(--dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{ITrash}</button>
           </div>
@@ -406,11 +444,12 @@ function StackScreen() {
           return (
             <div
               key={it.id}
+              data-item-id={it.id}
               data-dragidx={i}
               data-tour={it.id === focusId ? 'latest-item' : undefined}
               onPointerDown={rowPointerDown(i)}
               onClick={() => { if (suppressClick.current) return; if (S.selectedIds.length) { toggleSelect(it.id); return; } if (it.embed || it.url || it.kind === 'doc') openPlayer(it); else if (it.kind === 'note') openEditItem(it.id); }}
-              style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', minHeight: 68, borderRadius: 26, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: `1px solid ${isOver ? 'var(--acc-rim)' : 'var(--rim)'}`, boxShadow: isDragged ? 'var(--elev-hi)' : 'var(--elev)', cursor: (it.embed || it.url) ? 'pointer' : 'grab', touchAction: 'pan-y', userSelect: 'none', WebkitUserSelect: 'none', transform: isDragged ? `translateY(${drag.dy}px) scale(1.03)` : 'none', zIndex: isDragged ? 5 : 1, transition: isDragged ? 'none' : 'transform .2s, border-color .2s' }}
+              style={{ position: 'relative', display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 14px 4px 16px', minHeight: 68, borderRadius: 26, background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: `1px solid ${(isOver || S.flashId === it.id) ? 'var(--acc-rim)' : 'var(--rim)'}`, boxShadow: isDragged ? 'var(--elev-hi)' : (S.flashId === it.id ? 'var(--acc-glow), var(--elev)' : 'var(--elev)'), cursor: (it.embed || it.url) ? 'pointer' : 'grab', touchAction: 'pan-y', userSelect: 'none', WebkitUserSelect: 'none', transform: isDragged ? `translateY(${drag.dy}px) scale(1.03)` : 'none', zIndex: isDragged ? 5 : 1, transition: isDragged ? 'none' : 'transform .2s, border-color .2s' }}
             >
               {/* Vic 4 — small selection tick, top-left of every stack card */}
               {/* F10: 44px target, 22px circle. The button carries the hit area and
@@ -426,40 +465,55 @@ function StackScreen() {
                 </span>
               </button>
               {cardIcon(it)}
+              {/* TITLE FIRST, CONTROLS UNDERNEATH (2026-10-17, tester pass 1 E +
+                  Vic's screenshot). The time AND the three action buttons used
+                  to stack in one column on the right, and that column was as
+                  wide as its widest child — the button row, ~150px — so a 360px
+                  phone left the title ~40px: "Varico…", "HIIT …", "Take your
+                  suppl…". The buttons now sit on a line of their own under the
+                  title, the right-hand column is only the time, and the title
+                  may take two lines before it is cut. Same controls, same
+                  labels, same coach anchors — only where they sit changed. */}
               <div style={{ flex: 1, minWidth: 0 }}>
-                {/* A note set to "Scroll" only ever marqueed inside the full-screen
-                    popup (Popups.jsx). On the Stack card it was truncated with an
-                    ellipsis — so the single thing the user picked that animation
-                    FOR, reading a long affirmation, never happened where they
-                    actually look. Honour it here too. */}
-                {it.kind === 'note' && it.noteAnim === 'marquee' && String(it.title || '').trim() ? (
-                  <div style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                    <span className="ppwCardMarquee" style={{ display: 'inline-block', fontSize: 15.5, fontWeight: 600, letterSpacing: '-.01em', textShadow: 'var(--emboss)', animation: noteAnimCss('marquee', it.noteSpeed) }}>{it.title}</span>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    {/* A note set to "Scroll" only ever marqueed inside the full-screen
+                        popup (Popups.jsx). On the Stack card it was truncated with an
+                        ellipsis — so the single thing the user picked that animation
+                        FOR, reading a long affirmation, never happened where they
+                        actually look. Honour it here too. */}
+                    {it.kind === 'note' && it.noteAnim === 'marquee' && String(it.title || '').trim() ? (
+                      <div style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                        <span className="ppwCardMarquee" style={{ display: 'inline-block', fontSize: 15.5, fontWeight: 600, letterSpacing: '-.01em', textShadow: 'var(--emboss)', animation: noteAnimCss('marquee', it.noteSpeed) }}>{it.title}</span>
+                      </div>
+                    ) : (
+                      <div data-stack-title="" style={{ fontSize: 15.5, fontWeight: 600, letterSpacing: '-.01em', lineHeight: 1.3, display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2, overflow: 'hidden', overflowWrap: 'anywhere', textShadow: 'var(--emboss)' }}>{it.title}</div>
+                    )}
+                    <div style={{ marginTop: 3, fontSize: 12.5, color: 'var(--dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      {/* F6: say what we put there. Without this the starter slots read
+                          as things the customer chose, on day one, in their own app. */}
+                      {it.example && (
+                        <span style={{ flex: 'none', fontSize: 9.5, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', padding: '2px 6px', borderRadius: 999, border: '1px solid var(--hairline)', background: 'var(--track)', color: 'var(--dim)' }}>Example</span>
+                      )}
+                      <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{it.meta}</span>
+                    </div>
                   </div>
-                ) : (
-                  <div style={{ fontSize: 15.5, fontWeight: 600, letterSpacing: '-.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textShadow: 'var(--emboss)' }}>{it.title}</div>
-                )}
-                <div style={{ marginTop: 3, fontSize: 12.5, color: 'var(--dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  {/* F6: say what we put there. Without this the starter slots read
-                      as things the customer chose, on day one, in their own app. */}
-                  {it.example && (
-                    <span style={{ flex: 'none', fontSize: 9.5, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', padding: '2px 6px', borderRadius: 999, border: '1px solid var(--hairline)', background: 'var(--track)', color: 'var(--dim)' }}>Example</span>
+                  {it.time ? (
+                    // ppwTimeInput hides the browser's own clock glyph (app5.css):
+                    // it doubled the width of the column for a picker the whole
+                    // field already opens when tapped.
+                    <input type="time" className="ppwTimeInput" value={it.time} onClick={(e) => e.stopPropagation()} onChange={(e) => setItemTime(it.id, e.target.value)} aria-label="Edit slot time" data-tour={it.id === focusId ? 'item-time' : undefined} style={{ flex: 'none', marginTop: 1, fontSize: 15, fontWeight: 600, color: 'var(--dim)', background: 'transparent', border: 'none', outline: 'none', textAlign: 'right', padding: 0, width: 76, cursor: 'pointer' }} />
+                  ) : (
+                    <span data-tour={it.id === focusId ? 'item-time' : undefined} style={{ flex: 'none', marginTop: 2, fontSize: 10, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', padding: '3px 8px', borderRadius: 999, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)' }}>Next Up</span>
                   )}
-                  <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{it.meta}</span>
                 </div>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 5, flex: 'none' }}>
-                {it.time ? (
-                  <input type="time" value={it.time} onClick={(e) => e.stopPropagation()} onChange={(e) => setItemTime(it.id, e.target.value)} aria-label="Edit slot time" data-tour={it.id === focusId ? 'item-time' : undefined} style={{ fontSize: 15, fontWeight: 600, color: 'var(--dim)', background: 'transparent', border: 'none', outline: 'none', textAlign: 'right', padding: 0, width: 84, cursor: 'pointer' }} />
-                ) : (
-                  <span data-tour={it.id === focusId ? 'item-time' : undefined} style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', padding: '3px 8px', borderRadius: 999, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)' }}>Next Up</span>
-                )}
                 {/* F10 (UX pass 2026-08-11): these controls were 13x17 and 22x22
                     against the app's own 48px floor. The ICONS are unchanged —
                     only the padding grew, so the tappable area is real without
                     the row looking different. `gap` drops to 0 because the new
-                    padding now provides the separation. */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+                    padding now provides the separation. The negative left margin
+                    lines the first icon up with the title above it. */}
+                <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0, margin: '-2px 0 -8px -13px' }}>
                   {/* Vic 2026-08-31 — edit icon on every stack: opens its full
                       settings (a note's message + Scroll/Flash style especially,
                       which had no re-edit path before). */}
@@ -517,13 +571,23 @@ function FastingBadge() {
   const now = new Date();
   const hm = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
   const eating = isInEatWindow(hm, S.eatOpen, S.eatClose);
+  // A WORD IN THE TOP STRIP, NOT A DISC ON TOP OF THE BELL (2026-10-17). The
+  // badge was a 34px "E"/"F" disc at top 12px, right 14px — squarely over the
+  // Stack header's notification disc (Vic's screenshot: the "E" sat on the
+  // bell). Every screen leaves 28px of padding above its first line (the Demo
+  // marker lives there too, centred), so the badge now lives in that strip as
+  // a small pill that says the word. The button is the whole 28px strip tall
+  // so the tap target is bigger than the pill it draws.
   return (
     <>
-      <button onClick={() => setOpen(!open)} aria-label="Fasting status" style={{ position: 'absolute', top: 'calc(12px + env(safe-area-inset-top, 0px))', right: 14, zIndex: 31, width: 34, height: 34, borderRadius: 999, border: '1px solid var(--rim)', background: 'var(--surface-strong)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', boxShadow: 'var(--elev)', color: 'var(--accent)', fontWeight: 800, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        {eating ? 'E' : 'F'}
+      <button onClick={() => setOpen(!open)} aria-label={eating ? 'Eating window open. Tap for details' : 'Fasting. Tap for details'} aria-expanded={open} style={{ position: 'absolute', top: 'env(safe-area-inset-top, 0px)', right: 8, zIndex: 31, height: 28, padding: '0 6px', background: 'none', border: 'none', display: 'flex', alignItems: 'center' }}>
+        <span style={{ height: 20, padding: '0 9px', borderRadius: 999, border: '1px solid var(--rim)', background: 'var(--surface-strong)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', boxShadow: 'var(--elev)', color: 'var(--accent)', fontWeight: 800, fontSize: 9.5, letterSpacing: '.14em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap' }}>
+          <span aria-hidden="true" style={{ width: 6, height: 6, borderRadius: 999, background: 'currentColor', opacity: eating ? 1 : .55 }} />
+          {eating ? 'Eating' : 'Fasting'}
+        </span>
       </button>
       {open && (
-        <div style={{ position: 'absolute', top: 'calc(54px + env(safe-area-inset-top, 0px))', right: 14, left: 14, zIndex: 31, borderRadius: 20, padding: 16, background: 'var(--surface-strong)', backdropFilter: 'var(--blur-heavy)', WebkitBackdropFilter: 'var(--blur-heavy)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', animation: 'ppwSheetIn .4s cubic-bezier(.3,1.36,.4,1) both' }}>
+        <div style={{ position: 'absolute', top: 'calc(34px + env(safe-area-inset-top, 0px))', right: 14, left: 14, zIndex: 31, borderRadius: 20, padding: 16, background: 'var(--surface-strong)', backdropFilter: 'var(--blur-heavy)', WebkitBackdropFilter: 'var(--blur-heavy)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', animation: 'ppwSheetIn .4s cubic-bezier(.3,1.36,.4,1) both' }}>
           <div style={{ fontSize: 15, fontWeight: 700, textShadow: 'var(--emboss)' }}>{eating ? 'Eating window open' : 'Fasting'}</div>
           <div style={{ marginTop: 6, fontSize: 13, lineHeight: 1.5, color: 'var(--dim)' }}>
             {eating
@@ -908,7 +972,10 @@ export default function App5() {
     // is plainly on screen. With the 2026-10 indigo flip the app went dark and
     // that fixed mid-grey became a box around it. One ground for all eight
     // colourways instead, which is also the only version that cannot drift.
-    <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative', ...vars, ...(isDesktop ? { gap: 'clamp(40px, 5vw, 84px)', padding: '0 4vw' } : {}), background: 'var(--ground)' }}>
+    // ppwNoScroll (app5.css): `overflow: clip`, so neither the room nor the
+    // frame can ever be scrolled — `hidden` still lets a script scroll a box,
+    // and one stray scrollIntoView slid the whole phone off the screen.
+    <div className="ppwNoScroll" style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', ...vars, ...(isDesktop ? { gap: 'clamp(40px, 5vw, 84px)', padding: '0 4vw' } : {}), background: 'var(--ground)' }}>
       {isDesktop && (
         <>
           {/* the same luminous ground the frame has inside, at room scale */}
@@ -918,7 +985,22 @@ export default function App5() {
           <DesktopStage S={S} />
         </>
       )}
-      <div data-easyread={S.a11y.on ? '1' : '0'} style={{ position: 'relative', width: 'min(430px, 100vw)', height: isDesktop ? 'min(932px, 92dvh)' : 'min(932px, 100dvh)', overflow: 'hidden', borderRadius: 'clamp(0px, calc((100vw - 429px) * 99), 40px)', boxShadow: isDesktop ? '0 60px 140px -40px rgba(15,18,26,.6), 0 0 0 1px rgba(255,255,255,.09)' : '0 40px 120px -30px rgba(20,26,36,.55)', zIndex: 1, fontFamily: "'Nunito', system-ui, sans-serif", fontWeight: 500, color: 'var(--ink, #23262C)', zoom: S.a11y.zoom || 1, ...vars }}>
+      <div data-easyread={S.a11y.on ? '1' : '0'} className="ppwNoScroll" style={{ position: 'relative', width: 'min(430px, 100vw)', height: isDesktop ? 'min(932px, 92dvh)' : 'min(932px, 100dvh)', borderRadius: 'clamp(0px, calc((100vw - 429px) * 99), 40px)', boxShadow: isDesktop ? '0 60px 140px -40px rgba(15,18,26,.6), 0 0 0 1px rgba(255,255,255,.09)' : '0 40px 120px -30px rgba(20,26,36,.55)', zIndex: 1, fontFamily: "'Nunito', system-ui, sans-serif", fontWeight: 500, color: 'var(--ink, #23262C)', ...vars }}>
+      {/* THE TEXT-SIZE ZOOM LIVES ON THIS LAYER, NOT ON THE FRAME (2026-10-17).
+          Settings → Bigger text used to set `zoom` on the frame itself, and CSS
+          zoom scales an element's OWN box as well as its contents: at 115% the
+          frame became 115% of the screen tall, so the bottom 15% — the nav dock
+          and the + — sat below the edge of the phone with nothing to scroll to,
+          and the header lost 15% of its width to the right edge. That is Vic's
+          17 Oct screenshot exactly (reproduced at 360 x 652, zoom 1.15: page
+          750px tall in a 652px window). The frame now always fits the screen;
+          this full-size layer inside it carries the zoom, so everything in it
+          is drawn bigger and lays out in the room the screen really has. It is
+          still the coach marks' and hint bubble's positioning parent (they read
+          `host.parentElement` and divide by the zoom), so their maths is
+          unchanged — it simply stopped having to cope with a frame taller than
+          the phone. */}
+      <div style={{ position: 'absolute', inset: 0, zoom: S.a11y.zoom || 1 }}>
         {/* ground */}
         <div style={{ position: 'absolute', inset: 0, background: 'var(--ground)', transition: 'background .4s ease' }} />
         {/* luminous blobs the glass refracts */}
@@ -984,6 +1066,7 @@ export default function App5() {
             arrived before the code did — the one thing the stacking order here
             is load-bearing for. See screens/AccessGate.jsx. */}
         <AccessGate />
+      </div>
       </div>
     </div>
   );

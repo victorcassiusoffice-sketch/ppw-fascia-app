@@ -20,6 +20,29 @@
    asked the OS for less motion. The text stays fully readable, just static. */
 @media (prefers-reduced-motion: reduce) { .ppwCardMarquee { animation: none !important; } }
 
+/* ── NARROW CARDS (2026-10-17) ─────────────────────────────────────────────
+   NEXT UP's action row is a size container. Play + Done + "Snooze" + Delete
+   needs ~300px; on a 360px phone, or anywhere with Settings → Bigger text on,
+   the card is narrower than that, Done was crushed to a sliver and Delete hung
+   off the edge. Below 300px Snooze keeps its clock icon, its aria-label and
+   its title, and drops the word. Container units follow the text-size zoom,
+   so this switches at the right moment whatever the zoom is. */
+.ppwHeroActions { container-type: inline-size; }
+@container (max-width: 300px) {
+  .ppwSnoozeWord { display: none; }
+  .ppwSnoozeBtn { padding: 0 !important; width: 48px; }
+}
+/* The Stack rows' time field: the browser's own clock glyph made the field
+   84px wide for a picker the field already opens when it is tapped. */
+.ppwTimeInput::-webkit-calendar-picker-indicator { display: none; }
+
+/* The room and the phone frame clip, and can never be scrolled. `hidden`
+   clips too, but a box with overflow:hidden is still a scroll container, so a
+   script (scrollIntoView, a focus) can scroll it — and once it had, the whole
+   app sat shifted up and to the left with no way back. `clip` is not a scroll
+   container. `hidden` first, for any engine that does not know `clip`. */
+.ppwNoScroll { overflow: hidden; overflow: clip; }
+
 /* ── ONBOARDING PITCH (2026-08-25) — montage + stack-build. Transform+opacity
    ONLY per the PERF law above: no blur, no filter. ── */
 @keyframes ppwMontageIn { 0% { opacity:0; transform:translateY(28px) scale(.55); } 70% { opacity:1; transform:translateY(-3px) scale(1.05); } 100% { opacity:1; transform:none; } }
