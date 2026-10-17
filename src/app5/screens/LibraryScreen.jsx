@@ -16,8 +16,16 @@ import SuppsSection from './SuppsSection.jsx';
 // No membership import left here on purpose: this screen priced the Routines shelf
 // until 2026-10-08, and nothing on it names a product or a price now.
 
+// The quick add-to-today control's face. It used to be EMPTY until tapped — a
+// faint 24px square that read as an unticked checkbox, its meaning only in a
+// screen-reader label (tester pass 1, 2026-10-17). It now shows a plus until
+// the thing is added, and the tick after.
+const IPlus = <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>;
+const ITick = <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>;
+const quickAddStyle = (added, locked) => ({ width: 32, height: 32, flex: 'none', borderRadius: 10, border: `1.5px solid ${added ? 'var(--acc-rim)' : 'var(--rim)'}`, background: added ? 'var(--acc-surf)' : 'var(--disc)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: locked ? 'var(--dim)' : (added ? 'var(--acc-ink)' : 'var(--accent)'), padding: 0, transition: 'all .2s' });
+
 // small calendar "Add to Stack" disc — opens SchedulePicker to pick the day
-const ICal = <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="2.5" /><path d="M3.5 9.5h17M8 3.5v3M16 3.5v3M12 13v4M10 15h4" /></svg>;
+const ICal =<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="2.5" /><path d="M3.5 9.5h17M8 3.5v3M16 3.5v3M12 13v4M10 15h4" /></svg>;
 function AddToStackBtn({ onClick, label = 'Add to Stack on a day' }) {
   return (
     <button onClick={(e) => { e.stopPropagation(); onClick(); }} aria-label={label} title={label}
@@ -381,8 +389,8 @@ function MediaRow({ it }) {
         {/* calendar Add-to-Stack (item 2) — schedule onto a chosen day */}
         <AddToStackBtn onClick={() => openSchedule({ type: 'item', item: it })} />
         {/* quick add to today (existing tick) */}
-        <button onClick={add} aria-label="Add to today's stack" title="Quick add to today" style={{ width: 24, height: 24, flex: 'none', borderRadius: 8, border: `1.5px solid ${added ? 'var(--acc-rim)' : 'var(--rim)'}`, background: added ? 'var(--acc-surf)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--acc-ink)', padding: 0, transition: 'all .2s' }}>
-          {added && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>}
+        <button onClick={add} aria-label="Add to today's stack" title="Quick add to today" style={quickAddStyle(added, false)}>
+          {added ? ITick : IPlus}
         </button>
       </div>
     </div>
@@ -444,10 +452,10 @@ function ProtocolRow({ p }) {
             locked protocol the tap can only ever reach the refusal, so the
             control says so before it is tapped, not after: a padlock where the
             tick would be, and the same words the View position now uses. */}
-        <button data-tour="protocol-add" onClick={quickAdd} aria-label={locked ? `${p.title} is locked` : "Add to today's stack"} title={locked ? 'Not on your plan' : 'Quick add to today'} style={{ width: 24, height: 24, flex: 'none', borderRadius: 8, border: `1.5px solid ${added ? 'var(--acc-rim)' : 'var(--rim)'}`, background: added ? 'var(--acc-surf)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: locked ? 'var(--dim)' : 'var(--acc-ink)', padding: 0, transition: 'all .2s' }}>
+        <button data-tour="protocol-add" onClick={quickAdd} aria-label={locked ? `${p.title} is locked` : "Add to today's stack"} title={locked ? 'Not on your plan' : 'Quick add to today'} style={quickAddStyle(added, locked)}>
           {locked
             ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2.5" /><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5" /></svg>
-            : added && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>}
+            : (added ? ITick : IPlus)}
         </button>
       </div>
     </div>

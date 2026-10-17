@@ -9,7 +9,7 @@
 // it had no builder behind it in either tier. See the note at its old site.
 
 import React from 'react';
-import { useStore5, closeAdd, setCustomUrl, addCustomUrl, goLibrary, openNoteComposer, setNoteField, addNote, parseRoutineMd, addItemsToToday, createRoutine, routineItemsForSave, repeatLabel, getState, addDocToToday, openAiBridge, premiumGated } from '../store5.js';
+import { useStore5, closeAdd, setCustomUrl, addCustomUrl, goLibrary, goStackItem, openNoteComposer, setNoteField, addNote, parseRoutineMd, addItemsToToday, createRoutine, routineItemsForSave, repeatLabel, getState, addDocToToday, openAiBridge, premiumGated } from '../store5.js';
 import { saveFile } from '../files5.js';
 // The failed-paste sentence is registry copy (hints5.js `link-failed`), not
 // this screen's own words. It is marked `inline: true` there precisely because
@@ -61,6 +61,28 @@ export default function AddSheet() {
   // belongs to the attempt that caused it and to nothing else, so clear it
   // whenever the sheet opens or closes.
   React.useEffect(() => { setLinkErr(0); }, [S.addOpen]);
+  // Esc closes the sheet (tester pass 1, 2026-10-17): a keyboard user had no way
+  // out at all — no close button either, only a tap on the dim backdrop.
+  React.useEffect(() => {
+    if (!S.addOpen) return undefined;
+    const onKey = (e) => { if (e.key === 'Escape') closeAdd(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [S.addOpen]);
+  // The "added" line sits under the link field at the very bottom of a sheet
+  // that scrolls, so it appeared below the fold — at 390px a sliver of it, at
+  // 1280px none, and its View button sat under the clip where taps fell through
+  // to the backdrop. Bring it into view the moment it appears.
+  // Scrolls THE SHEET only — never scrollIntoView, which also scrolls every
+  // ancestor that can scroll, and moved the whole phone frame off the screen.
+  const addedRef = React.useRef(null);
+  const sheetRef = React.useRef(null);
+  React.useEffect(() => {
+    const el = addedRef.current, sc = sheetRef.current;
+    if (!S.addedCustom || !el || !sc) return;
+    const below = el.getBoundingClientRect().bottom - sc.getBoundingClientRect().bottom + 12;
+    if (below > 0) { try { sc.scrollBy({ top: below, behavior: 'smooth' }); } catch { sc.scrollTop += below; } }
+  }, [S.addedCustom]);
   const onRoutineFile = (e) => {
     const f = e.target.files && e.target.files[0];
     e.target.value = '';
@@ -79,8 +101,13 @@ export default function AddSheet() {
   return (
     <div style={{ position: 'absolute', inset: 0, zIndex: 30 }}>
       <div onClick={closeAdd} style={{ position: 'absolute', inset: 0, background: 'rgba(30,38,52,.35)', animation: 'ppwFade .3s ease both' }} />
-      <div style={{ position: 'absolute', left: 14, right: 14, bottom: 'calc(96px + env(safe-area-inset-bottom, 0px))', maxHeight: 'calc(100% - 130px)', overflowY: 'auto', borderRadius: 30, padding: '22px 20px 20px', background: 'var(--surface-strong)', backdropFilter: 'var(--blur-heavy)', WebkitBackdropFilter: 'var(--blur-heavy)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', transformOrigin: '50% 105%', animation: 'ppwSheetIn .5s cubic-bezier(.3,1.36,.4,1) both' }}>
-        <div data-tour="add-header" style={{ fontSize: 20, fontWeight: 600, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>Add to your stack</div>
+      <div ref={sheetRef} style={{ position: 'absolute', left: 14, right: 14, bottom: 'calc(96px + env(safe-area-inset-bottom, 0px))', maxHeight: 'calc(100% - 130px)', overflowY: 'auto', borderRadius: 30, padding: '22px 20px 20px', background: 'var(--surface-strong)', backdropFilter: 'var(--blur-heavy)', WebkitBackdropFilter: 'var(--blur-heavy)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', transformOrigin: '50% 105%', animation: 'ppwSheetIn .5s cubic-bezier(.3,1.36,.4,1) both' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+          <div data-tour="add-header" style={{ fontSize: 20, fontWeight: 600, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>Add to your stack</div>
+          <button onClick={closeAdd} aria-label="Close" style={{ width: 40, height: 40, flex: 'none', borderRadius: 999, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--ink)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+          </button>
+        </div>
 
         {/* FREE, zero-cost AI path (Vic 2d): the user's OWN AI plans their day.
             Sits above everything because it is the fastest way to a full day. */}
@@ -265,9 +292,12 @@ export default function AddSheet() {
           <div key={linkErr} id="add-link-error" role="alert" style={{ marginTop: 8, fontSize: 12.5, lineHeight: 1.45, fontWeight: 600, color: 'var(--bad)', animation: 'ppwRise .3s ease both' }}>{HINTS['link-failed'].copy}</div>
         )}
         {S.addedCustom && (
-          <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 18, border: '1px solid var(--rim)', background: 'var(--surface)', animation: 'ppwRise .3s ease both' }}>
-            <div style={{ flex: 1, fontSize: 13.5, color: 'var(--ink)' }}><strong>{S.addedCustom.title}</strong> added to today's stack</div>
-            <button onClick={() => goLibrary('media')} style={{ background: 'none', border: 'none', color: 'var(--accent)', fontSize: 13, fontWeight: 600 }}>View</button>
+          <div ref={addedRef} role="status" style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 12, padding: '8px 8px 8px 14px', borderRadius: 18, border: '1px solid var(--acc-rim)', background: 'var(--surface)', animation: 'ppwRise .3s ease both' }}>
+            <div style={{ flex: 1, minWidth: 0, fontSize: 13.5, lineHeight: 1.4, color: 'var(--ink)', overflowWrap: 'anywhere' }}><strong>{S.addedCustom.title}</strong> added to today's stack</div>
+            {/* goStackItem, not goLibrary('media'): a pasted link is on the
+                Stack, never on the Library's shelf, so View used to show
+                everything except the thing just added. */}
+            <button onClick={() => goStackItem(S.addedCustom.id)} style={{ flex: 'none', minHeight: 44, padding: '0 14px', borderRadius: 14, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontSize: 13, fontWeight: 700 }}>View on Stack</button>
           </div>
         )}
       </div>

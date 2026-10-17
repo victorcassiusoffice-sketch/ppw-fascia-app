@@ -8,8 +8,14 @@
 
 import React from 'react';
 import { THUMBS } from '../theme5.js';
-import { useStore5, closePlayer, safeUrl } from '../store5.js';
+import { useStore5, closePlayer, safeUrl, itemHref } from '../store5.js';
 import { fileUrl } from '../files5.js';
+
+// A document or a protocol is something you READ. Its poster used to carry the
+// same ▶ as a video, which told the user it would play and then did nothing
+// (tester pass 1, 2026-10-17). It gets a page glyph instead.
+const IPage = <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h8l4 4v14H6z" /><path d="M14 3v4h4M9.5 12h5M9.5 15.5h5" /></svg>;
+const IPlayBig = <svg width="42" height="42" viewBox="0 0 24 24" fill="currentColor"><path d="M9 6.2v11.6l9.4-5.8L9 6.2z" /></svg>;
 
 export default function MediaViewer() {
   const S = useStore5();
@@ -22,6 +28,13 @@ export default function MediaViewer() {
     if (it && it.kind === 'doc' && it.fileId) fileUrl(it.fileId).then((u) => { if (on) setDocUrl(u); });
     return () => { on = false; };
   }, [it && it.id]);
+  // Esc closes it, like every other sheet a keyboard user can open.
+  React.useEffect(() => {
+    if (!it) return undefined;
+    const onKey = (e) => { if (e.key === 'Escape') closePlayer(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [it]);
   if (!it) return null;
 
   // Defence in depth: items stored before the safeUrl fix (or hand-edited in
@@ -29,26 +42,38 @@ export default function MediaViewer() {
   const safeThumb = safeUrl(it.thumbUrl);
   const safeEmbed = safeUrl(it.embed);
   const poster = safeThumb ? `url(${safeThumb})` : (THUMBS[it.thumb] || THUMBS.au);
-  const openHref = it.kind === 'doc' ? docUrl : safeUrl(it.url);
+  const isDoc = it.kind === 'doc';
+  const isProtocol = it.kind === 'pdf';
+  const readable = isDoc || isProtocol;
+  // itemHref, not safeUrl: a bundled protocol is a path on this site
+  // ("/protocols/pdf/…"), which safeUrl refused — so it had no Open at all.
+  const openHref = isDoc ? docUrl : itemHref(it);
+  const openLabel = isDoc ? 'Open document ↗' : isProtocol ? 'Open protocol ↗' : 'Open ↗';
 
   return (
     <div style={{ position: 'absolute', inset: 0, zIndex: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div onClick={closePlayer} style={{ position: 'absolute', inset: 0, background: 'rgba(20,26,38,.5)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', animation: 'ppwFade .3s ease both' }} />
-      <div style={{ position: 'relative', width: '100%', borderRadius: 28, padding: 18, background: 'var(--surface-strong)', backdropFilter: 'var(--blur-heavy)', WebkitBackdropFilter: 'var(--blur-heavy)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', animation: 'ppwSheetIn .45s cubic-bezier(.3,1.3,.4,1) both' }}>
+      <div role="dialog" aria-label={it.title} style={{ position: 'relative', width: '100%', borderRadius: 28, padding: 18, background: 'var(--surface-strong)', backdropFilter: 'var(--blur-heavy)', WebkitBackdropFilter: 'var(--blur-heavy)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)', animation: 'ppwSheetIn .45s cubic-bezier(.3,1.3,.4,1) both' }}>
         {safeEmbed ? (
           <iframe src={safeEmbed} title="Media player" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen style={{ position: 'relative', width: '100%', aspectRatio: '16/9', border: 'none', borderRadius: 18, background: '#000', display: 'block' }} />
+        ) : readable && openHref ? (
+          // The poster of a readable thing IS a way in: tapping it opens the
+          // document, the same as the button underneath.
+          <a href={openHref} target="_blank" rel="noopener noreferrer" aria-label={openLabel.replace(' ↗', '')} style={{ position: 'relative', width: '100%', aspectRatio: '16/9', borderRadius: 18, background: poster, backgroundSize: 'cover', backgroundPosition: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,.9)' }}>
+            {!safeThumb && IPage}
+          </a>
         ) : (
           <div aria-hidden="true" style={{ position: 'relative', width: '100%', aspectRatio: '16/9', borderRadius: 18, background: poster, backgroundSize: 'cover', backgroundPosition: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,.9)' }}>
-            {!safeThumb && <svg width="42" height="42" viewBox="0 0 24 24" fill="currentColor"><path d="M9 6.2v11.6l9.4-5.8L9 6.2z" /></svg>}
+            {!safeThumb && (readable ? IPage : IPlayBig)}
           </div>
         )}
         <div style={{ position: 'relative', marginTop: 14, fontSize: 17, fontWeight: 600, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>{it.title}</div>
         <div style={{ position: 'relative', marginTop: 3, fontSize: 13, color: 'var(--dim)' }}>{it.meta}</div>
         <div style={{ position: 'relative', marginTop: 16, display: 'flex', gap: 10 }}>
           {openHref && (
-            <a href={openHref} target="_blank" rel="noopener noreferrer" style={{ height: 48, padding: '0 16px', borderRadius: 15, border: '1px solid var(--acc-rim)', background: it.kind === 'doc' ? 'var(--acc-surf)' : 'transparent', color: it.kind === 'doc' ? 'var(--acc-ink)' : 'var(--ink)', display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13.5, fontWeight: 600, textDecoration: 'none' }}>{it.kind === 'doc' ? 'Open document ↗' : 'Open ↗'}</a>
+            <a href={openHref} target="_blank" rel="noopener noreferrer" style={{ height: 48, padding: '0 16px', borderRadius: 15, border: '1px solid var(--acc-rim)', background: readable ? 'var(--acc-surf)' : 'transparent', color: readable ? 'var(--acc-ink)' : 'var(--ink)', display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13.5, fontWeight: 600, textDecoration: 'none' }}>{openLabel}</a>
           )}
-          {it.kind === 'doc' && !docUrl && <div style={{ alignSelf: 'center', fontSize: 12.5, color: 'var(--dim)' }}>Loading document…</div>}
+          {isDoc && !docUrl && <div style={{ alignSelf: 'center', fontSize: 12.5, color: 'var(--dim)' }}>Loading document…</div>}
           <button onClick={closePlayer} style={{ flex: 1, height: 48, padding: '0 16px', borderRadius: 15, border: '1px solid var(--rim)', background: 'transparent', color: 'var(--dim)', fontWeight: 600, fontSize: 13.5 }}>Cancel</button>
         </div>
       </div>

@@ -94,8 +94,12 @@ export default function AccessGate() {
   const wait = open ? attemptWaitMs() : 0;
   const waiting = wait > 0;
 
+  // preventScroll (tester pass 1, 2026-10-17): a plain focus() scrolled the door
+  // down to the code box on load, so a stranger's first sight was the middle of
+  // the confidentiality text, 500-650px below its own heading. The box still
+  // takes the focus; the door stays at its top.
   React.useEffect(() => {
-    if (open && needCode && inputRef.current) { try { inputRef.current.focus(); } catch { /* noop */ } }
+    if (open && needCode && inputRef.current) { try { inputRef.current.focus({ preventScroll: true }); } catch { /* noop */ } }
   }, [open, needCode]);
 
   // Tick the countdown only while there is one. The dependency is the BOOLEAN, so

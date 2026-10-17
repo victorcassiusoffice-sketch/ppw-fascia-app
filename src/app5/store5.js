@@ -77,6 +77,8 @@ export const QUIT_DEFAULT_AT = '07:00';
 // so the two can never drift into citing different videos for the same thing.
 const STARTER_STRETCH_ID = 'yLDAHd_C7G0';
 const STARTER_HIIT_ID = 'zr08J6wB53Y';
+// The Library's soundscape (Spotify editorial "Nature Sounds", see mediaItems).
+const SOUNDSCAPE_URL = 'https://open.spotify.com/playlist/37i9dQZF1DX4PP3DA4J0N8';
 
 /**
  * F6 (UX pass 2026-08-11) — these four are OURS, not the user's.
@@ -188,7 +190,14 @@ function initialState() {
     importedProtos: [],
     // media library (verbatim starters from the prototype)
     mediaItems: [
-      { id: 'm1', title: 'Deep Tissue Soundscape', meta: 'Spotify · 20 min', thumb: 'sp', note: true, url: 'https://open.spotify.com' },
+      // A REAL PLAYLIST, not Spotify's home page (tester pass 1, 2026-10-17): the
+      // url was bare `https://open.spotify.com`, so Open landed on Spotify's
+      // front page with nothing called this to search for. Spotify's own
+      // editorial "Nature Sounds" playlist, checked against Spotify's oEmbed on
+      // 2026-10-17 (title "Nature Sounds"). A playlist runs for hours, so the
+      // old "20 min" went too. SOUNDSCAPE_URL also repairs copies already on a
+      // Stack — see the hydration pass below.
+      { id: 'm1', title: 'Deep Tissue Soundscape', meta: 'Spotify · Nature Sounds playlist', thumb: 'sp', note: true, url: SOUNDSCAPE_URL },
       // Was the same beginners' yoga video as the old 07:30 starter card. Taking
       // yoga off the Stack and leaving it on this shelf would have been half a
       // change: the Library is two taps away and it is where someone browses.
@@ -302,6 +311,9 @@ function initialState() {
     //                was invisible to everything outside that one component —
     //                and Quest 4 has to know. Lifted, not duplicated.
     coach: null, journalOpen: false, hint: null, lastAddedId: null, aiStep: 0, calSelKey: null, calMonthOff: 0,
+    // flashId: the Stack card to scroll to and light up for a moment — set by
+    // "View" after an add (goStackItem), cleared by StackScreen. Never saved.
+    flashId: null,
     guide: { q: {} }, hints: {}, hintsOff: false,
     // selection / interaction
     selectedIds: [],
@@ -405,6 +417,10 @@ function initialState() {
     // stacks live in one consolidated blob; legacy per-key blobs load as fallback
     const st = gj('stacks') || {};
     const di = Array.isArray(st.d) ? st.d : gj('deckItems'); if (Array.isArray(di) && di.length) def.deckItems = di;
+    // A soundscape added before 2026-10-17 carries Spotify's bare home page as its
+    // link. Exact title + exact old url only, so nothing the user typed is touched.
+    def.deckItems = def.deckItems.map((it) => (it && it.title === 'Deep Tissue Soundscape' && it.url === 'https://open.spotify.com'
+      ? { ...it, url: SOUNDSCAPE_URL, meta: 'Spotify · Nature Sounds playlist' } : it));
     const db = (st.db && typeof st.db === 'object') ? st.db : gj('doneByDate'); if (db && typeof db === 'object') def.doneByDate = db;
     const ss = (st.ss && typeof st.ss === 'object') ? st.ss : gj('suppSel'); if (ss && typeof ss === 'object') def.suppSel = ss;
     const ip = Array.isArray(st.ip) ? st.ip : gj('importedProtos'); if (Array.isArray(ip)) def.importedProtos = ip;
@@ -895,6 +911,31 @@ export function safeUrl(u) {
   if (!/^https?:\/\//i.test(s)) return undefined;
   try { new URL(s); } catch { return undefined; }
   return s.slice(0, 500);
+}
+
+/**
+ * Where a stack's "Open" goes: safeUrl, plus ONE more shape — a path on this
+ * app's own site.
+ *
+ * The bundled protocol PDFs are stored as "/protocols/pdf/<name>.pdf"
+ * (protocols5.js builds `url` from BASE_URL), and safeUrl only ever passed full
+ * http(s) addresses, so a protocol added to the Stack opened a viewer with a
+ * dead ▶ and nothing but Cancel (tester pass 1, 2026-10-17, P1). A same-site
+ * path is resolved against the page's own origin and kept ONLY if it is still
+ * on that origin: "/\evil.com" and "//evil.com" both parse to another host,
+ * and both are refused.
+ */
+export function itemHref(it) {
+  if (!it) return undefined;
+  const direct = safeUrl(it.url);
+  if (direct) return direct;
+  const u = typeof it.url === 'string' ? it.url.trim() : '';
+  if (!/^\/(?![/\\])/.test(u)) return undefined;
+  try {
+    const here = window.location.origin;
+    const abs = new URL(u, here);
+    return abs.origin === here ? safeUrl(abs.href) : undefined;
+  } catch { return undefined; }
 }
 
 // ── AI-bridge / plan v2 helpers ──────────────────────────────────────────────
@@ -1736,6 +1777,18 @@ export function addNote() {
 }
 export function setCustomUrl(v) { setState({ customUrl: v }); }
 export function goLibrary(tab) { setState({ addOpen: false, addedCustom: null, screen: 'library', ...(tab ? { stackTab: tab } : {}) }); }
+/**
+ * "View" on the just-added line (2026-10-17, tester pass 1, P2): take the user
+ * to the thing they added. It used to call goLibrary('media'), and a pasted
+ * link is not on the Library's shelf, so View showed everything except what
+ * they had just made. It went onto TODAY's Stack, so that is where View goes,
+ * with the new card scrolled to and lit for a moment (`flashId`; StackScreen
+ * clears it again).
+ */
+export function goStackItem(id) {
+  setState({ addOpen: false, addedCustom: null, noteOpen: false, screen: 'stack', viewDate: null, flashId: id || null });
+}
+export function clearFlash() { if (state.flashId) setState({ flashId: null }); }
 // capRefusal goes with the message it describes: a stale one left behind would
 // make freeSlotAdviceApplies() answer for a paywall it knows nothing about.
 export function setUpsell(reason) { setState({ premiumUpsell: reason, capRefusal: null }); }

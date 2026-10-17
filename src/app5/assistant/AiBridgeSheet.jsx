@@ -19,6 +19,14 @@ const CARD = { background: 'var(--surface)', border: '1px solid var(--rim)', box
 const BTN_PRIMARY = { height: 52, borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 700, fontSize: 15, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)', width: '100%' };
 const BTN_GHOST = { height: 46, borderRadius: 14, border: '1px solid var(--rim)', background: 'transparent', color: 'var(--dim)', fontWeight: 600, fontSize: 13.5, width: '100%' };
 
+// The three AIs the prompt is written for. Plain web addresses: on a phone with
+// the AI's own app installed, each opens that app; anywhere else, the website.
+export const AI_APPS = [
+  { name: 'ChatGPT', url: 'https://chatgpt.com/' },
+  { name: 'Claude', url: 'https://claude.ai/new' },
+  { name: 'Gemini', url: 'https://gemini.google.com/app' },
+];
+
 const DAY_LABEL = (n) => {
   if (!n) return 'Today';
   if (n === 1) return 'Tomorrow';
@@ -245,7 +253,10 @@ export default function AiBridgeSheet() {
             </p>
             <div style={{ marginTop: 18, padding: 16, borderRadius: 20, ...CARD }}>
               <div style={{ fontSize: 13, fontWeight: 700, textShadow: 'var(--emboss)' }}>How it works</div>
-              <ol style={{ margin: '10px 0 0', paddingLeft: 18, fontSize: 13, lineHeight: 1.7, color: 'var(--dim)' }}>
+              {/* listStyle: the global CSS reset strips list markers, so the
+                  four steps rendered as four loose lines with no order to
+                  them (tester pass 1, 2026-10-17). */}
+              <ol style={{ margin: '10px 0 0', paddingLeft: 20, listStyle: 'decimal', fontSize: 13, lineHeight: 1.7, color: 'var(--dim)' }}>
                 <li>Send the prompt to your AI app</li>
                 <li>Tell it about your days — as much or as little as you like</li>
                 <li>Copy its whole reply</li>
@@ -321,7 +332,21 @@ export default function AiBridgeSheet() {
         {/* ── 2 PASTE ── */}
         {step === 2 && (
           <div style={{ animation: 'ppwScreenIn .5s cubic-bezier(.26,1,.4,1)' }}>
-            <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.6, color: 'var(--dim)' }}>
+            {/* THE WAY OUT TO THE AI (tester pass 1, 2026-10-17). After "Copy
+                the prompt" the sheet jumped straight to "paste its reply", and
+                the user had to work out on their own that they should now leave
+                the app, open an AI and paste. Three plain links say it, and
+                open the AI's own app on a phone that has it. */}
+            <div style={{ padding: 14, borderRadius: 18, ...CARD }}>
+              <div style={{ fontSize: 13.5, fontWeight: 700, textShadow: 'var(--emboss)' }}>Now open your AI and paste the prompt</div>
+              <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {AI_APPS.map((a) => (
+                  <a key={a.name} href={a.url} target="_blank" rel="noopener noreferrer" style={{ minHeight: 44, padding: '0 14px', borderRadius: 14, border: '1px solid var(--rim)', background: 'var(--disc)', color: 'var(--ink)', display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13.5, fontWeight: 600, textDecoration: 'none' }}>{a.name} ↗</a>
+                ))}
+              </div>
+              <div style={{ marginTop: 10, fontSize: 12, lineHeight: 1.5, color: 'var(--dim)' }}>Chat with it about your days. When it sends your plan, copy its whole reply and come back here.</div>
+            </div>
+            <p style={{ margin: '16px 0 0', fontSize: 14.5, lineHeight: 1.6, color: 'var(--dim)' }}>
               Copy your AI’s <strong style={{ color: 'var(--ink)' }}>whole reply</strong> and paste it here — including the block of code at the end.
             </p>
             <button onClick={pasteAssist} style={{ ...BTN_GHOST, marginTop: 14 }}>Paste from clipboard</button>
