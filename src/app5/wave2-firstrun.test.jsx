@@ -175,6 +175,14 @@ describe('telling people a new version is ready', () => {
     expect(applyUpdate).toHaveBeenCalled();
   });
 
+  it('goes away when the update turns out to be the build already on screen', async () => {
+    render(<UpdateBar />);
+    act(() => sw.cb({ updateReady: true, version: 'test' }));
+    await waitFor(() => screen.getByText(/a new version is ready/i));
+    act(() => sw.cb({ updateReady: false, version: 'test' }));
+    await waitFor(() => expect(screen.queryByText(/a new version is ready/i)).toBeNull());
+  });
+
   it('lets someone carry on with the old build, and says what that costs', async () => {
     render(<UpdateBar />);
     act(() => sw.cb({ updateReady: true, version: 'test' }));

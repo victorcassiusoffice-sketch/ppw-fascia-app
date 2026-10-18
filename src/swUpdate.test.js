@@ -8,6 +8,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   isUpdateReady,
   shouldHardReload,
+  shouldReloadOnTakeover,
   registerServiceWorker,
   onUpdateState,
   applyUpdate,
@@ -283,5 +284,141 @@ describe('applying is the user’s tap, or the app going into the background', (
     document.dispatchEvent(new Event('visibilitychange'));
     expect(waiting.postMessage).toHaveBeenCalledWith({ type: 'SKIP_WAITING' });
     Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'visible' });
+  });
+});
+
+// ── A TAKEOVER IS NOT A RELOAD (2026-10-19) ─────────────────────────────────
+// astra-tester, live 15f8f03: a first visit reloaded itself 0.5–1.5 s after it
+// opened — the + sheet closed, the agreement jumped back to the top, up to a
+// second of blank screen. sw.js claims the page as soon as it installs, and
+// every takeover reloaded, though the page had just come from the network and
+// already ran the deployed build. The first launch after a release did the same
+// (and could raise "A new version is ready" for the build on screen). A reload
+// is for a tab that is behind.
+
+describe('shouldReloadOnTakeover', () => {
+  it('reloads only a tab that runs an older build than the deployed one', () => {
+    expect(shouldReloadOnTakeover(true, 'newSHA', 'oldSHA')).toBe(true);
+    expect(shouldReloadOnTakeover(false, 'newSHA', 'oldSHA')).toBe(true);
+    expect(shouldReloadOnTakeover(true, 'sameSHA', 'sameSHA')).toBe(false);  // first launch after a release
+    expect(shouldReloadOnTakeover(false, 'sameSHA', 'sameSHA')).toBe(false); // first visit
+  });
+  it('without the deployed build: a takeover from an old worker reloads, a first one does not', () => {
+    expect(shouldReloadOnTakeover(true, null, 'oldSHA')).toBe(true);
+    expect(shouldReloadOnTakeover(false, null, 'oldSHA')).toBe(false);
+    expect(shouldReloadOnTakeover(true, 'anySHA', 'dev')).toBe(true);
+    expect(shouldReloadOnTakeover(false, 'anySHA', 'dev')).toBe(false);
+  });
+});
+
+describe('a new service worker taking control', () => {
+  let loc;
+  beforeEach(() => { _resetForTest(); sessionStorage.clear(); loc = stubReload(); });
+  afterEach(() => { loc.restore(); vi.unstubAllGlobals(); clearFakeSW(); });
+
+  const runningBuild = () => { let v = null; const off = onUpdateState((s) => { v = s.version; }); off(); return v; };
+  const offline = () => vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline'); }));
+  function installNewWorker(reg) {
+    const swListeners = {};
+    const nw = {
+      state: 'installing',
+      postMessage: vi.fn(),
+      addEventListener: (type, cb) => { (swListeners[type] ||= []).push(cb); },
+      _fire: (type) => (swListeners[type] || []).forEach((cb) => cb()),
+    };
+    reg.installing = nw;
+    reg._fire('updatefound');
+    nw.state = 'installed';
+    reg.waiting = nw;
+    nw._fire('statechange');
+    return nw;
+  }
+
+  it('a first visit keeps what is on screen', async () => {
+    const reg = makeRegistration();
+    const container = installFakeSW({ reg, controller: null });
+    stubVersion(runningBuild());
+    await registerServiceWorker({ immediate: true });
+    container._fire('controllerchange');
+    await flush();
+    expect(loc.reload).not.toHaveBeenCalled();
+  });
+
+  it('a first visit keeps what is on screen when the deployed build cannot be read', async () => {
+    const reg = makeRegistration();
+    const container = installFakeSW({ reg, controller: null });
+    offline();
+    await registerServiceWorker({ immediate: true });
+    container._fire('controllerchange');
+    await flush();
+    expect(loc.reload).not.toHaveBeenCalled();
+  });
+
+  it('the first launch after a release keeps what is on screen and offers no update', async () => {
+    // The page came fresh from the network under the old worker; the new one
+    // installs and takes over.
+    const reg = makeRegistration();
+    const container = installFakeSW({ reg, controller: {} });
+    stubVersion(runningBuild());
+    await registerServiceWorker({ immediate: true });
+    await flush();
+    let ready = null;
+    onUpdateState((s) => { ready = s.updateReady; });
+    installNewWorker(reg);
+    expect(ready).toBe(false);              // it is the build already on screen
+    container._fire('controllerchange');
+    await flush();
+    expect(loc.reload).not.toHaveBeenCalled();
+    expect(ready).toBe(false);
+  });
+
+  it('stops offering an update once the waiting worker turns out to be the build on screen', async () => {
+    const reg = makeRegistration();
+    installFakeSW({ reg, controller: {} });
+    let answer;
+    vi.stubGlobal('fetch', vi.fn(() => new Promise((r) => { answer = r; })));
+    await registerServiceWorker({ immediate: true });
+    let ready = null;
+    onUpdateState((s) => { ready = s.updateReady; });
+    installNewWorker(reg);                  // installed before the version check answered
+    expect(ready).toBe(true);
+    answer(new Response(JSON.stringify({ build: runningBuild() }), { status: 200, headers: { 'content-type': 'application/json' } }));
+    await flush();
+    expect(ready).toBe(false);
+  });
+
+  it('a tab behind the deployed build reloads, once', async () => {
+    const reg = makeRegistration();
+    const container = installFakeSW({ reg, controller: {} });
+    stubVersion('a-newer-build');
+    await registerServiceWorker({ immediate: true });
+    container._fire('controllerchange');
+    container._fire('controllerchange');
+    await flush();
+    expect(loc.reload).toHaveBeenCalledTimes(1);
+  });
+
+  it('a takeover from an old worker still reloads when the deployed build cannot be read', async () => {
+    const reg = makeRegistration();
+    const container = installFakeSW({ reg, controller: {} });
+    offline();
+    await registerServiceWorker({ immediate: true });
+    container._fire('controllerchange');
+    await flush();
+    expect(loc.reload).toHaveBeenCalledTimes(1);
+  });
+
+  it('after a first visit, a release found while the tab stays open still reloads it', async () => {
+    const reg = makeRegistration();
+    const container = installFakeSW({ reg, controller: null });
+    stubVersion(runningBuild());
+    await registerServiceWorker({ immediate: true });
+    container._fire('controllerchange');    // the first worker takes charge
+    await flush();
+    expect(loc.reload).not.toHaveBeenCalled();
+    stubVersion('a-newer-build');           // a release lands; its worker takes over
+    container._fire('controllerchange');
+    await flush();
+    expect(loc.reload).toHaveBeenCalledTimes(1);
   });
 });

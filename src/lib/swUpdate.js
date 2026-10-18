@@ -16,11 +16,14 @@
 //      auto-applies the moment they background the app (a backgrounded reload is
 //      invisible), OR it applies naturally on the next cold launch. Either way
 //      they never stay on a stale build, and an active user is never yanked.
-//   4. Reloads the page exactly once when the new SW takes control
-//      (controllerchange), guarded against reload loops.
+//   4. Reloads the page once when a new SW takes control (controllerchange)
+//      and this tab runs an older build than the deployed one, guarded against
+//      reload loops. A tab that already runs the deployed build is left alone
+//      (2026-10-19, below).
 //
-// The SW side (public/sw.js) deliberately does NOT skipWaiting() on install —
-// it waits for the SKIP_WAITING message posted by applyUpdate() below.
+// The SW side (public/sw.js) calls skipWaiting() on install (since 2026-06-18),
+// so a new worker takes control as soon as it has installed. The SKIP_WAITING
+// message posted by applyUpdate() is for a worker that is still parked.
 
 const BUILD = typeof __PPW_BUILD__ !== 'undefined' ? __PPW_BUILD__ : 'dev';
 
@@ -30,11 +33,18 @@ let _waitingWorker = null;
 // build by a stuck cache has a real update available and the user deserves to be
 // told, whether or not the SW machinery has managed to stage it.
 let _pendingBuild = null;
+// True once the version sentinel has seen that the deployed build IS the one
+// this tab runs. A worker installing then is the same build catching up with
+// a page that already has it (a first launch after a release loads the page
+// fresh from the network), not news for the user.
+let _runningDeployed = false;
 const _listeners = new Set();
+
+const _ready = () => !!_pendingBuild || (!!_waitingWorker && !_runningDeployed);
 
 function _emit() {
   const state = {
-    updateReady: !!_waitingWorker || !!_pendingBuild,
+    updateReady: _ready(),
     version: BUILD,
     serverVersion: _pendingBuild,
   };
@@ -48,7 +58,7 @@ function _emit() {
  *  update that was detected before it subscribed. */
 export function onUpdateState(cb) {
   _listeners.add(cb);
-  try { cb({ updateReady: !!_waitingWorker || !!_pendingBuild, version: BUILD, serverVersion: _pendingBuild }); } catch { /* noop */ }
+  try { cb({ updateReady: _ready(), version: BUILD, serverVersion: _pendingBuild }); } catch { /* noop */ }
   return () => _listeners.delete(cb);
 }
 
@@ -89,6 +99,20 @@ export function isUpdateReady(state, hasController) {
   return state === 'installed' && !!hasController;
 }
 
+/** Pure helper (unit-tested): reload when a new service worker takes control?
+ *  Only when this tab is behind (2026-10-19). Reloading for every takeover
+ *  blanked the screen ~1 s after it opened and closed whatever the visitor had
+ *  just tapped, on every first visit and on the first launch after every
+ *  release, when in both cases the page had come from the network and already
+ *  ran the deployed build.
+ *  - deployed build known: reload only when it differs from the running one
+ *  - not known (offline, dev): a takeover from an old worker reloads as it
+ *    always did; the first takeover of a page that had none does not */
+export function shouldReloadOnTakeover(hadController, deployedBuild, runningBuild) {
+  if (deployedBuild && runningBuild !== 'dev') return deployedBuild !== runningBuild;
+  return !!hadController;
+}
+
 // ── Version sentinel (2026-06-17) ────────────────────────────────────────────
 // The belt-and-suspenders for "device shows a stale build even though the live
 // URL is current". A tiny version.json (written at build with the commit SHA)
@@ -111,6 +135,26 @@ export function shouldHardReload(serverBuild, runningBuild, reloadedFor) {
   return true;
 }
 
+/** The build the server is deploying right now, read fresh (version.json,
+ *  no-store); null when it cannot be read: dev, offline, not deployed, or no
+ *  answer within 4 s. */
+async function readDeployedBuild() {
+  if (BUILD === 'dev') return null;            // dev server has no deployed build to recover to
+  if (typeof fetch !== 'function') return null; // unsupported env (jsdom unit tests)
+  const ctl = typeof AbortController === 'function' ? new AbortController() : null;
+  const timer = ctl ? setTimeout(() => ctl.abort(), 4000) : null;
+  try {
+    const res = await fetch(`${VERSION_URL}?t=${Date.now()}`, { cache: 'no-store', signal: ctl ? ctl.signal : undefined });
+    if (!res || !res.ok) return null;
+    const data = await res.json();
+    return (data && data.build) || null;
+  } catch {
+    return null;
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 /** The one-time guarded recovery reload. Only ever called from applyUpdate(). */
 function hardReloadOnce() {
   let reloadedFor = null;
@@ -130,24 +174,19 @@ function hardReloadOnce() {
  * backgrounded. Staying on the old build is allowed. Being uninformed is not.
  */
 async function checkVersion(reg) {
-  if (BUILD === 'dev') return;                 // dev server has no deployed build to recover to
-  if (typeof fetch !== 'function') return;     // unsupported env (jsdom unit tests)
-  let serverBuild = null;
-  try {
-    const res = await fetch(`${VERSION_URL}?t=${Date.now()}`, { cache: 'no-store' });
-    if (!res || !res.ok) return;
-    const data = await res.json();
-    serverBuild = data && data.build;
-  } catch {
-    return;                                    // offline / not deployed — keep working, never reload
-  }
-  if (!serverBuild || serverBuild === BUILD) {
-    if (_pendingBuild) { _pendingBuild = null; _emit(); }   // caught up
+  const serverBuild = await readDeployedBuild();
+  if (!serverBuild) return;                    // offline / not deployed — keep working, never reload
+  if (serverBuild === BUILD) {
+    const was = _ready();
+    _pendingBuild = null;                      // caught up
+    _runningDeployed = true;
+    if (_ready() !== was) _emit();
     return;
   }
 
   // A newer build is deployed. Record it — this alone lights the bar, even if the
   // SW is stuck and nothing can be staged, because the fact is true either way.
+  _runningDeployed = false;
   _pendingBuild = serverBuild;
 
   // Stage the new worker so the user's tap is instant when it comes. Staging is
@@ -162,6 +201,7 @@ async function checkVersion(reg) {
 export function _resetForTest() {
   _waitingWorker = null;
   _pendingBuild = null;
+  _runningDeployed = false;
   _listeners.clear();
 }
 
@@ -170,13 +210,27 @@ export function registerServiceWorker({ immediate = false } = {}) {
     return Promise.resolve(null);
   }
 
-  // Reload exactly once when the new SW takes control. The module-level guard
-  // stops a reload loop if controllerchange fires more than once.
+  // Reload once when a new SW takes control and this tab is behind the deployed
+  // build (shouldReloadOnTakeover). A tab that already runs it — every first
+  // visit, and the first launch after a release — keeps what is on screen, and
+  // the worker that just took over is no longer "waiting". The guard stops a
+  // reload loop if controllerchange fires more than once.
+  let hadController = !!navigator.serviceWorker.controller;
   let refreshing = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
+  navigator.serviceWorker.addEventListener('controllerchange', async () => {
+    const hadOne = hadController;
+    hadController = true;
     if (refreshing) return;
-    refreshing = true;
-    if (typeof window !== 'undefined') window.location.reload();
+    const deployed = await readDeployedBuild();
+    if (refreshing) return;
+    if (shouldReloadOnTakeover(hadOne, deployed, BUILD)) {
+      refreshing = true;
+      if (typeof window !== 'undefined') window.location.reload();
+      return;
+    }
+    if (deployed === BUILD) { _pendingBuild = null; _runningDeployed = true; }
+    _waitingWorker = null;
+    _emit();
   });
 
   const swUrl = `${import.meta.env.BASE_URL}sw.js`;

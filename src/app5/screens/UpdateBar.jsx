@@ -24,7 +24,10 @@ export default function UpdateBar() {
   const [ready, setReady] = React.useState(false);
   const [hidden, setHidden] = React.useState(false);
 
-  React.useEffect(() => onUpdateState((s) => { if (s.updateReady) setReady(true); }), []);
+  // Follows the state rather than latching on (2026-10-19): a worker that turns
+  // out to be the build already running stops being "a new version", and the
+  // bar goes away instead of offering an update to what is on screen.
+  React.useEffect(() => onUpdateState((s) => setReady(!!s.updateReady)), []);
 
   if (!ready || hidden) return null;
 
