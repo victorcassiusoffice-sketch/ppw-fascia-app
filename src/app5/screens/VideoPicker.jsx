@@ -32,18 +32,23 @@ export function ytMedia(id, title, author) {
   return { url: watchUrl(id), embed: embedUrl(id), thumb: 'yt', thumbUrl: thumbUrl(id), title: title || 'YouTube video', author: author || '' };
 }
 
+// On a narrow phone, or with Settings → Bigger text on, the title column was
+// ~100px and every title was cut after two short lines (astra-tester P3, 18 Oct,
+// 360 × 652 at 115%). The row now wraps: when the title would get less than
+// 120px, Add moves to its own line under the row and the title takes the width.
+// The title gets three lines and the channel line two before either is cut.
 function VideoRow({ v, onAdd, busy }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 10, borderRadius: 18, ...CARD }}>
+    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, padding: 10, borderRadius: 18, ...CARD }}>
       <a href={watchUrl(v.yt)} target="_blank" rel="noopener noreferrer" aria-label={`Watch ${v.title} on YouTube`}
         style={{ width: 96, height: 54, flex: 'none', borderRadius: 12, background: `#000 url(${smallThumb(v.yt)}) center/cover`, border: '1px solid var(--rim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,.92)' }}>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 6.2v11.6l9.4-5.8L9 6.2z" /></svg>
       </a>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 13.5, fontWeight: 600, lineHeight: 1.3, display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2, overflow: 'hidden', overflowWrap: 'anywhere' }}>{v.title}</div>
-        <div style={{ marginTop: 2, fontSize: 11.5, color: 'var(--dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{[v.author, v.mins ? `${v.mins} min` : null, 'YouTube'].filter(Boolean).join(' · ')}</div>
+      <div data-video-title="" style={{ flex: '1 1 120px', minWidth: 0 }}>
+        <div style={{ fontSize: 13.5, fontWeight: 600, lineHeight: 1.3, display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 3, overflow: 'hidden', overflowWrap: 'anywhere' }}>{v.title}</div>
+        <div style={{ marginTop: 2, fontSize: 11.5, lineHeight: 1.3, color: 'var(--dim)', display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2, overflow: 'hidden', overflowWrap: 'anywhere' }}>{[v.author, v.mins ? `${v.mins} min` : null, 'YouTube'].filter(Boolean).join(' · ')}</div>
       </div>
-      <button onClick={onAdd} disabled={busy} style={{ flex: 'none', minHeight: 44, padding: '0 14px', borderRadius: 14, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)', fontSize: 13, fontWeight: 700 }}>Add</button>
+      <button onClick={onAdd} disabled={busy} style={{ flex: 'none', marginLeft: 'auto', minHeight: 44, padding: '0 14px', borderRadius: 14, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)', fontSize: 13, fontWeight: 700 }}>Add</button>
     </div>
   );
 }
