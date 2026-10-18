@@ -139,6 +139,7 @@ describe('Talk to your AI — organise, end to end', () => {
     expect(screen.getByText('Evening walk')).toBeTruthy();
     expect(screen.getByText('To remove')).toBeTruthy();
     expect(screen.getByText('Long run')).toBeTruthy();
+    expect(screen.getByText(/1 stack stays the same/)).toBeTruthy();   // astra-tester P3, 18 Oct: was "stay"
     await waitFor(() => expect(screen.getByText(/1 of 2 videos found/)).toBeTruthy());
 
     // removing asks twice
@@ -178,6 +179,29 @@ describe('Talk to your AI — organise, end to end', () => {
     expect(back.find((x) => x.id === 'c')).toBeTruthy();
     expect(back.find((x) => x.title === 'Evening walk')).toBeUndefined();
     expect(back.find((x) => x.id === 'a').time).toBe('07:30');
+  });
+
+  // astra-tester P3, 18 Oct: the last step said "✓ Video added" for a stack that
+  // had its video before the organise (Full-body stretch on the live demo).
+  it('says a moved stack that already had its video "Has a video", not "Video added"', async () => {
+    stubYouTube();
+    act(() => setState({ aiOpen: true }));
+    render(<><AiBridgeSheet /><VideoPicker /></>);
+    act(() => { fireEvent.click(screen.getByText('I’ve already got a reply →')); });
+    const ids = Object.fromEntries(Object.entries(getState().aiRefs.map).map(([ref, id]) => [id, ref]));
+    const moved = ['```ppw-routine', JSON.stringify({ ppw: 'routine', v: 3, name: 'Later breathing', items: [
+      { ref: ids.a, title: 'Morning stretch', time: '07:30', repeat: 'daily' },
+      { ref: ids.b, title: 'Box breathing', time: '14:00', repeat: 'daily' },
+      { ref: ids.c, title: 'Long run', time: '18:00', repeat: 'weekly' },
+    ] }), '```'].join('\n');
+    fireEvent.change(screen.getByLabelText('Paste your AI\'s reply'), { target: { value: moved } });
+    act(() => { fireEvent.click(screen.getByText('See my plan')); });
+    expect(screen.getByText('13:00 → 14:00')).toBeTruthy();
+    expect(screen.getByText(/2 stacks stay the same/)).toBeTruthy();
+    act(() => { fireEvent.click(screen.getByText('Apply 1 change')); });
+    expect(screen.getByText('Would you like to add a video or link to these?')).toBeTruthy();
+    expect(screen.getByText('✓ Has a video')).toBeTruthy();
+    expect(screen.queryByText(/Video added/)).toBeNull();
   });
 });
 

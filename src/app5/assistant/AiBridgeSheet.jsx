@@ -356,8 +356,9 @@ export default function AiBridgeSheet() {
   const videoChip = (i) => {
     if (!parsed || !parsed.items[i] || parsed.items[i].kind === 'note') return null;
     const n = recsAt(i).recs.length;
-    if (vidChecking && (parsed.items[i]._videos || []).some((c) => c.yt)) return <span style={CHIP}>{IVideo} checking…</span>;
-    return n ? <span style={{ ...CHIP, color: 'var(--accent)', borderColor: 'var(--acc-rim)' }}>{IVideo} {n} video{n === 1 ? '' : 's'} found</span> : null;
+    // key: the chip goes into a row's chips array, beside the keyed field chips.
+    if (vidChecking && (parsed.items[i]._videos || []).some((c) => c.yt)) return <span key="video" style={CHIP}>{IVideo} checking…</span>;
+    return n ? <span key="video" style={{ ...CHIP, color: 'var(--accent)', borderColor: 'var(--acc-rim)' }}>{IVideo} {n} video{n === 1 ? '' : 's'} found</span> : null;
   };
   const toggle = (k) => { setPicked({ ...picked, [k]: !picked[k] }); setConfirmReplace(false); };
   // A function, not a component: a component declared inside render is a new
@@ -627,7 +628,7 @@ export default function AiBridgeSheet() {
                 {diff.keeps.length > 0 && (
                   <div style={{ marginTop: 16 }}>
                     <button onClick={() => setShowSame((v) => !v)} aria-expanded={showSame} style={{ background: 'none', border: 'none', padding: '6px 0', color: 'var(--dim)', fontSize: 12.5, fontWeight: 600 }}>
-                      {showSame ? '▾' : '▸'} {diff.keeps.length} stack{diff.keeps.length === 1 ? '' : 's'} stay the same
+                      {showSame ? '▾' : '▸'} {diff.keeps.length === 1 ? '1 stack stays' : `${diff.keeps.length} stacks stay`} the same
                     </button>
                     {showSame && (
                       <div style={{ marginTop: 6, display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -719,7 +720,9 @@ export default function AiBridgeSheet() {
                     const has = !!(it.url || it.embed);
                     const nRec = Array.isArray(it.recs) ? it.recs.length : 0;
                     const nPick = picksFor(it, 3).length;
-                    const hint = has ? (it.mediaTitle || 'Video added')
+                    // "Has a video", not "Video added": the stack may have had it
+                    // before the organise (astra-tester P3, 18 Oct, Full-body stretch).
+                    const hint = has ? (it.mediaTitle || 'Has a video')
                       : nRec ? `${nRec} suggested by your AI`
                       : nPick ? `${nPick} PPW pick${nPick === 1 ? '' : 's'}`
                       : 'Search YouTube for one';
