@@ -516,13 +516,20 @@ function StackScreen() {
                     ) : (
                       <div data-stack-title="" style={{ fontSize: 15.5, fontWeight: 600, letterSpacing: '-.01em', lineHeight: 1.3, display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2, overflow: 'hidden', overflowWrap: 'anywhere', textShadow: 'var(--emboss)' }}>{it.title}</div>
                     )}
-                    <div style={{ marginTop: 3, fontSize: 12.5, color: 'var(--dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    {/* The detail line wraps instead of being cut after the EXAMPLE
+                        badge (astra-tester P3, 18 Oct: "Suppleme…" at 390, and cut
+                        even without the badge at 360 with Bigger text). The badge sits
+                        in the text flow, so the next line starts under it with the
+                        card's full width. Three lines: at 360 with Bigger text the
+                        column is ~110px and the badge can take the first line alone. */}
+                    <div data-stack-meta="" style={{ marginTop: 3, fontSize: 12.5, lineHeight: 1.4, color: 'var(--dim)', display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 3, overflow: 'hidden', overflowWrap: 'anywhere' }}>
                       {/* F6: say what we put there. Without this the starter slots read
                           as things the customer chose, on day one, in their own app. */}
                       {it.example && (
-                        <span style={{ flex: 'none', fontSize: 9.5, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', padding: '2px 6px', borderRadius: 999, border: '1px solid var(--hairline)', background: 'var(--track)', color: 'var(--dim)' }}>Example</span>
+                        <span style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: 6, fontSize: 9.5, lineHeight: 1.2, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', padding: '2px 6px', borderRadius: 999, border: '1px solid var(--hairline)', background: 'var(--track)', color: 'var(--dim)' }}>Example</span>
                       )}
-                      <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{it.meta}</span>
+                      {/* a line never starts with the "·" between two parts */}
+                      {typeof it.meta === 'string' ? it.meta.replace(/ · /g, ' · ') : it.meta}
                     </div>
                   </div>
                   {it.time ? (
