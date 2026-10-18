@@ -107,6 +107,7 @@ describe('registerServiceWorker', () => {
     installFakeSW({ reg, controller: {} });
 
     await registerServiceWorker({ immediate: true });
+    await flush();   // offered once the version check has answered (2026-10-19)
 
     const states = [];
     onUpdateState((s) => states.push(s));
@@ -140,6 +141,7 @@ describe('registerServiceWorker', () => {
     newWorker.state = 'installed';
     reg.waiting = newWorker;
     newWorker._fire('statechange');
+    await flush();   // offered once the version check has answered (2026-10-19)
 
     expect(ready).toBe(true);
   });
@@ -372,7 +374,24 @@ describe('a new service worker taking control', () => {
     expect(ready).toBe(false);
   });
 
-  it('stops offering an update once the waiting worker turns out to be the build on screen', async () => {
+  const answerWith = (build) => new Response(JSON.stringify({ build }), { status: 200, headers: { 'content-type': 'application/json' } });
+
+  it('never flashes the bar for the build on screen when it installs before the version check answers', async () => {
+    const reg = makeRegistration();
+    installFakeSW({ reg, controller: {} });
+    let answer;
+    vi.stubGlobal('fetch', vi.fn(() => new Promise((r) => { answer = r; })));
+    await registerServiceWorker({ immediate: true });
+    const seen = [];
+    onUpdateState((s) => seen.push(s.updateReady));
+    installNewWorker(reg);                  // installed before the version check answered
+    await flush();
+    answer(answerWith(runningBuild()));
+    await flush();
+    expect(seen).not.toContain(true);
+  });
+
+  it('a worker that installs before the version check answers is offered when the tab is behind', async () => {
     const reg = makeRegistration();
     installFakeSW({ reg, controller: {} });
     let answer;
@@ -380,11 +399,12 @@ describe('a new service worker taking control', () => {
     await registerServiceWorker({ immediate: true });
     let ready = null;
     onUpdateState((s) => { ready = s.updateReady; });
-    installNewWorker(reg);                  // installed before the version check answered
-    expect(ready).toBe(true);
-    answer(new Response(JSON.stringify({ build: runningBuild() }), { status: 200, headers: { 'content-type': 'application/json' } }));
+    installNewWorker(reg);
     await flush();
-    expect(ready).toBe(false);
+    expect(ready).toBe(false);              // not yet: the check has not answered
+    answer(answerWith('a-newer-build'));
+    await flush();
+    expect(ready).toBe(true);
   });
 
   it('a tab behind the deployed build reloads, once', async () => {

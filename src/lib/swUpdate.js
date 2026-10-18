@@ -38,6 +38,7 @@ let _pendingBuild = null;
 // a page that already has it (a first launch after a release loads the page
 // fresh from the network), not news for the user.
 let _runningDeployed = false;
+let _versionCheck = null;   // the version check in flight, so a waiting worker is judged after it
 const _listeners = new Set();
 
 const _ready = () => !!_pendingBuild || (!!_waitingWorker && !_runningDeployed);
@@ -202,6 +203,7 @@ export function _resetForTest() {
   _waitingWorker = null;
   _pendingBuild = null;
   _runningDeployed = false;
+  _versionCheck = null;
   _listeners.clear();
 }
 
@@ -257,30 +259,32 @@ export function registerServiceWorker({ immediate = false } = {}) {
     // headless/incognito contexts) — guard so we never read .waiting on it.
     if (!reg) return null;
 
-    // A build may have installed and parked in `waiting` while the app was
-    // closed — surface it right away.
-    if (reg.waiting && navigator.serviceWorker.controller) {
-      _setWaiting(reg.waiting);
-    }
+    // Force a check now and whenever the app comes back to the foreground.
+    // Two signals: reg.update() pulls a fresh sw.js (the normal SW path), and
+    // checkVersion() compares the deployed build sentinel to the running build,
+    // which is what catches a stuck cache that reg.update() alone can't shift.
+    // Neither one applies anything any more — they only surface the bar.
+    const check = () => { reg.update().catch(() => {}); _versionCheck = checkVersion(reg); };
+
+    // A worker that has installed and waits is offered once the version check
+    // in flight has answered (2026-10-19): when it is the build already on
+    // screen it is not news, and the bar does not flash on and off for it.
+    const offer = (w) => Promise.resolve(_versionCheck).then(() => { if (w && reg.waiting === w) _setWaiting(w); });
 
     // A new build started installing during this session.
     reg.addEventListener('updatefound', () => {
       const nw = reg.installing;
       if (!nw) return;
       nw.addEventListener('statechange', () => {
-        if (isUpdateReady(nw.state, navigator.serviceWorker.controller)) {
-          _setWaiting(reg.waiting || nw);
-        }
+        if (isUpdateReady(nw.state, navigator.serviceWorker.controller)) offer(reg.waiting || nw);
       });
     });
 
-    // Force a check now and whenever the app comes back to the foreground.
-    // Two signals: reg.update() pulls a fresh sw.js (the normal SW path), and
-    // checkVersion() compares the deployed build sentinel to the running build,
-    // which is what catches a stuck cache that reg.update() alone can't shift.
-    // Neither one applies anything any more — they only surface the bar.
-    const check = () => { reg.update().catch(() => {}); checkVersion(reg); };
     check();
+
+    // A build may have installed and parked in `waiting` while the app was
+    // closed — surface it as soon as the check above has answered.
+    if (reg.waiting && navigator.serviceWorker.controller) offer(reg.waiting);
 
     if (typeof document !== 'undefined') {
       document.addEventListener('visibilitychange', () => {
