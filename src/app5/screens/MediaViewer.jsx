@@ -10,6 +10,8 @@ import React from 'react';
 import { THUMBS } from '../theme5.js';
 import { useStore5, closePlayer, safeUrl, itemHref } from '../store5.js';
 import { fileUrl } from '../files5.js';
+import { suppForItem, suppUnchecked } from '../../lib/suppsAffiliates.js';
+import { NotCheckedLabel, ShopLinkNote } from './SuppNotes.jsx';
 
 // A document or a protocol is something you READ. Its poster used to carry the
 // same ▶ as a video, which told the user it would play and then did nothing
@@ -20,6 +22,7 @@ const IPlayBig = <svg width="42" height="42" viewBox="0 0 24 24" fill="currentCo
 export default function MediaViewer() {
   const S = useStore5();
   const it = S.playerItem;
+  const shopNoteId = React.useId();
   // Document items: resolve the on-device file to an object URL when opened.
   const [docUrl, setDocUrl] = React.useState(null);
   React.useEffect(() => {
@@ -49,6 +52,11 @@ export default function MediaViewer() {
   // ("/protocols/pdf/…"), which safeUrl refused — so it had no Open at all.
   const openHref = isDoc ? docUrl : itemHref(it);
   const openLabel = isDoc ? 'Open document ↗' : isProtocol ? 'Open protocol ↗' : 'Open ↗';
+  // A supplement from the Supps shelf (V-SUPPS-DISCLAIMERS-1027): this is its
+  // detail view, so it wears "Not checked yet" while PPW has not cleared it, and
+  // its Open link says it leaves the app for iHerb.
+  const supp = !readable ? suppForItem(it) : null;
+  const shopNote = !!(supp && openHref);
 
   return (
     <div style={{ position: 'absolute', inset: 0, zIndex: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
@@ -69,13 +77,15 @@ export default function MediaViewer() {
         )}
         <div style={{ position: 'relative', marginTop: 14, fontSize: 17, fontWeight: 600, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>{it.title}</div>
         <div style={{ position: 'relative', marginTop: 3, fontSize: 13, color: 'var(--dim)' }}>{it.meta}</div>
+        {supp && suppUnchecked(supp) && <div style={{ position: 'relative', marginTop: 8 }}><NotCheckedLabel /></div>}
         <div style={{ position: 'relative', marginTop: 16, display: 'flex', gap: 10 }}>
           {openHref && (
-            <a href={openHref} target="_blank" rel="noopener noreferrer" style={{ height: 48, padding: '0 16px', borderRadius: 15, border: '1px solid var(--acc-rim)', background: readable ? 'var(--acc-surf)' : 'transparent', color: readable ? 'var(--acc-ink)' : 'var(--ink)', display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13.5, fontWeight: 600, textDecoration: 'none' }}>{openLabel}</a>
+            <a href={openHref} target="_blank" rel="noopener noreferrer" aria-describedby={shopNote ? shopNoteId : undefined} style={{ height: 48, padding: '0 16px', borderRadius: 15, border: '1px solid var(--acc-rim)', background: readable ? 'var(--acc-surf)' : 'transparent', color: readable ? 'var(--acc-ink)' : 'var(--ink)', display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13.5, fontWeight: 600, textDecoration: 'none' }}>{openLabel}</a>
           )}
           {isDoc && !docUrl && <div style={{ alignSelf: 'center', fontSize: 12.5, color: 'var(--dim)' }}>Loading document…</div>}
           <button onClick={closePlayer} style={{ flex: 1, height: 48, padding: '0 16px', borderRadius: 15, border: '1px solid var(--rim)', background: 'transparent', color: 'var(--dim)', fontWeight: 600, fontSize: 13.5 }}>Cancel</button>
         </div>
+        {shopNote && <ShopLinkNote id={shopNoteId} urls={[openHref]} lead="This link" single style={{ position: 'relative', marginTop: 10 }} />}
       </div>
     </div>
   );

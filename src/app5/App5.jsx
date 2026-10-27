@@ -20,6 +20,8 @@ import AddSheet from './screens/AddSheet.jsx';
 import GateNotice from './screens/GateNotice.jsx';
 import CalendarScreen from './screens/CalendarScreen.jsx';
 import MediaViewer from './screens/MediaViewer.jsx';
+import { NotCheckedLabel, ShopLinkNote } from './screens/SuppNotes.jsx';
+import { suppForItem, suppUnchecked } from '../lib/suppsAffiliates.js';
 import CompletedSheet from './screens/CompletedSheet.jsx';
 import RepeatSheet from './screens/RepeatSheet.jsx';
 import TermsScreen from './screens/TermsScreen.jsx';
@@ -204,6 +206,11 @@ function StackScreen() {
   const next = deck[0] || null;
   const rest = deck.slice(1);
   const completedCount = (S.doneByDate[key] || []).length;
+  // A supplement from the Supps shelf keeps its warnings on the Stack too
+  // (V-SUPPS-DISCLAIMERS-1027): "Not checked yet" while PPW has not cleared it,
+  // and, on the hero, the line that says its play button opens iHerb.
+  const nextSupp = next ? suppForItem(next) : null;
+  const heroShopNoteId = React.useId();
   // The finale plays one full lap of the day-progress ring, in the space the
   // GuideDisc is vacating — the guide hands the header over rather than just
   // disappearing out of it.
@@ -378,6 +385,7 @@ function StackScreen() {
             )}
             <span style={{ minWidth: 0 }}>{next.meta}</span>
           </div>
+          {nextSupp && suppUnchecked(nextSupp) && <div style={{ position: 'relative', marginTop: 8 }}><NotCheckedLabel /></div>}
           <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
             <button onClick={() => openRepeat(next.id)} aria-label="Repeat schedule" data-tour={restIsTarget ? undefined : 'item-repeat'} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, minHeight: 44, background: 'none', border: 'none', padding: '10px 8px 10px 0', color: 'var(--dim)', fontSize: 11, fontWeight: 600, letterSpacing: '.05em' }}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 2l4 4-4 4" /><path d="M3 11v-1a4 4 0 0 1 4-4h14" /><path d="M7 22l-4-4 4-4" /><path d="M21 13v1a4 4 0 0 1-4 4H3" /></svg>
@@ -404,7 +412,7 @@ function StackScreen() {
                 safeUrl check refused, so a protocol in Next Up had no way in.
                 A protocol is read, not played — page glyph, honest label. */}
             {itemHref(next) && (
-              <a href={itemHref(next)} target="_blank" rel="noopener noreferrer" aria-label={next.kind === 'pdf' ? 'Open protocol' : 'Play now'} style={{ height: 48, width: 52, flex: 'none', borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{next.kind === 'pdf' ? IDoc : IPlay}</a>
+              <a href={itemHref(next)} target="_blank" rel="noopener noreferrer" aria-label={next.kind === 'pdf' ? 'Open protocol' : 'Play now'} aria-describedby={nextSupp ? heroShopNoteId : undefined} style={{ height: 48, width: 52, flex: 'none', borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{next.kind === 'pdf' ? IDoc : IPlay}</a>
             )}
             {/* 2026-07-06 (Vic): icon-only tick — the "Done" text sat flush to the button edge. */}
             <button onClick={() => markDone(next.id, key)} aria-label="Done" title="Done" data-tour="done" style={{ flex: 1, height: 48, borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', boxShadow: 'var(--acc-glow)', color: 'var(--acc-ink)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -415,6 +423,9 @@ function StackScreen() {
             )}
             <button onClick={() => deleteItem(next.id)} aria-label="Delete this slot" style={{ height: 48, width: 48, flex: 'none', borderRadius: 16, border: '1px solid var(--rim)', background: 'transparent', color: 'var(--dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{ITrash}</button>
           </div>
+          {nextSupp && itemHref(next) && (
+            <ShopLinkNote id={heroShopNoteId} urls={[itemHref(next)]} lead="The play button" single style={{ position: 'relative', marginTop: 10 }} />
+          )}
         </div>
       ) : (
         <div style={{ position: 'relative', marginTop: 24, borderRadius: 28, padding: '28px 22px', textAlign: 'center', background: 'var(--surface)', backdropFilter: 'var(--blur)', WebkitBackdropFilter: 'var(--blur)', border: '1px solid var(--rim)', boxShadow: 'var(--elev-hi)' }}>
@@ -466,6 +477,7 @@ function StackScreen() {
         {rest.map((it, i) => {
           const isDragged = drag && drag.idx === i;
           const isOver = drag && drag.over === i && drag.idx !== i;
+          const itSupp = suppForItem(it);
           return (
             <div
               key={it.id}
@@ -531,6 +543,10 @@ function StackScreen() {
                       {/* a line never starts with the "·" between two parts */}
                       {typeof it.meta === 'string' ? it.meta.replace(/ · /g, ' · ') : it.meta}
                     </div>
+                    {/* Outside the three-line clamp above, so a long brand name can
+                        never push the warning out of sight. Compact: the column is
+                        about 110px at 360px with Bigger text. */}
+                    {itSupp && suppUnchecked(itSupp) && <div style={{ marginTop: 5 }}><NotCheckedLabel compact /></div>}
                   </div>
                   {it.time ? (
                     // ppwTimeInput hides the browser's own clock glyph (app5.css):

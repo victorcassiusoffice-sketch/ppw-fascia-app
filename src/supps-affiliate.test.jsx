@@ -53,11 +53,18 @@ describe('SuppsSection — buy flow + disclaimer gating', () => {
     expect(openSpy.mock.calls[0][0]).toBe(buyUrl(firstSupp));
   });
 
-  it('affiliate_live=false → NO cash-commission claim, shows pre-signup line', async () => {
+  // 2026-10-27 (V-SUPPS-DISCLAIMERS-1027): every link carries PPW's iHerb
+  // referral code (rcode), so the shelf now discloses it — "PPW may earn a small
+  // commission if you buy." The definite cash claim stays gated on
+  // affiliate_live, and the old "we don't yet earn" line is gone: it said the
+  // opposite of the disclosure. The full disclaimer suite is
+  // app5/supps-disclaimers.test.jsx.
+  it('affiliate_live=false → NO cash-commission claim; the referral code is disclosed', async () => {
     const SuppsSection = (await import('./app5/screens/SuppsSection.jsx')).default;
     const { container } = render(<SuppsSection />);
     expect(container.textContent).not.toContain('PPW earns a small commission');
-    expect(container.textContent).toContain('don’t yet earn');
+    expect(container.textContent).toContain('PPW may earn a small commission if you buy.');
+    expect(container.textContent).not.toMatch(/yet earn/);
   });
 
   it('affiliate_live=true (fixture) → cash-commission claim IS rendered', async () => {

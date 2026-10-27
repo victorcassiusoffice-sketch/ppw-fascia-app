@@ -5,13 +5,21 @@
 // item (sets iHerb's 7-day affiliate cookie), then shows the rest as an
 // "add these too" tap-list — every item added in that session is attributed.
 //
-// All commission wording is gated behind affiliate_live (currently false → no
-// cash-commission claim). Per-supp Add to Stack reuses the item-2 calendar
-// picker. Supps are grouped by protocol for context.
+// The cash-commission claim is still gated behind affiliate_live (currently
+// false). Per-supp Add to Stack reuses the item-2 calendar picker. Supps are
+// grouped by protocol for context.
+//
+// Disclaimers (Victor, 27 Oct 2026, V-SUPPS-DISCLAIMERS-1027: "We maximise on
+// disclaimers for this"): a notice at the top that is always open, "Not checked
+// yet" on every supplement PPW has not cleared, and a line beside every shop
+// button and link saying it opens iHerb, outside the app, that PPW does not sell
+// these products, and — only because the links carry PPW's iHerb referral code
+// (rcode) — that PPW may earn a small commission. The words live in SuppNotes.
 
 import React from 'react';
 import { useStore5, openSchedule } from '../store5.js';
-import { suppsGroupedByProtocol, buyUrl, affiliateLive, suppToStackItem } from '../../lib/suppsAffiliates.js';
+import { suppsGroupedByProtocol, buyUrl, affiliateLive, suppToStackItem, suppUnchecked, linksCarryReferral } from '../../lib/suppsAffiliates.js';
+import { SuppsNotice, NotCheckedLabel, ShopLinkNote, COMMISSION_LINE } from './SuppNotes.jsx';
 
 const PROTOCOL_LABEL = {
   'testosterone-optimisation-v1': 'Testosterone Optimisation',
@@ -19,9 +27,14 @@ const PROTOCOL_LABEL = {
 };
 const labelFor = (id) => PROTOCOL_LABEL[id] || id.replace(/[-_]+/g, ' ').replace(/\bv\d+\b/i, '').trim();
 
-function Disclaimer() {
+function Disclaimer({ urls }) {
   const [open, setOpen] = React.useState(false);
   const live = affiliateLive();
+  // The old not-live sentence said "we don't yet earn on these purchases". The
+  // links carry PPW's iHerb referral code, so that contradicted the commission
+  // line beside the shop button; it now says the same thing that line says, and
+  // says nothing about commission if the links ever carry no code.
+  const code = linksCarryReferral(urls);
   return (
     <div style={{ marginTop: 14, borderRadius: 18, border: '1px solid var(--hairline)', background: 'var(--track)', overflow: 'hidden' }}>
       <button onClick={() => setOpen((o) => !o)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', background: 'none', border: 'none', color: 'var(--ink)', textAlign: 'left' }}>
@@ -35,7 +48,9 @@ function Disclaimer() {
           <p style={{ margin: '8px 0 0' }}>
             {live
               ? 'Affiliate links: buy through them and your price is unchanged; PPW earns a small commission that funds the next protocol. We don’t stock or sell these ourselves.'
-              : 'These links go to iHerb; our code may give you a discount. We’re still setting up our affiliate account, so we don’t yet earn on these purchases.'}
+              : code
+                ? `These links go to iHerb; our code may give you a discount. PPW does not sell these products. ${COMMISSION_LINE}`
+                : 'These links go to iHerb. PPW does not sell these products.'}
           </p>
         </div>
       )}
@@ -58,6 +73,9 @@ function SuppRow({ s, checked, onToggle, protocolId }) {
         <div style={{ marginTop: 2, fontSize: 12, color: 'var(--dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {disabled ? 'Currently unavailable on iHerb' : [s.brand, s.brand_spec].filter(Boolean).join(' · ')}
         </div>
+        {/* Its own line, so the brand line keeps its full width and the label is
+            never the part an ellipsis cuts off. */}
+        {suppUnchecked(s) && <div style={{ marginTop: 6 }}><NotCheckedLabel /></div>}
       </div>
       <button onClick={() => openSchedule({ type: 'item', item: suppToStackItem(s, protocolId) })} aria-label={`Add ${s.name} to a day`} title="Add to Stack on a day"
         style={{ width: 38, height: 38, flex: 'none', borderRadius: 11, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -75,6 +93,10 @@ export default function SuppsSection({ query = '' }) {
   // iHerb" the first thing a novice read. The list is theirs to build, one tick at a time.
   const [selected, setSelected] = React.useState(() => new Set());
   const [shopList, setShopList] = React.useState(null); // the "add these too" reveal
+  // ids that tie each shop button and link to the line that explains it, so a
+  // screen reader hears "opens iHerb, outside the app" on the control itself
+  const shopNoteId = React.useId();
+  const listNoteId = React.useId();
 
   if (!groups.length) {
     return (
@@ -87,6 +109,11 @@ export default function SuppsSection({ query = '' }) {
 
   const toggle = (id) => setSelected((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
   const q = query.trim().toLowerCase();
+
+  // every supplement on the shelf, once (two protocols share some), in list order
+  const shown = [];
+  for (const g of groups) for (const s of g.supps) if (!shown.find((x) => x.id === s.id)) shown.push(s);
+  const shopUrls = shown.filter((s) => s.in_stock !== false).map(buyUrl).filter(Boolean);
 
   // selected supplements in list order across all groups (in-stock only)
   const orderedSelected = [];
@@ -101,7 +128,11 @@ export default function SuppsSection({ query = '' }) {
 
   return (
     <div data-tour="supps-top" style={{ marginTop: 18 }}>
-      <Disclaimer />
+      {/* Always shown, above the first group — a search that hides every row
+          still leaves the notice in place. */}
+      <SuppsNotice supps={shown} />
+
+      <Disclaimer urls={shopUrls} />
 
       {groups.map((g) => {
         const rows = g.supps.filter((s) => !q || s.name.toLowerCase().includes(q) || (s.brand || '').toLowerCase().includes(q));
@@ -117,18 +148,17 @@ export default function SuppsSection({ query = '' }) {
       })}
 
       {/* Shop the selection on iHerb (honest single-open + add-these-too) */}
-      <button onClick={shop} disabled={!n}
+      <button onClick={shop} disabled={!n} aria-describedby={shopNoteId}
         style={{ marginTop: 18, width: '100%', height: 52, borderRadius: 16, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', color: 'var(--acc-ink)', fontWeight: 700, fontSize: 15, textShadow: 'var(--label-shadow)', boxShadow: 'var(--acc-glow)', opacity: n ? 1 : 0.45, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="20" r="1.4" /><circle cx="18" cy="20" r="1.4" /><path d="M2 3h3l2.4 12.5a1.5 1.5 0 0 0 1.5 1.2h8.2a1.5 1.5 0 0 0 1.5-1.2L21.5 7H6" /></svg>
         {/* With nothing ticked the button says what the Supps hint says, word for word,
             so the screen only ever teaches one sentence for this idea. */}
         {n ? `Shop ${n} on iHerb` : 'Tick what you want.'}
       </button>
-      <div style={{ marginTop: 8, fontSize: 11, lineHeight: 1.5, color: 'var(--dim)', textAlign: 'center' }}>
-        {affiliateLive()
-          ? 'Your price is unchanged; PPW earns a small commission that funds the next protocol.'
-          : 'These open on iHerb; our code may give you a discount. We don’t yet earn on these purchases.'}
-      </div>
+      {/* Was "These open on iHerb; our code may give you a discount. We don't yet
+          earn on these purchases." The leave-the-app line replaces it, and the
+          commission sentence shows only because the links carry a referral code. */}
+      <ShopLinkNote id={shopNoteId} urls={shopUrls} lead="This button" align="center" style={{ marginTop: 8 }} />
 
       {shopList && (
         <div style={{ marginTop: 14, borderRadius: 18, border: '1px solid var(--rim)', background: 'var(--surface)', boxShadow: 'var(--elev)', padding: 16, animation: 'ppwRise .3s ease both' }}>
@@ -136,14 +166,18 @@ export default function SuppsSection({ query = '' }) {
             <>
               <div style={{ fontSize: 14, fontWeight: 700, textShadow: 'var(--emboss)' }}>Add these too</div>
               <div style={{ marginTop: 4, fontSize: 12, lineHeight: 1.5, color: 'var(--dim)' }}>Your basket keeps our code for 7 days — add the rest and check out together.</div>
+              <ShopLinkNote id={listNoteId} urls={shopList.map(buyUrl)} lead="Each link" style={{ marginTop: 6 }} />
               <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {shopList.map((s) => (
-                  <a key={s.id} href={buyUrl(s)} target="_blank" rel="noopener nofollow sponsored"
+                  <a key={s.id} href={buyUrl(s)} target="_blank" rel="noopener nofollow sponsored" aria-describedby={listNoteId}
                     style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 12, border: '1px solid var(--hairline)', background: 'var(--track)', color: 'var(--ink)', textDecoration: 'none' }}>
                     <span style={{ width: 24, height: 24, flex: 'none', borderRadius: 999, background: 'var(--acc-surf)', border: '1px solid var(--acc-rim)', color: 'var(--acc-ink)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
                     </span>
-                    <span style={{ flex: 1, minWidth: 0, fontSize: 13.5, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.name}</span>
+                    <span style={{ flex: 1, minWidth: 0 }}>
+                      <span style={{ display: 'block', fontSize: 13.5, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.name}</span>
+                      {suppUnchecked(s) && <span style={{ display: 'block', marginTop: 4 }}><NotCheckedLabel /></span>}
+                    </span>
                     <span style={{ flex: 'none', fontSize: 11.5, fontWeight: 600, color: 'var(--accent)' }}>Add ↗</span>
                   </a>
                 ))}
