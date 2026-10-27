@@ -7,9 +7,10 @@
 // checked on the screens a prospect actually meets:
 //
 //   · the Library's Supps tab — the notice, and the label on every row
-//   · the Stack — a supplement added to the day keeps "Not checked yet" on its
-//     card and on the Next up hero, and the hero's play button (which opens
-//     iHerb) says so
+//   · the Stack — a supplement added to the day keeps "Not yet checked by PPW"
+//     on its card and on the Next up hero, and the hero's play button (which
+//     opens iHerb) says so — with the store-credit sentence, never
+//     "commission", while the iHerb cash programme is off
 //
 // No access code appears anywhere in this file: the demo has no door.
 
@@ -24,7 +25,7 @@ import { isDemo } from './demo.js';
 import App5 from './App5.jsx';
 import { setState } from './store5.js';
 import { allSupps, suppToStackItem, buyUrl } from '../lib/suppsAffiliates.js';
-import { NOT_CHECKED, COMMISSION_LINE } from './screens/SuppNotes.jsx';
+import { NOT_CHECKED, CREDIT_LINE } from './screens/SuppNotes.jsx';
 
 const labels = (root = document) => [...root.querySelectorAll('[data-supp-unchecked]')];
 const describedBy = (el) => document.getElementById(el.getAttribute('aria-describedby') || '');
@@ -57,6 +58,7 @@ describe('the demo embed', () => {
     const n = document.querySelector('[data-supps-notice]');
     expect(n).toBeTruthy();
     expect(n.querySelector('h2').textContent).toBe(NOT_CHECKED);
+    expect(NOT_CHECKED).toBe('Not yet checked by PPW');
     expect(n.textContent).toContain('This is not medical advice.');
     const rows = document.querySelectorAll('[role="checkbox"][aria-label^="Select "]').length;
     expect(rows).toBe(8);
@@ -82,7 +84,9 @@ describe('the demo embed', () => {
     expect(labels(hero)).toHaveLength(1);
     const play = hero.querySelector('a[aria-label="Play now"]');
     expect(play.getAttribute('href')).toBe(buyUrl(vitD));
-    expect(describedBy(play).textContent).toBe(`The play button opens iHerb, outside the app. PPW does not sell this product. ${COMMISSION_LINE}`);
+    expect(CREDIT_LINE).toBe('PPW may get store credit from iHerb if you buy.');
+    expect(describedBy(play).textContent).toBe(`The play button opens iHerb, outside the app. PPW does not sell this product. ${CREDIT_LINE}`);
+    expect(hero.textContent).not.toMatch(/commission/i);
 
     const suppCard = document.querySelector('[data-item-id="sx2"]:not([data-tour="next-up"])');
     expect(labels(suppCard)).toHaveLength(1);

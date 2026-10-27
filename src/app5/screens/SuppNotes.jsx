@@ -6,27 +6,34 @@
 // appears:
 //
 //   SuppsNotice     — the top of the Supps tab, always open, never collapsed
-//   NotCheckedLabel — on every supplement PPW has not cleared, on its row and
-//                     on its detail view (the Stack card and the viewer too)
+//   NotCheckedLabel — on every supplement PPW has not yet checked against the
+//                     research, on its row and on its detail view (the Stack
+//                     card and the viewer too)
 //   ShopLinkNote    — beside every button or link that opens a shop: it opens
 //                     the shop, outside the app; PPW does not sell the product;
 //                     and, only when the link really carries a referral code,
-//                     that PPW may earn a small commission
+//                     what PPW may get from it. While the iHerb cash programme
+//                     is off (affiliate_live false — today) that is store
+//                     credit, because the links carry iHerb's Rewards code
+//                     (rcode); "commission" is said only once it is on.
 //
 // The words live here, once, so the Supps tab, the Stack and the viewer cannot
-// drift apart. Whether a label or the commission sentence shows is read from
-// the manifest (lib/suppsAffiliates.js), never hard-coded: a supplement cleared
-// in ppw-affiliates loses its label with no change here.
+// drift apart. Whether a label or the credit/commission sentence shows is read
+// from the manifest (lib/suppsAffiliates.js), never hard-coded: a supplement
+// PPW checks loses its label with no change here.
 //
 // Plain words on purpose: short sentences, no claim about what any supplement
 // does, no price, no amount. Ink colour, not the dim one, because a warning has
 // to be read, including at Settings → Bigger text on a 360px phone.
 
 import React from 'react';
-import { suppUnchecked, linksCarryReferral, shopName } from '../../lib/suppsAffiliates.js';
+import { suppUnchecked, linksCarryReferral, shopName, affiliateLive } from '../../lib/suppsAffiliates.js';
 
-export const NOT_CHECKED = 'Not checked yet';
+// "Not checked yet" alone read as the state of the tick box or the Done button
+// beside it; naming PPW makes it a statement about the research check.
+export const NOT_CHECKED = 'Not yet checked by PPW';
 export const COMMISSION_LINE = 'PPW may earn a small commission if you buy.';
+export const CREDIT_LINE = 'PPW may get store credit from iHerb if you buy.';
 export const INFO_LINE = 'This is not medical advice.';
 export const DOCTOR_LEAD = 'Speak to your doctor or pharmacist before you take any supplement, above all if you:';
 export const DOCTOR_CASES = [
@@ -43,10 +50,13 @@ const IAlert = (size) => (
 );
 
 /**
- * "Not checked yet" — a status, not a control. Ink on the track colour with a
- * rim, so it never reads as a tick box or a button. `compact` drops the glyph
- * and lets the words wrap, for the Stack card's narrow column (about 110px at
- * 360px with Bigger text).
+ * "Not yet checked by PPW" — a status, not a control. Ink on the track colour
+ * with a rim, so it never reads as a tick box or a button. The words may wrap:
+ * the label is long for the Stack card's column (about 70px at 360px with
+ * Bigger text) and for the "Add these too" links, and a label that wraps is
+ * read whole where one that cannot wrap is cut. A 10px radius keeps one line a
+ * pill and two or three lines a tidy tag. `compact` drops the glyph and the
+ * type is a touch smaller, for that Stack card.
  */
 export function NotCheckedLabel({ compact = false, style }) {
   return (
@@ -54,12 +64,10 @@ export function NotCheckedLabel({ compact = false, style }) {
       data-supp-unchecked=""
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 4, maxWidth: '100%',
-        // compact may wrap onto two or three lines in a narrow card: a soft
-        // rectangle stays a tidy tag there, where a full pill turns into a blob
-        padding: compact ? '2px 7px' : '2px 8px', borderRadius: compact ? 8 : 999,
+        padding: compact ? '2px 7px' : '2px 8px', borderRadius: 10,
         border: '1px solid var(--rim)', background: 'var(--track)', color: 'var(--ink)',
         fontSize: compact ? 10.5 : 11, lineHeight: 1.35, fontWeight: 700,
-        whiteSpace: compact ? 'normal' : 'nowrap', overflowWrap: 'anywhere',
+        whiteSpace: 'normal', overflowWrap: 'break-word',
         ...style,
       }}
     >
@@ -81,31 +89,34 @@ export function leaveAppText(urls, { lead = 'This link', single = false } = {}) 
 }
 
 /**
- * The line beside a shop button or link. The commission sentence appears only
+ * The line beside a shop button or link. The referral sentence appears only
  * when one of the links carries an affiliate or referral code; with none, the
- * line says nothing about commission at all.
+ * line says nothing about what PPW may get. Which sentence follows the iHerb
+ * cash programme: store credit while affiliate_live is false (today's links
+ * carry the Rewards rcode), a small commission only once it is true.
  */
 export function ShopLinkNote({ id, urls, lead, single = false, align = 'left', style }) {
-  const commission = linksCarryReferral(urls);
+  const referral = linksCarryReferral(urls);
   return (
     <div id={id} data-shop-note="" style={{ fontSize: 12, lineHeight: 1.5, color: 'var(--ink)', textAlign: align, ...style }}>
       <span data-leave-app="">{leaveAppText(urls, { lead, single })}</span>
-      {commission && <>{' '}<span data-commission="">{COMMISSION_LINE}</span></>}
+      {referral && <>{' '}<span data-commission="">{affiliateLive() ? COMMISSION_LINE : CREDIT_LINE}</span></>}
     </div>
   );
 }
 
 /**
  * The notice at the top of the Supps tab. Always shown, never collapsed. The
- * first sentence follows the data: every supplement held → "these
- * supplements"; some → the ones wearing the label; none → it is left out
- * rather than becoming untrue.
+ * first sentences follow the data: every supplement held → "these
+ * supplements" and "They"; some → the ones wearing the label, then "All the
+ * supplements here" (so "They" can never point at the marked ones only); none
+ * → the not-checked sentence is left out rather than becoming untrue.
  */
 export function SuppsNotice({ supps }) {
   const list = supps || [];
   const held = list.filter(suppUnchecked).length;
   const allHeld = list.length > 0 && held === list.length;
-  const heading = allHeld ? NOT_CHECKED : held ? 'Some are not checked yet' : 'Please read';
+  const heading = allHeld ? NOT_CHECKED : held ? 'Some are not yet checked by PPW' : 'Please read';
   const first = allHeld
     ? 'PPW has not yet checked these supplements against the research.'
     : held ? `PPW has not yet checked the supplements marked “${NOT_CHECKED}” against the research.` : null;
@@ -122,7 +133,7 @@ export function SuppsNotice({ supps }) {
         <h2 style={{ margin: 0, fontSize: 15.5, lineHeight: 1.3, fontWeight: 700, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>{heading}</h2>
       </div>
       {first && <p style={P}>{first}</p>}
-      <p style={P}>{first ? 'They are' : 'These supplements are'} listed for information only. {INFO_LINE}</p>
+      <p style={P}>{allHeld ? 'They are' : 'All the supplements here are'} listed for information only. {INFO_LINE}</p>
       <p style={P}>{DOCTOR_LEAD}</p>
       <ul style={{ margin: '4px 0 0', paddingLeft: 20, listStyle: 'disc', fontSize: 13.5, lineHeight: 1.5 }}>
         {DOCTOR_CASES.map((c) => <li key={c}>{c}</li>)}

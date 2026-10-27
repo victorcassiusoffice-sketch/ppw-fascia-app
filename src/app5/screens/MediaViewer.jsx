@@ -53,7 +53,7 @@ export default function MediaViewer() {
   const openHref = isDoc ? docUrl : itemHref(it);
   const openLabel = isDoc ? 'Open document ↗' : isProtocol ? 'Open protocol ↗' : 'Open ↗';
   // A supplement from the Supps shelf (V-SUPPS-DISCLAIMERS-1027): this is its
-  // detail view, so it wears "Not checked yet" while PPW has not cleared it, and
+  // detail view, so it wears "Not yet checked by PPW" until PPW has checked it, and
   // its Open link says it leaves the app for iHerb.
   const supp = !readable ? suppForItem(it) : null;
   const shopNote = !!(supp && openHref);

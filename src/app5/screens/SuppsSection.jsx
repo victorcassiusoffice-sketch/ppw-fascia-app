@@ -10,16 +10,18 @@
 // grouped by protocol for context.
 //
 // Disclaimers (Victor, 27 Oct 2026, V-SUPPS-DISCLAIMERS-1027: "We maximise on
-// disclaimers for this"): a notice at the top that is always open, "Not checked
-// yet" on every supplement PPW has not cleared, and a line beside every shop
-// button and link saying it opens iHerb, outside the app, that PPW does not sell
-// these products, and — only because the links carry PPW's iHerb referral code
-// (rcode) — that PPW may earn a small commission. The words live in SuppNotes.
+// disclaimers for this"): a notice at the top that is always open, "Not yet
+// checked by PPW" on every supplement PPW has not checked against the research,
+// and a line beside every shop button and link saying it opens iHerb, outside
+// the app, that PPW does not sell these products, and — only because the links
+// carry iHerb's Rewards referral code (rcode), which pays store credit — that
+// PPW may get store credit from iHerb. "Commission" waits for affiliate_live.
+// The words live in SuppNotes.
 
 import React from 'react';
 import { useStore5, openSchedule } from '../store5.js';
 import { suppsGroupedByProtocol, buyUrl, affiliateLive, suppToStackItem, suppUnchecked, linksCarryReferral } from '../../lib/suppsAffiliates.js';
-import { SuppsNotice, NotCheckedLabel, ShopLinkNote, COMMISSION_LINE } from './SuppNotes.jsx';
+import { SuppsNotice, NotCheckedLabel, ShopLinkNote, CREDIT_LINE } from './SuppNotes.jsx';
 
 const PROTOCOL_LABEL = {
   'testosterone-optimisation-v1': 'Testosterone Optimisation',
@@ -31,9 +33,10 @@ function Disclaimer({ urls }) {
   const [open, setOpen] = React.useState(false);
   const live = affiliateLive();
   // The old not-live sentence said "we don't yet earn on these purchases". The
-  // links carry PPW's iHerb referral code, so that contradicted the commission
-  // line beside the shop button; it now says the same thing that line says, and
-  // says nothing about commission if the links ever carry no code.
+  // links carry iHerb's Rewards referral code, which pays store credit, so that
+  // was not the whole truth either; it now says what the line beside the shop
+  // button says (store credit, never commission while affiliate_live is false),
+  // and says nothing about what PPW may get if the links ever carry no code.
   const code = linksCarryReferral(urls);
   return (
     <div style={{ marginTop: 14, borderRadius: 18, border: '1px solid var(--hairline)', background: 'var(--track)', overflow: 'hidden' }}>
@@ -49,7 +52,7 @@ function Disclaimer({ urls }) {
             {live
               ? 'Affiliate links: buy through them and your price is unchanged; PPW earns a small commission that funds the next protocol. We don’t stock or sell these ourselves.'
               : code
-                ? `These links go to iHerb; our code may give you a discount. PPW does not sell these products. ${COMMISSION_LINE}`
+                ? `These links go to iHerb; our code may give you a discount. PPW does not sell these products. ${CREDIT_LINE}`
                 : 'These links go to iHerb. PPW does not sell these products.'}
           </p>
         </div>
@@ -157,7 +160,8 @@ export default function SuppsSection({ query = '' }) {
       </button>
       {/* Was "These open on iHerb; our code may give you a discount. We don't yet
           earn on these purchases." The leave-the-app line replaces it, and the
-          commission sentence shows only because the links carry a referral code. */}
+          store-credit sentence shows only because the links carry a referral
+          code (it becomes the commission sentence only once affiliate_live). */}
       <ShopLinkNote id={shopNoteId} urls={shopUrls} lead="This button" align="center" style={{ marginTop: 8 }} />
 
       {shopList && (

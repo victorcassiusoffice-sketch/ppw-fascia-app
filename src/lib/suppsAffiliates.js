@@ -7,9 +7,12 @@
 //   1. iHerb has NO multi-add cart URL — buy = open the first item (sets the
 //      7-day affiliate cookie), then the user adds the rest in-session.
 //   2. Commission is gated on program.iherb.affiliate_live (currently false):
-//      until it's true the UI must NOT claim a cash commission. It may only say
-//      "PPW may earn a small commission if you buy." — and only beside a link
-//      that really carries a referral code (linkCarriesReferral, below).
+//      until it's true the UI must NOT claim a commission of any kind. Today's
+//      links carry iHerb's Rewards code (rcode), which pays store credit, so
+//      beside a link that really carries a referral code (linkCarriesReferral,
+//      below) the UI says "PPW may get store credit from iHerb if you buy."
+//      Only once affiliate_live is true may it say "PPW may earn a small
+//      commission if you buy."
 
 import manifest from '../config/supps-affiliates.json';
 
@@ -76,14 +79,16 @@ export function getSuppsForProtocol(protocolId, protocolJson) {
 const EVIDENCE_CLEARED = 'approved';
 
 /**
- * Has PPW NOT yet cleared this supplement? True means it wears "Not checked yet".
- * Fails closed: a missing row, a missing flag or an unknown status all count as
- * not checked. Both flags must clear, because the generator only ever sets
- * `publishable` after the evidence is approved.
+ * Has PPW NOT yet checked this supplement against the research? True means it
+ * wears "Not yet checked by PPW". The label is about the CHECK only, so it reads
+ * `evidence_status` alone: `publishable` also needs stock and the iHerb cash
+ * programme, and a supplement PPW has checked must not be called unchecked
+ * because of either. Fails closed: a missing row or a missing or unknown status
+ * counts as not checked.
  */
 export function suppUnchecked(s) {
   if (!s) return true;
-  return s.publishable !== true || s.evidence_status !== EVIDENCE_CLEARED;
+  return s.evidence_status !== EVIDENCE_CLEARED;
 }
 
 /** The manifest row with this id, or null. */

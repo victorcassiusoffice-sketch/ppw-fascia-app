@@ -207,7 +207,7 @@ function StackScreen() {
   const rest = deck.slice(1);
   const completedCount = (S.doneByDate[key] || []).length;
   // A supplement from the Supps shelf keeps its warnings on the Stack too
-  // (V-SUPPS-DISCLAIMERS-1027): "Not checked yet" while PPW has not cleared it,
+  // (V-SUPPS-DISCLAIMERS-1027): "Not yet checked by PPW" until PPW has checked it,
   // and, on the hero, the line that says its play button opens iHerb.
   const nextSupp = next ? suppForItem(next) : null;
   const heroShopNoteId = React.useId();
@@ -544,8 +544,9 @@ function StackScreen() {
                       {typeof it.meta === 'string' ? it.meta.replace(/ · /g, ' · ') : it.meta}
                     </div>
                     {/* Outside the three-line clamp above, so a long brand name can
-                        never push the warning out of sight. Compact: the column is
-                        about 110px at 360px with Bigger text. */}
+                        never push the warning out of sight. Compact, and free to
+                        wrap: with a time on the card the column is about 70px at
+                        360px with Bigger text. */}
                     {itSupp && suppUnchecked(itSupp) && <div style={{ marginTop: 5 }}><NotCheckedLabel compact /></div>}
                   </div>
                   {it.time ? (
