@@ -64,7 +64,7 @@ import SharedRoutineSheet from './screens/SharedRoutineSheet.jsx';
 // behind but these two import lines.
 import QuitCard from './quit5/QuitCard.jsx';
 import QuitSetupSheet from './quit5/QuitSetupSheet.jsx';
-import AccessGate from './screens/AccessGate.jsx';
+import StudioSheet from './screens/StudioSheet.jsx';
 import { isDemo } from './demo.js';
 import { isEnabled as passcodeEnabled, isLocked as passcodeLocked, lockNow, LOCK_AFTER_MS } from './passcode.js';
 import { installPressSound } from './sfx5.js';
@@ -171,9 +171,9 @@ function AccountControl() {
   const email = readEmail();
   // NOT IN THE DEMO (2026-10-05). Two reasons, and the second is the serious one.
   //
-  // It leads nowhere: since the B2B pivot the way INTO this app is a partner
-  // code, not an account, so a prospect who signed up from the embed would get
-  // an account that opens nothing and still meet the code door afterwards.
+  // It leads nowhere: the app is free and public (2026-11-03), so an account
+  // unlocks nothing a prospect in the iframe does not already have — a sign-up
+  // from a shop window would make an account for nothing.
   //
   // And it would let an iframe on a marketing page send real email — the sheet's
   // magic-link flow posts to the membership API — on behalf of whoever is
@@ -913,7 +913,9 @@ export default function App5() {
       // `dropped` travels with it: the decoder's item ceiling used to be
       // invisible, so a link carrying more stacks than the app accepts was
       // held — and printed — as if it were the whole programme.
-      if (res.ok) setPendingShare({ name: res.name, items: res.items, dropped: res.dropped });
+      // author / goal / version: routine format v2 (2026-11-03). Null on a v1
+      // link, and routineMeta inside setPendingShare leaves nulls out.
+      if (res.ok) setPendingShare({ name: res.name, items: res.items, dropped: res.dropped, author: res.author, goal: res.goal, version: res.version });
       // setShareError, NOT setState({ pendingShare: null, … }). This branch used
       // to null the held programme in state while leaving it in localStorage,
       // and the error panel's OK then deleted that orphan — so one mangled link
@@ -1095,6 +1097,9 @@ export default function App5() {
         <AccountSheet />
         <RepeatSheet />
         <EditStackSheet />
+        {/* z38 — the therapist's Studio (2026-11-03). Renders nothing for any
+            account that does not hold the practitioner licence. */}
+        <StudioSheet />
         {/* z35, with the other config sheets and below the slot reminder (37) —
             the sheet's own header says why that order is load-bearing. */}
         <QuitSetupSheet />
@@ -1116,13 +1121,12 @@ export default function App5() {
             genuinely no session to reach underneath. */}
         <LockScreen />
         <GateNotice />
-        {/* THE FRONT DOOR (80) — above everything, including the passcode lock
-            (70), because "are you allowed in at all" is asked before any of the
-            app's own questions. It COVERS the app rather than replacing it, so
-            the boot pass underneath still reads a `#r=` routine link that
-            arrived before the code did — the one thing the stacking order here
-            is load-bearing for. See screens/AccessGate.jsx. */}
-        <AccessGate />
+        {/* NO FRONT DOOR (2026-11-03, Victor: "lifestyle public"). The access
+            code and the confidentiality tick came off: the app is free and
+            public. A client arriving on a practitioner's `#r=` link meets the
+            programme straight after the first-run doors, and what PPW licenses
+            is the practitioner's Studio — decided by the server (store5
+            `practitioner`), never by a door on this device. */}
       </div>
       </div>
     </div>

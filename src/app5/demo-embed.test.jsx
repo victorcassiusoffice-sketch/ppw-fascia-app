@@ -1,16 +1,18 @@
 // THE DEMO EMBED (2026-10-05) — the app in an iframe on ppwellness.co.
 //
 // Vic: "I want to embed the Lifestyle app as a demo on my site ppwellness.co."
-// The app is licensed to businesses now and the way in is a partner code, so
-// without a second door the marketing page would frame a code prompt, which is
-// not a demo. `?demo=1` is that door.
+// `?demo=1` opens the app as a furnished sample day — no first-run choice, no
+// wizard, no terms tick-box — so a prospect meets the APP, not its sign-up.
+// (Until 2026-11-03 it also stood beside an access-code door. That door came
+// off when the app went public and free; the demo is unchanged by it.)
 //
 // FOUR CLAIMS REST ON THIS FILE, and all four are about what the demo must NOT
 // do, because that is where a demo door goes wrong:
 //
-//   1. It opens the app with no code.
-//   2. It grants NOTHING lasting — no `ppw5.access`, nothing else on disk.
-//   3. A normal load in the same browser afterwards still meets the gate.
+//   1. It opens the app with no door of any kind asked for.
+//   2. It grants NOTHING lasting — nothing on disk.
+//   3. A normal load in the same browser afterwards is the ordinary app, with
+//      its first-run doors back in place.
 //   4. It never touches a real user's data. Not their stacks, not their flags,
 //      not their theme — and it does not READ them either, so the embed cannot
 //      show one person's own day back to them inside a web page.
@@ -26,8 +28,6 @@
 //     choosing, which is the only way to compare a demo boot against a plain one
 //     in the same file. Components are never dynamically imported — a second
 //     React would not share the statically imported render().
-//
-// No access code appears anywhere in this file, in any form.
 
 // Before the imports, which are hoisted above everything else in the file. This
 // is the embed's own URL; initialState() reads it on the import that follows.
@@ -52,9 +52,7 @@ vi.mock('../lib/installPrompt.js', () => ({
 }));
 
 import { isDemo, DEMO_PARAM } from './demo.js';
-import { hasAccess } from './access.js';
 import App5 from './App5.jsx';
-import AccessGate from './screens/AccessGate.jsx';
 import { InstallBanner } from './screens/InstallAppCard.jsx';
 import { getState, setState } from './store5.js';
 
@@ -276,11 +274,16 @@ describe('what the demo writes to the device', () => {
     expect(localStorage.getItem(LS('stacks'))).toBeTruthy();
   });
 
-  it('never leaves an access grant behind', async () => {
+  it('never leaves a grant of any kind behind', async () => {
     const s = await bootStore('/?demo=1');
     s.save('access', JSON.stringify({ v: 1, id: 'nope' }));   // even if asked to
+    s.setStudioName('A visitor');                               // the Studio name, too
     expect(localStorage.getItem('ppw5.access')).toBeNull();
-    expect(hasAccess()).toBe(false);
+    expect(localStorage.getItem('ppw5.studio')).toBeNull();
+    // And a demo is nobody's licence: the Studio can never open in it.
+    expect(s.getState().practitioner).toBe(false);
+    expect(s.openStudio()).toBe(false);
+    expect(s.getState().studioOpen).toBe(false);
   });
 });
 
@@ -340,28 +343,29 @@ describe('the embed on screen', () => {
     expect(screen.queryByRole('note')).toBeNull();
   });
 
-  // Claim 3 — the one that makes the demo honest. Same browser, same stored
-  // state, parameter gone.
-  it('meets the gate again on the very next load without the parameter', async () => {
+  // Claim 3 — the one that makes the demo honest. Same browser, parameter gone:
+  // a fresh page life boots the ORDINARY app, first-run doors and all, because
+  // the demo answered those questions in memory only.
+  it('is the ordinary app, doors and all, on the very next load without the parameter', async () => {
     at('/?demo=1');
     await act(async () => { render(<App5 />); });
     expect(codeField()).toBeNull();
+    expect(screen.getByRole('note').textContent).toBe('Demo');
     cleanup();
 
-    at('/');                                   // a fresh page life, same device
-    await act(async () => { render(<App5 />); });
-    expect(codeField()).toBeTruthy();
-    expect(hasAccess()).toBe(false);
+    const s = await bootStore('/');            // a fresh page life, same device
+    expect(s.getState().onboarded).toBe(false);
+    expect(s.getState().firstRunChoice).toBe(false);
+    expect(s.getState().termsOk).toBe(false);
   });
 
-  it('puts no door on the frame at all while the parameter is there', () => {
-    at('/?demo=1');
-    render(<AccessGate />);
-    expect(codeField()).toBeNull();
+  it('asks for no code on any load — the door is gone from the public app', async () => {
     at('/');
-    cleanup();
-    render(<AccessGate />);
-    expect(codeField()).toBeTruthy();
+    await act(async () => { render(<App5 />); });
+    expect(codeField()).toBeNull();
+    expect(screen.queryByRole('checkbox', { name: /confidential/i })).toBeNull();
+    expect(localStorage.getItem('ppw5.access')).toBeNull();
+    expect(localStorage.getItem('ppw5.nda')).toBeNull();
   });
 
   // "Share → Add to Home Screen" from inside an iframe adds the PAGE, not the
@@ -380,7 +384,7 @@ describe('the embed on screen', () => {
 
   // The sheet behind this button sends a real magic-link email. An iframe on a
   // marketing page must not be able to do that, and the account it would make
-  // opens nothing anyway — the way into the app is a partner code.
+  // opens nothing anyway — the app is free and public.
   it('offers no sign-in from inside the frame', async () => {
     at('/?demo=1');
     await act(async () => { render(<App5 />); });

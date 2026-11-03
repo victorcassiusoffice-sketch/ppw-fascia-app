@@ -49,7 +49,7 @@ import React from 'react';
 import {
   useStore5, clearPendingShare, clearShareError, hideShareSheet, showShareSheet,
   createRoutine, routineItemsForSave, addItemsToToday, routineToLink, repeatLabel,
-  anySheetOpen,
+  anySheetOpen, routineMeta,
 } from '../store5.js';
 import { isStandalone, isIOS } from '../../lib/installPrompt.js';
 
@@ -172,7 +172,9 @@ export default function SharedRoutineSheet() {
     // routineItemsForSave is not optional: these are PARSED items carrying the
     // internal `_day`, and writing that into ppw5.routines is how a day-21 stack
     // came back as day 0 the next time it was shared (naming law in store5.js).
-    const r = createRoutine(pending.name, routineItemsForSave(items));
+    // routineMeta(pending): who sent it, what it is for and which version — kept
+    // on the saved routine (format v2, 2026-11-03), absent for a v1 link.
+    const r = createRoutine(pending.name, routineItemsForSave(items), routineMeta(pending));
     if (r) { setAck({ kind: 'routine', name: r.name || pending.name }); clearPendingShare(); return; }
     // null = the store refused it and has already raised the reason, which the
     // GateNotice renders above this sheet. Keep the programme on screen so it is
@@ -244,6 +246,16 @@ export default function SharedRoutineSheet() {
         </div>
         <div style={{ marginTop: 8, fontSize: 20, fontWeight: 700, letterSpacing: '-.01em', textShadow: 'var(--emboss)' }}>{pending.name}</div>
         <div style={{ marginTop: 3, fontSize: 12.5, color: 'var(--dim)' }}>{n} stack{n === 1 ? '' : 's'} · shared with you</div>
+
+        {/* ROUTINE FORMAT v2 (2026-11-03): who sent it, what it addresses, which
+            version. A v1 link carries none of these and prints nothing here. */}
+        {(pending.author || pending.goal || pending.version) && (
+          <div data-share-meta="" style={{ marginTop: 10, padding: '10px 12px', borderRadius: 14, border: '1px solid var(--rim)', background: 'var(--surface)', fontSize: 13, lineHeight: 1.5, color: 'var(--ink)' }}>
+            {pending.author && <div><span style={{ color: 'var(--dim)' }}>From </span><strong>{pending.author}</strong>{pending.version ? <span style={{ color: 'var(--dim)' }}> · version {pending.version}</span> : null}</div>}
+            {!pending.author && pending.version && <div><span style={{ color: 'var(--dim)' }}>Version </span><strong>{pending.version}</strong></div>}
+            {pending.goal && <div><span style={{ color: 'var(--dim)' }}>For </span>{pending.goal}</div>}
+          </div>
+        )}
 
         {/* THE DECODER'S CEILING, SAID OUT LOUD (2026-10-05, review pass).
             parseRoutineLink keeps at most PLAN_MAX_ITEMS stacks and used to

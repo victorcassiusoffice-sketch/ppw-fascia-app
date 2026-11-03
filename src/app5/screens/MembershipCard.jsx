@@ -300,6 +300,35 @@ export default function MembershipCard() {
   // a subscription that does not exist. Only the server's own verdict earns this
   // card. With the switch off the two values are identical, so the paid build is
   // unchanged.
+  // ── signed in + practitioner licence (2026-11-03) ──────────────────────────
+  // The server said `practitioner`: this account holds the yearly PPW licence
+  // that opens the Studio. Checked BEFORE the Premium card, because the server
+  // also reports a practitioner as premium and this card must not send a
+  // therapist to "manage it on Gumroad" — the licence is an invoice PPW sends
+  // on the web, not a subscription, and nothing about it is bought in the app.
+  if (phase === 'in' && S.practitioner) {
+    return (
+      <div style={card(true)}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+          <span style={{ width: 44, height: 44, flex: 'none', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--acc-surf)', border: '1px solid var(--acc-rim)', color: 'var(--acc-ink)', boxShadow: 'var(--acc-glow)' }}>{crown}</span>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 16, fontWeight: 700, textShadow: 'var(--emboss)' }}>Practitioner licence · active</div>
+            <div style={{ marginTop: 2, fontSize: 12.5, color: 'var(--dim)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{readEmail() || 'Signed in'}</div>
+          </div>
+        </div>
+        <div style={note()}>
+          {periodEnd ? `Your licence runs to ${periodEnd}. ` : ''}Send routines to your clients from Library → Routines → Studio: a link, a QR code or a printed card. The app is free for them.
+        </div>
+        {createdNote}
+        <SetPasswordBlock defaultOpen={S.justCreated} />
+        <button onClick={onRefresh} disabled={busy} style={quietBtn}>{busy ? 'Checking…' : 'Check membership'}</button>
+        <button onClick={onSignOut} style={quietBtn}>Sign out</button>
+        {msg && <div style={note()}>{msg}</div>}
+        {err && <div style={{ ...note(), color: 'var(--bad)' }}>{err}</div>}
+      </div>
+    );
+  }
+
   if (phase === 'in' && S.premiumPaid) {
     return (
       <div style={card(true)}>

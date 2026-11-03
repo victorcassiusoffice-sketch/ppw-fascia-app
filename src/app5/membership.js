@@ -220,6 +220,28 @@ export function cachedPremium() {
   return true;
 }
 
+/**
+ * The boot-time answer to "does this account hold the practitioner licence?"
+ * (2026-11-03). The SAME four conditions as cachedPremium — still signed in, a
+ * verified server read, not stale, period not lapsed — plus the flag itself.
+ * Setting ppw5.ent by hand opens nothing: the cache can only confirm what the
+ * server already said. Offline, a licence read within OFFLINE_GRACE_MS keeps the
+ * Studio open; a device that never phones home drops it after 7 days.
+ */
+export function cachedPractitioner() {
+  const c = readEntitlementCache();
+  if (!c || c.practitioner !== true) return false;
+  if (!isSignedIn()) return false;
+  if (!c.verified) return false;
+  const checked = Number(c.checkedAt || 0);
+  if (!checked || Date.now() - checked > OFFLINE_GRACE_MS) return false;
+  if (c.currentPeriodEnd) {
+    const end = new Date(c.currentPeriodEnd).getTime();
+    if (Number.isFinite(end) && end < Date.now()) return false;
+  }
+  return true;
+}
+
 // ── API ──────────────────────────────────────────────────────────────────────
 async function api(path, { method = 'GET', body, auth = false } = {}) {
   if (!API_BASE) throw new Error('Membership service is not configured.');
@@ -360,6 +382,11 @@ export async function fetchEntitlement() {
       // no purchase behind it. Vic's own account is one, which made his view look
       // like a billing fault. Keeping the role lets the UI say WHY.
       role: r.role ?? null,
+      // PRACTITIONER (2026-11-03): the yearly PPW licence a therapist or clinic
+      // holds, reported by the server as its own boolean beside `entitlement:
+      // 'practitioner'`. It is what opens the Studio. Read from BOTH shapes so
+      // a backend that only sends the entitlement string still unlocks it.
+      practitioner: r.practitioner === true || r.entitlement === 'practitioner',
       currentPeriodEnd: r.currentPeriodEnd ?? null,
       userId: r.userId ?? null,
       checkedAt: Date.now(),

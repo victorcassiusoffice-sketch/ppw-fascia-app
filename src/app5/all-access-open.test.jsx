@@ -46,10 +46,6 @@ import * as store from './store5.js';
 import LibraryScreen from './screens/LibraryScreen.jsx';
 import SharedRoutineSheet from './screens/SharedRoutineSheet.jsx';
 import GateNotice from './screens/GateNotice.jsx';
-import AccessGate from './screens/AccessGate.jsx';
-import { grantAccess, hasAccess, revokeLocalAccess } from './access.js';
-import { acceptNda, ndaAccepted, clearNdaAcceptance } from './nda.js';
-import registry from './access-codes.json';
 
 const LS = (k) => 'ppw5.' + k;
 
@@ -58,27 +54,14 @@ const deck = (n, tag = 'i') =>
   Array.from({ length: n }, (_, i) => ({ id: tag + i, title: 'thing ' + i }));
 
 /**
- * The id of a licence that is live in the committed registry.
- *
- * The ID, never the code: ids are public (they are what a device writes down),
- * and no plaintext code may ever appear in a test — src/app5/access-codes.json
- * holds hashes only and the plaintext lives in the gitignored ACCESS-CODES.md.
- * Reading it from the registry rather than hardcoding one also means this file
- * keeps working the next time a code is rotated.
+ * THE DOOR CAME OFF (2026-11-03, Victor: "lifestyle public"). Until then this
+ * helper wrote down the licence and the agreement a visitor held one second
+ * after typing the access code. The app is public and free now, so there is
+ * nothing to write — the helper stays, as a no-op, so every step of the walk
+ * below still reads as a visitor's own first minute in the app, with nothing
+ * granted beforehand.
  */
-const LIVE_CODE_ID = (registry.codes.find((c) => !c.revoked) || {}).id;
-
-/**
- * Put this device in the state a visitor is in one second after the door opened:
- * a live licence written down, the current wording agreed to, and nothing else.
- *
- * Goes through the real `grantAccess` / `acceptNda` rather than writing the keys,
- * so if either record's shape changes this helper changes with it.
- */
-function throughTheDoor() {
-  grantAccess(LIVE_CODE_ID);
-  acceptNda(LIVE_CODE_ID);
-}
+function throughTheDoor() {}
 
 /** A store booted from a clean module registry — what a brand-new install gets. */
 async function freshStore() {
@@ -139,27 +122,21 @@ afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
   vi.resetModules();
-  revokeLocalAccess();
-  clearNdaAcceptance();
 });
 
 // ── 1. in, with nothing bought ──────────────────────────────────────────────
-describe('1 · the visitor who just typed the code', () => {
-  it('is inside on a licence and an agreement, and on nothing else', () => {
+describe('1 · the visitor who just opened the app', () => {
+  it('is inside on nothing at all: no code, no agreement, no purchase, no account', () => {
     throughTheDoor();
-    expect(hasAccess()).toBe(true);
-    expect(ndaAccepted()).toBe(true);
-    // The door is what let them in. Not a purchase, not an account.
+    expect(localStorage.getItem('ppw5.access')).toBeNull();
+    expect(localStorage.getItem('ppw5.nda')).toBeNull();
     expect(localStorage.getItem(LS('authToken'))).toBeNull();
     expect(localStorage.getItem(LS('ent'))).toBeNull();
     expect(store.getState().signedIn).toBe(false);
     expect(store.getState().premiumPaid).toBe(false);
-  });
-
-  it('meets no door on screen once the licence is on this device', () => {
-    throughTheDoor();
-    render(<AccessGate />);
-    expect(document.body.textContent.trim()).toBe('');
+    // And no licence of the other kind either: the Studio is not theirs.
+    expect(store.getState().practitioner).toBe(false);
+    expect(store.openStudio()).toBe(false);
   });
 
   it('boots into the whole product from a virgin install', async () => {
@@ -783,11 +760,11 @@ describe('10 · the prospect in the marketing-page iframe', () => {
     expect(s.getState().premium).toBe(true);
     expect(s.getState().premiumPaid).toBe(false);
     expect(s.premiumGated(s.getState())).toBe(false);
-    // No licence on this device and none minted — the demo door stands BESIDE
-    // the code door rather than opening it.
-    expect(hasAccess()).toBe(false);
-    render(<AccessGate />);
-    expect(document.body.textContent.trim()).toBe('');
+    // No licence of any kind on this device and none minted: the demo is not a
+    // practitioner, and the Studio cannot open in it.
+    expect(localStorage.getItem('ppw5.access')).toBeNull();
+    expect(s.getState().practitioner).toBe(false);
+    expect(s.openStudio()).toBe(false);
   });
 
   it('lets a prospect build and keep a routine for the length of the visit', async () => {
