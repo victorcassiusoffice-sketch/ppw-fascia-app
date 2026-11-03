@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { THUMBS } from '../theme5.js';
-import { useStore5, getState, setTab, addToStack, setUpsell, openPlayer, createRoutine, deleteRoutine, updateRoutine, routineItemsForSave, routineToMd, routineToLink, itemFromUrl, openSchedule, loadProtocols, markLibSeen, repeatLabel, normOffset, SHARE_MAX_OFFSET, PREMIUM_PROTOCOL_UPSELL, premiumGated } from '../store5.js';
+import { useStore5, getState, setTab, addToStack, setUpsell, openPlayer, createRoutine, deleteRoutine, updateRoutine, routineItemsForSave, routineToMd, routineToLink, itemFromUrl, openSchedule, loadProtocols, markLibSeen, repeatLabel, normOffset, SHARE_MAX_OFFSET, PREMIUM_PROTOCOL_UPSELL, premiumGated, openStudio } from '../store5.js';
 import { TILE_ICONS, DOC_ACCEPT } from './AddSheet.jsx';
 import { RepeatChoices } from './RepeatSheet.jsx';
 import { saveFile } from '../files5.js';
@@ -57,7 +57,9 @@ function reducedMotion() {
 // whole payload is the programme (routineToLink → `/#r=…`), and the file rail
 // below is kept for the two cases a link cannot serve: a programme too long for
 // one URL, and a device with no navigator.share at all.
-const LINK_COPIED_TOAST = 'Link copied — paste it into WhatsApp.';
+// "into your message", not a messenger's name (2026-11-03): the built app
+// names no messaging service — the gate greps the bundle for it.
+const LINK_COPIED_TOAST = 'Link copied — paste it into your message.';
 const TOO_LONG_TOAST = 'This programme is too long for a link — sharing it as a file instead.';
 
 // share a routine as a .md file — native share sheet when the device supports
@@ -565,6 +567,14 @@ export default function LibraryScreen() {
               ? 'Saved routines are not on this account.'
               : 'Bundle stacks into a named routine, then drop the whole thing onto any day from the Calendar.'}
           </p>
+          {/* THE STUDIO (2026-11-03) — only for an account the server has called
+              a practitioner. A client, a signed-out visitor and the demo never
+              see this button, and openStudio() refuses them anyway. */}
+          {S.practitioner && (
+            <button onClick={openStudio} aria-label="Open Studio" style={{ marginTop: 14, minHeight: 44, padding: '0 18px', borderRadius: 14, border: '1px solid var(--acc-rim)', background: 'var(--acc-surf)', boxShadow: 'var(--acc-glow)', color: 'var(--acc-ink)', fontSize: 13.5, fontWeight: 700, textShadow: 'var(--label-shadow)' }}>
+              Studio · send a routine to a client
+            </button>
+          )}
         </div>
       )}
       {/* premiumGated(S), not !S.premium: the builder WRITES routines, and the

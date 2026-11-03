@@ -12,7 +12,7 @@
 import { deleteFile } from './files5.js';
 
 import { useSyncExternalStore } from 'react';
-import { cachedPremium, fetchEntitlement, isSignedIn, signOut as membershipSignOut, PREMIUM_OPEN } from './membership.js';
+import { cachedPremium, cachedPractitioner, fetchEntitlement, isSignedIn, signOut as membershipSignOut, PREMIUM_OPEN } from './membership.js';
 import { fetchProfile, saveProfile } from './profile.js';
 import { isDemo } from './demo.js';
 // Imported as well as re-exported below: a bare `export ... from` does not put
@@ -42,6 +42,51 @@ const LS = (k) => 'ppw5.' + k;
 // before anything has had a chance to read a URL.
 function lsWrite(k, v) { if (isDemo()) return; try { localStorage.setItem(LS(k), v); } catch {} }
 function lsDrop(k) { if (isDemo()) return; try { localStorage.removeItem(LS(k)); } catch {} }
+
+// ── routine meta: author, the issue it addresses, a version (2026-11-03) ──
+// Routine format v2. A practitioner's programme says who wrote it, what it is
+// for and which version it is, on the saved routine and on the wire. The three
+// are OPTIONAL everywhere — a routine built by hand carries none, a v1 link
+// carries none, and the receive sheet simply has no line to print for them.
+// ABOVE initialState on purpose: the boot pass rebuilds a held programme from
+// its localStorage mirror with these, and module-level consts defined further
+// down would not exist yet at that moment (a TDZ error on every boot that
+// found a mirror).
+export const ROUTINE_MAX_AUTHOR = 80;
+export const ROUTINE_MAX_GOAL = 120;
+export const ROUTINE_MAX_VERSION = 24;
+/** The practitioner's name, as typed in the Studio. */
+export const STUDIO_MAX_NAME = ROUTINE_MAX_AUTHOR;
+
+function cleanStr(v, max) {
+  if (v == null) return undefined;
+  const s = String(v).replace(/\s+/g, ' ').trim().slice(0, max);
+  return s || undefined;
+}
+/**
+ * A routine version, as a short string: "2", "3.1", "2026-11". A number is
+ * accepted and written as its digits. Anything blank is "no version", never 0.
+ */
+export function normRoutineVersion(v) {
+  if (typeof v === 'number') return Number.isFinite(v) && v > 0 ? String(Math.floor(v)) : undefined;
+  return cleanStr(v, ROUTINE_MAX_VERSION);
+}
+/**
+ * The three meta fields of a routine, normalised — and ONLY those, with absent
+ * ones left out (not written as undefined), so a spread into a saved routine
+ * adds nothing a hand-built routine would not have.
+ */
+export function routineMeta(src) {
+  const out = {};
+  if (!src || typeof src !== 'object') return out;
+  const author = cleanStr(src.author, ROUTINE_MAX_AUTHOR);
+  const goal = cleanStr(src.goal, ROUTINE_MAX_GOAL);
+  const version = normRoutineVersion(src.version);
+  if (author) out.author = author;
+  if (goal) out.goal = goal;
+  if (version) out.version = version;
+  return out;
+}
 
 // ── quit-taper constants ────────────────────────────────────────────────────
 // UP HERE, not down with the rest of the quit slice, for one mechanical reason:
@@ -180,6 +225,12 @@ function initialState() {
     // telling a non-payer they have a membership, and what lets a real
     // subscriber survive the switch going back to false.
     premium: false, premiumPaid: false, premiumUpsell: null, orbTipSeen: false, signedIn: isSignedIn(),
+    // PRACTITIONER (2026-11-03, Victor: "lifestyle option 1"): the server's own
+    // verdict that this account holds the yearly PPW practitioner licence — the
+    // one thing that opens the Studio. Hydrated from the verified entitlement
+    // cache at boot (cachedPractitioner), never from a bare flag. `studioOpen`
+    // is the Studio sheet; openStudio() refuses to set it for anyone else.
+    practitioner: false, studioOpen: false,
     // What a batch add asked for when the free cap refused it — see
     // raiseFreeCapUpsell. Null for every other paywall.
     capRefusal: null,
@@ -352,6 +403,7 @@ function initialState() {
     // these two are the same value and boot behaves exactly as it did.
     def.premiumPaid = cachedPremium();
     def.premium = PREMIUM_OPEN || def.premiumPaid;
+    def.practitioner = cachedPractitioner();
     if (g('orbTip') === '1') def.orbTipSeen = true;
     if (g('onboarded') === '1') def.onboarded = true;
     if (g('terms') === '1') def.termsOk = true;
@@ -374,10 +426,14 @@ function initialState() {
       // the terms gate), so dropping the count here would lose it on exactly
       // the path where it is the only surviving record that the link carried
       // more stacks than arrived — see parseRoutineLink.
+      // ...routineMeta(ps): who sent it, what it is for and which version
+      // (format v2, 2026-11-03) come back with it too — the real-browser gate
+      // caught a sheet that said nothing about the sender after this reload.
       def.pendingShare = {
         name: String(ps.name || 'Shared routine').slice(0, 60),
         items: ps.items,
         dropped: Math.max(0, Math.floor(Number(ps.dropped)) || 0),
+        ...routineMeta(ps),
       };
     }
     // THE QUIT PLAN. Read through readPlan rather than trusted: a truncated or
@@ -480,6 +536,8 @@ function demoState(def) {
     // what an unpaid visitor would meet — which is the honest default, because a
     // demo that unlocks more than the thing being demoed is a lie.
     premium: PREMIUM_OPEN, premiumPaid: false,
+    // A demo is nobody's licence: the Studio never opens inside the iframe.
+    practitioner: false, studioOpen: false,
     routines: bundle.length
       ? [{ id: 'rtDemoExample', name: 'Example routine', items: bundle }]
       : [],
@@ -705,7 +763,7 @@ export function saveRoutines(list) {
   setState({ routines: list });
   lsWrite('routines', JSON.stringify(list));
 }
-export function createRoutine(name, items) {
+export function createRoutine(name, items, meta) {
   // G1 (2026-07-28): the store enforces this, not just the UI. LibraryScreen hides
   // the builder from free users, but hiding a button is not a paywall — anything
   // that can reach this function (a stale view, a future caller, the console) was
@@ -714,7 +772,11 @@ export function createRoutine(name, items) {
     setState({ premiumUpsell: 'Routines are part of Premium — bundle stacks and drop them onto any day in one tap.' });
     return null;
   }
-  const r = { id: 'rt' + Date.now().toString(36), name: String(name).trim(), items };
+  // `meta` (2026-11-03, routine format v2): who wrote it, what it addresses and
+  // which version this is — kept on the saved routine so a received programme
+  // still says "From Victor · version 2" a month later, and so sharing it on
+  // carries the same three fields. Absent for a routine built by hand.
+  const r = { id: 'rt' + Date.now().toString(36), name: String(name).trim(), items, ...routineMeta(meta) };
   saveRoutines([...state.routines, r]);
   return r;
 }
@@ -733,6 +795,40 @@ export function updateRoutine(id, patch) {
   saveRoutines(state.routines.map((r) => r.id === id ? { ...r, ...patch } : r));
   return true;
 }
+
+// ── the Studio (2026-11-03, Victor: "lifestyle option 1") ──
+// (The routine meta — author, the issue, a version — lives near the top of this
+// file, above initialState, because the boot pass rebuilds a held programme
+// from its mirror with it.)
+// A licensed practitioner's name on their routines, and the one sheet that
+// turns a routine into a link, a QR code and a printed card. The name lives on
+// THIS device (`ppw5.studio`): the practitioner types it once, and no server
+// ever sees it — the same rule as every other thing the app keeps.
+const STUDIO_KEY = 'studio';
+export function studioName() {
+  try {
+    const v = JSON.parse(localStorage.getItem(LS(STUDIO_KEY)) || 'null');
+    return v && typeof v.name === 'string' ? v.name.slice(0, STUDIO_MAX_NAME) : '';
+  } catch { return ''; }
+}
+export function setStudioName(name) {
+  const clean = String(name == null ? '' : name).slice(0, STUDIO_MAX_NAME);
+  lsWrite(STUDIO_KEY, JSON.stringify({ v: 1, name: clean }));
+  return clean;
+}
+/**
+ * Open the Studio — ONLY for an account the server has called a practitioner.
+ * A client account, a signed-out visitor and the demo are all refused here, so
+ * there is no state a non-licensed account can reach that paints the sheet
+ * (StudioSheet.jsx checks `practitioner` again before it draws anything).
+ * Returns whether it opened, so a caller is never left guessing.
+ */
+export function openStudio() {
+  if (!state.practitioner) return false;
+  setState({ studioOpen: true, addOpen: false, accountOpen: false });
+  return true;
+}
+export function closeStudio() { if (state.studioOpen) setState({ studioOpen: false }); }
 
 // ── stack selection + bulk delete (Vic 4/4b) ──
 export function toggleSelect(id) {
@@ -1454,7 +1550,20 @@ export function routineToLink(r) {
   // Returning null sends the caller to the .md file, which has no item cap and
   // carries all of them, exactly as the oversize path already does.
   if (i.length > PLAN_MAX_ITEMS) return null;
-  const json = JSON.stringify({ p: 'ppwr', v: 1, n: String(r.name == null ? '' : r.name).trim().slice(0, 60), i });
+  // WIRE FORMAT v2 (2026-11-03): `a` who wrote it, `g` what it addresses, `rv`
+  // which version of the programme this is. All three optional, all three
+  // short, and a v1 reader that ignores unknown keys still opens the link —
+  // the item shape is unchanged, and videos still travel as a URL in `u`.
+  // `v: 2` is written so a receiver can tell the two apart; parseRoutineLink
+  // reads v1 and v2 alike (and a later version's known keys).
+  const meta = routineMeta(r);
+  const json = JSON.stringify({
+    p: 'ppwr', v: 2, n: String(r.name == null ? '' : r.name).trim().slice(0, 60),
+    ...(meta.author ? { a: meta.author } : {}),
+    ...(meta.goal ? { g: meta.goal } : {}),
+    ...(meta.version ? { rv: meta.version } : {}),
+    i,
+  });
   const url = linkBase() + '#r=' + b64urlEncode(json);
   return url.length > LINK_MAX_URL ? null : url;
 }
@@ -1533,7 +1642,16 @@ export function parseRoutineLink(input) {
   // Counted off the SLICE, not off `items`: blank rows the whitelist drops are
   // not stacks anyone prescribed, and reporting them as lost would be wrong.
   const dropped = Math.max(0, data.i.length - PLAN_MAX_ITEMS);
-  return { ok: true, name: String(data.n || 'Shared routine').slice(0, 60), items, dropped };
+  // BACKWARD COMPATIBLE (2026-11-03). A v1 link has no `v` (or v:1) and none of
+  // the three meta keys; it opens exactly as before, with the meta absent. A v2
+  // link carries them. A link from a LATER version still opens: the item shape
+  // is the contract, and unknown top-level keys are simply not read.
+  const wire = Math.max(1, Math.floor(Number(data.v)) || 1);
+  const meta = routineMeta({ author: data.a, goal: data.g, version: data.rv });
+  return {
+    ok: true, name: String(data.n || 'Shared routine').slice(0, 60), items, dropped, wire,
+    author: meta.author || null, goal: meta.goal || null, version: meta.version || null,
+  };
 }
 
 /**
@@ -1553,7 +1671,10 @@ export function setPendingShare(p) {
   // survives the reload the first-run doors cause) because it is the only
   // record that the link carried more stacks than arrived — see parseRoutineLink.
   const dropped = Math.max(0, Math.floor(Number(p.dropped)) || 0);
-  const pending = { name: String(p.name || 'Shared routine').slice(0, 60), items: p.items, dropped };
+  // The v2 meta (author, what it addresses, version) travels with the held
+  // programme and into the mirror, so the sheet can say who sent it after the
+  // reload the first-run doors cause.
+  const pending = { name: String(p.name || 'Shared routine').slice(0, 60), items: p.items, dropped, ...routineMeta(p) };
   lsWrite('pendingShare', JSON.stringify(pending));
   // shareHidden is reset: a NEW programme arriving is not something the person
   // has tapped away. Without this, a recipient who dismissed yesterday's share
@@ -1985,7 +2106,10 @@ export function setTheme(patch) {
  */
 export function applyServerEntitlement(ent) {
   const paid = !!(ent && ent.premium);
-  setState({ premium: PREMIUM_OPEN || paid, premiumPaid: paid, signedIn: isSignedIn() });
+  // PRACTITIONER (2026-11-03): the licence follows the server's answer exactly,
+  // both ways. A revoked licence takes the Studio down on the next read.
+  const practitioner = !!(ent && ent.practitioner);
+  setState({ premium: PREMIUM_OPEN || paid, premiumPaid: paid, signedIn: isSignedIn(), practitioner, studioOpen: state.studioOpen && practitioner });
   return paid;
 }
 
@@ -2030,14 +2154,17 @@ export async function syncEntitlement() {
   // offline visitor out of the app it just let them into.
   if (!isSignedIn()) {
     const paid = cachedPremium();
-    setState({ premium: PREMIUM_OPEN || paid, premiumPaid: paid, signedIn: false });
+    setState({ premium: PREMIUM_OPEN || paid, premiumPaid: paid, signedIn: false, practitioner: false, studioOpen: false });
     return false;
   }
   try {
     return applyServerEntitlement(await fetchEntitlement());
   } catch {
     const paid = cachedPremium();
-    setState({ premium: PREMIUM_OPEN || paid, premiumPaid: paid, signedIn: isSignedIn() });
+    // Offline: the verified licence read keeps the Studio open for its grace
+    // period, exactly as the paid answer keeps Premium.
+    const practitioner = cachedPractitioner();
+    setState({ premium: PREMIUM_OPEN || paid, premiumPaid: paid, signedIn: isSignedIn(), practitioner, studioOpen: state.studioOpen && practitioner });
     return paid;
   }
 }
@@ -2047,7 +2174,8 @@ export function signOutMembership() {
   // Signing out drops the PURCHASE, not the app. On an open build the person is
   // still entitled to everything, so locking the screen behind them here would
   // make "Sign out" read as "lock me out" — which is not what it says.
-  setState({ premium: PREMIUM_OPEN, premiumPaid: false, signedIn: false });
+  // The licence goes with the account, and the Studio with it.
+  setState({ premium: PREMIUM_OPEN, premiumPaid: false, signedIn: false, practitioner: false, studioOpen: false });
 }
 // general prefs (prototype key encodings)
 export function setSounds(on) { save('sounds', on ? '1' : '0'); setState({ sounds: !!on }); }
@@ -2454,9 +2582,10 @@ export function anySheetOpen(s = state) {
   // like the others here, so a hint bubble or a quest spotlight must not fire
   // on top of somebody deciding to stop smoking.
   // videoFor (2026-10-17): the "Add a video or link" sheet, same rule.
+  // studioOpen (2026-11-03): the practitioner's Studio sheet, same rule.
   return !!(s.aiOpen || s.addOpen || s.termsOpen || s.accountOpen || s.completedOpen ||
             s.playerItem || s.scheduleTarget || s.repeatId || s.editId || s.premiumUpsell ||
-            s.quitOpen || s.videoFor || shareSheetUp(s) || !s.onboarded);
+            s.quitOpen || s.videoFor || s.studioOpen || shareSheetUp(s) || !s.onboarded);
 }
 
 /** Which day the Calendar's panel is showing (unpadded `YYYY-M-D`, or null). */
